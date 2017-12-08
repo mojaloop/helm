@@ -1,0 +1,31 @@
+{{- $forensicLoggingSidecarHost := printf "%s-%s" .Release.Name .Values.forensicloggingsidecar.nameOverride -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "centralledger.fullname" . }}
+  labels:
+      app: {{ template "centralledger.name" . }}
+      chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
+data:
+  server.host: {{ .Values.ingress.hosts.api | quote }}
+  server.port: {{ .Values.containers.api.service.ports.api.internalPort | quote }}
+  admin.port: {{ .Values.containers.admin.service.ports.api.internalPort | quote }}
+  default.json: |
+    {{ .Values.config.default_json | replace "$service_api_port" (printf "%.0f" .Values.containers.api.service.ports.api.internalPort) | replace "$service_admin_port" (printf "%.0f" .Values.containers.admin.service.ports.api.internalPort) | replace "$ingress_host" .Values.ingress.hosts.api | replace "$forensicloggingsidecar_host" $forensicLoggingSidecarHost | replace "$forensicloggingsidecar_port" (printf "%.0f" .Values.forensicloggingsidecar.service.externalPort) }}
+  
+  knexfile.js: |
+    'use strict'
+
+    const migrationsDirectory = '/opt/central-ledger/migrations'
+    const Config = require('/opt/central-ledger/src/lib/config')
+    module.exports = {
+      client: 'pg',
+      connection: Config.DATABASE_URI,
+      migrations: {
+        directory: migrationsDirectory,
+        tableName: 'migrations',
+        stub: `${migrationsDirectory}/migration.template`
+      }
+    }
