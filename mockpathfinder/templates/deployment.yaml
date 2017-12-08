@@ -1,0 +1,64 @@
+{{- $dbHost := printf "%s-%s" .Release.Name .Values.postgresql.nameOverride -}}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "mockpathfinder.fullname" . }}
+  labels:
+    app: {{ template "mockpathfinder.name" . }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "mockpathfinder.name" . }}
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: bowerswilkins/awaitpostgres
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: "POSTGRES_URL"
+            value: "postgresql://{{ .Values.postgresql.postgresUser }}:{{ .Values.postgresql.postgresPassword }}@{{ $dbHost }}:{{ .Values.postgresql.service.port }}/{{ .Values.postgresql.postgresDatabase }}?sslmode=disable"
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          {{- range $port := .Values.service.ports }}
+            - name: {{ $port.name }}
+              containerPort: {{ $port.internalPort }}
+          {{- end }}
+          # livenessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 8080
+          #     httpHeaders:
+          #     - name: X-Custom-Header
+          #      value: Awesome
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 3
+          # securityContext:
+          #   capabilities:
+          #     add:
+          #       - NET_ADMIN
+          env:
+            - name: MOPF_DATABASE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "mockpathfinder.fullname" . }}
+                  key: db.uri
+          volumeMounts:
+          - name: {{ template "mockpathfinder.fullname" . }}-config-volume
+            mountPath: /opt/mock-pathfinder/config
+      volumes:
+        - name: {{ template "mockpathfinder.fullname" . }}-config-volume
+          configMap:
+            name: {{ template "mockpathfinder.fullname" . }}
+            items:
+            - key: default.json
+              path: default.json
+            - key: knexfile.js
+              path: knexfile.js
