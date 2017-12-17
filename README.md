@@ -167,20 +167,24 @@ This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
 
     `cd helm`
    
-12. Update all dependencies
+12. Switch to develop branch
+    git checkout -b origin/develop
+    git pull origin develop
+
+13. Update all dependencies
 
     `sh ./update-chars-dep.sh`
 
 ### Deploy Ingress
-13. Deploy Ingress Nginx via Helm
+14. Deploy Ingress Nginx via Helm
 
-    `helm install -namespace=kube-public -name=minikube -f ./config-ingress.yaml ./kube-public/ingress-nginx`
+    `helm install --namespace=kube-public --name=minikube -f ./config-ingress.yaml ./kube-public/ingress-nginx`
 
 ### Deploy Central
 
 14. Deploy Central via Helm
 
-    `helm install -namespace=mojaloop -name=dev -f ./config-central.yaml ./central`
+    `helm install --namespace=mojaloop --name=dev -f ./config-central.yaml ./central`
 
 ### Test Deplyoments
 
