@@ -62,7 +62,7 @@ This will display the following information:
 
 `<IP>`:`<PORT>` e.g. `192.168.99.100:31555`
 
-5. Add the Insecure Registry to your Docker prefences
+5. Add the Insecure Registry to your Docker preferences:
 
 If you’re using Mac OSX Docker client:
 
