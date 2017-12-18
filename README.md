@@ -173,7 +173,7 @@ This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
 
 13. Update all dependencies
 
-    `sh ./update-chars-dep.sh`
+    `sh ./update-charts-dep.sh`
 
 ### Deploy Ingress
 14. Deploy Ingress Nginx via Helm
