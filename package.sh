@@ -59,8 +59,6 @@ Packaging completed.\n \
 Ensure you check the output for any errors. \n \
 Ignore any http errors when connecting to \"local\" chart repository.\n \
 \n \
-Happy Helming! \n \
-\n \
 Run the following command to serve a local repository: helm serve --repo-path ./repo \n \
 \n \
 Happy Helming!
