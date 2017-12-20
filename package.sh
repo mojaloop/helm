@@ -1,7 +1,7 @@
 #!/bin/bash 
  
 # 
-# Script to update all Helm Chart Dependencies 
+# Script to Package all charts, and created an index.yaml in ./repo directory
 # 
  
 # Function to check the last command's result exited with a value of 0, otherwise the script will exit with a 1 
@@ -9,7 +9,7 @@ function checkCommandResult () {
     if [ $? -eq 0 ]; then 
         echo "" 
     else 
-        echo "command failed...exiting. Please fix me!"; 
+        echo "Command failed...exiting. Please fix me!"; 
         exit 1 
     fi 
 } 
