@@ -48,6 +48,10 @@ echo "Packaging Central..."
 helm package -u -d ./repo ./central 
 checkCommandResult 
  
+echo "Packaging Ingress-Nginx..."
+helm package -u -d ./repo ./kube-public/ingress-nginx/
+checkCommandResult
+
 cd ./repo 
  
 echo "Creating Helm repo index..." 

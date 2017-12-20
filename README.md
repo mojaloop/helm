@@ -1,10 +1,46 @@
 # Mojaloop Helm Charts
 
+Mojaloop published Helm Repo: http://mojaloop.io/helm/repo/
+
 Refer to Helm docs for more information: https://docs.helm.sh/
 
-## Update Chart Dependencies
+## Deployment from Repo
 
-Note: Please ensure that you update the Char dependencies in the order show below.
+1. Deploy specific chart
+
+- `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo <chart_name>`
+
+e.g. `helm install --debug --namespace=test --name=dev --repo=http://mojaloop.io/helm/repo centralledger`
+
+2. Deploy specific chart overriding values
+
+- `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo -f <values_file> <chart_name>`
+
+e.g. `helm install --debug --namespace=test --name=dev --repo=http://mojaloop.io/helm/repo -f ./values.yaml centralledger`
+
+Refer to the following default chart config file for values: http://mojaloop.io/helm/<chart_name>/values.yaml
+
+3. Deploy ALL Central componenets
+
+- `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo central`
+
+e.g. `helm install --debug --namespace=test --name=dev --repo=http://mojaloop.io/helm/repo central`
+
+4. Deploy Ingress
+
+- `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo ingress-nginx`
+
+e.g. `helm install --debug --namespace=kube-public --name=<release-name> --repo=http://mojaloop.io/helm/repo ingress-nginx`
+
+## Upgrading Deployments from Repo
+
+`helm upgrade --debug <release-name> --repo=http://mojaloop.io/helm/repo <chart_name>`
+
+e.g. `helm upgrade --debug dev --repo=http://mojaloop.io/helm/repo centralenduserregistry`
+
+## Update Chart Dependencies for Source
+
+Note: Please ensure that you update the Chart dependencies in the order show below.
 
 - `helm dep up centralkms`
 - `helm dep up forensicloggingsidecar`
@@ -21,11 +57,11 @@ Alternatively please use the helper script `sh ./update-charts-dep.sh`.
 
 This script will ensure the correct order is maintained.
 
-## Deployment
+## Deployment from Source
 
 1. Deploy specific chart
 
-- `helm install --debug --namespace=<namespace> --name=<release-name> <chart-directory>`
+- `helm install --debug --namespace=<namespace> --name=<release-name> <chart_directory>`
 
 e.g. `helm install --debug --namespace=test --name=dev ./centralledger`
 
@@ -41,9 +77,9 @@ e.g. `helm install --debug --namespace=test --name=dev ./central`
 
 e.g. `helm install --debug --namespace=kube-public --name=<release-name> ./kube-public/ingress-nginx`
 
-## Upgrading Deployments
+## Upgrading Deployments from Source
 
-`helm upgrade --debug <release-name> <chart-directory>`
+`helm upgrade --debug <release-name> <chart_directory>`
 
 e.g. `helm upgrade --debug dev ./centralenduserregistry/`
 
@@ -93,11 +129,11 @@ e.g. `helm del --purge dev`
 
 1. Execute a dry-run to display all the Kubernetes deployment files
 
- `helm install --dry-run --debug --namespace=<namespace> --name=<release-name> <chart-directory>`
+ `helm install --dry-run --debug --namespace=<namespace> --name=<release-name> <chart_directory>`
 
 2. Use Helm Linter to check for any issues
 
-`helm lint --strict <chart-directory>`
+`helm lint --strict <chart_directory>`
 
 ## Helper scripts
 
