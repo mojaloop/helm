@@ -28,10 +28,24 @@ centralhub:
   '
 
   service:
-    name: http-api-and-tcp-websocket
+    name: http-api-and-web
     type: ClusterIP
     externalPort: 4001
     internalPort: 4001
+
+    # This allows one to point the service to an external backend. 
+    # This is useful for local development where one wishes to hijack 
+    # the communication from the service to the node layer and point
+    # to a specific endpoint (IP, Port, etc).
+    external:
+      enabled: false
+      # 10.0.2.2 is the magic IP for the host on virtualbox's network
+      ip: 10.0.2.2
+      ports:
+        api: 
+          name: http-api-and-web
+          externalPort: 4001
+
 
   ingress:
     enabled: true
@@ -85,13 +99,13 @@ centralhub:
           enabled: true
           httpGet:
             path: /health
-          initialDelaySeconds: 15
+          initialDelaySeconds: 60
           periodSeconds: 5  
         livenessProbe:
           enabled: true
           httpGet:
             path: /health
-          initialDelaySeconds: 15
+          initialDelaySeconds: 60
           periodSeconds: 5
 
       admin:
@@ -111,13 +125,13 @@ centralhub:
           enabled: true
           httpGet:
             path: /health
-          initialDelaySeconds: 15
+          initialDelaySeconds: 60
           periodSeconds: 5  
         livenessProbe:
           enabled: true
           httpGet:
             path: /health
-          initialDelaySeconds: 15
+          initialDelaySeconds: 60
           periodSeconds: 10
 
 
@@ -155,7 +169,7 @@ centralhub:
 
     service:
       type: ClusterIP
-      
+
       # This allows one to point the service to an external backend. 
       # This is useful for local development where one wishes to hijack 
       # the communication from the service to the node layer and point
@@ -216,14 +230,27 @@ centralhub:
         externalPort: 5678
         internalPort: 5678
 
+        # This allows one to point the service to an external backend. 
+        # This is useful for local development where one wishes to hijack 
+        # the communication from the service to the node layer and point
+        # to a specific endpoint (IP, Port, etc).
+        external:
+          enabled: false
+          # 10.0.2.2 is the magic IP for the host on virtualbox's network
+          ip: 10.0.2.2
+          ports:
+            api: 
+              name: http-api-and-ws
+              externalPort: 5678
+
       readinessProbe:
         enabled: true
-        initialDelaySeconds: 15
+        initialDelaySeconds: 60
         periodSeconds: 5
 
       livenessProbe:
         enabled: true
-        initialDelaySeconds: 15
+        initialDelaySeconds: 60
         periodSeconds: 5
         
       ingress:
@@ -269,18 +296,31 @@ centralhub:
           externalPort: 8080
           internalPort: 8080
 
+          # This allows one to point the service to an external backend. 
+          # This is useful for local development where one wishes to hijack 
+          # the communication from the service to the node layer and point
+          # to a specific endpoint (IP, Port, etc).
+          external:
+            enabled: false
+            # 10.0.2.2 is the magic IP for the host on virtualbox's network
+            ip: 10.0.2.2
+            ports:
+              api: 
+                name: http-api-and-tcp-websocket
+                externalPort: 8080
+
         readinessProbe:
           enabled: true
           httpGet:
             path: /sidecars
-          initialDelaySeconds: 15
+          initialDelaySeconds: 60
           periodSeconds: 5
 
         livenessProbe:
           enabled: true
           httpGet:
             path: /sidecars
-          initialDelaySeconds: 15
+          initialDelaySeconds: 60
           periodSeconds: 5
           
         ingress:
@@ -389,12 +429,19 @@ centraldirectory:
         name: http-api
         externalPort: 3000
         internalPort: 3000
-    # - name: provisioning
-    #   externalPort: 8080
-    #   internalPort: 8080
-    # - name: query
-    #   externalPort: 15353
-    #   internalPort: 15353
+
+    # This allows one to point the service to an external backend. 
+    # This is useful for local development where one wishes to hijack 
+    # the communication from the service to the node layer and point
+    # to a specific endpoint (IP, Port, etc).
+    external:
+      enabled: false
+      # 10.0.2.2 is the magic IP for the host on virtualbox's network
+      ip: 10.0.2.2
+      ports:
+        api: 
+          name: http-api
+          externalPort: 3000
 
   ingress:
     enabled: false
@@ -456,12 +503,19 @@ centraldirectory:
           name: http-api
           externalPort: 3001
           internalPort: 3001
-      # - name: provisioning
-      #   externalPort: 8080
-      #   internalPort: 8080
-      # - name: query
-      #   externalPort: 15353
-      #   internalPort: 15353
+
+      # This allows one to point the service to an external backend. 
+      # This is useful for local development where one wishes to hijack 
+      # the communication from the service to the node layer and point
+      # to a specific endpoint (IP, Port, etc).
+      external:
+        enabled: false
+        # 10.0.2.2 is the magic IP for the host on virtualbox's network
+        ip: 10.0.2.2
+        ports:
+          provisioning: 
+            name: http-api
+            externalPort: 3001
 
     ingress:
       enabled: false
@@ -548,19 +602,30 @@ centraldirectory:
       type: ClusterIP
       ports:
         provisioning:
-          name: provisioning
+          name: tcp-provisioning
           externalPort: 8080
           internalPort: 8080
         query:
-          name: query
+          name: tcp-query
           externalPort: 15353
           internalPort: 15353
-      # - name: provisioning
-      #   externalPort: 8080
-      #   internalPort: 8080
-      # - name: query
-      #   externalPort: 15353
-      #   internalPort: 15353
+
+      # This allows one to point the service to an external backend. 
+      # This is useful for local development where one wishes to hijack 
+      # the communication from the service to the node layer and point
+      # to a specific endpoint (IP, Port, etc).
+      external:
+        enabled: false
+        # 10.0.2.2 is the magic IP for the host on virtualbox's network
+        ip: 10.0.2.2
+        ports:
+          provisioning: 
+            name: tcp-provisioning
+            externalPort: 8080
+          query: 
+            name: tcp-query
+            externalPort: 15353
+
 
     ingress:
       enabled: false

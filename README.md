@@ -4,18 +4,22 @@ Refer to Helm docs for more information: https://docs.helm.sh/
 
 ## Update Chart Dependencies
 
-- `helm dep up central`
-- `helm dep up centraldirectory`
-- `helm dep up centralenduserregistry`
-- `helm dep up centralhub`
-- `helm dep up centralkms`
-- `helm dep up centralledger`
-- `helm dep up forensicloggingsidecar`
-- `helm dep up mockpathfinder`
+Note: Please ensure that you update the Char dependencies in the order show below.
 
-Useful command to execute a dep update against all the directories: `find . -mindepth 1 -maxdepth 1 -type d -exec helm dep up {} \;`
+- `helm dep up centralkms`
+- `helm dep up forensicloggingsidecar`
+- `helm dep up centralledger`
+- `helm dep up centralhub`
+- `helm dep up mockpathfinder`
+- `helm dep up centralenduserregistry`
+- `helm dep up centraldirectory`
+- `helm dep up central`
 
 We are quitely waiting on recursive updates: https://github.com/kubernetes/helm/issues/2247
+
+Alternatively please use the helper script `sh ./update-charts-dep.sh`. 
+
+This script will ensure the correct order is maintained.
 
 ## Deployment
 
@@ -23,13 +27,13 @@ We are quitely waiting on recursive updates: https://github.com/kubernetes/helm/
 
 - `helm install --debug --namespace=<namespace> --name=<release-name> <chart-directory>`
 
-e.g. `helm install --debug --namespace=test --name=r1 ./centralledger`
+e.g. `helm install --debug --namespace=test --name=dev ./centralledger`
 
 2. Deploy ALL Central componenets
 
 - `helm install --debug --namespace=<namespace> --name=<release-name> ./central`
 
-e.g. `helm install --debug --namespace=test --name=r1 ./central`
+e.g. `helm install --debug --namespace=test --name=dev ./central`
 
 3. Deploy Ingress
 
@@ -41,7 +45,7 @@ e.g. `helm install --debug --namespace=kube-public --name=<release-name> ./kube-
 
 `helm upgrade --debug <release-name> <chart-directory>`
 
-e.g. `helm upgrade --debug r1 ./centralenduserregistry/`
+e.g. `helm upgrade --debug dev ./centralenduserregistry/`
 
 ## Testing Deployments
 
@@ -83,7 +87,7 @@ Check to see that an account name "LedgerName" is displayed
 
 `helm del --purge <release-name>`
 
-e.g. `helm del --purge r1`
+e.g. `helm del --purge dev`
 
 ## Debugging Charts
 
