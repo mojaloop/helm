@@ -26,10 +26,23 @@ config:
 '
 
 service:
-  name: http-api-and-tcp-websocket
+  name: http-api-and-web
   type: ClusterIP
   externalPort: 4001
   internalPort: 4001
+
+  # This allows one to point the service to an external backend. 
+  # This is useful for local development where one wishes to hijack 
+  # the communication from the service to the node layer and point
+  # to a specific endpoint (IP, Port, etc).
+  external:
+    enabled: false
+    # 10.0.2.2 is the magic IP for the host on virtualbox's network
+    ip: 10.0.2.2
+    ports:
+      api: 
+        name: http-api-and-web
+        externalPort: 4001
 
 centralledger:
   enabled: true
@@ -157,17 +170,22 @@ centralledger:
 
   service:
     type: ClusterIP
-  #   ports:
-  #     api:
-  #       name: http-api
-  #       externalPort: 3000
-  #       internalPort: 3000
-    # - name: provisioning
-    #   externalPort: 8080
-    #   internalPort: 8080
-    # - name: query
-    #   externalPort: 15353
-    #   internalPort: 15353
+    
+    # This allows one to point the service to an external backend. 
+    # This is useful for local development where one wishes to hijack 
+    # the communication from the service to the node layer and point
+    # to a specific endpoint (IP, Port, etc).
+    external:
+      enabled: false
+      # 10.0.2.2 is the magic IP for the host on virtualbox's network
+      ip: 10.0.2.2
+      ports:
+        api: 
+          name: http-api
+          externalPort: 3000
+        admin: 
+          name: http-api-admin
+          externalPort: 3001
 
   ingress:
     enabled: true
@@ -198,17 +216,6 @@ centralledger:
     #  cpu: 100m
     #  memory: 128Mi
 
-  centraldirectory:
-    enabled: true
-    nameOverride: "centraldirectory"
-    # service:
-    #   type: ClusterIP
-    #   ports:
-    #     api:
-    #       name: http-api
-    #       externalPort: 3001
-    #       internalPort: 3001
-
   forensicloggingsidecar:
     enabled: true
     nameOverride: "forensicloggingsidecar-ledger"
@@ -223,6 +230,19 @@ centralledger:
       type: ClusterIP
       externalPort: 5678
       internalPort: 5678
+
+      # This allows one to point the service to an external backend. 
+      # This is useful for local development where one wishes to hijack 
+      # the communication from the service to the node layer and point
+      # to a specific endpoint (IP, Port, etc).
+      external:
+        enabled: false
+        # 10.0.2.2 is the magic IP for the host on virtualbox's network
+        ip: 10.0.2.2
+        ports:
+          api: 
+            name: http-api-and-ws
+            externalPort: 5678
 
     readinessProbe:
       enabled: true
@@ -276,6 +296,19 @@ centralledger:
         type: ClusterIP
         externalPort: 8080
         internalPort: 8080
+
+        # This allows one to point the service to an external backend. 
+        # This is useful for local development where one wishes to hijack 
+        # the communication from the service to the node layer and point
+        # to a specific endpoint (IP, Port, etc).
+        external:
+          enabled: false
+          # 10.0.2.2 is the magic IP for the host on virtualbox's network
+          ip: 10.0.2.2
+          ports:
+            api: 
+              name: http-api-and-tcp-websocket
+              externalPort: 8080
 
       readinessProbe:
         enabled: true
