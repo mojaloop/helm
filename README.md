@@ -139,6 +139,7 @@ e.g. `helm del --purge dev`
 
 ### Ingress
 1.) Deploy Ingress
+
 This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
 
 `sh deploy-ingress.sh -r lb -e -o ./config-ingress.yaml`
@@ -149,6 +150,7 @@ This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
 
 ### Central
 1.) Deploy Central
+
 This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
 
 `sh deploy-central.sh -r dev -e -o ./config-central.yaml`
@@ -159,6 +161,7 @@ This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
 
 ### Package
 1.) Package charts
+
 Package all charts, and created an index.yaml in ./repo directory
 
 `sh package.sh`
