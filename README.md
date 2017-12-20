@@ -120,3 +120,9 @@ This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
 2.) Undeploy Central
 
 `sh clean.sh -r dev -e`
+
+### Package
+1.) Package charts
+Package all charts, and created an index.yaml in ./repo directory
+
+`sh package.sh`
