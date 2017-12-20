@@ -1,0 +1,148 @@
+{{- $dbHost := printf "%s-%s" .Release.Name .Values.postgresql.nameOverride -}}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "centralledger.fullname" . }}
+  labels:
+    app: {{ template "centralledger.name" . }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "centralledger.name" . }}
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      {{- if .Values.init.enabled }}
+      initContainers:
+        - name: {{ .Values.init.image.name }}
+          image: {{ .Values.init.image.repository }}:{{ .Values.init.image.tag }}
+          imagePullPolicy: {{ .Values.init.image.pullPolicy }}
+          env:
+          - name: "POSTGRES_URL"
+            value: "postgresql://{{ .Values.postgresql.postgresUser }}:{{ .Values.postgresql.postgresPassword }}@{{ $dbHost }}:{{ .Values.postgresql.service.port }}/{{ .Values.postgresql.postgresDatabase }}?sslmode=disable"
+      {{- end }}
+      containers:
+        - name: {{ template "centralledger.name" . }}
+          image: "{{ .Values.containers.api.image.repository }}:{{ .Values.containers.api.image.tag }}"
+          imagePullPolicy: {{ .Values.containers.api.image.pullPolicy }}
+          command: {{ .Values.containers.api.image.command }}
+          ports:
+          {{- range $port := .Values.containers.api.service.ports }}
+            - name: {{ $port.name }}
+              containerPort: {{ $port.internalPort }}
+          {{- end }}
+          {{- if .Values.containers.api.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.containers.api.readinessProbe.httpGet.path }}
+              port: {{ .Values.containers.api.service.ports.api.internalPort }}
+            initialDelaySeconds: {{ .Values.containers.api.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.containers.api.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{- if .Values.containers.api.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.containers.api.livenessProbe.httpGet.path }}
+              port: {{ .Values.containers.api.service.ports.api.internalPort }}
+            initialDelaySeconds: {{ .Values.containers.api.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.containers.api.livenessProbe.periodSeconds }}
+          {{- end }}
+          # securityContext:
+          #   capabilities:
+          #     add:
+          #       - NET_ADMIN
+          # envFrom:
+          #   - configMapRef:
+          #       name: central-ledger-config-env
+          env:
+            - name: CLEDG_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "centralledger.fullname" . }}
+                  key: server.port
+            # - name: CLEDG_ADMIN_PORT
+            #   valueFrom:
+            #     configMapKeyRef:
+            #       name: central-ledger-config
+            #       key: admin.port
+            - name: CLEDG_HOSTNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "centralledger.fullname" . }}
+                  key: server.host
+            - name: CLEDG_DATABASE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "centralledger.fullname" . }}
+                  key: db.uri
+          volumeMounts:
+          - name: {{ template "centralledger.fullname" . }}-config-volume
+            mountPath: /opt/central-ledger/config
+        - name: {{ template "centralledger.name" . }}-admin
+          image: "{{ .Values.containers.admin.image.repository }}:{{ .Values.containers.admin.image.tag }}"
+          imagePullPolicy: {{ .Values.containers.admin.image.pullPolicy }}
+          command: {{ .Values.containers.admin.image.command }}
+          ports:
+          {{- range $port := .Values.containers.admin.service.ports }}
+            - name: {{ $port.name }}
+              containerPort: {{ $port.internalPort }}
+          {{- end }}
+          {{- if .Values.containers.admin.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.containers.admin.readinessProbe.httpGet.path }}
+              port: {{ .Values.containers.admin.service.ports.api.internalPort }}
+            initialDelaySeconds: {{ .Values.containers.admin.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.containers.admin.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{- if .Values.containers.admin.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.containers.admin.livenessProbe.httpGet.path }}
+              port: {{ .Values.containers.admin.service.ports.api.internalPort }}
+            initialDelaySeconds: {{ .Values.containers.admin.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.containers.admin.livenessProbe.periodSeconds }}
+          {{- end }}
+          # securityContext:
+          #   capabilities:
+          #     add:
+          #       - NET_ADMIN
+          # envFrom:
+          #   - configMapRef:
+          #       name: central-ledger-config-env
+          env:
+            - name: CLEDG_ADMIN_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "centralledger.fullname" . }}
+                  key: admin.port
+            # - name: CLEDG_ADMIN_PORT
+            #   valueFrom:
+            #     configMapKeyRef:
+            #       name: central-ledger-config
+            #       key: admin.port
+            - name: CLEDG_HOSTNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "centralledger.fullname" . }}
+                  key: server.host
+            - name: CLEDG_DATABASE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "centralledger.fullname" . }}
+                  key: db.uri
+          volumeMounts:
+          - name: {{ template "centralledger.fullname" . }}-config-volume
+            mountPath: /opt/central-ledger/config
+      volumes:
+        - name: {{ template "centralledger.fullname" . }}-config-volume
+          configMap:
+            name: {{ template "centralledger.fullname" . }}
+            items:
+            - key: default.json
+              path: default.json
+            - key: knexfile.js
+              path: knexfile.js

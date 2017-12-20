@@ -1,0 +1,23 @@
+{{- if .Values.service.external.enabled -}}
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: {{ template "mockpathfinder.fullname" . }}
+  labels:
+    app: {{ template "mockpathfinder.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+subsets: 
+  -
+    addresses:
+      -
+        ip: {{ .Values.service.external.ip }}
+    ports:
+      -
+        port: {{ .Values.service.external.ports.provisioning.externalPort }}
+        name: {{ .Values.service.external.ports.provisioning.name }}
+      -
+        port: {{ .Values.service.external.ports.query.externalPort }}
+        name: {{ .Values.service.external.ports.query.name }}
+{{- end -}}

@@ -1,0 +1,65 @@
+{{- $dbHost := printf "%s-%s" .Release.Name .Values.postgresql.nameOverride -}}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "centraldirectory.fullname" . }}
+  labels:
+    app: {{ template "centraldirectory.name" . }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "centraldirectory.name" . }}
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      {{- if .Values.init.enabled }}
+      initContainers:
+        - name: wait-for-postgres
+          image: bowerswilkins/awaitpostgres
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: "POSTGRES_URL"
+            value: "postgresql://{{ .Values.postgresql.postgresUser }}:{{ .Values.postgresql.postgresPassword }}@{{ $dbHost }}:{{ .Values.postgresql.service.port }}/{{ .Values.postgresql.postgresDatabase }}?sslmode=disable"
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          {{- range $port := .Values.service.ports }}
+            - name: {{ $port.name }}
+              containerPort: {{ $port.internalPort }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.httpGet.path }}
+              port: {{ .Values.service.ports.api.internalPort }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          {{- end }}
+          # securityContext:
+          #   capabilities:
+          #     add:
+          #       - NET_ADMIN
+          env:
+            - name: CDIR_DATABASE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "centraldirectory.fullname" . }}
+                  key: db.uri
+          volumeMounts:
+          - name: {{ template "centraldirectory.fullname" . }}-config-volume
+            mountPath: /opt/mock-pathfinder/config
+      volumes:
+        - name: {{ template "centraldirectory.fullname" . }}-config-volume
+          configMap:
+            name: {{ template "centraldirectory.fullname" . }}
+            items:
+            - key: default.json
+              path: default.json
+            - key: knexfile.js
+              path: knexfile.js

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "centraldirectory.fullname" . }}
+  labels:
+    app: {{ template "centraldirectory.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    {{- range $port := .Values.service.ports }}
+    - port: {{ $port.externalPort }}
+      targetPort: {{ $port.internalPort }}
+      protocol: TCP
+      name: {{ $port.name }}
+    {{- end }}
+{{- if not .Values.service.external.enabled }}
+  selector:
+    app: {{ template "centraldirectory.name" . }}
+    release: {{ .Release.Name }}
+{{- end -}}
