@@ -1,9 +1,14 @@
 # CircleCI v2 Config
 version: 2
 
+defaults: &defaults
+  working_directory: /home/circleci/project
+  docker:
+    - image: wernight/kubectl
+
 jobs:
   build:
-    machine: true
+    <<: *defaults
     steps:
       - checkout
       - run: 
@@ -14,7 +19,7 @@ jobs:
           key: repo-cache-{{ .Branch }}-{{ .Revision }}
           paths: repo
   deploy:
-    machine: true
+    <<: *defaults
     steps:
       - checkout
       - run: 
