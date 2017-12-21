@@ -10,13 +10,13 @@ Refer to Helm docs for more information: https://docs.helm.sh/
 
 - `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo <chart_name>`
 
-e.g. `helm install --debug --namespace=test --name=dev --repo=http://mojaloop.io/helm/repo centralledger`
+e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo centralledger`
 
 2. Deploy specific chart overriding values
 
 - `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo -f <values_file> <chart_name>`
 
-e.g. `helm install --debug --namespace=test --name=dev --repo=http://mojaloop.io/helm/repo -f ./values.yaml centralledger`
+e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo -f ./values.yaml centralledger`
 
 Refer to the following default chart config file for values: http://mojaloop.io/helm/<chart_name>/values.yaml
 
@@ -24,7 +24,7 @@ Refer to the following default chart config file for values: http://mojaloop.io/
 
 - `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo central`
 
-e.g. `helm install --debug --namespace=test --name=dev --repo=http://mojaloop.io/helm/repo central`
+e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo central`
 
 4. Deploy Ingress
 
@@ -63,13 +63,13 @@ This script will ensure the correct order is maintained.
 
 - `helm install --debug --namespace=<namespace> --name=<release-name> <chart_directory>`
 
-e.g. `helm install --debug --namespace=test --name=dev ./centralledger`
+e.g. `helm install --debug --namespace=mojaloop --name=dev ./centralledger`
 
 2. Deploy ALL Central componenets
 
 - `helm install --debug --namespace=<namespace> --name=<release-name> ./central`
 
-e.g. `helm install --debug --namespace=test --name=dev ./central`
+e.g. `helm install --debug --namespace=mojaloop --name=dev ./central`
 
 3. Deploy Ingress
 
