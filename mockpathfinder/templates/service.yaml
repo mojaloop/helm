@@ -3,10 +3,12 @@ kind: Service
 metadata:
   name: {{ template "mockpathfinder.fullname" . }}
   labels:
-    app: {{ template "mockpathfinder.name" . }}
+    app: {{ template "mockpathfinder.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -18,6 +20,6 @@ spec:
     {{- end }}
 {{- if not .Values.service.external.enabled }}
   selector:
-    app: {{ template "mockpathfinder.name" . }}
+    app: {{ template "mockpathfinder.fullname" . }}
     release: {{ .Release.Name }}
 {{- end -}}

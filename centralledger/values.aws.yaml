@@ -10,7 +10,7 @@ containers:
       pullPolicy: IfNotPresent
       command: '["node", "src/api/index.js"]'
     service:
-      type: ClusterIP
+      type: LoadBalancer
       ports:
         api:
           name: http-api
@@ -20,13 +20,13 @@ containers:
       enabled: true
       httpGet:
         path: /health
-      initialDelaySeconds: 30
+      initialDelaySeconds: 120
       periodSeconds: 15
     livenessProbe:
       enabled: true
       httpGet:
         path: /health
-      initialDelaySeconds: 30
+      initialDelaySeconds: 60
       periodSeconds: 15
 
   admin:
@@ -46,13 +46,13 @@ containers:
       enabled: true
       httpGet:
         path: /health
-      initialDelaySeconds: 30
+      initialDelaySeconds: 120
       periodSeconds: 15
     livenessProbe:
       enabled: true
       httpGet:
         path: /health
-      initialDelaySeconds: 30
+      initialDelaySeconds: 60
       periodSeconds: 15
 
 
@@ -89,7 +89,7 @@ init:
     pullPolicy: IfNotPresent
 
 service:
-  type: ClusterIP
+  type: LoadBalancer
 
   # This allows one to point the service to an external backend. 
   # This is useful for local development where one wishes to hijack 
@@ -147,7 +147,7 @@ forensicloggingsidecar:
 
   service:
     name: http-api-and-ws
-    type: ClusterIP
+    type: LoadBalancer
     externalPort: 5678
     internalPort: 5678
 
@@ -166,12 +166,12 @@ forensicloggingsidecar:
 
   readinessProbe:
     enabled: true
-    initialDelaySeconds: 30
+    initialDelaySeconds: 120
     periodSeconds: 15
 
   livenessProbe:
     enabled: true
-    initialDelaySeconds: 30
+    initialDelaySeconds: 90
     periodSeconds: 15
     
   ingress:
@@ -218,6 +218,7 @@ forensicloggingsidecar:
         }
       }
   '
+
   centralkms:
     enabled: true
     nameOverride: "centralkms"
@@ -229,7 +230,7 @@ forensicloggingsidecar:
 
     service:
       name: http-api-and-tcp-websocket
-      type: ClusterIP
+      type: LoadBalancer
       externalPort: 8080
       internalPort: 8080
 
@@ -250,15 +251,15 @@ forensicloggingsidecar:
       enabled: true
       httpGet:
         path: /sidecars
-      initialDelaySeconds: 15
-      periodSeconds: 5
+      initialDelaySeconds: 45
+      periodSeconds: 15
 
     livenessProbe:
       enabled: true
       httpGet:
         path: /sidecars
-      initialDelaySeconds: 15
-      periodSeconds: 5
+      initialDelaySeconds: 30
+      periodSeconds: 15
       
     ingress:
       enabled: true
@@ -297,7 +298,7 @@ forensicloggingsidecar:
       postgresPassword: xD873IyaQB
 
       service:
-        type: ClusterIP
+        type: LoadBalancer
         port: 5432
         externalIPs: []
 
@@ -308,12 +309,12 @@ forensicloggingsidecar:
     postgresUser: sidecar
     ## Default: random 10 character string
     postgresPassword: Wqt0KlkKvL
-
+    
     service:
-      type: ClusterIP
+      type: LoadBalancer
       port: 5432
       externalIPs: []
-
+      
 postgresql:
   enabled: true 
   nameOverride: "centralledger-postgresql"
@@ -365,7 +366,12 @@ postgresql:
     accessMode: ReadWriteOnce
     size: 8Gi
     subPath: "postgresql-db"
-
+  
+    service:
+      type: LoadBalancer
+      port: 5432
+      externalIPs: []
+      
   metrics:
     enabled: false
     image: wrouesnel/postgres_exporter
@@ -397,6 +403,6 @@ postgresql:
       cpu: 100m
 
   service:
-    type: ClusterIP
+    type: LoadBalancer
     port: 5432
     externalIPs: []

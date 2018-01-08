@@ -3,10 +3,12 @@ kind: Service
 metadata:
   name: {{ template "centralhub.fullname" . }}
   labels:
-    app: {{ template "centralhub.name" . }}
+    app: {{ template "centralhub.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -16,6 +18,6 @@ spec:
       name: {{ .Values.service.Name }}
 {{- if not .Values.service.external.enabled }}
   selector:
-    app: {{ template "centralhub.name" . }}
+    app: {{ template "centralhub.fullname" . }}
     release: {{ .Release.Name }}
 {{- end -}}

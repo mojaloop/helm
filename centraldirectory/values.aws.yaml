@@ -1,18 +1,58 @@
-# Default values for forensic-logging-sidecar.
+# Default values for central-directory.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
 image:
-  repository: mojaloop/forensic-logging-sidecar
+  repository: mojaloop/central-directory
   tag: latest
   pullPolicy: IfNotPresent
-  command: '["/opt/sidecar/server.sh"]'
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+  initialDelaySeconds: 30
+  periodSeconds: 15
+
+config:
+  default_json: '
+    {
+      "PORT": $service_port,
+      "HOSTNAME": "http://$ingress_host",
+      "END_USER_REGISTRY_URL": "http://$centralenduserregistry_host:$centralenduserregistry_port",
+      "SCHEME_ID": "001",
+      "DEFAULT_DFSP": "",
+      "ENABLE_TOKEN_AUTH": false,
+      "PATHFINDER": {
+        "PARTNER_ID": 10305,
+        "SERVICE": "E2U+mm",
+        "CACHE_TIME": 300000,
+        "REGEX": {
+          "PATTERN": "^.*$",
+          "REPLACE": "mm:#{identifier}@leveloneproject.org"
+        },
+        "QUERY": {
+          "ADDRESS": "$pathfinder_host",
+          "PORT": 15353,
+          "TIMEOUT": 15000
+        },
+        "PROVISIONING": {
+          "ADDRESS": "http://$pathfinder_host:$pathfinder_provisioning_port/nrs-pi/services/SIPIX/SendRequest"
+        }
+      }
+    }
+'
+
+init:
+  enabled: true
 
 service:
-  name: http-api-and-ws
-  type: ClusterIP
-  externalPort: 5678
-  internalPort: 5678
+  type: LoadBalancer
+  ports:
+    api:
+      name: http-api
+      externalPort: 3000
+      internalPort: 3000
 
   # This allows one to point the service to an external backend. 
   # This is useful for local development where one wishes to hijack 
@@ -24,31 +64,18 @@ service:
     ip: 10.0.2.2
     ports:
       api: 
-        name: http-api-and-ws
-        externalPort: 5678
-
-readinessProbe:
-  enabled: true
-  initialDelaySeconds: 120
-  periodSeconds: 15
-
-livenessProbe:
-  enabled: true
-  initialDelaySeconds: 120
-  periodSeconds: 15
+        name: http-api
+        externalPort: 3000
 
 ingress:
   enabled: false
+  externalPath: /
   # Used to create an Ingress record.
   hosts:
-    api: forensic-logging-sidecar.local
-  
-  externalPath: /
-
+    api: central-directory.local
   annotations:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-    
   tls:
     # Secrets must be manually created in the namespace.
     # - secretName: chart-example-tls
@@ -66,37 +93,47 @@ resources: {}
   #  cpu: 100m
   #  memory: 128Mi
 
-config:
-  default_json: '
-    {
-      "PORT": $servicePort,
-      "SERVICE": "$serviceName",
-      "BATCH_SIZE": 64,
-      "BATCH_TIME_INTERVAL": 300000,
-      "KMS": {
-        "URL": "ws://$kmsHost:$kmsPort/sidecar",
-        "PING_INTERVAL": 30000,
-        "REQUEST_TIMEOUT": 120000,
-        "CONNECT_TIMEOUT": 60000,
-        "RECONNECT_INTERVAL": 10000
-      }
-    }
-'
-
-centralkms:
+centralenduserregistry:
   enabled: true
-  nameOverride: "centralkms"
+  nameOverride: "centralenduserregistry"
   replicaCount: 1
   image:
-    repository: mojaloop/central-kms
+    repository: mojaloop/central-end-user-registry
     tag: latest
     pullPolicy: IfNotPresent
 
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 15
+    
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 15
+
+  config:
+    default_json: '
+      {
+        "PORT": $service_port,
+        "HOSTNAME": "http://$ingress_host"
+      }
+  '
+
+  init:
+    enabled: true
+
   service:
-    name: http-api-and-tcp-websocket
-    type: ClusterIP
-    externalPort: 8080
-    internalPort: 8080
+    type: LoadBalancer
+    ports:
+      api:
+        name: http-api
+        externalPort: 3001
+        internalPort: 3001
 
     # This allows one to point the service to an external backend. 
     # This is useful for local development where one wishes to hijack 
@@ -107,40 +144,24 @@ centralkms:
       # 10.0.2.2 is the magic IP for the host on virtualbox's network
       ip: 10.0.2.2
       ports:
-        api: 
-          name: http-api-and-tcp-websocket
-          externalPort: 8080
+        provisioning: 
+          name: http-api
+          externalPort: 3001
 
-  readinessProbe:
-    enabled: true
-    httpGet:
-      path: /sidecars
-    initialDelaySeconds: 15
-    periodSeconds: 5
-
-  livenessProbe:
-    enabled: true
-    httpGet:
-      path: /sidecars
-    initialDelaySeconds: 15
-    periodSeconds: 5
-    
   ingress:
-    enabled: true
+    enabled: false
+    externalPath: /
     # Used to create an Ingress record.
     hosts:
-      - central-kms.local
-    externalPath: /
-    
+      api: central-end-user-registry.local
     annotations:
       # kubernetes.io/ingress.class: nginx
-    
+      # kubernetes.io/tls-acme: "true"
     tls:
       # Secrets must be manually created in the namespace.
       # - secretName: chart-example-tls
       #   hosts:
       #     - chart-example.local
-
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
@@ -155,20 +176,124 @@ centralkms:
 
   postgresql:
     enabled: true 
-    nameOverride: "centralkms-postgresql"
-    ## Create a database user
-    postgresUser: kms
-    ## Default: random 10 character string
-    postgresPassword: xD873IyaQB
+    nameOverride: "centralenduserregistry-postgresql"
+    ## postgres image repository
+    image: "postgres"
+    ## postgres image version
+    ## ref: https://hub.docker.com/r/library/postgres/tags/
+    ##
+    imageTag: "9.6.2"
 
-    service:
-      type: ClusterIP
-      port: 5432
-      externalIPs: []
+    ## Specify a imagePullPolicy
+    ## 'Always' if imageTag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    # imagePullPolicy:
+
+    ## Create a database user
+    ## Default: postgres
+    postgresUser: end_user_registry
+    ## Default: random 10 character string
+    postgresPassword: yGnTC07WQ6
+
+mockpathfinder:
+  enabled: true
+  nameOverride: "mockpathfinder"
+  replicaCount: 1
+  image:
+    repository: mojaloop/mock-pathfinder
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  config:
+    default_json: '
+    {
+      "QUERY": {
+        "PORT": $query_port,
+        "DEFAULT_RECORD": {
+          "order": 10,
+          "preference": 50,
+          "flags": "u",
+          "service": "E2U+pstn:tel",
+          "regexp": "!^(.*)$!tel:\\1;q_stat=102!",
+          "replacement": "",
+          "ttl": 900
+        }
+      },
+      "PROVISIONING": {
+        "PORT": $provisioning_port,
+        "PATH": "/nrs-pi/services/SIPIX/SendRequest",
+        "WSDL_FILE": "./sipix-2.0.0.wsdl",
+        "DEFAULT_CUSTOMER_ID": 1234
+      }
+    }
+  '
+
+  service:
+    type: ClusterIP
+    ports:
+      provisioning:
+        name: tcp-prov
+        externalPort: 8080
+        internalPort: 8080
+      query:
+        name: tcp-query
+        externalPort: 15353
+        internalPort: 15353
+
+    # This allows one to point the service to an external backend. 
+    # This is useful for local development where one wishes to hijack 
+    # the communication from the service to the node layer and point
+    # to a specific endpoint (IP, Port, etc).
+    external:
+      enabled: false
+      # 10.0.2.2 is the magic IP for the host on virtualbox's network
+      ip: 10.0.2.2
+      ports:
+        provisioning: 
+          name: tcp-prov
+          externalPort: 8080
+        query: 
+          name: tcp-query
+          externalPort: 15353
+
+
+  ingress:
+    enabled: false
+    # Used to create an Ingress record.
+    hosts:
+      api: mock-pathfinder.local
+    annotations:
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    tls:
+      # Secrets must be manually created in the namespace.
+      # - secretName: chart-example-tls
+      #   hosts:
+      #     - chart-example.local
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+
+  postgresql:
+    enabled: true 
+    nameOverride: "mockpathfinder-postgresql"
+    ## Create a database user
+    postgresUser: mock-pathfinder
+    ## Default: random 10 character string
+    postgresPassword: IypvXbJ1Zb
 
 postgresql:
-  enabled: true
-  nameOverride: "forensicloggingsidecar-postgresql"
+  enabled: true 
+  nameOverride: "centraldirectory-postgresql"
   ## postgres image repository
   image: "postgres"
   ## postgres image version
@@ -184,13 +309,13 @@ postgresql:
 
   ## Create a database user
   ## Default: postgres
-  postgresUser: sidecar
+  postgresUser: central-directory
   ## Default: random 10 character string
-  postgresPassword: Wqt0KlkKvL
+  postgresPassword: gR5hARbsfa
 
   ## Create a database
   ## Default: the postgres user
-  postgresDatabase: sidecar
+  postgresDatabase: central_directory
 
   ## Specify initdb arguments, e.g. --data-checksums
   ## ref: https://github.com/docker-library/docs/blob/master/postgres/content.md#postgres_initdb_args

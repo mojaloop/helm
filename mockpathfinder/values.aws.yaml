@@ -1,44 +1,47 @@
-# Default values for central-end-user-registry.
+# Default values for mockpathfinder.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
 image:
-  repository: mojaloop/central-end-user-registry
+  repository: mojaloop/mock-pathfinder
   tag: latest
   pullPolicy: IfNotPresent
 
-readinessProbe:
-  enabled: true
-  httpGet:
-    path: /health
-  initialDelaySeconds: 30
-  periodSeconds: 15
-
-livenessProbe:
-  enabled: true
-  httpGet:
-    path: /health
-  initialDelaySeconds: 30
-  periodSeconds: 15
-
 config:
   default_json: '
-    {
-      "PORT": $service_port,
-      "HOSTNAME": "http://$ingress_host"
+  {
+    "QUERY": {
+      "PORT": $query_port,
+      "DEFAULT_RECORD": {
+        "order": 10,
+        "preference": 50,
+        "flags": "u",
+        "service": "E2U+pstn:tel",
+        "regexp": "!^(.*)$!tel:\\1;q_stat=102!",
+        "replacement": "",
+        "ttl": 900
+      }
+    },
+    "PROVISIONING": {
+      "PORT": $provisioning_port,
+      "PATH": "/nrs-pi/services/SIPIX/SendRequest",
+      "WSDL_FILE": "./sipix-2.0.0.wsdl",
+      "DEFAULT_CUSTOMER_ID": 1234
     }
+  }
 '
 
-init:
-  enabled: true
-
 service:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
-    api:
-      name: http-api
-      externalPort: 3001
-      internalPort: 3001
+    provisioning:
+      name: tcp-prov
+      externalPort: 8080
+      internalPort: 8080
+    query:
+      name: tcp-query
+      externalPort: 15353
+      internalPort: 15353
 
   # This allows one to point the service to an external backend. 
   # This is useful for local development where one wishes to hijack 
@@ -50,15 +53,17 @@ service:
     ip: 10.0.2.2
     ports:
       provisioning: 
-        name: http-api
-        externalPort: 3001
+        name: tcp-prov
+        externalPort: 8080
+      query: 
+        name: tcp-query
+        externalPort: 15353
 
 ingress:
   enabled: false
-  externalPath: /
   # Used to create an Ingress record.
   hosts:
-    api: central-end-user-registry.local
+    api: mock-pathfinder.local
   annotations:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
@@ -81,7 +86,7 @@ resources: {}
 
 postgresql:
   enabled: true 
-  nameOverride: "centralenduserregistry-postgresql"
+  nameOverride: "mockpathfinder-postgresql"
   ## postgres image repository
   image: "postgres"
   ## postgres image version
@@ -97,13 +102,13 @@ postgresql:
 
   ## Create a database user
   ## Default: postgres
-  postgresUser: end_user_registry
+  postgresUser: mock-pathfinder
   ## Default: random 10 character string
-  postgresPassword: yGnTC07WQ6
+  postgresPassword: IypvXbJ1Zb
 
   ## Create a database
   ## Default: the postgres user
-  postgresDatabase: central_end_user_registry
+  postgresDatabase: mock_pathfinder
 
   ## Specify initdb arguments, e.g. --data-checksums
   ## ref: https://github.com/docker-library/docs/blob/master/postgres/content.md#postgres_initdb_args
@@ -162,6 +167,6 @@ postgresql:
       cpu: 100m
 
   service:
-    type: ClusterIP
+    type: LoadBalancer
     port: 5432
     externalIPs: []
