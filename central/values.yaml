@@ -10,12 +10,19 @@ centralhub:
     tag: latest
     pullPolicy: IfNotPresent
 
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 45
+    periodSeconds: 15
+  
   livenessProbe:
     enabled: true
     httpGet:
       path: /health
-    initialDelaySeconds: 60
-    periodSeconds: 10
+    initialDelaySeconds: 45
+    periodSeconds: 15
     
   config:
     default_json: '
@@ -32,6 +39,8 @@ centralhub:
     type: ClusterIP
     externalPort: 4001
     internalPort: 4001
+
+    annotations: {}
 
     # This allows one to point the service to an external backend. 
     # This is useful for local development where one wishes to hijack 
@@ -89,7 +98,6 @@ centralhub:
           pullPolicy: IfNotPresent
           command: '["node", "src/api/index.js"]'
         service:
-          type: ClusterIP
           ports:
             api:
               name: http-api
@@ -99,14 +107,14 @@ centralhub:
           enabled: true
           httpGet:
             path: /health
-          initialDelaySeconds: 60
-          periodSeconds: 5  
+          initialDelaySeconds: 120
+          periodSeconds: 15
         livenessProbe:
           enabled: true
           httpGet:
             path: /health
-          initialDelaySeconds: 60
-          periodSeconds: 5
+          initialDelaySeconds: 90
+          periodSeconds: 15
 
       admin:
         image:
@@ -115,7 +123,6 @@ centralhub:
           pullPolicy: IfNotPresent
           command: '["node", "src/admin/index.js"]'
         service:
-          type: ClusterIP
           ports:
             api:
               name: http-api-admin
@@ -125,14 +132,14 @@ centralhub:
           enabled: true
           httpGet:
             path: /health
-          initialDelaySeconds: 60
-          periodSeconds: 5  
+          initialDelaySeconds: 120
+          periodSeconds: 15  
         livenessProbe:
           enabled: true
           httpGet:
             path: /health
-          initialDelaySeconds: 60
-          periodSeconds: 10
+          initialDelaySeconds: 90
+          periodSeconds: 15
 
 
     config:
@@ -169,6 +176,8 @@ centralhub:
 
     service:
       type: ClusterIP
+      
+      annotations: {}
 
       # This allows one to point the service to an external backend. 
       # This is useful for local development where one wishes to hijack 
@@ -230,6 +239,8 @@ centralhub:
         externalPort: 5678
         internalPort: 5678
 
+        annotations: {}
+
         # This allows one to point the service to an external backend. 
         # This is useful for local development where one wishes to hijack 
         # the communication from the service to the node layer and point
@@ -245,13 +256,13 @@ centralhub:
 
       readinessProbe:
         enabled: true
-        initialDelaySeconds: 60
-        periodSeconds: 5
+        initialDelaySeconds: 90
+        periodSeconds: 15
 
       livenessProbe:
         enabled: true
-        initialDelaySeconds: 60
-        periodSeconds: 5
+        initialDelaySeconds: 90
+        periodSeconds: 15
         
       ingress:
         enabled: false
@@ -281,6 +292,23 @@ centralhub:
         #  cpu: 100m
         #  memory: 128Mi
 
+      config:
+        default_json: '
+          {
+            "PORT": $servicePort,
+            "SERVICE": "$serviceName",
+            "BATCH_SIZE": 64,
+            "BATCH_TIME_INTERVAL": 300000,
+            "KMS": {
+              "URL": "ws://$kmsHost:$kmsPort/sidecar",
+              "PING_INTERVAL": 30000,
+              "REQUEST_TIMEOUT": 90000,
+              "CONNECT_TIMEOUT": 60000,
+              "RECONNECT_INTERVAL": 10000
+            }
+          }
+      '
+      
       centralkms:
         enabled: true
         nameOverride: "centralkms"
@@ -296,6 +324,8 @@ centralhub:
           externalPort: 8080
           internalPort: 8080
 
+          annotations: {}
+          
           # This allows one to point the service to an external backend. 
           # This is useful for local development where one wishes to hijack 
           # the communication from the service to the node layer and point
@@ -313,15 +343,15 @@ centralhub:
           enabled: true
           httpGet:
             path: /sidecars
-          initialDelaySeconds: 60
-          periodSeconds: 5
+          initialDelaySeconds: 45
+          periodSeconds: 15
 
         livenessProbe:
           enabled: true
           httpGet:
             path: /sidecars
-          initialDelaySeconds: 60
-          periodSeconds: 5
+          initialDelaySeconds: 45
+          periodSeconds: 15
           
         ingress:
           enabled: true
@@ -359,6 +389,11 @@ centralhub:
           ## Default: random 10 character string
           postgresPassword: xD873IyaQB
 
+          service:
+            type: ClusterIP
+            port: 5432
+            externalIPs: []
+
       postgresql:
         enabled: true
         nameOverride: "forensicloggingsidecar-ledger-postgresql"
@@ -366,6 +401,11 @@ centralhub:
         postgresUser: sidecar
         ## Default: random 10 character string
         postgresPassword: Wqt0KlkKvL
+
+        service:
+          type: ClusterIP
+          port: 5432
+          externalIPs: []
 
     postgresql:
       enabled: true 
@@ -375,6 +415,11 @@ centralhub:
       ## Default: random 10 character string
       postgresPassword: oyMxgZChuu
 
+      service:
+        type: ClusterIP
+        port: 5432
+        externalIPs: []
+
 centraldirectory:
   enabled: true
   replicaCount: 1
@@ -383,12 +428,19 @@ centraldirectory:
     tag: latest
     pullPolicy: IfNotPresent
 
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 60
+    periodSeconds: 15
+
   livenessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
-    periodSeconds: 10
+    periodSeconds: 15
 
   config:
     default_json: '
@@ -478,12 +530,19 @@ centraldirectory:
       tag: latest
       pullPolicy: IfNotPresent
 
+    readinessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+      initialDelaySeconds: 45
+      periodSeconds: 15
+
     livenessProbe:
       enabled: true
       httpGet:
         path: /health
-      initialDelaySeconds: 60
-      periodSeconds: 10
+      initialDelaySeconds: 45
+      periodSeconds: 15
 
     config:
       default_json: '
@@ -660,6 +719,11 @@ centraldirectory:
       ## Default: random 10 character string
       postgresPassword: IypvXbJ1Zb
 
+      service:
+        type: ClusterIP
+        port: 5432
+        externalIPs: []
+
   postgresql:
     enabled: true 
     nameOverride: "centraldirectory-postgresql"
@@ -667,3 +731,8 @@ centraldirectory:
     postgresUser: central-directory
     ## Default: random 10 character string
     postgresPassword: gR5hARbsfa
+
+    service:
+      type: ClusterIP
+      port: 5432
+      externalIPs: []

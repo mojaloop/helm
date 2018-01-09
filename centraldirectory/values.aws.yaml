@@ -54,14 +54,15 @@ init:
   enabled: true
 
 service:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
     api:
       name: http-api
       externalPort: 3000
       internalPort: 3000
 
-  annotations: {}
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 
   # This allows one to point the service to an external backend. 
   # This is useful for local development where one wishes to hijack 
@@ -137,14 +138,15 @@ centralenduserregistry:
     enabled: true
 
   service:
-    type: ClusterIP
+    type: LoadBalancer
     ports:
       api:
         name: http-api
         externalPort: 3001
         internalPort: 3001
 
-    annotations: {}
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 
     # This allows one to point the service to an external backend. 
     # This is useful for local development where one wishes to hijack 
@@ -252,8 +254,9 @@ mockpathfinder:
         externalPort: 15353
         internalPort: 15353
 
-    annotations: {}
-    
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+
     # This allows one to point the service to an external backend. 
     # This is useful for local development where one wishes to hijack 
     # the communication from the service to the node layer and point

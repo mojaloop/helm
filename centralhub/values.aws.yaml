@@ -34,11 +34,12 @@ config:
 
 service:
   name: http-api-and-web
-  type: ClusterIP
+  type: LoadBalancer
   externalPort: 4001
   internalPort: 4001
-  
-  annotations: {}
+
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 
   # This allows one to point the service to an external backend. 
   # This is useful for local development where one wishes to hijack 
@@ -172,10 +173,11 @@ centralledger:
       pullPolicy: IfNotPresent
 
   service:
-    type: ClusterIP
+    type: LoadBalancer
     
-    annotations: {}
-
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    
     # This allows one to point the service to an external backend. 
     # This is useful for local development where one wishes to hijack 
     # the communication from the service to the node layer and point
@@ -229,14 +231,15 @@ centralledger:
       repository: mojaloop/forensic-logging-sidecar
       tag: latest
       pullPolicy: IfNotPresent
-
+      # command: '["sleep", "100000000"]'
     service:
       name: http-api-and-ws
-      type: ClusterIP
+      type: LoadBalancer
       externalPort: 5678
       internalPort: 5678
-      
-      annotations: {}
+
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 
       # This allows one to point the service to an external backend. 
       # This is useful for local development where one wishes to hijack 
@@ -288,7 +291,7 @@ centralledger:
       # requests:
       #  cpu: 100m
       #  memory: 128Mi
-    
+
     config:
       default_json: '
         {
@@ -316,11 +319,13 @@ centralledger:
 
       service:
         name: http-api-and-tcp-websocket
-        type: ClusterIP
+        # type: ClusterIP
+        type: LoadBalancer
         externalPort: 8080
         internalPort: 8080
-       
-        annotations: {}
+
+        annotations:
+          service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 
         # This allows one to point the service to an external backend. 
         # This is useful for local development where one wishes to hijack 
@@ -384,9 +389,9 @@ centralledger:
         postgresUser: kms
         ## Default: random 10 character string
         postgresPassword: xD873IyaQB
-
+  
         service:
-          type: ClusterIP
+          type: LoadBalancer
           port: 5432
           externalIPs: []
 
@@ -397,9 +402,9 @@ centralledger:
       postgresUser: sidecar
       ## Default: random 10 character string
       postgresPassword: Wqt0KlkKvL
-    
+  
       service:
-        type: ClusterIP
+        type: LoadBalancer
         port: 5432
         externalIPs: []
 
@@ -410,8 +415,8 @@ centralledger:
     postgresUser: central_ledger
     ## Default: random 10 character string
     postgresPassword: oyMxgZChuu
-
+    
     service:
-      type: ClusterIP
+      type: LoadBalancer
       port: 5432
       externalIPs: []

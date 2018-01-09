@@ -87,10 +87,9 @@ init:
     pullPolicy: IfNotPresent
 
 service:
-  type: ClusterIP
-  
-  annotations: {}
-
+  type: LoadBalancer
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
   # This allows one to point the service to an external backend. 
   # This is useful for local development where one wishes to hijack 
   # the communication from the service to the node layer and point
@@ -147,11 +146,12 @@ forensicloggingsidecar:
 
   service:
     name: http-api-and-ws
-    type: ClusterIP
+    type: LoadBalancer
     externalPort: 5678
     internalPort: 5678
 
-    annotations: {}
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 
     # This allows one to point the service to an external backend. 
     # This is useful for local development where one wishes to hijack 
@@ -220,6 +220,7 @@ forensicloggingsidecar:
         }
       }
   '
+
   centralkms:
     enabled: true
     nameOverride: "centralkms"
@@ -231,12 +232,13 @@ forensicloggingsidecar:
 
     service:
       name: http-api-and-tcp-websocket
-      type: ClusterIP
+      type: LoadBalancer
       externalPort: 8080
       internalPort: 8080
 
-      annotations: {}
-      
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+        
       # This allows one to point the service to an external backend. 
       # This is useful for local development where one wishes to hijack 
       # the communication from the service to the node layer and point
@@ -255,14 +257,14 @@ forensicloggingsidecar:
       httpGet:
         path: /sidecars
       initialDelaySeconds: 30
-      periodSeconds: 5
+      periodSeconds: 15
 
     livenessProbe:
       enabled: true
       httpGet:
         path: /sidecars
       initialDelaySeconds: 30
-      periodSeconds: 5
+      periodSeconds: 15
       
     ingress:
       enabled: true
@@ -301,7 +303,7 @@ forensicloggingsidecar:
       postgresPassword: xD873IyaQB
 
       service:
-        type: ClusterIP
+        type: LoadBalancer
         port: 5432
         externalIPs: []
 
@@ -312,12 +314,12 @@ forensicloggingsidecar:
     postgresUser: sidecar
     ## Default: random 10 character string
     postgresPassword: Wqt0KlkKvL
-
+    
     service:
-      type: ClusterIP
+      type: LoadBalancer
       port: 5432
       externalIPs: []
-
+      
 postgresql:
   enabled: true 
   nameOverride: "centralledger-postgresql"
@@ -369,7 +371,12 @@ postgresql:
     accessMode: ReadWriteOnce
     size: 8Gi
     subPath: "postgresql-db"
-
+  
+    service:
+      type: LoadBalancer
+      port: 5432
+      externalIPs: []
+      
   metrics:
     enabled: false
     image: wrouesnel/postgres_exporter
@@ -401,6 +408,6 @@ postgresql:
       cpu: 100m
 
   service:
-    type: ClusterIP
+    type: LoadBalancer
     port: 5432
     externalIPs: []

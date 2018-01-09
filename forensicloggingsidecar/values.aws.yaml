@@ -10,11 +10,13 @@ image:
 
 service:
   name: http-api-and-ws
-  type: ClusterIP
+  # type: ClusterIP
+  type: LoadBalancer
   externalPort: 5678
   internalPort: 5678
 
-  annotations: {}
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 
   # This allows one to point the service to an external backend. 
   # This is useful for local development where one wishes to hijack 
@@ -31,7 +33,7 @@ service:
 
 readinessProbe:
   enabled: true
-  initialDelaySeconds: 90
+  initialDelaySeconds: 120
   periodSeconds: 15
 
 livenessProbe:
@@ -96,9 +98,13 @@ centralkms:
 
   service:
     name: http-api-and-tcp-websocket
-    type: ClusterIP
+    # type: ClusterIP
+    type: LoadBalancer
     externalPort: 8080
     internalPort: 8080
+
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 
     # This allows one to point the service to an external backend. 
     # This is useful for local development where one wishes to hijack 
@@ -117,15 +123,15 @@ centralkms:
     enabled: true
     httpGet:
       path: /sidecars
-    initialDelaySeconds: 15
-    periodSeconds: 5
+    initialDelaySeconds: 90
+    periodSeconds: 15
 
   livenessProbe:
     enabled: true
     httpGet:
       path: /sidecars
-    initialDelaySeconds: 15
-    periodSeconds: 5
+    initialDelaySeconds: 90
+    periodSeconds: 15
     
   ingress:
     enabled: true
@@ -164,7 +170,8 @@ centralkms:
     postgresPassword: xD873IyaQB
 
     service:
-      type: ClusterIP
+      # type: ClusterIP
+      type: LoadBalancer
       port: 5432
       externalIPs: []
 
@@ -251,6 +258,7 @@ postgresql:
       cpu: 100m
 
   service:
-    type: ClusterIP
+    # type: ClusterIP
+    type: LoadBalancer
     port: 5432
     externalIPs: []
