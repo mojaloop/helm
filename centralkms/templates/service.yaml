@@ -8,12 +8,9 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
-    # this is status quo
-    # service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
-    # service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
-    # this is beta
-    # service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    {{- range $key, $value := .Values.service.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:

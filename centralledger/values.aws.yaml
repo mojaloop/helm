@@ -10,7 +10,6 @@ containers:
       pullPolicy: IfNotPresent
       command: '["node", "src/api/index.js"]'
     service:
-      type: LoadBalancer
       ports:
         api:
           name: http-api
@@ -36,7 +35,6 @@ containers:
       pullPolicy: IfNotPresent
       command: '["node", "src/admin/index.js"]'
     service:
-      type: ClusterIP
       ports:
         api:
           name: http-api-admin
@@ -90,7 +88,8 @@ init:
 
 service:
   type: LoadBalancer
-
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
   # This allows one to point the service to an external backend. 
   # This is useful for local development where one wishes to hijack 
   # the communication from the service to the node layer and point
@@ -150,6 +149,9 @@ forensicloggingsidecar:
     type: LoadBalancer
     externalPort: 5678
     internalPort: 5678
+
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
 
     # This allows one to point the service to an external backend. 
     # This is useful for local development where one wishes to hijack 
@@ -234,6 +236,9 @@ forensicloggingsidecar:
       externalPort: 8080
       internalPort: 8080
 
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+        
       # This allows one to point the service to an external backend. 
       # This is useful for local development where one wishes to hijack 
       # the communication from the service to the node layer and point
