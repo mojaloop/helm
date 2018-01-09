@@ -7,12 +7,19 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+  initialDelaySeconds: 45
+  periodSeconds: 15
+
 livenessProbe:
   enabled: true
   httpGet:
     path: /health
-  initialDelaySeconds: 60
-  periodSeconds: 10
+  initialDelaySeconds: 45
+  periodSeconds: 15
 
 config:
   default_json: '
@@ -32,6 +39,8 @@ service:
       name: http-api
       externalPort: 3001
       internalPort: 3001
+
+  annotations: {}
 
   # This allows one to point the service to an external backend. 
   # This is useful for local development where one wishes to hijack 
