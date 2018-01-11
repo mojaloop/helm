@@ -32,10 +32,6 @@ echo "Updating Central Hub..."
 helm dep up ./centralhub
 checkCommandResult
 
-echo "Updating Central..."
-helm dep up ./central
-checkCommandResult
-
 echo "Updating Mock Pathfinder..."
 helm dep up ./mockpathfinder
 checkCommandResult
@@ -46,6 +42,10 @@ checkCommandResult
 
 echo "Updating Central-Directory..."
 helm dep up ./centraldirectory
+checkCommandResult
+
+echo "Updating Central..."
+helm dep up ./central
 checkCommandResult
 
 echo "\
