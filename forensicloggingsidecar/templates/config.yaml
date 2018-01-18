@@ -12,7 +12,7 @@ data:
   ## The name for the sidecar service. Default: TestService
   # sidecar.name: "TestService"
   ## The port the sidecar server will run on. Default: 5678
-  sidecar.port: "{{ .Values.service.internalPort }}"
+  sidecar.port: "{{ .Values.service.ports.ws.internalPort }}"
   ## The message batch size. Default: 64
   # sidecar.batch.side: 64
   # The url for the KMS. Default: ws://localhost:8080/sidecar
@@ -28,7 +28,7 @@ data:
   # kms.reconnect.interval: 
 
   default.json: |
-      {{ .Values.config.default_json | replace "$servicePort" (printf "%.0f" .Values.service.internalPort) | replace "$kmsPort" (printf "%.0f" .Values.centralkms.service.externalPort) | replace "$kmsHost" $kmsHost | replace "$serviceName" (include "forensicloggingsidecar.fullname" .) }}
+      {{ .Values.config.default_json | replace "$servicePort" (printf "%.0f" .Values.service.ports.ws.internalPort) | replace "$healthPort" (printf "%.0f" .Values.service.ports.api.internalPort) |replace "$kmsPort" (printf "%.0f" .Values.centralkms.service.externalPort) | replace "$kmsHost" $kmsHost | replace "$serviceName" (include "forensicloggingsidecar.fullname" .) }}
 
   knexfile.js: |
     'use strict'

@@ -11,8 +11,15 @@ image:
 service:
   name: http-api-and-ws
   type: ClusterIP
-  externalPort: 5678
-  internalPort: 5678
+  ports:
+    ws:
+      name: ws-api
+      externalPort: 5678
+      internalPort: 5678
+    api:
+      name: http-api
+      externalPort: 6789
+      internalPort: 6789
 
   annotations: {}
 
@@ -25,18 +32,27 @@ service:
     # 10.0.2.2 is the magic IP for the host on virtualbox's network
     ip: 10.0.2.2
     ports:
-      api: 
-        name: http-api-and-ws
+      ws:
+        name: ws-api
         externalPort: 5678
+      api:
+        name: http-api
+        externalPort: 6789
 
 readinessProbe:
   enabled: true
-  initialDelaySeconds: 90
+  httpGet:
+    path: /health
+    port: 6789
+  initialDelaySeconds: 145
   periodSeconds: 15
 
 livenessProbe:
   enabled: true
-  initialDelaySeconds: 90
+  httpGet:
+    path: /health
+    port: 6789
+  initialDelaySeconds: 145
   periodSeconds: 15
 
 ingress:
@@ -72,6 +88,7 @@ config:
   default_json: '
     {
       "PORT": $servicePort,
+      "HEALTH_PORT": $healthPort,
       "SERVICE": "$serviceName",
       "BATCH_SIZE": 64,
       "BATCH_TIME_INTERVAL": 300000,
