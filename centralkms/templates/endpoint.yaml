@@ -1,0 +1,20 @@
+{{- if .Values.service.external.enabled -}}
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: {{ template "centralkms.fullname" . }}
+  labels:
+    app: {{ template "centralkms.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+subsets: 
+  -
+    addresses:
+      -
+        ip: {{ .Values.service.external.ip }}
+    ports:
+      -
+        port: {{ .Values.service.external.ports.api.externalPort }}
+        name: {{ .Values.service.external.ports.api.name }}
+{{- end -}}

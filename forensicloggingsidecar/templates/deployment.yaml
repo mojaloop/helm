@@ -4,13 +4,13 @@ kind: Deployment
 metadata:
   name: {{ template "forensicloggingsidecar.fullname" . }}
   labels:
-    app: {{ template "forensicloggingsidecar.name" . }}
+    app: {{ template "forensicloggingsidecar.fullname" . }}
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: {{ template "forensicloggingsidecar.name" . }}
+        app: {{ template "forensicloggingsidecar.fullname" . }}
         chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}
@@ -26,6 +26,7 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: {{ .Values.image.command }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
           {{- if .Values.readinessProbe.enabled }}
@@ -62,3 +63,15 @@ spec:
                 secretKeyRef:
                   name: {{ template "forensicloggingsidecar.fullname" . }}
                   key: db.uri
+          volumeMounts:
+          - name: {{ template "forensicloggingsidecar.fullname" . }}-config-volume
+            mountPath: /opt/sidecar/config
+      volumes:
+        - name: {{ template "forensicloggingsidecar.fullname" . }}-config-volume
+          configMap:
+            name: {{ template "forensicloggingsidecar.fullname" . }}
+            items:
+            - key: default.json
+              path: default.json
+            - key: knexfile.js
+              path: knexfile.js

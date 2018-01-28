@@ -1,35 +1,75 @@
 # Mojaloop Helm Charts
 
+Mojaloop published Helm Repo: http://mojaloop.io/helm/repo/
+
 Refer to Helm docs for more information: https://docs.helm.sh/
 
-## Update Chart Dependencies
-
-- `helm dep up central`
-- `helm dep up centraldirectory`
-- `helm dep up centralenduserregistry`
-- `helm dep up centralhub`
-- `helm dep up centralkms`
-- `helm dep up centralledger`
-- `helm dep up forensicloggingsidecar`
-- `helm dep up mockpathfinder`
-
-Useful command to execute a dep update against all the directories: `find . -mindepth 1 -maxdepth 1 -type d -exec helm dep up {} \;`
-
-We are quitely waiting on recursive updates: https://github.com/kubernetes/helm/issues/2247
-
-## Deployment
+## Deployment from Repo
 
 1. Deploy specific chart
 
-- `helm install --debug --namespace=<namespace> --name=<release-name> <chart-directory>`
+- `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo <chart_name>`
 
-e.g. `helm install --debug --namespace=test --name=r1 ./centralledger`
+e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo centralledger`
+
+2. Deploy specific chart overriding values
+
+- `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo -f <values_file> <chart_name>`
+
+e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo -f ./values.yaml centralledger`
+
+Refer to the following default chart config file for values: http://mojaloop.io/helm/<chart_name>/values.yaml
+
+3. Deploy ALL Central componenets
+
+- `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo central`
+
+e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo central`
+
+4. Deploy Ingress
+
+- `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo ingress-nginx`
+
+e.g. `helm install --debug --namespace=kube-public --name=<release-name> --repo=http://mojaloop.io/helm/repo ingress-nginx`
+
+## Upgrading Deployments from Repo
+
+`helm upgrade --debug <release-name> --repo=http://mojaloop.io/helm/repo <chart_name>`
+
+e.g. `helm upgrade --debug dev --repo=http://mojaloop.io/helm/repo centralenduserregistry`
+
+## Update Chart Dependencies for Source
+
+Note: Please ensure that you update the Chart dependencies in the order show below.
+
+- `helm dep up centralkms`
+- `helm dep up forensicloggingsidecar`
+- `helm dep up centralledger`
+- `helm dep up centralhub`
+- `helm dep up mockpathfinder`
+- `helm dep up centralenduserregistry`
+- `helm dep up centraldirectory`
+- `helm dep up central`
+
+We are quitely waiting on recursive updates: https://github.com/kubernetes/helm/issues/2247
+
+Alternatively please use the helper script `sh ./update-charts-dep.sh`. 
+
+This script will ensure the correct order is maintained.
+
+## Deployment from Source
+
+1. Deploy specific chart
+
+- `helm install --debug --namespace=<namespace> --name=<release-name> <chart_directory>`
+
+e.g. `helm install --debug --namespace=mojaloop --name=dev ./centralledger`
 
 2. Deploy ALL Central componenets
 
 - `helm install --debug --namespace=<namespace> --name=<release-name> ./central`
 
-e.g. `helm install --debug --namespace=test --name=r1 ./central`
+e.g. `helm install --debug --namespace=mojaloop --name=dev ./central`
 
 3. Deploy Ingress
 
@@ -37,11 +77,11 @@ e.g. `helm install --debug --namespace=test --name=r1 ./central`
 
 e.g. `helm install --debug --namespace=kube-public --name=<release-name> ./kube-public/ingress-nginx`
 
-## Upgrading Deployments
+## Upgrading Deployments from Source
 
-`helm upgrade --debug <release-name> <chart-directory>`
+`helm upgrade --debug <release-name> <chart_directory>`
 
-e.g. `helm upgrade --debug r1 ./centralenduserregistry/`
+e.g. `helm upgrade --debug dev ./centralenduserregistry/`
 
 ## Testing Deployments
 
@@ -83,22 +123,23 @@ Check to see that an account name "LedgerName" is displayed
 
 `helm del --purge <release-name>`
 
-e.g. `helm del --purge r1`
+e.g. `helm del --purge dev`
 
 ## Debugging Charts
 
 1. Execute a dry-run to display all the Kubernetes deployment files
 
- `helm install --dry-run --debug --namespace=<namespace> --name=<release-name> <chart-directory>`
+ `helm install --dry-run --debug --namespace=<namespace> --name=<release-name> <chart_directory>`
 
 2. Use Helm Linter to check for any issues
 
-`helm lint --strict <chart-directory>`
+`helm lint --strict <chart_directory>`
 
 ## Helper scripts
 
 ### Ingress
 1.) Deploy Ingress
+
 This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
 
 `sh deploy-ingress.sh -r lb -e -o ./config-ingress.yaml`
@@ -109,6 +150,7 @@ This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
 
 ### Central
 1.) Deploy Central
+
 This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
 
 `sh deploy-central.sh -r dev -e -o ./config-central.yaml`
@@ -117,7 +159,10 @@ This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
 
 `sh clean.sh -r dev -e`
 
+### Package
+1.) Package charts
 
+<<<<<<< HEAD
 ## Deploy Mojaloop on a local Minikube environment
 
 ### Setup local K8s environment
@@ -188,4 +233,4 @@ This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
 
 ### Test Deplyoments
 
-15. Refer to testing section above.
+`sh package.sh`

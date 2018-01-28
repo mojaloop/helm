@@ -1,4 +1,4 @@
-# Default values for mockpathfinder.
+# Default values for central-end-user-registry.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
@@ -7,12 +7,19 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+  initialDelaySeconds: 45
+  periodSeconds: 15
+
 livenessProbe:
   enabled: true
   httpGet:
     path: /health
-  initialDelaySeconds: 60
-  periodSeconds: 10
+  initialDelaySeconds: 45
+  periodSeconds: 15
 
 config:
   default_json: '
@@ -32,12 +39,21 @@ service:
       name: http-api
       externalPort: 3001
       internalPort: 3001
-  # - name: provisioning
-  #   externalPort: 8080
-  #   internalPort: 8080
-  # - name: query
-  #   externalPort: 15353
-  #   internalPort: 15353
+
+  annotations: {}
+
+  # This allows one to point the service to an external backend. 
+  # This is useful for local development where one wishes to hijack 
+  # the communication from the service to the node layer and point
+  # to a specific endpoint (IP, Port, etc).
+  external:
+    enabled: false
+    # 10.0.2.2 is the magic IP for the host on virtualbox's network
+    ip: 10.0.2.2
+    ports:
+      provisioning: 
+        name: http-api
+        externalPort: 3001
 
 ingress:
   enabled: false

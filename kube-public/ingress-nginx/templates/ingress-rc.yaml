@@ -19,21 +19,21 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     addonmanager.kubernetes.io/mode: Reconcile
-    app:  {{ template "nginx-ingress.name" . }}
+    app: {{ template "nginx-ingress.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.defaultbackend.replicaCount }}
   selector:
-    app: {{ template "nginx-ingress.name" . }}-default-http-backend
+    app: {{ template "nginx-ingress.fullname" . }}-default-http-backend
     release: {{ .Release.Name }}
     addonmanager.kubernetes.io/mode: Reconcile
   template:
     metadata:
       labels:
         addonmanager.kubernetes.io/mode: Reconcile
-        app:  {{ template "nginx-ingress.name" . }}-default-http-backend
+        app: {{ template "nginx-ingress.fullname" . }}-default-http-backend
         chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}
@@ -71,20 +71,20 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     addonmanager.kubernetes.io/mode: Reconcile
-    app:  {{ template "nginx-ingress.name" . }}-controller
+    app: {{ template "nginx-ingress.fullname" . }}-controller
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.controller.replicaCount }}
   selector:
-    app: {{ template "nginx-ingress.name" . }}-controller
+    app: {{ template "nginx-ingress.fullname" . }}-controller
     release: {{ .Release.Name }}
     addonmanager.kubernetes.io/mode: Reconcile
   template:
     metadata:
       labels:
-        app:  {{ template "nginx-ingress.name" . }}-controller
+        app: {{ template "nginx-ingress.fullname" . }}-controller
         chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}

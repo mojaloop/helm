@@ -1,0 +1,64 @@
+# CircleCI v2 Config
+version: 2
+
+defaults: &defaults
+  working_directory: /home/circleci/project
+  docker:
+    - image: wernight/kubectl
+
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: 
+          name: Build Chart packages
+          command: sh ./package.sh
+      # save Chart packages
+      - save_cache:
+          key: repo-cache-{{ .Branch }}-{{ .Revision }}
+          paths: repo
+  deploy:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: 
+          name: Checkout gh-pages branch
+          command: git checkout origin gh-pages
+      - restore_cache:
+          keys: repo-cache-{{ .Branch }}-{{ .Revision }}
+      - run: 
+          name: Murge origin master into gh-pages branch
+          command: git pull origin master
+      - run: 
+          name: Add repo to gh-pages branch
+          command: git add ./repo
+      - run: 
+          name: Commit changes to gh-pages branch
+          command: git commit -m "Publishing $(date '+%Y%m%d-%H%M%S')"
+      - run: 
+          name: Publish gh-pages
+          command: git push origin
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build:
+          context: org-global
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+            branches:
+              only:
+                - master
+      - deploy:
+          context: org-global
+          requires:
+            - build
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+            branches:
+              only:
+                - master

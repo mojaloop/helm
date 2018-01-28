@@ -6,6 +6,7 @@ image:
   repository: mojaloop/forensic-logging-sidecar
   tag: latest
   pullPolicy: IfNotPresent
+  command: '["/opt/sidecar/server.sh"]'
 
 service:
   name: http-api-and-ws
@@ -13,15 +14,30 @@ service:
   externalPort: 5678
   internalPort: 5678
 
+  annotations: {}
+
+  # This allows one to point the service to an external backend. 
+  # This is useful for local development where one wishes to hijack 
+  # the communication from the service to the node layer and point
+  # to a specific endpoint (IP, Port, etc).
+  external:
+    enabled: false
+    # 10.0.2.2 is the magic IP for the host on virtualbox's network
+    ip: 10.0.2.2
+    ports:
+      api: 
+        name: http-api-and-ws
+        externalPort: 5678
+
 readinessProbe:
   enabled: true
-  initialDelaySeconds: 15
-  periodSeconds: 5
+  initialDelaySeconds: 90
+  periodSeconds: 15
 
 livenessProbe:
   enabled: true
-  initialDelaySeconds: 15
-  periodSeconds: 5
+  initialDelaySeconds: 90
+  periodSeconds: 15
 
 ingress:
   enabled: false
@@ -52,6 +68,23 @@ resources: {}
   #  cpu: 100m
   #  memory: 128Mi
 
+config:
+  default_json: '
+    {
+      "PORT": $servicePort,
+      "SERVICE": "$serviceName",
+      "BATCH_SIZE": 64,
+      "BATCH_TIME_INTERVAL": 300000,
+      "KMS": {
+        "URL": "ws://$kmsHost:$kmsPort/sidecar",
+        "PING_INTERVAL": 30000,
+        "REQUEST_TIMEOUT": 120000,
+        "CONNECT_TIMEOUT": 60000,
+        "RECONNECT_INTERVAL": 10000
+      }
+    }
+'
+
 centralkms:
   enabled: true
   nameOverride: "centralkms"
@@ -66,6 +99,19 @@ centralkms:
     type: ClusterIP
     externalPort: 8080
     internalPort: 8080
+
+    # This allows one to point the service to an external backend. 
+    # This is useful for local development where one wishes to hijack 
+    # the communication from the service to the node layer and point
+    # to a specific endpoint (IP, Port, etc).
+    external:
+      enabled: false
+      # 10.0.2.2 is the magic IP for the host on virtualbox's network
+      ip: 10.0.2.2
+      ports:
+        api: 
+          name: http-api-and-tcp-websocket
+          externalPort: 8080
 
   readinessProbe:
     enabled: true
@@ -116,6 +162,11 @@ centralkms:
     postgresUser: kms
     ## Default: random 10 character string
     postgresPassword: xD873IyaQB
+
+    service:
+      type: ClusterIP
+      port: 5432
+      externalIPs: []
 
 postgresql:
   enabled: true
@@ -203,8 +254,3 @@ postgresql:
     type: ClusterIP
     port: 5432
     externalIPs: []
-
-central-kms:
-  name: "central-kms"  
-  service:
-    externalPort: 8080

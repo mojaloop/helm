@@ -3,10 +3,14 @@ kind: Service
 metadata:
   name: {{ template "centralledger.fullname" . }}
   labels:
-    app: {{ template "centralledger.name" . }}
+    app: {{ template "centralledger.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+  annotations:
+    {{- range $key, $value := .Values.service.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -22,6 +26,8 @@ spec:
       protocol: TCP
       name: {{ $port.name }}
     {{- end }}
+{{- if not .Values.service.external.enabled }}
   selector:
-    app: {{ template "centralledger.name" . }}
+    app: {{ template "centralledger.fullname" . }}
     release: {{ .Release.Name }}
+{{- end -}}

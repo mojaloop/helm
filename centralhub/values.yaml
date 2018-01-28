@@ -8,12 +8,19 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+  initialDelaySeconds: 45
+  periodSeconds: 15
+  
 livenessProbe:
   enabled: true
   httpGet:
     path: /health
-  initialDelaySeconds: 60
-  periodSeconds: 10
+  initialDelaySeconds: 45
+  periodSeconds: 15
   
 config:
   default_json: '
@@ -26,14 +33,25 @@ config:
 '
 
 service:
-  name: http-api-and-tcp-websocket
+  name: http-api-and-web
   type: ClusterIP
   externalPort: 4001
   internalPort: 4001
+  
+  annotations: {}
 
-centralledger:
-  enabled: true
-  nameOverride: centralledger
+  # This allows one to point the service to an external backend. 
+  # This is useful for local development where one wishes to hijack 
+  # the communication from the service to the node layer and point
+  # to a specific endpoint (IP, Port, etc).
+  external:
+    enabled: false
+    # 10.0.2.2 is the magic IP for the host on virtualbox's network
+    ip: 10.0.2.2
+    ports:
+      api: 
+        name: http-api-and-web
+        externalPort: 4001
 
 ingress:
   enabled: true
@@ -77,7 +95,6 @@ centralledger:
         pullPolicy: IfNotPresent
         command: '["node", "src/api/index.js"]'
       service:
-        type: ClusterIP
         ports:
           api:
             name: http-api
@@ -87,14 +104,14 @@ centralledger:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 15
-        periodSeconds: 5  
+        initialDelaySeconds: 120
+        periodSeconds: 15
       livenessProbe:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 15
-        periodSeconds: 5
+        initialDelaySeconds: 90
+        periodSeconds: 15
 
     admin:
       image:
@@ -103,7 +120,6 @@ centralledger:
         pullPolicy: IfNotPresent
         command: '["node", "src/admin/index.js"]'
       service:
-        type: ClusterIP
         ports:
           api:
             name: http-api-admin
@@ -113,14 +129,14 @@ centralledger:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 15
-        periodSeconds: 5  
+        initialDelaySeconds: 120
+        periodSeconds: 15
       livenessProbe:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 15
-        periodSeconds: 10
+        initialDelaySeconds: 90
+        periodSeconds: 15
 
 
   config:
@@ -157,17 +173,24 @@ centralledger:
 
   service:
     type: ClusterIP
-  #   ports:
-  #     api:
-  #       name: http-api
-  #       externalPort: 3000
-  #       internalPort: 3000
-    # - name: provisioning
-    #   externalPort: 8080
-    #   internalPort: 8080
-    # - name: query
-    #   externalPort: 15353
-    #   internalPort: 15353
+    
+    annotations: {}
+
+    # This allows one to point the service to an external backend. 
+    # This is useful for local development where one wishes to hijack 
+    # the communication from the service to the node layer and point
+    # to a specific endpoint (IP, Port, etc).
+    external:
+      enabled: false
+      # 10.0.2.2 is the magic IP for the host on virtualbox's network
+      ip: 10.0.2.2
+      ports:
+        api: 
+          name: http-api
+          externalPort: 3000
+        admin: 
+          name: http-api-admin
+          externalPort: 3001
 
   ingress:
     enabled: true
@@ -198,17 +221,6 @@ centralledger:
     #  cpu: 100m
     #  memory: 128Mi
 
-  centraldirectory:
-    enabled: true
-    nameOverride: "centraldirectory"
-    # service:
-    #   type: ClusterIP
-    #   ports:
-    #     api:
-    #       name: http-api
-    #       externalPort: 3001
-    #       internalPort: 3001
-
   forensicloggingsidecar:
     enabled: true
     nameOverride: "forensicloggingsidecar-ledger"
@@ -223,16 +235,31 @@ centralledger:
       type: ClusterIP
       externalPort: 5678
       internalPort: 5678
+      
+      annotations: {}
+
+      # This allows one to point the service to an external backend. 
+      # This is useful for local development where one wishes to hijack 
+      # the communication from the service to the node layer and point
+      # to a specific endpoint (IP, Port, etc).
+      external:
+        enabled: false
+        # 10.0.2.2 is the magic IP for the host on virtualbox's network
+        ip: 10.0.2.2
+        ports:
+          api: 
+            name: http-api-and-ws
+            externalPort: 5678
 
     readinessProbe:
       enabled: true
-      initialDelaySeconds: 15
-      periodSeconds: 5
+      initialDelaySeconds: 90
+      periodSeconds: 15
 
     livenessProbe:
       enabled: true
-      initialDelaySeconds: 15
-      periodSeconds: 5
+      initialDelaySeconds: 90
+      periodSeconds: 15
       
     ingress:
       enabled: false
@@ -261,7 +288,23 @@ centralledger:
       # requests:
       #  cpu: 100m
       #  memory: 128Mi
-
+    
+    config:
+      default_json: '
+        {
+          "PORT": $servicePort,
+          "SERVICE": "$serviceName",
+          "BATCH_SIZE": 64,
+          "BATCH_TIME_INTERVAL": 300000,
+          "KMS": {
+            "URL": "ws://$kmsHost:$kmsPort/sidecar",
+            "PING_INTERVAL": 30000,
+            "REQUEST_TIMEOUT": 90000,
+            "CONNECT_TIMEOUT": 60000,
+            "RECONNECT_INTERVAL": 10000
+          }
+        }
+    '
     centralkms:
       enabled: true
       nameOverride: "centralkms"
@@ -276,20 +319,35 @@ centralledger:
         type: ClusterIP
         externalPort: 8080
         internalPort: 8080
+       
+        annotations: {}
+
+        # This allows one to point the service to an external backend. 
+        # This is useful for local development where one wishes to hijack 
+        # the communication from the service to the node layer and point
+        # to a specific endpoint (IP, Port, etc).
+        external:
+          enabled: false
+          # 10.0.2.2 is the magic IP for the host on virtualbox's network
+          ip: 10.0.2.2
+          ports:
+            api: 
+              name: http-api-and-tcp-websocket
+              externalPort: 8080
 
       readinessProbe:
         enabled: true
         httpGet:
           path: /sidecars
-        initialDelaySeconds: 15
-        periodSeconds: 5
+        initialDelaySeconds: 45
+        periodSeconds: 15
 
       livenessProbe:
         enabled: true
         httpGet:
           path: /sidecars
-        initialDelaySeconds: 15
-        periodSeconds: 5
+        initialDelaySeconds: 45
+        periodSeconds: 15
         
       ingress:
         enabled: true
@@ -327,6 +385,11 @@ centralledger:
         ## Default: random 10 character string
         postgresPassword: xD873IyaQB
 
+        service:
+          type: ClusterIP
+          port: 5432
+          externalIPs: []
+
     postgresql:
       enabled: true
       nameOverride: "forensicloggingsidecar-ledger-postgresql"
@@ -334,6 +397,11 @@ centralledger:
       postgresUser: sidecar
       ## Default: random 10 character string
       postgresPassword: Wqt0KlkKvL
+    
+      service:
+        type: ClusterIP
+        port: 5432
+        externalIPs: []
 
   postgresql:
     enabled: true 
@@ -342,3 +410,8 @@ centralledger:
     postgresUser: central_ledger
     ## Default: random 10 character string
     postgresPassword: oyMxgZChuu
+
+    service:
+      type: ClusterIP
+      port: 5432
+      externalIPs: []
