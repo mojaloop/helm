@@ -27,3 +27,44 @@ spec:
           {{- end }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
+          env:
+            - name: proxy-host
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: proxy.host
+            - name: account-lookup-service.host
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: account-lookup-service.host
+            - name: account-lookup-service.port
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: account-lookup-service.port
+            - name: central-services-host
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: central-services.host
+            - name: central-ledger.host
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: central-ledger.host
+            - name: central-ledger.port
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: central-ledger.port
+            - name: metrics.reporter.kafka.broker
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: metrics.reporter.kafka.broker
+            - name: metrics.reporter.environment
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: metrics.reporter.environment
