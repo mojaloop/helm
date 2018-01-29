@@ -1,9 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "interop-switch.fullname" . }}
+  name: {{ template "interop-account-lookup.fullname" . }}
   labels:
-    app: {{ template "interop-switch.fullname" . }}
+    app: {{ template "interop-account-lookup.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "interop-switch.name" . }}
+        app: {{ template "interop-account-lookup.name" . }}
         chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}
@@ -28,43 +28,23 @@ spec:
           ports:
             - containerPort: {{ .Values.service.internalPort }}
           env:
-            - name: proxy-host
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "interop-switch.fullname" . }}
-                  key: proxy.host
             - name: account-lookup-service.host
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "interop-switch.fullname" . }}
+                  name: {{ template "interop-account-lookup.fullname" . }}
                   key: account-lookup-service.host
             - name: account-lookup-service.port
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "interop-switch.fullname" . }}
+                  name: {{ template "interop-account-lookup.fullname" . }}
                   key: account-lookup-service.port
-            - name: central-services-host
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "interop-switch.fullname" . }}
-                  key: central-services.host
-            - name: central-ledger.host
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "interop-switch.fullname" . }}
-                  key: central-ledger.host
-            - name: central-ledger.port
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "interop-switch.fullname" . }}
-                  key: central-ledger.port
             - name: metrics.reporter.kafka.broker
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "interop-switch.fullname" . }}
+                  name: {{ template "interop-account-lookup.fullname" . }}
                   key: metrics.reporter.kafka.broker
             - name: metrics.reporter.environment
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "interop-switch.fullname" . }}
+                  name: {{ template "interop-account-lookup.fullname" . }}
                   key: metrics.reporter.environment

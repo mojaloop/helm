@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "interop-account-lookup.fullname" . }}
+  labels:
+      app: {{ template "interop-account-lookup.fullname" . }}
+      chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
+data:
+  proxy.host: {{ .Values.config.proxy_host }}
+  account-lookup-service.host: {{ .Values.config.account_lookup_service_host }}
+  account-lookup-service.port: '{{ .Values.config.account_lookup_service_port }}'
+  central-services.host: {{ .Values.config.central_services_host }}
+  central-ledger.host: {{ .Values.config.central_ledger_host }}
+  central-ledger.port: '{{ .Values.config.central_ledger_port }}'
+  metrics.reporter.kafka.broker: {{ .Values.config.metrics_reporter_kafka_broker }}
+  metrics.reporter.environment: {{ .Values.config.metrics_reporter_environment }}
