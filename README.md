@@ -20,11 +20,13 @@ e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloo
 
 Refer to the following default chart config file for values: http://mojaloop.io/helm/<chart_name>/values.yaml
 
-3. Deploy ALL Central componenets
+3. Deploy Mojaloop componenets
 
-- `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo central`
+*Warning: This will deploy all charts.*
 
-e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo central`
+- `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo mojaloop`
+
+e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo mojaloop`
 
 4. Deploy Ingress
 
@@ -50,6 +52,7 @@ Note: Please ensure that you update the Chart dependencies in the order show bel
 - `helm dep up centralenduserregistry`
 - `helm dep up centraldirectory`
 - `helm dep up central`
+- `helm dep up mojaloop`
 
 We are quitely waiting on recursive updates: https://github.com/kubernetes/helm/issues/2247
 
@@ -65,11 +68,13 @@ This script will ensure the correct order is maintained.
 
 e.g. `helm install --debug --namespace=mojaloop --name=dev ./centralledger`
 
-2. Deploy ALL Central componenets
+2. Deploy mojaloop componenets
 
-- `helm install --debug --namespace=<namespace> --name=<release-name> ./central`
+*Warning: This will deploy all charts.*
 
-e.g. `helm install --debug --namespace=mojaloop --name=dev ./central`
+- `helm install --debug --namespace=<namespace> --name=<release-name> ./mojaloop`
+
+e.g. `helm install --debug --namespace=mojaloop --name=dev ./mojaloop`
 
 3. Deploy Ingress
 
