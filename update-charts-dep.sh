@@ -48,6 +48,10 @@ echo "Updating Central..."
 helm dep up ./central
 checkCommandResult
 
+echo "Updating Mojaloop..."
+helm dep up ./mojaloop
+checkCommandResult
+
 echo "\
 Chart updates completed.\n \
 Ensure you check the output for any errors. \n \
