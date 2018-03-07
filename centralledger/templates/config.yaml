@@ -9,9 +9,30 @@ metadata:
       release: {{ .Release.Name }}
       heritage: {{ .Release.Service }}
 data:
-  server.host: {{ .Values.ingress.hosts.api | quote }}
+  {{- if .Values.ingress.enabled }}
+    {{- if .Values.containers.api.service.httpsEnabled }}
+  server.host: {{ printf "https://%s" .Values.ingress.hosts.api }}
+    {{- else }}
+  server.host: {{ printf "http://%s" .Values.ingress.hosts.api }}
+    {{- end }}
+    {{- if .Values.containers.admin.service.httpsEnabled }}
+  admin.host: {{ printf "https://%s" .Values.ingress.hosts.admin }}
+    {{- else }}
+  admin.host: {{ printf "http://%s" .Values.ingress.hosts.admin }}
+    {{- end }}
+  {{- else}}
+    {{- if .Values.containers.api.service.httpsEnabled }}
+  server.host: {{ printf "https://%s:%.0f" (include "centralledger.fullname" .) .Values.containers.api.service.ports.api.externalPort }}
+    {{- else }}
+  server.host: {{ printf "http://%s:%.0f" (include "centralledger.fullname" .) .Values.containers.api.service.ports.api.externalPort }}
+    {{- end }}
+    {{- if .Values.containers.admin.service.httpsEnabled }}
+  admin.host:  {{ printf "https://%s:%.0f" (include "centralledger.fullname" .) .Values.containers.admin.service.ports.api.externalPort }}
+    {{- else }}
+  admin.host:  {{ printf "http://%s:%.0f" (include "centralledger.fullname" .) .Values.containers.admin.service.ports.api.externalPort }}
+    {{- end }}
+  {{- end}}
   server.port: {{ .Values.containers.api.service.ports.api.internalPort | quote }}
-  admin.host: {{ .Values.ingress.hosts.admin | quote }}
   admin.port: {{ .Values.containers.admin.service.ports.api.internalPort | quote }}
   default.json: |
     {{ .Values.config.default_json | replace "$service_api_port" (printf "%.0f" .Values.containers.api.service.ports.api.internalPort) | replace "$service_admin_port" (printf "%.0f" .Values.containers.admin.service.ports.api.internalPort) | replace "$ingress_host" .Values.ingress.hosts.api | replace "$forensicloggingsidecar_host" $forensicLoggingSidecarHost | replace "$forensicloggingsidecar_port" (printf "%.0f" .Values.forensicloggingsidecar.service.externalPort) }}
