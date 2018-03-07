@@ -11,26 +11,26 @@ metadata:
 data:
   {{- if .Values.ingress.enabled }}
     {{- if .Values.containers.api.service.httpsEnabled }}
-      {{- if eq .Values.ingress.externalPath.api "/" }}
+      {{- if (eq .Values.ingress.externalPath.api | default "/") "/" }}
   server.host: {{ printf "https://%s" .Values.ingress.hosts.api }}
       {{- else}}
   server.host: {{ printf "https://%s%s" .Values.ingress.hosts.api .Values.ingress.externalPath.api }}
       {{- end }}
     {{- else }}
-      {{- if eq .Values.ingress.externalPath.api "/" }}
+      {{- if eq (.Values.ingress.externalPath.api | default "/") "/" }}
   server.host: {{ printf "http://%s" .Values.ingress.hosts.api }}
       {{- else}}
   server.host: {{ printf "http://%s%s" .Values.ingress.hosts.api .Values.ingress.externalPath.api }}
       {{- end }}
     {{- end }}
     {{- if .Values.containers.admin.service.httpsEnabled }}
-      {{- if eq .Values.ingress.externalPath.admin "/" }}
+      {{- if eq (.Values.ingress.externalPath.admin | default "/") "/" }}
   admin.host: {{ printf "https://%s" .Values.ingress.hosts.admin }}
       {{- else}}
   admin.host: {{ printf "https://%s%s" .Values.ingress.hosts.admin .Values.ingress.externalPath.admin }}
       {{- end }}
     {{- else }}
-      {{- if eq .Values.ingress.externalPath.admin "/" }}
+      {{- if eq (.Values.ingress.externalPath.admin | default "/") "/" }}
   admin.host: {{ printf "http://%s" .Values.ingress.hosts.admin }}
       {{- else}}
   admin.host: {{ printf "http://%s%s" .Values.ingress.hosts.admin .Values.ingress.externalPath.admin }}
