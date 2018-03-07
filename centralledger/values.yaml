@@ -28,6 +28,7 @@ containers:
       pullPolicy: IfNotPresent
       command: '["node", "src/api/index.js"]'
     service:
+      httpsEnabled: false
       ports:
         api:
           name: http-api
@@ -53,6 +54,7 @@ containers:
       pullPolicy: IfNotPresent
       command: '["node", "src/admin/index.js"]'
     service:
+      httpsEnabled: false
       ports:
         api:
           name: http-api-admin
@@ -127,14 +129,13 @@ service:
 
 ingress:
   enabled: true
-  dns: true
   externalPath:
-    api: /centralledger/api
-    admin: /centralledger/admin/
+    api: /
+    admin: /admin
   # Used to create an Ingress record.
   hosts:
-    api: a02bcb8d21d2d11e8ada0027eebfb29a-160662342.eu-west-2.elb.amazonaws.com
-    admin: a02bcb8d21d2d11e8ada0027eebfb29a-160662342.eu-west-2.elb.amazonaws.com
+    api: central-ledger.local
+    admin: central-ledger.local
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: '/'
     # kubernetes.io/ingress.class: nginx
