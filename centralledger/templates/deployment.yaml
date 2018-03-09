@@ -15,7 +15,19 @@ spec:
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}
     spec:
-      {{- if .Values.init.enabled }}
+{{- if .Values.global.config.affinity }}
+      affinity:
+{{ toYaml .Values.global.config.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.global.config.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.global.config.nodeSelector | indent 8 }}
+{{- end }}
+{{- if .Values.global.config.tolerations }}
+      tolerations:
+{{ toYaml .Values.global.config.tolerations | indent 8 }}
+{{- end }}
+      {{- if and .Values.init.enabled .Values.postgresql.enabled }}
       initContainers:
         - name: {{ .Values.init.image.name }}
           image: {{ .Values.init.image.repository }}:{{ .Values.init.image.tag }}
@@ -50,24 +62,12 @@ spec:
             initialDelaySeconds: {{ .Values.containers.api.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.containers.api.livenessProbe.periodSeconds }}
           {{- end }}
-          # securityContext:
-          #   capabilities:
-          #     add:
-          #       - NET_ADMIN
-          # envFrom:
-          #   - configMapRef:
-          #       name: central-ledger-config-env
           env:
             - name: CLEDG_PORT
               valueFrom:
                 configMapKeyRef:
                   name: {{ template "centralledger.fullname" . }}
                   key: server.port
-            # - name: CLEDG_ADMIN_PORT
-            #   valueFrom:
-            #     configMapKeyRef:
-            #       name: central-ledger-config
-            #       key: admin.port
             - name: CLEDG_HOSTNAME
               valueFrom:
                 configMapKeyRef:
@@ -106,29 +106,17 @@ spec:
             initialDelaySeconds: {{ .Values.containers.admin.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.containers.admin.livenessProbe.periodSeconds }}
           {{- end }}
-          # securityContext:
-          #   capabilities:
-          #     add:
-          #       - NET_ADMIN
-          # envFrom:
-          #   - configMapRef:
-          #       name: central-ledger-config-env
           env:
             - name: CLEDG_ADMIN_PORT
               valueFrom:
                 configMapKeyRef:
                   name: {{ template "centralledger.fullname" . }}
                   key: admin.port
-            # - name: CLEDG_ADMIN_PORT
-            #   valueFrom:
-            #     configMapKeyRef:
-            #       name: central-ledger-config
-            #       key: admin.port
             - name: CLEDG_HOSTNAME
               valueFrom:
                 configMapKeyRef:
                   name: {{ template "centralledger.fullname" . }}
-                  key: server.host
+                  key: admin.host
             - name: CLEDG_DATABASE_URI
               valueFrom:
                 secretKeyRef:
