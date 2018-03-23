@@ -1,0 +1,98 @@
+# Default values for central-end-user-registry.
+# This is a YAML-formatted file.
+
+# Declare global configurations
+global:
+  config:
+    ## Pod scheduling preferences.
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    ##
+    affinity: {}
+
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
+    ## Set toleration for schedular
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations: []
+
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+image:
+  repository: mojaloop/mock-dfsp-connector
+  tag: latest
+  pullPolicy: IfNotPresent
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+  initialDelaySeconds: 45
+  periodSeconds: 15
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+  initialDelaySeconds: 45
+  periodSeconds: 15
+
+service:
+  type: ClusterIP
+  ports:
+    api:
+      name: http-api-10
+      externalPort: 8088
+      internalPort: 8088
+
+  annotations: {}
+
+  # This allows one to point the service to an external backend. 
+  # This is useful for local development where one wishes to hijack 
+  # the communication from the service to the node layer and point
+  # to a specific endpoint (IP, Port, etc).
+  external:
+    enabled: false
+    # 10.0.2.2 is the magic IP for the host on virtualbox's network
+    ip: 10.0.2.2
+    ports:
+      provisioning: 
+        name: http-api
+        externalPort: 3001
+
+config:
+  mockConnector:
+    host: '0.0.0.0' 
+    port: '8089' 
+  centralLedger:
+    host: 'poc-base-centralledger'
+    port: '3000' 
+  connectorAccount: '20'
+
+ingress:
+  enabled: true
+  externalPath: /
+  # Used to create an Ingress record.
+  hosts:
+    api: mock-dfsp-connector.local
+  annotations:
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  tls:
+    # Secrets must be manually created in the namespace.
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
