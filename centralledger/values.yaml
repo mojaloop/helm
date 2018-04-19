@@ -55,7 +55,12 @@ containers:
 
 
 config:
-  default_json: '
+  # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+  db_type: 'postgres'
+  # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+  db_driver: 'pg'
+  # default_json config for nodejs. The following variables will be injected by the helm chart (see config.yaml): $service_admin_port, $ingress_hostm $forensicloggingsidecar_host, $forensicloggingsidecar_port
+  default_json: |
     {
       "PORT": $service_api_port,
       "ADMIN_PORT": $service_admin_port,
@@ -76,7 +81,21 @@ config:
           "RECONNECT_INTERVAL": 5000
       }
     }
-'
+  # default_json config for nodejs db knex lib. The following variables will be injected by the helm chart (see config.yaml): $db_driver
+  knexfile_js: |
+    'use strict'
+
+    const migrationsDirectory = '/opt/central-ledger/migrations'
+    const Config = require('/opt/central-ledger/src/lib/config')
+    module.exports = {
+      client: '$db_driver',
+      connection: Config.DATABASE_URI,
+      migrations: {
+        directory: migrationsDirectory,
+        tableName: 'migrations',
+        stub: `${migrationsDirectory}/migration.template`
+      }
+    }
 
 init:
   enabled: true
@@ -109,12 +128,14 @@ service:
 
 ingress:
   enabled: true
+  type: http
   externalPath:
     api: /
     admin: /admin/
   # Used to create an Ingress record.
   hosts:
     api: central-ledger.local
+    admin: central-ledger.local
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: '/'
     # kubernetes.io/ingress.class: nginx
@@ -399,6 +420,101 @@ postgresql:
     requests:
       memory: 256Mi
       cpu: 100m
+
+  service:
+    type: ClusterIP
+    port: 5432
+    externalIPs: []
+
+mysql:
+  enabled: false
+  nameOverride: "centralledger-mysql"
+  # Default values for Percona XtraDB Cluster
+
+  ## percona image and version
+  ## ref: https://hub.docker.com/r/percona/percona-xtradb-cluster/tags/
+  image:
+    repository: "percona/percona-xtradb-cluster"
+    tag: "5.7.19"
+    pullPolicy: IfNotPresent
+
+  # Desired number of members of xtradb cluster
+  replicas: 1
+
+  ## Specify password for root user
+  ##
+  # mysqlRootPassword: not-a-secure-password
+
+  ## Specify password for xtradb backup user
+  ##
+  # xtraBackupPassword: replicate-my-data
+
+  ## Uncomment to create a database user
+  ##
+  mysqlUser: test
+  mysqlPassword: test
+
+  ## Allow unauthenticated access, uncomment to enable
+  ##
+  # mysqlAllowEmptyPassword: true
+
+  ## Uncomment to Create a database
+  ##
+  mysqlDatabase: test
+
+  ## hosts to allow root user access from
+  # set to "127.0.0.1" to deny remote root.
+  allowRootFrom: "%"
+
+  ## Persist data to a persitent volume
+  persistence:
+    enabled: false
+    ## percona data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+    accessMode: ReadWriteOnce
+    size: 8Gi
+
+  ## Node labels for pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Configure resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  # resources:
+  #  requests:
+  #    memory: 256Mi
+  #    cpu: 100m
+
+  configFiles:
+    node.cnf: |+
+      [mysqld]
+      datadir=/var/lib/mysql
+      default_storage_engine=InnoDB
+      binlog_format=ROW
+      innodb_flush_log_at_trx_commit  = 0
+      innodb_flush_method             = O_DIRECT
+      innodb_file_per_table           = 1
+      innodb_autoinc_lock_mode=2
+      bind_address = 0.0.0.0
+      wsrep_slave_threads=2
+      wsrep_cluster_address=gcomm://
+      wsrep_provider=/usr/lib/galera3/libgalera_smm.so
+      wsrep_cluster_name=galera
+      wsrep_sst_method=xtrabackup-v2
+  ## When set to true will create sidecar for `prom/mysqld-exporter`
+  ## metrics exporting
+  metricsExporter: false
+
+  ## When set to true will create sidecar to tail mysql log
+  logTail: true
 
   service:
     type: ClusterIP

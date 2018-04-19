@@ -47,6 +47,11 @@ checkCommandResult
 echo "Packaging Central..." 
 helm package -u -d ./repo ./central 
 checkCommandResult 
+
+echo "Packaging Mojaloop..." 
+helm package -u -d ./repo ./mojaloop 
+checkCommandResult 
+ 
  
 echo "Packaging Ingress-Nginx..."
 helm package -u -d ./repo ./kube-public/ingress-nginx/

@@ -16,6 +16,7 @@ spec:
         heritage: {{ .Release.Service }}
     spec:
       {{- if .Values.init.enabled }}
+        {{- if eq .Values.config.db_type "postgres"}}
       initContainers:
         - name: {{ .Values.init.image.name }}
           image: {{ .Values.init.image.repository }}:{{ .Values.init.image.tag }}
@@ -23,6 +24,7 @@ spec:
           env:
           - name: "POSTGRES_URL"
             value: "postgresql://{{ .Values.postgresql.postgresUser }}:{{ .Values.postgresql.postgresPassword }}@{{ $dbHost }}:{{ .Values.postgresql.service.port }}/{{ .Values.postgresql.postgresDatabase }}?sslmode=disable"
+        {{- end }}
       {{- end }}
       containers:
         - name: {{ template "centralledger.name" . }}
