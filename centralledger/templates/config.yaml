@@ -9,45 +9,7 @@ metadata:
       release: {{ .Release.Name }}
       heritage: {{ .Release.Service }}
 data:
-  {{- if .Values.ingress.enabled }}
-    {{- if .Values.containers.api.service.httpsEnabled }}
-      {{- if eq .Values.ingress.externalPath.api "/" }}
-  server.host: {{ printf "https://%s" .Values.ingress.hosts.api }}
-      {{- else}}
-  server.host: {{ printf "https://%s%s" .Values.ingress.hosts.api .Values.ingress.externalPath.api }}
-      {{- end }}
-    {{- else }}
-      {{- if eq .Values.ingress.externalPath.api "/" }}
-  server.host: {{ printf "http://%s" .Values.ingress.hosts.api }}
-      {{- else}}
-  server.host: {{ printf "http://%s%s" .Values.ingress.hosts.api .Values.ingress.externalPath.api }}
-      {{- end }}
-    {{- end }}
-    {{- if .Values.containers.admin.service.httpsEnabled }}
-      {{- if eq .Values.ingress.externalPath.admin "/" }}
-  admin.host: {{ printf "https://%s" .Values.ingress.hosts.admin }}
-      {{- else}}
-  admin.host: {{ printf "https://%s%s" .Values.ingress.hosts.admin .Values.ingress.externalPath.admin }}
-      {{- end }}
-    {{- else }}
-      {{- if eq .Values.ingress.externalPath.admin "/" }}
-  admin.host: {{ printf "http://%s" .Values.ingress.hosts.admin }}
-      {{- else}}
-  admin.host: {{ printf "http://%s%s" .Values.ingress.hosts.admin .Values.ingress.externalPath.admin }}
-      {{- end }}
-    {{- end }}
-  {{- else}}
-    {{- if .Values.containers.api.service.httpsEnabled }}
-  server.host: {{ printf "https://%s:%.0f" (include "centralledger.fullname" .) .Values.containers.api.service.ports.api.externalPort }}
-    {{- else }}
-  server.host: {{ printf "http://%s:%.0f" (include "centralledger.fullname" .) .Values.containers.api.service.ports.api.externalPort }}
-    {{- end }}
-    {{- if .Values.containers.admin.service.httpsEnabled }}
-  admin.host:  {{ printf "https://%s:%.0f" (include "centralledger.fullname" .) .Values.containers.admin.service.ports.api.externalPort }}
-    {{- else }}
-  admin.host:  {{ printf "http://%s:%.0f" (include "centralledger.fullname" .) .Values.containers.admin.service.ports.api.externalPort }}
-    {{- end }}
-  {{- end}}
+  server.host: {{ .Values.ingress.hosts.api | quote }}
   server.port: {{ .Values.containers.api.service.ports.api.internalPort | quote }}
   admin.host: {{  .Values.ingress.hosts.admin | quote }}
   admin.port: {{ .Values.containers.admin.service.ports.api.internalPort | quote }}
