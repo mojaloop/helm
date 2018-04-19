@@ -49,21 +49,7 @@ data:
     {{- end }}
   {{- end}}
   server.port: {{ .Values.containers.api.service.ports.api.internalPort | quote }}
+  admin.host: {{  .Values.ingress.hosts.admin | quote }}
   admin.port: {{ .Values.containers.admin.service.ports.api.internalPort | quote }}
-  default.json: |
-    {{ .Values.config.default_json | replace "$service_api_port" (printf "%.0f" .Values.containers.api.service.ports.api.internalPort) | replace "$service_admin_port" (printf "%.0f" .Values.containers.admin.service.ports.api.internalPort) | replace "$ingress_host" .Values.ingress.hosts.api | replace "$forensicloggingsidecar_host" $forensicLoggingSidecarHost | replace "$forensicloggingsidecar_port" (printf "%.0f" .Values.forensicloggingsidecar.service.externalPort) }}
-  
-  knexfile.js: |
-    'use strict'
-
-    const migrationsDirectory = '/opt/central-ledger/migrations'
-    const Config = require('/opt/central-ledger/src/lib/config')
-    module.exports = {
-      client: 'pg',
-      connection: Config.DATABASE_URI,
-      migrations: {
-        directory: migrationsDirectory,
-        tableName: 'migrations',
-        stub: `${migrationsDirectory}/migration.template`
-      }
-    }
+  default.json: {{ (.Values.config.default_json | replace "$service_api_port" (printf "%.0f" .Values.containers.api.service.ports.api.internalPort) | replace "$service_admin_port" (printf "%.0f" .Values.containers.admin.service.ports.api.internalPort) | replace "$ingress_host" .Values.ingress.hosts.api | replace "$forensicloggingsidecar_host" $forensicLoggingSidecarHost | replace "$forensicloggingsidecar_port" (printf "%.0f" .Values.forensicloggingsidecar.service.externalPort)) | quote }}
+  knexfile.js: {{ (.Values.config.knexfile_js | replace "$db_driver" .Values.config.db_driver) | quote}}
