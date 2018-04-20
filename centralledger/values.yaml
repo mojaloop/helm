@@ -1,6 +1,24 @@
 # Default values for central-ledger.
 # This is a YAML-formatted file.
+
+# Declare global configurations
+global:
+  config:
+    ## Pod scheduling preferences.
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    ##
+    affinity: {}
+
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
+    ## Set toleration for schedular
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations: []
+
 # Declare variables to be passed into your templates.
+
 replicaCount: 1
 containers:
   api:
@@ -131,7 +149,7 @@ ingress:
   type: http
   externalPath:
     api: /
-    admin: /admin/
+    admin: /admin
   # Used to create an Ingress record.
   hosts:
     api: central-ledger.local
@@ -340,7 +358,9 @@ forensicloggingsidecar:
       externalIPs: []
 
 postgresql:
-  enabled: true 
+  enabled: true
+  ## includeReleaseInName: If you are using an external DB, make sure this is set to 'false'
+  includeReleaseInName: true
   nameOverride: "centralledger-postgresql"
   ## postgres image repository
   image: "postgres"
@@ -451,8 +471,8 @@ mysql:
 
   ## Uncomment to create a database user
   ##
-  mysqlUser: test
-  mysqlPassword: test
+  mysqlUser: central_ledger
+  mysqlPassword: oyMxgZChuu
 
   ## Allow unauthenticated access, uncomment to enable
   ##
@@ -460,7 +480,7 @@ mysql:
 
   ## Uncomment to Create a database
   ##
-  mysqlDatabase: test
+  mysqlDatabase: central_ledger
 
   ## hosts to allow root user access from
   # set to "127.0.0.1" to deny remote root.
