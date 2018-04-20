@@ -17,6 +17,18 @@ spec:
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}
     spec:
+{{- if .Values.global.config.affinity }}
+      affinity:
+{{ toYaml .Values.global.config.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.global.config.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.global.config.nodeSelector | indent 8 }}
+{{- end }}
+{{- if .Values.global.config.tolerations }}
+      tolerations:
+{{ toYaml .Values.global.config.tolerations | indent 8 }}
+{{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
