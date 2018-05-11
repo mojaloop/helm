@@ -1,0 +1,46 @@
+# Default values for interop-switch.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+image:
+  repository: mojaloop/interop-switch
+  tag: latest
+## Optionally specify an array of imagePullSecrets.
+## Secrets must be manually created in the namespace.
+## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+##
+#  imagePullSecrets:
+#    - name: myregistrykey
+  pullPolicy: IfNotPresent
+
+config:
+  MAX_JVM_MEMORY: '256'
+  proxy_host: 'localhost'
+  account_lookup_service_host: 'interop-account-lookup'
+  account_lookup_service_port: '8089'
+  central_services_host: 'central-ledger.local'
+  central_ledger_host: 'central-ledger.local'
+  central_ledger_port: '3002'
+  metrics_reporter_kafka_broker: 'ec2-35-164-199-6.us-west-2.compute.amazonaws.com:9092'
+  metrics_reporter_environment: 'local'
+
+service:
+  name: interop-switch
+  type: ClusterIP
+  externalPort: 8090
+  internalPort: 80
+
+ingress:
+  enabled: true
+  # Used to create an Ingress record.
+  hosts:
+    - interop-switch.local
+  annotations:
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  tls:
+    # Secrets must be manually created in the namespace.
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local
+

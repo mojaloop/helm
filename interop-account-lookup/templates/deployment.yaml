@@ -1,0 +1,50 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "interop-account-lookup.fullname" . }}
+  labels:
+    app: {{ template "interop-account-lookup.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "interop-account-lookup.name" . }}
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.image.imagePullSecrets }}
+          imagePullSecrets:
+{{ toYaml .Values.image.imagePullSecrets | indent 10 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+          env:
+            - name: account-lookup-service.host
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-account-lookup.fullname" . }}
+                  key: account-lookup-service.host
+            - name: account-lookup-service.port
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-account-lookup.fullname" . }}
+                  key: account-lookup-service.port
+            - name: metrics.reporter.kafka.broker
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-account-lookup.fullname" . }}
+                  key: metrics.reporter.kafka.broker
+            - name: metrics.reporter.environment
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-account-lookup.fullname" . }}
+                  key: metrics.reporter.environment
