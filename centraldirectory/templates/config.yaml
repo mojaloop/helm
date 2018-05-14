@@ -12,9 +12,9 @@ metadata:
 data:
   server.host: {{ .Values.ingress.hosts.api | quote }}
   server.port: {{ .Values.service.ports.api.internalPort | quote }}
-  CDIR_ADMIN_KEY: {{ .Values.config.CDIR_ADMIN_KEY | quote}}
-  CDIR_ADMIN_SECRET: {{ .Values.config.CDIR_ADMIN_SECRET | quote}}
-  CDIR_PATHFINDER__PROVISIONING__ADDRESS: {{ .Values.config.CDIR_PATHFINDER__PROVISIONING__ADDRESS | quote}}
+  cdir.admin.key: {{ .Values.config.CDIR_ADMIN_KEY | quote}}
+  cdir.admin.secret: {{ .Values.config.CDIR_ADMIN_SECRET | quote}}
+  cdir.pathfinder.provisioning.address: {{ .Values.config.CDIR_PATHFINDER__PROVISIONING__ADDRESS | quote}}
   default.json: |
     {{ .Values.config.default_json | replace "$service_port" (printf "%.0f" .Values.service.ports.api.internalPort) | replace "$ingress_host" .Values.ingress.hosts.api | replace "$centralenduserregistry_host" $centralenduserregistryHost | replace "$centralenduserregistry_port" (printf "%.0f" .Values.centralenduserregistry.service.ports.api.externalPort) | replace "$pathfinder_host" $mockpathfinderHost | replace "$pathfinder_provisioning_port" (printf "%.0f" .Values.mockpathfinder.service.ports.provisioning.externalPort) | replace "$pathfinder_query_port" (printf "%.0f" .Values.mockpathfinder.service.ports.query.externalPort) }}
   
