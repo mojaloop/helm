@@ -1,0 +1,80 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "interop-switch.fullname" . }}
+  labels:
+    app: {{ template "interop-switch.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "interop-switch.name" . }}
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.image.imagePullSecrets }}
+          imagePullSecrets:
+{{ toYaml .Values.image.imagePullSecrets | indent 10 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+          env:
+            - name: SWITCH_SERVICE_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: SWITCH_SERVICE_HOST
+            - name: SWITCH_SERVICE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: SWITCH_SERVICE_PORT
+            - name: CENTRAL_DIR_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: CENTRAL_DIR_HOST
+            - name: CENTRAL_DIR_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: CENTRAL_DIR_PORT
+            - name: CONNECTOR_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: CONNECTOR_HOST
+            - name: PSQL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: PSQL_HOST
+            - name: PSQL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: PSQL_PORT
+            - name: PSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: PSQL_DATABASE
+            - name: PSQL_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: PSQL_USER
+            - name: PSQL_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch.fullname" . }}
+                  key: PSQL_PASSWORD
