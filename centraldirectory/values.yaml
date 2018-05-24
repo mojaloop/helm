@@ -41,7 +41,9 @@ livenessProbe:
 config:
   CDIR_ADMIN_KEY: "admin"
   CDIR_ADMIN_SECRET: "admin"
-  CDIR_PATHFINDER__PROVISIONING__ADDRESS: "http://dev-mockpathfinder:8080/nrs-pi/services/SIPIX/SendRequest"
+  CDIR_PATHFINDER__PROVISIONING__ADDRESS: "http://$pathfinder_host:8080/nrs-pi/services/SIPIX/SendRequest"
+  CDIR_PATHFINDER__QUERY__ADDRESS: "$pathfinder_host"
+  CDIR_PATHFINDER__QUERY__PORT: "15353"
   default_json: '
     {
       "PORT": $service_port,
@@ -101,7 +103,7 @@ ingress:
   externalPath: /
   # Used to create an Ingress record.
   hosts:
-    api: central-directory.test
+    api: central-directory.oss.test
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: '/'
     # kubernetes.io/ingress.class: nginx
@@ -234,7 +236,7 @@ mockpathfinder:
   replicaCount: 1
   image:
     repository: mojaloop/mock-pathfinder
-    tag: latest
+    tag: v0.2-SNAPSHOT
     pullPolicy: IfNotPresent
 
   config:
