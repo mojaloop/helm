@@ -24,8 +24,16 @@ spec:
           image: {{ .Values.init.image.repository }}:{{ .Values.init.image.tag }}
           imagePullPolicy: {{ .Values.init.image.pullPolicy }}
           env:
-          - name: "POSTGRES_URL"
-            value: "postgresql://{{ .Values.postgresql.postgresUser }}:{{ .Values.postgresql.postgresPassword }}@{{ $dbHost }}:{{ .Values.postgresql.service.port }}/{{ .Values.postgresql.postgresDatabase }}?sslmode=disable"
+          - name: "PGHOST"
+            value: "{{ $dbHost }}"
+          - name: "PGPORT"
+            value: "{{ .Values.postgresql.service.port }}"
+          - name: "PGUSER"
+            value: "{{ .Values.postgresql.postgresUser }}"
+          - name: "PGPASSWORD"
+            value: "{{ .Values.postgresql.postgresPassword }}"
+          - name: "PGDATABASE"
+            value: "{{ .Values.postgresql.postgresDatabase }}"
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
