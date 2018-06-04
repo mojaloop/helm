@@ -139,7 +139,7 @@ central:
         admin:
           image:
             repository: mojaloop/central-ledger
-            tag: latest
+            tag: v2.0.7.1-pocdb-20180521
             pullPolicy: IfNotPresent
             command: '["node", "src/admin/index.js"]'
           service:
@@ -164,9 +164,9 @@ central:
 
       config:
         # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
-        db_type: 'postgres'
+        db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-        db_driver: 'pg'
+        db_driver: 'mysql'
         # default_json config for nodejs. The following variables will be injected by the helm chart (see config.yaml): $service_admin_port, $ingress_hostm $forensicloggingsidecar_host, $forensicloggingsidecar_port
         default_json: |
           {
@@ -534,7 +534,7 @@ central:
           externalIPs: []
 
       mysql:
-        enabled: false
+        enabled: true
         nameOverride: "centralledger-mysql"
         # Default values for Percona XtraDB Cluster
 
@@ -625,7 +625,7 @@ central:
 
         service:
           type: ClusterIP
-          port: 5432
+          port: 3306
           externalIPs: []
 
   centraldirectory:
@@ -706,12 +706,13 @@ central:
             externalPort: 3000
 
     ingress:
-      enabled: false
+      enabled: true
       externalPath: /
       # Used to create an Ingress record.
       hosts:
         api: central-directory.local
       annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: '/'
         # kubernetes.io/ingress.class: nginx
         # kubernetes.io/tls-acme: "true"
       tls:
@@ -881,10 +882,17 @@ central:
             name: tcp-prov
             externalPort: 8080
             internalPort: 8080
-          query:
+            protocol: TCP
+          tcp_query:
             name: tcp-query
             externalPort: 15353
             internalPort: 15353
+            protocol: TCP
+          udp_query:
+            name: udp-query
+            externalPort: 15353
+            internalPort: 15353
+            protocol: UDP
 
         annotations: {}
 
@@ -955,3 +963,97 @@ central:
         type: ClusterIP
         port: 5432
         externalIPs: []
+
+interop-switch:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: mojaloop/interop-switch
+      tag: latest
+      pullPolicy: IfNotPresent
+
+    readinessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+      initialDelaySeconds: 60
+      periodSeconds: 15
+
+    livenessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+      initialDelaySeconds: 60
+      periodSeconds: 15
+
+    config:
+      MAX_JVM_MEMORY: '256'
+      MAX_JVM_MEMORY: '256'
+      SWITCH_SERVICE_HOST: '0.0.0.0'
+      SWITCH_SERVICE_PORT: '8088'
+      CENTRAL_DIR_HOST: 'centraldirectory'
+      CENTRAL_DIR_PORT: '80'
+      CONNECTOR_HOST: 'interop-connector'
+      PSQL_HOST: 'postgresql'
+      PSQL_PORT: '5432'
+      PSQL_DATABASE: 'interop_switch'
+      PSQL_USER: 'interop_switch'
+      PSQL_PASSWORD: 'cVq8iFqaLuHy8jjKuA'
+
+    init:
+      enabled: true
+      image:
+        name: create-tables
+        repository: mojaloop/interop-switch-init-container
+        tag: latest
+        pullPolicy: IfNotPresent
+
+    service:
+      type: ClusterIP
+      ports:
+        api:
+          name: http-api
+          externalPort: 8088
+          internalPort: 8088
+
+      annotations: {}
+
+      # This allows one to point the service to an external backend.
+      # This is useful for local development where one wishes to hijack
+      # the communication from the service to the node layer and point
+      # to a specific endpoint (IP, Port, etc).
+      external:
+        enabled: false
+        # 10.0.2.2 is the magic IP for the host on virtualbox's network
+        ip: 10.0.2.2
+        ports:
+          api:
+            name: http-api
+            externalPort: 3000
+
+    ingress:
+      enabled: true
+      externalPath: /switch/v1
+      # Used to create an Ingress record.
+      hosts:
+        api: interop-switch.local
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: '/switch/v1'
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      tls:
+        # Secrets must be manually created in the namespace.
+        # - secretName: chart-example-tls
+        #   hosts:
+        #     - chart-example.local
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+      # requests:
+      #  cpu: 100m
+      #  memory: 128Mi
