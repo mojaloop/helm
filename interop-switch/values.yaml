@@ -1,97 +1,54 @@
-# Default values for mockpathfinder.
+# Default values for interop-switch.
 # This is a YAML-formatted file.
-
-# Declare global configurations
-global:
-  config:
-    ## Pod scheduling preferences.
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-    ##
-    affinity: {}
-
-    ## Node labels for pod assignment
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-    nodeSelector: {}
-
-    ## Set toleration for schedular
-    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    tolerations: []
-
 # Declare variables to be passed into your templates.
-
 replicaCount: 1
 image:
-  repository: mojaloop/mock-pathfinder
-  tag: latest
+  repository: mojaloop/interop-switch
+  tag: 0.5-SNAPSHOT
+## Optionally specify an array of imagePullSecrets.
+## Secrets must be manually created in the namespace.
+## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+##
+#  imagePullSecrets:
+#    - name: myregistrykey
   pullPolicy: IfNotPresent
 
 config:
-  default_json: '
-  {
-    "QUERY": {
-      "PORT": $query_port,
-      "DEFAULT_RECORD": {
-        "order": 10,
-        "preference": 50,
-        "flags": "u",
-        "service": "E2U+pstn:tel",
-        "regexp": "!^(.*)$!tel:\\1;q_stat=102!",
-        "replacement": "",
-        "ttl": 900
-      }
-    },
-    "PROVISIONING": {
-      "PORT": $provisioning_port,
-      "PATH": "/nrs-pi/services/SIPIX/SendRequest",
-      "WSDL_FILE": "./sipix-2.0.0.wsdl",
-      "DEFAULT_CUSTOMER_ID": 1234
-    }
-  }
-'
+  MAX_JVM_MEMORY: '256'
+  MAX_JVM_MEMORY: '256'
+  SWITCH_SERVICE_HOST: '0.0.0.0'
+  SWITCH_SERVICE_PORT: '8088'
+  CENTRAL_DIR_HOST: 'centraldirectory'
+  CENTRAL_DIR_PORT: '80'
+  CONNECTOR_HOST: 'interop-connector'
+  PSQL_HOST: 'postgresql'
+  PSQL_PORT: '5432'
+  PSQL_DATABASE: 'interop_switch'
+  PSQL_USER: 'interop_switch'
+  PSQL_PASSWORD: 'cVq8iFqaLuHy8jjKuA'
+
+init:
+  enabled: true
+  image:
+    name: create-tables
+    repository: mojaloop/interop-switch-init-container
+    tag: latest
+    pullPolicy: IfNotPresent
 
 service:
+  name: interop-switch
   type: ClusterIP
-  ports:
-    provisioning:
-      name: tcp-prov
-      externalPort: 8080
-      internalPort: 8080
-      protocol: TCP
-    tcp_query:
-      name: tcp-query
-      externalPort: 15353
-      internalPort: 15353
-      protocol: TCP
-    udp_query:
-      name: udp-query
-      externalPort: 15353
-      internalPort: 15353
-      protocol: UDP
-  
-  annotations: {}
-
-  # This allows one to point the service to an external backend. 
-  # This is useful for local development where one wishes to hijack 
-  # the communication from the service to the node layer and point
-  # to a specific endpoint (IP, Port, etc).
-  external:
-    enabled: false
-    # 10.0.2.2 is the magic IP for the host on virtualbox's network
-    ip: 10.0.2.2
-    ports:
-      provisioning: 
-        name: tcp-prov
-        externalPort: 8080
-      query: 
-        name: tcp-query
-        externalPort: 15353
+  externalPort: 8088
+  internalPort: 8088
 
 ingress:
-  enabled: false
+  enabled: true
+  externalPath: /switch/v1
   # Used to create an Ingress record.
   hosts:
-    api: mock-pathfinder.local
+    api: interop-switch.local
   annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: '/switch/v1'
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   tls:
@@ -112,8 +69,10 @@ resources: {}
   #  memory: 128Mi
 
 postgresql:
-  enabled: true 
-  nameOverride: "mockpathfinder-postgresql"
+  enabled: true
+  ## includeReleaseInName: If you are using an external DB, make sure this is set to 'false'
+  includeReleaseInName: true
+  nameOverride: "interop-switch-postgresql"
   ## postgres image repository
   image: "postgres"
   ## postgres image version
@@ -129,13 +88,13 @@ postgresql:
 
   ## Create a database user
   ## Default: postgres
-  postgresUser: mock-pathfinder
+  postgresUser: interop_switch
   ## Default: random 10 character string
-  postgresPassword: IypvXbJ1Zb
+  postgresPassword: cVq8iFqaLuHy8jjKuA
 
   ## Create a database
   ## Default: the postgres user
-  postgresDatabase: mock_pathfinder
+  postgresDatabase: interop_switch
 
   ## Specify initdb arguments, e.g. --data-checksums
   ## ref: https://github.com/docker-library/docs/blob/master/postgres/content.md#postgres_initdb_args
@@ -197,3 +156,4 @@ postgresql:
     type: ClusterIP
     port: 5432
     externalIPs: []
+
