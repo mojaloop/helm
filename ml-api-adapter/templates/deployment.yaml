@@ -27,3 +27,13 @@ spec:
           {{- end }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
+          volumeMounts:
+            - name: {{ template "ml-api-adapter.fullname" . }}-config-volume
+              mountPath: /opt/ml-api-adapter/config
+      volumes:
+        - name: {{ template "ml-api-adapter.fullname" . }}-config-volume
+          configMap:
+            name: {{ template "ml-api-adapter.fullname" . }}
+            items:
+            - key: default.json
+              path: default.json

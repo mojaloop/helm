@@ -227,7 +227,9 @@ central:
                         "debug": "all",
                         "group.id": "central-ledger-kafka",
                         "metadata.broker.list": "$kafka_host:$kafka_port",
-                        "enable.auto.commit": false
+                        "enable.auto.commit": false,
+                        "socket.keepalive.enable": true,
+                        "socket.max.fails": 0
                       }
                     }
                   },
@@ -248,7 +250,9 @@ central:
                         "debug": "all",
                         "group.id": "central-ledger-kafka",
                         "metadata.broker.list": "$kafka_host:$kafka_port",
-                        "enable.auto.commit": false
+                        "enable.auto.commit": false,
+                        "socket.keepalive.enable": true,
+                        "socket.max.fails": 0
                       }
                     }
                   },
@@ -269,7 +273,9 @@ central:
                         "debug": "all",
                         "group.id": "central-ledger-kafka",
                         "metadata.broker.list": "$kafka_host:$kafka_port",
-                        "enable.auto.commit": false
+                        "enable.auto.commit": false,
+                        "socket.keepalive.enable": true,
+                        "socket.max.fails": 0
                       }
                     }
                   },
@@ -290,7 +296,9 @@ central:
                         "debug": "all",
                         "group.id": "central-ledger-kafka",
                         "metadata.broker.list": "$kafka_host:$kafka_port",
-                        "enable.auto.commit": false
+                        "enable.auto.commit": false,
+                        "socket.keepalive.enable": true,
+                        "socket.max.fails": 0
                       }
                     }
                   }
@@ -313,7 +321,9 @@ central:
                         "debug": "all",
                         "group.id": "central-ledger-kafka",
                         "metadata.broker.list": "$kafka_host:$kafka_port",
-                        "enable.auto.commit": false
+                        "enable.auto.commit": false,
+                        "socket.keepalive.enable": true,
+                        "socket.max.fails": 0
                       }
                     }
                   }
@@ -336,7 +346,9 @@ central:
                         "debug": "all",
                         "group.id": "central-ledger-kafka",
                         "metadata.broker.list": "$kafka_host:$kafka_port",
-                        "enable.auto.commit": false
+                        "enable.auto.commit": false,
+                        "socket.keepalive.enable": true,
+                        "socket.max.fails": 0
                       }
                     }
                   }
@@ -362,7 +374,9 @@ central:
                         "queue.buffering.max.ms": 50,
                         "batch.num.messages": 100,
                         "api.version.request": true,
-                        "dr_cb": true
+                        "dr_cb": true,
+                        "socket.keepalive.enable": true,
+                        "socket.max.fails": 0
                       }
                     }
                   },
@@ -384,7 +398,9 @@ central:
                         "queue.buffering.max.ms": 50,
                         "batch.num.messages": 100,
                         "api.version.request": true,
-                        "dr_cb": true
+                        "dr_cb": true,
+                        "socket.keepalive.enable": true,
+                        "socket.max.fails": 0
                       }
                     }
                   },
@@ -406,7 +422,9 @@ central:
                         "queue.buffering.max.ms": 50,
                         "batch.num.messages": 100,
                         "api.version.request": true,
-                        "dr_cb": true
+                        "dr_cb": true,
+                        "socket.keepalive.enable": true,
+                        "socket.max.fails": 0
                       }
                     }
                   },
@@ -428,7 +446,9 @@ central:
                         "queue.buffering.max.ms": 50,
                         "batch.num.messages": 100,
                         "api.version.request": true,
-                        "dr_cb": true
+                        "dr_cb": true,
+                        "socket.keepalive.enable": true,
+                        "socket.max.fails": 0
                       }
                     }
                   }
@@ -452,7 +472,9 @@ central:
                         "queue.buffering.max.ms": 50,
                         "batch.num.messages": 100,
                         "api.version.request": true,
-                        "dr_cb": true
+                        "dr_cb": true,
+                        "socket.keepalive.enable": true,
+                        "socket.max.fails": 0
                       }
                     }
                   }
@@ -476,7 +498,9 @@ central:
                         "queue.buffering.max.ms": 50,
                         "batch.num.messages": 100,
                         "api.version.request": true,
-                        "dr_cb": true
+                        "dr_cb": true,
+                        "socket.keepalive.enable": true,
+                        "socket.max.fails": 0
                       }
                     }
                   }
@@ -1632,6 +1656,8 @@ interop-switch:
       PSQL_DATABASE: 'interop_switch'
       PSQL_USER: 'interop_switch'
       PSQL_PASSWORD: 'cVq8iFqaLuHy8jjKuA'
+      ML_API_ADAPTER_HOST: 'test-ml-api-adapter.mojaloop.live'
+      ML_API_ADAPTER_PORT: 80
 
     init:
       enabled: true
@@ -1666,7 +1692,7 @@ interop-switch:
 
     ingress:
       enabled: true
-      externalPath: /switch/v1
+      externalPath: /interop/switch/v1
       # Used to create an Ingress record.
       hosts:
         api: interop-switch.local
@@ -1703,7 +1729,7 @@ ml-api-adapter:
     ##
     #  imagePullSecrets:
     #    - name: myregistrykey
-      pullPolicy: IfNotPresent
+      pullPolicy: Always
 
     config:
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
@@ -1740,8 +1766,8 @@ ml-api-adapter:
                 "REGEX": "topic-(.*)-(.*)-(.*)"
               },
               "NOTIFICATION_TOPIC_TEMPLATE": {
-                "TEMPLATE": "ml-api-adapter-notifications",
-                "REGEX": "notifications"
+                "TEMPLATE": "topic-notification-event",
+                "REGEX": "topic-notification-event"
               },
               "FULFIL_TOPIC_TEMPLATE": {
                 "TEMPLATE": "topic-transfer-fulfil",
@@ -1765,7 +1791,9 @@ ml-api-adapter:
                       "client.id": "notification",
                       "group.id": "kafka-ml-api-adapter",
                       "metadata.broker.list": "$kafka_host:$kafka_port",
-                      "enable.auto.commit": false
+                      "enable.auto.commit": false,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
                     }
                   }
                 }
@@ -1790,7 +1818,9 @@ ml-api-adapter:
                       "queue.buffering.max.ms": 50,
                       "batch.num.messages": 100,
                       "api.version.request": true,
-                      "dr_cb": true
+                      "dr_cb": true,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
                     }
                   }
                 },
@@ -1811,7 +1841,9 @@ ml-api-adapter:
                       "queue.buffering.max.ms": 50,
                       "batch.num.messages": 100,
                       "api.version.request": true,
-                      "dr_cb": true
+                      "dr_cb": true,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
                     }
                   }
                 }
@@ -1828,12 +1860,12 @@ ml-api-adapter:
 
     ingress:
       enabled: true
-      externalPath: /switch/v1
+      externalPath: /
       # Used to create an Ingress record.
       hosts:
         api: ml-api-adapter.local
       annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: '/switch/v1'
+        nginx.ingress.kubernetes.io/rewrite-target: '/'
         # kubernetes.io/ingress.class: nginx
         # kubernetes.io/tls-acme: "true"
       tls:
