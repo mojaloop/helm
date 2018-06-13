@@ -1,0 +1,21 @@
+{{- $mlAdapterHost := printf "%s-%s" .Release.Name "ml-api-adapter" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "interop-switch.fullname" . }}
+  labels:
+      app: {{ template "interop-switch.fullname" . }}
+      chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
+data:
+  SWITCH_SERVICE_HOST: {{ .Values.config.SWITCH_SERVICE_HOST | quote }}
+  SWITCH_SERVICE_PORT: {{ .Values.config.SWITCH_SERVICE_PORT | quote }}
+  CENTRAL_DIR_HOST: {{ (printf "%s-%s" .Release.Name .Values.config.CENTRAL_DIR_HOST) | quote }}
+  CENTRAL_DIR_PORT: {{ .Values.config.CENTRAL_DIR_PORT | quote }}
+  CONNECTOR_HOST: {{ ( printf "%s-%s" .Release.Name .Values.config.CONNECTOR_HOST) | quote}}
+  PSQL_HOST: {{ (printf "%s-%s" (include "interop-switch.fullname" .) .Values.config.PSQL_HOST) | quote }}
+  PSQL_PORT: {{ .Values.config.PSQL_PORT | quote }}
+  PSQL_DATABASE: {{ .Values.config.PSQL_DATABASE | quote }}
+  ML_API_ADAPTER_HOST: {{ (.Values.config.ML_API_ADAPTER_HOST | replace "$mlAdapterHost" $mlAdapterHost) | quote }}
+  ML_API_ADAPTER_PORT: {{ .Values.config.ML_API_ADAPTER_PORT | quote }}
