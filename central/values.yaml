@@ -23,8 +23,8 @@ centralhub:
   replicaCount: 1
   image:
     repository: mojaloop/central-hub
-    tag: latest
-    pullPolicy: IfNotPresent
+    tag: v2.4
+    pullPolicy: Always
 
   readinessProbe:
     enabled: true
@@ -113,8 +113,8 @@ centralhub:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: latest
-          pullPolicy: IfNotPresent
+          tag: v2.4
+          pullPolicy: Always
           command: '["node", "src/api/index.js"]'
         service:
           ports:
@@ -138,8 +138,8 @@ centralhub:
       admin:
         image:
           repository: mojaloop/central-ledger
-          tag: latest
-          pullPolicy: IfNotPresent
+          tag: v2.4
+          pullPolicy: Always
           command: '["node", "src/admin/index.js"]'
         service:
           ports:
@@ -162,11 +162,16 @@ centralhub:
 
 
     config:
+      # admin api key-secret
+      admin_key: admin
+      admin_secret: admin
       # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
-      db_type: 'postgres'
+      db_type: 'mysql'
       # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-      db_driver: 'pg'
-      # default_json config for nodejs. The following variables will be injected by the helm chart (see config.yaml): $service_admin_port, $ingress_hostm $forensicloggingsidecar_host, $forensicloggingsidecar_port
+      db_driver: 'mysql'
+      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+      #kafka_host: kafka
+      kafka_port: 9092
       default_json: |
         {
           "PORT": $service_api_port,
@@ -177,30 +182,351 @@ centralhub:
           "LEDGER_ACCOUNT_NAME": "LedgerName",
           "LEDGER_ACCOUNT_PASSWORD": "LedgerPassword",
           "AMOUNT": {
-              "PRECISION": 10,
-              "SCALE": 2
+            "PRECISION": 10,
+            "SCALE": 2
           },
           "SIDECAR": {
-              "DISABLED": false,
-              "HOST": "$forensicloggingsidecar_host",
-              "PORT": $forensicloggingsidecar_port,
-              "CONNECT_TIMEOUT": 45000,
-              "RECONNECT_INTERVAL": 5000
+            "DISABLED": false,
+            "HOST": "$forensicloggingsidecar_host",
+            "PORT": $forensicloggingsidecar_port,
+            "CONNECT_TIMEOUT": 45000,
+            "RECONNECT_INTERVAL": 5000
+          },
+          "EMAIL_USER": "modusboxemailtest@gmail.com",
+          "EMAIL_PASSWORD": "April2o0%",
+          "EMAIL_SMTP": "smtp.gmail.com",
+          "KAFKA": {
+            "TOPIC_TEMPLATES": {
+              "PARTICIPANT_TOPIC_TEMPLATE": {
+                "TEMPLATE": "topic-{{participantName}}-{{functionality}}-{{action}}",
+                "REGEX": "topic-(.*)-(.*)-(.*)"
+              },
+              "GENERAL_TOPIC_TEMPLATE": {
+                "TEMPLATE": "topic-{{functionality}}-{{action}}",
+                "REGEX": "topic-(.*)-(.*)"
+              }
+            },
+            "CONSUMER": {
+              "TRANSFER": {
+                "PREPARE": {
+                  "config": {
+                    "options": {
+                      "mode": 2,
+                      "batchSize": 1,
+                      "pollFrequency": 10,
+                      "recursiveTimeout": 100,
+                      "messageCharset": "utf8",
+                      "messageAsJSON": true,
+                      "sync": true,
+                      "consumeTimeout": 1000
+                    },
+                    "rdkafkaConf": {
+                      "client.id": "transfer-prepare",
+                      "debug": "all",
+                      "group.id": "central-ledger-kafka",
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "enable.auto.commit": false,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
+                    }
+                  }
+                },
+                "TRANSFER": {
+                  "config": {
+                    "options": {
+                      "mode": 2,
+                      "batchSize": 1,
+                      "pollFrequency": 10,
+                      "recursiveTimeout": 100,
+                      "messageCharset": "utf8",
+                      "messageAsJSON": true,
+                      "sync": true,
+                      "consumeTimeout": 1000
+                    },
+                    "rdkafkaConf": {
+                      "client.id": "transfer-transfer",
+                      "debug": "all",
+                      "group.id": "central-ledger-kafka",
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "enable.auto.commit": false,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
+                    }
+                  }
+                },
+                "FULFIL": {
+                  "config": {
+                    "options": {
+                      "mode": 2,
+                      "batchSize": 1,
+                      "pollFrequency": 10,
+                      "recursiveTimeout": 100,
+                      "messageCharset": "utf8",
+                      "messageAsJSON": true,
+                      "sync": true,
+                      "consumeTimeout": 1000
+                    },
+                    "rdkafkaConf": {
+                      "client.id": "transfer-fulfil",
+                      "debug": "all",
+                      "group.id": "central-ledger-kafka",
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "enable.auto.commit": false,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
+                    }
+                  }
+                },
+                "REJECT": {
+                  "config": {
+                    "options": {
+                      "mode": 2,
+                      "batchSize": 1,
+                      "pollFrequency": 10,
+                      "recursiveTimeout": 100,
+                      "messageCharset": "utf8",
+                      "messageAsJSON": true,
+                      "sync": true,
+                      "consumeTimeout": 1000
+                    },
+                    "rdkafkaConf": {
+                      "client.id": "transfer-reject",
+                      "debug": "all",
+                      "group.id": "central-ledger-kafka",
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "enable.auto.commit": false,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
+                    }
+                  }
+                }
+              },
+              "POSITION": {
+                "PREPARE": {
+                  "config": {
+                    "options": {
+                      "mode": 2,
+                      "batchSize": 1,
+                      "pollFrequency": 10,
+                      "recursiveTimeout": 100,
+                      "messageCharset": "utf8",
+                      "messageAsJSON": true,
+                      "sync": true,
+                      "consumeTimeout": 1000
+                    },
+                    "rdkafkaConf": {
+                      "client.id": "position-prepare",
+                      "debug": "all",
+                      "group.id": "central-ledger-kafka",
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "enable.auto.commit": false,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
+                    }
+                  }
+                }
+              },
+              "NOTIFICATION": {
+                "EVENT": {
+                  "config": {
+                    "options": {
+                      "mode": 2,
+                      "batchSize": 1,
+                      "pollFrequency": 10,
+                      "recursiveTimeout": 100,
+                      "messageCharset": "utf8",
+                      "messageAsJSON": true,
+                      "sync": true,
+                      "consumeTimeout": 1000
+                    },
+                    "rdkafkaConf": {
+                      "client.id": "notification-event",
+                      "debug": "all",
+                      "group.id": "central-ledger-kafka",
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "enable.auto.commit": false,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
+                    }
+                  }
+                }
+              }
+            },
+            "PRODUCER": {
+              "TRANSFER": {
+                "PREPARE": {
+                  "config": {
+                    "options": {
+                      "messageCharset": "utf8"
+                    },
+                    "rdkafkaConf": {
+                      "debug": "all",
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "client.id": "default-client",
+                      "event_cb": true,
+                      "compression.codec": "none",
+                      "retry.backoff.ms": 100,
+                      "message.send.max.retries": 2,
+                      "socket.keepalive.enable": true,
+                      "queue.buffering.max.messages": 10,
+                      "queue.buffering.max.ms": 50,
+                      "batch.num.messages": 100,
+                      "api.version.request": true,
+                      "dr_cb": true,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
+                    }
+                  }
+                },
+                "FULFIL": {
+                  "config": {
+                    "options": {
+                      "messageCharset": "utf8"
+                    },
+                    "rdkafkaConf": {
+                      "debug": "all",
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "client.id": "default-client",
+                      "event_cb": true,
+                      "compression.codec": "none",
+                      "retry.backoff.ms": 100,
+                      "message.send.max.retries": 2,
+                      "socket.keepalive.enable": true,
+                      "queue.buffering.max.messages": 10,
+                      "queue.buffering.max.ms": 50,
+                      "batch.num.messages": 100,
+                      "api.version.request": true,
+                      "dr_cb": true,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
+                    }
+                  }
+                },
+                "REJECT": {
+                  "config": {
+                    "options": {
+                      "messageCharset": "utf8"
+                    },
+                    "rdkafkaConf": {
+                      "debug": "all",
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "client.id": "default-client",
+                      "event_cb": true,
+                      "compression.codec": "none",
+                      "retry.backoff.ms": 100,
+                      "message.send.max.retries": 2,
+                      "socket.keepalive.enable": true,
+                      "queue.buffering.max.messages": 10,
+                      "queue.buffering.max.ms": 50,
+                      "batch.num.messages": 100,
+                      "api.version.request": true,
+                      "dr_cb": true,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
+                    }
+                  }
+                },
+                "TRANSFER": {
+                  "config": {
+                    "options": {
+                      "messageCharset": "utf8"
+                    },
+                    "rdkafkaConf": {
+                      "debug": "all",
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "client.id": "default-client",
+                      "event_cb": true,
+                      "compression.codec": "none",
+                      "retry.backoff.ms": 100,
+                      "message.send.max.retries": 2,
+                      "socket.keepalive.enable": true,
+                      "queue.buffering.max.messages": 10,
+                      "queue.buffering.max.ms": 50,
+                      "batch.num.messages": 100,
+                      "api.version.request": true,
+                      "dr_cb": true,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
+                    }
+                  }
+                }
+              },
+              "POSITION": {
+                "PREPARE": {
+                  "config": {
+                    "options": {
+                      "messageCharset": "utf8"
+                    },
+                    "rdkafkaConf": {
+                      "debug": "all",
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "client.id": "default-client",
+                      "event_cb": true,
+                      "compression.codec": "none",
+                      "retry.backoff.ms": 100,
+                      "message.send.max.retries": 2,
+                      "socket.keepalive.enable": true,
+                      "queue.buffering.max.messages": 10,
+                      "queue.buffering.max.ms": 50,
+                      "batch.num.messages": 100,
+                      "api.version.request": true,
+                      "dr_cb": true,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
+                    }
+                  }
+                }
+              },
+              "NOTIFICATION": {
+                "EVENT": {
+                  "config": {
+                    "options": {
+                      "messageCharset": "utf8"
+                    },
+                    "rdkafkaConf": {
+                      "debug": "all",
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "client.id": "default-client",
+                      "event_cb": true,
+                      "compression.codec": "none",
+                      "retry.backoff.ms": 100,
+                      "message.send.max.retries": 2,
+                      "socket.keepalive.enable": true,
+                      "queue.buffering.max.messages": 10,
+                      "queue.buffering.max.ms": 50,
+                      "batch.num.messages": 100,
+                      "api.version.request": true,
+                      "dr_cb": true,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0
+                    }
+                  }
+                }
+              }
+            }
           }
         }
+
       # default_json config for nodejs db knex lib. The following variables will be injected by the helm chart (see config.yaml): $db_driver
       knexfile_js: |
         'use strict'
 
         const migrationsDirectory = '/opt/central-ledger/migrations'
+        const seedsDirectory = '/opt/central-ledger/seeds'
+
         const Config = require('/opt/central-ledger/src/lib/config')
+
         module.exports = {
-          client: '$db_driver',
+          client: 'mysql',
           connection: Config.DATABASE_URI,
           migrations: {
             directory: migrationsDirectory,
-            tableName: 'migrations',
+            tableName: 'migration',
             stub: `${migrationsDirectory}/migration.template`
+          },
+          seeds: {
+            directory: seedsDirectory,
+            loadExtensions: ['.js']
           }
         }
 
@@ -210,15 +536,15 @@ centralhub:
         name: wait-for-postgres
         repository: bowerswilkins/awaitpostgres
         tag: latest
-        pullPolicy: IfNotPresent
+        pullPolicy: Always
 
     service:
       type: ClusterIP
-      
+
       annotations: {}
 
-      # This allows one to point the service to an external backend. 
-      # This is useful for local development where one wishes to hijack 
+      # This allows one to point the service to an external backend.
+      # This is useful for local development where one wishes to hijack
       # the communication from the service to the node layer and point
       # to a specific endpoint (IP, Port, etc).
       external:
@@ -226,10 +552,10 @@ centralhub:
         # 10.0.2.2 is the magic IP for the host on virtualbox's network
         ip: 10.0.2.2
         ports:
-          api: 
+          api:
             name: http-api
             externalPort: 3000
-          admin: 
+          admin:
             name: http-api-admin
             externalPort: 3001
 
@@ -237,7 +563,7 @@ centralhub:
       enabled: true
       externalPath:
         api: /
-        admin: /admin/
+        admin: /admin
       # Used to create an Ingress record.
       hosts:
         api: central-ledger.local
@@ -269,8 +595,8 @@ centralhub:
       replicaCount: 1
       image:
         repository: mojaloop/forensic-logging-sidecar
-        tag: latest
-        pullPolicy: IfNotPresent
+        tag: v2.4
+        pullPolicy: Always
 
       service:
         name: http-api-and-ws
@@ -280,8 +606,8 @@ centralhub:
 
         annotations: {}
 
-        # This allows one to point the service to an external backend. 
-        # This is useful for local development where one wishes to hijack 
+        # This allows one to point the service to an external backend.
+        # This is useful for local development where one wishes to hijack
         # the communication from the service to the node layer and point
         # to a specific endpoint (IP, Port, etc).
         external:
@@ -289,7 +615,7 @@ centralhub:
           # 10.0.2.2 is the magic IP for the host on virtualbox's network
           ip: 10.0.2.2
           ports:
-            api: 
+            api:
               name: http-api-and-ws
               externalPort: 5678
 
@@ -302,18 +628,18 @@ centralhub:
         enabled: true
         initialDelaySeconds: 90
         periodSeconds: 15
-        
+
       ingress:
         enabled: false
         # Used to create an Ingress record.
         hosts:
           api: forensic-logging-sidecar.local
-        
+
         externalPath: /
 
         annotations:
           # kubernetes.io/ingress.class: nginx
-          
+
         tls:
           # Secrets must be manually created in the namespace.
           # - secretName: chart-example-tls
@@ -353,8 +679,8 @@ centralhub:
         replicaCount: 1
         image:
           repository: mojaloop/central-kms
-          tag: latest
-          pullPolicy: IfNotPresent
+          tag: v2.4
+          pullPolicy: Always
 
         service:
           name: http-api-and-tcp-websocket
@@ -363,9 +689,9 @@ centralhub:
           internalPort: 8080
 
           annotations: {}
-          
-          # This allows one to point the service to an external backend. 
-          # This is useful for local development where one wishes to hijack 
+
+          # This allows one to point the service to an external backend.
+          # This is useful for local development where one wishes to hijack
           # the communication from the service to the node layer and point
           # to a specific endpoint (IP, Port, etc).
           external:
@@ -373,7 +699,7 @@ centralhub:
             # 10.0.2.2 is the magic IP for the host on virtualbox's network
             ip: 10.0.2.2
             ports:
-              api: 
+              api:
                 name: http-api-and-tcp-websocket
                 externalPort: 8080
 
@@ -390,17 +716,17 @@ centralhub:
             path: /sidecars
           initialDelaySeconds: 30
           periodSeconds: 5
-          
+
         ingress:
           enabled: true
           # Used to create an Ingress record.
           hosts:
             - central-kms.local
           externalPath: /
-          
+
           annotations:
             # kubernetes.io/ingress.class: nginx
-          
+
           tls:
             # Secrets must be manually created in the namespace.
             # - secretName: chart-example-tls
@@ -420,7 +746,7 @@ centralhub:
           #  memory: 128Mi
 
         postgresql:
-          enabled: true 
+          enabled: true
           nameOverride: "centralkms-postgresql"
           ## Create a database user
           postgresUser: kms
@@ -446,7 +772,9 @@ centralhub:
           externalIPs: []
 
     postgresql:
-      enabled: true 
+      enabled: true
+      ## includeReleaseInName: If you are using an external DB, make sure this is set to 'false'
+      includeReleaseInName: true
       nameOverride: "centralledger-postgresql"
       ## postgres image repository
       image: "postgres"
@@ -501,7 +829,7 @@ centralhub:
         enabled: false
         image: wrouesnel/postgres_exporter
         imageTag: v0.1.1
-        imagePullPolicy: IfNotPresent
+        imagepullPolicy: Always
         resources:
           requests:
             memory: 256Mi
@@ -533,7 +861,7 @@ centralhub:
         externalIPs: []
 
     mysql:
-      enabled: false
+      enabled: true
       nameOverride: "centralledger-mysql"
       # Default values for Percona XtraDB Cluster
 
@@ -542,7 +870,7 @@ centralhub:
       image:
         repository: "percona/percona-xtradb-cluster"
         tag: "5.7.19"
-        pullPolicy: IfNotPresent
+        pullPolicy: Always
 
       # Desired number of members of xtradb cluster
       replicas: 1
@@ -615,6 +943,7 @@ centralhub:
           wsrep_provider=/usr/lib/galera3/libgalera_smm.so
           wsrep_cluster_name=galera
           wsrep_sst_method=xtrabackup-v2
+          pxc_strict_mode=DISABLED
       ## When set to true will create sidecar for `prom/mysqld-exporter`
       ## metrics exporting
       metricsExporter: false
@@ -624,16 +953,343 @@ centralhub:
 
       service:
         type: ClusterIP
-        port: 5432
+        port: 3306
         externalIPs: []
+
+    kafka:
+      enabled: true
+      nameOverride: kafka
+      # ------------------------------------------------------------------------------
+      # Kafka:
+      # ------------------------------------------------------------------------------
+
+      ## The StatefulSet installs 3 pods by default
+      replicas: 1
+
+      ## The kafka image repository
+      image: "confluentinc/cp-kafka"
+
+      ## The kafka image tag
+      imageTag: "4.0.1-1"
+
+      ## Specify a imagePullPolicy
+      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      imagePullPolicy: "IfNotPresent"
+
+      ## Configure resource requests and limits
+      ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+      resources: {}
+        # limits:
+        #   cpu: 200m
+        #   memory: 1536Mi
+        # requests:
+        #   cpu: 100m
+        #   memory: 1024Mi
+      kafkaHeapOptions: "-Xmx1G -Xms1G"
+
+      ## The StatefulSet Update Strategy which Kafka will use when changes are applied.
+      ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+      updateStrategy:
+        type: "OnDelete"
+
+      ## Start and stop pods in Parallel or OrderedReady (one-by-one.)  Note - Can not change after first release.
+      ## ref: https://kubernetes.io/docs/tutorials/stateful-application/basic-stateful-set/#pod-management-policy
+      podManagementPolicy: OrderedReady
+
+      ## If RBAC is enabled on the cluster, the Kafka init container needs a service account
+      ## with permissisions sufficient to apply pod labels
+      rbac:
+        enabled: true
+
+      ## The name of the storage class which the cluster should use.
+      # storageClass: default
+
+      ## The subpath within the Kafka container's PV where logs will be stored.
+      ## This is combined with `persistence.mountPath`, to create, by default: /opt/kafka/data/logs
+      logSubPath: "logs"
+
+      ## Use an alternate scheduler, e.g. "stork".
+      ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+      ##
+      # schedulerName:
+
+      ## Pod scheduling preferences (by default keep pods within a release on separate nodes).
+      ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+      ## By default we don't set affinity
+      affinity: {}
+      ## Alternatively, this typical example defines:
+      ## antiAffinity (to keep Kafka pods on separate pods)
+      ## and affinity (to encourage Kafka pods to be collocated with Zookeeper pods)
+      # affinity:
+      #   podAntiAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #     - labelSelector:
+      #         matchExpressions:
+      #         - key: app
+      #           operator: In
+      #           values:
+      #           - kafka
+      #       topologyKey: "kubernetes.io/hostname"
+      #   podAffinity:
+      #     preferredDuringSchedulingIgnoredDuringExecution:
+      #      - weight: 50
+      #        podAffinityTerm:
+      #          labelSelector:
+      #            matchExpressions:
+      #            - key: app
+      #              operator: In
+      #              values:
+      #                - zookeeper
+      #          topologyKey: "kubernetes.io/hostname"
+
+      ## Node labels for pod assignment
+      ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+      nodeSelector: {}
+
+      ## Readiness probe config.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/
+      ##
+      readinessProbe:
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
+        successThreshold: 1
+        failureThreshold: 3
+
+      ## Period to wait for broker graceful shutdown (sigterm) before pod is killed (sigkill)
+      ## ref: https://kubernetes-v1-4.github.io/docs/user-guide/production-pods/#lifecycle-hooks-and-termination-notice
+      ## ref: https://kafka.apache.org/10/documentation.html#brokerconfigs controlled.shutdown.*
+      terminationGracePeriodSeconds: 60
+
+      # Tolerations for nodes that have taints on them.
+      # Useful if you want to dedicate nodes to just run kafka
+      # https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+      tolerations: []
+      # tolerations:
+      # - key: "key"
+      #   operator: "Equal"
+      #   value: "value"
+      #   effect: "NoSchedule"
+
+      ## External access.
+      ##
+      external:
+        enabled: false
+        servicePort: 19092
+        firstListenerPort: 31090
+        domain: cluster.local
+        init:
+          image: "lwolf/kubectl_deployer"
+          imageTag: "0.4"
+          imagePullPolicy: "IfNotPresent"
+
+      ## Configuration Overrides. Specify any Kafka settings you would like set on the StatefulSet
+      ## here in map format, as defined in the official docs.
+      ## ref: https://kafka.apache.org/documentation/#brokerconfigs
+      ##
+      configurationOverrides:
+        "offsets.topic.replication.factor": 1
+        # "auto.leader.rebalance.enable": true
+        # "auto.create.topics.enable": true
+        # "controlled.shutdown.enable": true
+        # "controlled.shutdown.max.retries": 100
+
+        ## Options required for external access via NodePort
+        ## ref:
+        ## - http://kafka.apache.org/documentation/#security_configbroker
+        ## - https://cwiki.apache.org/confluence/display/KAFKA/KIP-103%3A+Separation+of+Internal+and+External+traffic
+        ##
+        ## Setting "advertised.listeners" here appends to "PLAINTEXT://${POD_IP}:9092,"
+        # "advertised.listeners": |-
+        #   EXTERNAL://kafka.cluster.local:$((31090 + ${KAFKA_BROKER_ID}))
+        # "listener.security.protocol.map": |-
+        #   PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+
+      ## A collection of additional ports to expose on brokers (formatted as normal containerPort yaml)
+      # Useful when the image exposes metrics (like prometheus, etc.) through a javaagent instead of a sidecar
+      additionalPorts: {}
+
+      ## Persistence configuration. Specify if and how to persist data to a persistent volume.
+      ##
+      persistence:
+        enabled: false
+
+        ## The size of the PersistentVolume to allocate to each Kafka Pod in the StatefulSet. For
+        ## production servers this number should likely be much larger.
+        ##
+        size: "1Gi"
+
+        ## The location within the Kafka container where the PV will mount its storage and Kafka will
+        ## store its logs.
+        ##
+        mountPath: "/opt/kafka/data"
+
+        ## Kafka data Persistent Volume Storage Class
+        ## If defined, storageClassName: <storageClass>
+        ## If set to "-", storageClassName: "", which disables dynamic provisioning
+        ## If undefined (the default) or set to null, no storageClassName spec is
+        ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+        ##   GKE, AWS & OpenStack)
+        ##
+        # storageClass:
+
+      jmx:
+        ## Rules to apply to the Prometheus JMX Exporter.  Note while lots of stats have been cleaned and exposed,
+        ## there are still more stats to clean up and expose, others will never get exposed.  They keep lots of duplicates
+        ## that can be derived easily.  The configMap in this chart cleans up the metrics it exposes to be in a Prometheus
+        ## format, eg topic, broker are labels and not part of metric name. Improvements are gladly accepted and encouraged.
+        configMap:
+
+          ## Allows disabling the default configmap, note a configMap is needed
+          enabled: true
+
+          ## Allows setting values to generate confimap
+          ## To allow all metrics through (warning its crazy excessive) comment out below `overrideConfig` and set
+          ## `whitelistObjectNames: []`
+          overrideConfig: {}
+            # jmxUrl: service:jmx:rmi:///jndi/rmi://127.0.0.1:5555/jmxrmi
+            # lowercaseOutputName: true
+            # lowercaseOutputLabelNames: true
+            # ssl: false
+            # rules:
+            # - pattern: ".*"
+
+          ## If you would like to supply your own ConfigMap for JMX metrics, supply the name of that
+          ## ConfigMap as an `overrideName` here.
+          overrideName: ""
+
+        ## Port the jmx metrics are exposed in native jmx format, not in Prometheus format
+        port: 5555
+
+        ## JMX Whitelist Objects, can be set to control which JMX metrics are exposed.  Only whitelisted
+        ## values will be exposed via JMX Exporter.  They must also be exposed via Rules.  To expose all metrics
+        ## (warning its crazy excessive and they aren't formatted in a prometheus style) (1) `whitelistObjectNames: []`
+        ## (2) commented out above `overrideConfig`.
+        whitelistObjectNames:  # []
+        - kafka.controller:*
+        - kafka.server:*
+        - java.lang:*
+        - kafka.network:*
+        - kafka.log:*
+
+      ## Prometheus Exporters / Metrics
+      ##
+      prometheus:
+        ## Prometheus JMX Exporter: exposes the majority of Kafkas metrics
+        jmx:
+          enabled: false
+
+          ## The image to use for the metrics collector
+          image: solsson/kafka-prometheus-jmx-exporter@sha256
+
+          ## The image tag to use for the metrics collector
+          imageTag: a23062396cd5af1acdf76512632c20ea6be76885dfc20cd9ff40fb23846557e8
+
+          ## Interval at which Prometheus scrapes metrics, note: only used by Prometheus Operator
+          interval: 10s
+
+          ## Port jmx-exporter exposes Prometheus format metrics to scrape
+          port: 5556
+
+          resources: {}
+            # limits:
+            #   cpu: 200m
+            #   memory: 1Gi
+            # requests:
+            #   cpu: 100m
+            #   memory: 100Mi
+
+        ## Prometheus Kafka Exporter: exposes complimentary metrics to JMX Exporter
+        kafka:
+          enabled: false
+
+          ## The image to use for the metrics collector
+          image: danielqsj/kafka-exporter
+
+          ## The image tag to use for the metrics collector
+          imageTag: v1.0.1
+
+          ## Interval at which Prometheus scrapes metrics, note: only used by Prometheus Operator
+          interval: 10s
+
+          ## Port kafka-exporter exposes for Prometheus to scrape metrics
+          port: 9308
+
+          ## Resource limits
+          resources: {}
+      #      limits:
+      #        cpu: 200m
+      #        memory: 1Gi
+      #      requests:
+      #        cpu: 100m
+      #        memory: 100Mi
+
+        operator:
+          ## Are you using Prometheus Operator?
+          enabled: false
+
+          serviceMonitor:
+            # Namespace Prometheus is installed in
+            namespace: monitoring
+
+            ## Defaults to whats used if you follow CoreOS [Prometheus Install Instructions](https://github.com/coreos/prometheus-operator/tree/master/helm#tldr)
+            ## [Prometheus Selector Label](https://github.com/coreos/prometheus-operator/blob/master/helm/prometheus/templates/prometheus.yaml#L65)
+            ## [Kube Prometheus Selector Label](https://github.com/coreos/prometheus-operator/blob/master/helm/kube-prometheus/values.yaml#L298)
+            selector:
+              prometheus: kube-prometheus
+
+      # ------------------------------------------------------------------------------
+      # Zookeeper:
+      # ------------------------------------------------------------------------------
+
+      zookeeper:
+        ## If true, install the Zookeeper chart alongside Kafka
+        ## ref: https://github.com/kubernetes/charts/tree/master/incubator/zookeeper
+        enabled: true
+
+        ## ref: https://github.com/kubernetes/contrib/tree/master/statefulsets/zookeeper#stateful-set
+        # Desired quantity of ZooKeeper pods. This should always be (1,3,5, or 7)
+        replicaCount: 1
+
+        ## Configure Zookeeper resource requests and limits
+        ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+        resources: ~
+
+        ## The JVM heap size to allocate to Zookeeper
+        heap: "1G"
+
+        persistence:
+          enabled: false
+          ## The amount of PV storage allocated to each Zookeeper pod in the statefulset
+          # size: "2Gi"
+
+        ## Specify a Zookeeper imagePullPolicy
+        ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+        imagePullPolicy: "IfNotPresent"
+
+        ## If the Zookeeper Chart is disabled a URL and port are required to connect
+        url: ""
+        port: 2181
+
+        ## Pod scheduling preferences (by default keep pods within a release on separate nodes).
+        ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+        ## By default we don't set affinity:
+        affinity: {}  # Criteria by which pod label-values influence scheduling for zookeeper pods.
+        # podAntiAffinity:
+        #   requiredDuringSchedulingIgnoredDuringExecution:
+        #     - topologyKey: "kubernetes.io/hostname"
+        #       labelSelector:
+        #         matchLabels:
+        #           release: zookeeper
+
 
 centraldirectory:
   enabled: true
   replicaCount: 1
   image:
     repository: mojaloop/central-directory
-    tag: latest
-    pullPolicy: IfNotPresent
+    tag: v2.4
+    pullPolicy: Always
 
   readinessProbe:
     enabled: true
@@ -705,7 +1361,7 @@ centraldirectory:
           externalPort: 3000
 
   ingress:
-    enabled: false
+    enabled: true
     externalPath: /
     # Used to create an Ingress record.
     hosts:
@@ -736,8 +1392,8 @@ centraldirectory:
     replicaCount: 1
     image:
       repository: mojaloop/central-end-user-registry
-      tag: latest
-      pullPolicy: IfNotPresent
+      tag: v2.4
+      pullPolicy: Always
 
     readinessProbe:
       enabled: true
@@ -846,8 +1502,8 @@ centraldirectory:
     replicaCount: 1
     image:
       repository: mojaloop/mock-pathfinder
-      tag: latest
-      pullPolicy: IfNotPresent
+      tag: v2.4
+      pullPolicy: Always
 
     config:
       default_json: '
@@ -880,10 +1536,17 @@ centraldirectory:
           name: tcp-prov
           externalPort: 8080
           internalPort: 8080
-        query:
+          protocol: TCP
+        tcp_query:
           name: tcp-query
           externalPort: 15353
           internalPort: 15353
+          protocol: TCP
+        udp_query:
+          name: udp-query
+          externalPort: 15353
+          internalPort: 15353
+          protocol: UDP
 
       annotations: {}
 
