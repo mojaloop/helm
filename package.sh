@@ -46,12 +46,19 @@ checkCommandResult
  
 echo "Packaging Central..." 
 helm package -u -d ./repo ./central 
-checkCommandResult 
+checkCommandResult
+
+echo "Packaging interop-switch..."
+helm package -u -d ./repo ./interop-switch
+checkCommandResult
+
+echo "Packaging ml-api-adapter..."
+helm package -u -d ./repo ./ml-api-adapter
+checkCommandResult
 
 echo "Packaging Mojaloop..." 
 helm package -u -d ./repo ./mojaloop 
-checkCommandResult 
- 
+checkCommandResult
  
 echo "Packaging Ingress-Nginx..."
 helm package -u -d ./repo ./kube-public/ingress-nginx/
