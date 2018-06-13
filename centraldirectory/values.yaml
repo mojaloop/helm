@@ -39,6 +39,11 @@ livenessProbe:
   periodSeconds: 15
 
 config:
+  CDIR_ADMIN_KEY: "admin"
+  CDIR_ADMIN_SECRET: "admin"
+  CDIR_PATHFINDER__PROVISIONING__ADDRESS: "http://$pathfinder_host:8080/nrs-pi/services/SIPIX/SendRequest"
+  CDIR_PATHFINDER__QUERY__ADDRESS: "$pathfinder_host"
+  CDIR_PATHFINDER__QUERY__PORT: "15353"
   default_json: '
     {
       "PORT": $service_port,
@@ -94,12 +99,13 @@ service:
         externalPort: 3000
 
 ingress:
-  enabled: false
+  enabled: true
   externalPath: /
   # Used to create an Ingress record.
   hosts:
     api: central-directory.local
   annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: '/'
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   tls:
@@ -264,10 +270,17 @@ mockpathfinder:
         name: tcp-prov
         externalPort: 8080
         internalPort: 8080
-      query:
+        protocol: TCP
+      tcp_query:
         name: tcp-query
         externalPort: 15353
         internalPort: 15353
+        protocol: TCP
+      udp_query:
+        name: udp-query
+        externalPort: 15353
+        internalPort: 15353
+        protocol: UDP
 
     annotations: {}
     

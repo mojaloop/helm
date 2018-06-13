@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "interop-switch.fullname" . }}
+  labels:
+      app: {{ template "interop-switch.fullname" . }}
+      chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
+data:
+  SWITCH_SERVICE_HOST: {{ .Values.config.SWITCH_SERVICE_HOST }}
+  SWITCH_SERVICE_PORT: '{{ .Values.config.SWITCH_SERVICE_PORT }}'
+  CENTRAL_DIR_HOST: {{ .Release.Name }}-{{ .Values.config.CENTRAL_DIR_HOST }}
+  CENTRAL_DIR_PORT: '{{ .Values.config.CENTRAL_DIR_PORT }}'
+  CONNECTOR_HOST: {{ .Release.Name }}-{{ .Values.config.CONNECTOR_HOST }}
+  PSQL_HOST: {{ template "interop-switch.fullname" . }}-{{ .Values.config.PSQL_HOST }}
+  PSQL_PORT: '{{ .Values.config.PSQL_PORT }}'
+  PSQL_DATABASE: {{ .Values.config.PSQL_DATABASE }}
+  PSQL_USER: {{ .Values.config.PSQL_USER }}
+  PSQL_PASSWORD: {{ .Values.config.PSQL_PASSWORD }}
