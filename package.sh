@@ -64,11 +64,15 @@ echo "Packaging Ingress-Nginx..."
 helm package -u -d ./repo ./kube-public/ingress-nginx/
 checkCommandResult
 
-cd ./repo 
+echo "Packaging ntpd..."
+helm package -u -d ./repo ./kube-system/ntpd/
+checkCommandResult
+
+cd ./repo
  
 echo "Creating Helm repo index..." 
 helm repo index . --url http://mojaloop.io/helm/repo 
-checkCommandResult 
+checkCommandResult
 
 echo "\
 Packaging completed.\n \
