@@ -1,9 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "ml-api-adapter.fullname" . }}
+  name: {{ template "ml-api-adapter-handler-notification.fullname" . }}
   labels:
-    app: {{ template "ml-api-adapter.fullname" . }}
+    app: {{ template "ml-api-adapter-handler-notification.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "ml-api-adapter.fullname" . }}
+        app: {{ template "ml-api-adapter-handler-notification.fullname" . }}
         chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}
@@ -25,15 +25,16 @@ spec:
           imagePullSecrets:
 {{ toYaml .Values.image.imagePullSecrets | indent 10 }}
           {{- end }}
+          command: {{ .Values.image.command }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
           volumeMounts:
-            - name: {{ template "ml-api-adapter.fullname" . }}-config-volume
+            - name: {{ template "ml-api-adapter-handler-notification.fullname" . }}-config-volume
               mountPath: /opt/ml-api-adapter/config
       volumes:
-        - name: {{ template "ml-api-adapter.fullname" . }}-config-volume
+        - name: {{ template "ml-api-adapter-handler-notification.fullname" . }}-config-volume
           configMap:
-            name: {{ template "ml-api-adapter.fullname" . }}
+            name: {{ template "ml-api-adapter-handler-notification.fullname" . }}
             items:
             - key: default.json
               path: default.json
