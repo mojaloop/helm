@@ -1,11 +1,11 @@
 {{- if .Values.ingress.enabled -}}
-{{- $serviceName := include "centralledger.fullname" . -}}
+{{- $serviceName := include "centralledger-handler-transfer-prepare.fullname" . -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ template "centralledger.fullname" . }}
+  name: {{ template "centralledger-handler-transfer-prepare.fullname" . }}
   labels:
-    app: {{ template "centralledger.fullname" . }}
+    app: {{ template "centralledger-handler-transfer-prepare.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -22,13 +22,6 @@ spec:
             backend:
               serviceName: {{ $serviceName }}
               servicePort: {{ .Values.containers.api.service.ports.api.externalPort }}
-    - host: {{ .Values.ingress.hosts.admin }}
-      http:
-        paths:
-          - path: {{ .Values.ingress.externalPath.admin }}
-            backend:
-              serviceName: {{ $serviceName }}
-              servicePort: {{ .Values.containers.admin.service.ports.api.externalPort }}
   {{- if .Values.ingress.tls }}
   tls:
     {{ toYaml .Values.ingress.tls | indent 4 }}

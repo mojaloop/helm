@@ -1,16 +1,16 @@
-{{- $dbHost := printf "%s-%s" .Release.Name .Values.postgresql.nameOverride -}}
+{{- $dbHost := printf "%s-%s" .Release.Name .Values.config.db_host -}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "centralledger.fullname" . }}
+  name: {{ template "centralledger-service.fullname" . }}
   labels:
-    app: {{ template "centralledger.fullname" . }}
+    app: {{ template "centralledger-service.fullname" . }}
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: {{ template "centralledger.fullname" . }}
+        app: {{ template "centralledger-service.fullname" . }}
         chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}
@@ -35,11 +35,11 @@ spec:
           imagePullPolicy: {{ .Values.init.image.pullPolicy }}
           env:
           - name: "POSTGRES_URL"
-            value: "postgresql://{{ .Values.postgresql.postgresUser }}:{{ .Values.postgresql.postgresPassword }}@{{ $dbHost }}:{{ .Values.postgresql.service.port }}/{{ .Values.postgresql.postgresDatabase }}?sslmode=disable"
+            value: "postgresql://{{ .Values.config.db_user }}:{{ .Values.config.db_password }}@{{ $dbHost }}:{{ .Values.config.db_port }}/{{ .Values.config.db_database }}?sslmode=disable"
         {{- end }}
       {{- end }}
       containers:
-        - name: {{ template "centralledger.name" . }}
+        - name: {{ template "centralledger-service.name" . }}
           image: "{{ .Values.containers.api.image.repository }}:{{ .Values.containers.api.image.tag }}"
           imagePullPolicy: {{ .Values.containers.api.image.pullPolicy }}
           command: {{ .Values.containers.api.image.command }}
@@ -68,22 +68,22 @@ spec:
             - name: CLEDG_PORT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "centralledger.fullname" . }}
+                  name: {{ template "centralledger-service.fullname" . }}
                   key: server.port
             - name: CLEDG_HOSTNAME
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "centralledger.fullname" . }}
+                  name: {{ template "centralledger-service.fullname" . }}
                   key: server.host
             - name: CLEDG_DATABASE_URI
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "centralledger.fullname" . }}
+                  name: {{ template "centralledger-service.fullname" . }}
                   key: db.uri
           volumeMounts:
-          - name: {{ template "centralledger.fullname" . }}-config-volume
+          - name: {{ template "centralledger-service.fullname" . }}-config-volume
             mountPath: /opt/central-ledger/config
-        - name: {{ template "centralledger.name" . }}-admin
+        - name: {{ template "centralledger-service.name" . }}-admin
           image: "{{ .Values.containers.admin.image.repository }}:{{ .Values.containers.admin.image.tag }}"
           imagePullPolicy: {{ .Values.containers.admin.image.pullPolicy }}
           command: {{ .Values.containers.admin.image.command }}
@@ -112,35 +112,35 @@ spec:
             - name: CLEDG_ADMIN_PORT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "centralledger.fullname" . }}
+                  name: {{ template "centralledger-service.fullname" . }}
                   key: admin.port
             - name: CLEDG_ADMIN_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "centralledger.fullname" . }}
+                  name: {{ template "centralledger-service.fullname" . }}
                   key: admin.key
             - name: CLEDG_ADMIN_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "centralledger.fullname" . }}
+                  name: {{ template "centralledger-service.fullname" . }}
                   key: admin.secret
             - name: CLEDG_HOSTNAME
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "centralledger.fullname" . }}
+                  name: {{ template "centralledger-service.fullname" . }}
                   key: admin.host
             - name: CLEDG_DATABASE_URI
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "centralledger.fullname" . }}
+                  name: {{ template "centralledger-service.fullname" . }}
                   key: db.uri
           volumeMounts:
-          - name: {{ template "centralledger.fullname" . }}-config-volume
+          - name: {{ template "centralledger-service.fullname" . }}-config-volume
             mountPath: /opt/central-ledger/config
       volumes:
-        - name: {{ template "centralledger.fullname" . }}-config-volume
+        - name: {{ template "centralledger-service.fullname" . }}-config-volume
           configMap:
-            name: {{ template "centralledger.fullname" . }}
+            name: {{ template "centralledger-service.fullname" . }}
             items:
             - key: default.json
               path: default.json

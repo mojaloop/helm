@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "centralledger.fullname" . }}
+  name: {{ template "centralledger-handler-transfer-fulfil.fullname" . }}
   labels:
-    app: {{ template "centralledger.fullname" . }}
+    app: {{ template "centralledger-handler-transfer-fulfil.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -20,14 +20,8 @@ spec:
       protocol: TCP
       name: {{ $port.name }}
     {{- end }}
-    {{- range $port := .Values.containers.admin.service.ports }}
-    - port: {{ $port.externalPort }}
-      targetPort: {{ $port.internalPort }}
-      protocol: TCP
-      name: {{ $port.name }}
-    {{- end }}
 {{- if not .Values.service.external.enabled }}
   selector:
-    app: {{ template "centralledger.fullname" . }}
+    app: {{ template "centralledger-handler-transfer-fulfil.fullname" . }}
     release: {{ .Release.Name }}
 {{- end -}}
