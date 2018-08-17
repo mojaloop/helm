@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "ml-api-adapter.fullname" . }}
+  labels:
+    app: {{ template "ml-api-adapter.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "ml-api-adapter.fullname" . }}
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{- if .Values.image.imagePullSecrets }}
+          imagePullSecrets:
+{{ toYaml .Values.image.imagePullSecrets | indent 10 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+          volumeMounts:
+            - name: {{ template "ml-api-adapter.fullname" . }}-config-volume
+              mountPath: /opt/ml-api-adapter/config
+      volumes:
+        - name: {{ template "ml-api-adapter.fullname" . }}-config-volume
+          configMap:
+            name: {{ template "ml-api-adapter.fullname" . }}
+            items:
+            - key: default.json
+              path: default.json
