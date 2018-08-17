@@ -1,0 +1,193 @@
+# Default values for ml-api-adapter.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+image:
+  repository: mojaloop/ml-api-adapter
+  tag: v3.3.2-snapshot
+  command: '["node", "src/api/index.js"]'
+## Optionally specify an array of imagePullSecrets.
+## Secrets must be manually created in the namespace.
+## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+##
+#  imagePullSecrets:
+#    - name: myregistrykey
+  pullPolicy: Always
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+  initialDelaySeconds: 120
+  periodSeconds: 15
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+  initialDelaySeconds: 90
+  periodSeconds: 15
+
+config:
+  # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+  kafka_host: kafka
+  kafka_port: 9092
+  # default_json config for nodejs. The following variables will be injected by the helm chart (see config.yaml):  $ingress_host, $ingress_port, $kafka_host, $kafka_port
+  default_json: |
+        {
+          "PORT": $ingress_port,
+          "HOSTNAME": "$ingress_host",
+          "DFSP_URLS": {
+            "dfsp1": {
+              "transfers": "http://localhost:1080/transfers",
+              "error": "http://localhost:1080/transfers/error"
+            },
+            "dfsp2": {
+              "transfers": "http://localhost:1080/transfers",
+              "error": "http://localhost:1080/transfers/error"
+            }
+          },
+          "AMOUNT": {
+            "PRECISION": 10,
+            "SCALE": 2
+          },
+          "HANDLERS": {
+           "DISABLED": true,
+           "API": {
+             "DISABLED": false
+           }
+          },
+          "KAFKA": {
+            "TOPIC_TEMPLATES": {
+              "PARTICIPANT_TOPIC_TEMPLATE": {
+                "TEMPLATE": "topic-{{participantName}}-{{functionality}}-{{action}}",
+                "REGEX": "topic-(.*)-(.*)-(.*)"
+              },
+              "NOTIFICATION_TOPIC_TEMPLATE": {
+                "TEMPLATE": "topic-notification-event",
+                "REGEX": "topic-notification-event"
+              },
+              "FULFIL_TOPIC_TEMPLATE": {
+                "TEMPLATE": "topic-transfer-fulfil",
+                "REGEX": "topic-transfer-fulfil"
+              }
+            },
+            "CONSUMER": {
+              "NOTIFICATION": {
+                "EVENT": {
+                  "config": {
+                    "options": {
+                      "mode": 2,
+                      "batchSize": 1,
+                      "recursiveTimeout": 100,
+                      "messageCharset": "utf8",
+                      "messageAsJSON": true,
+                      "sync": true,
+                      "consumeTimeout": 1000
+                    },
+                    "rdkafkaConf": {
+                      "client.id": "ml-con-notification-event",
+                      "group.id": "kafka-ml-api-adapter",
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "socket.blocking.max.ms": 1,
+                      "fetch.wait.max.ms": 1,
+                      "fetch.error.backoff.ms": 1,
+                      "queue.buffering.max.ms": 1,
+                      "broker.version.fallback": "0.10.1.0",
+                      "api.version.request": true,
+                      "enable.auto.commit": false,
+                      "auto.commit.interval.ms": 200,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 1
+                    },
+                    "topicConf": {
+                      "auto.offset.reset": "earliest"
+                    }
+                  }
+                }
+              }
+            },
+            "PRODUCER": {
+              "TRANSFER": {
+                "PREPARE": {
+                  "config": {
+                    "options": {
+                      "messageCharset": "utf8"
+                    },
+                    "rdkafkaConf": {
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "client.id": "ml-prod-transfer-prepare",
+                      "event_cb": true,
+                      "compression.codec": "none",
+                      "retry.backoff.ms": 100,
+                      "message.send.max.retries": 2,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0,
+                      "queue.buffering.max.messages": 10000,
+                      "queue.buffering.max.ms": 50,
+                      "batch.num.messages": 100,
+                      "api.version.request": true,
+                      "dr_cb": true
+                    }
+                  }
+                },
+                "FULFIL": {
+                  "config": {
+                    "options": {
+                      "messageCharset": "utf8"
+                    },
+                    "rdkafkaConf": {
+                      "metadata.broker.list": "$kafka_host:$kafka_port",
+                      "client.id": "ml-prod-transfer-fulfil",
+                      "event_cb": true,
+                      "compression.codec": "none",
+                      "retry.backoff.ms": 100,
+                      "message.send.max.retries": 2,
+                      "socket.keepalive.enable": true,
+                      "socket.max.fails": 0,
+                      "queue.buffering.max.messages": 10000,
+                      "queue.buffering.max.ms": 50,
+                      "batch.num.messages": 100,
+                      "api.version.request": true,
+                      "dr_cb": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+service:
+  name: ml-api-adapter
+  type: ClusterIP
+  externalPort: 8088
+  internalPort: 8088
+
+ingress:
+  enabled: true
+  externalPath: /
+  # Used to create an Ingress record.
+  hosts:
+    api: ml-api-adapter.local
+
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: '/'
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  tls:
+    # Secrets must be manually created in the namespace.
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
