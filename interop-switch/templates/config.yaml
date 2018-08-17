@@ -1,4 +1,3 @@
-{{- $mlAdapterHost := printf "%s-%s" .Release.Name "ml-api-adapter" -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -17,5 +16,5 @@ data:
   PSQL_HOST: {{ (printf "%s-%s" (include "interop-switch.fullname" .) .Values.config.PSQL_HOST) | quote }}
   PSQL_PORT: {{ .Values.config.PSQL_PORT | quote }}
   PSQL_DATABASE: {{ .Values.config.PSQL_DATABASE | quote }}
-  ML_API_ADAPTER_HOST: {{ (.Values.config.ML_API_ADAPTER_HOST | replace "$mlAdapterHost" $mlAdapterHost) | quote }}
+  ML_API_ADAPTER_HOST: {{ (printf "%s-%s" .Release.Name .Values.config.ML_API_ADAPTER_HOST) | quote }}
   ML_API_ADAPTER_PORT: {{ .Values.config.ML_API_ADAPTER_PORT | quote }}
