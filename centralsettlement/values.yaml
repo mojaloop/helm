@@ -21,29 +21,37 @@ global:
 replicaCount: 1
 image:
   repository: mojaloop/central-settlement
-  tag: v3.5.0
+  tag: v3.4.1-snapshot
   pullPolicy: Always
 
 readinessProbe:
-  enabled: true
+  enabled: false
   httpGet:
     path: /health
   initialDelaySeconds: 60
   periodSeconds: 15
 
 livenessProbe:
-  enabled: true
+  enabled: false
   httpGet:
     path: /health
   initialDelaySeconds: 60
   periodSeconds: 15
 
 config:
-  C?: "?"
+  ## DB Configuration
+  # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+  db_type: 'mysql'
+  # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+  db_driver: 'mysql'
+  db_host: centralledger-mysql
+  db_port: 3306
+  db_user: central_ledger
+  db_password: oyMxgZChuu
+  db_database: central_ledger
+
   default_json: '
     {
-      "PORT": $service_port,
-      "HOSTNAME": "http://$ingress_host",
     }
 '
 
@@ -55,8 +63,8 @@ service:
   ports:
     api:
       name: http-api
-      externalPort: 3000
-      internalPort: 3000
+      externalPort: 8080
+      internalPort: 8080
 
   annotations: {}
 
@@ -71,7 +79,7 @@ service:
     ports:
       api: 
         name: http-api
-        externalPort: 3000
+        externalPort: 8080
 
 ingress:
   enabled: true

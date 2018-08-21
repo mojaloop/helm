@@ -1,4 +1,3 @@
-{{- $dbHost := printf "%s-%s" .Release.Name .Values.postgresql.nameOverride -}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -28,13 +27,7 @@ spec:
 {{ toYaml .Values.global.config.tolerations | indent 8 }}
 {{- end }}
       {{- if .Values.init.enabled }}
-      initContainers:
-        - name: wait-for-postgres
-          image: bowerswilkins/awaitpostgres
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-          - name: "POSTGRES_URL"
-            value: "postgresql://{{ .Values.postgresql.postgresUser }}:{{ .Values.postgresql.postgresPassword }}@{{ $dbHost }}:{{ .Values.postgresql.service.port }}/{{ .Values.postgresql.postgresDatabase }}?sslmode=disable"
+      initContainers: []
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -61,44 +54,10 @@ spec:
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
-          # securityContext:
-          #   capabilities:
-          #     add:
-          #       - NET_ADMIN
-          env:
-            - name: CDIR_DATABASE_URI
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "centralsettlement.fullname" . }}
-                  key: db.uri
-            - name: CDIR_ADMIN_KEY
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "centralsettlement.fullname" . }}
-                  key: cdir.admin.key
-            - name: CDIR_ADMIN_SECRET
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "centralsettlement.fullname" . }}
-                  key: cdir.admin.secret
-            - name: CDIR_PATHFINDER__PROVISIONING__ADDRESS
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "centralsettlement.fullname" . }}
-                  key: cdir.pathfinder.provisioning.address
-            - name: CDIR_PATHFINDER__QUERY__ADDRESS
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "centralsettlement.fullname" . }}
-                  key: cdir.pathfinder.query.address
-            - name: CDIR_PATHFINDER__QUERY__PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "centralsettlement.fullname" . }}
-                  key: cdir.pathfinder.query.port
+          env: []
           volumeMounts:
           - name: {{ template "centralsettlement.fullname" . }}-config-volume
-            mountPath: /opt/central-directory/config
+            mountPath: /opt/central-settlement/config
       volumes:
         - name: {{ template "centralsettlement.fullname" . }}-config-volume
           configMap:
