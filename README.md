@@ -51,7 +51,10 @@ Note: Please ensure that you update the Chart dependencies in the order show bel
 - `helm dep up mockpathfinder`
 - `helm dep up centralenduserregistry`
 - `helm dep up centraldirectory`
+- `helm dep up centralsettlement`
 - `helm dep up central`
+- `helm dep up ml-api-adapter`
+- `helm dep up interop-switch`
 - `helm dep up mojaloop`
 
 We are quitely waiting on recursive updates: https://github.com/kubernetes/helm/issues/2247
@@ -92,7 +95,7 @@ e.g. `helm upgrade --debug dev ./centralenduserregistry/`
 
 1. Add the following to your hosts file and ensure you have installed Ingress Controller on your Kubernetes Cluster:
 
-`<ip-of-k8s-node-ingress> central-kms.local forensic-logging-sidecar.local central-ledger.local central-end-user-registry.local central-directory.local central-hub.local`
+`<ip-of-k8s-node-ingress> interop-switch.local central-kms.local forensic-logging-sidecar.local central-ledger.local central-end-user-registry.local central-directory.local central-hub.local central-settlement.local ml-api-adapter.local`
 
 If your running Minikube, you can use the following cmd to discover your `<ip-of-k8s-node-ingress>`: 
 
