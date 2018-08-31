@@ -48,61 +48,61 @@ Clean install, in case you had another minikube before. Remember that Minikube i
 
 The memory should be in multiples of 1024
 
-`minikube start --memory 9216 --cpus 4`
+- `minikube start --memory 9216 --cpus 4`
 
 In case you are behind a proxy, pass the environment variables like this:
 
-`minikube start --docker-env http_proxy=$http_proxy  --docker-env https_proxy=$http_proxy  --docker-env HTTP_PROXY=$http_proxy  --docker-env HTTPS_PROXY=$http_proxy --docker-env no_proxy=192.168.99.0/24 --docker-env NO_PROXY=192.168.99.0/24 --memory 9216 --cpus 4`
+- `minikube start --docker-env http_proxy=$http_proxy  --docker-env https_proxy=$http_proxy  --docker-env HTTP_PROXY=$http_proxy  --docker-env HTTPS_PROXY=$http_proxy --docker-env no_proxy=192.168.99.0/24 --docker-env NO_PROXY=192.168.99.0/24 --memory 9216 --cpus 4`
 
 To see the pods status, once they are created proceed with:
 
-`kubectl get po --all-namespaces`
+- `kubectl get po --all-namespaces`
 
  It's very likely that the dashboard will throw an error (at least on binaries from GNU/Linux), for that matter do:
 
-`kubectl create clusterrolebinding kube-system-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default`
+- `kubectl create clusterrolebinding kube-system-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default`
 
 Now we install Tiller
 
-`helm init`
+- `helm init`
 
 Generally the embedded ingress is disabled, better to leave it that way. In case is enable, disable it with:
 
-`minikube addons disable ingress`
+- `minikube addons disable ingress`
 
 Finally we install the Mojaloop
 
-`helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo mojaloop`
+- `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo mojaloop`
 
 Then we install the Ingress from the Mojaloop project with the rbac.create flag
 Here the release name I put "moja" arbitrarily, special attention on this with permissions below
 
-`helm install --debug --namespace=kube-public --name=moja --repo=http://mojaloop.io/helm/repo ingress-nginx --set rbac.create=true`
+- `helm install --debug --namespace=kube-public --name=moja --repo=http://mojaloop.io/helm/repo ingress-nginx --set rbac.create=true`
 
 Now some permissions in order to Ingress run successfully 
 
-`kubectl -n kube-public create sa nginx-ingress-controller`
-`kubectl apply -f https://gist.githubusercontent.com/bdfintechpy/c816077cefd7fa938e453d8d97afb65b/raw/8ef6d0623e9273aa93f22ab2b5d5cbb40502a5aa/nginx-ingress-controller-clusterrole.yaml`
-`kubectl -n kube-public apply -f https://gist.githubusercontent.com/bdfintechpy/25793f9dd8fb7545d4a5a5bd268d8a7f/raw/421d2032e4a36577739b60c0e673e889c1d1c6e2/nginx-ingress-controller-role.yaml`
-`kubectl -n kube-public create rolebinding nginx-ingress-controller --role=nginx-ingress-controller --serviceaccount=kube-public:nginx-ingress-controller`
-`kubectl create clusterrolebinding nginx-ingress-controller --clusterrole=nginx-ingress-controller --serviceaccount=kube-public:nginx-ingress-controller`
-`kubectl -n kube-public patch rc/moja-ingress-nginx-controller -p '{"spec": {"template": {"spec": {"serviceAccountName": "nginx-ingress-controller"}}}}'`
+- `kubectl -n kube-public create sa nginx-ingress-controller`
+- `kubectl apply -f https://gist.githubusercontent.com/bdfintechpy/c816077cefd7fa938e453d8d97afb65b/raw/8ef6d0623e9273aa93f22ab2b5d5cbb40502a5aa/nginx-ingress-controller-clusterrole.yaml`
+- `kubectl -n kube-public apply -f https://gist.githubusercontent.com/bdfintechpy/25793f9dd8fb7545d4a5a5bd268d8a7f/raw/421d2032e4a36577739b60c0e673e889c1d1c6e2/nginx-ingress-controller-role.yaml`
+- `kubectl -n kube-public create rolebinding nginx-ingress-controller --role=nginx-ingress-controller --serviceaccount=kube-public:nginx-ingress-controller`
+- `kubectl create clusterrolebinding nginx-ingress-controller --clusterrole=nginx-ingress-controller --serviceaccount=kube-public:nginx-ingress-controller`
+- `kubectl -n kube-public patch rc/moja-ingress-nginx-controller -p '{"spec": {"template": {"spec": {"serviceAccountName": "nginx-ingress-controller"}}}}'`
 
 We re-create the ingress pod
 
-`kubectl -n kube-public delete po -l app=moja-ingress-nginx-controller`
+- `kubectl -n kube-public delete po -l app=moja-ingress-nginx-controller`
 
-`Wait a while, and everything should be running`
+Wait a while, and everything should be running
 
-`kubectl get po --all-namespaces`
+- `kubectl get po --all-namespaces`
 
 You might want to have access to the interop-switch, you can go through ingress or directly to the interop-switch changing his type ClusterIP to NodePort, with: 
 
-`kubectl edit svc dev-interop-switch --namespace=mojaloop`
+- `kubectl edit svc dev-interop-switch --namespace=mojaloop`
 
 Show the port assigned to the service
 
-`minikube service list`
+- `minikube service list`
 
 ## Upgrading Deployments from Repo
 
