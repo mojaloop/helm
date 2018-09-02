@@ -40,9 +40,13 @@ echo "Packaging Central-End-User-Registry..."
 helm package -u -d ./repo ./centralenduserregistry 
 checkCommandResult 
  
-echo "Packaging Central-Directory..." 
-helm package -u -d ./repo ./centraldirectory 
-checkCommandResult 
+echo "Packaging Central-Directory..."
+helm package -u -d ./repo ./centraldirectory
+checkCommandResult
+
+echo "Packaging Central-Settlement..."
+helm package -u -d ./repo ./centralsettlement
+checkCommandResult
  
 echo "Packaging Central..." 
 helm package -u -d ./repo ./central 
