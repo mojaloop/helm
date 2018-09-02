@@ -44,6 +44,10 @@ echo "Updating Central-Directory..."
 helm dep up ./centraldirectory
 checkCommandResult
 
+echo "Updating Central-Settlement..."
+helm dep up ./centralsettlement
+checkCommandResult
+
 echo "Updating interop-switch..."
 helm dep up ./interop-switch
 checkCommandResult
