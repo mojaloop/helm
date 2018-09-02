@@ -21,7 +21,7 @@ global:
 replicaCount: 1
 image:
   repository: mojaloop/central-settlement
-  tag: v3.4.1-snapshot
+  tag: v3.5.0-snapshot
   pullPolicy: Always
 
 readinessProbe:
@@ -52,6 +52,9 @@ config:
 
   default_json: '
     {
+      "PORT": $service_api_port,
+      "HOSTNAME": "http://central-settlements.local",
+      "DATABASE_URI" : "$dbdriver://$dbuser:$dbpassword@$dbhost:$dbport/$dbname"
     }
 '
 
@@ -63,8 +66,8 @@ service:
   ports:
     api:
       name: http-api
-      externalPort: 8080
-      internalPort: 8080
+      externalPort: 3007
+      internalPort: 3007
 
   annotations: {}
 
@@ -79,7 +82,7 @@ service:
     ports:
       api: 
         name: http-api
-        externalPort: 8080
+        externalPort: 3007
 
 ingress:
   enabled: true
