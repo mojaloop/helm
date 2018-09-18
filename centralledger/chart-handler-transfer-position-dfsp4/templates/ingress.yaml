@@ -1,0 +1,29 @@
+{{- if .Values.ingress.enabled -}}
+{{- $serviceName := include "centralledger-hand-tr-position-dfsp4.fullname" . -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "centralledger-hand-tr-position-dfsp4.fullname" . }}
+  labels:
+    app: {{ template "centralledger-hand-tr-position-dfsp4.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  rules:
+    - host: {{ .Values.ingress.hosts.api }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.externalPath.api }}
+            backend:
+              serviceName: {{ $serviceName }}
+              servicePort: {{ .Values.containers.api.service.ports.api.externalPort }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{ toYaml .Values.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}
