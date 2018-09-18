@@ -3,15 +3,15 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "centralledger-handler-transfer-prepare.fullname" . }}
+  name: {{ template "centralledger-hand-tr-prepare-dfsp1.fullname" . }}
   labels:
-    app: {{ template "centralledger-handler-transfer-prepare.fullname" . }}
+    app: {{ template "centralledger-hand-tr-prepare-dfsp1.fullname" . }}
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: {{ template "centralledger-handler-transfer-prepare.fullname" . }}
+        app: {{ template "centralledger-hand-tr-prepare-dfsp1.fullname" . }}
         chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}
@@ -52,7 +52,7 @@ spec:
           {{- end }}
       {{- end }}
       containers:
-        - name: {{ template "centralledger-handler-transfer-prepare.name" . }}
+        - name: {{ template "centralledger-hand-tr-prepare-dfsp1.name" . }}
           image: "{{ .Values.containers.api.image.repository }}:{{ .Values.containers.api.image.tag }}"
           imagePullPolicy: {{ .Values.containers.api.image.pullPolicy }}
           command: {{ .Values.containers.api.image.command }}
@@ -81,25 +81,25 @@ spec:
             - name: CLEDG_PORT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "centralledger-handler-transfer-prepare.fullname" . }}
+                  name: {{ template "centralledger-hand-tr-prepare-dfsp1.fullname" . }}
                   key: server.port
             - name: CLEDG_HOSTNAME
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "centralledger-handler-transfer-prepare.fullname" . }}
+                  name: {{ template "centralledger-hand-tr-prepare-dfsp1.fullname" . }}
                   key: server.host
             - name: CLEDG_DATABASE_URI
               valueFrom:
                 secretKeyRef:
-                  name: {{ template "centralledger-handler-transfer-prepare.fullname" . }}
+                  name: {{ template "centralledger-hand-tr-prepare-dfsp1.fullname" . }}
                   key: db.uri
           volumeMounts:
-          - name: {{ template "centralledger-handler-transfer-prepare.fullname" . }}-config-volume
+          - name: {{ template "centralledger-hand-tr-prepare-dfsp1.fullname" . }}-config-volume
             mountPath: /opt/central-ledger/config
       volumes:
-        - name: {{ template "centralledger-handler-transfer-prepare.fullname" . }}-config-volume
+        - name: {{ template "centralledger-hand-tr-prepare-dfsp1.fullname" . }}-config-volume
           configMap:
-            name: {{ template "centralledger-handler-transfer-prepare.fullname" . }}
+            name: {{ template "centralledger-hand-tr-prepare-dfsp1.fullname" . }}
             items:
             - key: default.json
               path: default.json
