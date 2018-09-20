@@ -9,6 +9,6 @@ export DBNAME=central_ledger
 export DB_SLEEPTIME=15
 export MESSAGES_BATCH_SIZE=1000
 export SCRIPT_DIR=scripts
-export FSPList=("dfps1" "dfsp2" "dfps3" "dfsp4")
+export FSPList=("dfsp1" "dfsp2" "dfsp3" "dfsp4")
 export DEFAULT_NET_DEBIT_CAP=1000000
 export CENTRAL_LEDGER_HOST=perf1-central-ledger.mojaloop.live
