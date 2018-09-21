@@ -4225,7 +4225,8 @@ central:
         pullPolicy: Always
 
       # Desired number of members of xtradb cluster
-      replicas: 3
+      ## Note that this should be 3, but reverting it to 1 due to the replication issue with the inserts.
+      replicas: 1
 
       ## Specify password for root user
       ##
@@ -4311,6 +4312,11 @@ central:
           wsrep_cluster_name=galera
           wsrep_sst_method=xtrabackup-v2
           pxc_strict_mode=DISABLED
+#          binlog_group_commit_sync_delay=10000
+#          wsrep_sync_wait=7
+      ## See the following page for information on wsrep_sync_wait
+      ## https://www.percona.com/doc/percona-xtradb-cluster/LATEST/wsrep-system-index.html#wsrep_sync_wait
+
       ## When set to true will create sidecar for `prom/mysqld-exporter`
       ## metrics exporting
       metricsExporter: false
