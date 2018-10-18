@@ -26,7 +26,7 @@ ml-api-adapter-service:
   replicaCount: 1
   image:
     repository: mojaloop/ml-api-adapter
-    tag: v3.5.0-snapshot
+    tag: v3.8.0
     command: '["node", "src/api/index.js"]'
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -57,6 +57,11 @@ ml-api-adapter-service:
     default_json: |
           {
             "PORT": $ingress_port,
+            "ENDPOINT_SOURCE_URL": "http://localhost:3001/participants/{{fsp}}/endpoints",
+            "ENDPOINT_CACHE_CONFIG": {
+              "expiresIn": 180000,
+              "generateTimeout": 30000
+            },
             "HOSTNAME": "$ingress_host",
             "DFSP_URLS": {
               "dfsp1": {
@@ -144,7 +149,7 @@ ml-api-adapter-service:
                         "message.send.max.retries": 2,
                         "socket.keepalive.enable": true,
                         "socket.max.fails": 0,
-                        "queue.buffering.max.messages": 10000,
+                        "queue.buffering.max.messages": 10000000,
                         "queue.buffering.max.ms": 50,
                         "batch.num.messages": 100,
                         "api.version.request": true,
@@ -166,7 +171,7 @@ ml-api-adapter-service:
                         "message.send.max.retries": 2,
                         "socket.keepalive.enable": true,
                         "socket.max.fails": 0,
-                        "queue.buffering.max.messages": 10000,
+                        "queue.buffering.max.messages": 10000000,
                         "queue.buffering.max.ms": 50,
                         "batch.num.messages": 100,
                         "api.version.request": true,
@@ -222,7 +227,7 @@ ml-api-adapter-handler-notification:
   replicaCount: 1
   image:
     repository: mojaloop/ml-api-adapter
-    tag: v3.5.0-snapshot
+    tag: v3.8.0
     command: '["node", "src/handlers/index.js", "handler", "--notification"]'
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -257,6 +262,11 @@ ml-api-adapter-handler-notification:
           {
             "PORT": $ingress_port,
             "HOSTNAME": "$ingress_host",
+            "ENDPOINT_SOURCE_URL": "http://localhost:3001/participants/{{fsp}}/endpoints",
+            "ENDPOINT_CACHE_CONFIG": {
+              "expiresIn": 180000,
+              "generateTimeout": 30000
+            },
             "DFSP_URLS": {
               "dfsp1": {
                 "transfers": "http://localhost:1080/transfers",
@@ -343,7 +353,7 @@ ml-api-adapter-handler-notification:
                         "message.send.max.retries": 2,
                         "socket.keepalive.enable": true,
                         "socket.max.fails": 0,
-                        "queue.buffering.max.messages": 10000,
+                        "queue.buffering.max.messages": 10000000,
                         "queue.buffering.max.ms": 50,
                         "batch.num.messages": 100,
                         "api.version.request": true,
@@ -365,7 +375,7 @@ ml-api-adapter-handler-notification:
                         "message.send.max.retries": 2,
                         "socket.keepalive.enable": true,
                         "socket.max.fails": 0,
-                        "queue.buffering.max.messages": 10000,
+                        "queue.buffering.max.messages": 10000000,
                         "queue.buffering.max.ms": 50,
                         "batch.num.messages": 100,
                         "api.version.request": true,
