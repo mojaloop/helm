@@ -26,7 +26,7 @@ containers:
       repository: mojaloop/central-ledger
       tag: v3.7.5-snapshot
       pullPolicy: Always
-      command: '["node", "src/handlers/index.js", "handler", "--transfer"]'
+      command: '["node", "src/handlers/index.js", "handler", "--get"]'
     service:
       ports:
         api:
@@ -153,7 +153,7 @@ config:
                }
              }
            },
-           "TRANSFER": {
+           "GET": {
              "config": {
                "options": {
                  "mode": 2,
@@ -166,7 +166,7 @@ config:
                  "consumeTimeout": 1000
                },
                "rdkafkaConf": {
-                 "client.id": "cl-con-transfer-transfer",
+                 "client.id": "cl-con-transfer-get",
                  "debug": "all",
                  "group.id": "central-ledger-kafka",
                  "metadata.broker.list": "$kafka_host:$kafka_port",
@@ -619,7 +619,7 @@ ingress:
     admin: /admin
   # Used to create an Ingress record.
   hosts:
-    api: central-ledger-timeout.local
+    api: central-ledger-transfer-get.local
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: '/'
     # kubernetes.io/ingress.class: nginx

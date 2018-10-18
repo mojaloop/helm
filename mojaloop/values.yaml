@@ -3984,7 +3984,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.5.1-snapshot
+            tag: v3.7.5-snapshot
             pullPolicy: Always
             command: '["node", "src/api/index.js"]'
           service:
@@ -4009,7 +4009,7 @@ central:
         admin:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.5.1-snapshot
+            tag: v3.7.5-snapshot
             pullPolicy: Always
             command: '["node", "src/admin/index.js"]'
           service:
@@ -4633,7 +4633,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.5.1-snapshot
+            tag: v3.7.5-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
           service:
@@ -5262,7 +5262,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.5.1-snapshot
+            tag: v3.7.5-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--position"]'
           service:
@@ -5890,7 +5890,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.5.1-snapshot
+            tag: v3.7.5-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
           service:
@@ -6518,7 +6518,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.5.1-snapshot
+            tag: v3.7.5-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
           service:
@@ -8170,7 +8170,7 @@ central:
     replicaCount: 1
     image:
       repository: mojaloop/central-settlement
-      tag: v3.5.0-snapshot
+      tag: v3.8.0
       pullPolicy: Always
 
     readinessProbe:
@@ -8365,7 +8365,7 @@ ml-api-adapter:
       replicaCount: 1
       image:
         repository: mojaloop/ml-api-adapter
-        tag: v3.5.0-snapshot
+        tag: v3.8.0
         command: '["node", "src/api/index.js"]'
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
@@ -8384,6 +8384,11 @@ ml-api-adapter:
               {
                 "PORT": $ingress_port,
                 "HOSTNAME": "$ingress_host",
+                "ENDPOINT_SOURCE_URL": "http://perf1-central-ledger.mojaloop.live/admin/participants/{{fsp}}/endpoints",
+                "ENDPOINT_CACHE_CONFIG": {
+                  "expiresIn": 180000,
+                  "generateTimeout": 30000
+                },
                 "DFSP_URLS": {
                   "dfsp1": {
                     "transfers": "http://localhost:1080/transfers",
@@ -8548,7 +8553,7 @@ ml-api-adapter:
       replicaCount: 1
       image:
         repository: mojaloop/ml-api-adapter
-        tag: v3.5.0-snapshot
+        tag: v3.8.0
         command: '["node", "src/handlers/index.js", "handler", "--notification"]'
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
@@ -8570,6 +8575,11 @@ ml-api-adapter:
               {
                 "PORT": $ingress_port,
                 "HOSTNAME": "$ingress_host",
+                "ENDPOINT_SOURCE_URL": "http://perf1-central-ledger.mojaloop.live/admin/participants/{{fsp}}/endpoints",
+                "ENDPOINT_CACHE_CONFIG": {
+                  "expiresIn": 180000,
+                  "generateTimeout": 30000
+                },
                 "DFSP_URLS": {
                   "dfsp1": {
                     "transfers": "http://localhost:1080/transfers",
