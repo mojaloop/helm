@@ -36,7 +36,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.7.5-snapshot
+            tag: v3.7.6-snapshot
             pullPolicy: Always
             command: '["node", "src/api/index.js"]'
           service:
@@ -61,7 +61,7 @@ central:
         admin:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.7.5-snapshot
+            tag: v3.7.6-snapshot
             pullPolicy: Always
             command: '["node", "src/admin/index.js"]'
           service:
@@ -119,6 +119,8 @@ central:
            "ADMIN_PORT": $service_admin_port,
            "HOSTNAME": "$ingress_host",
            "RUN_MIGRATIONS": true,
+           "MAX_CONNECTION_POOL": 250,
+           "MIN_CONNECTION_POOL": 2,
            "ENABLE_TOKEN_AUTH": false,
            "ENABLE_BASIC_AUTH": false,
            "LEDGER_ACCOUNT_NAME": "LedgerName",
@@ -556,7 +558,8 @@ central:
             seeds: {
               directory: seedsDirectory,
               loadExtensions: ['.js']
-            }
+            },
+            pool: { min: Config.MIN_CONNECTION_POOL, max: Config.MAX_CONNECTION_POOL }
           }
 
       init:
@@ -626,7 +629,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.7.5-snapshot
+            tag: v3.7.6-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--prepare", "dfsp1"]'
 
@@ -637,7 +640,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.7.5-snapshot
+            tag: v3.7.6-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--prepare", "dfsp2"]'
 
@@ -648,7 +651,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.7.5-snapshot
+            tag: v3.7.6-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--prepare", "dfsp3"]'
 
@@ -659,7 +662,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.7.5-snapshot
+            tag: v3.7.6-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--prepare", "dfsp4"]'
 
@@ -670,7 +673,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.7.5-snapshot
+            tag: v3.7.6-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--position", "dfsp1"]'
 
@@ -681,7 +684,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.7.5-snapshot
+            tag: v3.7.6-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--position", "dfsp2"]'
 
@@ -692,7 +695,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.7.5-snapshot
+            tag: v3.7.6-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--position", "dfsp3"]'
 
@@ -703,7 +706,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.7.5-snapshot
+            tag: v3.7.6-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--position", "dfsp4"]'
 
@@ -718,7 +721,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.7.5-snapshot
+            tag: v3.7.6-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
           service:
@@ -770,6 +773,9 @@ central:
            "HOSTNAME": "$ingress_host",
            "ENABLE_TOKEN_AUTH": false,
            "ENABLE_BASIC_AUTH": false,
+           "RUN_MIGRATIONS": false,
+           "MAX_CONNECTION_POOL": 250,
+           "MIN_CONNECTION_POOL": 2,
            "LEDGER_ACCOUNT_NAME": "LedgerName",
            "LEDGER_ACCOUNT_PASSWORD": "LedgerPassword",
            "AMOUNT": {
@@ -1205,7 +1211,8 @@ central:
             seeds: {
               directory: seedsDirectory,
               loadExtensions: ['.js']
-            }
+            },
+            pool: { min: Config.MIN_CONNECTION_POOL, max: Config.MAX_CONNECTION_POOL }
           }
 
       init:
@@ -1291,7 +1298,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.7.5-snapshot
+            tag: v3.7.6-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
           service:
@@ -1343,6 +1350,9 @@ central:
            "HOSTNAME": "$ingress_host",
            "ENABLE_TOKEN_AUTH": false,
            "ENABLE_BASIC_AUTH": false,
+           "RUN_MIGRATIONS": false,
+           "MAX_CONNECTION_POOL": 250,
+           "MIN_CONNECTION_POOL": 2,
            "LEDGER_ACCOUNT_NAME": "LedgerName",
            "LEDGER_ACCOUNT_PASSWORD": "LedgerPassword",
            "AMOUNT": {
@@ -1778,7 +1788,8 @@ central:
             seeds: {
               directory: seedsDirectory,
               loadExtensions: ['.js']
-            }
+            },
+            pool: { min: Config.MIN_CONNECTION_POOL, max: Config.MAX_CONNECTION_POOL }
           }
 
       init:
@@ -1864,7 +1875,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.7.5-snapshot
+            tag: v3.7.6-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--get"]'
           service:
@@ -1916,6 +1927,9 @@ central:
            "HOSTNAME": "$ingress_host",
            "ENABLE_TOKEN_AUTH": false,
            "ENABLE_BASIC_AUTH": false,
+           "MAX_CONNECTION_POOL": 250,
+           "MIN_CONNECTION_POOL": 2,
+           "RUN_MIGRATIONS": false,
            "LEDGER_ACCOUNT_NAME": "LedgerName",
            "LEDGER_ACCOUNT_PASSWORD": "LedgerPassword",
            "AMOUNT": {
@@ -2382,7 +2396,8 @@ central:
             seeds: {
               directory: seedsDirectory,
               loadExtensions: ['.js']
-            }
+            },
+            pool: { min: Config.MIN_CONNECTION_POOL, max: Config.MAX_CONNECTION_POOL }
           }
 
       init:
@@ -2866,9 +2881,9 @@ central:
           wsrep_cluster_name=galera
           wsrep_sst_method=xtrabackup-v2
           pxc_strict_mode=DISABLED
-          max_connections=605
-          max_user_connections=600
-          thread_cache_size=600
+          max_connections=999
+          max_user_connections=994
+          thread_cache_size=999
           log_output=file
           slow_query_log=ON
           long_query_time=1

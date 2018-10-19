@@ -24,7 +24,7 @@ containers:
   api:
     image:
       repository: mojaloop/central-ledger
-      tag: v3.7.5-snapshot
+      tag: v3.7.6-snapshot
       pullPolicy: Always
       command: '["node", "src/handlers/index.js", "handler", "--position", "dfsp2"]'
     service:
@@ -76,6 +76,9 @@ config:
      "HOSTNAME": "$ingress_host",
      "ENABLE_TOKEN_AUTH": false,
      "ENABLE_BASIC_AUTH": false,
+     "RUN_MIGRATIONS": false,
+     "MAX_CONNECTION_POOL": 500,
+     "MIN_CONNECTION_POOL": 2,
      "LEDGER_ACCOUNT_NAME": "LedgerName",
      "LEDGER_ACCOUNT_PASSWORD": "LedgerPassword",
      "AMOUNT": {
@@ -566,7 +569,8 @@ config:
       seeds: {
         directory: seedsDirectory,
         loadExtensions: ['.js']
-      }
+      },
+      pool: { min: Config.MIN_CONNECTION_POOL, max: Config.MAX_CONNECTION_POOL }
     }
 
 init:
