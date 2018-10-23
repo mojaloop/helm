@@ -31,14 +31,14 @@ readinessProbe:
     path: /health
   initialDelaySeconds: 45
   periodSeconds: 15
-  
+
 livenessProbe:
   enabled: true
   httpGet:
     path: /health
   initialDelaySeconds: 45
   periodSeconds: 15
-  
+
 config:
   default_json: '
     {
@@ -54,11 +54,11 @@ service:
   type: ClusterIP
   externalPort: 4001
   internalPort: 4001
-  
+
   annotations: {}
 
-  # This allows one to point the service to an external backend. 
-  # This is useful for local development where one wishes to hijack 
+  # This allows one to point the service to an external backend.
+  # This is useful for local development where one wishes to hijack
   # the communication from the service to the node layer and point
   # to a specific endpoint (IP, Port, etc).
   external:
@@ -66,7 +66,7 @@ service:
     # 10.0.2.2 is the magic IP for the host on virtualbox's network
     ip: 10.0.2.2
     ports:
-      api: 
+      api:
         name: http-api-and-web
         externalPort: 4001
 
@@ -75,13 +75,13 @@ ingress:
   # Used to create an Ingress record.
   hosts:
     - central-hub.local
-  
+
   externalPath: /
-  
+
   annotations:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  
+
   tls:
     # Secrets must be manually created in the namespace.
     # - secretName: chart-example-tls
@@ -199,6 +199,7 @@ centralledger:
          "PORT": $service_api_port,
          "ADMIN_PORT": $service_admin_port,
          "HOSTNAME": "$ingress_host",
+         "RUN_MIGRATIONS": true,
          "ENABLE_TOKEN_AUTH": false,
          "ENABLE_BASIC_AUTH": false,
          "LEDGER_ACCOUNT_NAME": "LedgerName",
@@ -816,6 +817,7 @@ centralledger:
        {
          "PORT": $service_api_port,
          "HOSTNAME": "$ingress_host",
+         "RUN_MIGRATIONS": false,
          "ENABLE_TOKEN_AUTH": false,
          "ENABLE_BASIC_AUTH": false,
          "LEDGER_ACCOUNT_NAME": "LedgerName",
@@ -1445,6 +1447,7 @@ centralledger:
        {
          "PORT": $service_api_port,
          "HOSTNAME": "$ingress_host",
+         "RUN_MIGRATIONS": false,
          "ENABLE_TOKEN_AUTH": false,
          "ENABLE_BASIC_AUTH": false,
          "LEDGER_ACCOUNT_NAME": "LedgerName",
@@ -2073,6 +2076,7 @@ centralledger:
        {
          "PORT": $service_api_port,
          "HOSTNAME": "$ingress_host",
+         "RUN_MIGRATIONS": false,
          "ENABLE_TOKEN_AUTH": false,
          "ENABLE_BASIC_AUTH": false,
          "LEDGER_ACCOUNT_NAME": "LedgerName",
@@ -2702,6 +2706,7 @@ centralledger:
        {
          "PORT": $service_api_port,
          "HOSTNAME": "$ingress_host",
+         "RUN_MIGRATIONS": false,
          "ENABLE_TOKEN_AUTH": false,
          "ENABLE_BASIC_AUTH": false,
          "LEDGER_ACCOUNT_NAME": "LedgerName",
@@ -3330,6 +3335,7 @@ centralledger:
        {
          "PORT": $service_api_port,
          "HOSTNAME": "$ingress_host",
+         "RUN_MIGRATIONS": false,
          "ENABLE_TOKEN_AUTH": false,
          "ENABLE_BASIC_AUTH": false,
          "LEDGER_ACCOUNT_NAME": "LedgerName",
