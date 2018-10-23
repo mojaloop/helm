@@ -47,26 +47,18 @@ config:
   # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
   kafka_host: kafka
   kafka_port: 9092
+  central_services_host: centralledger-service
+  central_services_port: 3001
   # default_json config for nodejs. The following variables will be injected by the helm chart (see config.yaml):  $ingress_host, $ingress_port, $kafka_host, $kafka_port
   default_json: |
         {
           "PORT": $ingress_port,
-          "ENDPOINT_SOURCE_URL": "http://localhost:3001/participants/{{fsp}}/endpoints",
+          "ENDPOINT_SOURCE_URL": "http://$central_services_host:$central_services_port/participants/{{fsp}}/endpoints",
           "ENDPOINT_CACHE_CONFIG": {
             "expiresIn": 180000,
             "generateTimeout": 30000
           },
           "HOSTNAME": "$ingress_host",
-          "DFSP_URLS": {
-            "dfsp1": {
-              "transfers": "http://localhost:1080/transfers",
-              "error": "http://localhost:1080/transfers/error"
-            },
-            "dfsp2": {
-              "transfers": "http://localhost:1080/transfers",
-              "error": "http://localhost:1080/transfers/error"
-            }
-          },
           "AMOUNT": {
             "PRECISION": 10,
             "SCALE": 2

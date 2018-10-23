@@ -1,4 +1,5 @@
 {{- $kafkaHost := printf "%s-%s" .Release.Name .Values.config.kafka_host -}}
+{{- $centralServicesHost := printf "%s-%s" .Release.Name .Values.config.central_services_host -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,4 +10,4 @@ metadata:
       release: {{ .Release.Name }}
       heritage: {{ .Release.Service }}
 data:
-  default.json: {{ (.Values.config.default_json | replace "$ingress_host" .Values.ingress.hosts.api |  replace "$ingress_port" (printf "%.0f" .Values.service.externalPort) | replace "$kafka_host" $kafkaHost | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) ) | quote }}
+  default.json: {{ (.Values.config.default_json | replace "$ingress_host" .Values.ingress.hosts.api |  replace "$ingress_port" (printf "%.0f" .Values.service.externalPort) | replace "$kafka_host" $kafkaHost | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port | replace "$central_services_host" $centralServicesHost | replace "$central_services_port" (printf "%.0f" .Values.config.central_services_port)  ) | quote }}
