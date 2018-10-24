@@ -26,7 +26,7 @@ ml-api-adapter-service:
   replicaCount: 1
   image:
     repository: mojaloop/ml-api-adapter
-    tag: v3.7.4-snapshot
+    tag: v3.7.5-snapshot
     command: '["node", "src/api/index.js"]'
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -62,16 +62,6 @@ ml-api-adapter-service:
             "ENDPOINT_CACHE_CONFIG": {
               "expiresIn": 180000,
               "generateTimeout": 30000
-            },
-            "DFSP_URLS": {
-              "dfsp1": {
-                "transfers": "http://localhost:1080/transfers",
-                "error": "http://localhost:1080/transfers/error"
-              },
-              "dfsp2": {
-                "transfers": "http://localhost:1080/transfers",
-                "error": "http://localhost:1080/transfers/error"
-              }
             },
             "AMOUNT": {
               "PRECISION": 10,
@@ -124,7 +114,8 @@ ml-api-adapter-service:
                         "enable.auto.commit": false,
                         "auto.commit.interval.ms": 200,
                         "socket.keepalive.enable": true,
-                        "socket.max.fails": 1
+                        "socket.max.fails": 1,
+                        "partition.assignment.strategy": "range"
                       },
                       "topicConf": {
                         "auto.offset.reset": "earliest"
@@ -227,7 +218,7 @@ ml-api-adapter-handler-notification:
   replicaCount: 1
   image:
     repository: mojaloop/ml-api-adapter
-    tag: v3.7.4-snapshot
+    tag: v3.7.5-snapshot
     command: '["node", "src/handlers/index.js", "handler", "--notification"]'
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -266,16 +257,6 @@ ml-api-adapter-handler-notification:
             "ENDPOINT_CACHE_CONFIG": {
               "expiresIn": 180000,
               "generateTimeout": 30000
-            },
-            "DFSP_URLS": {
-              "dfsp1": {
-                "transfers": "http://localhost:1080/transfers",
-                "error": "http://localhost:1080/transfers/error"
-              },
-              "dfsp2": {
-                "transfers": "http://localhost:1080/transfers",
-                "error": "http://localhost:1080/transfers/error"
-              }
             },
             "AMOUNT": {
               "PRECISION": 10,
@@ -328,7 +309,8 @@ ml-api-adapter-handler-notification:
                         "enable.auto.commit": false,
                         "auto.commit.interval.ms": 200,
                         "socket.keepalive.enable": true,
-                        "socket.max.fails": 1
+                        "socket.max.fails": 1,
+                        "partition.assignment.strategy": "range"
                       },
                       "topicConf": {
                         "auto.offset.reset": "earliest"
@@ -357,7 +339,8 @@ ml-api-adapter-handler-notification:
                         "queue.buffering.max.ms": 50,
                         "batch.num.messages": 100,
                         "api.version.request": true,
-                        "dr_cb": true
+                        "dr_cb": true,
+                        "partitioner": "random"
                       }
                     }
                   },
@@ -379,7 +362,8 @@ ml-api-adapter-handler-notification:
                         "queue.buffering.max.ms": 50,
                         "batch.num.messages": 100,
                         "api.version.request": true,
-                        "dr_cb": true
+                        "dr_cb": true,
+                        "partitioner": "random"
                       }
                     }
                   }

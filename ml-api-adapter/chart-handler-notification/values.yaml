@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   repository: mojaloop/ml-api-adapter
-  tag: v3.7.4-snapshot
+  tag: v3.7.5-snapshot
   command: '["node", "src/handlers/index.js", "handler", "--notification"]'
 ## Optionally specify an array of imagePullSecrets.
 ## Secrets must be manually created in the namespace.
@@ -57,16 +57,6 @@ config:
             "expiresIn": 180000,
             "generateTimeout": 30000
           },
-          "DFSP_URLS": {
-            "dfsp1": {
-              "transfers": "http://localhost:1080/transfers",
-              "error": "http://localhost:1080/transfers/error"
-            },
-            "dfsp2": {
-              "transfers": "http://localhost:1080/transfers",
-              "error": "http://localhost:1080/transfers/error"
-            }
-          },
           "AMOUNT": {
             "PRECISION": 10,
             "SCALE": 2
@@ -118,7 +108,8 @@ config:
                       "enable.auto.commit": false,
                       "auto.commit.interval.ms": 200,
                       "socket.keepalive.enable": true,
-                      "socket.max.fails": 1
+                      "socket.max.fails": 1,
+                      "partition.assignment.strategy": "range"
                     },
                     "topicConf": {
                       "auto.offset.reset": "earliest"
@@ -147,7 +138,8 @@ config:
                       "queue.buffering.max.ms": 50,
                       "batch.num.messages": 100,
                       "api.version.request": true,
-                      "dr_cb": true
+                      "dr_cb": true,
+                      "partitioner": "random"
                     }
                   }
                 },
@@ -169,7 +161,8 @@ config:
                       "queue.buffering.max.ms": 50,
                       "batch.num.messages": 100,
                       "api.version.request": true,
-                      "dr_cb": true
+                      "dr_cb": true,
+                      "partitioner": "random"
                     }
                   }
                 }

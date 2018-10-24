@@ -117,7 +117,7 @@ centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v3.7.6-snapshot
+          tag: v3.7.7-snapshot
           pullPolicy: Always
           command: '["node", "src/api/index.js"]'
         service:
@@ -142,7 +142,7 @@ centralledger:
       admin:
         image:
           repository: mojaloop/central-ledger
-          tag: v3.7.6-snapshot
+          tag: v3.7.7-snapshot
           pullPolicy: Always
           command: '["node", "src/admin/index.js"]'
         service:
@@ -274,38 +274,8 @@ centralledger:
                      "broker.version.fallback": "0.10.1.0",
                      "api.version.request": true,
                      "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
-                   },
-                   "topicConf": {
-                     "auto.offset.reset": "earliest"
-                   }
-                 }
-               },
-               "TRANSFER": {
-                 "config": {
-                   "options": {
-                     "mode": 2,
-                     "batchSize": 1,
-                     "pollFrequency": 10,
-                     "recursiveTimeout": 100,
-                     "messageCharset": "utf8",
-                     "messageAsJSON": true,
-                     "sync": true,
-                     "consumeTimeout": 1000
-                   },
-                   "rdkafkaConf": {
-                     "client.id": "cl-con-transfer-transfer",
-                     "debug": "all",
-                     "group.id": "central-ledger-kafka",
-                     "metadata.broker.list": "$kafka_host:$kafka_port",
-                     "socket.blocking.max.ms": 1,
-                     "fetch.wait.max.ms": 1,
-                     "fetch.error.backoff.ms": 1,
-                     "queue.buffering.max.ms": 1,
-                     "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true,
-                     "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
+                     "auto.commit.interval.ms": 200,
+                     "partition.assignment.strategy": "range"
                    },
                    "topicConf": {
                      "auto.offset.reset": "earliest"
@@ -336,7 +306,8 @@ centralledger:
                      "broker.version.fallback": "0.10.1.0",
                      "api.version.request": true,
                      "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
+                     "auto.commit.interval.ms": 200,
+                     "partition.assignment.strategy": "range"
                    },
                    "topicConf": {
                      "auto.offset.reset": "earliest"
@@ -544,30 +515,6 @@ centralledger:
                      "api.version.request": true
                    }
                  }
-               },
-               "TRANSFER": {
-                 "config": {
-                   "options": {
-                     "messageCharset": "utf8"
-                   },
-                   "rdkafkaConf": {
-                     "debug": "all",
-                     "metadata.broker.list": "$kafka_host:$kafka_port",
-                     "client.id": "cl-prod-transfer-transfer",
-                     "event_cb": true,
-                     "compression.codec": "none",
-                     "retry.backoff.ms": 100,
-                     "message.send.max.retries": 2,
-                     "socket.keepalive.enable": true,
-                     "queue.buffering.max.messages": 10000000,
-                     "batch.num.messages": 100,
-                     "dr_cb": true,
-                     "socket.blocking.max.ms": 1,
-                     "queue.buffering.max.ms": 1,
-                     "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true
-                   }
-                 }
                }
              },
              "POSITION": {
@@ -665,7 +612,8 @@ centralledger:
                      "socket.blocking.max.ms": 1,
                      "queue.buffering.max.ms": 1,
                      "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true
+                     "api.version.request": true,
+                     "partitioner": "random"
                    }
                  }
                }
@@ -770,7 +718,7 @@ centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v3.7.6-snapshot
+          tag: v3.7.7-snapshot
           pullPolicy: Always
           command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
         service:
@@ -895,38 +843,8 @@ centralledger:
                      "broker.version.fallback": "0.10.1.0",
                      "api.version.request": true,
                      "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
-                   },
-                   "topicConf": {
-                     "auto.offset.reset": "earliest"
-                   }
-                 }
-               },
-               "TRANSFER": {
-                 "config": {
-                   "options": {
-                     "mode": 2,
-                     "batchSize": 1,
-                     "pollFrequency": 10,
-                     "recursiveTimeout": 100,
-                     "messageCharset": "utf8",
-                     "messageAsJSON": true,
-                     "sync": true,
-                     "consumeTimeout": 1000
-                   },
-                   "rdkafkaConf": {
-                     "client.id": "cl-con-transfer-transfer",
-                     "debug": "all",
-                     "group.id": "central-ledger-kafka",
-                     "metadata.broker.list": "$kafka_host:$kafka_port",
-                     "socket.blocking.max.ms": 1,
-                     "fetch.wait.max.ms": 1,
-                     "fetch.error.backoff.ms": 1,
-                     "queue.buffering.max.ms": 1,
-                     "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true,
-                     "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
+                     "auto.commit.interval.ms": 200,
+                     "partition.assignment.strategy": "range"
                    },
                    "topicConf": {
                      "auto.offset.reset": "earliest"
@@ -957,7 +875,8 @@ centralledger:
                      "broker.version.fallback": "0.10.1.0",
                      "api.version.request": true,
                      "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
+                     "auto.commit.interval.ms": 200,
+                     "partition.assignment.strategy": "range"
                    },
                    "topicConf": {
                      "auto.offset.reset": "earliest"
@@ -1165,30 +1084,6 @@ centralledger:
                      "api.version.request": true
                    }
                  }
-               },
-               "TRANSFER": {
-                 "config": {
-                   "options": {
-                     "messageCharset": "utf8"
-                   },
-                   "rdkafkaConf": {
-                     "debug": "all",
-                     "metadata.broker.list": "$kafka_host:$kafka_port",
-                     "client.id": "cl-prod-transfer-transfer",
-                     "event_cb": true,
-                     "compression.codec": "none",
-                     "retry.backoff.ms": 100,
-                     "message.send.max.retries": 2,
-                     "socket.keepalive.enable": true,
-                     "queue.buffering.max.messages": 10000000,
-                     "batch.num.messages": 100,
-                     "dr_cb": true,
-                     "socket.blocking.max.ms": 1,
-                     "queue.buffering.max.ms": 1,
-                     "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true
-                   }
-                 }
                }
              },
              "POSITION": {
@@ -1286,7 +1181,8 @@ centralledger:
                      "socket.blocking.max.ms": 1,
                      "queue.buffering.max.ms": 1,
                      "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true
+                     "api.version.request": true,
+                     "partitioner": "random"
                    }
                  }
                }
@@ -1403,7 +1299,7 @@ centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v3.7.6-snapshot
+          tag: v3.7.7-snapshot
           pullPolicy: Always
           command: '["node", "src/handlers/index.js", "handler", "--position"]'
         service:
@@ -1528,38 +1424,8 @@ centralledger:
                      "broker.version.fallback": "0.10.1.0",
                      "api.version.request": true,
                      "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
-                   },
-                   "topicConf": {
-                     "auto.offset.reset": "earliest"
-                   }
-                 }
-               },
-               "TRANSFER": {
-                 "config": {
-                   "options": {
-                     "mode": 2,
-                     "batchSize": 1,
-                     "pollFrequency": 10,
-                     "recursiveTimeout": 100,
-                     "messageCharset": "utf8",
-                     "messageAsJSON": true,
-                     "sync": true,
-                     "consumeTimeout": 1000
-                   },
-                   "rdkafkaConf": {
-                     "client.id": "cl-con-transfer-transfer",
-                     "debug": "all",
-                     "group.id": "central-ledger-kafka",
-                     "metadata.broker.list": "$kafka_host:$kafka_port",
-                     "socket.blocking.max.ms": 1,
-                     "fetch.wait.max.ms": 1,
-                     "fetch.error.backoff.ms": 1,
-                     "queue.buffering.max.ms": 1,
-                     "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true,
-                     "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
+                     "auto.commit.interval.ms": 200,
+                     "partition.assignment.strategy": "range"
                    },
                    "topicConf": {
                      "auto.offset.reset": "earliest"
@@ -1590,7 +1456,8 @@ centralledger:
                      "broker.version.fallback": "0.10.1.0",
                      "api.version.request": true,
                      "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
+                     "auto.commit.interval.ms": 200,
+                     "partition.assignment.strategy": "range"
                    },
                    "topicConf": {
                      "auto.offset.reset": "earliest"
@@ -1798,30 +1665,6 @@ centralledger:
                      "api.version.request": true
                    }
                  }
-               },
-               "TRANSFER": {
-                 "config": {
-                   "options": {
-                     "messageCharset": "utf8"
-                   },
-                   "rdkafkaConf": {
-                     "debug": "all",
-                     "metadata.broker.list": "$kafka_host:$kafka_port",
-                     "client.id": "cl-prod-transfer-transfer",
-                     "event_cb": true,
-                     "compression.codec": "none",
-                     "retry.backoff.ms": 100,
-                     "message.send.max.retries": 2,
-                     "socket.keepalive.enable": true,
-                     "queue.buffering.max.messages": 10000000,
-                     "batch.num.messages": 100,
-                     "dr_cb": true,
-                     "socket.blocking.max.ms": 1,
-                     "queue.buffering.max.ms": 1,
-                     "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true
-                   }
-                 }
                }
              },
              "POSITION": {
@@ -1919,7 +1762,8 @@ centralledger:
                      "socket.blocking.max.ms": 1,
                      "queue.buffering.max.ms": 1,
                      "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true
+                     "api.version.request": true,
+                     "partitioner": "random"
                    }
                  }
                }
@@ -2035,7 +1879,7 @@ centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v3.7.6-snapshot
+          tag: v3.7.7-snapshot
           pullPolicy: Always
           command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
         service:
@@ -2160,38 +2004,8 @@ centralledger:
                      "broker.version.fallback": "0.10.1.0",
                      "api.version.request": true,
                      "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
-                   },
-                   "topicConf": {
-                     "auto.offset.reset": "earliest"
-                   }
-                 }
-               },
-               "TRANSFER": {
-                 "config": {
-                   "options": {
-                     "mode": 2,
-                     "batchSize": 1,
-                     "pollFrequency": 10,
-                     "recursiveTimeout": 100,
-                     "messageCharset": "utf8",
-                     "messageAsJSON": true,
-                     "sync": true,
-                     "consumeTimeout": 1000
-                   },
-                   "rdkafkaConf": {
-                     "client.id": "cl-con-transfer-transfer",
-                     "debug": "all",
-                     "group.id": "central-ledger-kafka",
-                     "metadata.broker.list": "$kafka_host:$kafka_port",
-                     "socket.blocking.max.ms": 1,
-                     "fetch.wait.max.ms": 1,
-                     "fetch.error.backoff.ms": 1,
-                     "queue.buffering.max.ms": 1,
-                     "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true,
-                     "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
+                     "auto.commit.interval.ms": 200,
+                     "partition.assignment.strategy": "range"
                    },
                    "topicConf": {
                      "auto.offset.reset": "earliest"
@@ -2222,7 +2036,8 @@ centralledger:
                      "broker.version.fallback": "0.10.1.0",
                      "api.version.request": true,
                      "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
+                     "auto.commit.interval.ms": 200,
+                     "partition.assignment.strategy": "range"
                    },
                    "topicConf": {
                      "auto.offset.reset": "earliest"
@@ -2430,30 +2245,6 @@ centralledger:
                      "api.version.request": true
                    }
                  }
-               },
-               "TRANSFER": {
-                 "config": {
-                   "options": {
-                     "messageCharset": "utf8"
-                   },
-                   "rdkafkaConf": {
-                     "debug": "all",
-                     "metadata.broker.list": "$kafka_host:$kafka_port",
-                     "client.id": "cl-prod-transfer-transfer",
-                     "event_cb": true,
-                     "compression.codec": "none",
-                     "retry.backoff.ms": 100,
-                     "message.send.max.retries": 2,
-                     "socket.keepalive.enable": true,
-                     "queue.buffering.max.messages": 10000000,
-                     "batch.num.messages": 100,
-                     "dr_cb": true,
-                     "socket.blocking.max.ms": 1,
-                     "queue.buffering.max.ms": 1,
-                     "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true
-                   }
-                 }
                }
              },
              "POSITION": {
@@ -2551,7 +2342,8 @@ centralledger:
                      "socket.blocking.max.ms": 1,
                      "queue.buffering.max.ms": 1,
                      "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true
+                     "api.version.request": true,
+                     "partitioner": "random"
                    }
                  }
                }
@@ -2667,7 +2459,7 @@ centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v3.7.6-snapshot
+          tag: v3.7.7-snapshot
           pullPolicy: Always
           command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
         service:
@@ -2792,38 +2584,8 @@ centralledger:
                      "broker.version.fallback": "0.10.1.0",
                      "api.version.request": true,
                      "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
-                   },
-                   "topicConf": {
-                     "auto.offset.reset": "earliest"
-                   }
-                 }
-               },
-               "TRANSFER": {
-                 "config": {
-                   "options": {
-                     "mode": 2,
-                     "batchSize": 1,
-                     "pollFrequency": 10,
-                     "recursiveTimeout": 100,
-                     "messageCharset": "utf8",
-                     "messageAsJSON": true,
-                     "sync": true,
-                     "consumeTimeout": 1000
-                   },
-                   "rdkafkaConf": {
-                     "client.id": "cl-con-transfer-transfer",
-                     "debug": "all",
-                     "group.id": "central-ledger-kafka",
-                     "metadata.broker.list": "$kafka_host:$kafka_port",
-                     "socket.blocking.max.ms": 1,
-                     "fetch.wait.max.ms": 1,
-                     "fetch.error.backoff.ms": 1,
-                     "queue.buffering.max.ms": 1,
-                     "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true,
-                     "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
+                     "auto.commit.interval.ms": 200,
+                     "partition.assignment.strategy": "range"
                    },
                    "topicConf": {
                      "auto.offset.reset": "earliest"
@@ -2854,7 +2616,8 @@ centralledger:
                      "broker.version.fallback": "0.10.1.0",
                      "api.version.request": true,
                      "enable.auto.commit": false,
-                     "auto.commit.interval.ms": 200
+                     "auto.commit.interval.ms": 200,
+                     "partition.assignment.strategy": "range"
                    },
                    "topicConf": {
                      "auto.offset.reset": "earliest"
@@ -3062,30 +2825,6 @@ centralledger:
                      "api.version.request": true
                    }
                  }
-               },
-               "TRANSFER": {
-                 "config": {
-                   "options": {
-                     "messageCharset": "utf8"
-                   },
-                   "rdkafkaConf": {
-                     "debug": "all",
-                     "metadata.broker.list": "$kafka_host:$kafka_port",
-                     "client.id": "cl-prod-transfer-transfer",
-                     "event_cb": true,
-                     "compression.codec": "none",
-                     "retry.backoff.ms": 100,
-                     "message.send.max.retries": 2,
-                     "socket.keepalive.enable": true,
-                     "queue.buffering.max.messages": 10000000,
-                     "batch.num.messages": 100,
-                     "dr_cb": true,
-                     "socket.blocking.max.ms": 1,
-                     "queue.buffering.max.ms": 1,
-                     "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true
-                   }
-                 }
                }
              },
              "POSITION": {
@@ -3183,7 +2922,8 @@ centralledger:
                      "socket.blocking.max.ms": 1,
                      "queue.buffering.max.ms": 1,
                      "broker.version.fallback": "0.10.1.0",
-                     "api.version.request": true
+                     "api.version.request": true,
+                     "partitioner": "random"
                    }
                  }
                }
@@ -3299,7 +3039,7 @@ centralledger:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.7.6-snapshot
+            tag: v3.7.7-snapshot
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--get"]'
           service:
@@ -3424,7 +3164,8 @@ centralledger:
                        "broker.version.fallback": "0.10.1.0",
                        "api.version.request": true,
                        "enable.auto.commit": false,
-                       "auto.commit.interval.ms": 200
+                       "auto.commit.interval.ms": 200,
+                       "partition.assignment.strategy": "range"
                      },
                      "topicConf": {
                        "auto.offset.reset": "earliest"
@@ -3455,7 +3196,8 @@ centralledger:
                        "broker.version.fallback": "0.10.1.0",
                        "api.version.request": true,
                        "enable.auto.commit": false,
-                       "auto.commit.interval.ms": 200
+                       "auto.commit.interval.ms": 200,
+                       "partition.assignment.strategy": "range"
                      },
                      "topicConf": {
                        "auto.offset.reset": "earliest"
@@ -3791,7 +3533,8 @@ centralledger:
                        "socket.blocking.max.ms": 1,
                        "queue.buffering.max.ms": 1,
                        "broker.version.fallback": "0.10.1.0",
-                       "api.version.request": true
+                       "api.version.request": true,
+                       "partitioner": "random"
                      }
                    }
                  }
