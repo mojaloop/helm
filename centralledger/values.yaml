@@ -112,6 +112,7 @@ centralledger-service:
        "PORT": $service_api_port,
        "ADMIN_PORT": $service_admin_port,
        "HOSTNAME": "$ingress_host",
+       "RUN_MIGRATIONS": true,
        "ENABLE_TOKEN_AUTH": false,
        "ENABLE_BASIC_AUTH": false,
        "LEDGER_ACCOUNT_NAME": "LedgerName",
@@ -729,6 +730,7 @@ centralledger-handler-transfer-prepare:
      {
        "PORT": $service_api_port,
        "HOSTNAME": "$ingress_host",
+       "RUN_MIGRATIONS": false,
        "ENABLE_TOKEN_AUTH": false,
        "ENABLE_BASIC_AUTH": false,
        "LEDGER_ACCOUNT_NAME": "LedgerName",
@@ -1358,6 +1360,7 @@ centralledger-handler-transfer-position:
      {
        "PORT": $service_api_port,
        "HOSTNAME": "$ingress_host",
+       "RUN_MIGRATIONS": false,
        "ENABLE_TOKEN_AUTH": false,
        "ENABLE_BASIC_AUTH": false,
        "LEDGER_ACCOUNT_NAME": "LedgerName",
@@ -1986,6 +1989,7 @@ centralledger-handler-transfer-get:
      {
        "PORT": $service_api_port,
        "HOSTNAME": "$ingress_host",
+       "RUN_MIGRATIONS": false,
        "ENABLE_TOKEN_AUTH": false,
        "ENABLE_BASIC_AUTH": false,
        "LEDGER_ACCOUNT_NAME": "LedgerName",
@@ -2615,6 +2619,7 @@ centralledger-handler-transfer-fulfil:
      {
        "PORT": $service_api_port,
        "HOSTNAME": "$ingress_host",
+       "RUN_MIGRATIONS": false,
        "ENABLE_TOKEN_AUTH": false,
        "ENABLE_BASIC_AUTH": false,
        "LEDGER_ACCOUNT_NAME": "LedgerName",
@@ -3243,6 +3248,7 @@ centralledger-handler-timeout:
      {
        "PORT": $service_api_port,
        "HOSTNAME": "$ingress_host",
+       "RUN_MIGRATIONS": false,
        "ENABLE_TOKEN_AUTH": false,
        "ENABLE_BASIC_AUTH": false,
        "LEDGER_ACCOUNT_NAME": "LedgerName",
@@ -3827,8 +3833,8 @@ forensicloggingsidecar:
 
     annotations: {}
 
-    # This allows one to point the service to an external backend. 
-    # This is useful for local development where one wishes to hijack 
+    # This allows one to point the service to an external backend.
+    # This is useful for local development where one wishes to hijack
     # the communication from the service to the node layer and point
     # to a specific endpoint (IP, Port, etc).
     external:
@@ -3836,7 +3842,7 @@ forensicloggingsidecar:
       # 10.0.2.2 is the magic IP for the host on virtualbox's network
       ip: 10.0.2.2
       ports:
-        api: 
+        api:
           name: http-api-and-ws
           externalPort: 5678
 
@@ -3849,18 +3855,18 @@ forensicloggingsidecar:
     enabled: true
     initialDelaySeconds: 90
     periodSeconds: 15
-    
+
   ingress:
     enabled: false
     # Used to create an Ingress record.
     hosts:
       api: forensic-logging-sidecar.local
-    
+
     externalPath: /
 
     annotations:
       # kubernetes.io/ingress.class: nginx
-      
+
     tls:
       # Secrets must be manually created in the namespace.
       # - secretName: chart-example-tls
@@ -3910,9 +3916,9 @@ forensicloggingsidecar:
       internalPort: 8080
 
       annotations: {}
-      
-      # This allows one to point the service to an external backend. 
-      # This is useful for local development where one wishes to hijack 
+
+      # This allows one to point the service to an external backend.
+      # This is useful for local development where one wishes to hijack
       # the communication from the service to the node layer and point
       # to a specific endpoint (IP, Port, etc).
       external:
@@ -3920,7 +3926,7 @@ forensicloggingsidecar:
         # 10.0.2.2 is the magic IP for the host on virtualbox's network
         ip: 10.0.2.2
         ports:
-          api: 
+          api:
             name: http-api-and-tcp-websocket
             externalPort: 8080
 
@@ -3937,17 +3943,17 @@ forensicloggingsidecar:
         path: /sidecars
       initialDelaySeconds: 30
       periodSeconds: 5
-      
+
     ingress:
       enabled: true
       # Used to create an Ingress record.
       hosts:
         - central-kms.local
       externalPath: /
-      
+
       annotations:
         # kubernetes.io/ingress.class: nginx
-      
+
       tls:
         # Secrets must be manually created in the namespace.
         # - secretName: chart-example-tls
@@ -3967,7 +3973,7 @@ forensicloggingsidecar:
       #  memory: 128Mi
 
     postgresql:
-      enabled: true 
+      enabled: true
       nameOverride: "centralkms-postgresql"
       ## Create a database user
       postgresUser: kms
