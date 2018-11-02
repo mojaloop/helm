@@ -14,6 +14,11 @@ spec:
         chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}
+      {{- if .Values.metrics.enabled }}
+      annotations:
+        prometheus.io/port: "{{ .Values.containers.api.service.ports.api.internalPort }}"
+        prometheus.io/scrape: "true"
+      {{- end }}
     spec:
 {{- if .Values.global.config.affinity }}
       affinity:
