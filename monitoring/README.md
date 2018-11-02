@@ -9,3 +9,6 @@
 
 `helm install --namespace=monitoring --name=graf stable/grafana -f grafana-perf1-values.yaml`
 
+## Add Network Policy to allow for all Ingresses into the Perf1 Test environment from the Internal K8s Network
+
+`kubectl create -f k8s-network-policy.yaml` 
