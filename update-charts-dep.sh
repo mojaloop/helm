@@ -28,9 +28,9 @@ echo "Updating Central-Ledger..."
 helm dep up ./centralledger
 checkCommandResult
 
-echo "Updating Central Hub..."
-helm dep up ./centralhub
-checkCommandResult
+#echo "Updating Central Hub..."
+#helm dep up ./centralhub
+#checkCommandResult
 
 echo "Updating Mock Pathfinder..."
 helm dep up ./mockpathfinder

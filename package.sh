@@ -28,9 +28,9 @@ echo "Packaging Central-Ledger..."
 helm package -u -d ./repo ./centralledger 
 checkCommandResult 
  
-echo "Packaging Central Hub..." 
-helm package -u -d ./repo ./centralhub 
-checkCommandResult 
+#echo "Packaging Central Hub..."
+#helm package -u -d ./repo ./centralhub
+#checkCommandResult
  
 echo "Packaging Mock Pathfinder..." 
 helm package -u -d ./repo ./mockpathfinder 
