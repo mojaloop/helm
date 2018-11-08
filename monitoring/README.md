@@ -11,7 +11,7 @@
 
 ## Install Heapster
 
-`helm install --namespace=monitoring --name=heap stable/heapster -f heapster-values.yaml`
+`helm install --namespace=kube-system --name=heap stable/heapster -f heapster-values.yaml`
 
 Note that the affinity and tolerations are not being set correctly by the helm chart. One must manually set this in the deployment if desired until the issue is resolved.
 
@@ -35,9 +35,6 @@ Note that the affinity and tolerations are not being set correctly by the helm c
             }
           }
         },
-```
-
-```YAML
         "tolerations": [
           {
             "key": "dedicated",
