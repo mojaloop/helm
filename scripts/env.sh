@@ -15,27 +15,33 @@ export FSPList=("payerfsp" "payeefsp" "dfsp1" "dfsp2" "dfsp3" "dfsp4" "mockfsp1"
 export DEFAULT_NET_DEBIT_CAP=10000000
 export CENTRAL_LEDGER_HOST=perf1-central-ledger.mojaloop.live
 
+#export MOCK_HOST=ec2-35-178-158-3.eu-west-2.compute.amazonaws.com
+#export MOCK_PORT=8080
+#exoprt MOCK_HOST=mock-server
+export MOCK_HOST=sim-simulators
+export MOCK_PORT=80
+
 export FSP1=dfsp1
-export FSP1_HOST=ec2-35-178-158-3.eu-west-2.compute.amazonaws.com
-export FSP1_PORT=8080
+export FSP1_HOST=$MOCK_HOST
+export FSP1_PORT=$MOCK_PORT
 export FSP1_URL_PREFIX=http
 export FSP1_BASE_URL=
 
 export FSP2=dfsp2
-export FSP2_HOST=ec2-35-178-158-3.eu-west-2.compute.amazonaws.com
-export FSP2_PORT=8080
+export FSP2_HOST=$MOCK_HOST
+export FSP1_PORT=$MOCK_PORT
 export FSP2_URL_PREFIX=http
 export FSP2_BASE_URL=
 
 export FSP3=dfsp3
-export FSP3_HOST=ec2-52-56-183-65.eu-west-2.compute.amazonaws.com
-export FSP3_PORT=8080
+export FSP3_HOST=$MOCK_HOST
+export FSP1_PORT=$MOCK_PORT
 export FSP3_URL_PREFIX=http
 export FSP3_BASE_URL=
 
 export FSP4=dfsp4
-export FSP4_HOST=ec2-52-56-183-65.eu-west-2.compute.amazonaws.com
-export FSP4_PORT=8080
+export FSP4_HOST=$MOCK_HOST
+export FSP1_PORT=$MOCK_PORT
 export FSP4_URL_PREFIX=http
 export FSP4_BASE_URL=
 
