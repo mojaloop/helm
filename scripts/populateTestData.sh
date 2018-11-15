@@ -77,7 +77,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_POST\",
-    \"value\": \"${FSP1_URL_PREFIX}://${FSP1_HOST}:${FSP1_PORT}/transfers\"
+    \"value\": \"${FSP1_URL_PREFIX}://${FSP1_HOST}:${FSP1_PORT}${FSP1_BASE_URL}/transfers\"
   }'"
 
   sh -c "curl -X POST \
@@ -86,7 +86,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_PUT\",
-    \"value\": \"${FSP1_URL_PREFIX}://${FSP1_HOST}:${FSP1_PORT}/transfers/{{transferId}}\"
+    \"value\": \"${FSP1_URL_PREFIX}://${FSP1_HOST}:${FSP1_PORT}${FSP1_BASE_URL}/transfers/{{transferId}}\"
   }'"
 
   sh -c "curl -X POST \
@@ -95,7 +95,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_ERROR\",
-    \"value\": \"${FSP1_URL_PREFIX}://${FSP1_HOST}:${FSP1_PORT}/transfers/{{transferId}}/error\"
+    \"value\": \"${FSP1_URL_PREFIX}://${FSP1_HOST}:${FSP1_PORT}${FSP1_BASE_URL}/transfers/{{transferId}}/error\"
   }'"
 
   echo
@@ -107,7 +107,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_POST\",
-    \"value\": \"${FSP2_URL_PREFIX}://${FSP2_HOST}:${FSP2_PORT}/transfers\"
+    \"value\": \"${FSP2_URL_PREFIX}://${FSP2_HOST}:${FSP2_PORT}${FSP2_BASE_URL}/transfers\"
   }'"
 
   sh -c "curl -X POST \
@@ -116,7 +116,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_PUT\",
-    \"value\": \"${FSP2_URL_PREFIX}://${FSP2_HOST}:${FSP2_PORT}/transfers/{{transferId}}\"
+    \"value\": \"${FSP2_URL_PREFIX}://${FSP2_HOST}:${FSP2_PORT}${FSP2_BASE_URL}/transfers/{{transferId}}\"
   }'"
 
   sh -c "curl -X POST \
@@ -125,7 +125,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_ERROR\",
-    \"value\": \"${FSP2_URL_PREFIX}://${FSP2_HOST}:${FSP2_PORT}/transfers/{{transferId}}/error\"
+    \"value\": \"${FSP2_URL_PREFIX}://${FSP2_HOST}:${FSP2_PORT}${FSP2_BASE_URL}/transfers/{{transferId}}/error\"
   }'"
 
   echo
@@ -137,7 +137,7 @@ done
       -H 'Content-Type: application/json' \
       -d '{
       \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_POST\",
-      \"value\": \"${FSP3_URL_PREFIX}://${FSP3_HOST}:${FSP3_PORT}/transfers\"
+      \"value\": \"${FSP3_URL_PREFIX}://${FSP3_HOST}:${FSP3_PORT}${FSP3_BASE_URL}/transfers\"
     }'"
 
     sh -c "curl -X POST \
@@ -146,7 +146,7 @@ done
       -H 'Content-Type: application/json' \
       -d '{
       \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_PUT\",
-      \"value\": \"${FSP3_URL_PREFIX}://${FSP3_HOST}:${FSP3_PORT}/transfers/{{transferId}}\"
+      \"value\": \"${FSP3_URL_PREFIX}://${FSP3_HOST}:${FSP3_PORT}${FSP3_BASE_URL}/transfers/{{transferId}}\"
     }'"
 
     sh -c "curl -X POST \
@@ -155,7 +155,7 @@ done
       -H 'Content-Type: application/json' \
       -d '{
       \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_ERROR\",
-      \"value\": \"${FSP3_URL_PREFIX}://${FSP3_HOST}:${FSP3_PORT}/transfers/{{transferId}}/error\"
+      \"value\": \"${FSP3_URL_PREFIX}://${FSP3_HOST}:${FSP3_PORT}${FSP3_BASE_URL}/transfers/{{transferId}}/error\"
     }'"
 
     echo
@@ -167,7 +167,7 @@ done
       -H 'Content-Type: application/json' \
       -d '{
       \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_POST\",
-      \"value\": \"${FSP4_URL_PREFIX}://${FSP4_HOST}:${FSP4_PORT}/transfers\"
+      \"value\": \"${FSP4_URL_PREFIX}://${FSP4_HOST}:${FSP4_PORT}${FSP4_BASE_URL}/transfers\"
     }'"
 
     sh -c "curl -X POST \
@@ -176,7 +176,7 @@ done
       -H 'Content-Type: application/json' \
       -d '{
       \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_PUT\",
-      \"value\": \"${FSP4_URL_PREFIX}://${FSP4_HOST}:${FSP4_PORT}/transfers/{{transferId}}\"
+      \"value\": \"${FSP4_URL_PREFIX}://${FSP4_HOST}:${FSP4_PORT}${FSP4_BASE_URL}/transfers/{{transferId}}\"
     }'"
 
     sh -c "curl -X POST \
@@ -185,7 +185,7 @@ done
       -H 'Content-Type: application/json' \
       -d '{
       \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_ERROR\",
-      \"value\": \"${FSP4_URL_PREFIX}://${FSP4_HOST}:${FSP4_PORT}/transfers/{{transferId}}/error\"
+      \"value\": \"${FSP4_URL_PREFIX}://${FSP4_HOST}:${FSP4_PORT}${FSP4_BASE_URL}/transfers/{{transferId}}/error\"
     }'"
 
   echo
@@ -197,7 +197,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_POST\",
-    \"value\": \"${MOCK_FSP_URL_PREFIX}://${MOCK_FSP_HOST}:${MOCK_FSP_PORT}/${MOCK_FSP_BASE_URL}/transfers\"
+    \"value\": \"${MOCK_FSP_URL_PREFIX}://${MOCK_FSP_HOST}:${MOCK_FSP_PORT}${MOCK_FSP_BASE_URL}/transfers\"
   }'"
 
   sh -c "curl -X POST \
@@ -206,7 +206,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_PUT\",
-    \"value\": \"${MOCK_FSP_URL_PREFIX}://${MOCK_FSP_HOST}:${MOCK_FSP_PORT}/${MOCK_FSP_BASE_URL}/transfers/{{transferId}}\"
+    \"value\": \"${MOCK_FSP_URL_PREFIX}://${MOCK_FSP_HOST}:${MOCK_FSP_PORT}${MOCK_FSP_BASE_URL}/transfers/{{transferId}}\"
   }'"
 
   sh -c "curl -X POST \
@@ -215,7 +215,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_ERROR\",
-    \"value\": \"${MOCK_FSP_URL_PREFIX}://${MOCK_FSP_HOST}:${MOCK_FSP_PORT}/${MOCK_FSP_BASE_URL}/transfers/{{transferId}}/error\"
+    \"value\": \"${MOCK_FSP_URL_PREFIX}://${MOCK_FSP_HOST}:${MOCK_FSP_PORT}${MOCK_FSP_BASE_URL}/transfers/{{transferId}}/error\"
   }'"
 
   echo
@@ -227,7 +227,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_POST\",
-    \"value\": \"${MOCK_FSP_URL_PREFIX}://${MOCK_FSP_HOST}:${MOCK_FSP_PORT}/${MOCK_FSP_BASE_URL}/transfers\"
+    \"value\": \"${MOCK_FSP_URL_PREFIX}://${MOCK_FSP_HOST}:${MOCK_FSP_PORT}${MOCK_FSP_BASE_URL}/transfers\"
   }'"
 
   sh -c "curl -X POST \
@@ -236,7 +236,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_PUT\",
-    \"value\": \"${MOCK_FSP_URL_PREFIX}://${MOCK_FSP_HOST}:${MOCK_FSP_PORT}/${MOCK_FSP_BASE_URL}/transfers/{{transferId}}\"
+    \"value\": \"${MOCK_FSP_URL_PREFIX}://${MOCK_FSP_HOST}:${MOCK_FSP_PORT}${MOCK_FSP_BASE_URL}/transfers/{{transferId}}\"
   }'"
 
   sh -c "curl -X POST \
@@ -245,7 +245,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_ERROR\",
-    \"value\": \"${MOCK_FSP_URL_PREFIX}://${MOCK_FSP_HOST}:${MOCK_FSP_PORT}/${MOCK_FSP_BASE_URL}/transfers/{{transferId}}/error\"
+    \"value\": \"${MOCK_FSP_URL_PREFIX}://${MOCK_FSP_HOST}:${MOCK_FSP_PORT}${MOCK_FSP_BASE_URL}/transfers/{{transferId}}/error\"
   }'"
 
   echo
@@ -257,7 +257,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_POST\",
-    \"value\": \"${FSP7_URL_PREFIX}://${FSP7_HOST}:${FSP7_PORT}/${FSP7_BASE_URL}/transfers\"
+    \"value\": \"${FSP7_URL_PREFIX}://${FSP7_HOST}:${FSP7_PORT}${FSP7_BASE_URL}/transfers\"
   }'"
 
   sh -c "curl -X POST \
@@ -266,7 +266,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_PUT\",
-    \"value\": \"${FSP7_URL_PREFIX}://${FSP7_HOST}:${FSP7_PORT}/${FSP7_BASE_URL}/transfers/{{transferId}}\"
+    \"value\": \"${FSP7_URL_PREFIX}://${FSP7_HOST}:${FSP7_PORT}${FSP7_BASE_URL}/transfers/{{transferId}}\"
   }'"
 
   sh -c "curl -X POST \
@@ -275,7 +275,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_ERROR\",
-    \"value\": \"${FSP7_URL_PREFIX}://${FSP7_HOST}:${FSP7_PORT}/${FSP7_BASE_URL}/transfers/{{transferId}}/error\"
+    \"value\": \"${FSP7_URL_PREFIX}://${FSP7_HOST}:${FSP7_PORT}${FSP7_BASE_URL}/transfers/{{transferId}}/error\"
   }'"
 
   echo
@@ -287,7 +287,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_POST\",
-    \"value\": \"${FSP8_URL_PREFIX}://${FSP8_HOST}:${FSP8_PORT}/${FSP8_BASE_URL}/transfers\"
+    \"value\": \"${FSP8_URL_PREFIX}://${FSP8_HOST}:${FSP8_PORT}${FSP8_BASE_URL}/transfers\"
   }'"
 
   sh -c "curl -X POST \
@@ -296,7 +296,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_PUT\",
-    \"value\": \"${FSP8_URL_PREFIX}://${FSP8_HOST}:${FSP8_PORT}/${FSP8_BASE_URL}/transfers/{{transferId}}\"
+    \"value\": \"${FSP8_URL_PREFIX}://${FSP8_HOST}:${FSP8_PORT}${FSP8_BASE_URL}/transfers/{{transferId}}\"
   }'"
 
   sh -c "curl -X POST \
@@ -305,7 +305,7 @@ done
     -H 'Content-Type: application/json' \
     -d '{
     \"type\": \"FSPIOP_CALLBACK_URL_TRANSFER_ERROR\",
-    \"value\": \"${FSP8_URL_PREFIX}://${FSP8_HOST}:${FSP8_PORT}/${FSP8_BASE_URL}/transfers/{{transferId}}/error\"
+    \"value\": \"${FSP8_URL_PREFIX}://${FSP8_HOST}:${FSP8_PORT}${FSP8_BASE_URL}/transfers/{{transferId}}/error\"
   }'"
 
 

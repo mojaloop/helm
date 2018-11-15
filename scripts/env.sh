@@ -20,30 +20,31 @@ export CENTRAL_LEDGER_HOST=perf1-central-ledger.mojaloop.live
 #exoprt MOCK_HOST=mock-server
 export MOCK_HOST=sim-simulators
 export MOCK_PORT=80
+export MOCK_BASE_URL=/payeefsp
 
 export FSP1=dfsp1
 export FSP1_HOST=$MOCK_HOST
 export FSP1_PORT=$MOCK_PORT
 export FSP1_URL_PREFIX=http
-export FSP1_BASE_URL=
+export FSP1_BASE_URL=$MOCK_BASE_URL
 
 export FSP2=dfsp2
 export FSP2_HOST=$MOCK_HOST
-export FSP1_PORT=$MOCK_PORT
+export FSP2_PORT=$MOCK_PORT
 export FSP2_URL_PREFIX=http
-export FSP2_BASE_URL=
+export FSP2_BASE_URL=$MOCK_BASE_URL
 
 export FSP3=dfsp3
 export FSP3_HOST=$MOCK_HOST
-export FSP1_PORT=$MOCK_PORT
+export FSP3_PORT=$MOCK_PORT
 export FSP3_URL_PREFIX=http
-export FSP3_BASE_URL=
+export FSP3_BASE_URL=$MOCK_BASE_URL
 
 export FSP4=dfsp4
 export FSP4_HOST=$MOCK_HOST
-export FSP1_PORT=$MOCK_PORT
+export FSP4_PORT=$MOCK_PORT
 export FSP4_URL_PREFIX=http
-export FSP4_BASE_URL=
+export FSP4_BASE_URL=$MOCK_BASE_URL
 
 export FSP5=mockfsp1
 export FSP6=mockfsp2
