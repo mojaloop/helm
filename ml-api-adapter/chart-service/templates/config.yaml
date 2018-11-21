@@ -10,4 +10,9 @@ metadata:
       release: {{ .Release.Name }}
       heritage: {{ .Release.Service }}
 data:
+
+  {{- if not .Values.global.config.externalKafka }}
   default.json: {{ (.Values.config.default_json | replace "$ingress_host" .Values.ingress.hosts.api |  replace "$ingress_port" (printf "%.0f" .Values.service.externalPort) | replace "$kafka_host" $kafkaHost | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) | replace "$central_services_host" $centralServicesHost | replace "$central_services_port" (printf "%.0f" .Values.config.central_services_port)  ) | quote }}
+  {{- else }}
+  default.json: {{ (.Values.config.default_json | replace "$ingress_host" .Values.ingress.hosts.api |  replace "$ingress_port" (printf "%.0f" .Values.service.externalPort) | replace "$kafka_host" .Values.config.kafka_host | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) | replace "$central_services_host" $centralServicesHost | replace "$central_services_port" (printf "%.0f" .Values.config.central_services_port)  ) | quote }}
+  {{- end }}

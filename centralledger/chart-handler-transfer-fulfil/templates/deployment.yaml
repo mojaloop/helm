@@ -44,7 +44,11 @@ spec:
           command:
             - sh
             - "-c"
+            {{- if not .Values.global.config.externalKafka }}
             - {{ (.Values.init.kafka.command | replace "$kafka_host" $kafkaHost | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) ) | quote }}
+            {{- else }}
+            - {{ (.Values.init.kafka.command | replace "$kafka_host" .Values.config.kafka_host | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) ) | quote }}
+            {{- end }}
           env:
           {{- range $envItem := .Values.init.kafka.env }}
             - name: {{ $envItem.name }}
