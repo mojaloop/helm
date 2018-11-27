@@ -13,9 +13,12 @@ function checkCommandResult () {
         exit 1 
     fi 
 } 
- 
+
+echo "Removing old charts..."
+find ./ -name "charts"| xargs rm -Rf
+
 mkdir ./repo 
- 
+
 echo "Packaging Central-KMS..." 
 helm package -u -d ./repo ./centralkms 
 checkCommandResult 
