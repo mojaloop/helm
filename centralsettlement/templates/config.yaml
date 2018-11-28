@@ -1,4 +1,4 @@
-{{- $dbDeployHost := printf "%s-%s" .Release.Name .Values.config.db_host -}}
+{{- $dbHost := (.Values.config.db_host | replace "$release_name" .Release.Name) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,7 +10,7 @@ metadata:
       heritage: {{ .Release.Service }}
 data:
   default.json: |
-    {{ .Values.config.default_json | replace "$service_api_port" (printf "%.0f" .Values.service.ports.api.internalPort) | replace "$dbdriver" .Values.config.db_type | replace "$dbuser" .Values.config.db_user | replace "$dbpassword" .Values.config.db_password | replace "$dbhost" $dbDeployHost | replace "$dbport" (printf "%.0f" .Values.config.db_port) | replace "$dbname" .Values.config.db_database }}
+    {{ .Values.config.default_json | replace "$service_api_port" (printf "%.0f" .Values.service.ports.api.internalPort) | replace "$dbdriver" .Values.config.db_type | replace "$dbuser" .Values.config.db_user | replace "$dbpassword" .Values.config.db_password | replace "$dbhost" $dbHost | replace "$dbport" (printf "%.0f" .Values.config.db_port) | replace "$dbname" .Values.config.db_database }}
   
 #  knexfile.js: |
 #    'use strict'
