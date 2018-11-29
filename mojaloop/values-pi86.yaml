@@ -36,7 +36,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.9.0-performance
+            tag: v3.9.1-performance
             pullPolicy: Always
             command: '["node", "src/api/index.js"]'
           service:
@@ -49,19 +49,19 @@ central:
             enabled: true
             httpGet:
               path: /health
-            initialDelaySeconds: 120
+            initialDelaySeconds: 30
             periodSeconds: 15
           livenessProbe:
             enabled: true
             httpGet:
               path: /health
-            initialDelaySeconds: 90
+            initialDelaySeconds: 20
             periodSeconds: 15
 
         admin:
           image:
             repository: mojaloop/central-ledger
-            tag: v3.9.0-performance
+            tag: v3.9.1-performance
             pullPolicy: Always
             command: '["node", "src/admin/index.js"]'
           service:
@@ -74,13 +74,13 @@ central:
             enabled: true
             httpGet:
               path: /health
-            initialDelaySeconds: 120
+            initialDelaySeconds: 30
             periodSeconds: 15
           livenessProbe:
             enabled: true
             httpGet:
               path: /health
-            initialDelaySeconds: 90
+            initialDelaySeconds: 20
             periodSeconds: 15
 
       metrics:
@@ -132,7 +132,7 @@ central:
              "SCALE": 2
            },
            "SIDECAR": {
-             "DISABLED": false,
+             "DISABLED": true,
              "HOST": "$forensicloggingsidecar_host",
              "PORT": $forensicloggingsidecar_port,
              "CONNECT_TIMEOUT": 45000,
@@ -834,7 +834,7 @@ central:
              "SCALE": 2
            },
            "SIDECAR": {
-             "DISABLED": false,
+             "DISABLED": true,
              "HOST": "$forensicloggingsidecar_host",
              "PORT": $forensicloggingsidecar_port,
              "CONNECT_TIMEOUT": 45000,
@@ -1366,7 +1366,7 @@ central:
       # This is a YAML-formatted file.
 
       # Declare variables to be passed into your templates.
-      enabled: false
+      enabled: true
       replicaCount: 1
       containers:
         api:
@@ -2926,7 +2926,8 @@ central:
 
       ## Specify password for root user
       ##
-      # mysqlRootPassword: not-a-secure-password
+      mysqlRootPassword: thisIsAPassword
+
 
       ## Specify password for xtradb backup user
       ##
@@ -3043,7 +3044,9 @@ central:
       image: "confluentinc/cp-kafka"
 
       ## The kafka image tag
-      imageTag: "5.0.0-2"
+      # latest confluentinc version
+      # imageTag: "5.0.0-2"
+      imageTag: "4.0.1-1"
 
       ## Specify a imagePullPolicy
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
