@@ -4,7 +4,7 @@ metadata:
   name: {{ include "emailnotifier.fullname" . }}
   labels:
     app.kubernetes.io/name: {{ include "emailnotifier.name" . }}
-    helm.sh/chart: {{ include "emailnotifier.chart" . }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
@@ -41,17 +41,13 @@ spec:
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
-          resources:
-{{ toYaml .Values.resources | indent 12 }}
-    {{- with .Values.nodeSelector }}
-      nodeSelector:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.affinity }}
-      affinity:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.tolerations }}
-      tolerations:
-{{ toYaml . | indent 8 }}
-    {{- end }}
+          volumeMounts:
+            - name: {{ template "emailnotifier.fullname" . }}-config-volume
+              mountPath: /opt/email-notifier/config
+      volumes:
+        - name: {{ template "emailnotifier.fullname" . }}-config-volume
+          configMap:
+            name: {{ template "emailnotifier.fullname" . }}
+            items:
+              - key: default.json
+                path: default.json

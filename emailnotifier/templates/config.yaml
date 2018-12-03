@@ -9,6 +9,4 @@ metadata:
       release: {{ .Release.Name }}
       heritage: {{ .Release.Service }}
 data:
-  server.host: {{ .Values.ingress.hosts.api | quote }}
-  server.port: {{ .Values.containers.api.service.ports.api.internalPort | quote }}
-  default.json: {{ (.Values.config.default_json | replace "$service_api_port" (printf "%.0f" .Values.containers.api.service.ports.api.internalPort) | replace "$ingress_host" .Values.ingress.hosts.api | replace "$kafka_host" (default .Values.config.kafka_host $kafkaHost) | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) ) | replace "$email_pass" (.Values.config.email.pass) | replace "$email_user" (.Values.config.email.user) |replace "$email_secure_connection" (.Values.config.email.secure_connection) | replace "$email_tls_ciphers" (.Values.config.email.ciphers) | replace "$port" (printf "%.0f" .Values.config.healthCheckPort) | replace "$email_port" (printf "%.0f" .Values.config.email.port) | quote}}
+  default.json: {{ (.Values.config.default_json | replace "$ingress_host" .Values.ingress.hosts.api | replace "$kafka_host" (default .Values.config.kafka_host $kafkaHost) | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) ) | replace "$email_pass" (.Values.config.email.pass) | replace "$email_user" (.Values.config.email.user) | replace "$email_tls_ciphers" (.Values.config.email.ciphers) | replace "$email_port" (printf "%.0f" .Values.config.email.port) | replace "$port" (printf "%.0f" .Values.config.healthCheckPort) | quote}}
