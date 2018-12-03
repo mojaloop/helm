@@ -1,0 +1,12 @@
+{{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "emailnotifier.fullname" . }}
+  labels:
+      app: {{ template "emailnotifier.fullname" . }}
+      chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
+data:
+  default.json: {{ .Values.config.default_json | replace "$ingress_host" .Values.ingress.hosts.api | replace "$kafka_host" (default .Values.config.kafka_host $kafkaHost) | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) | replace "$email_pass" (.Values.config.email.pass) | replace "$email_user" (.Values.config.email.user) | replace "$email_tls_ciphers" (.Values.config.email.ciphers) | replace "$email_port" (printf "%.0f" .Values.config.email.port) | replace "$port" (printf "%.0f" .Values.config.healthCheckPort) | quote }}
