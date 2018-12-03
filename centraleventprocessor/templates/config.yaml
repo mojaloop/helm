@@ -1,0 +1,16 @@
+{{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
+{{- $mongodbHost := ( .Values.config.mongo_host | replace "$release_name" .Release.Name ) -}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "centraleventprocessor.fullname" . }}
+  labels:
+      app: {{ template "centraleventprocessor.fullname" . }}
+      chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
+data:
+  default.json: {{ .Values.config.default_json | replace "$ingress_host" .Values.ingress.hosts.api | replace "$kafka_host" (default .Values.config.kafka_host $kafkaHost) | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) | replace "$mongo_host" (default .Values.config.mongo_host $mongodbHost) | replace "$mongo_port" (printf "%.0f" .Values.config.mongo_port) | replace "$mongo_database" .Values.config.mongo_database|  replace "$port" (printf "%.0f" .Values.config.healthCheckPort) | quote}}
+
+  
