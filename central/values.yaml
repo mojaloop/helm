@@ -6186,3 +6186,460 @@ emailnotifier:
     # requests:
     #  cpu: 100m
     #  memory: 128Mi
+centraleventprocessor:
+  replicaCount: 1
+  image:
+    repository: mojaloop/central-event-processor
+    tag: v0.1
+    pullPolicy: Always
+
+  service:
+    name: central-event-processor
+    type: ClusterIP
+    externalPort: 3080
+    internalPort: 3080
+
+    annotations: {}
+
+    # This allows one to point the service to an external backend. 
+    # This is useful for local development where one wishes to hijack 
+    # the communication from the service to the node layer and point
+    # to a specific endpoint (IP, Port, etc).
+    external:
+      enabled: false
+      # 10.0.2.2 is the magic IP for the host on virtualbox's network
+      ip: 10.0.2.2
+      ports:
+        api: 
+          name: central-event-processor
+          externalPort: 3080
+
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /healthcheck
+    initialDelaySeconds: 30
+    periodSeconds: 15
+
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /healthcheck
+    initialDelaySeconds: 30
+    periodSeconds: 15
+
+  ingress:
+    enabled: true
+    # Used to create an Ingress record.
+    hosts:
+      api: central-event-processor.local
+    
+    externalPath: /
+    
+    annotations:
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    
+    tls:
+      # Secrets must be manually created in the namespace.
+      # - secretName: chart-example-tls
+      #   hosts:
+      #     - chart-example.local
+
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+
+  config:
+    ## Kafka Configuration
+    # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+    kafka_host: '$release_name-kafka'
+    kafka_port: 9092
+    healthCheckPort: 3080
+    mongo_host: '$release_name-mongodb'
+    mongo_port: 27017
+    mongo_database: 'mojaloop'
+    
+    ## App Configuration Template
+    # default_json config for nodejs. The following variables will be injected by the helm chart (see config.yaml): $service_api_port, $service_admin_port, $ingress_host, $forensicloggingsidecar_host, $forensicloggingsidecar_port, $kafka_host, $kafka_port
+
+    default_json: |
+      {
+        "notificationMinutes": {
+          "resetPeriod": 60,
+          "notificationInterval": 3
+        },
+        "swaggerOptions": {
+          "info": {
+            "title": "Central notification system API Documentation",
+            "description": "Api Documentation for central-notification"
+          },
+          "expanded": "full"
+        },
+        "mongo": {
+          "uri": "$mongo_host:$mongo_port",
+          "database": "$mongo_database",
+          "ruleCollection": "Rule",
+          "netDebitCapPositionCollection": "NDCPosition",
+          "actionCollection": "Actions",
+          "eventCollection": "Events",
+          "limitCollection": "Limits",
+          "notificationEndpointCollection": "NotificationEndpoints"
+        },
+        "KAFKA": {
+          "TOPIC_TEMPLATES": {
+            "NOTIFICATION_TOPIC_TEMPLATE": {
+              "TEMPLATE": "topic-notification-event",
+              "REGEX": "topic-notification-event"
+            },
+            "GENERAL_TOPIC_TEMPLATE": {
+              "TEMPLATE": "topic-{{functionality}}-{{action}}",
+              "REGEX": "topic-(.*)-(.*)"
+            }
+          },
+          "CONSUMER": {
+            "NOTIFICATION": {
+              "EVENT": {
+                "config": {
+                  "options": {
+                    "mode": 2,
+                    "batchSize": 1,
+                    "recursiveTimeout": 100,
+                    "messageCharset": "utf8",
+                    "messageAsJSON": true,
+                    "sync": true,
+                    "consumeTimeout": 1000
+                  },
+                  "rdkafkaConf": {
+                    "client.id": "cep-con-notification-event",
+                    "group.id": "notifier",
+                    "metadata.broker.list": "$kafka_host:$kafka_port",
+                    "socket.blocking.max.ms": 1,
+                    "fetch.wait.max.ms": 1,
+                    "fetch.error.backoff.ms": 1,
+                    "queue.buffering.max.ms": 1,
+                    "broker.version.fallback": "0.10.1.0",
+                    "api.version.request": true,
+                    "enable.auto.commit": false,
+                    "auto.commit.interval.ms": 200,
+                    "socket.keepalive.enable": true,
+                    "socket.max.fails": 1
+                  },
+                  "topicConf": {
+                    "auto.offset.reset": "earliest"
+                  }
+                }
+              }
+            }
+          },
+          "PRODUCER": {
+            "NOTIFICATION": {
+              "EVENT": {
+                "config": {
+                  "options": {
+                    "messageCharset": "utf8"
+                  },
+                  "rdkafkaConf": {
+                    "debug": "all",
+                    "metadata.broker.list": "$kafka_host:$kafka_port",
+                    "client.id": "cep-prod-notification-event",
+                    "event_cb": true,
+                    "compression.codec": "none",
+                    "retry.backoff.ms": 100,
+                    "message.send.max.retries": 2,
+                    "socket.keepalive.enable": true,
+                    "queue.buffering.max.messages": 10000000,
+                    "batch.num.messages": 100,
+                    "dr_cb": true,
+                    "socket.blocking.max.ms": 1,
+                    "queue.buffering.max.ms": 1,
+                    "broker.version.fallback": "0.10.1.0",
+                    "api.version.request": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "healthCheckPort": $port
+      }
+
+  mongodb:
+  ## Global Docker image registry
+  ## Please, note that this will override the image registry for all the images, including dependencies, configured to use the global value
+  ##
+  # global:
+  #   imageRegistry:
+    enabled: true
+    nameOverride: mongodb
+
+    image:
+      ## Bitnami MongoDB registry
+      ##
+      registry: docker.io
+      ## Bitnami MongoDB image name
+      ##
+      repository: bitnami/mongodb
+      ## Bitnami MongoDB image tag
+      ## ref: https://hub.docker.com/r/bitnami/mongodb/tags/
+      ##
+      tag: 4.0.3
+
+      ## Specify a imagePullPolicy
+      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
+      pullPolicy: Always
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ##
+      # pullSecrets:
+      #   - myRegistrKeySecretName
+
+    ## Enable authentication
+    ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
+    #
+    usePassword: false
+    # existingSecret: name-of-existing-secret
+
+    ## MongoDB admin password
+    ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
+    ##
+    # mongodbRootPassword:
+
+    ## MongoDB custom user and database
+    ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run
+    ##
+    # mongodbUsername: username
+    # mongodbPassword: password
+    # mongodbDatabase: database
+
+
+    ## Whether enable/disable IPv6 on MongoDB
+    ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#enabling/disabling-ipv6
+    ##
+    mongodbEnableIPv6: true
+
+    ## MongoDB additional command line flags
+    ##
+    ## Can be used to specify command line flags, for example:
+    ##
+    ## mongodbExtraFlags:
+    ##  - "--wiredTigerCacheSizeGB=2"
+    mongodbExtraFlags: []
+
+    ## Pod Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    ##
+    securityContext:
+      enabled: true
+      fsGroup: 1001
+      runAsUser: 1001
+
+    ## Kubernetes Cluster Domain
+    clusterDomain: cluster.local
+
+    ## Kubernetes service type
+    service:
+      annotations: {}
+      type: ClusterIP
+      # clusterIP: None
+      port: 27017
+
+      ## Specify the nodePort value for the LoadBalancer and NodePort service types.
+      ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+      ##
+      # nodePort:
+
+    ## Setting up replication
+    ## ref: https://github.com/bitnami/bitnami-docker-mongodb#setting-up-a-replication
+    #
+    replicaSet:
+      ## Whether to create a MongoDB replica set for high availability or not
+      enabled: false
+      useHostnames: true
+
+      ## Name of the replica set
+      ##
+      name: rs0
+
+      ## Key used for replica set authentication
+      ##
+      # key: key
+
+      ## Number of replicas per each node type
+      ##
+      replicas:
+        secondary: 1
+        arbiter: 1
+      ## Pod Disruption Budget
+      ## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
+      pdb:
+        minAvailable:
+          primary: 1
+          secondary: 1
+          arbiter: 1
+
+    # Annotations to be added to MongoDB pods
+    podAnnotations: {}
+
+    # Additional pod labels to apply
+    podLabels: {}
+
+    ## Configure resource requests and limits
+    ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    ##
+    resources: {}
+    # limits:
+    #   cpu: 500m
+    #   memory: 512Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 256Mi
+
+    ## Node selector
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
+    ## Affinity
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity: {}
+
+    ## Tolerations
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations: []
+
+    ## Enable persistence using Persistent Volume Claims
+    ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+    ##
+    persistence:
+      enabled: true
+      ## A manually managed Persistent Volume and Claim
+      ## Requires persistence.enabled: true
+      ## If defined, PVC must be created manually before volume will be bound
+      # existingClaim:
+
+      ## mongodb data Persistent Volume Storage Class
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+      ##   GKE, AWS & OpenStack)
+      ##
+      # storageClass: "-"
+      accessModes:
+        - ReadWriteOnce
+      size: 8Gi
+      annotations: {}
+
+    ## Configure extra options for liveness and readiness probes
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    readinessProbe:
+      enabled: true
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+
+    # Entries for the MongoDB config file
+    configmap:
+    #  # Where and how to store data.
+    #  storage:
+    #    dbPath: /opt/bitnami/mongodb/data/db
+    #    journal:
+    #      enabled: true
+    #    #engine:
+    #    #wiredTiger:
+    #  # where to write logging data.
+    #  systemLog:
+    #    destination: file
+    #    logAppend: true
+    #    path: /opt/bitnami/mongodb/logs/mongodb.log
+    #  # network interfaces
+    #  net:
+    #    port: 27017
+    #    bindIp: 0.0.0.0
+    #    unixDomainSocket:
+    #      enabled: true
+    #      pathPrefix: /opt/bitnami/mongodb/tmp
+    #  # replica set options
+    #  #replication:
+    #  #  replSetName: replicaset
+    #  # process management options
+    #  processManagement:
+    #     fork: false
+    #     pidFilePath: /opt/bitnami/mongodb/tmp/mongodb.pid
+    #  # set parameter options
+    #  setParameter:
+    #     enableLocalhostAuthBypass: true
+    #  # security options
+    #  security:
+    #    authorization: enabled
+    #    #keyFile: /opt/bitnami/mongodb/conf/keyfile
+
+    ## Prometheus Exporter / Metrics
+    ##
+    metrics:
+      enabled: false
+
+      image:
+        registry: docker.io
+        repository: forekshub/percona-mongodb-exporter
+        tag: latest
+        pullPolicy: IfNotPresent
+        ## Optionally specify an array of imagePullSecrets.
+        ## Secrets must be manually created in the namespace.
+        ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+        ##
+        # pullSecrets:
+        #   - myRegistrKeySecretName
+
+      ## Metrics exporter resource requests and limits
+      ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+      ##
+      # resources: {}
+
+      ## Metrics exporter pod Annotation
+      podAnnotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9216"
+
+      ## Prometheus Service Monitor
+      ## ref: https://github.com/coreos/prometheus-operator
+      ##      https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md
+      serviceMonitor:
+        ## If the operator is installed in your cluster, set to true to create a Service Monitor Entry
+        enabled: false
+        ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Service Monitors to work with
+        ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
+        additionalLabels: {}
+
+        ## Specify Metric Relabellings to add to the scrape endpoint
+        ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
+        # relabellings:
+
+        alerting:
+          ## Define individual alerting rules as required
+          ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#rulegroup
+          ##      https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+          rules: {}
+
+          ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Prometheus Rules to work with
+          ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
+    additionalLabels: {}

@@ -55,6 +55,10 @@ echo "Packaging Email Notifier..."
 helm package -u -d ./repo ./emailnotifier 
 checkCommandResult
 
+echo "Packaging Central Event Processor..." 
+helm package -u -d ./repo ./centraleventprocessor 
+checkCommandResult
+
 echo "Packaging Central..." 
 helm package -u -d ./repo ./central 
 checkCommandResult
