@@ -59,6 +59,10 @@ echo "Updating ml-api-adapter..."
 helm dep up ./ml-api-adapter
 checkCommandResult
 
+echo "Updating Email Notifier..."
+helm dep up ./emailnotifier
+checkCommandResult
+
 echo "Updating Central..."
 helm dep up ./central
 checkCommandResult
