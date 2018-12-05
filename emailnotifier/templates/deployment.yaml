@@ -1,3 +1,5 @@
+{{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
+
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -19,6 +21,22 @@ spec:
         app.kubernetes.io/name: {{ include "emailnotifier.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+    {{- if .Values.init.enabled }}
+      initContainers:
+        - name: {{ .Values.init.kafka.name }}
+          image: {{ .Values.init.kafka.repository }}:{{ .Values.init.kafka.tag }}
+          imagePullPolicy: {{ .Values.init.kafka.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.init.kafka.command | replace "$kafka_host" $kafkaHost | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) ) | quote }}
+          env:
+          {{- range $envItem := .Values.init.kafka.env }}
+            - name: {{ $envItem.name }}
+              value: {{ $envItem.value }}
+          {{- end }}
+        {{- end }}
+
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
