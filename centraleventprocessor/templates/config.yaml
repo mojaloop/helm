@@ -1,8 +1,7 @@
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
 {{- $mongodbHost := ( .Values.config.mongo_host | replace "$release_name" .Release.Name ) -}}
-
-{{- $centralLedgerAdminHost := printf "%s-%s" .Release.Name .Values.config.central_ledger_admin_host -}}}}
-{{- $centralLedgerApiHost := printf "%s-%s" .Release.Name .Values.config.central_ledger_api_host  -}}}}
+{{- $centralLedgerAdminHost := printf "%s-%s" .Release.Name .Values.config.central_ledger_admin_host -}}
+{{- $centralLedgerApiHost := printf "%s-%s" .Release.Name .Values.config.central_ledger_api_host -}}
 
 apiVersion: v1
 kind: ConfigMap
@@ -14,4 +13,4 @@ metadata:
       release: {{ .Release.Name }}
       heritage: {{ .Release.Service }}
 data:
-  default.json: {{ .Values.config.default_json | replace "$ingress_host" .Values.ingress.hosts.api | replace "$kafka_host" (default .Values.config.kafka_host $kafkaHost) | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) | replace "$mongo_host" (default .Values.config.mongo_host $mongodbHost) | replace "$mongo_port" (printf "%.0f" .Values.config.mongo_port) | replace "$mongo_database" .Values.config.mongo_database | replace "$mongo_username" .Values.config.mongo_username |replace "$mongo_password" .Values.config.mongo_password | replace "$port" (printf "%.0f" .Values.config.PORT) | replace "$central_ledger_admin_host" (default .Values.config.central_ledger_admin_host $centralLedgerAdminHost) | replace "$central_ledger_admin_port" (printf "%.0f" .Values.config.central_ledger_admin_port) | replace "$central_ledger_api_host" (default .Values.config.central_ledger_api_host $centralLedgerApiHost) | replace "$central_ledger_api_port" (printf "%.0f" .Values.config.central_ledger_api_port)| quote}}
+  default.json: {{ .Values.config.default_json | replace "$ingress_host" .Values.ingress.hosts.api | replace "$kafka_host" (default .Values.config.kafka_host $kafkaHost) | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) | replace "$mongo_host" (default .Values.config.mongo_host $mongodbHost) | replace "$mongo_port" (printf "%.0f" .Values.config.mongo_port) | replace "$mongo_database" .Values.config.mongo_database | replace "$mongo_username" .Values.config.mongo_username |replace "$mongo_password" .Values.config.mongo_password | replace "$port" (printf "%.0f" .Values.config.PORT) | replace "$central_ledger_admin_host" $centralLedgerAdminHost | replace "$central_ledger_admin_port" (printf "%.0f" .Values.config.central_ledger_admin_port) | replace "$central_ledger_api_host" $centralLedgerApiHost | replace "$central_ledger_api_port" (printf "%.0f" .Values.config.central_ledger_api_port)| quote}}
