@@ -6005,7 +6005,7 @@ central:
     replicaCount: 1
     image:
       repository: mojaloop/email-notifier
-      tag: v4.1.1
+      tag: v4.2.0
       pullPolicy: Always
     init:
       enabled: true
@@ -6079,8 +6079,8 @@ central:
                       "consumeTimeout": 1000
                     },
                     "rdkafkaConf": {
-                      "client.id": "cep-con-notification-event",
-                      "group.id": "notifier",
+                      "client.id": "emailnotif-con-notification-event",
+                      "group.id": "email-notifier-kafka",
                       "metadata.broker.list": "$kafka_host:$kafka_port",
                       "socket.blocking.max.ms": 1,
                       "fetch.wait.max.ms": 1,
@@ -6193,7 +6193,7 @@ central:
     replicaCount: 1
     image:
       repository: mojaloop/central-event-processor
-      tag: v4.1.1
+      tag: v4.2.0
       pullPolicy: Always
     init:
       enabled: true
@@ -6215,7 +6215,7 @@ central:
         repository: bitnami/mongodb
         tag: latest
         pullPolicy: Always
-        command: "mongo mongodb://$mongo_username:$mongo_password@$mongo_host:$mongo_port/$mongo_database --eval \"db.adminCommand('ping')\""
+        command: "mongo mongodb://$mongo_host:$mongo_port --eval \"db.adminCommand('ping')\""
 
     service:
       name: central-event-processor
@@ -6290,9 +6290,7 @@ central:
       PORT: 3080
       mongo_host: '$release_name-mongodb'
       mongo_port: 27017
-      mongo_username: mojaloop
       mongo_database: mojaloop
-      mongo_password: password
       central_ledger_admin_host: 'centralledger-service'
       central_ledger_admin_port: 3001
       central_ledger_api_host: 'centralledger-service'
@@ -6324,8 +6322,6 @@ central:
           "mongo": {
             "uri": "$mongo_host:$mongo_port",
             "database": "$mongo_database",
-            "username": "$mongo_username",
-            "password": "$mongo_password",
             "ruleCollection": "Rule",
             "netDebitCapPositionCollection": "NDCPosition",
             "actionCollection": "Actions",
@@ -6359,7 +6355,7 @@ central:
                     },
                     "rdkafkaConf": {
                       "client.id": "cep-con-notification-event",
-                      "group.id": "notifier",
+                      "group.id": "central-event-processor-kafka",
                       "metadata.broker.list": "$kafka_host:$kafka_port",
                       "socket.blocking.max.ms": 1,
                       "fetch.wait.max.ms": 1,
@@ -6445,20 +6441,20 @@ central:
       ## Enable authentication
       ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
       #
-      usePassword: true
+      usePassword: false
       # existingSecret: name-of-existing-secret
 
       ## MongoDB admin password
       ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
       ##
-      mongodbRootPassword: adminpass
+      # mongodbRootPassword: adminpass
 
       ## MongoDB custom user and database
       ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run
       ##
-      mongodbUsername: mojaloop
-      mongodbPassword: password
-      mongodbDatabase: mojaloop
+      # mongodbUsername: mojaloop
+      # mongodbPassword: password
+      # mongodbDatabase: mojaloop
 
 
       ## Whether enable/disable IPv6 on MongoDB
@@ -6627,9 +6623,9 @@ central:
       #  setParameter:
       #     enableLocalhostAuthBypass: true
       #  # security options
-      #  security:
-      #    authorization: enabled
-      #    #keyFile: /opt/bitnami/mongodb/conf/keyfile
+      # security:
+      #   authorization: enabled
+      #   keyFile: /opt/bitnami/mongodb/conf/keyfile
 
       ## Prometheus Exporter / Metrics
       ##
