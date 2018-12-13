@@ -1,5 +1,3 @@
-{{- $forensicLoggingSidecarHost := printf "%s-%s" .Release.Name .Values.config.forensicloggingsidecar_host -}}
-{{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -14,5 +12,5 @@ data:
   server.port: {{ .Values.containers.api.service.ports.api.internalPort | quote }}
   admin.host: {{  .Values.ingress.hosts.admin | quote }}
   admin.port: {{ .Values.containers.admin.service.ports.api.internalPort | quote }}
-  default.json: {{ (.Values.config.default_json | replace "$service_api_port" (printf "%.0f" .Values.containers.api.service.ports.api.internalPort) | replace "$service_admin_port" (printf "%.0f" .Values.containers.admin.service.ports.api.internalPort) | replace "$ingress_host" .Values.ingress.hosts.api | replace "$forensicloggingsidecar_host" $forensicLoggingSidecarHost | replace "$forensicloggingsidecar_port" (printf "%.0f" .Values.config.forensicloggingsidecar_port) | replace "$kafka_host" (default .Values.config.kafka_host $kafkaHost) | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) ) | quote }}
-  knexfile.js: {{ (.Values.config.knexfile_js | replace "$db_driver" .Values.config.db_driver) | quote}}
+  default.json: {{ (tpl (.Files.Get .Values.config.default_json) . ) | quote }}
+  knexfile.js: {{ (tpl (.Files.Get .Values.config.knexfile_js) . ) | quote }}
