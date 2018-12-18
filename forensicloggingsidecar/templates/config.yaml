@@ -26,22 +26,5 @@ data:
   # kms.connect.timeout: 60000
   ## TBC?
   # kms.reconnect.interval: 
-
-  default.json: |
-      {{ .Values.config.default_json | replace "$servicePort" (printf "%.0f" .Values.service.internalPort) | replace "$kmsPort" (printf "%.0f" .Values.centralkms.service.externalPort) | replace "$kmsHost" $kmsHost | replace "$serviceName" (include "forensicloggingsidecar.fullname" .) }}
-
-  knexfile.js: |
-    'use strict'
-
-    const migrationsDirectory = '/opt/sidecar/migrations'
-    const Config = require('/opt/sidecar/src/lib/config')
-
-    module.exports = {
-      client: 'pg',
-      connection: Config.DATABASE_URI,
-      migrations: {
-        directory: migrationsDirectory,
-        tableName: 'migrations',
-        stub: `${migrationsDirectory}/migration.template`
-      }
-    }
+  default.json: {{ (tpl (.Files.Get "configs/default.json") . ) | quote }}
+  knexfile.js: {{ (tpl (.Files.Get "configs/knexfile.js") . ) | quote }}

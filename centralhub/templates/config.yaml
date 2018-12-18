@@ -1,4 +1,3 @@
-{{- $centralledgerHost := printf "%s-%s" .Release.Name .Values.centralledger.nameOverride -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,6 +8,4 @@ metadata:
       release: {{ .Release.Name }}
       heritage: {{ .Release.Service }}
 data:
-  default.json: |
-    {{ .Values.config.default_json | replace "$service_port" (printf "%.0f" .Values.service.internalPort) | replace "$centralledger_api_port" (printf "%.0f" .Values.centralledger.containers.api.service.ports.api.internalPort) | replace "$centralledger_admin_port" (printf "%.0f" .Values.centralledger.containers.admin.service.ports.api.internalPort) | replace "$ingress_host" (.Values.ingress.hosts | first) | replace "$centralledger_host" $centralledgerHost }}
-
+  default.json: {{ (tpl (.Files.Get "configs/default.json") . ) | quote }}
