@@ -1,6 +1,8 @@
+{{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
+{{- $centralServicesHost := printf "%s-%s" .Release.Name .Values.config.central_services_host -}}
 {
     "PORT": {{ .Values.service.externalPort }},
-    "ENDPOINT_SOURCE_URL": "http://{{ printf "%s-%s" .Release.Name .Values.config.central_services_host }}:{{ .Values.config.central_services_port }}/participants/{{"{{"}}fsp{{"}}"}}/endpoints",
+    "ENDPOINT_SOURCE_URL": "http://{{ $centralServicesHost }}:{{ .Values.config.central_services_port }}/participants/{{"{{"}}fsp{{"}}"}}/endpoints",
     "ENDPOINT_CACHE_CONFIG": {
         "expiresIn": 180000,
         "generateTimeout": 30000
@@ -47,7 +49,7 @@
                         "rdkafkaConf": {
                             "client.id": "ml-con-notification-event",
                             "group.id": "kafka-ml-api-adapter",
-                            "metadata.broker.list": "{{ ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) }}:{{ .Values.config.kafka_port }}",
+                            "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
                             "socket.blocking.max.ms": 1,
                             "fetch.wait.max.ms": 1,
                             "fetch.error.backoff.ms": 1,
@@ -74,7 +76,7 @@
                             "messageCharset": "utf8"
                         },
                         "rdkafkaConf": {
-                            "metadata.broker.list": "{{ ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) }}:{{ .Values.config.kafka_port }}",
+                            "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
                             "client.id": "ml-prod-transfer-prepare",
                             "event_cb": true,
                             "compression.codec": "none",
@@ -96,7 +98,7 @@
                             "messageCharset": "utf8"
                         },
                         "rdkafkaConf": {
-                            "metadata.broker.list": "{{ ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) }}:{{ .Values.config.kafka_port }}",
+                            "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
                             "client.id": "ml-prod-transfer-fulfil",
                             "event_cb": true,
                             "compression.codec": "none",
