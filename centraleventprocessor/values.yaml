@@ -22,7 +22,7 @@ global:
 replicaCount: 1
 image:
   repository: mojaloop/central-event-processor
-  tag: v4.2.0
+  tag: v4.3.0
   pullPolicy: Always
 
 init:
@@ -120,8 +120,10 @@ config:
   PORT: 3080
   mongo_host: '$release_name-mongodb'
   mongo_port: 27017
+  mongo_user: mojaloop
+  mongo_password: password
   mongo_database: mojaloop
-  central_ledger_admin_host: 'centralledger-service'
+  central_ledger_admin_host: '$release_name-centralledger-service'
   central_ledger_admin_port: 3001
   central_ledger_api_host: 'centralledger-service'
   central_ledger_api_port: 3000
@@ -487,20 +489,20 @@ mongodb:
   ## Enable authentication
   ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
   #
-  usePassword: false
+  usePassword: true
   # existingSecret: name-of-existing-secret
 
   ## MongoDB admin password
   ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
   ##
-  # mongodbRootPassword: adminpass
+  mongodbRootPassword: adminpass
 
   ## MongoDB custom user and database
   ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run
   ##
-  # mongodbUsername: mojaloop
-  # mongodbPassword: password
-  # mongodbDatabase: mojaloop
+  mongodbUsername: mojaloop
+  mongodbPassword: password
+  mongodbDatabase: mojaloop
 
 
   ## Whether enable/disable IPv6 on MongoDB

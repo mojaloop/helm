@@ -37,7 +37,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v4.1.1
+            tag: v4.2.1
             pullPolicy: Always
             command: '["node", "src/api/index.js"]'
           service:
@@ -62,7 +62,7 @@ central:
         admin:
           image:
             repository: mojaloop/central-ledger
-            tag: v4.1.1
+            tag: v4.2.1
             pullPolicy: Always
             command: '["node", "src/admin/index.js"]'
           service:
@@ -184,7 +184,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v4.1.1
+            tag: v4.2.1
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
           service:
@@ -311,7 +311,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v4.1.1
+            tag: v4.2.1
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--admin"]'
           service:
@@ -438,7 +438,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v4.1.1
+            tag: v4.2.1
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--position"]'
           service:
@@ -565,7 +565,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v4.1.1
+            tag: v4.2.1
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--get"]'
           service:
@@ -692,7 +692,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v4.1.1
+            tag: v4.2.1
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
           service:
@@ -819,7 +819,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v4.1.1
+            tag: v4.2.1
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
           service:
@@ -1901,7 +1901,7 @@ central:
     replicaCount: 1
     image:
       repository: mojaloop/central-settlement
-      tag: v4.1.0
+      tag: v4.2.0
       pullPolicy: Always
 
     readinessProbe:
@@ -1982,104 +1982,12 @@ central:
       # requests:
       #  cpu: 100m
       #  memory: 128Mi
-  emailnotifier:
-    replicaCount: 1
-    image:
-      repository: mojaloop/email-notifier
-      tag: v4.2.0
-      pullPolicy: Always
-    init:
-      enabled: true
-      kafka:
-        name: wait-for-kafka
-        repository: solsson/kafka
-        tag: latest
-        pullPolicy: Always
-        command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
-        env: {}
-        ## Env example
-        # env:
-        #   envItem1:
-        #     name: hello
-        #     value: world
-
-    config:
-      ## Kafka Configuration
-      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-      kafka_host: '$release_name-kafka'
-      kafka_port: 9092
-      email:
-        host: 'smtp.gmail.com'
-        port: 587
-        # secure_connection: false
-        user: 'user'
-        pass: 'pass'
-        ciphers: 'SSLv3'
-      PORT: 3081
-
-    init:
-      enabled: true
-
-    service:
-      name: email-notifier
-      type: ClusterIP
-      externalPort: 3081
-      internalPort: 3081
-
-      annotations: {}
-
-      # This allows one to point the service to an external backend. 
-      # This is useful for local development where one wishes to hijack 
-      # the communication from the service to the node layer and point
-      # to a specific endpoint (IP, Port, etc).
-      external:
-        enabled: false
-        # 10.0.2.2 is the magic IP for the host on virtualbox's network
-        ip: 10.0.2.2
-        ports:
-          api: 
-            name: email-notifier
-            externalPort: 3081
-            internalPort: 3081
-
-    readinessProbe:
-      enabled: true
-      httpGet:
-        path: /health
-      initialDelaySeconds: 30
-      periodSeconds: 15
-
-    livenessProbe:
-      enabled: true
-      httpGet:
-        path: /health
-      initialDelaySeconds: 30
-      periodSeconds: 15
-
-    ingress:
-      enabled: true
-      # Used to create an Ingress record.
-      hosts:
-        api: email-notifier.local
-      
-      externalPath: /
-      
-      annotations:
-        # kubernetes.io/ingress.class: nginx
-        # kubernetes.io/tls-acme: "true"
-      
-      tls:
-        # Secrets must be manually created in the namespace.
-        # - secretName: chart-example-tls
-        #   hosts:
-        #     - chart-example.local
-
-    resources: {}
+  
   centraleventprocessor:
     replicaCount: 1
     image:
       repository: mojaloop/central-event-processor
-      tag: v4.2.0
+      tag: v4.3.0
       pullPolicy: Always
     init:
       enabled: true
@@ -2176,8 +2084,10 @@ central:
       PORT: 3080
       mongo_host: '$release_name-mongodb'
       mongo_port: 27017
+      mongo_user: mojaloop
+      mongo_password: password
       mongo_database: mojaloop
-      central_ledger_admin_host: 'centralledger-service'
+      central_ledger_admin_host: '$release_name-centralledger-service'
       central_ledger_admin_port: 3001
       central_ledger_api_host: 'centralledger-service'
       central_ledger_api_port: 3000
@@ -2217,20 +2127,20 @@ central:
       ## Enable authentication
       ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
       #
-      usePassword: false
+      usePassword: true
       # existingSecret: name-of-existing-secret
 
       ## MongoDB admin password
       ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
       ##
-      # mongodbRootPassword: adminpass
+      mongodbRootPassword: adminpass
 
       ## MongoDB custom user and database
       ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run
       ##
-      # mongodbUsername: mojaloop
-      # mongodbPassword: password
-      # mongodbDatabase: mojaloop
+      mongodbUsername: mojaloop
+      mongodbPassword: password
+      mongodbDatabase: mojaloop
 
 
       ## Whether enable/disable IPv6 on MongoDB
@@ -2399,9 +2309,9 @@ central:
       #  setParameter:
       #     enableLocalhostAuthBypass: true
       #  # security options
-      # security:
-      #   authorization: enabled
-      #   keyFile: /opt/bitnami/mongodb/conf/keyfile
+      #  security:
+      #  authorization: enabled
+        #keyFile: /opt/bitnami/mongodb/conf/keyfile
 
       ## Prometheus Exporter / Metrics
       ##
@@ -2453,6 +2363,7 @@ central:
             ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Prometheus Rules to work with
             ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
       additionalLabels: {}
+
 interop-switch:
     enabled: true
     replicaCount: 1
@@ -2671,3 +2582,107 @@ ml-api-adapter:
         # requests:
         #  cpu: 100m
         #  memory: 128Mi
+
+emailnotifier:
+  replicaCount: 1
+  image:
+    repository: mojaloop/email-notifier
+    tag: v4.3.0
+    pullPolicy: Always
+  init:
+    enabled: true
+    kafka:
+      name: wait-for-kafka
+      repository: solsson/kafka
+      tag: latest
+      pullPolicy: Always
+      command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
+      env: {}
+      ## Env example
+      # env:
+      #   envItem1:
+      #     name: hello
+      #     value: world
+
+  config:
+    ## Kafka Configuration
+    # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+    kafka_host: '$release_name-kafka'
+    kafka_port: 9092
+    email:
+      host: 'smtp.gmail.com'
+      port: 587
+      # secure_connection: false
+      user: 'user@gmail.com'
+      pass: 'pass'
+      ciphers: 'SSLv3'
+    PORT: 3081
+
+  init:
+    enabled: true
+
+  service:
+    name: email-notifier
+    type: ClusterIP
+    externalPort: 3081
+    internalPort: 3081
+
+    annotations: {}
+
+    # This allows one to point the service to an external backend. 
+    # This is useful for local development where one wishes to hijack 
+    # the communication from the service to the node layer and point
+    # to a specific endpoint (IP, Port, etc).
+    external:
+      enabled: false
+      # 10.0.2.2 is the magic IP for the host on virtualbox's network
+      ip: 10.0.2.2
+      ports:
+        api: 
+          name: email-notifier
+          externalPort: 3081
+          internalPort: 3081
+
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 15
+
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 15
+
+  ingress:
+    enabled: true
+    # Used to create an Ingress record.
+    hosts:
+      api: email-notifier.local
+    
+    externalPath: /
+    
+    annotations:
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    
+    tls:
+      # Secrets must be manually created in the namespace.
+      # - secretName: chart-example-tls
+      #   hosts:
+      #     - chart-example.local
+
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
