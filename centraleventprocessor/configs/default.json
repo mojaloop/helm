@@ -1,0 +1,111 @@
+{{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
+{{- $mongodbHost := ( .Values.config.mongo_host | replace "$release_name" .Release.Name ) -}}
+{{- $centralLedgerAdminHost := ( .Values.config.central_ledger_admin_host | replace "$release_name" .Release.Name ) -}}
+{{- $centralLedgerApiHost := ( .Values.config.central_ledger_admin_host | replace "$release_name" .Release.Name ) -}}
+{
+    "notificationMinutes": {
+        "resetPeriod": 60,
+        "notificationInterval": 3
+    },
+    "swaggerOptions": {
+        "info": {
+            "title": "Central notification system API Documentation",
+            "description": "Api Documentation for central-notification"
+        },
+        "expanded": "full"
+    },
+    "PORT": {{ .Values.config.PORT }},
+    "centralLedgerAPI": {
+        "adminHost": "{{ $centralLedgerAdminHost }}",
+        "adminPort": {{ .Values.config.central_ledger_admin_port }},
+        "apiHost": "{{ $centralLedgerApiHost }}",
+        "apiPort": {{ .Values.config.central_ledger_api_port }}
+    },
+    "mongo": {
+        "user": "{{ .Values.config.mongo_user }}",
+        "password": "{{ .Values.config.mongo_password }}",
+        "uri": "{{ (default .Values.config.mongo_host $mongodbHost) }}:{{ .Values.config.mongo_port }}",
+        "database": "{{ .Values.config.mongo_database }}",
+        "ruleCollection": "Rule",
+        "netDebitCapPositionCollection": "NDCPosition",
+        "actionCollection": "Actions",
+        "eventCollection": "Events",
+        "limitCollection": "Limits",
+        "notificationEndpointCollection": "NotificationEndpoints"
+  },
+    "KAFKA": {
+        "TOPIC_TEMPLATES": {
+            "NOTIFICATION_TOPIC_TEMPLATE": {
+                "TEMPLATE": "topic-notification-event",
+                "REGEX": "topic-notification-event"
+            },
+            "GENERAL_TOPIC_TEMPLATE": {
+                "TEMPLATE": "topic-{{"{{"}}functionality{{"}}"}}-{{"{{"}}action{{"}}"}}",
+                "REGEX": "topic-(.*)-(.*)"
+            }
+        },
+        "CONSUMER": {
+            "NOTIFICATION": {
+                "EVENT": {
+                    "config": {
+                        "options": {
+                            "mode": 2,
+                            "batchSize": 1,
+                            "recursiveTimeout": 100,
+                            "messageCharset": "utf8",
+                            "messageAsJSON": true,
+                            "sync": true,
+                            "consumeTimeout": 1000
+                        },
+                        "rdkafkaConf": {
+                            "client.id": "cep-con-notification-event",
+                            "group.id": "central-event-processor-kafka",
+                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+                            "socket.blocking.max.ms": 1,
+                            "fetch.wait.max.ms": 1,
+                            "fetch.error.backoff.ms": 1,
+                            "queue.buffering.max.ms": 1,
+                            "broker.version.fallback": "0.10.1.0",
+                            "api.version.request": true,
+                            "enable.auto.commit": false,
+                            "auto.commit.interval.ms": 200,
+                            "socket.keepalive.enable": true,
+                            "socket.max.fails": 1
+                        },
+                        "topicConf": {
+                            "auto.offset.reset": "earliest"
+                        }
+                    }
+                }
+            }
+        },
+        "PRODUCER": {
+            "NOTIFICATION": {
+                "EVENT": {
+                    "config": {
+                        "options": {
+                            "messageCharset": "utf8"
+                        },
+                        "rdkafkaConf": {
+                            "debug": "all",
+                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+                            "client.id": "cep-prod-notification-event",
+                            "event_cb": true,
+                            "compression.codec": "none",
+                            "retry.backoff.ms": 100,
+                            "message.send.max.retries": 2,
+                            "socket.keepalive.enable": true,
+                            "queue.buffering.max.messages": 10000000,
+                            "batch.num.messages": 100,
+                            "dr_cb": true,
+                            "socket.blocking.max.ms": 1,
+                            "queue.buffering.max.ms": 1,
+                            "broker.version.fallback": "0.10.1.0",
+                            "api.version.request": true
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
