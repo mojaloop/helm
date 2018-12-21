@@ -1,4 +1,4 @@
-{{- $dbHost := printf "%s-%s" .Release.Name .Values.config.db_host -}}
+{{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -28,14 +28,23 @@ spec:
 {{ toYaml .Values.global.config.tolerations | indent 8 }}
 {{- end }}
       {{- if .Values.init.enabled }}
-        {{- if eq .Values.config.db_type "postgres"}}
       initContainers:
-        - name: {{ .Values.init.image.name }}
-          image: {{ .Values.init.image.repository }}:{{ .Values.init.image.tag }}
-          imagePullPolicy: {{ .Values.init.image.pullPolicy }}
+        {{- if eq .Values.config.db_type "postgres"}}
+        - name: {{ .Values.init.psql.name }}
+          image: {{ .Values.init.psql.repository }}:{{ .Values.init.psql.tag }}
+          imagePullPolicy: {{ .Values.init.psql.pullPolicy }}
           env:
           - name: "POSTGRES_URL"
             value: "postgresql://{{ .Values.config.db_user }}:{{ .Values.config.db_password }}@{{ $dbHost }}:{{ .Values.config.db_port }}/{{ .Values.config.db_database }}?sslmode=disable"
+        {{- end }}
+        {{- if eq .Values.config.db_type "mysql"}}
+        - name: {{ .Values.init.mysql.name }}
+          image: {{ .Values.init.mysql.repository }}:{{ .Values.init.mysql.tag }}
+          imagePullPolicy: {{ .Values.init.mysql.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.init.mysql.command | replace "$db_user" (print .Values.config.db_user) | replace "$db_password" (print .Values.config.db_password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.config.db_database) | replace "$db_port" (print .Values.config.db_port) )| quote }}
         {{- end }}
       {{- end }}
       containers:
