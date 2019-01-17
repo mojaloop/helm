@@ -1,0 +1,50 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "interop-switch-js.fullname" . }}
+  labels:
+    app: {{ template "interop-switch-js.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "interop-switch-js.fullname" . }}
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{- if .Values.image.imagePullSecrets }}
+          imagePullSecrets:
+{{ toYaml .Values.image.imagePullSecrets | indent 10 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+          env:
+            - name: IOP_ENDPOINT_SOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch-js.fullname" . }}
+                  key: ENDPOINT_SOURCE_URL
+            - name: IOP_ROUTING_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch-js.fullname" . }}
+                  key: ROUTING_ENDPOINT
+            - name: IOP_DATABASE_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch-js.fullname" . }}
+                  key: DATABASE_URI
+            - name: IOP_PROVISIONED_PARTIES
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "interop-switch-js.fullname" . }}
+                  key: PROVISIONED_PARTIES

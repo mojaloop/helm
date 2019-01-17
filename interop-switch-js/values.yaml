@@ -1,0 +1,70 @@
+# Default values for interop-switch-js.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+image:
+  repository: donchangfoot/interop-switch-js
+  tag: latest
+## Optionally specify an array of imagePullSecrets.
+## Secrets must be manually created in the namespace.
+## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+##
+#  imagePullSecrets:
+#    - name: myregistrykey
+  pullPolicy: Always
+
+config:
+
+  ## DB Configuration
+  # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+  db_type: 'mysql'
+  # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+  db_driver: 'mysql'
+  db_host: '$release_name-centralledger-mysql'
+  db_port: 3306
+  db_user: central_ledger
+  db_password: oyMxgZChuu
+  db_database: central_ledger
+
+  CENTRAL_LEDGER_HOST: 'centralledger-service/admin'
+  CENTRAL_LEDGER_PORT: 3001
+
+  ENDPOINT_SOURCE_URL: "centralledger-service/admin/participants/{{fsp}}/endpoints"
+  ROUTING_ENDPOINT: "centralledger-service/admin/nextHop"
+  DATABASE_URI: "mysql://central_ledger:oyMxgZChuu@localhost:3306/central_ledger"
+  PROVISIONED_PARTIES: '[{"msisdn":"255222222222","fspId":"moja.tz.red.tzs.pink","currency":"USD"},{"msisdn":"27111111111","fspId":"moja.za.blue.zar.green","currency":"USD"}]'
+
+service:
+  name: interop-switch-js
+  type: ClusterIP
+  externalPort: 3000
+  internalPort: 3000
+
+ingress:
+  enabled: true
+  externalPath: /
+  # Used to create an Ingress record.
+  hosts:
+    - interop-switch-js.local
+
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: '/'
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  tls:
+    # Secrets must be manually created in the namespace.
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
