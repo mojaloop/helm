@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "crossnetwork.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "crossnetwork.name" . }}
+    helm.sh/chart: {{ include "crossnetwork.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "crossnetwork.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "crossnetwork.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: CONNECTOR_PROFILE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "crossnetwork.fullname" . }}
+                  key: CONNECTOR_PROFILE
+            - name: CONNECTOR_BACKEND
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "crossnetwork.fullname" . }}
+                  key: CONNECTOR_BACKEND
+            - name: CONNECTOR_STORE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "crossnetwork.fullname" . }}
+                  key: CONNECTOR_STORE
+            - name: CONNECTOR_ILP_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "crossnetwork.fullname" . }}
+                  key: CONNECTOR_ILP_ADDRESS
+            - name: CONNECTOR_ADMIN_API
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "crossnetwork.fullname" . }}
+                  key: CONNECTOR_ADMIN_API
+            - name: CONNECTOR_ADMIN_API_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "crossnetwork.fullname" . }}
+                  key: CONNECTOR_ADMIN_API_HOST
+            - name: CONNECTOR_ACCOUNTS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "crossnetwork.fullname" . }}
+                  key: CONNECTOR_ACCOUNTS
+            - name: CONNECTOR_ACCOUNT_PROVIDERS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "crossnetwork.fullname" . }}
+                  key: CONNECTOR_ACCOUNT_PROVIDERS
+            - name: CONNECTOR_ROUTES
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "crossnetwork.fullname" . }}
+                  key: CONNECTOR_ROUTES
+            - name: CONNECTOR_DISABLE_MIDDLEWARE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "crossnetwork.fullname" . }}
+                  key: CONNECTOR_DISABLE_MIDDLEWARE
+            {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

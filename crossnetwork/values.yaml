@@ -1,0 +1,73 @@
+# Default values for crossnetwork.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: donchangfoot/ilp-moja-connector
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  ports:
+    - name: moja-blue-api
+      externalPort: 1082
+      internalPort: 1082
+    - name: moja-red-api
+      externalPort: 1083
+      internalPort: 1083
+
+config:
+  CONNECTOR_PROFILE: connector
+  CONNECTOR_BACKEND: one-to-one
+  CONNECTOR_STORE: memdown
+  CONNECTOR_ILP_ADDRESS: moja.superremit
+  CONNECTOR_ADMIN_API: false
+  CONNECTOR_ADMIN_API_HOST: '0.0.0.0'
+  CONNECTOR_ACCOUNTS: '{"mojablue":{"relation":"peer","sendRoutes":false,"receiveRoutes":false,"assetScale":1,"assetCode":"USD","plugin":"ilp-plugin-moja","options":{"listener":{"port":1082,"host":"0.0.0.0","baseAddress":""},"server":{"endpoint":"http://localhost:3000"},"endpoints":{"tranfers":"http://localhost:3000","quotes":"http://localhost:2998"},"ilpAddress":"moja.superremit"}},"mojared":{"relation":"peer","sendRoutes":false,"receiveRoutes":false,"assetScale":1,"assetCode":"USD","plugin":"ilp-plugin-moja","options":{"listener":{"port":1083,"host":"0.0.0.0","baseAddress":""},"server":{"endpoint":"http://localhost:2000"},"endpoints":{"tranfers":"http://localhost:2000","quotes":"http://localhost:2999"},"ilpAddress":"moja.superremit"}}}'
+  CONNECTOR_ACCOUNT_PROVIDERS: '{"loop-back":{"type":"loop-back","options":{"defaultAccountInfo":{"plugin":"ilp-plugin-btp","relation":"child","assetCode":"USD","assetScale":10},"loopBackAccounts":["load-test"]}},"plugin":{"type":"plugin"}}'
+  CONNECTOR_ROUTES: '[{"targetPrefix":"moja.za.blue","peerId":"mojablue"},{"targetPrefix":"moja.tz.red","peerId":"mojared"}]'
+  CONNECTOR_DISABLE_MIDDLEWARE: '["deduplicate","expire","validateFulfillment","maxPacketAmount"]'
+
+ingress:
+  enabled: true
+  externalPath: /
+  # Used to create an Ingress record.
+  hosts:
+    - ilp-moja-connector.local
+
+  paths:
+    - path: '/blue'
+      port: 1082
+    - path: '/red'
+      port: 1083
+
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: '/'
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  tls:
+  # Secrets must be manually created in the namespace.
+  # - secretName: chart-example-tls
+  #   hosts:
+  #     - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

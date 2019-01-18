@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "crossnetwork.fullname" . }}
+  labels:
+    app: {{ template "crossnetwork.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  CONNECTOR_PROFILE: {{ .Values.config.CONNECTOR_PROFILE }}
+  CONNECTOR_BACKEND: {{ .Values.config.CONNECTOR_BACKEND }}
+  CONNECTOR_STORE: {{ .Values.config.CONNECTOR_STORE }}
+  CONNECTOR_ILP_ADDRESS: {{ .Values.config.CONNECTOR_ILP_ADDRESS }}
+  CONNECTOR_ADMIN_API: {{ .Values.config.CONNECTOR_ADMIN_API | quote }}
+  CONNECTOR_ADMIN_API_HOST: {{ .Values.config.CONNECTOR_ADMIN_API_HOST }}
+  CONNECTOR_ACCOUNTS: {{ .Values.config.CONNECTOR_ACCOUNTS | toJson }}
+  CONNECTOR_ACCOUNT_PROVIDERS: {{ .Values.config.CONNECTOR_ACCOUNT_PROVIDERS | toJson }}
+  CONNECTOR_ROUTES: {{ .Values.config.CONNECTOR_ROUTES | toJson }}
+  CONNECTOR_DISABLE_MIDDLEWARE: {{ .Values.config.CONNECTOR_DISABLE_MIDDLEWARE | toJson }}
+  DEBUG: "*"
+
