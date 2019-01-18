@@ -1,8 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_K8S-PHOENIX-PERF1",
-      "label": "k8s-phoenix-perf1",
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
       "description": "",
       "type": "datasource",
       "pluginId": "prometheus",
@@ -72,7 +72,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Central Ledger Lag by Consumer Group",
       "fill": 1,
       "gridPos": {
@@ -177,7 +177,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "fill": 1,
       "gridPos": {
         "h": 9,
@@ -232,6 +232,13 @@
           "intervalFactor": 1,
           "legendFormat": "{{app}}",
           "refId": "I"
+        },
+        {
+          "expr": "sum(rate(moja_cl_posi_hand_transfer_position_count{}[30s]))",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "Positions - Average",
+          "refId": "A"
         }
       ],
       "thresholds": [],
@@ -284,7 +291,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Transfer Positions / sec",
       "format": "none",
       "gauge": {
@@ -366,7 +373,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Transfers Prepares / sec",
       "format": "none",
       "gauge": {
@@ -449,7 +456,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Transfers Fullfills / sec",
       "format": "none",
       "gauge": {
@@ -528,7 +535,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "fill": 1,
       "gridPos": {
         "h": 9,
@@ -569,7 +576,7 @@
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "Transfer Prepare - {{fspId}}",
+          "legendFormat": "Transfer Prepare - {{kubernetes_pod_name}}",
           "refId": "A"
         },
         {
@@ -667,7 +674,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Central Services Total CPU Usage",
       "format": "percent",
       "gauge": {
@@ -751,7 +758,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Transfer Prepare Handler CPU Usage",
       "format": "percent",
       "gauge": {
@@ -834,7 +841,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Transfer Position Handler CPU Usage",
       "format": "percent",
       "gauge": {
@@ -917,7 +924,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Transfer Fulfil Handler CPU Usage",
       "format": "percent",
       "gauge": {
@@ -992,7 +999,7 @@
       "valueName": "avg"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1000,198 +1007,197 @@
         "y": 29
       },
       "id": 48,
-      "panels": [
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "${DS_K8S-PHOENIX-PERF1}",
-          "description": "Central-Service  - CPU Usage in Seconds by Pod",
-          "fill": 1,
-          "gridPos": {
-            "h": 9,
-            "w": 24,
-            "x": 0,
-            "y": 30
-          },
-          "id": 2,
-          "legend": {
-            "alignAsTable": true,
-            "avg": true,
-            "current": true,
-            "hideEmpty": true,
-            "hideZero": true,
-            "max": true,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null as zero",
-          "percentage": true,
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "sum (irate (moja_cl_prep_hand_process_cpu_seconds_total[1m])) by (app) ",
-              "format": "time_series",
-              "hide": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{app}}",
-              "refId": "A"
-            },
-            {
-              "expr": "sum (irate (moja_cl_posi_hand_process_cpu_seconds_total[1m])) by (app)",
-              "format": "time_series",
-              "hide": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{app}}",
-              "refId": "E"
-            },
-            {
-              "expr": "sum (irate (moja_cl_fulf_hand_process_cpu_seconds_total[1m])) by (app)",
-              "format": "time_series",
-              "hide": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{app}}",
-              "refId": "I"
-            },
-            {
-              "expr": "sum(\n    irate(container_cpu_usage_seconds_total{namespace='test', pod_name=~'test-centralledger-hand.*|test-centralledger-serv.*|test-centralledger-handler-transfer-fulfil.*'}[30s]))\nby (pod_name)",
-              "format": "time_series",
-              "hide": false,
-              "instant": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{pod_name}}",
-              "refId": "B"
-            },
-            {
-              "expr": "sum (irate (container_cpu_usage_seconds_total{namespace='test', pod_name=~'test-centralledger-hand.*|test-centralledger-serv.*|test-centralledger-handler-transfer-fulfil.*'}[1m]))",
-              "format": "time_series",
-              "hide": true,
-              "instant": false,
-              "intervalFactor": 1,
-              "legendFormat": "All Total",
-              "refId": "C"
-            },
-            {
-              "expr": "sum (rate (container_cpu_usage_seconds_total{namespace='test', pod_name=~'test-centralledger-hand.*|test-centralledger-serv.*|test-centralledger-handler-transfer-fulfil.*'}[1m])) by (instance)",
-              "format": "time_series",
-              "hide": true,
-              "intervalFactor": 1,
-              "refId": "D"
-            },
-            {
-              "expr": "sum (irate (container_cpu_usage_seconds_total{}[1m])) by (instance)",
-              "format": "time_series",
-              "hide": true,
-              "intervalFactor": 1,
-              "refId": "F"
-            },
-            {
-              "expr": "irate(node_cpu_seconds_total{}[5m]})",
-              "format": "time_series",
-              "hide": true,
-              "intervalFactor": 1,
-              "legendFormat": "",
-              "refId": "G"
-            },
-            {
-              "expr": "kube_node_status_capacity_cpu_cores",
-              "format": "time_series",
-              "hide": true,
-              "intervalFactor": 1,
-              "refId": "H"
-            },
-            {
-              "expr": "kube_node_status_allocatable_cpu_cores",
-              "format": "time_series",
-              "hide": true,
-              "intervalFactor": 1,
-              "refId": "J"
-            },
-            {
-              "expr": "sum(node_load1) by (instance)",
-              "format": "time_series",
-              "hide": true,
-              "intervalFactor": 1,
-              "refId": "K"
-            },
-            {
-              "expr": "sum(node_load1)",
-              "format": "time_series",
-              "hide": true,
-              "intervalFactor": 1,
-              "refId": "L"
-            },
-            {
-              "expr": "sum(\n    irate(container_cpu_usage_seconds_total{beta_kubernetes_io_instance_type=\"m4.2xlarge\"}[30s]))\nby (pod_name)",
-              "format": "time_series",
-              "hide": true,
-              "intervalFactor": 1,
-              "refId": "M"
-            },
-            {
-              "expr": "sum(\n    irate(container_cpu_usage_seconds_total{}[30s]))",
-              "format": "time_series",
-              "hide": true,
-              "intervalFactor": 1,
-              "refId": "N"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Central-Service  - CPU Usage in Seconds by Pod",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "percent",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        }
-      ],
+      "panels": [],
       "title": "CPU Usage by Pods",
       "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "description": "Central-Service  - CPU Usage in Seconds by Pod",
+      "fill": 1,
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "id": 2,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null as zero",
+      "percentage": true,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum (irate (moja_cl_prep_hand_process_cpu_seconds_total[1m])) by (app) ",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{app}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum (irate (moja_cl_posi_hand_process_cpu_seconds_total[1m])) by (app)",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{app}}",
+          "refId": "E"
+        },
+        {
+          "expr": "sum (irate (moja_cl_fulf_hand_process_cpu_seconds_total[1m])) by (app)",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{app}}",
+          "refId": "I"
+        },
+        {
+          "expr": "sum(\n    irate(container_cpu_usage_seconds_total{namespace='test', pod_name=~'test-centralledger-hand.*|test-centralledger-serv.*|test-centralledger-handler-transfer-fulfil.*'}[30s]))\nby (pod_name)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{pod_name}}",
+          "refId": "B"
+        },
+        {
+          "expr": "sum (irate (container_cpu_usage_seconds_total{namespace='test', pod_name=~'test-centralledger-hand.*|test-centralledger-serv.*|test-centralledger-handler-transfer-fulfil.*'}[1m]))",
+          "format": "time_series",
+          "hide": true,
+          "instant": false,
+          "intervalFactor": 1,
+          "legendFormat": "All Total",
+          "refId": "C"
+        },
+        {
+          "expr": "sum (rate (container_cpu_usage_seconds_total{namespace='test', pod_name=~'test-centralledger-hand.*|test-centralledger-serv.*|test-centralledger-handler-transfer-fulfil.*'}[1m])) by (instance)",
+          "format": "time_series",
+          "hide": true,
+          "intervalFactor": 1,
+          "refId": "D"
+        },
+        {
+          "expr": "sum (irate (container_cpu_usage_seconds_total{}[1m])) by (instance)",
+          "format": "time_series",
+          "hide": true,
+          "intervalFactor": 1,
+          "refId": "F"
+        },
+        {
+          "expr": "irate(node_cpu_seconds_total{}[5m]})",
+          "format": "time_series",
+          "hide": true,
+          "intervalFactor": 1,
+          "legendFormat": "",
+          "refId": "G"
+        },
+        {
+          "expr": "kube_node_status_capacity_cpu_cores",
+          "format": "time_series",
+          "hide": true,
+          "intervalFactor": 1,
+          "refId": "H"
+        },
+        {
+          "expr": "kube_node_status_allocatable_cpu_cores",
+          "format": "time_series",
+          "hide": true,
+          "intervalFactor": 1,
+          "refId": "J"
+        },
+        {
+          "expr": "sum(node_load1) by (instance)",
+          "format": "time_series",
+          "hide": true,
+          "intervalFactor": 1,
+          "refId": "K"
+        },
+        {
+          "expr": "sum(node_load1)",
+          "format": "time_series",
+          "hide": true,
+          "intervalFactor": 1,
+          "refId": "L"
+        },
+        {
+          "expr": "sum(\n    irate(container_cpu_usage_seconds_total{beta_kubernetes_io_instance_type=\"m4.2xlarge\"}[30s]))\nby (pod_name)",
+          "format": "time_series",
+          "hide": true,
+          "intervalFactor": 1,
+          "refId": "M"
+        },
+        {
+          "expr": "sum(\n    irate(container_cpu_usage_seconds_total{}[30s]))",
+          "format": "time_series",
+          "hide": true,
+          "intervalFactor": 1,
+          "refId": "N"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Central-Service  - CPU Usage in Seconds by Pod",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "percent",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "collapsed": false,
@@ -1199,7 +1205,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 39
       },
       "id": 46,
       "panels": [],
@@ -1211,13 +1217,13 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "fill": 1,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 40
       },
       "id": 10,
       "legend": {
@@ -1309,14 +1315,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "decimals": 0,
       "fill": 1,
       "gridPos": {
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 47
       },
       "id": 18,
       "legend": {
@@ -1397,7 +1403,7 @@
       }
     }
   ],
-  "refresh": "10s",
+  "refresh": false,
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
@@ -1436,5 +1442,5 @@
   "timezone": "",
   "title": "Mojaloop - Central-Ledger",
   "uid": "5z9mkZ-pr",
-  "version": 75
+  "version": 6
 }
