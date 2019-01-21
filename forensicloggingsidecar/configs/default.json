@@ -1,0 +1,14 @@
+{{- $kmsHost := printf "%s-%s" .Release.Name .Values.centralkms.nameOverride -}}
+{
+    "PORT": {{ .Values.service.internalPort }},
+    "SERVICE": "{{ (include "forensicloggingsidecar.fullname" .) }}",
+    "BATCH_SIZE": 64,
+    "BATCH_TIME_INTERVAL": 300000,
+    "KMS": {
+        "URL": "ws://{{ $kmsHost }}:{{ .Values.centralkms.service.externalPort }}/sidecar",
+        "PING_INTERVAL": 30000,
+        "REQUEST_TIMEOUT": 120000,
+        "CONNECT_TIMEOUT": 60000,
+        "RECONNECT_INTERVAL": 10000
+    }
+}

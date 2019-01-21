@@ -44,34 +44,7 @@ config:
   CDIR_PATHFINDER__PROVISIONING__ADDRESS: "http://$pathfinder_host:8080/nrs-pi/services/SIPIX/SendRequest"
   CDIR_PATHFINDER__QUERY__ADDRESS: "$pathfinder_host"
   CDIR_PATHFINDER__QUERY__PORT: "15353"
-  default_json: '
-    {
-      "PORT": $service_port,
-      "HOSTNAME": "http://$ingress_host",
-      "END_USER_REGISTRY_URL": "http://$centralenduserregistry_host:$centralenduserregistry_port",
-      "SCHEME_ID": "001",
-      "DEFAULT_DFSP": "",
-      "ENABLE_TOKEN_AUTH": false,
-      "PATHFINDER": {
-        "PARTNER_ID": 10305,
-        "SERVICE": "E2U+mm",
-        "CACHE_TIME": 300000,
-        "REGEX": {
-          "PATTERN": "^.*$",
-          "REPLACE": "mm:#{identifier}@leveloneproject.org"
-        },
-        "QUERY": {
-          "ADDRESS": "$pathfinder_host",
-          "PORT": 15353,
-          "TIMEOUT": 15000
-        },
-        "PROVISIONING": {
-          "ADDRESS": "http://$pathfinder_host:$pathfinder_provisioning_port/nrs-pi/services/SIPIX/SendRequest"
-        }
-      }
-    }
-'
-
+ 
 init:
   enabled: true
 
@@ -148,13 +121,7 @@ centralenduserregistry:
     initialDelaySeconds: 45
     periodSeconds: 15
 
-  config:
-    default_json: '
-      {
-        "PORT": $service_port,
-        "HOSTNAME": "http://$ingress_host"
-      }
-  '
+  config: {}
 
   init:
     enabled: true
@@ -239,29 +206,7 @@ mockpathfinder:
     tag: v2.4
     pullPolicy: Always
 
-  config:
-    default_json: '
-    {
-      "QUERY": {
-        "PORT": $query_port,
-        "DEFAULT_RECORD": {
-          "order": 10,
-          "preference": 50,
-          "flags": "u",
-          "service": "E2U+pstn:tel",
-          "regexp": "!^(.*)$!tel:\\1;q_stat=102!",
-          "replacement": "",
-          "ttl": 900
-        }
-      },
-      "PROVISIONING": {
-        "PORT": $provisioning_port,
-        "PATH": "/nrs-pi/services/SIPIX/SendRequest",
-        "WSDL_FILE": "./sipix-2.0.0.wsdl",
-        "DEFAULT_CUSTOMER_ID": 1234
-      }
-    }
-  '
+  config: {}
 
   service:
     type: ClusterIP

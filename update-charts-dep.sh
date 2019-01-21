@@ -19,6 +19,10 @@ function checkCommandResult () {
 echo "Removing old charts..."
 find ./ -name "charts"| xargs rm -Rf
 
+echo "Updating Promfana..."
+helm dep up ./monitoring/promfana
+checkCommandResult
+
 echo "Updating Central-KMS..."
 helm dep up ./centralkms
 checkCommandResult
@@ -29,10 +33,6 @@ checkCommandResult
 
 echo "Updating Central-Ledger..."
 helm dep up ./centralledger
-checkCommandResult
-
-echo "Updating Central Hub..."
-helm dep up ./centralhub
 checkCommandResult
 
 echo "Updating Mock Pathfinder..."
