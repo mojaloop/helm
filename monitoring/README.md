@@ -55,7 +55,7 @@ Login to the Grafana dashboard.
 
 ### 4. Import Dashboards
 
-Instructions [Grafana Dashboard Installation](./grafana-dashboards/README.md)
+Instructions [Grafana Dashboard Installation](./dashboards/README.md)
 
 
 ## Alternative Manual Prometheus & Grafana without Mojaloop Helm Chart/Repository
