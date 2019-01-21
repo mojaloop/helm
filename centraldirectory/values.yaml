@@ -44,7 +44,7 @@ config:
   CDIR_PATHFINDER__PROVISIONING__ADDRESS: "http://$pathfinder_host:8080/nrs-pi/services/SIPIX/SendRequest"
   CDIR_PATHFINDER__QUERY__ADDRESS: "$pathfinder_host"
   CDIR_PATHFINDER__QUERY__PORT: "15353"
- 
+
 init:
   enabled: true
 
@@ -58,8 +58,8 @@ service:
 
   annotations: {}
 
-  # This allows one to point the service to an external backend. 
-  # This is useful for local development where one wishes to hijack 
+  # This allows one to point the service to an external backend.
+  # This is useful for local development where one wishes to hijack
   # the communication from the service to the node layer and point
   # to a specific endpoint (IP, Port, etc).
   external:
@@ -67,7 +67,7 @@ service:
     # 10.0.2.2 is the magic IP for the host on virtualbox's network
     ip: 10.0.2.2
     ports:
-      api: 
+      api:
         name: http-api
         externalPort: 3000
 
@@ -76,7 +76,7 @@ ingress:
   externalPath: /
   # Used to create an Ingress record.
   hosts:
-    api: central-directory.local
+    api: central-directory.zared.demo.openafrica.network
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: '/'
     # kubernetes.io/ingress.class: nginx
@@ -113,7 +113,7 @@ centralenduserregistry:
       path: /health
     initialDelaySeconds: 45
     periodSeconds: 15
-    
+
   livenessProbe:
     enabled: true
     httpGet:
@@ -136,8 +136,8 @@ centralenduserregistry:
 
     annotations: {}
 
-    # This allows one to point the service to an external backend. 
-    # This is useful for local development where one wishes to hijack 
+    # This allows one to point the service to an external backend.
+    # This is useful for local development where one wishes to hijack
     # the communication from the service to the node layer and point
     # to a specific endpoint (IP, Port, etc).
     external:
@@ -145,7 +145,7 @@ centralenduserregistry:
       # 10.0.2.2 is the magic IP for the host on virtualbox's network
       ip: 10.0.2.2
       ports:
-        provisioning: 
+        provisioning:
           name: http-api
           externalPort: 3001
 
@@ -154,7 +154,7 @@ centralenduserregistry:
     externalPath: /
     # Used to create an Ingress record.
     hosts:
-      api: central-end-user-registry.local
+      api: central-end-user-registry.zared.demo.openafrica.network
     annotations:
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
@@ -176,7 +176,7 @@ centralenduserregistry:
     #  memory: 128Mi
 
   postgresql:
-    enabled: true 
+    enabled: true
     nameOverride: "centralenduserregistry-postgresql"
     ## postgres image repository
     image: "postgres"
@@ -228,9 +228,9 @@ mockpathfinder:
         protocol: UDP
 
     annotations: {}
-    
-    # This allows one to point the service to an external backend. 
-    # This is useful for local development where one wishes to hijack 
+
+    # This allows one to point the service to an external backend.
+    # This is useful for local development where one wishes to hijack
     # the communication from the service to the node layer and point
     # to a specific endpoint (IP, Port, etc).
     external:
@@ -238,10 +238,10 @@ mockpathfinder:
       # 10.0.2.2 is the magic IP for the host on virtualbox's network
       ip: 10.0.2.2
       ports:
-        provisioning: 
+        provisioning:
           name: tcp-prov
           externalPort: 8080
-        query: 
+        query:
           name: tcp-query
           externalPort: 15353
 
@@ -250,7 +250,7 @@ mockpathfinder:
     enabled: false
     # Used to create an Ingress record.
     hosts:
-      api: mock-pathfinder.local
+      api: mock-pathfinder.zared.demo.openafrica.network
     annotations:
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
@@ -272,7 +272,7 @@ mockpathfinder:
     #  memory: 128Mi
 
   postgresql:
-    enabled: true 
+    enabled: true
     nameOverride: "mockpathfinder-postgresql"
     ## Create a database user
     postgresUser: mock-pathfinder
@@ -285,7 +285,7 @@ mockpathfinder:
       externalIPs: []
 
 postgresql:
-  enabled: true 
+  enabled: true
   nameOverride: "centraldirectory-postgresql"
   ## postgres image repository
   image: "postgres"
