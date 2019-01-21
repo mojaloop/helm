@@ -8,6 +8,6 @@
 
 - [Dashboard Documentation](./dashboards/README.md)
 
-## EFK - ElasticSearch FluendD & Kabana Monitoring for Mojaloop
+## EFK - ElasticSearch FluendtD & Kabana Monitoring for Mojaloop
 
 - [EFK Documentation](./EFK.md)
