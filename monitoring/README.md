@@ -49,9 +49,11 @@ Password: `kubectl -n monitoring get secrets/promfana-grafana -o 'go-template={{
 
 Login to the Grafana dashboard.
 
-1. Create a new Prometheus Data Source
-2. Name it `Prometheus`
-3. Mark it as `default`
+1. Create a new Data Source
+2. Name: `Prometheus`
+3. Type: `Prometheus`
+4. Mark it as `default`
+5. URL: `http://promfana-prometheus-server`
 
 ### 4. Import Dashboards
 
