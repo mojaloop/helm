@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "mock-dfsp.fullname" . }}
+  labels:
+    app: {{ template "mock-dfsp.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "mock-dfsp.fullname" . }}
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+          env:
+            - name: DFSP_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "mock-dfsp.fullname" . }}
+                  key: DFSP_ID
+            - name: MLAPI_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "mock-dfsp.fullname" . }}
+                  key: MLAPI_URL
+            - name: MLSWITCH_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "mock-dfsp.fullname" . }}
+                  key: MLSWITCH_URL
