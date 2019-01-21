@@ -17,7 +17,11 @@ function checkCommandResult () {
 echo "Removing old charts..."
 find ./ -name "charts"| xargs rm -Rf
 
-mkdir ./repo 
+mkdir ./repo
+
+echo "Packaging Promfana..."
+helm package -u -d ./repo ./monitoring/promfana
+checkCommandResult
 
 echo "Packaging Central-KMS..." 
 helm package -u -d ./repo ./centralkms 
