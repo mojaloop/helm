@@ -1,0 +1,42 @@
+# Default values for mojaloop-efk.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+global:
+  config:
+    ## Pod scheduling preferences.
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    ##
+    affinity: {}
+
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
+    ## Set toleration for schedular
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations: []
+
+# Declare variables to be passed into your templates.
+fluentd-elasticsearch:
+
+elasticsearch:
+  master:
+    persistence:
+      enabled: false
+  data:
+    persistence:
+      enabled: false
+
+kibana:
+  env:
+    ELASTICSEARCH_URL: http://elasticsearch-client:9200
+  files:
+    kibana.yml:
+      elasticsearch.url: http://elasticsearch-client:9200
+  ingress:
+    enabled: true
+    hosts:
+      - k8s-phoenix-dev0-efk.mojaloop.live
+  serviceAccount:
+    create: true
