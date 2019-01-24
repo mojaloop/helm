@@ -45,7 +45,7 @@ fluentd-elasticsearch:
     #   memory: 200Mi
 
   elasticsearch:
-    host: 'elasticsearch-client'
+    host: 'efk-elasticsearch-client'
     port: 9200
     scheme: 'http'
     ssl_version: TLSv1_2
@@ -231,6 +231,15 @@ fluentd-elasticsearch:
         read_from_head true
       </source>
       # Detect exceptions in the log output and forward them as one log entry.
+      <match kubernetes.var.log.containers.**fluentd**.log>
+        @type null
+      </match>
+      <match kubernetes.var.log.containers.**kube-system**.log>
+        @type null
+      </match>
+      <match kubernetes.**>
+        @type stdout
+      </match>
       <match raw.kubernetes.**>
         @id raw.kubernetes
         @type detect_exceptions
@@ -524,6 +533,14 @@ elasticsearch:
   # Declare variables to be passed into your templates.
   appVersion: "6.5.4"
 
+  svc:
+    master:
+      spec:
+        clusterIP:
+      ports:
+        - port: 9300
+          targetPort: transport
+
   ## Define serviceAccount names for components. Defaults to component's fully qualified name.
   ##
   serviceAccounts:
@@ -737,7 +754,7 @@ kibana:
     # To adjust a config option to an env var uppercase + replace `.` with `_`
     # Ref: https://www.elastic.co/guide/en/kibana/current/settings.html
     #
-    ELASTICSEARCH_URL: http://elasticsearch-client:9200
+    ELASTICSEARCH_URL: http://efk-elasticsearch-client:9200
     # SERVER_PORT: 5601
     # LOGGING_VERBOSE: "true"
     # SERVER_DEFAULTROUTE: "/app/kibana"
@@ -747,7 +764,7 @@ kibana:
       ## Default Kibana configuration from kibana-docker.
       server.name: kibana
       server.host: "0"
-      elasticsearch.url: http://elasticsearch-client:9200
+      elasticsearch.url: http://efk-elasticsearch-client:9200
 
       ## Custom config properties below
       ## Ref: https://www.elastic.co/guide/en/kibana/current/settings.html
