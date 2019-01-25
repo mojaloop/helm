@@ -11,6 +11,7 @@ Login to Grafana and create the following folders:
 - `Mojaloop - Application`
 - `Mojaloop - Datastore` 
 - `Mojaloop - Messaging`
+- `Mojaloop - Kubernetes`
 
 Import the corresponding dashboards:
 
@@ -27,3 +28,7 @@ Datastore
 Messaging
 - [Kafka Cluster Overview](./messaging/dashboard-Kafka%20-%20Cluster%20Overview.json)
 - [Kafka Topic Overview](./messaging/dashboard-Kafka%20-%20Topic%20Overview.json)
+
+Kubernetes:
+- [Clusters](./kubernetes/Kubernetes%20Cluster.json)
+- [Deployments](./kubernetes/Kubernetes%20Deployment.json)
