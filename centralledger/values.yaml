@@ -30,7 +30,7 @@ centralledger-service:
     api:
       image:
         repository: mojaloop/central-ledger
-        tag: v4.2.1
+        tag: v4.4.1
         pullPolicy: Always
         command: '["node", "src/api/index.js"]'
       service:
@@ -55,7 +55,7 @@ centralledger-service:
     admin:
       image:
         repository: mojaloop/central-ledger
-        tag: v4.2.1
+        tag: v4.4.1
         pullPolicy: Always
         command: '["node", "src/admin/index.js"]'
       service:
@@ -77,6 +77,10 @@ centralledger-service:
         initialDelaySeconds: 90
         periodSeconds: 15
 
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: true
 
   config:
     # admin api key-secret
@@ -183,7 +187,7 @@ centralledger-handler-transfer-prepare:
     api:
       image:
         repository: mojaloop/central-ledger
-        tag: v4.2.1
+        tag: v4.4.1
         pullPolicy: Always
         command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
       service:
@@ -204,6 +208,11 @@ centralledger-handler-transfer-prepare:
           path: /health
         initialDelaySeconds: 90
         periodSeconds: 15
+
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: true
 
   config:
     ## Forensic Logging sidecar
@@ -317,7 +326,7 @@ centralledger-handler-transfer-position:
     api:
       image:
         repository: mojaloop/central-ledger
-        tag: v4.2.1
+        tag: v4.4.1
         pullPolicy: Always
         command: '["node", "src/handlers/index.js", "handler", "--position"]'
       service:
@@ -338,6 +347,11 @@ centralledger-handler-transfer-position:
           path: /health
         initialDelaySeconds: 90
         periodSeconds: 15
+
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: true
 
   config:
     ## Forensic Logging sidecar
@@ -450,7 +464,7 @@ centralledger-handler-transfer-get:
     api:
       image:
         repository: mojaloop/central-ledger
-        tag: v4.2.1
+        tag: v4.4.1
         pullPolicy: Always
         command: '["node", "src/handlers/index.js", "handler", "--get"]'
       service:
@@ -471,6 +485,11 @@ centralledger-handler-transfer-get:
           path: /health
         initialDelaySeconds: 90
         periodSeconds: 15
+
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: false
 
   config:
     ## Forensic Logging sidecar
@@ -584,7 +603,7 @@ centralledger-handler-transfer-fulfil:
     api:
       image:
         repository: mojaloop/central-ledger
-        tag: v4.2.1
+        tag: v4.4.1
         pullPolicy: Always
         command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
       service:
@@ -605,6 +624,11 @@ centralledger-handler-transfer-fulfil:
           path: /health
         initialDelaySeconds: 90
         periodSeconds: 15
+
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: true
 
   config:
     ## Forensic Logging sidecar
@@ -717,7 +741,7 @@ centralledger-handler-timeout:
     api:
       image:
         repository: mojaloop/central-ledger
-        tag: v4.2.1
+        tag: v4.4.1
         pullPolicy: Always
         command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
       service:
@@ -738,6 +762,11 @@ centralledger-handler-timeout:
           path: /health
         initialDelaySeconds: 90
         periodSeconds: 15
+
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: false
 
   config:
     ## Forensic Logging sidecar
@@ -850,7 +879,7 @@ centralledger-handler-admin-transfer:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v4.2.1
+            tag: v4.4.1
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--admin"]'
           service:
@@ -871,6 +900,11 @@ centralledger-handler-admin-transfer:
               path: /health
             initialDelaySeconds: 90
             periodSeconds: 15
+
+      ## metric configuration for prometheus instrumentation
+      metrics:
+        ## flag to enable/disable the metrics end-points
+        enabled: false
 
       config:
         ## Forensic Logging sidecar
@@ -1296,6 +1330,11 @@ mysql:
   #    memory: 256Mi
   #    cpu: 100m
 
+  ## Configure the following values below if required
+  #   performance_schema=ON
+  #   max_connections=999
+  #   max_user_connections=999
+  #   thread_cache_size=999
   configFiles:
     node.cnf: |+
       [mysqld]
@@ -1313,9 +1352,12 @@ mysql:
       wsrep_cluster_name=galera
       wsrep_sst_method=xtrabackup-v2
       pxc_strict_mode=DISABLED
+      max_connections=999
+      max_user_connections=994
+      thread_cache_size=999
   ## When set to true will create sidecar for `prom/mysqld-exporter`
   ## metrics exporting
-  metricsExporter: false
+  metricsExporter: true
 
   ## When set to true will create sidecar to tail mysql log
   logTail: true
@@ -1457,7 +1499,9 @@ kafka:
   ## ref: https://kafka.apache.org/documentation/#brokerconfigs
   ##
   configurationOverrides:
+    ## Configure these to match the number of Kafka nodes for HA
     "offsets.topic.replication.factor": 1
+    "default.replication.factor": 1
     # "auto.leader.rebalance.enable": true
     # "auto.create.topics.enable": true
     # "controlled.shutdown.enable": true
@@ -1546,7 +1590,7 @@ kafka:
   prometheus:
     ## Prometheus JMX Exporter: exposes the majority of Kafkas metrics
     jmx:
-      enabled: false
+      enabled: true
 
       ## The image to use for the metrics collector
       image: solsson/kafka-prometheus-jmx-exporter@sha256
@@ -1570,7 +1614,7 @@ kafka:
 
     ## Prometheus Kafka Exporter: exposes complimentary metrics to JMX Exporter
     kafka:
-      enabled: false
+      enabled: true
 
       ## The image to use for the metrics collector
       image: danielqsj/kafka-exporter
