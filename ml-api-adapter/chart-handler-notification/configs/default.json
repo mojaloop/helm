@@ -29,6 +29,10 @@
     },
     "KAFKA": {
         "TOPIC_TEMPLATES": {
+            "GENERAL_TOPIC_TEMPLATE": {
+                "TEMPLATE": "topic-{{"{{"}}functionality{{"}}"}}-{{"{{"}}action{{"}}"}}",
+                "REGEX": "topic-(.*)-(.*)"
+            },
             "PARTICIPANT_TOPIC_TEMPLATE": {
                 "TEMPLATE": "topic-{{"{{"}}participantName{{"}}"}}-{{"{{"}}functionality{{"}}"}}-{{"{{"}}action{{"}}"}}",
                 "REGEX": "topic-(.*)-(.*)-(.*)"
@@ -40,6 +44,10 @@
             "FULFIL_TOPIC_TEMPLATE": {
                 "TEMPLATE": "topic-transfer-fulfil",
                 "REGEX": "topic-transfer-fulfil"
+            },
+            "GET_TRANSFERS_TOPIC_TEMPLATE": {
+                "TEMPLATE": "topic-transfer-get",
+                "REGEX": "topic-transfer-get"
             }
         },
         "CONSUMER": {
@@ -96,6 +104,24 @@
                         "rdkafkaConf": {
                             "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
                             "client.id": "ml-prod-transfer-fulfil",
+                            "event_cb": true,
+                            "dr_cb": false,
+                            "socket.keepalive.enable": true,
+                            "queue.buffering.max.messages": 10000000
+                        },
+                        "topicConf": {
+                            "request.required.acks": "all"
+                        }
+                    }
+                },
+                "GET": {
+                    "config": {
+                        "options": {
+                            "messageCharset": "utf8"
+                        },
+                        "rdkafkaConf": {
+                            "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
+                            "client.id": "ml-prod-transfer-get",
                             "event_cb": true,
                             "dr_cb": false,
                             "socket.keepalive.enable": true,
