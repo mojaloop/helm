@@ -7,5 +7,35 @@
     "HUB_PARTICIPANT": {
         "ID": 1,
         "NAME": "Hub"
-    }
+    },
+    "KAFKA": {
+        "TOPIC_TEMPLATES": {
+          "GENERAL_TOPIC_TEMPLATE": {
+            "TEMPLATE": "topic-{{functionality}}-{{action}}",
+            "REGEX": "topic-(.*)-(.*)"
+          }
+        },
+        "PRODUCER": {
+          "NOTIFICATION": {
+            "EVENT": {
+              "config": {
+                "options": {
+                  "messageCharset": "utf8"
+                },
+                "rdkafkaConf": {
+                  "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+                  "client.id": "cs-prod-notification-event",
+                  "event_cb": true,
+                  "socket.keepalive.enable": true,
+                  "queue.buffering.max.messages": 10000000,
+                  "dr_cb": false
+                },
+                "topicConf": {
+                    "request.required.acks": "all"
+                }
+              }
+            }
+          }
+        }
+  }
 }
