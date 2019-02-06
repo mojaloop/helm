@@ -24,26 +24,26 @@ containers:
   api:
     image:
       repository: mojaloop/central-ledger
-      tag: v4.4.1
+      tag: v5.1.0
       pullPolicy: Always
       command: '["node", "src/handlers/index.js", "handler", "--admin"]'
     service:
       ports:
         api:
           name: http-api
-          externalPort: 3000
-          internalPort: 3000
+          externalPort: 3001
+          internalPort: 3001
     readinessProbe:
       enabled: true
       httpGet:
         path: /health
-      initialDelaySeconds: 120
+      initialDelaySeconds: 60
       periodSeconds: 15
     livenessProbe:
       enabled: true
       httpGet:
         path: /health
-      initialDelaySeconds: 90
+      initialDelaySeconds: 60
       periodSeconds: 15
 
 ## metric configuration for prometheus instrumentation
@@ -119,9 +119,6 @@ service:
     ports:
       api:
         name: http-api
-        externalPort: 3000
-      admin:
-        name: http-api-admin
         externalPort: 3001
 
 ingress:
@@ -129,7 +126,6 @@ ingress:
   type: http
   externalPath:
     api: /
-    admin: /admin
   # Used to create an Ingress record.
   hosts:
     api: central-ledger-transfer-prepare.local

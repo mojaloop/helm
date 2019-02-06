@@ -21,7 +21,7 @@ global:
 replicaCount: 1
 image:
   repository: mojaloop/central-settlement
-  tag: v4.4.1
+  tag: v5.1.0
   pullPolicy: Always
 
 readinessProbe:
@@ -39,6 +39,10 @@ livenessProbe:
   periodSeconds: 15
 
 config:
+  ## Kafka Configuration
+  # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+  kafka_host: '$release_name-kafka'
+  kafka_port: 9092
   ## DB Configuration
   # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
   db_type: 'mysql'
@@ -49,6 +53,9 @@ config:
   db_user: central_ledger
   db_password: oyMxgZChuu
   db_database: central_ledger
+  hub_participant:
+    id: 1
+    name: hub
 
 init:
   enabled: true
