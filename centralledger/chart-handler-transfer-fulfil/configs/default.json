@@ -38,7 +38,12 @@
             },
             "config": {
                 "timeout": {{ .Values.metrics.config.timeout }},
-                "prefix": "{{ .Values.metrics.config.prefix }}"
+                "prefix": "{{ .Values.metrics.config.prefix | quote }}",
+                "defaultLabels": {
+                {{- range $key, $value := .Values.metrics.config.defaultLabels }}
+                    {{ $key  | quote }}: {{ $value | quote }}
+                {{- end }}
+                }
             }
         }
     },
