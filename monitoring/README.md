@@ -2,6 +2,9 @@
 
 ## Mojaloop Prometheus & Grafana Installation
 
+Refer to the [Metrics for Mojaloop
+](METRICS.md) for information on the specific Metrics that have been instrumented through Prometheus.
+
 ### 1. Install Prometheus & Grafana
 
 Ensure that you have setup the Mojaloop Helm repository: `helm repo add mojaloop http://mojaloop.io/helm/repo/`
