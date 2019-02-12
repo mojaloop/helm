@@ -1,8 +1,8 @@
 # Monitoring for Mojaloop
 
-## Mojaloop Prometheus & Grafana Installation
-
 Refer to the [Metrics for Mojaloop](METRICS.md) for information on the specific Metrics that have been instrumented through Prometheus.
+
+## Mojaloop Prometheus & Grafana Installation
 
 - [PROMFANA Documentation](./PROMFANA.md)
 
