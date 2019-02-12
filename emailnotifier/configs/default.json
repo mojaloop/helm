@@ -15,6 +15,9 @@
         }
     },
     "PORT": {{ .Values.config.PORT }},
+    "HUB_PARTICIPANT": {
+        "NAME": "{{ .Values.config.hub_participant.name }}"
+    },
     "KAFKA": {
         "TOPIC_TEMPLATES": {
             "NOTIFICATION_TOPIC_TEMPLATE": {
@@ -40,8 +43,8 @@
                             "consumeTimeout": 1000
                         },
                         "rdkafkaConf": {
-                            "client.id": "emailnotif-con-notification-event",
-                            "group.id": "email-notifier-kafka",
+                            "client.id": "enotifier-con",
+                            "group.id": "enotifier-group",
                             "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "socket.blocking.max.ms": 1,
                             "fetch.wait.max.ms": 1,
@@ -71,7 +74,7 @@
                         "rdkafkaConf": {
                             "debug": "all",
                             "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
-                            "client.id": "cep-prod-notification-event",
+                            "client.id": "enotifier-prod",
                             "event_cb": true,
                             "compression.codec": "none",
                             "retry.backoff.ms": 100,
