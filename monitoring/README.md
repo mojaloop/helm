@@ -2,8 +2,7 @@
 
 ## Mojaloop Prometheus & Grafana Installation
 
-Refer to the [Metrics for Mojaloop
-](METRICS.md) for information on the specific Metrics that have been instrumented through Prometheus.
+Refer to the [Metrics for Mojaloop](METRICS.md) for information on the specific Metrics that have been instrumented through Prometheus.
 
 - [PROMFANA Documentation](./PROMFANA.md)
 
