@@ -13,5 +13,4 @@ Mojaloop metrics that have been instrumented through Prometheus:
 | moja_transfer_prepare | Central-Ledger | Consume a prepare transfer message from the kafka topic and process it accordingly | serviceName, success, fspId  |
 | moja_transfer_position | Central-Ledger | Consume a prepare transfer message from the kafka topic and process it accordingly | serviceName, success, fspId  |
 | moja_transfer_fulfil | Central-Ledger | Consume a fulfil transfer message from the kafka topic and process it accordingly | serviceName, success, fspId  |
-| moja_sim_http_request | Simulator | Histogram for http operation | success, fsp, operation, source, destination  |
-
+| moja_sim_request | Simulator | Histogram for http operation | success, fsp, operation, source, destination  |
