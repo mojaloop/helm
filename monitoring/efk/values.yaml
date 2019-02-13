@@ -26,6 +26,12 @@ fluentd-elasticsearch:
   ## ref: http://kubernetes.io/docs/user-guide/images/#updating-images
     tag: v2.4.0
     pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ##
+    # pullSecrets:
+    #   - myRegistrKeySecretName
 
   # Specify to use specific priorityClass for pods
   # ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
@@ -231,15 +237,6 @@ fluentd-elasticsearch:
         read_from_head true
       </source>
       # Detect exceptions in the log output and forward them as one log entry.
-      <match kubernetes.var.log.containers.**fluentd**.log>
-        @type null
-      </match>
-      <match kubernetes.var.log.containers.**kube-system**.log>
-        @type null
-      </match>
-      <match kubernetes.**>
-        @type stdout
-      </match>
       <match raw.kubernetes.**>
         @id raw.kubernetes
         @type detect_exceptions
@@ -487,7 +484,6 @@ fluentd-elasticsearch:
       <filter kubernetes.**>
         @type kubernetes_metadata
       </filter>
-
       <match **>
         @id elasticsearch
         @type elasticsearch
@@ -515,7 +511,6 @@ fluentd-elasticsearch:
           overflow_action block
         </buffer>
       </match>
-
   # extraVolumes:
   #   - name: es-certs
   #     secret:
