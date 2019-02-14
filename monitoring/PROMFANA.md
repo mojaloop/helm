@@ -1,8 +1,17 @@
 # Prometheus & Grafana Monitoring for Mojaloop
 
+**What?**
+- **Prometheus**: Leading open-source instrumentation solution for monitoring
+- **Grafana**: The open platform for beautiful analytics and monitoring
+
+**Why?**
+- Metric Instrumentation for Mojaloop
+- Low overhead on nodejs (histograms + pull metric end-point)
+- Real-time metric visualization for Performance and Health monitoring of the Mojaloop Stack
+
 ## Mojaloop Prometheus & Grafana Installation
 
-### 1. Install Prometheus & Grafana
+### 1. Installation
 
 Ensure that you have setup the Mojaloop Helm repository: `helm repo add mojaloop http://mojaloop.io/helm/repo/`
 
@@ -74,6 +83,10 @@ __Where the values.yaml is the respective values file for the stable/prometheus 
 
 __Where the values.yaml is the respective values file for the stable/grafana chart__
 
+___Note: Please ensure that you configure the Ingress for Grafana & Prometheus as required in the values.yaml.___
+
+___Note: Target namespace in the above command can be changed as required.___
+
 ### 3. Follow the above steps in "Mojaloop Prometheus & Grafana Installation" section 
 
 - [Network Policy Configuration](#12-Configure-Network-Policy-to-allow-for-all-Ingresses-into-the-your-Mojaloop-environment-from-the-Internal-K8s-Network)
@@ -83,7 +96,9 @@ __Where the values.yaml is the respective values file for the stable/grafana cha
 
 ## Known issues
 
-Affinity and tolerations are not being set correctly by the Prometheus helm chart as when this was written. One must manually add this in the deployment template if desired until the issue has been resolved.
+1. **Warning:** Prometheus does not have an authentication mechanism. To be addressed in future. It is not recommended that you expose this through Ingress publicly. 
+
+2. Affinity and tolerations are not being set correctly by the Prometheus helm chart as when this was written. One must manually add this in the deployment template if desired until the issue has been resolved.
 
 ```YAML
         "affinity": {

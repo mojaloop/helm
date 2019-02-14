@@ -57,7 +57,7 @@ fluentd-elasticsearch:
     ssl_version: TLSv1_2
     buffer_chunk_limit: 2M
     buffer_queue_limit: 8
-    logstash_prefix: 'logstash'
+    logstash_prefix: 'fluentd'
 
   # If you want to add custom environment variables, use the env dict
   # You can then reference these in your config file e.g.:
@@ -226,6 +226,8 @@ fluentd-elasticsearch:
       # {"log":"[info:2016-02-16T16:04:05.930-08:00] Some log text here\n","stream":"stdout","time":"2016-02-17T00:04:05.931087621Z"}
       # CRI Log Example:
       # 2016-02-17T00:04:05.931087621Z stdout F [info:2016-02-16T16:04:05.930-08:00] Some log text here
+
+      ## Source for all container logs. Fluentd will be running as a Daemonset, and should have access to this location
       <source>
         @id fluentd-containers.log
         @type tail
@@ -236,7 +238,24 @@ fluentd-elasticsearch:
         format json
         read_from_head true
       </source>
-      # Detect exceptions in the log output and forward them as one log entry.
+
+      ## Uncomment if you want to ignore all fluentd logs
+      #  <match kubernetes.var.log.containers.**fluentd**.log>
+      #    @type null
+      #  </match>
+      #
+
+      ## Uncomment if you want to ignore all Kubernetes System logs
+      #  <match kubernetes.var.log.containers.**kube-system**.log>
+      #    @type null
+      #  </match>
+
+      ## Uncomment if you have issues consuming logs
+      #  <match kubernetes.**>
+      #    @type stdout
+      #  </match>
+
+      ## Detect exceptions in the log output and forward them as one log entry.
       <match raw.kubernetes.**>
         @id raw.kubernetes
         @type detect_exceptions
@@ -640,7 +659,7 @@ elasticsearch:
         # kubernetes.io/tls-acme: "true"
       path: /
       hosts:
-        - k8s-phoenix-dev0-efk.mojaloop.live
+        - elasticsearch.local
       tls: []
       #  - secretName: chart-example-tls
       #    hosts:
@@ -797,7 +816,7 @@ kibana:
   ingress:
     enabled: true
     hosts:
-      - k8s-phoenix-dev0-efk.mojaloop.live
+      - kibana.local
       # - localhost.localdomain/kibana
     # annotations:
     #   kubernetes.io/ingress.class: nginx
