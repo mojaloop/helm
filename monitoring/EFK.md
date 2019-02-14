@@ -14,7 +14,7 @@
 
 ## EFK Installation
 
-### 1. Install Installation
+### 1. Installation
 
 Ensure that you have setup the Mojaloop Helm repository: `helm repo add mojaloop http://mojaloop.io/helm/repo/`
 
