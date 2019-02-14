@@ -23,6 +23,10 @@ echo "Packaging Promfana..."
 helm package -u -d ./repo ./monitoring/promfana
 checkCommandResult
 
+echo "Packaging EFK..."
+helm package -u -d ./repo ./monitoring/efk
+checkCommandResult
+
 echo "Packaging Central-KMS..." 
 helm package -u -d ./repo ./centralkms 
 checkCommandResult 

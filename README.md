@@ -243,3 +243,7 @@ This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
 Package all charts, and created an index.yaml in ./repo directory
 
 `sh package.sh`
+
+## Monitoring Mojaloop
+
+Refer to [Monitoring Documentation](./monitoring/README.md)
