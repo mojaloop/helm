@@ -23,6 +23,10 @@ echo "Updating Promfana..."
 helm dep up ./monitoring/promfana
 checkCommandResult
 
+echo "Updating EFK..."
+helm dep up ./monitoring/efk
+checkCommandResult
+
 echo "Updating Central-KMS..."
 helm dep up ./centralkms
 checkCommandResult
