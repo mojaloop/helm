@@ -109,7 +109,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(irate(moja_sim_http_request_count[30s])) by (fsp, operation)",
+          "expr": "sum(irate(moja_sim_request_count[120s])) by (source, operation)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -117,7 +117,7 @@
           "refId": "A"
         },
         {
-          "expr": "sum(irate(moja_sim_http_request_count[30s])) by (kubernetes_pod_name)",
+          "expr": "sum(irate(moja_sim_request_count[120s])) by (kubernetes_pod_name)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -125,7 +125,7 @@
           "refId": "E"
         },
         {
-          "expr": "sum(irate(moja_sim_http_request_count[30s])) by (fsp, operation, kubernetes_pod_name)",
+          "expr": "sum(irate(moja_sim_request_count[120s])) by (source, operation, kubernetes_pod_name)",
           "format": "time_series",
           "hide": true,
           "intervalFactor": 1,
@@ -133,7 +133,7 @@
           "refId": "B"
         },
         {
-          "expr": "sum(irate(moja_sim_http_request_count[30s])) by (app)",
+          "expr": "sum(irate(moja_sim_request_count[120s])) by (app)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{app}}",
@@ -242,7 +242,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(moja_sim_http_request_count{fsp='payee', operation='postTransfers'}[30s]))",
+          "expr": "sum(rate(moja_sim_request_count{fsp='payee', operation='postTransfers'}[120s]))",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -324,10 +324,11 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(moja_sim_http_request_count{fsp='payee', operation='putTransfersById'}[30s]))",
+          "expr": "sum(rate(moja_sim_request_count{fsp='payee', operation='putTransfersById'}[120s]))",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -406,7 +407,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(moja_sim_http_request_count{fsp='payee'}[30s]))",
+          "expr": "sum(rate(moja_sim_request_count{fsp='payee'}[120s]))",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -470,7 +471,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(irate(moja_sim_http_request_sum[30s]) / irate(moja_sim_http_request_count[30s])) by (fsp, operation, kubernetes_pod_name)",
+          "expr": "avg(irate(moja_sim_request_sum[120s]) / irate(moja_sim_request_count[120s])) by (fsp, operation, kubernetes_pod_name)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -478,7 +479,7 @@
           "refId": "A"
         },
         {
-          "expr": "avg(irate(moja_sim_http_request_sum[30s]) / irate(moja_sim_http_request_count[30s])) by (kubernetes_pod_name)",
+          "expr": "avg(irate(moja_sim_request_sum[120s]) / irate(moja_sim_request_count[120s])) by (kubernetes_pod_name)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -486,7 +487,7 @@
           "refId": "B"
         },
         {
-          "expr": "avg(irate(moja_sim_http_request_sum[30s]) / irate(moja_sim_http_request_count[30s])) by (fsp, operation)",
+          "expr": "avg(irate(moja_sim_request_sum[120s]) / irate(moja_sim_request_count[120s])) by (fsp, operation)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -494,14 +495,14 @@
           "refId": "C"
         },
         {
-          "expr": "avg(irate(moja_sim_http_request_sum[30s]) / irate(moja_sim_http_request_count[30s])) by (app)",
+          "expr": "avg(irate(moja_sim_request_sum[120s]) / irate(moja_sim_request_count[120s])) by (app)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{app}}",
           "refId": "D"
         },
         {
-          "expr": "irate(moja_sim_http_request_sum[30s]) / irate(moja_sim_http_request_count[30s])",
+          "expr": "irate(moja_sim_request_sum[120s]) / irate(moja_sim_request_count[120s])",
           "format": "time_series",
           "hide": true,
           "interval": "",
@@ -601,7 +602,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(moja_sim_nodejs_eventloop_lag_seconds)",
+          "expr": "avg(moja_nodejs_eventloop_lag_seconds{serviceName=\"simulator\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -689,7 +690,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "kube_deployment_spec_replicas{deployment=~\".*simulators.*\"}",
+          "expr": "kube_deployment_spec_replicas{deployment=~\".*simulator.*\"}",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 1,
@@ -739,7 +740,7 @@
       }
     }
   ],
-  "refresh": false,
+  "refresh": "5s",
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
@@ -778,5 +779,5 @@
   "timezone": "",
   "title": "Mojaloop - Simulators",
   "uid": "-Sr0y8fip",
-  "version": 5
+  "version": 3
 }

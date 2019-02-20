@@ -1,8 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_K8S-PHOENIX-PERF1",
-      "label": "k8s-phoenix-perf1",
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
       "description": "",
       "type": "datasource",
       "pluginId": "prometheus",
@@ -72,7 +72,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "ML API Lag by  Consumer Group",
       "fill": 1,
       "gridPos": {
@@ -111,6 +111,8 @@
         {
           "expr": "sum(kafka_consumergroup_lag{topic=~\"topic-.*\", consumergroup=~\"ml-group.*\"}) by (consumergroup, topic)",
           "format": "time_series",
+          "instant": false,
+          "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{topic}}",
           "refId": "A"
@@ -174,7 +176,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "decimals": 1,
       "fill": 1,
       "gridPos": {
@@ -212,7 +214,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(moja_ml_service_transfers_prepare_count{}[30s])) by (app)",
+          "expr": "sum(rate(moja_transfer_prepare_count{serviceName=\"ml-service\"}[120s])) by (app)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -220,28 +222,28 @@
           "refId": "D"
         },
         {
-          "expr": "sum(rate(moja_ml_service_transfers_fulfil_count{}[30s])) by (app)",
+          "expr": "sum(rate(moja_transfer_fulfil_count{serviceName=\"ml-service\"}[120s])) by (app)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Transfers API Fulfill",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(moja_ml_notifi_hand_notification_event_count{}[30s])) by (app)",
+          "expr": "sum(rate(moja_notification_event_count{serviceName=\"ml-handler-notification\"}[120s])) by (app)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Notification Events",
           "refId": "B"
         },
         {
-          "expr": "sum(rate(moja_ml_notifi_hand_notification_event_count{}[30s])) by (kubernetes_pod_name)",
+          "expr": "sum(rate(moja_notification_event_count{serviceName=\"ml-handler-notification\"}[120s])) by (kubernetes_pod_name)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{kubernetes_pod_name}}",
           "refId": "C"
         },
         {
-          "expr": "sum(rate(moja_ml_service_transfers_prepare_count{}[30s])) by (kubernetes_pod_name)",
+          "expr": "sum(rate(moja_transfer_prepare_count{serviceName=\"ml-service\"}[120s])) by (kubernetes_pod_name)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -299,7 +301,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Transfers API Prepares / sec",
       "format": "none",
       "gauge": {
@@ -352,7 +354,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(moja_ml_service_transfers_prepare_count{}[30s]))",
+          "expr": "sum(irate(moja_transfer_prepare_count{serviceName=\"ml-service\"}[120s]))",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -383,7 +385,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Transfers API Fullfills / sec",
       "format": "none",
       "gauge": {
@@ -436,7 +438,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(moja_ml_service_transfers_fulfil_count{}[30s]))",
+          "expr": "sum(irate(moja_transfer_fulfil_count{serviceName=\"ml-service\"}[120s]))",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -465,7 +467,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Notification Events / Sec",
       "format": "none",
       "gauge": {
@@ -518,7 +520,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(moja_ml_notifi_hand_notification_event_count{}[30s]))",
+          "expr": "sum(irate(moja_notification_event_count{serviceName=\"ml-handler-notification\"}[120s]))",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -543,7 +545,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "fill": 1,
       "gridPos": {
         "h": 9,
@@ -579,7 +581,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(irate(moja_ml_service_transfers_prepare_sum[30s]) / irate(moja_ml_service_transfers_prepare_count[30s]))",
+          "expr": "avg(irate(moja_transfer_prepare_sum{serviceName=\"ml-service\"}[120s]) / irate(moja_transfer_prepare_count{serviceName=\"ml-service\"}[120s]))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -587,14 +589,14 @@
           "refId": "A"
         },
         {
-          "expr": "avg(irate(moja_ml_service_transfers_fulfil_sum[30s]) / irate(moja_ml_service_transfers_fulfil_count[30s]))",
+          "expr": "avg(irate(moja_transfer_fulfil_sum{serviceName=\"ml-service\"}[120s]) / irate(moja_transfer_fulfil_count{serviceName=\"ml-service\"}[120s]))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Transfer API Fulfil - Average",
           "refId": "B"
         },
         {
-          "expr": "avg(irate(moja_ml_notifi_hand_notification_event_sum[30s]) / irate(moja_ml_notifi_hand_notification_event_count[30s]))",
+          "expr": "avg(irate(moja_notification_event_sum{serviceName=\"ml-handler-notification\"}[120s]) / irate(moja_notification_event_count{serviceName=\"ml-handler-notification\"}[120s]))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Notification Events - Average",
@@ -663,7 +665,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Mojaloop API Adapter Total CPU Usage",
       "format": "percent",
       "gauge": {
@@ -716,7 +718,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum (irate (container_cpu_usage_seconds_total{namespace='test', pod_name=~'test-ml.*'}[1m])) / sum (machine_cpu_cores{kubernetes_io_hostname=~'k8s-phoenix-perf1-gc.*'}) * 100",
+          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -745,7 +747,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "ML API Service CPU Usage",
       "format": "percent",
       "gauge": {
@@ -798,7 +800,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum (irate (container_cpu_usage_seconds_total{namespace='test', pod_name=~'test-ml-api-adapter-service-.*'}[30s])) / sum (machine_cpu_cores{kubernetes_io_hostname=~'k8s-phoenix-perf1-gc.*'}) * 100",
+          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-service.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -827,7 +829,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_K8S-PHOENIX-PERF1}",
+      "datasource": "${DS_PROMETHEUS}",
       "description": "ML API Notification CPU Usage",
       "format": "percent",
       "gauge": {
@@ -880,7 +882,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum (irate (container_cpu_usage_seconds_total{namespace='test', pod_name=~'test-ml-api-adapter-handler-notification-.*'}[30s])) / sum (machine_cpu_cores{kubernetes_io_hostname=~'k8s-phoenix-perf1-gc.*'}) * 100",
+          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-handler-notification.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -901,7 +903,7 @@
       "valueName": "avg"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -909,317 +911,302 @@
         "y": 29
       },
       "id": 28,
-      "panels": [
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "${DS_K8S-PHOENIX-PERF1}",
-          "description": "ML-API  -  CPU Usage in Seconds by Pod",
-          "fill": 1,
-          "gridPos": {
-            "h": 7,
-            "w": 24,
-            "x": 0,
-            "y": 30
-          },
-          "id": 2,
-          "legend": {
-            "alignAsTable": true,
-            "avg": true,
-            "current": true,
-            "max": true,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "percentage": false,
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "sum (rate (moja_ml_service_process_cpu_seconds_total[1m])) by (app)",
-              "format": "time_series",
-              "hide": true,
-              "intervalFactor": 1,
-              "legendFormat": "{{app}}",
-              "refId": "A"
-            },
-            {
-              "expr": "sum (rate (moja_ml_notifi_hand_process_cpu_seconds_total[1m])) by (app)",
-              "format": "time_series",
-              "hide": true,
-              "intervalFactor": 1,
-              "legendFormat": "{{app}}",
-              "refId": "B"
-            },
-            {
-              "expr": "sum(\n    rate(container_cpu_usage_seconds_total{namespace='test', pod_name=~'test-ml.*'}[30s]))\nby (pod_name)",
-              "format": "time_series",
-              "intervalFactor": 1,
-              "legendFormat": "{{pod_name}}",
-              "refId": "C"
-            },
-            {
-              "expr": "sum(\n    rate(container_cpu_usage_seconds_total{namespace='test', pod_name=~'test-ml.*'}[30s]))",
-              "format": "time_series",
-              "intervalFactor": 1,
-              "legendFormat": "All Total",
-              "refId": "D"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "ML-API  -  CPU Usage in Seconds by Pod",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "percent",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        }
-      ],
+      "panels": [],
       "title": "CPU Usage by Pods",
       "type": "row"
     },
     {
-      "collapsed": true,
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "description": "ML-API  -  CPU Usage in Seconds by Pod",
+      "fill": 1,
       "gridPos": {
-        "h": 1,
+        "h": 7,
         "w": 24,
         "x": 0,
         "y": 30
       },
-      "id": 34,
-      "panels": [
+      "id": 2,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "${DS_K8S-PHOENIX-PERF1}",
-          "decimals": 0,
-          "fill": 1,
-          "gridPos": {
-            "h": 4,
-            "w": 24,
-            "x": 0,
-            "y": 11
-          },
-          "id": 18,
-          "legend": {
-            "alignAsTable": true,
-            "avg": false,
-            "current": true,
-            "max": false,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "sideWidth": null,
-            "sort": "current",
-            "sortDesc": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "percentage": false,
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "kube_deployment_spec_replicas{deployment=~\".*-ml-api-.*\"}",
-              "format": "time_series",
-              "hide": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{deployment}}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "ML-API - # Nodes for each Components",
-          "tooltip": {
-            "shared": false,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "decimals": 0,
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          "expr": "sum (rate (moja_process_cpu_seconds_total{serviceName=~\"ml-.*\"}[2m])) by (app)",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{app}}",
+          "refId": "A"
         },
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "${DS_K8S-PHOENIX-PERF1}",
-          "fill": 1,
-          "gridPos": {
-            "h": 7,
-            "w": 24,
-            "x": 0,
-            "y": 15
-          },
-          "id": 10,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "percentage": false,
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "avg(moja_ml_service_nodejs_eventloop_lag_seconds)",
-              "format": "time_series",
-              "intervalFactor": 1,
-              "legendFormat": "ML-API-Service",
-              "refId": "A"
-            },
-            {
-              "expr": " avg(moja_ml_notifi_hand_nodejs_eventloop_lag_seconds)",
-              "format": "time_series",
-              "intervalFactor": 1,
-              "legendFormat": "ML-API-Notification-Handler",
-              "refId": "B"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "ML-API  - Event Loop Lag in Seconds",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "s",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          "expr": "sum(\n    rate(container_cpu_usage_seconds_total{pod_name=~'.*ml.*'}[2m]))\nby (pod_name)",
+          "format": "time_series",
+          "hide": true,
+          "intervalFactor": 1,
+          "legendFormat": "{{pod_name}}",
+          "refId": "C"
+        },
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{pod_name=~'.*ml.*'}[2m]))",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "All Total",
+          "refId": "D"
         }
       ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "ML-API  -  CPU Usage in Seconds by Pod",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "percent",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "id": 34,
+      "panels": [],
       "title": "Misc",
       "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "decimals": 0,
+      "fill": 1,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      },
+      "id": 18,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": true,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sideWidth": null,
+        "sort": "current",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "kube_deployment_spec_replicas{deployment=~\".*ml-api-.*\"}",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{deployment}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "ML-API - # Nodes for each Components",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": 0,
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "fill": 1,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 42
+      },
+      "id": 10,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "avg(moja_nodejs_eventloop_lag_seconds{serviceName=~\"ml.*\"}) by (app)",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{app}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "ML-API  - Event Loop Lag in Seconds",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "s",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
   "refresh": "10s",
@@ -1261,5 +1248,5 @@
   "timezone": "",
   "title": "Mojaloop - ML-API",
   "uid": "5z9mkZ-mz",
-  "version": 79
+  "version": 8
 }

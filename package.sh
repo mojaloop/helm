@@ -19,6 +19,10 @@ find ./ -name "charts"| xargs rm -Rf
 
 mkdir ./repo
 
+echo "Packaging Simulator..."
+helm package -u -d ./repo ./simulator
+checkCommandResult
+
 echo "Packaging Promfana..."
 helm package -u -d ./repo ./monitoring/promfana
 checkCommandResult
