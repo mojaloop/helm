@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "simulators.fullname" . }}
+  labels:
+    app: {{ template "simulators.name" . }}
+    chart: {{ template "simulators.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort | quote}}
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "simulators.name" . }}
+    release: {{ .Release.Name }}

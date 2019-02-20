@@ -1,0 +1,86 @@
+# Default values for simulators.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: mojaloop/simulator
+  tag: v5.1.0
+  pullPolicy: Always
+
+imagePullSecrets: []
+#  - name: {{replace with credential}}
+
+metrics:
+  enabled: true
+  prefix: moja_
+  timeout: 5000
+  defaultLabels:
+    serviceName: simulator
+
+config:
+  ## Add '$release' into any of the *_SERVICE_ENDPOINT values to include the release name as part of the deployment
+  PARTIES_SERVICE_ENDPOINT: 'http://localhost:8088'
+  QUOTES_SERVICE_ENDPOINT: 'http://localhost:8088'
+  TRANSFERS_SERVICE_ENDPOINT: 'http://localhost:8088'
+  TRANSFERS_FULFIL_RESPONSE_DISABLED: false
+  TRANSFERS_FULFILMENT: 'XoSz1cL0tljJSCp_VtIYmPNw-zFUgGfbUqf69AagUzY'
+  TRANSFERS_CONDITION: 'HOr22-H3AfTDHrSkPjJtVPRdKouuMkDXTR4ejlQa8Ks'
+  TRANSFERS_ILPPACKET: 'AQAAAAAAAADIEHByaXZhdGUucGF5ZWVmc3CCAiB7InRyYW5zYWN0aW9uSWQiOiIyZGY3NzRlMi1mMWRiLTRmZjctYTQ5NS0yZGRkMzdhZjdjMmMiLCJxdW90ZUlkIjoiMDNhNjA1NTAtNmYyZi00NTU2LThlMDQtMDcwM2UzOWI4N2ZmIiwicGF5ZWUiOnsicGFydHlJZEluZm8iOnsicGFydHlJZFR5cGUiOiJNU0lTRE4iLCJwYXJ0eUlkZW50aWZpZXIiOiIyNzcxMzgwMzkxMyIsImZzcElkIjoicGF5ZWVmc3AifSwicGVyc29uYWxJbmZvIjp7ImNvbXBsZXhOYW1lIjp7fX19LCJwYXllciI6eyJwYXJ0eUlkSW5mbyI6eyJwYXJ0eUlkVHlwZSI6Ik1TSVNETiIsInBhcnR5SWRlbnRpZmllciI6IjI3NzEzODAzOTExIiwiZnNwSWQiOiJwYXllcmZzcCJ9LCJwZXJzb25hbEluZm8iOnsiY29tcGxleE5hbWUiOnt9fX0sImFtb3VudCI6eyJjdXJyZW5jeSI6IlVTRCIsImFtb3VudCI6IjIwMCJ9LCJ0cmFuc2FjdGlvblR5cGUiOnsic2NlbmFyaW8iOiJERVBPU0lUIiwic3ViU2NlbmFyaW8iOiJERVBPU0lUIiwiaW5pdGlhdG9yIjoiUEFZRVIiLCJpbml0aWF0b3JUeXBlIjoiQ09OU1VNRVIiLCJyZWZ1bmRJbmZvIjp7fX19'
+  LOG_LEVEL: 'info'
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: http
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: 8444
+    scheme: HTTP
+  initialDelaySeconds: 5
+  periodSeconds: 15
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: 8444
+    scheme: HTTP
+  initialDelaySeconds: 5
+  periodSeconds: 15
+
+ingress:
+  enabled: true
+  annotations: {
+    "nginx.ingress.kubernetes.io/rewrite-target": "/"
+  }
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  path: /
+  hosts:
+    - mojaloop-simulators.local
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
