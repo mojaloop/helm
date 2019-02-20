@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "simulators.fullname" . }}
+  labels:
+      app: {{ template "simulators.fullname" . }}
+      chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
+data:
+  PARTIES_ENDPOINT: {{ (.Values.config.PARTIES_SERVICE_ENDPOINT | replace "$release_name" .Release.Name) }}
+  QUOTES_ENDPOINT: {{ (.Values.config.QUOTES_SERVICE_ENDPOINT | replace "$release_name" .Release.Name) }}
+  TRANSFERS_ENDPOINT: {{ (.Values.config.TRANSFERS_SERVICE_ENDPOINT | replace "$release_name" .Release.Name) }}
+  TRANSFERS_FULFIL_RESPONSE_DISABLED: {{ .Values.config.TRANSFERS_FULFIL_RESPONSE_DISABLED | quote }}
+  TRANSFERS_FULFILMENT: {{ .Values.config.TRANSFERS_FULFILMENT | quote }}
+  TRANSFERS_CONDITION: {{ .Values.config.TRANSFERS_CONDITION | quote }}
+  TRANSFERS_ILPPACKET: {{ .Values.config.TRANSFERS_ILPPACKET | quote }}
+  LOG_LEVEL: {{ .Values.config.LOG_LEVEL | quote }}
+  METRICS_DISABLED: {{ .Values.metrics.enabled | not | quote }}
+  METRICS_PREFIX: {{ .Values.metrics.prefix | quote }}
+  METRICS_TIMEOUT: {{ .Values.metrics.timeout | quote }}
+  METRICS_SERVICENAME: {{ .Values.metrics.defaultLabels.serviceName }}
