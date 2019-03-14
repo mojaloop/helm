@@ -14,6 +14,11 @@ spec:
         chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}
+      {{- if .Values.metrics.enabled }}
+      annotations:
+        prometheus.io/port: "{{ .Values.containers.api.service.ports.api.internalPort }}"
+        prometheus.io/scrape: "true"
+      {{- end }}
     spec:
 {{- if .Values.global.config.affinity }}
       affinity:
@@ -74,70 +79,6 @@ spec:
             periodSeconds: {{ .Values.containers.api.livenessProbe.periodSeconds }}
           {{- end }}
           env:
-            - name: CLEDG_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "centralledger-service.fullname" . }}
-                  key: server.port
-            - name: CLEDG_HOSTNAME
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "centralledger-service.fullname" . }}
-                  key: server.host
-            - name: CLEDG_DATABASE_URI
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "centralledger-service.fullname" . }}
-                  key: db.uri
-          volumeMounts:
-          - name: {{ template "centralledger-service.fullname" . }}-config-volume
-            mountPath: /opt/central-ledger/config
-        - name: {{ template "centralledger-service.name" . }}-admin
-          image: "{{ .Values.containers.admin.image.repository }}:{{ .Values.containers.admin.image.tag }}"
-          imagePullPolicy: {{ .Values.containers.admin.image.pullPolicy }}
-          command: {{ .Values.containers.admin.image.command }}
-          ports:
-          {{- range $port := .Values.containers.admin.service.ports }}
-            - name: {{ $port.name }}
-              containerPort: {{ $port.internalPort }}
-          {{- end }}
-          {{- if .Values.containers.admin.readinessProbe.enabled }}
-          readinessProbe:
-            httpGet:
-              path: {{ .Values.containers.admin.readinessProbe.httpGet.path }}
-              port: {{ .Values.containers.admin.service.ports.api.internalPort }}
-            initialDelaySeconds: {{ .Values.containers.admin.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.containers.admin.readinessProbe.periodSeconds }}
-          {{- end }}
-          {{- if .Values.containers.admin.livenessProbe.enabled }}
-          livenessProbe:
-            httpGet:
-              path: {{ .Values.containers.admin.livenessProbe.httpGet.path }}
-              port: {{ .Values.containers.admin.service.ports.api.internalPort }}
-            initialDelaySeconds: {{ .Values.containers.admin.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.containers.admin.livenessProbe.periodSeconds }}
-          {{- end }}
-          env:
-            - name: CLEDG_ADMIN_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "centralledger-service.fullname" . }}
-                  key: admin.port
-            - name: CLEDG_ADMIN_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "centralledger-service.fullname" . }}
-                  key: admin.key
-            - name: CLEDG_ADMIN_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "centralledger-service.fullname" . }}
-                  key: admin.secret
-            - name: CLEDG_HOSTNAME
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "centralledger-service.fullname" . }}
-                  key: admin.host
             - name: CLEDG_DATABASE_URI
               valueFrom:
                 secretKeyRef:

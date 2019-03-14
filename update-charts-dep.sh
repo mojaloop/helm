@@ -19,6 +19,19 @@ function checkCommandResult () {
 echo "Removing old charts..."
 find ./ -name "charts"| xargs rm -Rf
 
+## Disabled as Simulator has no requirements at this time
+#echo "Updating Simulator..."
+#helm dep up ./simulator
+#checkCommandResult
+
+echo "Updating Promfana..."
+helm dep up ./monitoring/promfana
+checkCommandResult
+
+echo "Updating EFK..."
+helm dep up ./monitoring/efk
+checkCommandResult
+
 echo "Updating Central-KMS..."
 helm dep up ./centralkms
 checkCommandResult

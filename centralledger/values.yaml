@@ -37,53 +37,27 @@ centralledger-service:
         ports:
           api:
             name: http-api
-            externalPort: 3000
-            internalPort: 3000
-      readinessProbe:
-        enabled: true
-        httpGet:
-          path: /health
-        initialDelaySeconds: 120
-        periodSeconds: 15
-      livenessProbe:
-        enabled: true
-        httpGet:
-          path: /health
-        initialDelaySeconds: 90
-        periodSeconds: 15
-
-    admin:
-      image:
-        repository: mojaloop/central-ledger
-        tag: v4.3.2-crossnetwork
-        pullPolicy: Always
-        command: '["node", "src/admin/index.js"]'
-      service:
-        ports:
-          api:
-            name: http-api-admin
             externalPort: 3001
             internalPort: 3001
       readinessProbe:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 120
+        initialDelaySeconds: 60
         periodSeconds: 15
       livenessProbe:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 90
+        initialDelaySeconds: 60
         periodSeconds: 15
 
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: true
 
   config:
-    # admin api key-secret
-    admin_key: admin
-    admin_secret: admin
-
-
     ## Forensic Logging sidecar
     # this is for Forensic Logging Sidecar
     forensicloggingsidecar_host: forensicloggingsidecar-ledger
@@ -135,9 +109,6 @@ centralledger-service:
       ports:
         api:
           name: http-api
-          externalPort: 3000
-        admin:
-          name: http-api-admin
           externalPort: 3001
 
   ingress:
@@ -145,7 +116,6 @@ centralledger-service:
     type: http
     externalPath:
       api: /
-      admin: /admin
     # Used to create an Ingress record.
     hosts:
       api: central-ledger.za.blue.demo.openafrica.network
@@ -190,20 +160,25 @@ centralledger-handler-transfer-prepare:
         ports:
           api:
             name: http-api
-            externalPort: 3000
-            internalPort: 3000
+            externalPort: 3001
+            internalPort: 3001
       readinessProbe:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 120
+        initialDelaySeconds: 60
         periodSeconds: 15
       livenessProbe:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 90
+        initialDelaySeconds: 60
         periodSeconds: 15
+
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: true
 
   config:
     ## Forensic Logging sidecar
@@ -270,9 +245,6 @@ centralledger-handler-transfer-prepare:
       ports:
         api:
           name: http-api
-          externalPort: 3000
-        admin:
-          name: http-api-admin
           externalPort: 3001
 
   ingress:
@@ -280,7 +252,6 @@ centralledger-handler-transfer-prepare:
     type: http
     externalPath:
       api: /
-      admin: /admin
     # Used to create an Ingress record.
     hosts:
       api: central-ledger-transfer-prepare.za.blue.demo.openafrica.network
@@ -324,20 +295,25 @@ centralledger-handler-transfer-position:
         ports:
           api:
             name: http-api
-            externalPort: 3000
-            internalPort: 3000
+            externalPort: 3001
+            internalPort: 3001
       readinessProbe:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 120
+        initialDelaySeconds: 60
         periodSeconds: 15
       livenessProbe:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 90
+        initialDelaySeconds: 60
         periodSeconds: 15
+
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: true
 
   config:
     ## Forensic Logging sidecar
@@ -404,9 +380,6 @@ centralledger-handler-transfer-position:
       ports:
         api:
           name: http-api
-          externalPort: 3000
-        admin:
-          name: http-api-admin
           externalPort: 3001
 
   ingress:
@@ -414,7 +387,6 @@ centralledger-handler-transfer-position:
     type: http
     externalPath:
       api: /
-      admin: /admin
     # Used to create an Ingress record.
     hosts:
       api: central-ledger-transfer-position.za.blue.demo.openafrica.network
@@ -457,20 +429,25 @@ centralledger-handler-transfer-get:
         ports:
           api:
             name: http-api
-            externalPort: 3000
-            internalPort: 3000
+            externalPort: 3001
+            internalPort: 3001
       readinessProbe:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 120
+        initialDelaySeconds: 60
         periodSeconds: 15
       livenessProbe:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 90
+        initialDelaySeconds: 60
         periodSeconds: 15
+
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: false
 
   config:
     ## Forensic Logging sidecar
@@ -537,9 +514,6 @@ centralledger-handler-transfer-get:
       ports:
         api:
           name: http-api
-          externalPort: 3000
-        admin:
-          name: http-api-admin
           externalPort: 3001
 
   ingress:
@@ -547,7 +521,6 @@ centralledger-handler-transfer-get:
     type: http
     externalPath:
       api: /
-      admin: /admin
     # Used to create an Ingress record.
     hosts:
       api: central-ledger-transfer-get.za.blue.demo.openafrica.network
@@ -591,20 +564,25 @@ centralledger-handler-transfer-fulfil:
         ports:
           api:
             name: http-api
-            externalPort: 3000
-            internalPort: 3000
+            externalPort: 3001
+            internalPort: 3001
       readinessProbe:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 120
+        initialDelaySeconds: 60
         periodSeconds: 15
       livenessProbe:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 90
+        initialDelaySeconds: 60
         periodSeconds: 15
+
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: true
 
   config:
     ## Forensic Logging sidecar
@@ -671,9 +649,6 @@ centralledger-handler-transfer-fulfil:
       ports:
         api:
           name: http-api
-          externalPort: 3000
-        admin:
-          name: http-api-admin
           externalPort: 3001
 
   ingress:
@@ -681,7 +656,6 @@ centralledger-handler-transfer-fulfil:
     type: http
     externalPath:
       api: /
-      admin: /admin
     # Used to create an Ingress record.
     hosts:
       api: central-ledger-transfer-position.za.blue.demo.openafrica.network
@@ -724,20 +698,25 @@ centralledger-handler-timeout:
         ports:
           api:
             name: http-api
-            externalPort: 3000
-            internalPort: 3000
+            externalPort: 3001
+            internalPort: 3001
       readinessProbe:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 120
+        initialDelaySeconds: 60
         periodSeconds: 15
       livenessProbe:
         enabled: true
         httpGet:
           path: /health
-        initialDelaySeconds: 90
+        initialDelaySeconds: 60
         periodSeconds: 15
+
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: false
 
   config:
     ## Forensic Logging sidecar
@@ -804,9 +783,6 @@ centralledger-handler-timeout:
       ports:
         api:
           name: http-api
-          externalPort: 3000
-        admin:
-          name: http-api-admin
           externalPort: 3001
 
   ingress:
@@ -814,7 +790,6 @@ centralledger-handler-timeout:
     type: http
     externalPath:
       api: /
-      admin: /admin
     # Used to create an Ingress record.
     hosts:
       api: central-ledger-timeout.za.blue.demo.openafrica.network
@@ -857,20 +832,25 @@ centralledger-handler-admin-transfer:
             ports:
               api:
                 name: http-api
-                externalPort: 3000
-                internalPort: 3000
+                externalPort: 3001
+                internalPort: 3001
           readinessProbe:
             enabled: true
             httpGet:
               path: /health
-            initialDelaySeconds: 120
+            initialDelaySeconds: 60
             periodSeconds: 15
           livenessProbe:
             enabled: true
             httpGet:
               path: /health
-            initialDelaySeconds: 90
+            initialDelaySeconds: 60
             periodSeconds: 15
+
+      ## metric configuration for prometheus instrumentation
+      metrics:
+        ## flag to enable/disable the metrics end-points
+        enabled: false
 
       config:
         ## Forensic Logging sidecar
@@ -937,9 +917,6 @@ centralledger-handler-admin-transfer:
           ports:
             api:
               name: http-api
-              externalPort: 3000
-            admin:
-              name: http-api-admin
               externalPort: 3001
 
       ingress:
@@ -947,7 +924,6 @@ centralledger-handler-admin-transfer:
         type: http
         externalPath:
           api: /
-          admin: /admin
         # Used to create an Ingress record.
         hosts:
           api: central-ledger-admin-transfer.za.blue.demo.openafrica.network
@@ -1004,12 +980,12 @@ forensicloggingsidecar:
 
   readinessProbe:
     enabled: true
-    initialDelaySeconds: 90
+    initialDelaySeconds: 60
     periodSeconds: 15
 
   livenessProbe:
     enabled: true
-    initialDelaySeconds: 90
+    initialDelaySeconds: 60
     periodSeconds: 15
 
   ingress:
@@ -1296,6 +1272,11 @@ mysql:
   #    memory: 256Mi
   #    cpu: 100m
 
+  ## Configure the following values below if required
+  #   performance_schema=ON
+  #   max_connections=999
+  #   max_user_connections=999
+  #   thread_cache_size=999
   configFiles:
     node.cnf: |+
       [mysqld]
@@ -1313,9 +1294,13 @@ mysql:
       wsrep_cluster_name=galera
       wsrep_sst_method=xtrabackup-v2
       pxc_strict_mode=DISABLED
+      max_connections=999
+      max_user_connections=994
+      thread_cache_size=999
   ## When set to true will create sidecar for `prom/mysqld-exporter`
   ## metrics exporting
-  metricsExporter: false
+  metricsExporter:
+    enabled: true
 
   ## When set to true will create sidecar to tail mysql log
   logTail: true
@@ -1457,7 +1442,9 @@ kafka:
   ## ref: https://kafka.apache.org/documentation/#brokerconfigs
   ##
   configurationOverrides:
+    ## Configure these to match the number of Kafka nodes for HA
     "offsets.topic.replication.factor": 1
+    "default.replication.factor": 1
     # "auto.leader.rebalance.enable": true
     # "auto.create.topics.enable": true
     # "controlled.shutdown.enable": true
@@ -1546,7 +1533,7 @@ kafka:
   prometheus:
     ## Prometheus JMX Exporter: exposes the majority of Kafkas metrics
     jmx:
-      enabled: false
+      enabled: true
 
       ## The image to use for the metrics collector
       image: solsson/kafka-prometheus-jmx-exporter@sha256
@@ -1570,7 +1557,7 @@ kafka:
 
     ## Prometheus Kafka Exporter: exposes complimentary metrics to JMX Exporter
     kafka:
-      enabled: false
+      enabled: true
 
       ## The image to use for the metrics collector
       image: danielqsj/kafka-exporter

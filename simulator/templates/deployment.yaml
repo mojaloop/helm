@@ -1,0 +1,138 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "simulators.fullname" . }}
+  labels:
+    app: {{ template "simulators.name" . }}
+    chart: {{ template "simulators.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+#      app: {{ template "simulators.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "simulators.name" . }}
+        release: {{ .Release.Name }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+        {{- if .Values.metrics.enabled }}
+        prometheus.io/port: "8444"
+        prometheus.io/scrape: "true"
+        {{- end }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8444
+              protocol: TCP
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.httpGet.path }}
+              port: {{ .Values.readinessProbe.httpGet.port }}
+              scheme: {{ .Values.readinessProbe.httpGet.scheme }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.httpGet.path }}
+              port: {{ .Values.livenessProbe.httpGet.port }}
+              scheme: {{ .Values.livenessProbe.httpGet.scheme }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          {{- end }}
+          env:
+            - name: PARTIES_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "simulators.fullname" . }}
+                  key: PARTIES_ENDPOINT
+            - name: QUOTES_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "simulators.fullname" . }}
+                  key: QUOTES_ENDPOINT
+            - name: TRANSFERS_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "simulators.fullname" . }}
+                  key: TRANSFERS_ENDPOINT
+            - name: TRANSFERS_FULFIL_RESPONSE_DISABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "simulators.fullname" . }}
+                  key: TRANSFERS_FULFIL_RESPONSE_DISABLED
+            - name: TRANSFERS_FULFILMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "simulators.fullname" . }}
+                  key: TRANSFERS_FULFILMENT
+            - name: TRANSFERS_CONDITION
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "simulators.fullname" . }}
+                  key: TRANSFERS_CONDITION
+            - name: TRANSFERS_ILPPACKET
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "simulators.fullname" . }}
+                  key: TRANSFERS_ILPPACKET
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "simulators.fullname" . }}
+                  key: LOG_LEVEL
+            - name: METRICS_DISABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "simulators.fullname" . }}
+                  key: METRICS_DISABLED
+            - name: METRICS_PREFIX
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "simulators.fullname" . }}
+                  key: METRICS_PREFIX
+            - name: METRICS_TIMEOUT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "simulators.fullname" . }}
+                  key: METRICS_TIMEOUT
+            - name: METRICS_SERVICENAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "simulators.fullname" . }}
+                  key: METRICS_SERVICENAME
+          {{- if .Values.resources }}
+          resources:
+            {{ toYaml .Values.resources | indent 8 }}
+          {{- end }}
+
+{{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+{{- end }}
+
+{{- if .Values.affinity }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+{{- end }}
+
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+{{- end }}
+
+{{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+{{- end }}

@@ -15,6 +15,11 @@ spec:
         chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}
+      {{- if .Values.metrics.enabled }}
+      annotations:
+        prometheus.io/port: "{{ .Values.containers.api.service.ports.api.internalPort }}"
+        prometheus.io/scrape: "true"
+      {{- end }}
     spec:
 {{- if .Values.global.config.affinity }}
       affinity:
@@ -87,16 +92,6 @@ spec:
             periodSeconds: {{ .Values.containers.api.livenessProbe.periodSeconds }}
           {{- end }}
           env:
-            - name: CLEDG_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "centralledger-handler-transfer-fulfil.fullname" . }}
-                  key: server.port
-            - name: CLEDG_HOSTNAME
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "centralledger-handler-transfer-fulfil.fullname" . }}
-                  key: server.host
             - name: CLEDG_DATABASE_URI
               valueFrom:
                 secretKeyRef:
