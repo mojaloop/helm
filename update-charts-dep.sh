@@ -80,6 +80,10 @@ echo "Updating Central..."
 helm dep up ./central
 checkCommandResult
 
+echo "Updating Cross Network..."
+helm dep up ./cross-network
+checkCommandResult
+
 echo "Updating Mojaloop..."
 helm dep up ./mojaloop
 checkCommandResult
