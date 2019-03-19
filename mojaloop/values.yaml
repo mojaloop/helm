@@ -37,7 +37,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v5.2.0
+            tag: v5.4.0
             pullPolicy: Always
             command: '["node", "src/api/index.js"]'
           service:
@@ -160,7 +160,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v5.2.0
+            tag: v5.4.0
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
           service:
@@ -294,7 +294,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v5.2.0
+            tag: v5.4.0
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--admin"]'
           service:
@@ -428,7 +428,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v5.2.0
+            tag: v5.4.0
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--position"]'
           service:
@@ -562,7 +562,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v5.2.0
+            tag: v5.4.0
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--get"]'
           service:
@@ -696,7 +696,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v5.2.0
+            tag: v5.4.0
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
           service:
@@ -830,7 +830,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v5.2.0
+            tag: v5.4.0
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
           service:
@@ -1268,6 +1268,17 @@ central:
       ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
       ##
       nodeSelector: {}
+
+      ## Pod annotations
+      ## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+      ##
+      podAnnotations: {}
+
+      ## Tolerations labels for pod assignment
+      ## Allow the scheduling on tainted nodes (requires Kubernetes >= 1.6)
+      ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+      ##
+      tolerations: []
 
       ## Configure resource requests and limits
       ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
@@ -2509,7 +2520,7 @@ ml-api-adapter:
       replicaCount: 1
       image:
         repository: mojaloop/ml-api-adapter
-        tag: v5.1.1
+        tag: v5.4.0
         command: '["node", "src/api/index.js"]'
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
@@ -2530,6 +2541,9 @@ ml-api-adapter:
         kafka_port: 9092
         central_services_host: centralledger-service
         central_services_port: 3001
+        security:
+          callback:
+            rejectUnauthorized: true
 
       service:
         name: ml-api-adapter
@@ -2574,7 +2588,7 @@ ml-api-adapter:
       replicaCount: 1
       image:
         repository: mojaloop/ml-api-adapter
-        tag: v5.1.1
+        tag: v5.4.0
         command: '["node", "src/handlers/index.js", "handler", "--notification"]'
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
@@ -2598,6 +2612,9 @@ ml-api-adapter:
         kafka_port: 9092
         central_services_host: centralledger-service
         central_services_port: 3001
+        security:
+          callback:
+            rejectUnauthorized: true
 
       service:
         name: ml-api-adapter
