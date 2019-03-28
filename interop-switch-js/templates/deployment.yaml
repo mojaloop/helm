@@ -27,29 +27,19 @@ spec:
           {{- end }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
+          volumeMounts:
+          - name: {{ template "interop-switch-js.fullname" . }}-config-volume
+            mountPath: /opt/interop-switch-js/config
           env:
             - name: DEBUG
               valueFrom:
                 configMapKeyRef:
                   name: {{ template "interop-switch-js.fullname" . }}
                   key: DEBUG
-            - name: IOP_ENDPOINT_SOURCE_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "interop-switch-js.fullname" . }}
-                  key: ENDPOINT_SOURCE_URL
-            - name: IOP_ROUTING_ENDPOINT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "interop-switch-js.fullname" . }}
-                  key: ROUTING_ENDPOINT
-            - name: IOP_DATABASE_URI
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "interop-switch-js.fullname" . }}
-                  key: DATABASE_URI
-            - name: IOP_PROVISIONED_PARTIES
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ template "interop-switch-js.fullname" . }}
-                  key: PROVISIONED_PARTIES
+      volumes:
+        - name: {{ template "interop-switch-js.fullname" . }}-config-volume
+          configMap:
+            name: {{ template "interop-switch-js.fullname" . }}
+            items:
+            - key: default.json
+              path: default.json
