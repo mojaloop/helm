@@ -23,6 +23,10 @@ echo "Packaging Simulator..."
 helm package -u -d ./repo ./simulator
 checkCommandResult
 
+echo "Packaging Documentation..."
+helm package -u -d ./repo ./documentation
+checkCommandResult
+
 echo "Packaging Promfana..."
 helm package -u -d ./repo ./monitoring/promfana
 checkCommandResult
