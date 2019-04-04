@@ -1,48 +1,167 @@
-# Default values for account-lookup-service.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
 
-replicaCount: 1
+account-lookup-service-api:
+  enabled: true
+  # Default values for account-lookup-service.
+  # This is a YAML-formatted file.
+  # Declare variables to be passed into your templates.
 
-image:
-  repository: nginx
-  tag: stable
-  pullPolicy: IfNotPresent
+  replicaCount: 1
 
-nameOverride: ""
-fullnameOverride: ""
+  image:
+    repository: mojaloop/account-lookup-service
+    tag: v5.5.0
+    pullPolicy: IfNotPresent
 
-service:
-  type: ClusterIP
-  port: 80
+  nameOverride: ""
+  fullnameOverride: ""
 
-ingress:
-  enabled: false
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  path: /
-  hosts:
-    - chart-example.local
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  service:
+    type: ClusterIP
+    port: 80
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
+  ingress:
+    enabled: true
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    path: /
+    hosts:
+      - acount-lookup-service.local
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
 
-nodeSelector: {}
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
 
-tolerations: []
+  nodeSelector: {}
 
-affinity: {}
+  tolerations: []
+
+  affinity: {}
+
+mysql:
+  enabled: true
+  nameOverride: "account-lookup-service-mysql"
+  # Default values for Percona XtraDB Cluster
+
+  ## percona image and version
+  ## ref: https://hub.docker.com/r/percona/percona-xtradb-cluster/tags/
+  image:
+    repository: "percona/percona-xtradb-cluster"
+    tag: "5.7.19"
+    pullPolicy: Always
+
+  # Desired number of members of xtradb cluster
+  replicas: 1
+
+  ## Specify password for root user
+  ##
+  # mysqlRootPassword: not-a-secure-password
+
+  ## Specify password for xtradb backup user
+  ##
+  # xtraBackupPassword: replicate-my-data
+
+  ## Uncomment to create a database user
+  ##
+  mysqlUser: account_lookup_service
+  mysqlPassword: OdonPianoX
+
+  ## Allow unauthenticated access, uncomment to enable
+  ##
+  # mysqlAllowEmptyPassword: true
+
+  ## Uncomment to Create a database
+  ##
+  mysqlDatabase: account_lookup_service
+
+  ## hosts to allow root user access from
+  # set to "127.0.0.1" to deny remote root.
+  allowRootFrom: "%"
+
+  ## Persist data to a persitent volume
+  persistence:
+    enabled: false
+    ## percona data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+    accessMode: ReadWriteOnce
+    size: 8Gi
+
+  ## Node labels for pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod annotations
+  ## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+
+  ## Tolerations labels for pod assignment
+  ## Allow the scheduling on tainted nodes (requires Kubernetes >= 1.6)
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+
+  ## Configure resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  # resources:
+  #  requests:
+  #    memory: 256Mi
+  #    cpu: 100m
+
+  ## Configure the following values below if required
+  #   performance_schema=ON
+  #   max_connections=999
+  #   max_user_connections=999
+  #   thread_cache_size=999
+  configFiles:
+    node.cnf: |+
+      [mysqld]
+      datadir=/var/lib/mysql
+      default_storage_engine=InnoDB
+      binlog_format=ROW
+      innodb_flush_log_at_trx_commit  = 0
+      innodb_flush_method             = O_DIRECT
+      innodb_file_per_table           = 1
+      innodb_autoinc_lock_mode=2
+      bind_address = 0.0.0.0
+      wsrep_slave_threads=2
+      wsrep_cluster_address=gcomm://
+      wsrep_provider=/usr/lib/galera3/libgalera_smm.so
+      wsrep_cluster_name=galera
+      wsrep_sst_method=xtrabackup-v2
+      pxc_strict_mode=DISABLED
+      max_connections=999
+      max_user_connections=994
+      thread_cache_size=999
+  ## When set to true will create sidecar for `prom/mysqld-exporter`
+  ## metrics exporting
+  metricsExporter:
+    enabled: true
+
+  ## When set to true will create sidecar to tail mysql log
+  logTail: true
+
+  service:
+    type: ClusterIP
+    port: 3306
+    externalIPs: []
