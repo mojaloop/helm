@@ -1,3 +1,4 @@
+{{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -33,20 +34,20 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.containers.api.image.repository }}:{{ .Values.containers.api.image.tag }}"
+          imagePullPolicy: {{ .Values.containers.api.image.pullPolicy }}
           ports:
-            - name: http
-              containerPort: 80
+            - name: {{ .Values.containers.api.service.ports.api.name }}
+              containerPort: {{ .Values.containers.api.service.ports.api.port }}
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
-              port: http
+              path: /health
+              port: {{ .Values.containers.api.service.ports.api.name }}
           readinessProbe:
             httpGet:
-              path: /
-              port: http
+              path: /health
+              port: {{ .Values.containers.api.service.ports.api.name }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           volumeMounts:
