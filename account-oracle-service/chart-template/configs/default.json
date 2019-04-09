@@ -1,0 +1,10 @@
+{{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
+{
+  "PORT": {{ .Values.containers.api.service.ports.api.port }},
+  "HOSTNAME": "http://als-oracle-template.local",
+  "DATABASE_URI" : "{{ .Values.config.db_type }}://{{ .Values.config.db_user }}:{{ .Values.config.db_password }}@{{ (default .Values.config.db_host $dbHost) }}:{{ .Values.config.db_port }}/{{ .Values.config.db_database }}",
+  "HUB_PARTICIPANT": {
+    "ID": 1,
+    "NAME": "Hub"
+  }
+}

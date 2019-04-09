@@ -1,0 +1,77 @@
+{{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "als-oracle-template.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "als-oracle-template.name" . }}
+    helm.sh/chart: {{ include "als-oracle-template.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "als-oracle-template.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "als-oracle-template.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      {{- if .Values.init.enabled }}
+      initContainers:
+        {{- if eq .Values.config.db_type "mysql"}}
+        - name: {{ .Values.init.mysql.name }}
+          image: {{ .Values.init.mysql.repository }}:{{ .Values.init.mysql.tag }}
+          imagePullPolicy: {{ .Values.init.mysql.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.init.mysql.command | replace "$db_user" (print .Values.config.db_user) | replace "$db_password" (print .Values.config.db_password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.config.db_database) | replace "$db_port" (print .Values.config.db_port) )| quote }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.containers.api.image.repository }}:{{ .Values.containers.api.image.tag }}"
+          imagePullPolicy: {{ .Values.containers.api.image.pullPolicy }}
+#          command: {{ .Values.containers.api.image.command }}
+          ports:
+            - name: {{ .Values.containers.api.service.ports.api.name }}
+              containerPort: {{ .Values.containers.api.service.ports.api.port }}
+              protocol: TCP
+#          livenessProbe:
+#            httpGet:
+#              path: /health
+#              port: {{ .Values.containers.api.service.ports.api.name }}
+#          readinessProbe:
+#            httpGet:
+#              path: /health
+#              port: {{ .Values.containers.api.service.ports.api.name }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          volumeMounts:
+          - name: {{ template "als-oracle-template.fullname" . }}-config-volume
+            mountPath: /home/node/app/config
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      volumes:
+        - name: {{ template "als-oracle-template.fullname" . }}-config-volume
+          configMap:
+            name: {{ template "als-oracle-template.fullname" . }}
+            items:
+            - key: default.json
+              path: default.json
+            - key: knexfile.js
+              path: knexfile.js

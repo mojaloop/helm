@@ -10,6 +10,7 @@ containers:
       repository: mojaloop/account-lookup-service
       tag: v5.5.0
       pullPolicy: IfNotPresent
+      command: '["node", "src/index.js", "server", "--api"]'
     service:
       ports:
         api:
@@ -20,6 +21,7 @@ containers:
       repository: mojaloop/account-lookup-service
       tag: v5.5.0
       pullPolicy: IfNotPresent
+      command: '["node", "src/index.js", "server", "--admin"]'
     service:
       ports:
         api:
@@ -38,7 +40,7 @@ metrics:
     timeout: 5000
     prefix: moja_
     defaultLabels:
-      serviceName: account-lookup-service
+      serviceName: account-lookup-service-api
 
 config:
   ## Central-Ledger config
@@ -56,9 +58,9 @@ config:
   db_driver: 'mysql'
   db_host: '$release_name-account-lookup-service-mysql'
   db_port: 3306
-  db_user: account_lookup_service
+  db_user: account_lookup
   db_password: OdonPianoX
-  db_database: account_lookup_service
+  db_database: account_lookup
 
 init:
   enabled: true
@@ -80,7 +82,7 @@ ingress:
     # kubernetes.io/tls-acme: "true"
   path: /
   hosts:
-    - acount-lookup-service.local
+    - account-lookup-service-api.local
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
