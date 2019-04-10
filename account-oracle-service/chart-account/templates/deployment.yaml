@@ -2,22 +2,22 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{ include "als-oracle-template-service.fullname" . }}
+  name: {{ include "als-oracle-account-service.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "als-oracle-template-service.name" . }}
-    helm.sh/chart: {{ include "als-oracle-template-service.chart" . }}
+    app.kubernetes.io/name: {{ include "als-oracle-account-service.name" . }}
+    helm.sh/chart: {{ include "als-oracle-account-service.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "als-oracle-template-service.name" . }}
+      app.kubernetes.io/name: {{ include "als-oracle-account-service.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "als-oracle-template-service.name" . }}
+        app.kubernetes.io/name: {{ include "als-oracle-account-service.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       {{- if .Values.init.enabled }}
@@ -52,7 +52,7 @@ spec:
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           volumeMounts:
-          - name: {{ template "als-oracle-template-service.fullname" . }}-config-volume
+          - name: {{ template "als-oracle-account-service.fullname" . }}-config-volume
             mountPath: /home/node/app/config
     {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -67,9 +67,9 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
       volumes:
-        - name: {{ template "als-oracle-template-service.fullname" . }}-config-volume
+        - name: {{ template "als-oracle-account-service.fullname" . }}-config-volume
           configMap:
-            name: {{ template "als-oracle-template-service.fullname" . }}
+            name: {{ template "als-oracle-account-service.fullname" . }}
             items:
             - key: default.json
               path: default.json
