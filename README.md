@@ -20,7 +20,7 @@ e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloo
 
 Refer to the following default chart config file for values: http://mojaloop.io/helm/<chart_name>/values.yaml
 
-3. Deploy Mojaloop componenets
+3. Deploy Mojaloop components
 
 *Warning: This will deploy all charts.*
 
