@@ -86,6 +86,20 @@ jobs:
           name: Placeholder for setup
           command: echo "Placeholder for setup - Nothing to do here"
 
+  test:
+    <<: *defaults_working_directory
+    <<: *defaults_docker_node
+    steps:
+      - checkout
+      - run:
+          <<: *defaults_Dependencies
+      - run:
+          <<: *defaults_environment
+      - run:
+          name: Linting Helm Charts
+          command: |
+            sh lint-charts-dep.sh
+
   build:
     <<: *defaults_working_directory
     <<: *defaults_docker_node
@@ -140,10 +154,22 @@ workflows:
                 - /feature.*/
                 - /bugfix.*/
                 - gh-pages
-      - build:
+      - test:
           context: org-global
           requires:
             - setup
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore:
+                - /feature.*/
+                - /bugfix.*/
+                - gh-pages
+      - build:
+          context: org-global
+          requires:
+            - test
           filters:
             tags:
               only: /.*/
