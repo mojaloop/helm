@@ -37,10 +37,6 @@ echo "Linting Account Oracle Service..."
 helm lint ./account-oracle-service
 checkCommandResult
 
-echo "Linting Account Oracle Service Template..."
-helm lint ./account-oracle-service/chart-template
-checkCommandResult
-
 echo "Linting Account Lookup Service..."
 helm lint ./account-lookup-service
 checkCommandResult
