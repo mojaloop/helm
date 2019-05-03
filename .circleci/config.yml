@@ -6,7 +6,7 @@ defaults_working_directory: &defaults_working_directory
 
 defaults_docker_node: &defaults_docker_node
   docker:
-    - image: node:10.15-alpine
+    - image: alpine/helm:2.13.1
 
 defaults_Dependencies: &defaults_Dependencies
   name: Install default dependencies
@@ -16,13 +16,11 @@ defaults_Dependencies: &defaults_Dependencies
     apk --no-cache add curl
     apk --no-cache add openssh-client
     apk add --no-cache -t build-dependencies make gcc g++ python libtool autoconf automake
-    npm config set unsafe-perm true
-    npm install -g gitbook-cli
 
 defaults_Environment: &defaults_environment
   name: Set default environment
   command: |
-    echo "Nothing to do here right now...move along!"
+    helm init --client-only --skip-refresh
 
 defaults_slack_announcement: &defaults_slack_announcement
   name: Slack announcement for tag releases
