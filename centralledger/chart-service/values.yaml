@@ -92,7 +92,7 @@ init:
     repository: mysql
     tag: latest
     pullPolicy: Always
-    command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+    command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from central_ledger.migration_lock;') && echo 'is_locked=$result' && if [[ $result != 0 ]]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
 service:
   type: ClusterIP
