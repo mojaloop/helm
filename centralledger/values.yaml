@@ -93,7 +93,11 @@ centralledger-service:
       repository: mysql
       tag: latest
       pullPolicy: Always
-      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from central_ledger.migration_lock;') && echo 'is_locked=$result' && if [[ $result != 0 ]]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+      command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+    migration:
+      enabled: true
+      name: run-migration
+      command: npm run migrate
 
   service:
     type: ClusterIP
@@ -230,7 +234,7 @@ centralledger-handler-transfer-prepare:
       repository: mysql
       tag: latest
       pullPolicy: Always
-      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from central_ledger.migration_lock;') && echo 'is_locked=$result' && if [[ $result != 0 ]]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && echo 'is_locked=$result' && if [[ $result != 0 ]]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
   service:
     type: ClusterIP
@@ -367,7 +371,7 @@ centralledger-handler-transfer-position:
       repository: mysql
       tag: latest
       pullPolicy: Always
-      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from central_ledger.migration_lock;') && echo 'is_locked=$result' && if [[ $result != 0 ]]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && echo 'is_locked=$result' && if [[ $result != 0 ]]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
   service:
     type: ClusterIP
@@ -503,7 +507,7 @@ centralledger-handler-transfer-get:
       repository: mysql
       tag: latest
       pullPolicy: Always
-      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from central_ledger.migration_lock;') && echo 'is_locked=$result' && if [[ $result != 0 ]]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && echo 'is_locked=$result' && if [[ $result != 0 ]]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
   service:
     type: ClusterIP
@@ -640,7 +644,7 @@ centralledger-handler-transfer-fulfil:
       repository: mysql
       tag: latest
       pullPolicy: Always
-      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from central_ledger.migration_lock;') && echo 'is_locked=$result' && if [[ $result != 0 ]]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && echo 'is_locked=$result' && if [[ $result != 0 ]]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
   service:
     type: ClusterIP
@@ -776,7 +780,7 @@ centralledger-handler-timeout:
       repository: mysql
       tag: latest
       pullPolicy: Always
-      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from central_ledger.migration_lock;') && echo 'is_locked=$result' && if [[ $result != 0 ]]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && echo 'is_locked=$result' && if [[ $result != 0 ]]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
   service:
     type: ClusterIP
@@ -912,7 +916,7 @@ centralledger-handler-admin-transfer:
       repository: mysql
       tag: latest
       pullPolicy: Always
-      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from central_ledger.migration_lock;') && echo 'is_locked=$result' && if [[ $result != 0 ]]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && echo 'is_locked=$result' && if [[ $result != 0 ]]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
   service:
     type: ClusterIP
