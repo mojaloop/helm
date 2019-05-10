@@ -35,7 +35,7 @@ centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v6.1.1
+          tag: v6.1.3
           pullPolicy: Always
           command: '["node", "src/api/index.js"]'
         service:
@@ -163,7 +163,7 @@ centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v6.1.1
+          tag: v6.1.3
           pullPolicy: Always
           command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
         service:
@@ -300,7 +300,7 @@ centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v6.1.1
+          tag: v6.1.3
           pullPolicy: Always
           command: '["node", "src/handlers/index.js", "handler", "--position"]'
         service:
@@ -436,7 +436,7 @@ centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v6.1.1
+          tag: v6.1.3
           pullPolicy: Always
           command: '["node", "src/handlers/index.js", "handler", "--get"]'
         service:
@@ -573,7 +573,7 @@ centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v6.1.1
+          tag: v6.1.3
           pullPolicy: Always
           command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
         service:
@@ -709,7 +709,7 @@ centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v6.1.1
+          tag: v6.1.3
           pullPolicy: Always
           command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
         service:
@@ -835,140 +835,140 @@ centralledger:
       #  memory: 128Mi
 
   centralledger-handler-admin-transfer:
-      # Default values for central-ledger.
-      # This is a YAML-formatted file.
+    # Default values for central-ledger.
+    # This is a YAML-formatted file.
 
-      # Declare variables to be passed into your templates.
-      enabled: true
-      replicaCount: 1
-      containers:
-        api:
-          image:
-            repository: mojaloop/central-ledger
-            tag: v6.1.1
-            pullPolicy: Always
-            command: '["node", "src/handlers/index.js", "handler", "--admin"]'
-          service:
-            ports:
-              api:
-                name: http-api
-                externalPort: 3001
-                internalPort: 3001
-          readinessProbe:
-            enabled: true
-            httpGet:
-              path: /health
-            initialDelaySeconds: 60
-            periodSeconds: 15
-          livenessProbe:
-            enabled: true
-            httpGet:
-              path: /health
-            initialDelaySeconds: 60
-            periodSeconds: 15
-
-      ## metric configuration for prometheus instrumentation
-      metrics:
-        ## flag to enable/disable the metrics end-points
-        enabled: false
-
-      config:
-        ## Forensic Logging sidecar
-        # this is for Forensic Logging Sidecar
-        forensicloggingsidecar_host: forensicloggingsidecar-ledger
-        forensicloggingsidecar_port: 5678
-
-        ## DB Configuration
-        # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
-        db_type: 'mysql'
-        # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-        db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
-        db_connection_pool_min: 10
-        db_connection_pool_max: 30
-
-        ## Kafka Configuration
-        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
-
-      init:
-        enabled: true
-        kafka:
-          name: wait-for-kafka
-          repository: solsson/kafka
-          tag: latest
+    # Declare variables to be passed into your templates.
+    enabled: true
+    replicaCount: 1
+    containers:
+      api:
+        image:
+          repository: mojaloop/central-ledger
+          tag: v6.1.3
           pullPolicy: Always
-          command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
-          env: {}
-          ## Env example
-          # env:
-          #   envItem1:
-          #     name: hello
-          #     value: world
-          #
-        psql:
-          name: wait-for-postgres
-          repository: bowerswilkins/awaitpostgres
-          tag: latest
-          pullPolicy: Always
-        mysql:
-          name: wait-for-mysql
-          repository: mysql
-          tag: latest
-          pullPolicy: Always
-          command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
-
-      service:
-        type: ClusterIP
-
-        annotations: {}
-
-        # This allows one to point the service to an external backend.
-        # This is useful for local development where one wishes to hijack
-        # the communication from the service to the node layer and point
-        # to a specific endpoint (IP, Port, etc).
-        external:
-          enabled: false
-          # 10.0.2.2 is the magic IP for the host on virtualbox's network
-          ip: 10.0.2.2
+          command: '["node", "src/handlers/index.js", "handler", "--admin"]'
+        service:
           ports:
             api:
               name: http-api
               externalPort: 3001
+              internalPort: 3001
+        readinessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 60
+          periodSeconds: 15
+        livenessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 60
+          periodSeconds: 15
 
-      ingress:
-        enabled: true
-        type: http
-        externalPath:
-          api: /
-        # Used to create an Ingress record.
-        hosts:
-          api: central-ledger-admin-transfer.local
-        annotations:
-          nginx.ingress.kubernetes.io/rewrite-target: '/'
-          # kubernetes.io/ingress.class: nginx
-          # kubernetes.io/tls-acme: "true"
-        tls:
-          # Secrets must be manually created in the namespace.
-          # - secretName: chart-example-tls
-          #   hosts:
-          #     - chart-example.local
-      resources: {}
-        # We usually recommend not to specify default resources and to leave this as a conscious
-        # choice for the user. This also increases chances charts run on environments with little
-        # resources, such as Minikube. If you do want to specify resources, uncomment the following
-        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-        # limits:
-        #  cpu: 100m
-        #  memory: 128Mi
-        # requests:
-        #  cpu: 100m
-        #  memory: 128Mi
+    ## metric configuration for prometheus instrumentation
+    metrics:
+      ## flag to enable/disable the metrics end-points
+      enabled: false
+
+    config:
+      ## Forensic Logging sidecar
+      # this is for Forensic Logging Sidecar
+      forensicloggingsidecar_host: forensicloggingsidecar-ledger
+      forensicloggingsidecar_port: 5678
+
+      ## DB Configuration
+      # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+      db_type: 'mysql'
+      # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+      db_driver: 'mysql'
+      db_host: '$release_name-centralledger-mysql'
+      db_port: 3306
+      db_user: central_ledger
+      db_password: oyMxgZChuu
+      db_database: central_ledger
+      db_connection_pool_min: 10
+      db_connection_pool_max: 30
+
+      ## Kafka Configuration
+      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+      kafka_host: '$release_name-kafka'
+      kafka_port: 9092
+
+    init:
+      enabled: true
+      kafka:
+        name: wait-for-kafka
+        repository: solsson/kafka
+        tag: latest
+        pullPolicy: Always
+        command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
+        env: {}
+        ## Env example
+        # env:
+        #   envItem1:
+        #     name: hello
+        #     value: world
+        #
+      psql:
+        name: wait-for-postgres
+        repository: bowerswilkins/awaitpostgres
+        tag: latest
+        pullPolicy: Always
+      mysql:
+        name: wait-for-mysql
+        repository: mysql
+        tag: latest
+        pullPolicy: Always
+        command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+
+    service:
+      type: ClusterIP
+
+      annotations: {}
+
+      # This allows one to point the service to an external backend.
+      # This is useful for local development where one wishes to hijack
+      # the communication from the service to the node layer and point
+      # to a specific endpoint (IP, Port, etc).
+      external:
+        enabled: false
+        # 10.0.2.2 is the magic IP for the host on virtualbox's network
+        ip: 10.0.2.2
+        ports:
+          api:
+            name: http-api
+            externalPort: 3001
+
+    ingress:
+      enabled: true
+      type: http
+      externalPath:
+        api: /
+      # Used to create an Ingress record.
+      hosts:
+        api: central-ledger-admin-transfer.local
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: '/'
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      tls:
+        # Secrets must be manually created in the namespace.
+        # - secretName: chart-example-tls
+        #   hosts:
+        #     - chart-example.local
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+      # requests:
+      #  cpu: 100m
+      #  memory: 128Mi
 
   forensicloggingsidecar:
     enabled: true
