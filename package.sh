@@ -35,20 +35,6 @@ echo "Packaging EFK..."
 helm package -u -d ./repo ./monitoring/efk
 checkCommandResult
 
-# This is required as a pre-requisites for Account Oracle Services
-echo "Updating Account Oracle Service Account..."
-helm dep up ./account-oracle-service/chart-account
-checkCommandResult
-
-# This is required as a pre-requisites for Account Oracle Services
-echo "Updating Account Oracle Service Template..."
-helm dep up ./account-oracle-service/chart-template
-checkCommandResult
-
-echo "Packaging Account Oracle Service..."
-helm package -u -d ./repo  ./account-oracle-service
-checkCommandResult
-
 echo "Packaging Account Lookup Service..."
 helm package -u -d ./repo  ./account-lookup-service
 checkCommandResult

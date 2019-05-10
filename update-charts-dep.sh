@@ -41,10 +41,6 @@ echo "Updating Account Oracle Service Template..."
 helm dep up ./account-oracle-service/chart-template
 checkCommandResult
 
-echo "Updating Account Oracle Service..."
-helm dep up ./account-oracle-service
-checkCommandResult
-
 echo "Updating Account Lookup Service..."
 helm dep up ./account-lookup-service
 checkCommandResult

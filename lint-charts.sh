@@ -33,10 +33,6 @@ echo "Linting EFK..."
 helm lint ./monitoring/efk
 checkCommandResult
 
-echo "Linting Account Oracle Service..."
-helm lint ./account-oracle-service
-checkCommandResult
-
 echo "Linting Account Lookup Service..."
 helm lint ./account-lookup-service
 checkCommandResult
