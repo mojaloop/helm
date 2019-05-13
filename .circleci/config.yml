@@ -49,8 +49,8 @@ defaults_git_identity_setup: &defaults_git_identity_setup
     git config --global user.name "$GIT_CI_EMAIL"
     git remote add $GITHUB_PROJECT_USERNAME https://$GIT_CI_USER:$GITHUB_TOKEN@github.com/$GITHUB_PROJECT_USERNAME/$GITHUB_PROJECT_REPONAME.git
 
-defaults_publish_to_gh_pages: &defaults_publish_to_gh_pages
-  name: Publish documentation
+defaults_publish: &defaults_publish
+  name: Publish helm charts
   command: |
     echo "Setting BASH_ENV..."
     source $BASH_ENV
@@ -65,7 +65,7 @@ defaults_publish_to_gh_pages: &defaults_publish_to_gh_pages
     git checkout -b $GITHUB_TARGET_BRANCH $GITHUB_PROJECT_USERNAME/$GITHUB_TARGET_BRANCH &> git.log
 
     echo "Merging tagged release code from $GITHUB_TAG..."
-    git merge $GITHUB_TAG
+    git merge --no-commit $GITHUB_TAG
 
     echo "Package helm charts..."
     sh package.sh
@@ -142,7 +142,7 @@ jobs:
       - run:
           <<: *defaults_git_identity_setup
       - run:
-          <<: *defaults_publish_to_gh_pages
+          <<: *defaults_publish
       - run:
           <<: *defaults_slack_announcement
 
