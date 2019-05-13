@@ -51,10 +51,22 @@ spec:
             - "-c"
             - {{ (.Values.init.mysql.command | replace "$db_user" (print .Values.config.db_user) | replace "$db_password" (print .Values.config.db_password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.config.db_database) | replace "$db_port" (print .Values.config.db_port) )| quote }}
         {{- end }}
+        {{- if .Values.init.migration.enabled }}
+        - name: {{ .Values.init.migration.name }}
+          image: {{ .Values.containers.api.image.repository }}:{{ .Values.containers.api.image.tag }}
+          imagePullPolicy: {{ .Values.containers.api.image.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ .Values.init.migration.command }}
+          env:
+            - name: "CLEDG_DATABASE_URI"
+              value: "{{ .Values.config.db_type }}://{{ .Values.config.db_user }}:{{ .Values.config.db_password }}@{{ (default .Values.config.db_host $dbHost) }}:{{ .Values.config.db_port }}/{{ .Values.config.db_database }}"
+        {{- end }}
       {{- end }}
       containers:
         - name: {{ template "centralledger-service.name" . }}
-          image: "{{ .Values.containers.api.image.repository }}:{{ .Values.containers.api.image.tag }}"
+          image: {{ .Values.containers.api.image.repository }}:{{ .Values.containers.api.image.tag }}
           imagePullPolicy: {{ .Values.containers.api.image.pullPolicy }}
           command: {{ .Values.containers.api.image.command }}
           ports:
