@@ -37,7 +37,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v6.1.1
+            tag: v6.1.3
             pullPolicy: Always
             command: '["node", "src/api/index.js"]'
           service:
@@ -101,6 +101,10 @@ central:
           tag: latest
           pullPolicy: Always
           command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+        migration:
+          enabled: true
+          name: run-migration
+          command: npm run migrate
 
       service:
         type: ClusterIP
@@ -162,7 +166,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v6.1.1
+            tag: v6.1.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
           service:
@@ -238,7 +242,7 @@ central:
           repository: mysql
           tag: latest
           pullPolicy: Always
-          command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+          command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
       service:
         type: ClusterIP
@@ -298,7 +302,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v6.1.1
+            tag: v6.1.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--admin"]'
           service:
@@ -374,7 +378,7 @@ central:
           repository: mysql
           tag: latest
           pullPolicy: Always
-          command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+          command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
       service:
         type: ClusterIP
@@ -434,7 +438,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v6.1.1
+            tag: v6.1.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--position"]'
           service:
@@ -510,7 +514,7 @@ central:
           repository: mysql
           tag: latest
           pullPolicy: Always
-          command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+          command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
       service:
         type: ClusterIP
@@ -570,7 +574,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v6.1.1
+            tag: v6.1.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--get"]'
           service:
@@ -646,7 +650,7 @@ central:
           repository: mysql
           tag: latest
           pullPolicy: Always
-          command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+          command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
       service:
         type: ClusterIP
@@ -706,7 +710,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v6.1.1
+            tag: v6.1.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
           service:
@@ -782,7 +786,7 @@ central:
           repository: mysql
           tag: latest
           pullPolicy: Always
-          command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+          command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
       service:
         type: ClusterIP
@@ -842,7 +846,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v6.1.1
+            tag: v6.1.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
           service:
@@ -918,7 +922,7 @@ central:
           repository: mysql
           tag: latest
           pullPolicy: Always
-          command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+          command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
       service:
         type: ClusterIP
@@ -1995,7 +1999,7 @@ central:
         repository: mysql
         tag: latest
         pullPolicy: Always
-        command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+        command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
     service:
       type: ClusterIP
@@ -2768,3 +2772,763 @@ emailnotifier:
     # requests:
     #  cpu: 100m
     #  memory: 128Mi
+
+
+# Disabling Oracle Template for now <-- to be removed in future
+als-oracle-template-service:
+  enabled: false
+
+account-lookup-service:
+
+  account-lookup-service-api:
+    enabled: true
+    # Default values for account-lookup-service.
+    # This is a YAML-formatted file.
+    # Declare variables to be passed into your templates.
+
+    replicaCount: 1
+    containers:
+      api:
+        image:
+          repository: mojaloop/account-lookup-service
+          tag: v5.5.0
+          pullPolicy: IfNotPresent
+          command: '["node", "src/index.js", "server", "--api"]'
+        service:
+          ports:
+            api:
+              name: http-api
+              port: 4002
+      admin:
+        image:
+          repository: mojaloop/account-lookup-service
+          tag: v5.5.0
+          pullPolicy: IfNotPresent
+          command: '["node", "src/index.js", "server", "--admin"]'
+        service:
+          ports:
+            api:
+              name: http-admin
+              port: 4001
+
+    nameOverride: ""
+    fullnameOverride: ""
+
+
+    ## metric configuration for prometheus instrumentation
+    metrics:
+      ## flag to enable/disable the metrics end-points
+      enabled: true
+      config:
+        timeout: 5000
+        prefix: moja_
+        defaultLabels:
+          serviceName: account-lookup-service-api
+
+    config:
+      ## Central-Ledger config
+      central_services_host: '$release_name-centralledger-service'
+      central_services_port: 3001
+
+      end_point_cache:
+        expiresIn: 180000
+        generateTimeout: 30000
+
+      ## DB Configuration
+      # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+      db_type: 'mysql'
+      # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+      db_driver: 'mysql'
+      db_host: '$release_name-account-lookup-mysql'
+      db_port: 3306
+      db_user: account_lookup
+      db_password: OdonPianoX
+      db_database: account_lookup
+
+    init:
+      enabled: true
+      mysql:
+        enabled: true
+        name: wait-for-mysql
+        repository: mysql
+        tag: latest
+        pullPolicy: Always
+        command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select * from oracleEndpoint;' ; do echo waiting for MySQL; sleep 2; done;"
+
+    service:
+      type: ClusterIP
+      port: 80
+
+    ingress:
+      enabled: true
+      annotations: {}
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      path: /
+      hosts:
+        - account-lookup-service-api.local
+      tls: []
+      #  - secretName: chart-example-tls
+      #    hosts:
+      #      - chart-example.local
+
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+      # requests:
+      #  cpu: 100m
+      #  memory: 128Mi
+
+    nodeSelector: {}
+
+    tolerations: []
+
+    affinity: {}
+
+  account-lookup-service-admin:
+    enabled: true
+
+    # Default values for account-lookup-service.
+    # This is a YAML-formatted file.
+    # Declare variables to be passed into your templates.
+
+    replicaCount: 1
+    containers:
+      api:
+        image:
+          repository: mojaloop/account-lookup-service
+          tag: v5.5.0
+          pullPolicy: IfNotPresent
+          command: '["node", "src/index.js", "server", "--api"]'
+        service:
+          ports:
+            api:
+              name: http-api
+              port: 4002
+      admin:
+        image:
+          repository: mojaloop/account-lookup-service
+          tag: v5.5.0
+          pullPolicy: IfNotPresent
+          command: '["node", "src/index.js", "server", "--admin"]'
+        service:
+          ports:
+            api:
+              name: http-admin
+              port: 4001
+
+    nameOverride: ""
+    fullnameOverride: ""
+
+
+    ## metric configuration for prometheus instrumentation
+    metrics:
+      ## flag to enable/disable the metrics end-points
+      enabled: true
+      config:
+        timeout: 5000
+        prefix: moja_
+        defaultLabels:
+          serviceName: account-lookup-service-admin
+
+    config:
+      ## Central-Ledger config
+      central_services_host: '$release_name-centralledger-service'
+      central_services_port: 3001
+
+      end_point_cache:
+        expiresIn: 180000
+        generateTimeout: 30000
+
+      ## DB Configuration
+      # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+      db_type: 'mysql'
+      # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+      db_driver: 'mysql'
+      db_host: '$release_name-account-lookup-mysql'
+      db_port: 3306
+      db_user: account_lookup
+      db_password: OdonPianoX
+      db_database: account_lookup
+
+    init:
+      enabled: true
+      mysql:
+        name: wait-for-mysql
+        repository: mysql
+        tag: latest
+        pullPolicy: Always
+        command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+
+    service:
+      type: ClusterIP
+      port: 80
+
+    ingress:
+      enabled: true
+      annotations: {}
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      path: /
+      hosts:
+        - account-lookup-service-admin.local
+      tls: []
+      #  - secretName: chart-example-tls
+      #    hosts:
+      #      - chart-example.local
+
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+      # requests:
+      #  cpu: 100m
+      #  memory: 128Mi
+
+    nodeSelector: {}
+
+    tolerations: []
+
+    affinity: {}
+
+  mysql:
+    enabled: true
+    nameOverride: "account-lookup-mysql"
+    # Default values for Percona XtraDB Cluster
+
+    ## percona image and version
+    ## ref: https://hub.docker.com/r/percona/percona-xtradb-cluster/tags/
+    image:
+      repository: "percona/percona-xtradb-cluster"
+      tag: "5.7.19"
+      pullPolicy: Always
+
+    # Desired number of members of xtradb cluster
+    replicas: 1
+
+    ## Specify password for root user
+    ##
+    # mysqlRootPassword: not-a-secure-password
+
+    ## Specify password for xtradb backup user
+    ##
+    # xtraBackupPassword: replicate-my-data
+
+    ## Uncomment to create a database user
+    ##
+    mysqlUser: account_lookup
+    mysqlPassword: OdonPianoX
+
+    ## Allow unauthenticated access, uncomment to enable
+    ##
+    # mysqlAllowEmptyPassword: true
+
+    ## Uncomment to Create a database
+    ##
+    mysqlDatabase: account_lookup
+
+    ## hosts to allow root user access from
+    # set to "127.0.0.1" to deny remote root.
+    allowRootFrom: "%"
+
+    ## Persist data to a persitent volume
+    persistence:
+      enabled: false
+      ## percona data Persistent Volume Storage Class
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+      ##   GKE, AWS & OpenStack)
+      ##
+      # storageClass: "-"
+      accessMode: ReadWriteOnce
+      size: 8Gi
+
+    ## Node labels for pod assignment
+    ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+    ##
+    nodeSelector: {}
+
+    ## Pod annotations
+    ## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+    ##
+    podAnnotations: {}
+
+    ## Tolerations labels for pod assignment
+    ## Allow the scheduling on tainted nodes (requires Kubernetes >= 1.6)
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    ##
+    tolerations: []
+
+    ## Configure resource requests and limits
+    ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    ##
+    # resources:
+    #  requests:
+    #    memory: 256Mi
+    #    cpu: 100m
+
+    ## Configure the following values below if required
+    #   performance_schema=ON
+    #   max_connections=999
+    #   max_user_connections=999
+    #   thread_cache_size=999
+    configFiles:
+      node.cnf: |+
+        [mysqld]
+        datadir=/var/lib/mysql
+        default_storage_engine=InnoDB
+        binlog_format=ROW
+        innodb_flush_log_at_trx_commit  = 0
+        innodb_flush_method             = O_DIRECT
+        innodb_file_per_table           = 1
+        innodb_autoinc_lock_mode=2
+        bind_address = 0.0.0.0
+        wsrep_slave_threads=2
+        wsrep_cluster_address=gcomm://
+        wsrep_provider=/usr/lib/galera3/libgalera_smm.so
+        wsrep_cluster_name=galera
+        wsrep_sst_method=xtrabackup-v2
+        pxc_strict_mode=DISABLED
+        max_connections=999
+        max_user_connections=994
+        thread_cache_size=999
+    ## When set to true will create sidecar for `prom/mysqld-exporter`
+    ## metrics exporting
+    metricsExporter:
+      enabled: true
+
+    ## When set to true will create sidecar to tail mysql log
+    logTail: true
+
+    service:
+      type: ClusterIP
+      port: 3306
+      externalIPs: []
+
+  account-oracle-service:
+    enabled: true
+
+    als-oracle-account-service:
+      enabled: true
+      # Default values for als-oracle-account-service.
+      # This is a YAML-formatted file.
+      # Declare variables to be passed into your templates.
+
+      replicaCount: 1
+      containers:
+        api:
+          image:
+            repository: mojaloop/als-oracle-account
+            tag: v5.5.0
+            pullPolicy: IfNotPresent
+      #      command: '["npm","run","migrate","&&","node","src/server.js",]' <-- need to relook at this as its not working
+          service:
+            ports:
+              api:
+                name: http-api
+                port: 3030
+
+      nameOverride: ""
+      fullnameOverride: ""
+
+
+      ### metric configuration for prometheus instrumentation
+      #metrics:
+      #  ## flag to enable/disable the metrics end-points
+      #  enabled: true
+      #  config:
+      #    timeout: 5000
+      #    prefix: moja_
+      #    defaultLabels:
+      #      serviceName: als-oracle-account-service
+
+      config:
+        ## DB Configuration
+        # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+        db_type: 'mysql'
+        # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+        db_driver: 'mysql'
+        db_host: '$release_name-als-oracle-account-mysql'
+        db_port: 3306
+        db_user: als_oracle_account
+        db_password: OdonXhiatiX
+        db_database: als_oracle_account
+
+      init:
+        enabled: true
+        mysql:
+          name: wait-for-mysql
+          repository: mysql
+          tag: latest
+          pullPolicy: Always
+          command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+
+      service:
+        type: ClusterIP
+        port: 80
+
+      ingress:
+        enabled: true
+        annotations: {}
+          # kubernetes.io/ingress.class: nginx
+          # kubernetes.io/tls-acme: "true"
+        path: /
+        hosts:
+          - als-oracle-account.local
+        tls: []
+        #  - secretName: chart-example-tls
+        #    hosts:
+        #      - chart-example.local
+
+      resources: {}
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This also increases chances charts run on environments with little
+        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+        #  cpu: 100m
+        #  memory: 128Mi
+        # requests:
+        #  cpu: 100m
+        #  memory: 128Mi
+
+      nodeSelector: {}
+
+      tolerations: []
+
+      affinity: {}
+
+
+      mysql:
+        enabled: true
+        nameOverride: "als-oracle-account-mysql"
+        # Default values for Percona XtraDB Cluster
+
+        ## percona image and version
+        ## ref: https://hub.docker.com/r/percona/percona-xtradb-cluster/tags/
+        image:
+          repository: "percona/percona-xtradb-cluster"
+          tag: "5.7.19"
+          pullPolicy: Always
+
+        # Desired number of members of xtradb cluster
+        replicas: 1
+
+        ## Specify password for root user
+        ##
+        # mysqlRootPassword: not-a-secure-password
+
+        ## Specify password for xtradb backup user
+        ##
+        # xtraBackupPassword: replicate-my-data
+
+        ## Uncomment to create a database user
+        ##
+        mysqlUser: als_oracle_account
+        mysqlPassword: OdonXhiatiX
+
+        ## Allow unauthenticated access, uncomment to enable
+        ##
+        # mysqlAllowEmptyPassword: true
+
+        ## Uncomment to Create a database
+        ##
+        mysqlDatabase: als_oracle_account
+
+        ## hosts to allow root user access from
+        # set to "127.0.0.1" to deny remote root.
+        allowRootFrom: "%"
+
+        ## Persist data to a persitent volume
+        persistence:
+          enabled: false
+          ## percona data Persistent Volume Storage Class
+          ## If defined, storageClassName: <storageClass>
+          ## If set to "-", storageClassName: "", which disables dynamic provisioning
+          ## If undefined (the default) or set to null, no storageClassName spec is
+          ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+          ##   GKE, AWS & OpenStack)
+          ##
+          # storageClass: "-"
+          accessMode: ReadWriteOnce
+          size: 8Gi
+
+        ## Node labels for pod assignment
+        ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+        ##
+        nodeSelector: {}
+
+        ## Pod annotations
+        ## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+        ##
+        podAnnotations: {}
+
+        ## Tolerations labels for pod assignment
+        ## Allow the scheduling on tainted nodes (requires Kubernetes >= 1.6)
+        ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+        ##
+        tolerations: []
+
+        ## Configure resource requests and limits
+        ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+        ##
+        # resources:
+        #  requests:
+        #    memory: 256Mi
+        #    cpu: 100m
+
+        ## Configure the following values below if required
+        #   performance_schema=ON
+        #   max_connections=999
+        #   max_user_connections=999
+        #   thread_cache_size=999
+        configFiles:
+          node.cnf: |+
+            [mysqld]
+            datadir=/var/lib/mysql
+            default_storage_engine=InnoDB
+            binlog_format=ROW
+            innodb_flush_log_at_trx_commit  = 0
+            innodb_flush_method             = O_DIRECT
+            innodb_file_per_table           = 1
+            innodb_autoinc_lock_mode=2
+            bind_address = 0.0.0.0
+            wsrep_slave_threads=2
+            wsrep_cluster_address=gcomm://
+            wsrep_provider=/usr/lib/galera3/libgalera_smm.so
+            wsrep_cluster_name=galera
+            wsrep_sst_method=xtrabackup-v2
+            pxc_strict_mode=DISABLED
+            max_connections=999
+            max_user_connections=994
+            thread_cache_size=999
+        ## When set to true will create sidecar for `prom/mysqld-exporter`
+        ## metrics exporting
+        metricsExporter:
+          enabled: true
+
+        ## When set to true will create sidecar to tail mysql log
+        logTail: true
+
+        service:
+          type: ClusterIP
+          port: 3306
+          externalIPs: []
+
+    als-oracle-template-service:
+      enabled: true
+      # Default values for als-oracle-template.
+      # This is a YAML-formatted file.
+      # Declare variables to be passed into your templates.
+
+      replicaCount: 1
+      containers:
+        api:
+          image:
+            repository: mojaloop/als-oracle-template
+            tag: v5.5.0
+            pullPolicy: IfNotPresent
+    #        command: '["npm","run","migrate","&&","node","src/server.js",]'
+          service:
+            ports:
+              api:
+                name: http-api
+                port: 3030
+
+      nameOverride: ""
+      fullnameOverride: ""
+
+
+    #  ## metric configuration for prometheus instrumentation
+    #  metrics:
+    #    ## flag to enable/disable the metrics end-points
+    #    enabled: true
+    #    config:
+    #      timeout: 5000
+    #      prefix: moja_
+    #      defaultLabels:
+    #        serviceName: als-oracle-template-service
+
+      config:
+        ## DB Configuration
+        # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+        db_type: 'mysql'
+        # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+        db_driver: 'mysql'
+        db_host: '$release_name-als-oracle-template-mysql'
+        db_port: 3306
+        db_user: als_oracle_template
+        db_password: OdonXhiatiX
+        db_database: als_oracle_template
+
+      init:
+        enabled: true
+        mysql:
+          name: wait-for-mysql
+          repository: mysql
+          tag: latest
+          pullPolicy: Always
+          command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+
+      service:
+        type: ClusterIP
+        port: 80
+
+      ingress:
+        enabled: true
+        annotations: {}
+          # kubernetes.io/ingress.class: nginx
+          # kubernetes.io/tls-acme: "true"
+        path: /
+        hosts:
+          - als-oracle-template.local
+        tls: []
+        #  - secretName: chart-example-tls
+        #    hosts:
+        #      - chart-example.local
+
+      resources: {}
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This also increases chances charts run on environments with little
+        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+        #  cpu: 100m
+        #  memory: 128Mi
+        # requests:
+        #  cpu: 100m
+        #  memory: 128Mi
+
+      nodeSelector: {}
+
+      tolerations: []
+
+      affinity: {}
+
+
+      mysql:
+        enabled: true
+        nameOverride: "als-oracle-template-mysql"
+        # Default values for Percona XtraDB Cluster
+
+        ## percona image and version
+        ## ref: https://hub.docker.com/r/percona/percona-xtradb-cluster/tags/
+        image:
+          repository: "percona/percona-xtradb-cluster"
+          tag: "5.7.19"
+          pullPolicy: Always
+
+        # Desired number of members of xtradb cluster
+        replicas: 1
+
+        ## Specify password for root user
+        ##
+        # mysqlRootPassword: not-a-secure-password
+
+        ## Specify password for xtradb backup user
+        ##
+        # xtraBackupPassword: replicate-my-data
+
+        ## Uncomment to create a database user
+        ##
+        mysqlUser: als_oracle_template
+        mysqlPassword: OdonXhiatiX
+
+        ## Allow unauthenticated access, uncomment to enable
+        ##
+        # mysqlAllowEmptyPassword: true
+
+        ## Uncomment to Create a database
+        ##
+        mysqlDatabase: als_oracle_template
+
+        ## hosts to allow root user access from
+        # set to "127.0.0.1" to deny remote root.
+        allowRootFrom: "%"
+
+        ## Persist data to a persitent volume
+        persistence:
+          enabled: false
+          ## percona data Persistent Volume Storage Class
+          ## If defined, storageClassName: <storageClass>
+          ## If set to "-", storageClassName: "", which disables dynamic provisioning
+          ## If undefined (the default) or set to null, no storageClassName spec is
+          ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+          ##   GKE, AWS & OpenStack)
+          ##
+          # storageClass: "-"
+          accessMode: ReadWriteOnce
+          size: 8Gi
+
+        ## Node labels for pod assignment
+        ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+        ##
+        nodeSelector: {}
+
+        ## Pod annotations
+        ## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+        ##
+        podAnnotations: {}
+
+        ## Tolerations labels for pod assignment
+        ## Allow the scheduling on tainted nodes (requires Kubernetes >= 1.6)
+        ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+        ##
+        tolerations: []
+
+        ## Configure resource requests and limits
+        ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+        ##
+        # resources:
+        #  requests:
+        #    memory: 256Mi
+        #    cpu: 100m
+
+        ## Configure the following values below if required
+        #   performance_schema=ON
+        #   max_connections=999
+        #   max_user_connections=999
+        #   thread_cache_size=999
+        configFiles:
+          node.cnf: |+
+            [mysqld]
+            datadir=/var/lib/mysql
+            default_storage_engine=InnoDB
+            binlog_format=ROW
+            innodb_flush_log_at_trx_commit  = 0
+            innodb_flush_method             = O_DIRECT
+            innodb_file_per_table           = 1
+            innodb_autoinc_lock_mode=2
+            bind_address = 0.0.0.0
+            wsrep_slave_threads=2
+            wsrep_cluster_address=gcomm://
+            wsrep_provider=/usr/lib/galera3/libgalera_smm.so
+            wsrep_cluster_name=galera
+            wsrep_sst_method=xtrabackup-v2
+            pxc_strict_mode=DISABLED
+            max_connections=999
+            max_user_connections=994
+            thread_cache_size=999
+        ## When set to true will create sidecar for `prom/mysqld-exporter`
+        ## metrics exporting
+        metricsExporter:
+          enabled: true
+
+        ## When set to true will create sidecar to tail mysql log
+        logTail: true
+
+        service:
+          type: ClusterIP
+          port: 3306
+          externalIPs: []

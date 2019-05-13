@@ -35,6 +35,10 @@ echo "Packaging EFK..."
 helm package -u -d ./repo ./monitoring/efk
 checkCommandResult
 
+echo "Packaging Account Lookup Service..."
+helm package -u -d ./repo  ./account-lookup-service
+checkCommandResult
+
 echo "Packaging Central-KMS..." 
 helm package -u -d ./repo ./centralkms 
 checkCommandResult 
