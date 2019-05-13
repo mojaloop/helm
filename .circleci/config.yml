@@ -58,17 +58,17 @@ defaults_publish_to_gh_pages: &defaults_publish_to_gh_pages
     echo "Fetching info from remote $GITHUB_PROJECT_USERNAME"
     git fetch -q $GITHUB_PROJECT_USERNAME &> git.log
 
-    echo "Checking out $GITBOOK_TARGET_BRANCH"
-    git checkout -b $GITBOOK_TARGET_BRANCH $GITHUB_PROJECT_USERNAME/$GITBOOK_TARGET_BRANCH  &> git.log
+    echo "Checking out $GITHUB_TARGET_BRANCH"
+    git checkout -b $GITHUB_TARGET_BRANCH $GITHUB_PROJECT_USERNAME/$GITHUB_TARGET_BRANCH  &> git.log
 
-    echo "Pulling latest code from $GITBOOK_TARGET_BRANCH branch..."
-    git pull -q $GITHUB_PROJECT_USERNAME $GITBOOK_TARGET_BRANCH --rebase &> git.log
+    echo "Pulling latest code from $GITHUB_TARGET_BRANCH branch..."
+    git pull -q $GITHUB_PROJECT_USERNAME master --rebase &> git.log
 
     echo "Package helm charts..."
     sh package.sh
 
     echo "Staging general changes..."
-    git add .
+    git add -A
 
     echo "Staging packaged Helm charts..."
     git add -f repo/*.*
@@ -76,8 +76,8 @@ defaults_publish_to_gh_pages: &defaults_publish_to_gh_pages
     echo "Commiting changes..."
     git commit -a -m "Updating release to $GITHUB_TAG"
 
-    echo "Publishing $GITHUB_TAG release to $GITBOOK_TARGET_BRANCH on github..."
-    git push -q $GITHUB_PROJECT_USERNAME $GITBOOK_TARGET_BRANCH &> git.log
+    echo "Publishing $GITHUB_TAG release to $GITHUB_TARGET_BRANCH on github..."
+    git push -q $GITHUB_PROJECT_USERNAME $GITHUB_TARGET_BRANCH &> git.log
 
 jobs:
   setup:
@@ -129,7 +129,7 @@ jobs:
       - run:
           name: setup environment vars
           command: |
-            echo 'export GITBOOK_TARGET_BRANCH=$GITBOOK_TARGET_BRANCH' >> $BASH_ENV
+            echo 'export GITHUB_TARGET_BRANCH=$HELM_TARGET_BRANCH' >> $BASH_ENV
             echo 'export GITHUB_TOKEN=$GITHUB_TOKEN' >> $BASH_ENV
             echo 'export GITHUB_PROJECT_USERNAME=$CIRCLE_PROJECT_USERNAME' >> $BASH_ENV
             echo 'export GITHUB_PROJECT_REPONAME=$CIRCLE_PROJECT_REPONAME' >> $BASH_ENV
