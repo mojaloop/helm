@@ -33,14 +33,6 @@ echo "Updating EFK..."
 helm dep up ./monitoring/efk
 checkCommandResult
 
-echo "Updating Account Oracle Service Account..."
-helm dep up ./account-oracle-service/chart-account
-checkCommandResult
-
-echo "Updating Account Oracle Service Template..."
-helm dep up ./account-oracle-service/chart-template
-checkCommandResult
-
 echo "Updating Account Lookup Service..."
 helm dep up ./account-lookup-service
 checkCommandResult
