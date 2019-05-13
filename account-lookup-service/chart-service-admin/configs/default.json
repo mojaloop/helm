@@ -1,0 +1,31 @@
+{{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
+{{- $centralServicesHost := ( .Values.config.central_services_host | replace "$release_name" .Release.Name ) -}}
+{
+  "ADMIN_PORT":  {{ .Values.containers.admin.service.ports.api.port }},
+  "API_PORT":  {{ .Values.containers.api.service.ports.api.port }},
+  "DATABASE_URI": "{{ .Values.config.db_type }}://{{ .Values.config.db_user }}:{{ .Values.config.db_password }}@{{ (default .Values.config.db_host $dbHost) }}:{{ .Values.config.db_port }}/{{ .Values.config.db_database }}",
+  "RUN_MIGRATIONS": false,
+  "ENDPOINT_CACHE_CONFIG": {
+    "expiresIn": {{ .Values.config.end_point_cache.expiresIn }},
+    "generateTimeout": {{ .Values.config.end_point_cache.generateTimeout }}
+  },
+  "SWITCH_ENDPOINT": "http://{{ (default .Values.config.central_services_host $centralServicesHost) }}:{{ .Values.config.central_services_port }}",
+  "INSTRUMENTATION": {
+    "METRICS": {
+      "DISABLED": {{ not .Values.metrics.enabled }},
+      "labels": {
+        "fspId": "*"
+      },
+      "config": {
+        "timeout": {{ .Values.metrics.config.timeout }},
+        "prefix": {{ .Values.metrics.config.prefix | quote }},
+        "defaultLabels": {
+        {{- range $key, $value := .Values.metrics.config.defaultLabels }}
+          {{ $key  | quote }}: {{ $value | quote }}
+        {{- end }}
+        }
+      }
+    }
+  }
+}
+

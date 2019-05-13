@@ -18,6 +18,7 @@ function checkCommandResult () {
 
 echo "Removing old charts..."
 find ./ -name "charts"| xargs rm -Rf
+find ./ -name "tmpcharts"| xargs rm -Rf
 
 ## Disabled as Simulator has no requirements at this time
 #echo "Updating Simulator..."
@@ -30,6 +31,10 @@ checkCommandResult
 
 echo "Updating EFK..."
 helm dep up ./monitoring/efk
+checkCommandResult
+
+echo "Updating Account Lookup Service..."
+helm dep up ./account-lookup-service
 checkCommandResult
 
 echo "Updating Central-KMS..."

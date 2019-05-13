@@ -1,57 +1,186 @@
 # CircleCI v2 Config
 version: 2
 
-defaults: &defaults
+defaults_working_directory: &defaults_working_directory
   working_directory: /home/circleci/project
+
+defaults_docker_node: &defaults_docker_node
   docker:
-    - image: wernight/kubectl
+    - image: alpine/helm:2.13.1
+
+defaults_Dependencies: &defaults_Dependencies
+  name: Install default dependencies
+  command: |
+    apk --no-cache add git
+    apk --no-cache add ca-certificates
+    apk --no-cache add curl
+    apk --no-cache add openssh-client
+    apk add --no-cache -t build-dependencies make gcc g++ python libtool autoconf automake
+
+defaults_Environment: &defaults_environment
+  name: Set default environment
+  command: |
+    echo "Initialising helm for local use only"
+    helm init --client-only --skip-refresh
+
+    echo "Adding repos necessary for publishing process"
+    helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator
+    helm repo add kiwigrid https://kiwigrid.github.io
+
+defaults_slack_announcement: &defaults_slack_announcement
+  name: Slack announcement for tag releases
+  command: |
+    curl -X POST \
+      $SLACK_WEBHOOK_ANNOUNCEMENT \
+      -H 'Content-type: application/json' \
+      -H 'cache-control: no-cache' \
+      -d "{
+      \"text\": \"*${CIRCLE_PROJECT_REPONAME}* - Release \`${CIRCLE_TAG}\`: https://github.com/mojaloop/${CIRCLE_PROJECT_REPONAME}/releases/tag/${CIRCLE_TAG}\"
+    }"
+
+defaults_git_identity_setup: &defaults_git_identity_setup
+  name: Setup Git Identity
+  command: |
+    echo "Setting BASH_ENV..."
+    source $BASH_ENV
+
+    git config --global user.email "$GIT_CI_USER"
+    git config --global user.password "$GIT_CI_PASSWORD"
+    git config --global user.name "$GIT_CI_EMAIL"
+    git remote add $GITHUB_PROJECT_USERNAME https://$GIT_CI_USER:$GITHUB_TOKEN@github.com/$GITHUB_PROJECT_USERNAME/$GITHUB_PROJECT_REPONAME.git
+
+defaults_publish_to_gh_pages: &defaults_publish_to_gh_pages
+  name: Publish documentation
+  command: |
+    echo "Setting BASH_ENV..."
+    source $BASH_ENV
+
+    echo "Fetching info from remote $GITHUB_PROJECT_USERNAME"
+    git fetch -q $GITHUB_PROJECT_USERNAME &> git.log
+
+    echo "Checking out $GITBOOK_TARGET_BRANCH"
+    git checkout -b $GITBOOK_TARGET_BRANCH $GITHUB_PROJECT_USERNAME/$GITBOOK_TARGET_BRANCH  &> git.log
+
+    echo "Pulling latest code from $GITBOOK_TARGET_BRANCH branch..."
+    git pull -q $GITHUB_PROJECT_USERNAME $GITBOOK_TARGET_BRANCH --rebase &> git.log
+
+    echo "Package helm charts..."
+    sh package.sh
+
+    echo "Staging general changes..."
+    git add .
+
+    echo "Staging packaged Helm charts..."
+    git add -f repo/*.*
+
+    echo "Commiting changes..."
+    git commit -a -m "Updating release to $GITHUB_TAG"
+
+    echo "Publishing $GITHUB_TAG release to $GITBOOK_TARGET_BRANCH on github..."
+    git push -q $GITHUB_PROJECT_USERNAME $GITBOOK_TARGET_BRANCH &> git.log
 
 jobs:
+  setup:
+    <<: *defaults_working_directory
+    <<: *defaults_docker_node
+    steps:
+      - checkout
+      - run:
+          name: Placeholder for setup
+          command: echo "Placeholder for setup - Nothing to do here"
+
+  test:
+    <<: *defaults_working_directory
+    <<: *defaults_docker_node
+    steps:
+      - checkout
+      - run:
+          <<: *defaults_Dependencies
+      - run:
+          <<: *defaults_environment
+      - run:
+          name: Linting Helm Charts
+          command: |
+            sh lint-charts.sh
+
   build:
-    <<: *defaults
+    <<: *defaults_working_directory
+    <<: *defaults_docker_node
     steps:
       - checkout
-      - run: 
-          name: Build Chart packages
-          command: sh ./package.sh
-      # save Chart packages
-      - save_cache:
-          key: repo-cache-{{ .Branch }}-{{ .Revision }}
-          paths: repo
+      - run:
+          <<: *defaults_Dependencies
+      - run:
+          <<: *defaults_environment
+      - run:
+          name: Update Helm Charts
+          command: |
+            sh update-charts-dep.sh
+
   deploy:
-    <<: *defaults
+    <<: *defaults_working_directory
+    <<: *defaults_docker_node
     steps:
       - checkout
-      - run: 
-          name: Checkout gh-pages branch
-          command: git checkout origin gh-pages
-      - restore_cache:
-          keys: repo-cache-{{ .Branch }}-{{ .Revision }}
-      - run: 
-          name: Murge origin master into gh-pages branch
-          command: git pull origin master
-      - run: 
-          name: Add repo to gh-pages branch
-          command: git add ./repo
-      - run: 
-          name: Commit changes to gh-pages branch
-          command: git commit -m "Publishing $(date '+%Y%m%d-%H%M%S')"
-      - run: 
-          name: Publish gh-pages
-          command: git push origin
+      - run:
+          <<: *defaults_Dependencies
+      - run:
+          <<: *defaults_environment
+      - run:
+          name: setup environment vars
+          command: |
+            echo 'export GITBOOK_TARGET_BRANCH=$GITBOOK_TARGET_BRANCH' >> $BASH_ENV
+            echo 'export GITHUB_TOKEN=$GITHUB_TOKEN' >> $BASH_ENV
+            echo 'export GITHUB_PROJECT_USERNAME=$CIRCLE_PROJECT_USERNAME' >> $BASH_ENV
+            echo 'export GITHUB_PROJECT_REPONAME=$CIRCLE_PROJECT_REPONAME' >> $BASH_ENV
+            echo 'export GITHUB_TAG=$CIRCLE_TAG' >> $BASH_ENV
+            echo 'export GIT_CI_USER=$GIT_CI_USER' >> $BASH_ENV
+            echo 'export GIT_CI_EMAIL=$GIT_CI_EMAIL' >> $BASH_ENV
+      - run:
+          <<: *defaults_git_identity_setup
+      - run:
+          <<: *defaults_publish_to_gh_pages
+      - run:
+          <<: *defaults_slack_announcement
 
 workflows:
   version: 2
   build_and_test:
     jobs:
-      - build:
+      - setup:
           context: org-global
           filters:
             tags:
-              only: /v[0-9]+(\.[0-9]+)*/
+              only: /.*/
             branches:
-              only:
-                - master
+              ignore:
+                - /feature.*/
+                - /bugfix.*/
+                - gh-pages
+      - test:
+          context: org-global
+          requires:
+            - setup
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore:
+                - /feature.*/
+                - /bugfix.*/
+                - gh-pages
+      - build:
+          context: org-global
+          requires:
+            - test
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore:
+                - /feature.*/
+                - /bugfix.*/
+                - gh-pages
       - deploy:
           context: org-global
           requires:
@@ -60,5 +189,5 @@ workflows:
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
             branches:
-              only:
-                - master
+              ignore:
+                - /.*/

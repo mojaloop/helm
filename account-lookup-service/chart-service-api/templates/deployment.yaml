@@ -1,0 +1,77 @@
+{{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "account-lookup-service-api.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "account-lookup-service-api.name" . }}
+    helm.sh/chart: {{ include "account-lookup-service-api.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "account-lookup-service-api.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "account-lookup-service-api.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      {{- if .Values.init.enabled }}
+      initContainers:
+        {{- if and (eq .Values.config.db_type "mysql") (eq .Values.init.mysql.enabled true) }}
+        - name: {{ .Values.init.mysql.name }}
+          image: {{ .Values.init.mysql.repository }}:{{ .Values.init.mysql.tag }}
+          imagePullPolicy: {{ .Values.init.mysql.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.init.mysql.command | replace "$db_user" (print .Values.config.db_user) | replace "$db_password" (print .Values.config.db_password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.config.db_database) | replace "$db_port" (print .Values.config.db_port) )| quote }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.containers.api.image.repository }}:{{ .Values.containers.api.image.tag }}"
+          imagePullPolicy: {{ .Values.containers.api.image.pullPolicy }}
+          command: {{ .Values.containers.api.image.command }}
+          ports:
+            - name: {{ .Values.containers.api.service.ports.api.name }}
+              containerPort: {{ .Values.containers.api.service.ports.api.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.containers.api.service.ports.api.name }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.containers.api.service.ports.api.name }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          volumeMounts:
+          - name: {{ template "account-lookup-service-api.fullname" . }}-config-volume
+            mountPath: /opt/account-lookup-service/config
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      volumes:
+        - name: {{ template "account-lookup-service-api.fullname" . }}-config-volume
+          configMap:
+            name: {{ template "account-lookup-service-api.fullname" . }}
+            items:
+            - key: default.json
+              path: default.json
+            - key: knexfile.js
+              path: knexfile.js
