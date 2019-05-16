@@ -1,6 +1,16 @@
 {{- $dbDeployHost := (.Values.config.db_host | replace "$release_name" .Release.Name) }}
-{ ! TO BE UPDATED WHEN CODE IS AVAILABLE
-    "PORT": {{ .Values.service.ports.api.internalPort }},
-    "HOSTNAME": "http://central-settlements.local",
-    "DATABASE_URI": "{{ .Values.config.db_type }}://{{ .Values.config.db_user }}:{{ .Values.config.db_password }}@{{ $dbDeployHost }}:{{ .Values.config.db_port }}/{{ .Values.config.db_database }}"
+{
+  "HOSTNAME": "http://quoting-service.local",
+  "LISTEN_ADDRESS": "0.0.0.0",
+  "PORT": {{ .Values.service.ports.api.internalPort }},
+  "DATABASE": {
+    "DIALECT": "{{ .Values.config.db_type }}",
+    "HOST": "{{ $dbDeployHost }}",
+    "PORT": {{.Values.config.db_port}},
+    "USER": "{{ .Values.config.db_user }}",
+    "PASSWORD": "{{ .Values.config.db_password }}",
+    "SCHEMA": "{{ .Values.config.db_database }}",
+    "POOL_MINSIZE": {{ .Values.config.db_connection_pool_min }},
+    "POOL_MAXSIZE": {{ .Values.config.db_connection_pool_max }}
+  }
 }
