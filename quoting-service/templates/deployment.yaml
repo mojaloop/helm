@@ -1,0 +1,93 @@
+{{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "quotingservice.fullname" . }}
+  labels:
+    app: {{ template "quotingservice.fullname" . }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "quotingservice.fullname" . }}
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+{{- if .Values.global.config.affinity }}
+      affinity:
+{{ toYaml .Values.global.config.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.global.config.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.global.config.nodeSelector | indent 8 }}
+{{- end }}
+{{- if .Values.global.config.tolerations }}
+      tolerations:
+{{ toYaml .Values.global.config.tolerations | indent 8 }}
+{{- end }}
+      {{- if .Values.init.enabled }}
+      initContainers:
+        {{- if eq .Values.config.db_type "mysql"}}
+        - name: {{ .Values.init.mysql.name }}
+          image: {{ .Values.init.mysql.repository }}:{{ .Values.init.mysql.tag }}
+          imagePullPolicy: {{ .Values.init.mysql.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.init.mysql.command | replace "$db_user" (print .Values.config.db_user) | replace "$db_password" (print .Values.config.db_password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.config.db_database) | replace "$db_port" (print .Values.config.db_port) )| quote }}
+        {{- end }}
+        {{- if .Values.init.migration.enabled }}
+        - name: {{ .Values.init.migration.name }}
+          image: {{ .Values.containers.api.image.repository }}:{{ .Values.containers.api.image.tag }}
+          imagePullPolicy: {{ .Values.containers.api.image.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ .Values.init.migration.command }}
+          env:
+            - name: "CLEDG_DATABASE_URI-TOBEUPDATEDWHENCODEISREADY"
+              value: "{{ .Values.config.db_type }}://{{ .Values.config.db_user }}:{{ .Values.config.db_password }}@{{ (default .Values.config.db_host $dbHost) }}:{{ .Values.config.db_port }}/{{ .Values.config.db_database }}"
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          {{- range $port := .Values.service.ports }}
+            - name: {{ $port.name }}
+              containerPort: {{ $port.internalPort }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.httpGet.path }}
+              port: {{ .Values.service.ports.api.internalPort }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.httpGet.path }}
+              port: {{ .Values.service.ports.api.internalPort }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          {{- end }}
+          env: 
+            - name: LOG_LEVEL
+              value: {{ .Values.config.log_level }}
+          volumeMounts:
+          - name: {{ template "quotingservice.fullname" . }}-config-volume
+            mountPath: /opt/central-settlement/config
+      volumes:
+        - name: {{ template "quotingservice.fullname" . }}-config-volume
+          configMap:
+            name: {{ template "quotingservice.fullname" . }}
+            items:
+            - key: default.json
+              path: default.json
+#            - key: knexfile.js
+#              path: knexfile.js
