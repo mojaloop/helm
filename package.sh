@@ -87,6 +87,10 @@ echo "Packaging ml-api-adapter..."
 helm package -u -d ./repo ./ml-api-adapter
 checkCommandResult
 
+echo "Packaging quoting-service..."
+helm package -u -d ./repo ./quoting-service
+checkCommandResult
+
 echo "Packaging Mojaloop..." 
 helm package -u -d ./repo ./mojaloop 
 checkCommandResult
