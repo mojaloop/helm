@@ -73,6 +73,10 @@ echo "Linting ml-api-adapter..."
 helm lint ./ml-api-adapter
 checkCommandResult
 
+echo "Linting quoting-service..."
+helm lint ./quoting-service
+checkCommandResult
+
 echo "Linting Email Notifier..."
 helm lint ./emailnotifier
 checkCommandResult
