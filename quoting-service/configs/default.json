@@ -1,0 +1,16 @@
+{{- $dbDeployHost := (.Values.config.db_host | replace "$release_name" .Release.Name) }}
+{
+  "HOSTNAME": "http://quoting-service.local",
+  "LISTEN_ADDRESS": "0.0.0.0",
+  "PORT": {{ .Values.service.ports.api.internalPort }},
+  "DATABASE": {
+    "DIALECT": "{{ .Values.config.db_type }}",
+    "HOST": "{{ $dbDeployHost }}",
+    "PORT": {{.Values.config.db_port}},
+    "USER": "{{ .Values.config.db_user }}",
+    "PASSWORD": "{{ .Values.config.db_password }}",
+    "SCHEMA": "{{ .Values.config.db_database }}",
+    "POOL_MINSIZE": {{ .Values.config.db_connection_pool_min }},
+    "POOL_MAXSIZE": {{ .Values.config.db_connection_pool_max }}
+  }
+}
