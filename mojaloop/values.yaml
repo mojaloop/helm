@@ -2434,100 +2434,101 @@ central:
             ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
       additionalLabels: {}
 
-interop-switch:
-    enabled: true
-    replicaCount: 1
-    image:
-      repository: mojaloop/interop-switch
-      tag: v2.4
-      pullPolicy: Always
-
-    readinessProbe:
-      enabled: true
-      httpGet:
-        path: /health
-      initialDelaySeconds: 60
-      periodSeconds: 15
-
-    livenessProbe:
-      enabled: true
-      httpGet:
-        path: /health
-      initialDelaySeconds: 60
-      periodSeconds: 15
-
-    config:
-      MAX_JVM_MEMORY: '256'
-      SWITCH_SERVICE_HOST: '0.0.0.0'
-      SWITCH_SERVICE_PORT: '8088'
-      CENTRAL_DIR_HOST: 'centraldirectory'
-      CENTRAL_DIR_PORT: '3000'
-      CONNECTOR_HOST: 'interop-connector'
-      PSQL_HOST: 'postgresql'
-      PSQL_PORT: '5432'
-      PSQL_DATABASE: 'interop_switch'
-      PSQL_USER: 'interop_switch'
-      PSQL_PASSWORD: 'cVq8iFqaLuHy8jjKuA'
-      ML_API_ADAPTER_HOST: 'ml-api-adapter-service'
-      ML_API_ADAPTER_PORT: 8088
-
-    init:
-      enabled: true
-      image:
-        name: create-tables
-        repository: mojaloop/interop-switch-init-container
-        tag: latest
-        pullPolicy: Always
-
-    service:
-      type: ClusterIP
-      ports:
-        api:
-          name: http-api
-          externalPort: 8088
-          internalPort: 8088
-
-      annotations: {}
-
-      # This allows one to point the service to an external backend.
-      # This is useful for local development where one wishes to hijack
-      # the communication from the service to the node layer and point
-      # to a specific endpoint (IP, Port, etc).
-      external:
-        enabled: false
-        # 10.0.2.2 is the magic IP for the host on virtualbox's network
-        ip: 10.0.2.2
-        ports:
-          api:
-            name: http-api
-            externalPort: 3000
-
-    ingress:
-      enabled: true
-      externalPath: /interop/switch/v1
-      # Used to create an Ingress record.
-      hosts:
-        api: interop-switch.local
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: '/switch/v1'
-        # kubernetes.io/ingress.class: nginx
-        # kubernetes.io/tls-acme: "true"
-      tls:
-        # Secrets must be manually created in the namespace.
-        # - secretName: chart-example-tls
-        #   hosts:
-        #     - chart-example.local
-    resources: {}
-      # We usually recommend not to specify default resources and to leave this as a conscious
-      # choice for the user. This also increases chances charts run on environments with little
-      # resources, such as Minikube. If you do want to specify resources, uncomment the following
-      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-      # limits:
-      #  cpu: 100m
-      #  memory: 128Mi
-      # requests:
-      #  cpu: 100m
-      #  memory: 128Mi
+## Deprecated - to be removed shortly
+#interop-switch:
+#    enabled: true
+#    replicaCount: 1
+#    image:
+#      repository: mojaloop/interop-switch
+#      tag: v2.4
+#      pullPolicy: Always
+#
+#    readinessProbe:
+#      enabled: true
+#      httpGet:
+#        path: /health
+#      initialDelaySeconds: 60
+#      periodSeconds: 15
+#
+#    livenessProbe:
+#      enabled: true
+#      httpGet:
+#        path: /health
+#      initialDelaySeconds: 60
+#      periodSeconds: 15
+#
+#    config:
+#      MAX_JVM_MEMORY: '256'
+#      SWITCH_SERVICE_HOST: '0.0.0.0'
+#      SWITCH_SERVICE_PORT: '8088'
+#      CENTRAL_DIR_HOST: 'centraldirectory'
+#      CENTRAL_DIR_PORT: '3000'
+#      CONNECTOR_HOST: 'interop-connector'
+#      PSQL_HOST: 'postgresql'
+#      PSQL_PORT: '5432'
+#      PSQL_DATABASE: 'interop_switch'
+#      PSQL_USER: 'interop_switch'
+#      PSQL_PASSWORD: 'cVq8iFqaLuHy8jjKuA'
+#      ML_API_ADAPTER_HOST: 'ml-api-adapter-service'
+#      ML_API_ADAPTER_PORT: 8088
+#
+#    init:
+#      enabled: true
+#      image:
+#        name: create-tables
+#        repository: mojaloop/interop-switch-init-container
+#        tag: latest
+#        pullPolicy: Always
+#
+#    service:
+#      type: ClusterIP
+#      ports:
+#        api:
+#          name: http-api
+#          externalPort: 8088
+#          internalPort: 8088
+#
+#      annotations: {}
+#
+#      # This allows one to point the service to an external backend.
+#      # This is useful for local development where one wishes to hijack
+#      # the communication from the service to the node layer and point
+#      # to a specific endpoint (IP, Port, etc).
+#      external:
+#        enabled: false
+#        # 10.0.2.2 is the magic IP for the host on virtualbox's network
+#        ip: 10.0.2.2
+#        ports:
+#          api:
+#            name: http-api
+#            externalPort: 3000
+#
+#    ingress:
+#      enabled: true
+#      externalPath: /interop/switch/v1
+#      # Used to create an Ingress record.
+#      hosts:
+#        api: interop-switch.local
+#      annotations:
+#        nginx.ingress.kubernetes.io/rewrite-target: '/switch/v1'
+#        # kubernetes.io/ingress.class: nginx
+#        # kubernetes.io/tls-acme: "true"
+#      tls:
+#        # Secrets must be manually created in the namespace.
+#        # - secretName: chart-example-tls
+#        #   hosts:
+#        #     - chart-example.local
+#    resources: {}
+#      # We usually recommend not to specify default resources and to leave this as a conscious
+#      # choice for the user. This also increases chances charts run on environments with little
+#      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+#      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+#      # limits:
+#      #  cpu: 100m
+#      #  memory: 128Mi
+#      # requests:
+#      #  cpu: 100m
+#      #  memory: 128Mi
 
 ml-api-adapter:
     ml-api-adapter-service:
