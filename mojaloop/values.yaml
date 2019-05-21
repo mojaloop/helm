@@ -37,7 +37,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v6.2.2
+            tag: v6.2.3
             pullPolicy: Always
             command: '["node", "src/api/index.js"]'
           service:
@@ -166,7 +166,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v6.2.2
+            tag: v6.2.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
           service:
@@ -302,7 +302,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v6.2.2
+            tag: v6.2.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--admin"]'
           service:
@@ -438,7 +438,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v6.2.2
+            tag: v6.2.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--position"]'
           service:
@@ -574,7 +574,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v6.2.2
+            tag: v6.2.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--get"]'
           service:
@@ -710,7 +710,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v6.2.2
+            tag: v6.2.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
           service:
@@ -846,7 +846,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v6.2.2
+            tag: v6.2.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
           service:
@@ -1669,287 +1669,287 @@ central:
         #         matchLabels:
         #           release: zookeeper
 
-
-  centraldirectory:
-    enabled: true
-    replicaCount: 1
-    image:
-      repository: mojaloop/central-directory
-      tag: v2.4
-      pullPolicy: Always
-
-    readinessProbe:
-      enabled: true
-      httpGet:
-        path: /health
-      initialDelaySeconds: 60
-      periodSeconds: 15
-
-    livenessProbe:
-      enabled: true
-      httpGet:
-        path: /health
-      initialDelaySeconds: 60
-      periodSeconds: 15
-
-    config: {}
-
-    init:
-      enabled: true
-
-    service:
-      type: ClusterIP
-      ports:
-        api:
-          name: http-api
-          externalPort: 3000
-          internalPort: 3000
-
-      annotations: {}
-
-      # This allows one to point the service to an external backend.
-      # This is useful for local development where one wishes to hijack
-      # the communication from the service to the node layer and point
-      # to a specific endpoint (IP, Port, etc).
-      external:
-        enabled: false
-        # 10.0.2.2 is the magic IP for the host on virtualbox's network
-        ip: 10.0.2.2
-        ports:
-          api:
-            name: http-api
-            externalPort: 3000
-
-    ingress:
-      enabled: true
-      externalPath: /
-      # Used to create an Ingress record.
-      hosts:
-        api: central-directory.local
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: '/'
-        # kubernetes.io/ingress.class: nginx
-        # kubernetes.io/tls-acme: "true"
-      tls:
-        # Secrets must be manually created in the namespace.
-        # - secretName: chart-example-tls
-        #   hosts:
-        #     - chart-example.local
-    resources: {}
-      # We usually recommend not to specify default resources and to leave this as a conscious
-      # choice for the user. This also increases chances charts run on environments with little
-      # resources, such as Minikube. If you do want to specify resources, uncomment the following
-      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-      # limits:
-      #  cpu: 100m
-      #  memory: 128Mi
-      # requests:
-      #  cpu: 100m
-      #  memory: 128Mi
-
-    centralenduserregistry:
-      enabled: true
-      nameOverride: "centralenduserregistry"
-      replicaCount: 1
-      image:
-        repository: mojaloop/central-end-user-registry
-        tag: v2.4
-        pullPolicy: Always
-
-      readinessProbe:
-        enabled: true
-        httpGet:
-          path: /health
-        initialDelaySeconds: 45
-        periodSeconds: 15
-
-      livenessProbe:
-        enabled: true
-        httpGet:
-          path: /health
-        initialDelaySeconds: 45
-        periodSeconds: 15
-
-      config: {}
-
-      init:
-        enabled: true
-
-      service:
-        type: ClusterIP
-        ports:
-          api:
-            name: http-api
-            externalPort: 3001
-            internalPort: 3001
-
-        annotations: {}
-
-        # This allows one to point the service to an external backend.
-        # This is useful for local development where one wishes to hijack
-        # the communication from the service to the node layer and point
-        # to a specific endpoint (IP, Port, etc).
-        external:
-          enabled: false
-          # 10.0.2.2 is the magic IP for the host on virtualbox's network
-          ip: 10.0.2.2
-          ports:
-            provisioning:
-              name: http-api
-              externalPort: 3001
-
-      ingress:
-        enabled: false
-        externalPath: /
-        # Used to create an Ingress record.
-        hosts:
-          api: central-end-user-registry.local
-        annotations:
-          # kubernetes.io/ingress.class: nginx
-          # kubernetes.io/tls-acme: "true"
-        tls:
-          # Secrets must be manually created in the namespace.
-          # - secretName: chart-example-tls
-          #   hosts:
-          #     - chart-example.local
-      resources: {}
-        # We usually recommend not to specify default resources and to leave this as a conscious
-        # choice for the user. This also increases chances charts run on environments with little
-        # resources, such as Minikube. If you do want to specify resources, uncomment the following
-        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-        # limits:
-        #  cpu: 100m
-        #  memory: 128Mi
-        # requests:
-        #  cpu: 100m
-        #  memory: 128Mi
-
-      postgresql:
-        enabled: true
-        nameOverride: "centralenduserregistry-postgresql"
-        ## postgres image repository
-        image: "postgres"
-        ## postgres image version
-        ## ref: https://hub.docker.com/r/library/postgres/tags/
-        ##
-        imageTag: "9.6.2"
-
-        ## Specify a imagePullPolicy
-        ## 'Always' if imageTag is 'latest', else set to 'IfNotPresent'
-        ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-        ##
-        # imagePullPolicy:
-
-        ## Create a database user
-        ## Default: postgres
-        postgresUser: end_user_registry
-        ## Default: random 10 character string
-        postgresPassword: yGnTC07WQ6
-
-        service:
-          type: ClusterIP
-          port: 5432
-          externalIPs: []
-
-    mockpathfinder:
-      enabled: true
-      nameOverride: "mockpathfinder"
-      replicaCount: 1
-      image:
-        repository: mojaloop/mock-pathfinder
-        tag: v2.4
-        pullPolicy: Always
-
-      config: {}
-
-      service:
-        type: ClusterIP
-        ports:
-          provisioning:
-            name: tcp-prov
-            externalPort: 8080
-            internalPort: 8080
-            protocol: TCP
-          tcp_query:
-            name: tcp-query
-            externalPort: 15353
-            internalPort: 15353
-            protocol: TCP
-          udp_query:
-            name: udp-query
-            externalPort: 15353
-            internalPort: 15353
-            protocol: UDP
-
-        annotations: {}
-
-        # This allows one to point the service to an external backend.
-        # This is useful for local development where one wishes to hijack
-        # the communication from the service to the node layer and point
-        # to a specific endpoint (IP, Port, etc).
-        external:
-          enabled: false
-          # 10.0.2.2 is the magic IP for the host on virtualbox's network
-          ip: 10.0.2.2
-          ports:
-            provisioning:
-              name: tcp-prov
-              externalPort: 8080
-            query:
-              name: tcp-query
-              externalPort: 15353
-
-
-      ingress:
-        enabled: false
-        # Used to create an Ingress record.
-        hosts:
-          api: mock-pathfinder.local
-        annotations:
-          # kubernetes.io/ingress.class: nginx
-          # kubernetes.io/tls-acme: "true"
-        tls:
-          # Secrets must be manually created in the namespace.
-          # - secretName: chart-example-tls
-          #   hosts:
-          #     - chart-example.local
-      resources: {}
-        # We usually recommend not to specify default resources and to leave this as a conscious
-        # choice for the user. This also increases chances charts run on environments with little
-        # resources, such as Minikube. If you do want to specify resources, uncomment the following
-        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-        # limits:
-        #  cpu: 100m
-        #  memory: 128Mi
-        # requests:
-        #  cpu: 100m
-        #  memory: 128Mi
-
-      postgresql:
-        enabled: true
-        nameOverride: "mockpathfinder-postgresql"
-        ## Create a database user
-        postgresUser: mock-pathfinder
-        ## Default: random 10 character string
-        postgresPassword: IypvXbJ1Zb
-
-        service:
-          type: ClusterIP
-          port: 5432
-          externalIPs: []
-
-    postgresql:
-      enabled: true
-      nameOverride: "centraldirectory-postgresql"
-      ## Default: postgres
-      postgresUser: central-directory
-      ## Default: random 10 character string
-      postgresPassword: gR5hARbsfa
-
-      service:
-        type: ClusterIP
-        port: 5432
-        externalIPs: []
+  ## Deprecated - to be removed shortly
+#  centraldirectory:
+#    enabled: true
+#    replicaCount: 1
+#    image:
+#      repository: mojaloop/central-directory
+#      tag: v2.4
+#      pullPolicy: Always
+#
+#    readinessProbe:
+#      enabled: true
+#      httpGet:
+#        path: /health
+#      initialDelaySeconds: 60
+#      periodSeconds: 15
+#
+#    livenessProbe:
+#      enabled: true
+#      httpGet:
+#        path: /health
+#      initialDelaySeconds: 60
+#      periodSeconds: 15
+#
+#    config: {}
+#
+#    init:
+#      enabled: true
+#
+#    service:
+#      type: ClusterIP
+#      ports:
+#        api:
+#          name: http-api
+#          externalPort: 3000
+#          internalPort: 3000
+#
+#      annotations: {}
+#
+#      # This allows one to point the service to an external backend.
+#      # This is useful for local development where one wishes to hijack
+#      # the communication from the service to the node layer and point
+#      # to a specific endpoint (IP, Port, etc).
+#      external:
+#        enabled: false
+#        # 10.0.2.2 is the magic IP for the host on virtualbox's network
+#        ip: 10.0.2.2
+#        ports:
+#          api:
+#            name: http-api
+#            externalPort: 3000
+#
+#    ingress:
+#      enabled: true
+#      externalPath: /
+#      # Used to create an Ingress record.
+#      hosts:
+#        api: central-directory.local
+#      annotations:
+#        nginx.ingress.kubernetes.io/rewrite-target: '/'
+#        # kubernetes.io/ingress.class: nginx
+#        # kubernetes.io/tls-acme: "true"
+#      tls:
+#        # Secrets must be manually created in the namespace.
+#        # - secretName: chart-example-tls
+#        #   hosts:
+#        #     - chart-example.local
+#    resources: {}
+#      # We usually recommend not to specify default resources and to leave this as a conscious
+#      # choice for the user. This also increases chances charts run on environments with little
+#      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+#      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+#      # limits:
+#      #  cpu: 100m
+#      #  memory: 128Mi
+#      # requests:
+#      #  cpu: 100m
+#      #  memory: 128Mi
+#
+#    centralenduserregistry:
+#      enabled: true
+#      nameOverride: "centralenduserregistry"
+#      replicaCount: 1
+#      image:
+#        repository: mojaloop/central-end-user-registry
+#        tag: v2.4
+#        pullPolicy: Always
+#
+#      readinessProbe:
+#        enabled: true
+#        httpGet:
+#          path: /health
+#        initialDelaySeconds: 45
+#        periodSeconds: 15
+#
+#      livenessProbe:
+#        enabled: true
+#        httpGet:
+#          path: /health
+#        initialDelaySeconds: 45
+#        periodSeconds: 15
+#
+#      config: {}
+#
+#      init:
+#        enabled: true
+#
+#      service:
+#        type: ClusterIP
+#        ports:
+#          api:
+#            name: http-api
+#            externalPort: 3001
+#            internalPort: 3001
+#
+#        annotations: {}
+#
+#        # This allows one to point the service to an external backend.
+#        # This is useful for local development where one wishes to hijack
+#        # the communication from the service to the node layer and point
+#        # to a specific endpoint (IP, Port, etc).
+#        external:
+#          enabled: false
+#          # 10.0.2.2 is the magic IP for the host on virtualbox's network
+#          ip: 10.0.2.2
+#          ports:
+#            provisioning:
+#              name: http-api
+#              externalPort: 3001
+#
+#      ingress:
+#        enabled: false
+#        externalPath: /
+#        # Used to create an Ingress record.
+#        hosts:
+#          api: central-end-user-registry.local
+#        annotations:
+#          # kubernetes.io/ingress.class: nginx
+#          # kubernetes.io/tls-acme: "true"
+#        tls:
+#          # Secrets must be manually created in the namespace.
+#          # - secretName: chart-example-tls
+#          #   hosts:
+#          #     - chart-example.local
+#      resources: {}
+#        # We usually recommend not to specify default resources and to leave this as a conscious
+#        # choice for the user. This also increases chances charts run on environments with little
+#        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+#        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+#        # limits:
+#        #  cpu: 100m
+#        #  memory: 128Mi
+#        # requests:
+#        #  cpu: 100m
+#        #  memory: 128Mi
+#
+#      postgresql:
+#        enabled: true
+#        nameOverride: "centralenduserregistry-postgresql"
+#        ## postgres image repository
+#        image: "postgres"
+#        ## postgres image version
+#        ## ref: https://hub.docker.com/r/library/postgres/tags/
+#        ##
+#        imageTag: "9.6.2"
+#
+#        ## Specify a imagePullPolicy
+#        ## 'Always' if imageTag is 'latest', else set to 'IfNotPresent'
+#        ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+#        ##
+#        # imagePullPolicy:
+#
+#        ## Create a database user
+#        ## Default: postgres
+#        postgresUser: end_user_registry
+#        ## Default: random 10 character string
+#        postgresPassword: yGnTC07WQ6
+#
+#        service:
+#          type: ClusterIP
+#          port: 5432
+#          externalIPs: []
+#
+#    mockpathfinder:
+#      enabled: true
+#      nameOverride: "mockpathfinder"
+#      replicaCount: 1
+#      image:
+#        repository: mojaloop/mock-pathfinder
+#        tag: v2.4
+#        pullPolicy: Always
+#
+#      config: {}
+#
+#      service:
+#        type: ClusterIP
+#        ports:
+#          provisioning:
+#            name: tcp-prov
+#            externalPort: 8080
+#            internalPort: 8080
+#            protocol: TCP
+#          tcp_query:
+#            name: tcp-query
+#            externalPort: 15353
+#            internalPort: 15353
+#            protocol: TCP
+#          udp_query:
+#            name: udp-query
+#            externalPort: 15353
+#            internalPort: 15353
+#            protocol: UDP
+#
+#        annotations: {}
+#
+#        # This allows one to point the service to an external backend.
+#        # This is useful for local development where one wishes to hijack
+#        # the communication from the service to the node layer and point
+#        # to a specific endpoint (IP, Port, etc).
+#        external:
+#          enabled: false
+#          # 10.0.2.2 is the magic IP for the host on virtualbox's network
+#          ip: 10.0.2.2
+#          ports:
+#            provisioning:
+#              name: tcp-prov
+#              externalPort: 8080
+#            query:
+#              name: tcp-query
+#              externalPort: 15353
+#
+#
+#      ingress:
+#        enabled: false
+#        # Used to create an Ingress record.
+#        hosts:
+#          api: mock-pathfinder.local
+#        annotations:
+#          # kubernetes.io/ingress.class: nginx
+#          # kubernetes.io/tls-acme: "true"
+#        tls:
+#          # Secrets must be manually created in the namespace.
+#          # - secretName: chart-example-tls
+#          #   hosts:
+#          #     - chart-example.local
+#      resources: {}
+#        # We usually recommend not to specify default resources and to leave this as a conscious
+#        # choice for the user. This also increases chances charts run on environments with little
+#        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+#        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+#        # limits:
+#        #  cpu: 100m
+#        #  memory: 128Mi
+#        # requests:
+#        #  cpu: 100m
+#        #  memory: 128Mi
+#
+#      postgresql:
+#        enabled: true
+#        nameOverride: "mockpathfinder-postgresql"
+#        ## Create a database user
+#        postgresUser: mock-pathfinder
+#        ## Default: random 10 character string
+#        postgresPassword: IypvXbJ1Zb
+#
+#        service:
+#          type: ClusterIP
+#          port: 5432
+#          externalIPs: []
+#
+#    postgresql:
+#      enabled: true
+#      nameOverride: "centraldirectory-postgresql"
+#      ## Default: postgres
+#      postgresUser: central-directory
+#      ## Default: random 10 character string
+#      postgresPassword: gR5hARbsfa
+#
+#      service:
+#        type: ClusterIP
+#        port: 5432
+#        externalIPs: []
 
   centralsettlement:
     # Declare variables to be passed into your templates.
@@ -2434,100 +2434,101 @@ central:
             ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
       additionalLabels: {}
 
-interop-switch:
-    enabled: true
-    replicaCount: 1
-    image:
-      repository: mojaloop/interop-switch
-      tag: v2.4
-      pullPolicy: Always
-
-    readinessProbe:
-      enabled: true
-      httpGet:
-        path: /health
-      initialDelaySeconds: 60
-      periodSeconds: 15
-
-    livenessProbe:
-      enabled: true
-      httpGet:
-        path: /health
-      initialDelaySeconds: 60
-      periodSeconds: 15
-
-    config:
-      MAX_JVM_MEMORY: '256'
-      SWITCH_SERVICE_HOST: '0.0.0.0'
-      SWITCH_SERVICE_PORT: '8088'
-      CENTRAL_DIR_HOST: 'centraldirectory'
-      CENTRAL_DIR_PORT: '3000'
-      CONNECTOR_HOST: 'interop-connector'
-      PSQL_HOST: 'postgresql'
-      PSQL_PORT: '5432'
-      PSQL_DATABASE: 'interop_switch'
-      PSQL_USER: 'interop_switch'
-      PSQL_PASSWORD: 'cVq8iFqaLuHy8jjKuA'
-      ML_API_ADAPTER_HOST: 'ml-api-adapter-service'
-      ML_API_ADAPTER_PORT: 8088
-
-    init:
-      enabled: true
-      image:
-        name: create-tables
-        repository: mojaloop/interop-switch-init-container
-        tag: latest
-        pullPolicy: Always
-
-    service:
-      type: ClusterIP
-      ports:
-        api:
-          name: http-api
-          externalPort: 8088
-          internalPort: 8088
-
-      annotations: {}
-
-      # This allows one to point the service to an external backend.
-      # This is useful for local development where one wishes to hijack
-      # the communication from the service to the node layer and point
-      # to a specific endpoint (IP, Port, etc).
-      external:
-        enabled: false
-        # 10.0.2.2 is the magic IP for the host on virtualbox's network
-        ip: 10.0.2.2
-        ports:
-          api:
-            name: http-api
-            externalPort: 3000
-
-    ingress:
-      enabled: true
-      externalPath: /interop/switch/v1
-      # Used to create an Ingress record.
-      hosts:
-        api: interop-switch.local
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: '/switch/v1'
-        # kubernetes.io/ingress.class: nginx
-        # kubernetes.io/tls-acme: "true"
-      tls:
-        # Secrets must be manually created in the namespace.
-        # - secretName: chart-example-tls
-        #   hosts:
-        #     - chart-example.local
-    resources: {}
-      # We usually recommend not to specify default resources and to leave this as a conscious
-      # choice for the user. This also increases chances charts run on environments with little
-      # resources, such as Minikube. If you do want to specify resources, uncomment the following
-      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-      # limits:
-      #  cpu: 100m
-      #  memory: 128Mi
-      # requests:
-      #  cpu: 100m
-      #  memory: 128Mi
+## Deprecated - to be removed shortly
+#interop-switch:
+#    enabled: true
+#    replicaCount: 1
+#    image:
+#      repository: mojaloop/interop-switch
+#      tag: v2.4
+#      pullPolicy: Always
+#
+#    readinessProbe:
+#      enabled: true
+#      httpGet:
+#        path: /health
+#      initialDelaySeconds: 60
+#      periodSeconds: 15
+#
+#    livenessProbe:
+#      enabled: true
+#      httpGet:
+#        path: /health
+#      initialDelaySeconds: 60
+#      periodSeconds: 15
+#
+#    config:
+#      MAX_JVM_MEMORY: '256'
+#      SWITCH_SERVICE_HOST: '0.0.0.0'
+#      SWITCH_SERVICE_PORT: '8088'
+#      CENTRAL_DIR_HOST: 'centraldirectory'
+#      CENTRAL_DIR_PORT: '3000'
+#      CONNECTOR_HOST: 'interop-connector'
+#      PSQL_HOST: 'postgresql'
+#      PSQL_PORT: '5432'
+#      PSQL_DATABASE: 'interop_switch'
+#      PSQL_USER: 'interop_switch'
+#      PSQL_PASSWORD: 'cVq8iFqaLuHy8jjKuA'
+#      ML_API_ADAPTER_HOST: 'ml-api-adapter-service'
+#      ML_API_ADAPTER_PORT: 8088
+#
+#    init:
+#      enabled: true
+#      image:
+#        name: create-tables
+#        repository: mojaloop/interop-switch-init-container
+#        tag: latest
+#        pullPolicy: Always
+#
+#    service:
+#      type: ClusterIP
+#      ports:
+#        api:
+#          name: http-api
+#          externalPort: 8088
+#          internalPort: 8088
+#
+#      annotations: {}
+#
+#      # This allows one to point the service to an external backend.
+#      # This is useful for local development where one wishes to hijack
+#      # the communication from the service to the node layer and point
+#      # to a specific endpoint (IP, Port, etc).
+#      external:
+#        enabled: false
+#        # 10.0.2.2 is the magic IP for the host on virtualbox's network
+#        ip: 10.0.2.2
+#        ports:
+#          api:
+#            name: http-api
+#            externalPort: 3000
+#
+#    ingress:
+#      enabled: true
+#      externalPath: /interop/switch/v1
+#      # Used to create an Ingress record.
+#      hosts:
+#        api: interop-switch.local
+#      annotations:
+#        nginx.ingress.kubernetes.io/rewrite-target: '/switch/v1'
+#        # kubernetes.io/ingress.class: nginx
+#        # kubernetes.io/tls-acme: "true"
+#      tls:
+#        # Secrets must be manually created in the namespace.
+#        # - secretName: chart-example-tls
+#        #   hosts:
+#        #     - chart-example.local
+#    resources: {}
+#      # We usually recommend not to specify default resources and to leave this as a conscious
+#      # choice for the user. This also increases chances charts run on environments with little
+#      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+#      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+#      # limits:
+#      #  cpu: 100m
+#      #  memory: 128Mi
+#      # requests:
+#      #  cpu: 100m
+#      #  memory: 128Mi
 
 ml-api-adapter:
     ml-api-adapter-service:
@@ -3111,423 +3112,6 @@ account-lookup-service:
       port: 3306
       externalIPs: []
 
-  account-oracle-service:
-    enabled: true
-
-    als-oracle-account-service:
-      enabled: true
-      # Default values for als-oracle-account-service.
-      # This is a YAML-formatted file.
-      # Declare variables to be passed into your templates.
-
-      replicaCount: 1
-      containers:
-        api:
-          image:
-            repository: mojaloop/als-oracle-account
-            tag: v5.5.0
-            pullPolicy: IfNotPresent
-      #      command: '["npm","run","migrate","&&","node","src/server.js",]' <-- need to relook at this as its not working
-          service:
-            ports:
-              api:
-                name: http-api
-                port: 3030
-
-      nameOverride: ""
-      fullnameOverride: ""
-
-
-      ### metric configuration for prometheus instrumentation
-      #metrics:
-      #  ## flag to enable/disable the metrics end-points
-      #  enabled: true
-      #  config:
-      #    timeout: 5000
-      #    prefix: moja_
-      #    defaultLabels:
-      #      serviceName: als-oracle-account-service
-
-      config:
-        ## DB Configuration
-        # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
-        db_type: 'mysql'
-        # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-        db_driver: 'mysql'
-        db_host: '$release_name-als-oracle-account-mysql'
-        db_port: 3306
-        db_user: als_oracle_account
-        db_password: OdonXhiatiX
-        db_database: als_oracle_account
-
-      init:
-        enabled: true
-        mysql:
-          name: wait-for-mysql
-          repository: mysql
-          tag: latest
-          pullPolicy: Always
-          command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
-
-      service:
-        type: ClusterIP
-        port: 80
-
-      ingress:
-        enabled: true
-        annotations: {}
-          # kubernetes.io/ingress.class: nginx
-          # kubernetes.io/tls-acme: "true"
-        path: /
-        hosts:
-          - als-oracle-account.local
-        tls: []
-        #  - secretName: chart-example-tls
-        #    hosts:
-        #      - chart-example.local
-
-      resources: {}
-        # We usually recommend not to specify default resources and to leave this as a conscious
-        # choice for the user. This also increases chances charts run on environments with little
-        # resources, such as Minikube. If you do want to specify resources, uncomment the following
-        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-        # limits:
-        #  cpu: 100m
-        #  memory: 128Mi
-        # requests:
-        #  cpu: 100m
-        #  memory: 128Mi
-
-      nodeSelector: {}
-
-      tolerations: []
-
-      affinity: {}
-
-
-      mysql:
-        enabled: true
-        nameOverride: "als-oracle-account-mysql"
-        # Default values for Percona XtraDB Cluster
-
-        ## percona image and version
-        ## ref: https://hub.docker.com/r/percona/percona-xtradb-cluster/tags/
-        image:
-          repository: "percona/percona-xtradb-cluster"
-          tag: "5.7.19"
-          pullPolicy: Always
-
-        # Desired number of members of xtradb cluster
-        replicas: 1
-
-        ## Specify password for root user
-        ##
-        # mysqlRootPassword: not-a-secure-password
-
-        ## Specify password for xtradb backup user
-        ##
-        # xtraBackupPassword: replicate-my-data
-
-        ## Uncomment to create a database user
-        ##
-        mysqlUser: als_oracle_account
-        mysqlPassword: OdonXhiatiX
-
-        ## Allow unauthenticated access, uncomment to enable
-        ##
-        # mysqlAllowEmptyPassword: true
-
-        ## Uncomment to Create a database
-        ##
-        mysqlDatabase: als_oracle_account
-
-        ## hosts to allow root user access from
-        # set to "127.0.0.1" to deny remote root.
-        allowRootFrom: "%"
-
-        ## Persist data to a persitent volume
-        persistence:
-          enabled: false
-          ## percona data Persistent Volume Storage Class
-          ## If defined, storageClassName: <storageClass>
-          ## If set to "-", storageClassName: "", which disables dynamic provisioning
-          ## If undefined (the default) or set to null, no storageClassName spec is
-          ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-          ##   GKE, AWS & OpenStack)
-          ##
-          # storageClass: "-"
-          accessMode: ReadWriteOnce
-          size: 8Gi
-
-        ## Node labels for pod assignment
-        ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
-        ##
-        nodeSelector: {}
-
-        ## Pod annotations
-        ## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-        ##
-        podAnnotations: {}
-
-        ## Tolerations labels for pod assignment
-        ## Allow the scheduling on tainted nodes (requires Kubernetes >= 1.6)
-        ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-        ##
-        tolerations: []
-
-        ## Configure resource requests and limits
-        ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-        ##
-        # resources:
-        #  requests:
-        #    memory: 256Mi
-        #    cpu: 100m
-
-        ## Configure the following values below if required
-        #   performance_schema=ON
-        #   max_connections=999
-        #   max_user_connections=999
-        #   thread_cache_size=999
-        configFiles:
-          node.cnf: |+
-            [mysqld]
-            datadir=/var/lib/mysql
-            default_storage_engine=InnoDB
-            binlog_format=ROW
-            innodb_flush_log_at_trx_commit  = 0
-            innodb_flush_method             = O_DIRECT
-            innodb_file_per_table           = 1
-            innodb_autoinc_lock_mode=2
-            bind_address = 0.0.0.0
-            wsrep_slave_threads=2
-            wsrep_cluster_address=gcomm://
-            wsrep_provider=/usr/lib/galera3/libgalera_smm.so
-            wsrep_cluster_name=galera
-            wsrep_sst_method=xtrabackup-v2
-            pxc_strict_mode=DISABLED
-            max_connections=999
-            max_user_connections=994
-            thread_cache_size=999
-        ## When set to true will create sidecar for `prom/mysqld-exporter`
-        ## metrics exporting
-        metricsExporter:
-          enabled: true
-
-        ## When set to true will create sidecar to tail mysql log
-        logTail: true
-
-        service:
-          type: ClusterIP
-          port: 3306
-          externalIPs: []
-
-    als-oracle-template-service:
-      enabled: true
-      # Default values for als-oracle-template.
-      # This is a YAML-formatted file.
-      # Declare variables to be passed into your templates.
-
-      replicaCount: 1
-      containers:
-        api:
-          image:
-            repository: mojaloop/als-oracle-template
-            tag: v5.5.0
-            pullPolicy: IfNotPresent
-    #        command: '["npm","run","migrate","&&","node","src/server.js",]'
-          service:
-            ports:
-              api:
-                name: http-api
-                port: 3030
-
-      nameOverride: ""
-      fullnameOverride: ""
-
-
-    #  ## metric configuration for prometheus instrumentation
-    #  metrics:
-    #    ## flag to enable/disable the metrics end-points
-    #    enabled: true
-    #    config:
-    #      timeout: 5000
-    #      prefix: moja_
-    #      defaultLabels:
-    #        serviceName: als-oracle-template-service
-
-      config:
-        ## DB Configuration
-        # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
-        db_type: 'mysql'
-        # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-        db_driver: 'mysql'
-        db_host: '$release_name-als-oracle-template-mysql'
-        db_port: 3306
-        db_user: als_oracle_template
-        db_password: OdonXhiatiX
-        db_database: als_oracle_template
-
-      init:
-        enabled: true
-        mysql:
-          name: wait-for-mysql
-          repository: mysql
-          tag: latest
-          pullPolicy: Always
-          command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
-
-      service:
-        type: ClusterIP
-        port: 80
-
-      ingress:
-        enabled: true
-        annotations: {}
-          # kubernetes.io/ingress.class: nginx
-          # kubernetes.io/tls-acme: "true"
-        path: /
-        hosts:
-          - als-oracle-template.local
-        tls: []
-        #  - secretName: chart-example-tls
-        #    hosts:
-        #      - chart-example.local
-
-      resources: {}
-        # We usually recommend not to specify default resources and to leave this as a conscious
-        # choice for the user. This also increases chances charts run on environments with little
-        # resources, such as Minikube. If you do want to specify resources, uncomment the following
-        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-        # limits:
-        #  cpu: 100m
-        #  memory: 128Mi
-        # requests:
-        #  cpu: 100m
-        #  memory: 128Mi
-
-      nodeSelector: {}
-
-      tolerations: []
-
-      affinity: {}
-
-
-      mysql:
-        enabled: true
-        nameOverride: "als-oracle-template-mysql"
-        # Default values for Percona XtraDB Cluster
-
-        ## percona image and version
-        ## ref: https://hub.docker.com/r/percona/percona-xtradb-cluster/tags/
-        image:
-          repository: "percona/percona-xtradb-cluster"
-          tag: "5.7.19"
-          pullPolicy: Always
-
-        # Desired number of members of xtradb cluster
-        replicas: 1
-
-        ## Specify password for root user
-        ##
-        # mysqlRootPassword: not-a-secure-password
-
-        ## Specify password for xtradb backup user
-        ##
-        # xtraBackupPassword: replicate-my-data
-
-        ## Uncomment to create a database user
-        ##
-        mysqlUser: als_oracle_template
-        mysqlPassword: OdonXhiatiX
-
-        ## Allow unauthenticated access, uncomment to enable
-        ##
-        # mysqlAllowEmptyPassword: true
-
-        ## Uncomment to Create a database
-        ##
-        mysqlDatabase: als_oracle_template
-
-        ## hosts to allow root user access from
-        # set to "127.0.0.1" to deny remote root.
-        allowRootFrom: "%"
-
-        ## Persist data to a persitent volume
-        persistence:
-          enabled: false
-          ## percona data Persistent Volume Storage Class
-          ## If defined, storageClassName: <storageClass>
-          ## If set to "-", storageClassName: "", which disables dynamic provisioning
-          ## If undefined (the default) or set to null, no storageClassName spec is
-          ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-          ##   GKE, AWS & OpenStack)
-          ##
-          # storageClass: "-"
-          accessMode: ReadWriteOnce
-          size: 8Gi
-
-        ## Node labels for pod assignment
-        ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
-        ##
-        nodeSelector: {}
-
-        ## Pod annotations
-        ## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-        ##
-        podAnnotations: {}
-
-        ## Tolerations labels for pod assignment
-        ## Allow the scheduling on tainted nodes (requires Kubernetes >= 1.6)
-        ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-        ##
-        tolerations: []
-
-        ## Configure resource requests and limits
-        ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-        ##
-        # resources:
-        #  requests:
-        #    memory: 256Mi
-        #    cpu: 100m
-
-        ## Configure the following values below if required
-        #   performance_schema=ON
-        #   max_connections=999
-        #   max_user_connections=999
-        #   thread_cache_size=999
-        configFiles:
-          node.cnf: |+
-            [mysqld]
-            datadir=/var/lib/mysql
-            default_storage_engine=InnoDB
-            binlog_format=ROW
-            innodb_flush_log_at_trx_commit  = 0
-            innodb_flush_method             = O_DIRECT
-            innodb_file_per_table           = 1
-            innodb_autoinc_lock_mode=2
-            bind_address = 0.0.0.0
-            wsrep_slave_threads=2
-            wsrep_cluster_address=gcomm://
-            wsrep_provider=/usr/lib/galera3/libgalera_smm.so
-            wsrep_cluster_name=galera
-            wsrep_sst_method=xtrabackup-v2
-            pxc_strict_mode=DISABLED
-            max_connections=999
-            max_user_connections=994
-            thread_cache_size=999
-        ## When set to true will create sidecar for `prom/mysqld-exporter`
-        ## metrics exporting
-        metricsExporter:
-          enabled: true
-
-        ## When set to true will create sidecar to tail mysql log
-        logTail: true
-
-        service:
-          type: ClusterIP
-          port: 3306
-          externalIPs: []
-
 quoting-service:
   # Declare variables to be passed into your templates.
   replicaCount: 1
@@ -3623,3 +3207,94 @@ quoting-service:
     # requests:
     #  cpu: 100m
     #  memory: 128Mi
+
+simulator:
+  # Default values for simulators.
+  # This is a YAML-formatted file.
+  # Declare variables to be passed into your templates.
+
+  replicaCount: 1
+
+  image:
+    repository: mojaloop/simulator
+    tag: v6.2.0
+    pullPolicy: Always
+
+  imagePullSecrets: []
+  #  - name: {{replace with credential}}
+
+  metrics:
+    enabled: true
+    prefix: moja_
+    timeout: 5000
+    defaultLabels:
+      serviceName: simulator
+
+  config:
+    ## Add '$release' into any of the *_SERVICE_ENDPOINT values to include the release name as part of the deployment
+    PARTIES_SERVICE_ENDPOINT: 'http://$release_name-account-lookup-service'
+    QUOTES_SERVICE_ENDPOINT: 'http://$release_name-quoting-service'
+    TRANSFERS_SERVICE_ENDPOINT: 'http://$release_name-ml-api-adapter-service'
+    ## Disable the fulfil response callback
+    TRANSFERS_FULFIL_RESPONSE_DISABLED: false
+    ## Set the fulfil response response information
+    TRANSFERS_FULFILMENT: 'XoSz1cL0tljJSCp_VtIYmPNw-zFUgGfbUqf69AagUzY'
+    TRANSFERS_CONDITION: 'HOr22-H3AfTDHrSkPjJtVPRdKouuMkDXTR4ejlQa8Ks'
+    TRANSFERS_ILPPACKET: 'AQAAAAAAAADIEHByaXZhdGUucGF5ZWVmc3CCAiB7InRyYW5zYWN0aW9uSWQiOiIyZGY3NzRlMi1mMWRiLTRmZjctYTQ5NS0yZGRkMzdhZjdjMmMiLCJxdW90ZUlkIjoiMDNhNjA1NTAtNmYyZi00NTU2LThlMDQtMDcwM2UzOWI4N2ZmIiwicGF5ZWUiOnsicGFydHlJZEluZm8iOnsicGFydHlJZFR5cGUiOiJNU0lTRE4iLCJwYXJ0eUlkZW50aWZpZXIiOiIyNzcxMzgwMzkxMyIsImZzcElkIjoicGF5ZWVmc3AifSwicGVyc29uYWxJbmZvIjp7ImNvbXBsZXhOYW1lIjp7fX19LCJwYXllciI6eyJwYXJ0eUlkSW5mbyI6eyJwYXJ0eUlkVHlwZSI6Ik1TSVNETiIsInBhcnR5SWRlbnRpZmllciI6IjI3NzEzODAzOTExIiwiZnNwSWQiOiJwYXllcmZzcCJ9LCJwZXJzb25hbEluZm8iOnsiY29tcGxleE5hbWUiOnt9fX0sImFtb3VudCI6eyJjdXJyZW5jeSI6IlVTRCIsImFtb3VudCI6IjIwMCJ9LCJ0cmFuc2FjdGlvblR5cGUiOnsic2NlbmFyaW8iOiJERVBPU0lUIiwic3ViU2NlbmFyaW8iOiJERVBPU0lUIiwiaW5pdGlhdG9yIjoiUEFZRVIiLCJpbml0aWF0b3JUeXBlIjoiQ09OU1VNRVIiLCJyZWZ1bmRJbmZvIjp7fX19'
+    ## Set debug level for log output
+    LOG_LEVEL: 'info'
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: http
+
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+      port: 8444
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 15
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+      port: 8444
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 15
+
+  ingress:
+    enabled: true
+    annotations: {
+      "nginx.ingress.kubernetes.io/rewrite-target": "/"
+    }
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    path: /
+    hosts:
+      - moja-simulator.local
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
