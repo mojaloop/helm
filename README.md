@@ -5,9 +5,21 @@
 
 Mojaloop published Helm Repo: http://mojaloop.io/helm/repo/
 
+Mojaloop deployment documentation: http://mojaloop.io/documentation/deployment-guide/
+
 Refer to Helm docs for more information: https://docs.helm.sh/
 
-## Deployment from Repo
+## Configure remote Mojaloop Helm repo on your Helm Client
+
+1. Add Mojaloop repo 
+
+`helm repo add mojaloop http://mojaloop.io/helm/repo/`
+
+2. Keep your local Mojaloop repo up to date
+
+`helm repo up mojaloop`
+
+## Deployment from remote Mojaloop repo
 
 1. Deploy specific chart
 
@@ -31,89 +43,13 @@ Refer to the following default chart config file for values: http://mojaloop.io/
 
 e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo mojaloop`
 
-4. Deploy Ingress
-
-- `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo ingress-nginx`
-
-e.g. `helm install --debug --namespace=kube-public --name=<release-name> --repo=http://mojaloop.io/helm/repo ingress-nginx`
-
-## Local installation with Minikube
-
-This procedure assumes that you have VirtualBox, Minikube, kubectl and helm installed appropriately.
-
-Clean install, in case you had another minikube before. Remember that Minikube is installed in the user's home.
-
-- `minikube stop`
-- `minikube delete`
-- `rm -rf .kube/`
-- `rm -rf .minikube/`
-- `rm -rf .helm/`
-
-The memory should be in multiples of 1024
-
-- `minikube start --memory 9216 --cpus 4`
-
-In case you are behind a proxy, pass the environment variables like this:
-
-- `minikube start --docker-env http_proxy=$http_proxy  --docker-env https_proxy=$http_proxy  --docker-env HTTP_PROXY=$http_proxy  --docker-env HTTPS_PROXY=$http_proxy --docker-env no_proxy=192.168.99.0/24 --docker-env NO_PROXY=192.168.99.0/24 --memory 9216 --cpus 4`
-
-To see the pods status, once they are created proceed with:
-
-- `kubectl get po --all-namespaces`
-
- It's very likely that the dashboard will throw an error (at least on binaries from GNU/Linux), for that matter do:
-
-- `kubectl create clusterrolebinding kube-system-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default`
-
-Now we install Tiller
-
-- `helm init`
-
-Generally the embedded ingress is disabled, better to leave it that way. In case is enable, disable it with:
-
-- `minikube addons disable ingress`
-
-Finally we install the Mojaloop
-
-- `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo mojaloop`
-
-Then we install the Ingress from the Mojaloop project with the rbac.create flag
-Here the release name I put "moja" arbitrarily, special attention on this with permissions below
-
-- `helm install --debug --namespace=kube-public --name=moja --repo=http://mojaloop.io/helm/repo ingress-nginx --set rbac.create=true`
-
-Now some permissions in order to Ingress run successfully 
-
-- `kubectl -n kube-public create sa nginx-ingress-controller`
-- `kubectl apply -f https://gist.githubusercontent.com/bdfintechpy/c816077cefd7fa938e453d8d97afb65b/raw/8ef6d0623e9273aa93f22ab2b5d5cbb40502a5aa/nginx-ingress-controller-clusterrole.yaml`
-- `kubectl -n kube-public apply -f https://gist.githubusercontent.com/bdfintechpy/25793f9dd8fb7545d4a5a5bd268d8a7f/raw/421d2032e4a36577739b60c0e673e889c1d1c6e2/nginx-ingress-controller-role.yaml`
-- `kubectl -n kube-public create rolebinding nginx-ingress-controller --role=nginx-ingress-controller --serviceaccount=kube-public:nginx-ingress-controller`
-- `kubectl create clusterrolebinding nginx-ingress-controller --clusterrole=nginx-ingress-controller --serviceaccount=kube-public:nginx-ingress-controller`
-- `kubectl -n kube-public patch rc/moja-ingress-nginx-controller -p '{"spec": {"template": {"spec": {"serviceAccountName": "nginx-ingress-controller"}}}}'`
-
-We re-create the ingress pod
-
-- `kubectl -n kube-public delete po -l app=moja-ingress-nginx-controller`
-
-Wait a while, and everything should be running
-
-- `kubectl get po --all-namespaces`
-
-You might want to have access to the interop-switch, you can go through ingress or directly to the interop-switch changing his type ClusterIP to NodePort, with: 
-
-- `kubectl edit svc dev-interop-switch --namespace=mojaloop`
-
-Show the port assigned to the service
-
-- `minikube service list`
-
 ## Upgrading Deployments from Repo
 
 `helm upgrade --debug <release-name> --repo=http://mojaloop.io/helm/repo <chart_name>`
 
 e.g. `helm upgrade --debug dev --repo=http://mojaloop.io/helm/repo centralenduserregistry`
 
-## Update Chart Dependencies for Source
+## Update Chart Dependencies for Source for local repo deployments
 
 Note: Please ensure that you update the Chart dependencies in the order show below.
 
@@ -136,7 +72,7 @@ Alternatively please use the helper script `sh ./update-charts-dep.sh`.
 
 This script will ensure the correct order is maintained.
 
-## Deployment from Source
+## Deployment from Source for local repo deployments
 
 1. Deploy specific chart
 
@@ -168,37 +104,23 @@ e.g. `helm upgrade --debug dev ./centralenduserregistry/`
 
 1. Add the following to your hosts file and ensure you have installed Ingress Controller on your Kubernetes Cluster:
 
-`<ip-of-k8s-node-ingress> interop-switch.local central-kms.local forensic-logging-sidecar.local central-ledger.local central-end-user-registry.local central-directory.local central-hub.local central-settlement.local ml-api-adapter.local`
+`<ip-of-k8s-node-ingress>	 ml-api-adapter.local central-ledger.local account-lookup-service.local quoting-service.local central-settlement.local moja-simulator.local`
 
-If your running Minikube, you can use the following cmd to discover your `<ip-of-k8s-node-ingress>`: 
+2. Curl Health End-points for ML-API-Adapter
 
-`minikube ip`
-
-
-2. Curl Health End-points for Central Ledger
-http://central-ledger.local/admin/accounts
-
-`curl http://central-ledger.local/health`
-
-`curl http://central-ledger.local/admin/health`
+`curl http://ml-api-adapter.local/health`
 
 Expected output:
 
 `{"status":"OK"}`
 
-3. Confirm Central Ledger DB Connectivity
+3. Curl Health End-points for Central Ledger
 
-`curl http://central-ledger.local/admin/accounts`
+`curl http://central-ledger.local/health`
 
 Expected output:
 
-`[{"name":"LedgerName","id":"central-ledger.local/accounts/LedgerName","created":"2017-12-06T20:57:05.760Z","is_disabled":false,"_links":{"self":"central-ledger.local/accounts/LedgerName"}}]`
-
-4. Open the Central Management Hub in your browser
-
-http://central-hub.local/members
-
-Check to see that an account name "LedgerName" is displayed
+`{"status":"OK"}`
 
 ## Removing Deployments
 
@@ -218,29 +140,21 @@ e.g. `helm del --purge dev`
 
 ## Helper scripts
 
-### Ingress
-1.) Deploy Ingress
+### Lint Helm Charts
+1.) Lint charts
 
-This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
+This will Lint all parent charts to ensure they conform to Helm standards
 
-`sh deploy-ingress.sh -r lb -e -o ./config-ingress.yaml`
+`lint-charts.sh`
 
-2.) Undeploy Ingress
+### Update Helm Charts for Local usage
+1.) Update charts
 
-`sh clean.sh -r lb -e`
+Update all charts, and their respective dependencies (requirements).
 
-### Central
-1.) Deploy Central
+`update-charts-dep.sh`
 
-This will deploy a new Ingress Nginx Controller with TCP and HTTP Ingress
-
-`sh deploy-central.sh -r dev -e -o ./config-central.yaml`
-
-2.) Undeploy Central
-
-`sh clean.sh -r dev -e`
-
-### Package
+### Package Helm Charts into Local repo
 1.) Package charts
 
 Package all charts, and created an index.yaml in ./repo directory
