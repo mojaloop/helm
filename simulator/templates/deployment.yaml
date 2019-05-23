@@ -52,6 +52,11 @@ spec:
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
           env:
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ template "simulators.fullname" . }}
+                  key: LOG_LEVEL
             - name: PARTIES_ENDPOINT
               valueFrom:
                 configMapKeyRef:
@@ -87,11 +92,11 @@ spec:
                 configMapKeyRef:
                   name: {{ template "simulators.fullname" . }}
                   key: TRANSFERS_ILPPACKET
-            - name: LOG_LEVEL
+            - name: MOCK_JWS_SIGNATURE
               valueFrom:
                 configMapKeyRef:
                   name: {{ template "simulators.fullname" . }}
-                  key: LOG_LEVEL
+                  key: MOCK_JWS_SIGNATURE
             - name: METRICS_DISABLED
               valueFrom:
                 configMapKeyRef:
