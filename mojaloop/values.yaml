@@ -2537,141 +2537,140 @@ central:
 #      #  memory: 128Mi
 
 ml-api-adapter:
-    ml-api-adapter-service:
+  ml-api-adapter-service:
+    enabled: true
+    # Default values for ml-api-adapter.
+    # This is a YAML-formatted file.
+    # Declare variables to be passed into your templates.
+    replicaCount: 1
+    image:
+      repository: mojaloop/ml-api-adapter
+      tag: v6.2.1
+      command: '["node", "src/api/index.js"]'
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+    ##
+    #  imagePullSecrets:
+    #    - name: myregistrykey
+      pullPolicy: Always
+
+    ## metric configuration for prometheus instrumentation
+    metrics:
+      ## flag to enable/disable the metrics end-points
       enabled: true
-      # Default values for ml-api-adapter.
-      # This is a YAML-formatted file.
-      # Declare variables to be passed into your templates.
-      replicaCount: 1
-      image:
-        repository: mojaloop/ml-api-adapter
-        tag: v6.2.1
-        command: '["node", "src/api/index.js"]'
-      ## Optionally specify an array of imagePullSecrets.
-      ## Secrets must be manually created in the namespace.
-      ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
-      ##
-      #  imagePullSecrets:
-      #    - name: myregistrykey
-        pullPolicy: Always
 
-      ## metric configuration for prometheus instrumentation
-      metrics:
-        ## flag to enable/disable the metrics end-points
-        enabled: true
+    config:
+      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+      kafka_host: '$release_name-kafka'
+      kafka_port: 9092
+      central_services_host: '$release_name-centralledger-service'
+      central_services_port: 80
+      security:
+        callback:
+          rejectUnauthorized: true
 
-      config:
-        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
-        central_services_host: centralledger-service
-        central_services_port: 3001
-        security:
-          callback:
-            rejectUnauthorized: true
+    service:
+      type: ClusterIP
+      externalPort: 80
+      internalPort: 8088
 
-      service:
-        type: ClusterIP
-        externalPort: 80
-        internalPort: 8088
-
-      ingress:
-        enabled: true
-        externalPath: /
-        # Used to create an Ingress record.
-        hosts:
-          api: ml-api-adapter.local
-
-        annotations:
-          nginx.ingress.kubernetes.io/rewrite-target: '/'
-          # kubernetes.io/ingress.class: nginx
-          # kubernetes.io/tls-acme: "true"
-        tls:
-          # Secrets must be manually created in the namespace.
-          # - secretName: chart-example-tls
-          #   hosts:
-          #     - chart-example.local
-      resources: {}
-        # We usually recommend not to specify default resources and to leave this as a conscious
-        # choice for the user. This also increases chances charts run on environments with little
-        # resources, such as Minikube. If you do want to specify resources, uncomment the following
-        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-        # limits:
-        #  cpu: 100m
-        #  memory: 128Mi
-        # requests:
-        #  cpu: 100m
-        #  memory: 128Mi
-
-
-    ml-api-adapter-handler-notification:
+    ingress:
       enabled: true
-      # Default values for ml-api-adapter.
-      # This is a YAML-formatted file.
-      # Declare variables to be passed into your templates.
-      replicaCount: 1
-      image:
-        repository: mojaloop/ml-api-adapter
-        tag: v6.2.1
-        command: '["node", "src/handlers/index.js", "handler", "--notification"]'
-      ## Optionally specify an array of imagePullSecrets.
-      ## Secrets must be manually created in the namespace.
-      ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
-      ##
-      #  imagePullSecrets:
-      #    - name: myregistrykey
-        pullPolicy: Always
+      externalPath: /
+      # Used to create an Ingress record.
+      hosts:
+        api: ml-api-adapter.local
 
-      init:
-        enabled: true
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: '/'
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      tls:
+        # Secrets must be manually created in the namespace.
+        # - secretName: chart-example-tls
+        #   hosts:
+        #     - chart-example.local
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+      # requests:
+      #  cpu: 100m
+      #  memory: 128Mi
 
-      ## metric configuration for prometheus instrumentation
-      metrics:
-        ## flag to enable/disable the metrics end-points
-        enabled: true
+  ml-api-adapter-handler-notification:
+    enabled: true
+    # Default values for ml-api-adapter.
+    # This is a YAML-formatted file.
+    # Declare variables to be passed into your templates.
+    replicaCount: 1
+    image:
+      repository: mojaloop/ml-api-adapter
+      tag: v6.2.1
+      command: '["node", "src/handlers/index.js", "handler", "--notification"]'
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+    ##
+    #  imagePullSecrets:
+    #    - name: myregistrykey
+      pullPolicy: Always
 
-      config:
-        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
-        central_services_host: centralledger-service
-        central_services_port: 3001
-        security:
-          callback:
-            rejectUnauthorized: true
+    init:
+      enabled: true
 
-      service:
-        type: ClusterIP
-        externalPort: 80
-        internalPort: 8088
+    ## metric configuration for prometheus instrumentation
+    metrics:
+      ## flag to enable/disable the metrics end-points
+      enabled: true
 
-      ingress:
-        enabled: true
-        externalPath: /
-        # Used to create an Ingress record.
-        hosts:
-          api: ml-api-adapter-notification.local
+    config:
+      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+      kafka_host: '$release_name-kafka'
+      kafka_port: 9092
+      central_services_host: '$release_name-centralledger-service'
+      central_services_port: 80
+      security:
+        callback:
+          rejectUnauthorized: true
 
-        annotations:
-          nginx.ingress.kubernetes.io/rewrite-target: '/'
-          # kubernetes.io/ingress.class: nginx
-          # kubernetes.io/tls-acme: "true"
-        tls:
-          # Secrets must be manually created in the namespace.
-          # - secretName: chart-example-tls
-          #   hosts:
-          #     - chart-example.local
-      resources: {}
-        # We usually recommend not to specify default resources and to leave this as a conscious
-        # choice for the user. This also increases chances charts run on environments with little
-        # resources, such as Minikube. If you do want to specify resources, uncomment the following
-        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-        # limits:
-        #  cpu: 100m
-        #  memory: 128Mi
-        # requests:
-        #  cpu: 100m
-        #  memory: 128Mi
+    service:
+      type: ClusterIP
+      externalPort: 80
+      internalPort: 8088
+
+    ingress:
+      enabled: true
+      externalPath: /
+      # Used to create an Ingress record.
+      hosts:
+        api: ml-api-adapter-notification.local
+
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: '/'
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      tls:
+        # Secrets must be manually created in the namespace.
+        # - secretName: chart-example-tls
+        #   hosts:
+        #     - chart-example.local
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+      # requests:
+      #  cpu: 100m
+      #  memory: 128Mi
 
 emailnotifier:
   replicaCount: 1
