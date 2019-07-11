@@ -1,4 +1,5 @@
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
+{{- $objStoreUri := ( .Values.config.objstore_uri | replace "$release_name" .Release.Name ) -}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -26,6 +27,13 @@ spec:
     spec:
       {{- if .Values.init.enabled }}
       initContainers:
+        - name: {{ .Values.init.mongodb.name }}
+          image: {{ .Values.init.mongodb.repository }}:{{ .Values.init.mongodb.tag }}
+          imagePullPolicy: {{ .Values.init.mongodb.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.init.mongodb.command | replace "$mongouri" $objStoreUri | quote }}
         - name: {{ .Values.init.image.name }}
           image: {{ .Values.init.image.repository }}:{{ .Values.init.image.tag }}
           imagePullPolicy: {{ .Values.init.image.pullPolicy }}

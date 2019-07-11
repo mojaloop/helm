@@ -1,5 +1,6 @@
 {{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
+{{- $objStoreUri := ( .Values.config.objstore_uri | replace "$release_name" .Release.Name ) -}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -35,6 +36,13 @@ spec:
 {{- end }}
       {{- if .Values.init.enabled }}
       initContainers:
+        - name: {{ .Values.init.mongodb.name }}
+          image: {{ .Values.init.mongodb.repository }}:{{ .Values.init.mongodb.tag }}
+          imagePullPolicy: {{ .Values.init.mongodb.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.init.mongodb.command | replace "$mongouri" $objStoreUri | quote }}
         {{- if eq .Values.config.db_type "postgres"}}
         - name: {{ .Values.init.psql.name }}
           image: {{ .Values.init.psql.repository }}:{{ .Values.init.psql.tag }}
