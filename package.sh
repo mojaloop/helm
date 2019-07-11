@@ -94,7 +94,19 @@ checkCommandResult
 echo "Packaging Mojaloop..." 
 helm package -u -d ./repo ./mojaloop 
 checkCommandResult
- 
+
+echo "Updating bulk-centralledger..."
+helm package -u -d ./repo ./bulk-centralledger/
+checkCommandResult
+
+echo "Updating bulk-api-adapter..."
+helm package -u -d ./repo ./bulk-api-adapter/
+checkCommandResult
+
+echo "Updating Mojaloop Bulk..."
+helm package -u -d ./repo ./mojaloop-bulk/
+checkCommandResult
+
 echo "Packaging Ingress-Nginx..."
 helm package -u -d ./repo ./kube-public/ingress-nginx/
 checkCommandResult

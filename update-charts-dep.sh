@@ -93,6 +93,18 @@ echo "Updating Mojaloop..."
 helm dep up ./mojaloop
 checkCommandResult
 
+echo "Updating bulk-centralledger..."
+helm dep up ./bulk-centralledger/
+checkCommandResult
+
+echo "Updating bulk-api-adapter..."
+helm dep up ./bulk-api-adapter/
+checkCommandResult
+
+echo "Updating Mojaloop Bulk..."
+helm dep up ./mojaloop-bulk
+checkCommandResult
+
 echo "\
 Chart updates completed.\n \
 Ensure you check the output for any errors. \n \
