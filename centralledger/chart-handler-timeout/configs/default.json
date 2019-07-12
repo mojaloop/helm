@@ -1,4 +1,5 @@
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
+{{- $objStoreUri := ( .Values.config.objstore_uri | replace "$release_name" .Release.Name ) -}}
 {
     "PORT": {{ .Values.containers.api.service.ports.api.internalPort }},
     "HOSTNAME": "{{ .Values.ingress.hosts.api }}",
@@ -17,6 +18,10 @@
     "DB_CONNECTION": {
         "POOL_MIN": {{ .Values.config.db_connection_pool_min }},
         "POOL_MAX": {{ .Values.config.db_connection_pool_max }}
+    },
+    "MONGODB": {
+        "DISABLED": {{ .Values.config.objstore_disabled }},
+        "URI": {{ (default .Values.config.objstore_uri $objStoreUri) | quote }}
     },
     "HANDLERS": {
         "DISABLED": false,

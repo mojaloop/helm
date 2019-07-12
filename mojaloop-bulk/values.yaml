@@ -1,0 +1,976 @@
+# Default values for central.
+# This is a YAML-formatted file.
+# Declare global configurations
+global:
+  config:
+    ## Pod scheduling preferences.
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    ##
+    affinity: {}
+
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
+    ## Set toleration for schedular
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations: []
+
+bulk-api-adapter:
+
+  bulk-api-adapter-service:
+    enabled: true
+    # Default values for bulk-api-adapter.
+    # This is a YAML-formatted file.
+    # Declare variables to be passed into your templates.
+    replicaCount: 1
+    image:
+      repository: mojaloop/bulk-api-adapter
+      tag: v7.1.1-snapshot
+      command: '["node", "src/api/index.js"]'
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+      ##
+      #  imagePullSecrets:
+      #    - name: myregistrykey
+      pullPolicy: Always
+
+    init:
+      enabled: true
+      image:
+        name: wait-for-kafka
+        repository: solsson/kafka
+        tag: latest
+        pullPolicy: Always
+        command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
+        env: {}
+        ## Env example
+        # env:
+        #   envItem1:
+        #     name: hello
+        #     value: world
+        #
+      mongodb:
+        name: wait-for-mongodb
+        repository: bitnami/mongodb
+        tag: latest
+        pullPolicy: Always
+        command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
+
+    readinessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+      initialDelaySeconds: 120
+      periodSeconds: 15
+    livenessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+      initialDelaySeconds: 90
+      periodSeconds: 15
+
+    ## metric configuration for prometheus instrumentation
+    metrics:
+      ## flag to enable/disable the metrics end-points
+      enabled: true
+      config:
+        timeout: 5000
+        prefix: moja_
+        defaultLabels:
+          serviceName: bulk-service
+
+    config:
+      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+      kafka_host: '$release_name-kafka'
+      kafka_port: 9092
+      central_services_host: '$release_name-centralledger-service'
+      central_services_port: 80
+      security:
+        callback:
+          rejectUnauthorized: true
+      log_level: 'info'
+
+      ## MongoDB Configuration for Object Store
+      objstore_uri: 'mongodb://$release_name-centralledger-obj:27017/mlos'
+
+    service:
+      type: ClusterIP
+      externalPort: 80
+      internalPort: 8088
+
+    ingress:
+      enabled: true
+      externalPath: /
+      # Used to create an Ingress record.
+      hosts:
+        api: bulk-api-adapter.local
+
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: '/'
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      tls:
+      # Secrets must be manually created in the namespace.
+      # - secretName: chart-example-tls
+      #   hosts:
+      #     - chart-example.local
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+
+  bulk-api-adapter-handler-notification:
+    enabled: true
+    # Default values for bulk-api-adapter-handler-notification.
+    # This is a YAML-formatted file.
+    # Declare variables to be passed into your templates.
+    replicaCount: 1
+    image:
+      repository: mojaloop/bulk-api-adapter
+      tag: v7.1.1-snapshot
+      command: '["node", "src/handlers/index.js", "handler", "--notification"]'
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+      ##
+      #  imagePullSecrets:
+      #    - name: myregistrykey
+      pullPolicy: Always
+
+    init:
+      enabled: true
+      image:
+        name: wait-for-kafka
+        repository: solsson/kafka
+        tag: latest
+        pullPolicy: Always
+        command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
+        env: {}
+        ## Env example
+        # env:
+        #   envItem1:
+        #     name: hello
+        #     value: world
+        #
+      mongodb:
+        name: wait-for-mongodb
+        repository: bitnami/mongodb
+        tag: latest
+        pullPolicy: Always
+        command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
+
+    readinessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+      initialDelaySeconds: 120
+      periodSeconds: 15
+    livenessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+      initialDelaySeconds: 90
+      periodSeconds: 15
+
+    ## metric configuration for prometheus instrumentation
+    metrics:
+      ## flag to enable/disable the metrics end-points
+      enabled: true
+      config:
+        timeout: 5000
+        prefix: moja_
+        defaultLabels:
+          serviceName: bulk-handler-notification
+
+    config:
+      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+      kafka_host: '$release_name-kafka'
+      kafka_port: 9092
+      central_services_host: '$release_name-centralledger-service'
+      central_services_port: 80
+      security:
+        callback:
+          rejectUnauthorized: true
+      log_level: 'info'
+
+      ## MongoDB Configuration for Object Store
+      objstore_uri: 'mongodb://$release_name-centralledger-obj:27017/mlos'
+
+    service:
+      type: ClusterIP
+      externalPort: 80
+      internalPort: 8088
+
+    ingress:
+      enabled: true
+      externalPath: /
+      # Used to create an Ingress record.
+      hosts:
+        api: bulk-api-adapter-notification.local
+
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: '/'
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      tls:
+      # Secrets must be manually created in the namespace.
+      # - secretName: chart-example-tls
+      #   hosts:
+      #     - chart-example.local
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+
+bulk-centralledger:
+
+  cl-handler-bulk-transfer-prepare:
+    enabled: true
+    # Default values for centralledger-handler-bulk-transfer-prepare.
+    # This is a YAML-formatted file.
+    # Declare variables to be passed into your templates.
+    replicaCount: 1
+    containers:
+      api:
+        image:
+          repository: mojaloop/central-ledger
+          tag: v7.1.2
+          pullPolicy: Always
+          command: '["node", "src/handlers/index.js", "handler", "--bulkprepare"]'
+        service:
+          ports:
+            api:
+              name: http-api
+              externalPort: 80
+              internalPort: 3001
+        readinessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 60
+          periodSeconds: 15
+        livenessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 60
+          periodSeconds: 15
+
+    ## metric configuration for prometheus instrumentation
+    metrics:
+      ## flag to enable/disable the metrics end-points
+      enabled: true
+      config:
+        timeout: 5000
+        prefix: moja_
+        defaultLabels:
+          serviceName: central-handler-bulkprepare
+
+    config:
+      ## Forensic Logging sidecar
+      # this is for Forensic Logging Sidecar
+      forensicloggingsidecar_disabled: true
+      forensicloggingsidecar_host: forensicloggingsidecar-ledger
+      forensicloggingsidecar_port: 5678
+
+      ## DB Configuration
+      # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+      db_type: 'mysql'
+      # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+      db_driver: 'mysql'
+      db_host: '$release_name-centralledger-mysql'
+      db_port: 3306
+      db_user: central_ledger
+      db_password: oyMxgZChuu
+      db_database: central_ledger
+      db_connection_pool_min: 10
+      db_connection_pool_max: 30
+
+      ## MongoDB Configuration for Object Store
+      objstore_disabled: false
+      objstore_uri: 'mongodb://$release_name-centralledger-obj:27017/mlos'
+
+      ## Kafka Configuration
+      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+      kafka_host: '$release_name-kafka'
+      kafka_port: 9092
+
+      ## Node Configuration
+      log_level: 'info'
+
+    init:
+      enabled: true
+      kafka:
+        name: wait-for-kafka
+        repository: solsson/kafka
+        tag: latest
+        pullPolicy: Always
+        command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
+        env: {}
+        ## Env example
+        # env:
+        #   envItem1:
+        #     name: hello
+        #     value: world
+        #
+      psql:
+        name: wait-for-postgres
+        repository: bowerswilkins/awaitpostgres
+        tag: latest
+        pullPolicy: Always
+      mysql:
+        name: wait-for-mysql
+        repository: mysql
+        tag: latest
+        pullPolicy: Always
+        command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+      mongodb:
+        name: wait-for-mongodb
+        repository: bitnami/mongodb
+        tag: latest
+        pullPolicy: Always
+        command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
+
+    service:
+      type: ClusterIP
+
+      annotations: {}
+
+      # This allows one to point the service to an external backend.
+      # This is useful for local development where one wishes to hijack
+      # the communication from the service to the node layer and point
+      # to a specific endpoint (IP, Port, etc).
+      external:
+        enabled: false
+        # 10.0.2.2 is the magic IP for the host on virtualbox's network
+        ip: 10.0.2.2
+        ports:
+          api:
+            name: http-api
+            externalPort: 3001
+
+    ingress:
+      enabled: true
+      type: http
+      externalPath:
+        api: /
+      # Used to create an Ingress record.
+      hosts:
+        api: central-ledger-transfer-bulkprepare.local
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: '/'
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      tls:
+      # Secrets must be manually created in the namespace.
+      # - secretName: chart-example-tls
+      #   hosts:
+      #     - chart-example.local
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+      # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+
+  cl-handler-bulk-transfer-fulfil:
+    enabled: true
+    # Default values for centralledger-handler-bulk-transfer-fulfil.
+    # This is a YAML-formatted file.
+    # Declare variables to be passed into your templates.
+    replicaCount: 1
+    containers:
+      api:
+        image:
+          repository: mojaloop/central-ledger
+          tag: v7.1.2
+          pullPolicy: Always
+          command: '["node", "src/handlers/index.js", "handler", "--bulkfulfil"]'
+        service:
+          ports:
+            api:
+              name: http-api
+              externalPort: 80
+              internalPort: 3001
+        readinessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 60
+          periodSeconds: 15
+        livenessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 60
+          periodSeconds: 15
+
+    ## metric configuration for prometheus instrumentation
+    metrics:
+      ## flag to enable/disable the metrics end-points
+      enabled: true
+      config:
+        timeout: 5000
+        prefix: moja_
+        defaultLabels:
+          serviceName: central-handler-bulkfulfil
+
+    config:
+      ## Forensic Logging sidecar
+      # this is for Forensic Logging Sidecar
+      forensicloggingsidecar_disabled: true
+      forensicloggingsidecar_host: forensicloggingsidecar-ledger
+      forensicloggingsidecar_port: 5678
+
+      ## DB Configuration
+      # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+      db_type: 'mysql'
+      # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+      db_driver: 'mysql'
+      db_host: '$release_name-centralledger-mysql'
+      db_port: 3306
+      db_user: central_ledger
+      db_password: oyMxgZChuu
+      db_database: central_ledger
+      db_connection_pool_min: 10
+      db_connection_pool_max: 30
+
+      ## MongoDB Configuration for Object Store
+      objstore_disabled: false
+      objstore_uri: 'mongodb://$release_name-centralledger-obj:27017/mlos'
+
+      ## Kafka Configuration
+      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+      kafka_host: '$release_name-kafka'
+      kafka_port: 9092
+
+      ## Node Configuration
+      log_level: 'info'
+
+    init:
+      enabled: true
+      kafka:
+        name: wait-for-kafka
+        repository: solsson/kafka
+        tag: latest
+        pullPolicy: Always
+        command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
+        env: {}
+        ## Env example
+        # env:
+        #   envItem1:
+        #     name: hello
+        #     value: world
+        #
+      psql:
+        name: wait-for-postgres
+        repository: bowerswilkins/awaitpostgres
+        tag: latest
+        pullPolicy: Always
+      mysql:
+        name: wait-for-mysql
+        repository: mysql
+        tag: latest
+        pullPolicy: Always
+        command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+      mongodb:
+        name: wait-for-mongodb
+        repository: bitnami/mongodb
+        tag: latest
+        pullPolicy: Always
+        command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
+
+    service:
+      type: ClusterIP
+
+      annotations: {}
+
+      # This allows one to point the service to an external backend.
+      # This is useful for local development where one wishes to hijack
+      # the communication from the service to the node layer and point
+      # to a specific endpoint (IP, Port, etc).
+      external:
+        enabled: false
+        # 10.0.2.2 is the magic IP for the host on virtualbox's network
+        ip: 10.0.2.2
+        ports:
+          api:
+            name: http-api
+            externalPort: 3001
+
+    ingress:
+      enabled: true
+      type: http
+      externalPath:
+        api: /
+      # Used to create an Ingress record.
+      hosts:
+        api: central-ledger-transfer-bulkfulfil.local
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: '/'
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      tls:
+      # Secrets must be manually created in the namespace.
+      # - secretName: chart-example-tls
+      #   hosts:
+      #     - chart-example.local
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+      # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+
+  cl-handler-bulk-transfer-processing:
+    enabled: true
+    # Default values for centralledger-handler-bulk-transfer-processing.
+    # This is a YAML-formatted file.
+    # Declare variables to be passed into your templates.
+    replicaCount: 1
+    containers:
+      api:
+        image:
+          repository: mojaloop/central-ledger
+          tag: v7.1.2
+          pullPolicy: Always
+          command: '["node", "src/handlers/index.js", "handler", "--bulkprocessing"]'
+        service:
+          ports:
+            api:
+              name: http-api
+              externalPort: 80
+              internalPort: 3001
+        readinessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 60
+          periodSeconds: 15
+        livenessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 60
+          periodSeconds: 15
+
+    ## metric configuration for prometheus instrumentation
+    metrics:
+      ## flag to enable/disable the metrics end-points
+      enabled: true
+      config:
+        timeout: 5000
+        prefix: moja_
+        defaultLabels:
+          serviceName: central-handler-bulkprocessing
+
+    config:
+      ## Forensic Logging sidecar
+      # this is for Forensic Logging Sidecar
+      forensicloggingsidecar_disabled: true
+      forensicloggingsidecar_host: forensicloggingsidecar-ledger
+      forensicloggingsidecar_port: 5678
+
+      ## DB Configuration
+      # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+      db_type: 'mysql'
+      # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+      db_driver: 'mysql'
+      db_host: '$release_name-centralledger-mysql'
+      db_port: 3306
+      db_user: central_ledger
+      db_password: oyMxgZChuu
+      db_database: central_ledger
+      db_connection_pool_min: 10
+      db_connection_pool_max: 30
+
+      ## MongoDB Configuration for Object Store
+      objstore_disabled: false
+      objstore_uri: 'mongodb://$release_name-centralledger-obj:27017/mlos'
+
+      ## Kafka Configuration
+      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+      kafka_host: '$release_name-kafka'
+      kafka_port: 9092
+
+      ## Node Configuration
+      log_level: 'info'
+
+    init:
+      enabled: true
+      kafka:
+        name: wait-for-kafka
+        repository: solsson/kafka
+        tag: latest
+        pullPolicy: Always
+        command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
+        env: {}
+        ## Env example
+        # env:
+        #   envItem1:
+        #     name: hello
+        #     value: world
+        #
+      psql:
+        name: wait-for-postgres
+        repository: bowerswilkins/awaitpostgres
+        tag: latest
+        pullPolicy: Always
+      mysql:
+        name: wait-for-mysql
+        repository: mysql
+        tag: latest
+        pullPolicy: Always
+        command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+      mongodb:
+        name: wait-for-mongodb
+        repository: bitnami/mongodb
+        tag: latest
+        pullPolicy: Always
+        command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
+
+    service:
+      type: ClusterIP
+
+      annotations: {}
+
+      # This allows one to point the service to an external backend.
+      # This is useful for local development where one wishes to hijack
+      # the communication from the service to the node layer and point
+      # to a specific endpoint (IP, Port, etc).
+      external:
+        enabled: false
+        # 10.0.2.2 is the magic IP for the host on virtualbox's network
+        ip: 10.0.2.2
+        ports:
+          api:
+            name: http-api
+            externalPort: 3001
+
+    ingress:
+      enabled: true
+      type: http
+      externalPath:
+        api: /
+      # Used to create an Ingress record.
+      hosts:
+        api: central-ledger-transfer-bulkprocessing.local
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: '/'
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      tls:
+      # Secrets must be manually created in the namespace.
+      # - secretName: chart-example-tls
+      #   hosts:
+      #     - chart-example.local
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+      # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+
+# Declare variables to be passed into your templates.
+mongodb:
+  ## Global Docker image registry
+  ## Please, note that this will override the image registry for all the images, including dependencies, configured to use the global value
+  ##
+  # global:
+  #   imageRegistry:
+  enabled: true
+  nameOverride: centralledger-obj
+
+  image:
+    ## Bitnami MongoDB registry
+    ##
+    registry: docker.io
+    ## Bitnami MongoDB image name
+    ##
+    repository: bitnami/mongodb
+    ## Bitnami MongoDB image tag
+    ## ref: https://hub.docker.com/r/bitnami/mongodb/tags/
+    ##
+    tag: 4.0.3
+
+    ## Specify a imagePullPolicy
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: Always
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ##
+    # pullSecrets:
+    #   - myRegistrKeySecretName
+
+  ## Enable authentication
+  ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
+  #
+  usePassword: true
+  # existingSecret: name-of-existing-secret
+
+  ## MongoDB admin password
+  ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
+  ##
+  mongodbRootPassword: adminpass
+
+  ## MongoDB custom user and database
+  ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run
+  ##
+  mongodbUsername: mojaloop
+  mongodbPassword: password
+  mongodbDatabase: mojaloop
+
+
+  ## Whether enable/disable IPv6 on MongoDB
+  ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#enabling/disabling-ipv6
+  ##
+  mongodbEnableIPv6: true
+
+  ## MongoDB additional command line flags
+  ##
+  ## Can be used to specify command line flags, for example:
+  ##
+  ## mongodbExtraFlags:
+  ##  - "--wiredTigerCacheSizeGB=2"
+  mongodbExtraFlags: []
+
+  ## Pod Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  ##
+  securityContext:
+    enabled: true
+    fsGroup: 1001
+    runAsUser: 1001
+
+  ## Kubernetes Cluster Domain
+  clusterDomain: cluster.local
+
+  ## Kubernetes service type
+  service:
+    annotations: {}
+    type: ClusterIP
+    # clusterIP: None
+    port: 27017
+
+    ## Specify the nodePort value for the LoadBalancer and NodePort service types.
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+    ##
+    # nodePort:
+
+  ## Setting up replication
+  ## ref: https://github.com/bitnami/bitnami-docker-mongodb#setting-up-a-replication
+  #
+  replicaSet:
+    ## Whether to create a MongoDB replica set for high availability or not
+    enabled: false
+    useHostnames: true
+
+    ## Name of the replica set
+    ##
+    name: rs0
+
+    ## Key used for replica set authentication
+    ##
+    # key: key
+
+    ## Number of replicas per each node type
+    ##
+    replicas:
+      secondary: 1
+      arbiter: 1
+    ## Pod Disruption Budget
+    ## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
+    pdb:
+      minAvailable:
+        primary: 1
+        secondary: 1
+        arbiter: 1
+
+  # Annotations to be added to MongoDB pods
+  podAnnotations: {}
+
+  # Additional pod labels to apply
+  podLabels: {}
+
+  ## Configure resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources: {}
+  # limits:
+  #   cpu: 500m
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 256Mi
+
+  ## Node selector
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  nodeSelector: {}
+
+  ## Affinity
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  affinity: {}
+
+  ## Tolerations
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations: []
+
+  ## Enable persistence using Persistent Volume Claims
+  ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+  ##
+  persistence:
+    enabled: false
+    ## A manually managed Persistent Volume and Claim
+    ## Requires persistence.enabled: true
+    ## If defined, PVC must be created manually before volume will be bound
+    # existingClaim:
+
+    ## mongodb data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
+    annotations: {}
+
+  ## Configure extra options for liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+
+  # Entries for the MongoDB config file
+  configmap:
+  #  # Where and how to store data.
+  #  storage:
+  #    dbPath: /opt/bitnami/mongodb/data/db
+  #    journal:
+  #      enabled: true
+  #    #engine:
+  #    #wiredTiger:
+  #  # where to write logging data.
+  #  systemLog:
+  #    destination: file
+  #    logAppend: true
+  #    path: /opt/bitnami/mongodb/logs/mongodb.log
+  #  # network interfaces
+  #  net:
+  #    port: 27017
+  #    bindIp: 0.0.0.0
+  #    unixDomainSocket:
+  #      enabled: true
+  #      pathPrefix: /opt/bitnami/mongodb/tmp
+  #  # replica set options
+  #  #replication:
+  #  #  replSetName: replicaset
+  #  # process management options
+  #  processManagement:
+  #     fork: false
+  #     pidFilePath: /opt/bitnami/mongodb/tmp/mongodb.pid
+  #  # set parameter options
+  #  setParameter:
+  #     enableLocalhostAuthBypass: true
+  #  # security options
+  #  security:
+  #  authorization: enabled
+  #keyFile: /opt/bitnami/mongodb/conf/keyfile
+
+  ## Prometheus Exporter / Metrics
+  ##
+  metrics:
+    enabled: false
+
+    image:
+      registry: docker.io
+      repository: forekshub/percona-mongodb-exporter
+      tag: latest
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ##
+      # pullSecrets:
+      #   - myRegistrKeySecretName
+
+    ## Metrics exporter resource requests and limits
+    ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    ##
+    # resources: {}
+
+    ## Metrics exporter pod Annotation
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "9216"
+
+    ## Prometheus Service Monitor
+    ## ref: https://github.com/coreos/prometheus-operator
+    ##      https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md
+    serviceMonitor:
+      ## If the operator is installed in your cluster, set to true to create a Service Monitor Entry
+      enabled: false
+      ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Service Monitors to work with
+      ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
+      additionalLabels: {}
+
+      ## Specify Metric Relabellings to add to the scrape endpoint
+      ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
+      # relabellings:
+
+      alerting:
+        ## Define individual alerting rules as required
+        ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#rulegroup
+        ##      https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+        rules: {}
+
+        ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Prometheus Rules to work with
+        ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
+  additionalLabels: {}
