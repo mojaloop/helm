@@ -89,10 +89,6 @@ echo "Updating Central..."
 helm dep up ./central
 checkCommandResult
 
-echo "Updating Mojaloop..."
-helm dep up ./mojaloop
-checkCommandResult
-
 echo "Updating bulk-centralledger..."
 helm dep up ./bulk-centralledger/
 checkCommandResult
@@ -103,6 +99,10 @@ checkCommandResult
 
 echo "Updating Mojaloop Bulk..."
 helm dep up ./mojaloop-bulk
+checkCommandResult
+
+echo "Updating Mojaloop..."
+helm dep up ./mojaloop
 checkCommandResult
 
 echo "\

@@ -91,10 +91,6 @@ echo "Packaging quoting-service..."
 helm package -u -d ./repo ./quoting-service
 checkCommandResult
 
-echo "Packaging Mojaloop..." 
-helm package -u -d ./repo ./mojaloop 
-checkCommandResult
-
 echo "Updating bulk-centralledger..."
 helm package -u -d ./repo ./bulk-centralledger/
 checkCommandResult
@@ -105,6 +101,10 @@ checkCommandResult
 
 echo "Updating Mojaloop Bulk..."
 helm package -u -d ./repo ./mojaloop-bulk/
+checkCommandResult
+
+echo "Packaging Mojaloop..." 
+helm package -u -d ./repo ./mojaloop 
 checkCommandResult
 
 echo "Packaging Ingress-Nginx..."
