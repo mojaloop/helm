@@ -2061,7 +2061,7 @@ central:
     replicaCount: 1
     image:
       repository: mojaloop/central-event-processor
-      tag: v7.1.0
+      tag: v7.1.1
       pullPolicy: Always
     init:
       enabled: true
@@ -2555,6 +2555,22 @@ ml-api-adapter:
     #    - name: myregistrykey
       pullPolicy: Always
 
+    init:
+      enabled: true
+      image:
+        name: wait-for-kafka
+        repository: solsson/kafka
+        tag: latest
+        pullPolicy: Always
+        command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
+        env: {}
+        ## Env example
+        # env:
+        #   envItem1:
+        #     name: hello
+        #     value: world
+        #
+
     ## metric configuration for prometheus instrumentation
     metrics:
       ## flag to enable/disable the metrics end-points
@@ -2573,7 +2589,7 @@ ml-api-adapter:
     service:
       type: ClusterIP
       externalPort: 80
-      internalPort: 8088
+      internalPort: 3000
 
     ingress:
       enabled: true
@@ -2642,7 +2658,7 @@ ml-api-adapter:
     service:
       type: ClusterIP
       externalPort: 80
-      internalPort: 8088
+      internalPort: 300
 
     ingress:
       enabled: true
