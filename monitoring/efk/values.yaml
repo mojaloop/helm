@@ -20,11 +20,11 @@ global:
 # Declare variables to be passed into your templates.
 fluentd-elasticsearch:
   image:
-    repository: gcr.io/google-containers/fluentd-elasticsearch
-  ## Specify an imagePullPolicy (Required)
-  ## It's recommended to change this to 'Always' if the image tag is 'latest'
-  ## ref: http://kubernetes.io/docs/user-guide/images/#updating-images
-    tag: v2.4.0
+    repository: quay.io/fluentd_elasticsearch/fluentd
+    ## Specify an imagePullPolicy (Required)
+    ## It's recommended to change this to 'Always' if the image tag is 'latest'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#updating-images
+    tag: v2.6.0
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -47,11 +47,11 @@ fluentd-elasticsearch:
     #   cpu: 100m
     #   memory: 500Mi
     # requests:
-    #   cpu: 100m
-    #   memory: 200Mi
+  #   cpu: 100m
+  #   memory: 200Mi
 
   elasticsearch:
-    host: 'efk-elasticsearch-client'
+    host: 'elasticsearch-master'
     port: 9200
     scheme: 'http'
     ssl_version: TLSv1_2
@@ -63,7 +63,7 @@ fluentd-elasticsearch:
   # You can then reference these in your config file e.g.:
   #     user "#{ENV['OUTPUT_USER']}"
   env:
-    # OUTPUT_USER: my_user
+  # OUTPUT_USER: my_user
 
   # If you want to add custom environment variables from secrets, use the secret list
   secret:
@@ -93,8 +93,8 @@ fluentd-elasticsearch:
       ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#sysctl
       ##
       # seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
-      # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
-      # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+    # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
+    # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
 
   livenessProbe:
     enabled: true
@@ -102,8 +102,8 @@ fluentd-elasticsearch:
   annotations: {}
 
   podAnnotations: {}
-    # prometheus.io/scrape: "true"
-    # prometheus.io/port: "24231"
+  # prometheus.io/scrape: "true"
+  # prometheus.io/port: "24231"
 
   ## DaemonSet update strategy
   ## Ref: https://kubernetes.io/docs/tasks/manage-daemon/update-daemon-set/
@@ -112,424 +112,424 @@ fluentd-elasticsearch:
 
   tolerations: {}
     # - key: node-role.kubernetes.io/master
-    #   operator: Exists
-    #   effect: NoSchedule
+  #   operator: Exists
+  #   effect: NoSchedule
 
   nodeSelector: {}
 
   service: {}
     # type: ClusterIP
     # ports:
-    #   - name: "monitor-agent"
-    #     port: 24231
+  #   - name: "monitor-agent"
+  #     port: 24231
 
   configMaps:
     system.conf: |-
       <system>
         root_dir /tmp/fluentd-buffers/
       </system>
-    containers.input.conf: |-
-      # This configuration file for Fluentd / td-agent is used
-      # to watch changes to Docker log files. The kubelet creates symlinks that
-      # capture the pod name, namespace, container name & Docker container ID
-      # to the docker logs for pods in the /var/log/containers directory on the host.
-      # If running this fluentd configuration in a Docker container, the /var/log
-      # directory should be mounted in the container.
-      #
-      # These logs are then submitted to Elasticsearch which assumes the
-      # installation of the fluent-plugin-elasticsearch & the
-      # fluent-plugin-kubernetes_metadata_filter plugins.
-      # See https://github.com/uken/fluent-plugin-elasticsearch &
-      # https://github.com/fabric8io/fluent-plugin-kubernetes_metadata_filter for
-      # more information about the plugins.
-      #
-      # Example
-      # =======
-      # A line in the Docker log file might look like this JSON:
-      #
-      # {"log":"2014/09/25 21:15:03 Got request with path wombat\n",
-      #  "stream":"stderr",
-      #   "time":"2014-09-25T21:15:03.499185026Z"}
-      #
-      # The time_format specification below makes sure we properly
-      # parse the time format produced by Docker. This will be
-      # submitted to Elasticsearch and should appear like:
-      # $ curl 'http://elasticsearch-logging:9200/_search?pretty'
-      # ...
-      # {
-      #      "_index" : "logstash-2014.09.25",
-      #      "_type" : "fluentd",
-      #      "_id" : "VBrbor2QTuGpsQyTCdfzqA",
-      #      "_score" : 1.0,
-      #      "_source":{"log":"2014/09/25 22:45:50 Got request with path wombat\n",
-      #                 "stream":"stderr","tag":"docker.container.all",
-      #                 "@timestamp":"2014-09-25T22:45:50+00:00"}
-      #    },
-      # ...
-      #
-      # The Kubernetes fluentd plugin is used to write the Kubernetes metadata to the log
-      # record & add labels to the log record if properly configured. This enables users
-      # to filter & search logs on any metadata.
-      # For example a Docker container's logs might be in the directory:
-      #
-      #  /var/lib/docker/containers/997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b
-      #
-      # and in the file:
-      #
-      #  997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b-json.log
-      #
-      # where 997599971ee6... is the Docker ID of the running container.
-      # The Kubernetes kubelet makes a symbolic link to this file on the host machine
-      # in the /var/log/containers directory which includes the pod name and the Kubernetes
-      # container name:
-      #
-      #    synthetic-logger-0.25lps-pod_default_synth-lgr-997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b.log
-      #    ->
-      #    /var/lib/docker/containers/997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b/997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b-json.log
-      #
-      # The /var/log directory on the host is mapped to the /var/log directory in the container
-      # running this instance of Fluentd and we end up collecting the file:
-      #
-      #   /var/log/containers/synthetic-logger-0.25lps-pod_default_synth-lgr-997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b.log
-      #
-      # This results in the tag:
-      #
-      #  var.log.containers.synthetic-logger-0.25lps-pod_default_synth-lgr-997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b.log
-      #
-      # The Kubernetes fluentd plugin is used to extract the namespace, pod name & container name
-      # which are added to the log message as a kubernetes field object & the Docker container ID
-      # is also added under the docker field object.
-      # The final tag is:
-      #
-      #   kubernetes.var.log.containers.synthetic-logger-0.25lps-pod_default_synth-lgr-997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b.log
-      #
-      # And the final log record look like:
-      #
-      # {
-      #   "log":"2014/09/25 21:15:03 Got request with path wombat\n",
-      #   "stream":"stderr",
-      #   "time":"2014-09-25T21:15:03.499185026Z",
-      #   "kubernetes": {
-      #     "namespace": "default",
-      #     "pod_name": "synthetic-logger-0.25lps-pod",
-      #     "container_name": "synth-lgr"
-      #   },
-      #   "docker": {
-      #     "container_id": "997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b"
-      #   }
-      # }
-      #
-      # This makes it easier for users to search for logs by pod name or by
-      # the name of the Kubernetes container regardless of how many times the
-      # Kubernetes pod has been restarted (resulting in a several Docker container IDs).
-      # Json Log Example:
-      # {"log":"[info:2016-02-16T16:04:05.930-08:00] Some log text here\n","stream":"stdout","time":"2016-02-17T00:04:05.931087621Z"}
-      # CRI Log Example:
-      # 2016-02-17T00:04:05.931087621Z stdout F [info:2016-02-16T16:04:05.930-08:00] Some log text here
-
-      ## Source for all container logs. Fluentd will be running as a Daemonset, and should have access to this location
-      <source>
-        @id fluentd-containers.log
-        @type tail
-        path /var/log/containers/*.log
-        pos_file /var/log/fluentd-containers.log.pos
-        time_format %Y-%m-%dT%H:%M:%S.%NZ
-        tag raw.kubernetes.*
-        format json
-        read_from_head true
-      </source>
-
-      ## Uncomment if you want to ignore all fluentd logs
-      #  <match kubernetes.var.log.containers.**fluentd**.log>
-      #    @type null
-      #  </match>
-      #
-
-      ## Uncomment if you want to ignore all Kubernetes System logs
-      #  <match kubernetes.var.log.containers.**kube-system**.log>
-      #    @type null
-      #  </match>
-
-      ## Uncomment if you have issues consuming logs
-      #  <match kubernetes.**>
-      #    @type stdout
-      #  </match>
-
-      ## Detect exceptions in the log output and forward them as one log entry.
-      <match raw.kubernetes.**>
-        @id raw.kubernetes
-        @type detect_exceptions
-        remove_tag_prefix raw
-        message log
-        stream stream
-        multiline_flush_interval 5
-        max_bytes 500000
-        max_lines 1000
-      </match>
-    system.input.conf: |-
-      # Example:
-      # 2015-12-21 23:17:22,066 [salt.state       ][INFO    ] Completed state [net.ipv4.ip_forward] at time 23:17:22.066081
-      <source>
-        @id minion
-        @type tail
-        format /^(?<time>[^ ]* [^ ,]*)[^\[]*\[[^\]]*\]\[(?<severity>[^ \]]*) *\] (?<message>.*)$/
-        time_format %Y-%m-%d %H:%M:%S
-        path /var/log/salt/minion
-        pos_file /var/log/salt.pos
-        tag salt
-      </source>
-      # Example:
-      # Dec 21 23:17:22 gke-foo-1-1-4b5cbd14-node-4eoj startupscript: Finished running startup script /var/run/google.startup.script
-      <source>
-        @id startupscript.log
-        @type tail
-        format syslog
-        path /var/log/startupscript.log
-        pos_file /var/log/startupscript.log.pos
-        tag startupscript
-      </source>
-      # Examples:
-      # time="2016-02-04T06:51:03.053580605Z" level=info msg="GET /containers/json"
-      # time="2016-02-04T07:53:57.505612354Z" level=error msg="HTTP Error" err="No such image: -f" statusCode=404
-      <source>
-        @id docker.log
-        @type tail
-        format /^time="(?<time>[^)]*)" level=(?<severity>[^ ]*) msg="(?<message>[^"]*)"( err="(?<error>[^"]*)")?( statusCode=($<status_code>\d+))?/
-        path /var/log/docker.log
-        pos_file /var/log/docker.log.pos
-        tag docker
-      </source>
-      # Example:
-      # 2016/02/04 06:52:38 filePurge: successfully removed file /var/etcd/data/member/wal/00000000000006d0-00000000010a23d1.wal
-      <source>
-        @id etcd.log
-        @type tail
-        # Not parsing this, because it doesn't have anything particularly useful to
-        # parse out of it (like severities).
-        format none
-        path /var/log/etcd.log
-        pos_file /var/log/etcd.log.pos
-        tag etcd
-      </source>
-      # Multi-line parsing is required for all the kube logs because very large log
-      # statements, such as those that include entire object bodies, get split into
-      # multiple lines by glog.
-      # Example:
-      # I0204 07:32:30.020537    3368 server.go:1048] POST /stats/container/: (13.972191ms) 200 [[Go-http-client/1.1] 10.244.1.3:40537]
-      <source>
-        @id kubelet.log
-        @type tail
-        format multiline
-        multiline_flush_interval 5s
-        format_firstline /^\w\d{4}/
-        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
-        time_format %m%d %H:%M:%S.%N
-        path /var/log/kubelet.log
-        pos_file /var/log/kubelet.log.pos
-        tag kubelet
-      </source>
-      # Example:
-      # I1118 21:26:53.975789       6 proxier.go:1096] Port "nodePort for kube-system/default-http-backend:http" (:31429/tcp) was open before and is still needed
-      <source>
-        @id kube-proxy.log
-        @type tail
-        format multiline
-        multiline_flush_interval 5s
-        format_firstline /^\w\d{4}/
-        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
-        time_format %m%d %H:%M:%S.%N
-        path /var/log/kube-proxy.log
-        pos_file /var/log/kube-proxy.log.pos
-        tag kube-proxy
-      </source>
-      # Example:
-      # I0204 07:00:19.604280       5 handlers.go:131] GET /api/v1/nodes: (1.624207ms) 200 [[kube-controller-manager/v1.1.3 (linux/amd64) kubernetes/6a81b50] 127.0.0.1:38266]
-      <source>
-        @id kube-apiserver.log
-        @type tail
-        format multiline
-        multiline_flush_interval 5s
-        format_firstline /^\w\d{4}/
-        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
-        time_format %m%d %H:%M:%S.%N
-        path /var/log/kube-apiserver.log
-        pos_file /var/log/kube-apiserver.log.pos
-        tag kube-apiserver
-      </source>
-      # Example:
-      # I0204 06:55:31.872680       5 servicecontroller.go:277] LB already exists and doesn't need update for service kube-system/kube-ui
-      <source>
-        @id kube-controller-manager.log
-        @type tail
-        format multiline
-        multiline_flush_interval 5s
-        format_firstline /^\w\d{4}/
-        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
-        time_format %m%d %H:%M:%S.%N
-        path /var/log/kube-controller-manager.log
-        pos_file /var/log/kube-controller-manager.log.pos
-        tag kube-controller-manager
-      </source>
-      # Example:
-      # W0204 06:49:18.239674       7 reflector.go:245] pkg/scheduler/factory/factory.go:193: watch of *api.Service ended with: 401: The event in requested index is outdated and cleared (the requested history has been cleared [2578313/2577886]) [2579312]
-      <source>
-        @id kube-scheduler.log
-        @type tail
-        format multiline
-        multiline_flush_interval 5s
-        format_firstline /^\w\d{4}/
-        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
-        time_format %m%d %H:%M:%S.%N
-        path /var/log/kube-scheduler.log
-        pos_file /var/log/kube-scheduler.log.pos
-        tag kube-scheduler
-      </source>
-      # Example:
-      # I1104 10:36:20.242766       5 rescheduler.go:73] Running Rescheduler
-      <source>
-        @id rescheduler.log
-        @type tail
-        format multiline
-        multiline_flush_interval 5s
-        format_firstline /^\w\d{4}/
-        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
-        time_format %m%d %H:%M:%S.%N
-        path /var/log/rescheduler.log
-        pos_file /var/log/rescheduler.log.pos
-        tag rescheduler
-      </source>
-      # Example:
-      # I0603 15:31:05.793605       6 cluster_manager.go:230] Reading config from path /etc/gce.conf
-      <source>
-        @id glbc.log
-        @type tail
-        format multiline
-        multiline_flush_interval 5s
-        format_firstline /^\w\d{4}/
-        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
-        time_format %m%d %H:%M:%S.%N
-        path /var/log/glbc.log
-        pos_file /var/log/glbc.log.pos
-        tag glbc
-      </source>
-      # Example:
-      # I0603 15:31:05.793605       6 cluster_manager.go:230] Reading config from path /etc/gce.conf
-      <source>
-        @id cluster-autoscaler.log
-        @type tail
-        format multiline
-        multiline_flush_interval 5s
-        format_firstline /^\w\d{4}/
-        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
-        time_format %m%d %H:%M:%S.%N
-        path /var/log/cluster-autoscaler.log
-        pos_file /var/log/cluster-autoscaler.log.pos
-        tag cluster-autoscaler
-      </source>
-      # Logs from systemd-journal for interesting services.
-      <source>
-        @id journald-docker
-        @type systemd
-        matches [{ "_SYSTEMD_UNIT": "docker.service" }]
-        <storage>
-          @type local
-          persistent true
-          path /var/log/journald-docker.pos
-        </storage>
-        read_from_head true
-        tag docker
-      </source>
-      <source>
-        @id journald-kubelet
-        @type systemd
-        matches [{ "_SYSTEMD_UNIT": "kubelet.service" }]
-        <storage>
-          @type local
-          persistent true
-          path /var/log/journald-kubelet.pos
-        </storage>
-        read_from_head true
-        tag kubelet
-      </source>
-      <source>
-        @id journald-node-problem-detector
-        @type systemd
-        matches [{ "_SYSTEMD_UNIT": "node-problem-detector.service" }]
-        <storage>
-          @type local
-          persistent true
-          path /var/log/journald-node-problem-detector.pos
-        </storage>
-        read_from_head true
-        tag node-problem-detector
-      </source>
-    forward.input.conf: |-
-      # Takes the messages sent over TCP
-      <source>
-        @type forward
-      </source>
-    monitoring.conf: |-
-      # Prometheus Exporter Plugin
-      # input plugin that exports metrics
-      <source>
-        @type prometheus
-      </source>
-      <source>
-        @type monitor_agent
-      </source>
-      # input plugin that collects metrics from MonitorAgent
-      <source>
-        @type prometheus_monitor
-        <labels>
-          host ${hostname}
-        </labels>
-      </source>
-      # input plugin that collects metrics for output plugin
-      <source>
-        @type prometheus_output_monitor
-        <labels>
-          host ${hostname}
-        </labels>
-      </source>
-      # input plugin that collects metrics for in_tail plugin
-      <source>
-        @type prometheus_tail_monitor
-        <labels>
-          host ${hostname}
-        </labels>
-      </source>
-    output.conf: |
-      # Enriches records with Kubernetes metadata
-      <filter kubernetes.**>
-        @type kubernetes_metadata
-      </filter>
-      <match **>
-        @id elasticsearch
-        @type elasticsearch
-        @log_level info
-        include_tag_key true
-        type_name _doc
-        host "#{ENV['OUTPUT_HOST']}"
-        port "#{ENV['OUTPUT_PORT']}"
-        scheme "#{ENV['OUTPUT_SCHEME']}"
-        ssl_version "#{ENV['OUTPUT_SSL_VERSION']}"
-        logstash_format true
-        logstash_prefix "#{ENV['LOGSTASH_PREFIX']}"
-        reconnect_on_error true
-        <buffer>
-          @type file
-          path /var/log/fluentd-buffers/kubernetes.system.buffer
-          flush_mode interval
-          retry_type exponential_backoff
-          flush_thread_count 2
-          flush_interval 5s
-          retry_forever
-          retry_max_interval 30
-          chunk_limit_size "#{ENV['OUTPUT_BUFFER_CHUNK_LIMIT']}"
-          queue_limit_length "#{ENV['OUTPUT_BUFFER_QUEUE_LIMIT']}"
-          overflow_action block
-        </buffer>
-      </match>
+#    containers.input.conf: |-
+#      # This configuration file for Fluentd / td-agent is used
+#      # to watch changes to Docker log files. The kubelet creates symlinks that
+#      # capture the pod name, namespace, container name & Docker container ID
+#      # to the docker logs for pods in the /var/log/containers directory on the host.
+#      # If running this fluentd configuration in a Docker container, the /var/log
+#      # directory should be mounted in the container.
+#      #
+#      # These logs are then submitted to Elasticsearch which assumes the
+#      # installation of the fluent-plugin-elasticsearch & the
+#      # fluent-plugin-kubernetes_metadata_filter plugins.
+#      # See https://github.com/uken/fluent-plugin-elasticsearch &
+#      # https://github.com/fabric8io/fluent-plugin-kubernetes_metadata_filter for
+#      # more information about the plugins.
+#      #
+#      # Example
+#      # =======
+#      # A line in the Docker log file might look like this JSON:
+#      #
+#      # {"log":"2014/09/25 21:15:03 Got request with path wombat\n",
+#      #  "stream":"stderr",
+#      #   "time":"2014-09-25T21:15:03.499185026Z"}
+#      #
+#      # The time_format specification below makes sure we properly
+#      # parse the time format produced by Docker. This will be
+#      # submitted to Elasticsearch and should appear like:
+#      # $ curl 'http://elasticsearch-logging:9200/_search?pretty'
+#      # ...
+#      # {
+#      #      "_index" : "logstash-2014.09.25",
+#      #      "_type" : "fluentd",
+#      #      "_id" : "VBrbor2QTuGpsQyTCdfzqA",
+#      #      "_score" : 1.0,
+#      #      "_source":{"log":"2014/09/25 22:45:50 Got request with path wombat\n",
+#      #                 "stream":"stderr","tag":"docker.container.all",
+#      #                 "@timestamp":"2014-09-25T22:45:50+00:00"}
+#      #    },
+#      # ...
+#      #
+#      # The Kubernetes fluentd plugin is used to write the Kubernetes metadata to the log
+#      # record & add labels to the log record if properly configured. This enables users
+#      # to filter & search logs on any metadata.
+#      # For example a Docker container's logs might be in the directory:
+#      #
+#      #  /var/lib/docker/containers/997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b
+#      #
+#      # and in the file:
+#      #
+#      #  997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b-json.log
+#      #
+#      # where 997599971ee6... is the Docker ID of the running container.
+#      # The Kubernetes kubelet makes a symbolic link to this file on the host machine
+#      # in the /var/log/containers directory which includes the pod name and the Kubernetes
+#      # container name:
+#      #
+#      #    synthetic-logger-0.25lps-pod_default_synth-lgr-997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b.log
+#      #    ->
+#      #    /var/lib/docker/containers/997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b/997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b-json.log
+#      #
+#      # The /var/log directory on the host is mapped to the /var/log directory in the container
+#      # running this instance of Fluentd and we end up collecting the file:
+#      #
+#      #   /var/log/containers/synthetic-logger-0.25lps-pod_default_synth-lgr-997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b.log
+#      #
+#      # This results in the tag:
+#      #
+#      #  var.log.containers.synthetic-logger-0.25lps-pod_default_synth-lgr-997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b.log
+#      #
+#      # The Kubernetes fluentd plugin is used to extract the namespace, pod name & container name
+#      # which are added to the log message as a kubernetes field object & the Docker container ID
+#      # is also added under the docker field object.
+#      # The final tag is:
+#      #
+#      #   kubernetes.var.log.containers.synthetic-logger-0.25lps-pod_default_synth-lgr-997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b.log
+#      #
+#      # And the final log record look like:
+#      #
+#      # {
+#      #   "log":"2014/09/25 21:15:03 Got request with path wombat\n",
+#      #   "stream":"stderr",
+#      #   "time":"2014-09-25T21:15:03.499185026Z",
+#      #   "kubernetes": {
+#      #     "namespace": "default",
+#      #     "pod_name": "synthetic-logger-0.25lps-pod",
+#      #     "container_name": "synth-lgr"
+#      #   },
+#      #   "docker": {
+#      #     "container_id": "997599971ee6366d4a5920d25b79286ad45ff37a74494f262e3bc98d909d0a7b"
+#      #   }
+#      # }
+#      #
+#      # This makes it easier for users to search for logs by pod name or by
+#      # the name of the Kubernetes container regardless of how many times the
+#      # Kubernetes pod has been restarted (resulting in a several Docker container IDs).
+#      # Json Log Example:
+#      # {"log":"[info:2016-02-16T16:04:05.930-08:00] Some log text here\n","stream":"stdout","time":"2016-02-17T00:04:05.931087621Z"}
+#      # CRI Log Example:
+#      # 2016-02-17T00:04:05.931087621Z stdout F [info:2016-02-16T16:04:05.930-08:00] Some log text here
+#
+#      ## Source for all container logs. Fluentd will be running as a Daemonset, and should have access to this location
+#      <source>
+#        @id fluentd-containers.log
+#        @type tail
+#        path /var/log/containers/*.log
+#        pos_file /var/log/fluentd-containers.log.pos
+#        time_format %Y-%m-%dT%H:%M:%S.%NZ
+#        tag raw.kubernetes.*
+#        format json
+#        read_from_head true
+#      </source>
+#
+#      ## Uncomment if you want to ignore all fluentd logs
+#      <match kubernetes.var.log.containers.**fluentd**.log>
+#        @type null
+#      </match>
+#
+#
+#      ## Uncomment if you want to ignore all Kubernetes System logs
+#      <match kubernetes.var.log.containers.**kube-system**.log>
+#        @type null
+#      </match>
+#
+#      ## Uncomment if you have issues consuming logs
+#      #  <match kubernetes.**>
+#      #    @type stdout
+#      #  </match>
+#
+#      ## Detect exceptions in the log output and forward them as one log entry.
+#      <match raw.kubernetes.**>
+#        @id raw.kubernetes
+#        @type detect_exceptions
+#        remove_tag_prefix raw
+#        message log
+#        stream stream
+#        multiline_flush_interval 5
+#        max_bytes 500000
+#        max_lines 1000
+#      </match>
+  #    system.input.conf: |-
+  #      # Example:
+  #      # 2015-12-21 23:17:22,066 [salt.state       ][INFO    ] Completed state [net.ipv4.ip_forward] at time 23:17:22.066081
+  #      <source>
+  #        @id minion
+  #        @type tail
+  #        format /^(?<time>[^ ]* [^ ,]*)[^\[]*\[[^\]]*\]\[(?<severity>[^ \]]*) *\] (?<message>.*)$/
+  #        time_format %Y-%m-%d %H:%M:%S
+  #        path /var/log/salt/minion
+  #        pos_file /var/log/salt.pos
+  #        tag salt
+  #      </source>
+  #      # Example:
+  #      # Dec 21 23:17:22 gke-foo-1-1-4b5cbd14-node-4eoj startupscript: Finished running startup script /var/run/google.startup.script
+  #      <source>
+  #        @id startupscript.log
+  #        @type tail
+  #        format syslog
+  #        path /var/log/startupscript.log
+  #        pos_file /var/log/startupscript.log.pos
+  #        tag startupscript
+  #      </source>
+  #      # Examples:
+  #      # time="2016-02-04T06:51:03.053580605Z" level=info msg="GET /containers/json"
+  #      # time="2016-02-04T07:53:57.505612354Z" level=error msg="HTTP Error" err="No such image: -f" statusCode=404
+  #      <source>
+  #        @id docker.log
+  #        @type tail
+  #        format /^time="(?<time>[^)]*)" level=(?<severity>[^ ]*) msg="(?<message>[^"]*)"( err="(?<error>[^"]*)")?( statusCode=($<status_code>\d+))?/
+  #        path /var/log/docker.log
+  #        pos_file /var/log/docker.log.pos
+  #        tag docker
+  #      </source>
+  #      # Example:
+  #      # 2016/02/04 06:52:38 filePurge: successfully removed file /var/etcd/data/member/wal/00000000000006d0-00000000010a23d1.wal
+  #      <source>
+  #        @id etcd.log
+  #        @type tail
+  #        # Not parsing this, because it doesn't have anything particularly useful to
+  #        # parse out of it (like severities).
+  #        format none
+  #        path /var/log/etcd.log
+  #        pos_file /var/log/etcd.log.pos
+  #        tag etcd
+  #      </source>
+  #      # Multi-line parsing is required for all the kube logs because very large log
+  #      # statements, such as those that include entire object bodies, get split into
+  #      # multiple lines by glog.
+  #      # Example:
+  #      # I0204 07:32:30.020537    3368 server.go:1048] POST /stats/container/: (13.972191ms) 200 [[Go-http-client/1.1] 10.244.1.3:40537]
+  #      <source>
+  #        @id kubelet.log
+  #        @type tail
+  #        format multiline
+  #        multiline_flush_interval 5s
+  #        format_firstline /^\w\d{4}/
+  #        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+  #        time_format %m%d %H:%M:%S.%N
+  #        path /var/log/kubelet.log
+  #        pos_file /var/log/kubelet.log.pos
+  #        tag kubelet
+  #      </source>
+  #      # Example:
+  #      # I1118 21:26:53.975789       6 proxier.go:1096] Port "nodePort for kube-system/default-http-backend:http" (:31429/tcp) was open before and is still needed
+  #      <source>
+  #        @id kube-proxy.log
+  #        @type tail
+  #        format multiline
+  #        multiline_flush_interval 5s
+  #        format_firstline /^\w\d{4}/
+  #        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+  #        time_format %m%d %H:%M:%S.%N
+  #        path /var/log/kube-proxy.log
+  #        pos_file /var/log/kube-proxy.log.pos
+  #        tag kube-proxy
+  #      </source>
+  #      # Example:
+  #      # I0204 07:00:19.604280       5 handlers.go:131] GET /api/v1/nodes: (1.624207ms) 200 [[kube-controller-manager/v1.1.3 (linux/amd64) kubernetes/6a81b50] 127.0.0.1:38266]
+  #      <source>
+  #        @id kube-apiserver.log
+  #        @type tail
+  #        format multiline
+  #        multiline_flush_interval 5s
+  #        format_firstline /^\w\d{4}/
+  #        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+  #        time_format %m%d %H:%M:%S.%N
+  #        path /var/log/kube-apiserver.log
+  #        pos_file /var/log/kube-apiserver.log.pos
+  #        tag kube-apiserver
+  #      </source>
+  #      # Example:
+  #      # I0204 06:55:31.872680       5 servicecontroller.go:277] LB already exists and doesn't need update for service kube-system/kube-ui
+  #      <source>
+  #        @id kube-controller-manager.log
+  #        @type tail
+  #        format multiline
+  #        multiline_flush_interval 5s
+  #        format_firstline /^\w\d{4}/
+  #        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+  #        time_format %m%d %H:%M:%S.%N
+  #        path /var/log/kube-controller-manager.log
+  #        pos_file /var/log/kube-controller-manager.log.pos
+  #        tag kube-controller-manager
+  #      </source>
+  #      # Example:
+  #      # W0204 06:49:18.239674       7 reflector.go:245] pkg/scheduler/factory/factory.go:193: watch of *api.Service ended with: 401: The event in requested index is outdated and cleared (the requested history has been cleared [2578313/2577886]) [2579312]
+  #      <source>
+  #        @id kube-scheduler.log
+  #        @type tail
+  #        format multiline
+  #        multiline_flush_interval 5s
+  #        format_firstline /^\w\d{4}/
+  #        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+  #        time_format %m%d %H:%M:%S.%N
+  #        path /var/log/kube-scheduler.log
+  #        pos_file /var/log/kube-scheduler.log.pos
+  #        tag kube-scheduler
+  #      </source>
+  #      # Example:
+  #      # I1104 10:36:20.242766       5 rescheduler.go:73] Running Rescheduler
+  #      <source>
+  #        @id rescheduler.log
+  #        @type tail
+  #        format multiline
+  #        multiline_flush_interval 5s
+  #        format_firstline /^\w\d{4}/
+  #        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+  #        time_format %m%d %H:%M:%S.%N
+  #        path /var/log/rescheduler.log
+  #        pos_file /var/log/rescheduler.log.pos
+  #        tag rescheduler
+  #      </source>
+  #      # Example:
+  #      # I0603 15:31:05.793605       6 cluster_manager.go:230] Reading config from path /etc/gce.conf
+  #      <source>
+  #        @id glbc.log
+  #        @type tail
+  #        format multiline
+  #        multiline_flush_interval 5s
+  #        format_firstline /^\w\d{4}/
+  #        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+  #        time_format %m%d %H:%M:%S.%N
+  #        path /var/log/glbc.log
+  #        pos_file /var/log/glbc.log.pos
+  #        tag glbc
+  #      </source>
+  #      # Example:
+  #      # I0603 15:31:05.793605       6 cluster_manager.go:230] Reading config from path /etc/gce.conf
+  #      <source>
+  #        @id cluster-autoscaler.log
+  #        @type tail
+  #        format multiline
+  #        multiline_flush_interval 5s
+  #        format_firstline /^\w\d{4}/
+  #        format1 /^(?<severity>\w)(?<time>\d{4} [^\s]*)\s+(?<pid>\d+)\s+(?<source>[^ \]]+)\] (?<message>.*)/
+  #        time_format %m%d %H:%M:%S.%N
+  #        path /var/log/cluster-autoscaler.log
+  #        pos_file /var/log/cluster-autoscaler.log.pos
+  #        tag cluster-autoscaler
+  #      </source>
+  #      # Logs from systemd-journal for interesting services.
+  #      <source>
+  #        @id journald-docker
+  #        @type systemd
+  #        matches [{ "_SYSTEMD_UNIT": "docker.service" }]
+  #        <storage>
+  #          @type local
+  #          persistent true
+  #          path /var/log/journald-docker.pos
+  #        </storage>
+  #        read_from_head true
+  #        tag docker
+  #      </source>
+  #      <source>
+  #        @id journald-kubelet
+  #        @type systemd
+  #        matches [{ "_SYSTEMD_UNIT": "kubelet.service" }]
+  #        <storage>
+  #          @type local
+  #          persistent true
+  #          path /var/log/journald-kubelet.pos
+  #        </storage>
+  #        read_from_head true
+  #        tag kubelet
+  #      </source>
+  #      <source>
+  #        @id journald-node-problem-detector
+  #        @type systemd
+  #        matches [{ "_SYSTEMD_UNIT": "node-problem-detector.service" }]
+  #        <storage>
+  #          @type local
+  #          persistent true
+  #          path /var/log/journald-node-problem-detector.pos
+  #        </storage>
+  #        read_from_head true
+  #        tag node-problem-detector
+  #      </source>
+  #    forward.input.conf: |-
+  #      # Takes the messages sent over TCP
+  #      <source>
+  #        @type forward
+  #      </source>
+  #    monitoring.conf: |-
+  #      # Prometheus Exporter Plugin
+  #      # input plugin that exports metrics
+  #      <source>
+  #        @type prometheus
+  #      </source>
+  #      <source>
+  #        @type monitor_agent
+  #      </source>
+  #      # input plugin that collects metrics from MonitorAgent
+  #      <source>
+  #        @type prometheus_monitor
+  #        <labels>
+  #          host ${hostname}
+  #        </labels>
+  #      </source>
+  #      # input plugin that collects metrics for output plugin
+  #      <source>
+  #        @type prometheus_output_monitor
+  #        <labels>
+  #          host ${hostname}
+  #        </labels>
+  #      </source>
+  #      # input plugin that collects metrics for in_tail plugin
+  #      <source>
+  #        @type prometheus_tail_monitor
+  #        <labels>
+  #          host ${hostname}
+  #        </labels>
+  #      </source>
+  #    output.conf: |
+  #      # Enriches records with Kubernetes metadata
+  #      <filter kubernetes.**>
+  #        @type kubernetes_metadata
+  #      </filter>
+  #      <match **>
+  #        @id elasticsearch
+  #        @type elasticsearch
+  #        @log_level info
+  #        include_tag_key true
+  #        type_name _doc
+  #        host "#{ENV['OUTPUT_HOST']}"
+  #        port "#{ENV['OUTPUT_PORT']}"
+  #        scheme "#{ENV['OUTPUT_SCHEME']}"
+  #        ssl_version "#{ENV['OUTPUT_SSL_VERSION']}"
+  #        logstash_format true
+  #        logstash_prefix "#{ENV['LOGSTASH_PREFIX']}"
+  #        reconnect_on_error true
+  #        <buffer>
+  #          @type file
+  #          path /var/log/fluentd-buffers/kubernetes.system.buffer
+  #          flush_mode interval
+  #          retry_type exponential_backoff
+  #          flush_thread_count 2
+  #          flush_interval 5s
+  #          retry_forever
+  #          retry_max_interval 30
+  #          chunk_limit_size "#{ENV['OUTPUT_BUFFER_CHUNK_LIMIT']}"
+  #          queue_limit_length "#{ENV['OUTPUT_BUFFER_QUEUE_LIMIT']}"
+  #          overflow_action block
+  #        </buffer>
+  #      </match>
   # extraVolumes:
   #   - name: es-certs
   #     secret:
@@ -544,404 +544,340 @@ elasticsearch:
   # Default values for elasticsearch.
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
-  appVersion: "6.6.0"
+  clusterName: "elasticsearch"
+  nodeGroup: "master"
 
-  svc:
-    master:
-      spec:
-        clusterIP:
-      ports:
-        - port: 9300
-          targetPort: transport
+  # The service that non master groups will try to connect to when joining the cluster
+  # This should be set to clusterName + "-" + nodeGroup for your master group
+  masterService: ""
 
-  ## Define serviceAccount names for components. Defaults to component's fully qualified name.
-  ##
-  serviceAccounts:
-    client:
-      create: true
-      name:
-    master:
-      create: true
-      name:
-    data:
-      create: true
-      name:
+  # Elasticsearch roles that will be applied to this nodeGroup
+  # These will be set as environment variables. E.g. node.master=true
+  roles:
+    master: "true"
+    ingest: "true"
+    data: "true"
 
-  ## Specify if a Pod Security Policy for node-exporter must be created
-  ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/
-  ##
-  podSecurityPolicy:
+  replicas: 3
+  minimumMasterNodes: 2
+
+  esMajorVersion: ""
+
+  # Allows you to add any config files in /usr/share/elasticsearch/config/
+  # such as elasticsearch.yml and log4j2.properties
+  esConfig: {}
+  #  elasticsearch.yml: |
+  #    key:
+  #      nestedkey: value
+  #  log4j2.properties: |
+  #    key = value
+
+  # Extra environment variables to append to this nodeGroup
+  # This will be appended to the current 'env:' key. You can use any of the kubernetes env
+  # syntax here
+  extraEnvs: []
+  #  - name: MY_ENVIRONMENT_VAR
+  #    value: the_value_goes_here
+
+  # A list of secrets and their paths to mount inside the pod
+  # This is useful for mounting certificates for security and for mounting
+  # the X-Pack license
+  secretMounts: []
+  #  - name: elastic-certificates
+  #    secretName: elastic-certificates
+  #    path: /usr/share/elasticsearch/config/certs
+
+  image: "docker.elastic.co/elasticsearch/elasticsearch"
+  imageTag: "7.2.0"
+  imagePullPolicy: "IfNotPresent"
+
+  podAnnotations: {}
+  # iam.amazonaws.com/role: es-cluster
+
+  esJavaOpts: "-Xmx1g -Xms1g"
+
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "2Gi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+
+  initResources: {}
+    # limits:
+    #   cpu: "25m"
+    #   # memory: "128Mi"
+  # requests:
+  #   cpu: "25m"
+  #   memory: "128Mi"
+
+  sidecarResources: {}
+    # limits:
+    #   cpu: "25m"
+    #   # memory: "128Mi"
+  # requests:
+  #   cpu: "25m"
+  #   memory: "128Mi"
+
+  networkHost: "0.0.0.0"
+
+  volumeClaimTemplate:
+    accessModes: [ "ReadWriteOnce" ]
+    storageClassName: "awsgp2"
+    resources:
+      requests:
+        storage: 30Gi
+
+  persistence:
     enabled: false
     annotations: {}
-      ## Specify pod annotations
-      ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#apparmor
-      ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#seccomp
-      ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#sysctl
-      ##
-      # seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
-      # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
-      # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
 
-  image:
-    repository: "docker.elastic.co/elasticsearch/elasticsearch-oss"
-    tag: "6.6.0"
-    pullPolicy: "IfNotPresent"
-    # If specified, use these secrets to access the image
-    # pullSecrets:
-    #   - registry-secret
+  extraVolumes: []
+  # - name: extras
+  #   emptyDir: {}
 
-  initImage:
-    repository: "busybox"
-    tag: "latest"
-    pullPolicy: "Always"
+  extraVolumeMounts: []
+  # - name: extras
+  #   mountPath: /usr/share/extras
+  #   readOnly: true
 
-  cluster:
-    name: "elasticsearch"
-    # If you want X-Pack installed, switch to an image that includes it, enable this option and toggle the features you want
-    # enabled in the environment variables outlined in the README
-    xpackEnable: false
-    # Some settings must be placed in a keystore, so they need to be mounted in from a secret.
-    # Use this setting to specify the name of the secret
-    # keystoreSecret: eskeystore
-    config: {}
-    # Custom parameters, as string, to be added to ES_JAVA_OPTS environment variable
-    additionalJavaOpts: ""
-    # Command to run at the end of deployment
-    bootstrapShellCommand: ""
-    env:
-      # IMPORTANT: https://www.elastic.co/guide/en/elasticsearch/reference/current/important-settings.html#minimum_master_nodes
-      # To prevent data loss, it is vital to configure the discovery.zen.minimum_master_nodes setting so that each master-eligible
-      # node knows the minimum number of master-eligible nodes that must be visible in order to form a cluster.
-      MINIMUM_MASTER_NODES: "2"
+  extraInitContainers: []
+  # - name: do-something
+  #   image: busybox
+  #   command: ['do', 'something']
 
-  client:
-    name: client
-    replicas: 2
-    serviceType: ClusterIP
-    loadBalancerIP: {}
-    loadBalancerSourceRanges: {}
-  ## (dict) If specified, apply these annotations to the client service
-  #  serviceAnnotations:
-  #    example: client-svc-foo
-    heapSize: "512m"
-    # additionalJavaOpts: "-XX:MaxRAM=512m"
-    antiAffinity: "soft"
-    nodeAffinity: {}
-    nodeSelector: {}
-    tolerations: []
-    initResources: {}
-      # limits:
-      #   cpu: "25m"
-      #   # memory: "128Mi"
-      # requests:
-      #   cpu: "25m"
-      #   memory: "128Mi"
-    resources:
-      limits:
-        cpu: "1"
-        memory: "1024Mi"
-      requests:
-        cpu: "25m"
-        memory: "512Mi"
-    priorityClassName: ""
-    ## (dict) If specified, apply these annotations to each client Pod
-    # podAnnotations:
-    #   example: client-foo
-    podDisruptionBudget:
-      enabled: false
-      minAvailable: 1
-      # maxUnavailable: 1
-    ingress:
-      enabled: false
-      annotations: {}
-        # kubernetes.io/ingress.class: nginx
-        # kubernetes.io/tls-acme: "true"
-      path: /
-      hosts:
-        - elasticsearch.local
-      tls: []
-      #  - secretName: chart-example-tls
-      #    hosts:
-      #      - chart-example.local
+  # This is the PriorityClass settings as defined in
+  # https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+  priorityClassName: ""
 
-  master:
-    name: master
-    exposeHttp: false
-    replicas: 3
-    heapSize: "512m"
-    # additionalJavaOpts: "-XX:MaxRAM=512m"
-    persistence:
-      enabled: false
-      accessMode: ReadWriteOnce
-      name: data
-      size: "4Gi"
-      # storageClass: "ssd"
-    antiAffinity: "soft"
-    nodeAffinity: {}
-    nodeSelector: {}
-    tolerations: []
-    initResources: {}
-      # limits:
-      #   cpu: "25m"
-      #   # memory: "128Mi"
-      # requests:
-      #   cpu: "25m"
-      #   memory: "128Mi"
-    resources:
-      limits:
-        cpu: "1"
-        # memory: "1024Mi"
-      requests:
-        cpu: "25m"
-        memory: "512Mi"
-    priorityClassName: ""
-    ## (dict) If specified, apply these annotations to each master Pod
-    # podAnnotations:
-    #   example: master-foo
-    podDisruptionBudget:
-      enabled: false
-      minAvailable: 2  # Same as `cluster.env.MINIMUM_MASTER_NODES`
-      # maxUnavailable: 1
-    updateStrategy:
-      type: OnDelete
+  # By default this will make sure two pods don't end up on the same node
+  # Changing this to a region would allow you to spread pods across regions
+  antiAffinityTopologyKey: "kubernetes.io/hostname"
 
-  data:
-    name: data
-    exposeHttp: false
-    replicas: 2
-    heapSize: "1536m"
-    # additionalJavaOpts: "-XX:MaxRAM=1536m"
-    persistence:
-      enabled: false
-      accessMode: ReadWriteOnce
-      name: data
-      size: "30Gi"
-      # storageClass: "ssd"
-    terminationGracePeriodSeconds: 3600
-    antiAffinity: "soft"
-    nodeAffinity: {}
-    nodeSelector: {}
-    tolerations: []
-    initResources: {}
-      # limits:
-      #   cpu: "25m"
-      #   # memory: "128Mi"
-      # requests:
-      #   cpu: "25m"
-      #   memory: "128Mi"
-    resources:
-      limits:
-        cpu: "1"
-        # memory: "2048Mi"
-      requests:
-        cpu: "25m"
-        memory: "1536Mi"
-    priorityClassName: ""
-    ## (dict) If specified, apply these annotations to each data Pod
-    # podAnnotations:
-    #   example: data-foo
-    podDisruptionBudget:
-      enabled: false
-      # minAvailable: 1
-      maxUnavailable: 1
-    updateStrategy:
-      type: OnDelete
-    hooks:  # post-start and pre-stop hooks
-      drain:  # drain the node before stopping it and re-integrate it into the cluster after start
-        enabled: true
+  # Hard means that by default pods will only be scheduled if there are enough nodes for them
+  # and that they will never end up on the same node. Setting this to soft will do this "best effort"
+  antiAffinity: "hard"
 
-  ## Additional init containers
-  extraInitContainers: |
+  # This is the node affinity settings as defined in
+  # https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#node-affinity-beta-feature
+  nodeAffinity: {}
 
-kibana:
-  image:
-    repository: "docker.elastic.co/kibana/kibana-oss"
-    tag: "6.6.0"
-    pullPolicy: "IfNotPresent"
+  # The default is to deploy all pods serially. By setting this to parallel all pods are started at
+  # the same time when bootstrapping the cluster
+  podManagementPolicy: "Parallel"
 
-  commandline:
-    args: []
-
-  env:
-    # All Kibana configuration options are adjustable via env vars.
-    # To adjust a config option to an env var uppercase + replace `.` with `_`
-    # Ref: https://www.elastic.co/guide/en/kibana/current/settings.html
-    #
-    ELASTICSEARCH_URL: http://efk-elasticsearch-client:9200
-    # SERVER_PORT: 5601
-    # LOGGING_VERBOSE: "true"
-    # SERVER_DEFAULTROUTE: "/app/kibana"
-
-  files:
-    kibana.yml:
-      ## Default Kibana configuration from kibana-docker.
-      server.name: kibana
-      server.host: "0"
-      elasticsearch.url: http://efk-elasticsearch-client:9200
-
-      ## Custom config properties below
-      ## Ref: https://www.elastic.co/guide/en/kibana/current/settings.html
-      # server.port: 5601
-      # logging.verbose: "true"
-      # server.defaultRoute: "/app/kibana"
-
-  deployment:
-    annotations: {}
+  protocol: http
+  httpPort: 9200
+  transportPort: 9300
 
   service:
     type: ClusterIP
-    externalPort: 443
-    internalPort: 5601
-    # authProxyPort: 5602 To be used with authProxyEnabled and a proxy extraContainer
-    ## External IP addresses of service
-    ## Default: nil
-    ##
-    # externalIPs:
-    # - 192.168.0.1
-    #
-    ## LoadBalancer IP if service.type is LoadBalancer
-    ## Default: nil
-    ##
-    # loadBalancerIP: 10.2.2.2
+    nodePort:
     annotations: {}
-      # Annotation example: setup ssl with aws cert when service.type is LoadBalancer
-      # service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:EXAMPLE_CERT
-    labels: {}
-      ## Label example: show service URL in `kubectl cluster-info`
-      # kubernetes.io/cluster-service: "true"
-    ## Limit load balancer source ips to list of CIDRs (where available)
-    # loadBalancerSourceRanges: []
+
+  updateStrategy: RollingUpdate
+
+  # This is the max unavailable setting for the pod disruption budget
+  # The default value of 1 will make sure that kubernetes won't allow more than 1
+  # of your pods to be unavailable during maintenance
+  maxUnavailable: 1
+
+  podSecurityContext:
+    fsGroup: 1000
+
+  # The following value is deprecated,
+  # please use the above podSecurityContext.fsGroup instead
+  fsGroup: ""
+
+  securityContext:
+    capabilities:
+      drop:
+        - ALL
+    # readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+
+  # How long to wait for elasticsearch to stop gracefully
+  terminationGracePeriod: 120
+
+  sysctlVmMaxMapCount: 262144
+
+  readinessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 3
+    timeoutSeconds: 5
+
+  # https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html#request-params wait_for_status
+  clusterHealthCheckParams: "wait_for_status=green&timeout=1s"
+
+  ## Use an alternate scheduler.
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  schedulerName: ""
+
+  imagePullSecrets: []
+  nodeSelector: {}
+  tolerations: []
+
+  # Enabling this will publically expose your Elasticsearch instance.
+  # Only enable this if you have security enabled on your cluster
+  ingress:
+    enabled: false
+    annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    path: /
+    hosts:
+      - elasticsearch.local
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  nameOverride: ""
+  fullnameOverride: ""
+
+  # https://github.com/elastic/helm-charts/issues/63
+  masterTerminationFix: false
+
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+  # postStart:
+  #   exec:
+  #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+
+  sysctlInitContainer:
+    enabled: true
+
+kibana:
+  elasticsearchURL: "" # "http://elasticsearch-master:9200"
+  elasticsearchHosts: "http://elasticsearch-master:9200"
+
+  replicas: 1
+
+  # Extra environment variables to append to this nodeGroup
+  # This will be appended to the current 'env:' key. You can use any of the kubernetes env
+  # syntax here
+  extraEnvs: []
+  #  - name: MY_ENVIRONMENT_VAR
+  #    value: the_value_goes_here
+
+  # A list of secrets and their paths to mount inside the pod
+  # This is useful for mounting certificates for security and for mounting
+  # the X-Pack license
+  secretMounts: []
+  #  - name: elastic-certificates
+  #    secretName: elastic-certificates
+  #    path: /usr/share/elasticsearch/config/certs
+
+  image: "docker.elastic.co/kibana/kibana"
+  imageTag: "7.2.0"
+  imagePullPolicy: "IfNotPresent"
+
+  podAnnotations: {}
+  # iam.amazonaws.com/role: es-cluster
+
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "500m"
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"
+
+  protocol: http
+
+  serverHost: "0.0.0.0"
+
+  healthCheckPath: "/app/kibana"
+
+  # Allows you to add any config files in /usr/share/kibana/config/
+  # such as kibana.yml
+  kibanaConfig: {}
+  #   kibana.yml: |
+  #     key:
+  #       nestedkey: value
+
+  # If Pod Security Policy in use it may be required to specify security context as well as service account
+
+  podSecurityContext:
+    fsGroup: 1000
+
+  securityContext:
+    capabilities:
+      drop:
+        - ALL
+    # readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+
+  serviceAccount: ""
+
+  # This is the PriorityClass settings as defined in
+  # https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+  priorityClassName: ""
+
+  # By default this will make sure two pods don't end up on the same node
+  # Changing this to a region would allow you to spread pods across regions
+  antiAffinityTopologyKey: "kubernetes.io/hostname"
+
+  # Hard means that by default pods will only be scheduled if there are enough nodes for them
+  # and that they will never end up on the same node. Setting this to soft will do this "best effort"
+  antiAffinity: "hard"
+
+  httpPort: 5601
+
+  # This is the max unavailable setting for the pod disruption budget
+  # The default value of 1 will make sure that kubernetes won't allow more than 1
+  # of your pods to be unavailable during maintenance
+  maxUnavailable: 1
+
+  updateStrategy:
+    type: "Recreate"
+
+  service:
+    type: ClusterIP
+    port: 5601
+    nodePort:
+    annotations: {}
+      # cloud.google.com/load-balancer-type: "Internal"
+      # service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
+    # service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    # service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
+    # service.beta.kubernetes.io/cce-load-balancer-internal-vpc: "true"
 
   ingress:
     enabled: true
+    annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    path: /
     hosts:
       - kibana.local
-      # - localhost.localdomain/kibana
-    # annotations:
-    #   kubernetes.io/ingress.class: nginx
-    #   kubernetes.io/tls-acme: "true"
-    # tls:
-      # - secretName: chart-example-tls
-      #   hosts:
-      #     - chart-example.local
-
-  serviceAccount:
-    # Specifies whether a service account should be created
-    create: true
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    # If set and create is false, the service account must be existing
-    name:
-
-  livenessProbe:
-    enabled: false
-    initialDelaySeconds: 30
-    timeoutSeconds: 10
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
 
   readinessProbe:
-    enabled: false
-    initialDelaySeconds: 30
-    timeoutSeconds: 10
+    failureThreshold: 3
+    initialDelaySeconds: 10
     periodSeconds: 10
-    successThreshold: 5
+    successThreshold: 3
+    timeoutSeconds: 5
 
-  # Enable an authproxy. Specify container in extraContainers
-  authProxyEnabled: false
-
-  extraContainers: |
-  # - name: proxy
-  #   image: quay.io/gambol99/keycloak-proxy:latest
-  #   args:
-  #     - --resource=uri=/*
-  #     - --discovery-url=https://discovery-url
-  #     - --client-id=client
-  #     - --client-secret=secret
-  #     - --listen=0.0.0.0:5602
-  #     - --upstream-url=http://127.0.0.1:5601
-  #   ports:
-  #     - name: web
-  #       containerPort: 9090
-  resources: {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 300Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 300Mi
-
-  priorityClassName: ""
-
-  # Affinity for pod assignment
-  # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  # affinity: {}
-
-  # Tolerations for pod assignment
-  # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  tolerations: []
-
-  # Node labels for pod assignment
-  # Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  imagePullSecrets: []
   nodeSelector: {}
+  tolerations: []
+  affinity: {}
 
-  podAnnotations: {}
-  replicaCount: 1
-  revisionHistoryLimit: 3
-
-  # To export a dashboard from a running Kibana 6.3.x use:
-  # curl --user <username>:<password> -XGET https://kibana.yourdomain.com:5601/api/kibana/dashboards/export?dashboard=<some-dashboard-uuid> > my-dashboard.json
-  # A dashboard is defined by a name and a string with the json payload or the download url
-  dashboardImport:
-    timeout: 60
-    xpackauth:
-      enabled: false
-      username: mojaloop
-      password: mojaloop1
-    dashboards: {}
-      # k8s: https://raw.githubusercontent.com/monotek/kibana-dashboards/master/k8s-fluentd-elasticsearch.json
-
-  # List of plugins to install using initContainer
-  # NOTE : We notice that lower resource constraints given to the chart + plugins are likely not going to work well.
-  plugins:
-    # set to true to enable plugins installation
-    enabled: false
-    # set to true to remove all kibana plugins before installation
-    reset: false
-    # Use <plugin_name,version,url> to add/upgrade plugin
-    values:
-      # - elastalert-kibana-plugin,1.0.1,https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/1.0.1/elastalert-kibana-plugin-1.0.1-6.4.2.zip
-      # - logtrail,0.1.30,https://github.com/sivasamyk/logtrail/releases/download/v0.1.30/logtrail-6.4.2-0.1.30.zip
-      # - other_plugin
-
-  persistentVolumeClaim:
-    # set to true to use pvc
-    enabled: false
-    # set to true to use you own pvc
-    existingClaim: false
-    annotations: {}
-
-    accessModes:
-      - ReadWriteOnce
-    size: "5Gi"
-    ## If defined, storageClassName: <storageClass>
-    ## If set to "-", storageClassName: "", which disables dynamic provisioning
-    ## If undefined (the default) or set to null, no storageClassName spec is
-    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-    ##   GKE, AWS & OpenStack)
-    ##
-    # storageClass: "-"
-
-  # default security context
-  securityContext:
-    enabled: false
-    allowPrivilegeEscalation: false
-    runAsUser: 1000
-    fsGroup: 2000
-
-  extraConfigMapMounts: []
-    # - name: logtrail-configs
-    #   configMap: kibana-logtrail
-    #   mountPath: /usr/share/kibana/plugins/logtrail/logtrail.json
-    #   subPath: logtrail.json
+  nameOverride: ""
+  fullnameOverride: ""
 
 apm-server:
   image:
@@ -972,12 +908,12 @@ apm-server:
 
   # The update strategy to apply to the Deployment or DaemonSet
   updateStrategy: {}
-    # rollingUpdate:
+  # rollingUpdate:
   #   maxUnavailable: 1
   # type: RollingUpdate
 
   service:
-    enabled: false
+    enabled: true
     type: ClusterIP
     port: 8200
     # portName: apm-server-svc
@@ -1007,7 +943,7 @@ apm-server:
     # kubernetes.io/ingress.class: nginx-public
     labels: {}
     hosts:
-      - apm-server-ingress.example.com
+      - apm-server.local
     tls: []
     #  - secretName: chart-example-tls
     #    hosts:
@@ -1054,10 +990,10 @@ apm-server:
       ## Hints the minimum number of events stored in the queue,
       ## before providing a batch of events to the outputs.
       ## A value of 0 (the default) ensures events are immediately available
-      ## to be sent to the outputs.
-      # flush.min_events: 2048
+    ## to be sent to the outputs.
+    # flush.min_events: 2048
 
-      ## Maximum duration after which events are available to the outputs,
+    ## Maximum duration after which events are available to the outputs,
     ## if the number of events stored in the queue is < min_flush_events.
     # flush.timeout: 1s
 
@@ -1065,18 +1001,18 @@ apm-server:
     # --set config."output\.file".enabled=false
     output.file:
       enabled: false
-#      path: "/usr/share/apm-server/data"
-#      filename: apm-server
-#      rotate_every_kb: 10000
-#      number_of_files: 5
+    #      path: "/usr/share/apm-server/data"
+    #      filename: apm-server
+    #      rotate_every_kb: 10000
+    #      number_of_files: 5
 
     ## Set output.file.enabled to false to enable elasticsearch
     output.elasticsearch:
-      hosts: ["efk-elasticsearch-client:9200"]
+      hosts: ["elasticsearch-master:9200"]
       protocol: "http"
-#      protocol: "https"
-#      username: "elastic"
-#      password: "changeme"
+  #      protocol: "https"
+  #      username: "elastic"
+  #      password: "changeme"
 
   # List of beat plugins
   plugins: []
@@ -1093,11 +1029,11 @@ apm-server:
 
   # Add additional volumes and mounts, for example to read other log files on the host
   extraVolumes: []
-    # - hostPath:
+  # - hostPath:
   #     path: /var/log
   #   name: varlog
   extraVolumeMounts: []
-    # - name: varlog
+  # - name: varlog
   #   mountPath: /host/var/log
   #   readOnly: true
 
@@ -1113,9 +1049,9 @@ apm-server:
     ## resources, such as Minikube. If you do want to specify resources, uncomment the following
     ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
     # limits:
-    #  cpu: 100m
-    #  memory: 200Mi
-    # requests:
+  #  cpu: 100m
+  #  memory: 200Mi
+  # requests:
   #  cpu: 100m
   #  memory: 100Mi
 
