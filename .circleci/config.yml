@@ -30,10 +30,11 @@ defaults_license_scanner: &defaults_license_scanner
     # TODO: temp for testing only
     git clone https://github.com/vessels-tech/license-scanner-1 /tmp/license-scanner
     cd /tmp/license-scanner && git fetch && git checkout feature/916-add-license-scan
-
     cd /tmp/license-scanner && make build default-files set-up    
     echo 'export mode=docker' >> $BASH_ENV
-    echo 'export dockerImages="mojaloop/ml-api-adapter:latest mojaloop/central-ledger:latest mojaloop/simulator:latest"' >> $BASH_ENV
+    dockerImages=`cd /home/circleci/project && ./format_docker_images.sh`
+    echo "dockerImages are $dockerImages"
+    echo 'export dockerImages="$dockerImages"' >> $BASH_ENV
 
 defaults_Environment: &defaults_environment
   name: Set default environment
