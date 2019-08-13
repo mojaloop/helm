@@ -22,17 +22,13 @@ defaults_Dependencies: &defaults_Dependencies
 defaults_license_scanner: &defaults_license_scanner
   name: Install and set up license-scanner
   command: |
-    # nvm install v10.15.3 && nvm alias default v10.15.3
-    # echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
-    # echo "[ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"" >> $BASH_ENV
-
-    # git clone https://github.com/mojaloop/license-scanner /tmp/license-scanner
+    git clone https://github.com/mojaloop/license-scanner /tmp/license-scanner
     # TODO: temp for testing only
-    git clone https://github.com/vessels-tech/license-scanner-1 /tmp/license-scanner
-    cd /tmp/license-scanner && git fetch && git checkout feature/916-add-license-scan
+    # git clone https://github.com/vessels-tech/license-scanner-1 /tmp/license-scanner
+    # cd /tmp/license-scanner && git fetch && git checkout feature/916-add-license-scan
     cd /tmp/license-scanner && make build default-files set-up    
     echo 'export mode=docker' >> $BASH_ENV
-    dockerImages=`cd /home/circleci/project && ./format_docker_images.sh`
+    dockerImages=`cd /home/circleci/project && ./format-docker-images.sh`
     echo "dockerImages are $dockerImages"
     echo 'export dockerImages="$dockerImages"' >> $BASH_ENV
 
@@ -134,6 +130,7 @@ jobs:
       - run:
           name: Set up nvm
           command: |
+            # Note: this needs to be separate from the nvm install step 
             echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
             echo "[ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"" >> $BASH_ENV
       - run:
