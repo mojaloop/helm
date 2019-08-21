@@ -1,0 +1,13 @@
+{{- $forensicLoggingSidecarHost := printf "%s-%s" .Release.Name .Values.config.forensicloggingsidecar_host -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "centralledger-handler-bulk-transfer-prepare.fullname" . }}
+  labels:
+      app: {{ template "centralledger-handler-bulk-transfer-prepare.fullname" . }}
+      chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
+data:
+  default.json: {{ (tpl (.Files.Get "configs/default.json") . ) | quote }}
+  knexfile.js: {{ (tpl (.Files.Get "configs/knexfile.js") . ) | quote }}
