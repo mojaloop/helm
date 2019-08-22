@@ -9,6 +9,15 @@ Mojaloop deployment documentation: http://mojaloop.io/documentation/deployment-g
 
 Refer to Helm docs for more information: https://docs.helm.sh/
 
+## Dependencies
+
+1. Add Helm dependency repositories:
+```bash
+helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator;
+helm repo add kiwigrid https://kiwigrid.github.io;
+helm repo add elastic https://helm.elastic.co
+```
+
 ## Configure remote Mojaloop Helm repo on your Helm Client
 
 1. Add Mojaloop repo 
