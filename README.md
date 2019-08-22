@@ -9,7 +9,7 @@ Mojaloop deployment documentation: http://mojaloop.io/documentation/deployment-g
 
 Refer to Helm docs for more information: https://docs.helm.sh/
 
-## Dependencies
+## Pre-requisites
 
 1. Add Helm dependency repositories:
 ```bash
