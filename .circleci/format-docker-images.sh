@@ -6,9 +6,9 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 ##
 # steps (inline comments breaks bash)
-# 1. Search through all values.yaml files for the strings `repository:` and `tag:`
-# 2. Remove leading whitespace
-# 3. Collapse into one line
+# 1. Search through all values.yaml files for the strings `repository: mojaloop` and `tag:`
+# 2. Remove leading and trailing whitespace
+# 3. Collapse into one line, ensuring the pattern: `repo*\ntag:`
 # 4. Remove the `repository:` string, Replace the ` tag: ` string with `:`
 # 5. Remove rows that don't contain 'mojaloop'
 # 6. Remove rows that are commented out in yaml (start with #)
@@ -16,11 +16,10 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # 8. Collapse list into one line, separated with spaces
 # 9. Remove any leading whitespace
 ##
-
-cat ${DIR}/**/values.yaml \
-  | grep '\ *repository:\|\ *tag:' \
+cat ${DIR}/../**/values.yaml \
+  | grep 'repository:.mojaloop\|tag:' \
   | awk '{$1=$1;print}' \
-  | awk 'NR%2{printf "%s ",$0;next;}1' \
+  | awk 'BEGIN{FS="   *"} f ~ "repo" && $1 ~ "tag" {print f" "$1} {f=$1}' \
   | sed -e "s/repository://g"  -e "s/ tag: /:/g" \
   | grep "mojaloop" \
   | grep -v "^#" \
