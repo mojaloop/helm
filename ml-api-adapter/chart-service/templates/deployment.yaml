@@ -1,3 +1,4 @@
+{{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -22,6 +23,21 @@ spec:
         prometheus.io/scrape: "true"
       {{- end }}
     spec:
+      {{- if .Values.init.enabled }}
+      initContainers:
+        - name: {{ .Values.init.image.name }}
+          image: {{ .Values.init.image.repository }}:{{ .Values.init.image.tag }}
+          imagePullPolicy: {{ .Values.init.image.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.init.image.command | replace "$kafka_host" $kafkaHost | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) ) | quote }}
+          env:
+          {{- range $envItem := .Values.init.image.env }}
+          - name: {{ $envItem.name }}
+            value: {{ $envItem.value }}
+          {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
