@@ -37,7 +37,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v7.3.1
+            tag: v7.4.3
             pullPolicy: Always
             command: '["node", "src/api/index.js"]'
           service:
@@ -106,6 +106,8 @@ central:
           enabled: true
           name: run-migration
           command: npm run migrate
+          config:
+            run_data_migration: true
 
       service:
         type: ClusterIP
@@ -165,7 +167,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v7.3.1
+            tag: v7.4.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
           service:
@@ -302,7 +304,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v7.3.1
+            tag: v7.4.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--admin"]'
           service:
@@ -439,7 +441,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v7.3.1
+            tag: v7.4.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--position"]'
           service:
@@ -576,7 +578,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v7.3.1
+            tag: v7.4.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--get"]'
           service:
@@ -713,7 +715,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v7.3.1
+            tag: v7.4.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
           service:
@@ -850,7 +852,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v7.3.1
+            tag: v7.4.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
           service:
@@ -1961,7 +1963,7 @@ central:
     replicaCount: 1
     image:
       repository: mojaloop/central-settlement
-      tag: v7.3.0
+      tag: v7.4.0
       pullPolicy: Always
 
     readinessProbe:
@@ -2544,7 +2546,7 @@ ml-api-adapter:
     replicaCount: 1
     image:
       repository: mojaloop/ml-api-adapter
-      tag: v7.3.0
+      tag: v7.4.1
       command: '["node", "src/api/index.js"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -2584,6 +2586,9 @@ ml-api-adapter:
       security:
         callback:
           rejectUnauthorized: true
+      log_level: 'info'
+      max_callback_time_lag_dilation_milliseconds: 100
+      max_fulfil_timeout_duration_seconds: 240
 
     service:
       type: ClusterIP
@@ -2626,7 +2631,7 @@ ml-api-adapter:
     replicaCount: 1
     image:
       repository: mojaloop/ml-api-adapter
-      tag: v7.3.0
+      tag: v7.4.1
       command: '["node", "src/handlers/index.js", "handler", "--notification"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -2653,6 +2658,9 @@ ml-api-adapter:
       security:
         callback:
           rejectUnauthorized: true
+      log_level: 'info'
+      max_callback_time_lag_dilation_milliseconds: 100
+      max_fulfil_timeout_duration_seconds: 240
 
     service:
       type: ClusterIP
@@ -3557,7 +3565,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v7.3.1
+            tag: v7.4.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--bulkprepare"]'
           service:
@@ -3711,7 +3719,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v7.3.1
+            tag: v7.4.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--bulkfulfil"]'
           service:
@@ -3865,7 +3873,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v7.3.1
+            tag: v7.4.3
             pullPolicy: Always
             command: '["node", "src/handlers/index.js", "handler", "--bulkprocessing"]'
           service:

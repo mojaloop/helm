@@ -4,7 +4,9 @@ version: 2
 defaults_working_directory: &defaults_working_directory
   working_directory: /home/circleci/project
 
-defaults_docker_node: &defaults_docker_node
+#TODO: add proper defaults for node, rename this to defaults_docker_helm
+
+defaults_docker_helm: &defaults_docker_helm
   docker:
     - image: alpine/helm:2.13.1
 
@@ -16,6 +18,16 @@ defaults_Dependencies: &defaults_Dependencies
     apk --no-cache add curl
     apk --no-cache add openssh-client
     apk add --no-cache -t build-dependencies make gcc g++ python libtool autoconf automake
+
+defaults_license_scanner: &defaults_license_scanner
+  name: Install and set up license-scanner
+  command: |
+    git clone https://github.com/mojaloop/license-scanner /tmp/license-scanner
+    cd /tmp/license-scanner && make build default-files set-up    
+    echo 'export mode=docker' >> $BASH_ENV
+    dockerImages=`cd /home/circleci/project && ./.circleci/format-docker-images.sh`
+    echo "dockerImages are $dockerImages"
+    echo "export dockerImages=\"${dockerImages}\"" >> $BASH_ENV
 
 defaults_Environment: &defaults_environment
   name: Set default environment
@@ -57,7 +69,7 @@ defaults_publish: &defaults_publish
 jobs:
   setup:
     <<: *defaults_working_directory
-    <<: *defaults_docker_node
+    <<: *defaults_docker_helm
     steps:
       - checkout
       - run:
@@ -66,7 +78,7 @@ jobs:
 
   test:
     <<: *defaults_working_directory
-    <<: *defaults_docker_node
+    <<: *defaults_docker_helm
     steps:
       - checkout
       - run:
@@ -77,10 +89,43 @@ jobs:
           name: Linting Helm Charts
           command: |
             sh lint-charts.sh
+  
+  audit-licenses:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          <<: *defaults_license_scanner
+      - run:
+          name: Set up nvm
+          command: |
+            # Note: this needs to be separate from the nvm install step 
+            echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
+            echo "[ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"" >> $BASH_ENV
+      - run:
+          name: Set up correct node version
+          command: |
+            nvm install v10.15.3 && nvm alias default v10.15.3
+            node --version
+      - run:
+          name: Run the license-scanner
+          command: |
+            # TODO: get the list of docker images from the helm charts
+            source $BASH_ENV
+            env | grep docker
+            cd /tmp/license-scanner && make run 
+      - run:
+          name: Build and save license-scanner summary
+          command: |
+            node --version
+            cd /tmp/license-scanner && make postprocess
+      - store_artifacts:
+          path: /tmp/license-scanner/results
+          prefix: licenses
 
   build:
     <<: *defaults_working_directory
-    <<: *defaults_docker_node
+    <<: *defaults_docker_helm
     steps:
       - checkout
       - run:
@@ -94,7 +139,7 @@ jobs:
 
   deploy:
     <<: *defaults_working_directory
-    <<: *defaults_docker_node
+    <<: *defaults_docker_helm
     steps:
       - checkout
       - run:
@@ -144,10 +189,23 @@ workflows:
                 - /feature.*/
                 - /bugfix.*/
                 - gh-pages
+      - audit-licenses:
+          context: org-global
+          requires:
+            - setup
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore:
+                - /feature.*/
+                - /bugfix.*/
+                - gh-pages
       - build:
           context: org-global
           requires:
             - test
+            - audit-licenses
           filters:
             tags:
               only: /.*/
