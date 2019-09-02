@@ -25,6 +25,10 @@ find ./ -name "tmpcharts"| xargs rm -Rf
 #helm dep up ./simulator
 #checkCommandResult
 
+echo "Updating Event Stream Processor..."
+helm dep up ./eventstreamprocessor
+checkCommandResult
+
 echo "Updating Promfana..."
 helm dep up ./monitoring/promfana
 checkCommandResult

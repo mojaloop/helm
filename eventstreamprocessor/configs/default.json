@@ -1,0 +1,79 @@
+{{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
+{{- $efkHost := ( .Values.config.efk_host | replace "$release_name" .Release.Name ) -}}
+{{- $apmHost := ( .Values.config.apm_host | replace "$release_name" .Release.Name ) -}}
+{
+    "efk": {
+        "host": "{{ (default .Values.config.efk_host $efkHost) }}",
+        "port": {{ .Values.config.efk_port }},
+        "timeout": 3.0,
+        "reconnectInterval": 600,
+        "requireAckResponse": true,
+        "namespace": "{{ .Values.config.efk_namespace }}"
+        },
+    "apm": {
+        "serviceName": "{{ .Values.config.apm_service_name }}",
+        "serverUrl": "http://{{ (default .Values.config.apm_host $apmHost) }}:{{ .Values.config.apm_port }}"
+    },
+    "PORT": {{ .Values.config.PORT }},
+    "KAFKA": {
+        "TOPIC_TEMPLATES": {
+            "GENERAL_TOPIC_TEMPLATE": {
+                "TEMPLATE": "topic-{{"{{"}}functionality{{"}}"}}",
+                "REGEX": "topic-(.*)"
+            }
+        },
+        "PRODUCER": {
+            "EVENT": {
+                "config": {
+                    "options": {
+                        "messageCharset": "utf8"
+                    },
+                    "rdkafkaConf": {
+                        "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+                        "client.id": "es-prod-event",
+                        "event_cb": true,
+                        "dr_cb": true,
+                        "socket.keepalive.enable": true,
+                        "queue.buffering.max.messages": 10000000
+                    },
+                    "topicConf": {
+                        "request.required.acks": "all"
+                    }
+                }
+            }
+        },
+        "CONSUMER": {
+            "EVENT": {
+                "config": {
+                    "options": {
+                        "mode": 2,
+                        "batchSize": 1,
+                        "recursiveTimeout": 100,
+                        "messageCharset": "utf8",
+                        "messageAsJSON": true,
+                        "sync": true,
+                        "consumeTimeout": 1000
+                    },
+                    "rdkafkaConf": {
+                        "client.id": "cep-event-mediation",
+                        "group.id": "cep-event-mediation-group",
+                        "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+                        "socket.blocking.max.ms": 1,
+                        "fetch.wait.max.ms": 1,
+                        "fetch.error.backoff.ms": 1,
+                        "queue.buffering.max.ms": 1,
+                        "broker.version.fallback": "0.10.1.0",
+                        "api.version.request": true,
+                        "enable.auto.commit": false,
+                        "auto.commit.interval.ms": 200,
+                        "socket.keepalive.enable": true,
+                        "socket.max.fails": 1
+                    },
+                    "topicConf": {
+                        "auto.offset.reset": "earliest"
+                    }
+                }
+            }
+        }
+    }
+}

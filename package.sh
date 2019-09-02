@@ -19,6 +19,10 @@ find ./ -name "charts"| xargs rm -Rf
 
 mkdir ./repo
 
+echo "Updating Event Stream Processor..."
+helm package -u -d ./eventstreamprocessor
+checkCommandResult
+
 echo "Packaging Simulator..."
 helm package -u -d ./repo ./simulator
 checkCommandResult
