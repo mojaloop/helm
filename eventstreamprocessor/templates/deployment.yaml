@@ -6,6 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ include "eventstreamprocessor.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
@@ -62,7 +63,7 @@ spec:
           {{- end }}
           volumeMounts:
             - name: {{ template "eventstreamprocessor.fullname" . }}-config-volume
-              mountPath: /opt/central-event-processor/config
+              mountPath: /opt/event-stream-processor/config
           env:
             - name: LOG_LEVEL
               value: {{ .Values.config.log_level }}
