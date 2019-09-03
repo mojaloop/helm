@@ -26,7 +26,7 @@ ml-api-adapter-service:
   replicaCount: 1
   image:
     repository: mojaloop/ml-api-adapter
-    tag: v7.4.1
+    tag: v7.4.2-snapshot
     command: '["node", "src/api/index.js"]'
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -35,6 +35,23 @@ ml-api-adapter-service:
   #  imagePullSecrets:
   #    - name: myregistrykey
     pullPolicy: Always
+
+  sidecar:
+    enabled: true
+    image:
+      repository: mojaloop/event-sidecar
+      tag: v7.4.0
+      pullPolicy: Always
+    readinessProbe:
+      enabled: true
+      initialDelaySeconds: 120
+      periodSeconds: 15
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 90
+      periodSeconds: 15
+    config:
+      log_level: info
 
   init:
     enabled: true
@@ -125,7 +142,7 @@ ml-api-adapter-handler-notification:
   replicaCount: 1
   image:
     repository: mojaloop/ml-api-adapter
-    tag: v7.4.1
+    tag: v7.4.2-snapshot
     command: '["node", "src/handlers/index.js", "handler", "--notification"]'
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -134,6 +151,23 @@ ml-api-adapter-handler-notification:
   #  imagePullSecrets:
   #    - name: myregistrykey
     pullPolicy: Always
+
+  sidecar:
+    enabled: true
+    image:
+      repository: mojaloop/event-sidecar
+      tag: v7.4.0
+      pullPolicy: Always
+    readinessProbe:
+      enabled: true
+      initialDelaySeconds: 120
+      periodSeconds: 15
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 90
+      periodSeconds: 15
+    config:
+      log_level: info
 
   init:
     enabled: true

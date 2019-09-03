@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   repository: mojaloop/ml-api-adapter
-  tag: v7.4.1
+  tag: v7.4.2-snapshot
   command: '["node", "src/handlers/index.js", "handler", "--notification"]'
 ## Optionally specify an array of imagePullSecrets.
 ## Secrets must be manually created in the namespace.
@@ -13,6 +13,32 @@ image:
 #  imagePullSecrets:
 #    - name: myregistrykey
   pullPolicy: Always
+
+sidecar:
+  enabled: true
+  image:
+    repository: mojaloop/event-sidecar
+    tag: v7.4.0
+    pullPolicy: Always
+    command: '["npm", "run", "start"]'
+  service:
+    internalPort: 3000
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 120
+    periodSeconds: 15
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 90
+    periodSeconds: 15
+  config:
+    event_logger_grpc_host: localhost
+    event_logger_grpc_port: 50051
+    log_level: info
 
 init:
   enabled: true
