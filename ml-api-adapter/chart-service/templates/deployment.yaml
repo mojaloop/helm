@@ -18,10 +18,11 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "ml-api-adapter-service.fullname" . }}
-        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-        release: {{ .Release.Name }}
-        heritage: {{ .Release.Service }}
+        app.kubernetes.io/name: {{ include "ml-api-adapter-service.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
       {{- if .Values.metrics.enabled }}
       annotations:
         prometheus.io/port: "{{ .Values.service.internalPort }}"
@@ -76,14 +77,14 @@ spec:
           env:
             {{- if .Values.sidecar.enabled }}
             - name: EVENT_SDK_EVENT_LOGGER_SIDECAR_DISABLED
-              value: false
+              value: "false"
             - name: EVENT_SDK_EVENT_LOGGER_SERVER_HOST
-              value: {{ .Values.sidecar.config.event_logger_grpc_host }}
+              value: {{ .Values.sidecar.config.event_logger_grpc_host | quote }}
             - name: EVENT_SDK_EVENT_LOGGER_SERVER_PORT
-              value: {{ .Values.sidecar.config.event_logger_grpc_port }}
+              value: {{ .Values.sidecar.config.event_logger_grpc_port | quote }}
             {{- end }}
             - name: LOG_LEVEL
-              value: {{ .Values.config.log_level }}
+              value: {{ .Values.config.log_level | quote }}
         {{- if .Values.sidecar.enabled }}
         - name: {{ .Chart.Name }}-sidecar
           image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
@@ -112,7 +113,7 @@ spec:
             periodSeconds: {{ .Values.sidecar.livenessProbe.periodSeconds }}
           {{- end }}
           volumeMounts:
-            - name: {{ template "ml-api-adapter-service.fullname" . }}-sidecar-config-volume
+            - name: {{ template "ml-api-adapter-service.fullname" . }}-sidecar-volume
               mountPath: /opt/event-sidecar/config
           env:
             - name: LOG_LEVEL
@@ -121,15 +122,15 @@ spec:
       volumes:
         - name: {{ template "ml-api-adapter-service.fullname" . }}-config-volume
           configMap:
-            name: {{ template "ml-api-adapter-service.fullname" . }}
+            name: {{ template "ml-api-adapter-service.fullname" . }}-config
             items:
             - key: default.json
               path: default.json
         {{- if .Values.sidecar.enabled }}
-        - name: {{ template "ml-api-adapter-service.fullname" . }}-sidecar-config-volume
+        - name: {{ template "ml-api-adapter-service.fullname" . }}-sidecar-volume
           configMap:
-            name: {{ template "ml-api-adapter-service.fullname" . }}
+            name: {{ template "ml-api-adapter-service.fullname" . }}-sidecar
             items:
-            - key: default-sidecar.json
-              path: default-sidecar.json
+            - key: default.json
+              path: default.json
         {{- end }}
