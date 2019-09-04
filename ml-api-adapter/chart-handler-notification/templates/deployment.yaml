@@ -75,6 +75,8 @@ spec:
             - name: {{ template "ml-api-adapter-handler-notification.fullname" . }}-config-volume
               mountPath: /opt/ml-api-adapter/config
           env:
+            - name: LOG_LEVEL
+              value: {{ .Values.config.log_level | quote }}
             {{- if .Values.sidecar.enabled }}
             - name: EVENT_SDK_SIDECAR_DISABLED
               value: "false"
@@ -83,8 +85,6 @@ spec:
             - name: EVENT_SDK_SERVER_PORT
               value: {{ .Values.sidecar.config.event_logger_grpc_port | quote }}
             {{- end }}
-            - name: LOG_LEVEL
-              value: {{ .Values.config.log_level | quote }}
         {{- if .Values.sidecar.enabled }}
         - name: {{ .Chart.Name }}-sidecar
           image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"

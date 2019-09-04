@@ -108,6 +108,14 @@ spec:
                   key: db.uri
             - name: LOG_LEVEL
               value: {{ .Values.config.log_level }}
+            {{- if .Values.sidecar.enabled }}
+            - name: EVENT_SDK_SIDECAR_DISABLED
+              value: "false"
+            - name: EVENT_SDK_SERVER_HOST
+              value: {{ .Values.sidecar.config.event_logger_grpc_host | quote }}
+            - name: EVENT_SDK_SERVER_PORT
+              value: {{ .Values.sidecar.config.event_logger_grpc_port | quote }}
+            {{- end }}
           volumeMounts:
           - name: {{ template "centralledger-handler-transfer-position.fullname" . }}-config-volume
             mountPath: /opt/central-ledger/config
