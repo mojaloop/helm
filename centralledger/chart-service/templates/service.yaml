@@ -3,10 +3,11 @@ kind: Service
 metadata:
   name: {{ template "centralledger-service.fullname" . }}
   labels:
-    app: {{ template "centralledger-service.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "centralledger-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   annotations:
     {{- range $key, $value := .Values.service.annotations }}
       {{ $key }}: {{ $value | quote }}
@@ -22,6 +23,6 @@ spec:
     {{- end }}
 {{- if not .Values.service.external.enabled }}
   selector:
-    app: {{ template "centralledger-service.fullname" . }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ include "centralledger-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
