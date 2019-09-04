@@ -5,9 +5,10 @@ metadata:
   name: {{ include "account-lookup-service-api.fullname" . }}
   labels:
     app.kubernetes.io/name: {{ include "account-lookup-service-api.name" . }}
-    helm.sh/chart: {{ include "account-lookup-service-api.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -19,6 +20,9 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "account-lookup-service-api.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     spec:
       {{- if .Values.init.enabled }}
       initContainers:
@@ -72,7 +76,7 @@ spec:
       volumes:
         - name: {{ template "account-lookup-service-api.fullname" . }}-config-volume
           configMap:
-            name: {{ template "account-lookup-service-api.fullname" . }}
+            name: {{ template "account-lookup-service-api.fullname" . }}-config
             items:
             - key: default.json
               path: default.json
