@@ -84,7 +84,7 @@ central:
       config:
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
-        forensicloggingsidecar_disabled: false
+        forensicloggingsidecar_disabled: true
         forensicloggingsidecar_host: forensicloggingsidecar-ledger
         forensicloggingsidecar_port: 5678
 
@@ -231,7 +231,7 @@ central:
       config:
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
-        forensicloggingsidecar_disabled: false
+        forensicloggingsidecar_disabled: true
         forensicloggingsidecar_host: forensicloggingsidecar-ledger
         forensicloggingsidecar_port: 5678
 
@@ -385,7 +385,7 @@ central:
       config:
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
-        forensicloggingsidecar_disabled: false
+        forensicloggingsidecar_disabled: true
         forensicloggingsidecar_host: forensicloggingsidecar-ledger
         forensicloggingsidecar_port: 5678
 
@@ -539,7 +539,7 @@ central:
       config:
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
-        forensicloggingsidecar_disabled: false
+        forensicloggingsidecar_disabled: true
         forensicloggingsidecar_host: forensicloggingsidecar-ledger
         forensicloggingsidecar_port: 5678
 
@@ -693,7 +693,7 @@ central:
       config:
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
-        forensicloggingsidecar_disabled: false
+        forensicloggingsidecar_disabled: true
         forensicloggingsidecar_host: forensicloggingsidecar-ledger
         forensicloggingsidecar_port: 5678
 
@@ -847,7 +847,7 @@ central:
       config:
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
-        forensicloggingsidecar_disabled: false
+        forensicloggingsidecar_disabled: true
         forensicloggingsidecar_host: forensicloggingsidecar-ledger
         forensicloggingsidecar_port: 5678
 
@@ -1001,7 +1001,7 @@ central:
       config:
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
-        forensicloggingsidecar_disabled: false
+        forensicloggingsidecar_disabled: true
         forensicloggingsidecar_host: forensicloggingsidecar-ledger
         forensicloggingsidecar_port: 5678
 
@@ -1097,173 +1097,173 @@ central:
         #  cpu: 100m
         #  memory: 128Mi
 
-    forensicloggingsidecar:
-      enabled: true
-      nameOverride: "forensicloggingsidecar-ledger"
-      replicaCount: 1
-      image:
-        repository: mojaloop/forensic-logging-sidecar
-        tag: v2.4
-        pullPolicy: Always
-
-      service:
-        name: http-api-and-ws
-        type: ClusterIP
-        externalPort: 5678
-        internalPort: 5678
-
-        annotations: {}
-
-        # This allows one to point the service to an external backend.
-        # This is useful for local development where one wishes to hijack
-        # the communication from the service to the node layer and point
-        # to a specific endpoint (IP, Port, etc).
-        external:
-          enabled: false
-          # 10.0.2.2 is the magic IP for the host on virtualbox's network
-          ip: 10.0.2.2
-          ports:
-            api:
-              name: http-api-and-ws
-              externalPort: 5678
-
-      readinessProbe:
-        enabled: true
-        initialDelaySeconds: 90
-        periodSeconds: 15
-
-      livenessProbe:
-        enabled: true
-        initialDelaySeconds: 90
-        periodSeconds: 15
-
-      ingress:
-        enabled: false
-        # Used to create an Ingress record.
-        hosts:
-          api: forensic-logging-sidecar.local
-
-        externalPath: /
-
-        annotations:
-          # kubernetes.io/ingress.class: nginx
-
-        tls:
-          # Secrets must be manually created in the namespace.
-          # - secretName: chart-example-tls
-          #   hosts:
-          #     - chart-example.local
-      resources: {}
-        # We usually recommend not to specify default resources and to leave this as a conscious
-        # choice for the user. This also increases chances charts run on environments with little
-        # resources, such as Minikube. If you do want to specify resources, uncomment the following
-        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-        # limits:
-        #  cpu: 100m
-        #  memory: 128Mi
-        # requests:
-        #  cpu: 100m
-        #  memory: 128Mi
-
-      config: {}
-
-      centralkms:
-        enabled: true
-        nameOverride: "centralkms"
-        replicaCount: 1
-        image:
-          repository: mojaloop/central-kms
-          tag: v2.4
-          pullPolicy: Always
-
-        service:
-          name: http-api-and-tcp-websocket
-          type: ClusterIP
-          externalPort: 8080
-          internalPort: 8080
-
-          annotations: {}
-
-          # This allows one to point the service to an external backend.
-          # This is useful for local development where one wishes to hijack
-          # the communication from the service to the node layer and point
-          # to a specific endpoint (IP, Port, etc).
-          external:
-            enabled: false
-            # 10.0.2.2 is the magic IP for the host on virtualbox's network
-            ip: 10.0.2.2
-            ports:
-              api:
-                name: http-api-and-tcp-websocket
-                externalPort: 8080
-
-        readinessProbe:
-          enabled: true
-          httpGet:
-            path: /sidecars
-          initialDelaySeconds: 30
-          periodSeconds: 5
-
-        livenessProbe:
-          enabled: true
-          httpGet:
-            path: /sidecars
-          initialDelaySeconds: 30
-          periodSeconds: 5
-
-        ingress:
-          enabled: true
-          # Used to create an Ingress record.
-          hosts:
-            - central-kms.local
-          externalPath: /
-
-          annotations:
-            # kubernetes.io/ingress.class: nginx
-
-          tls:
-            # Secrets must be manually created in the namespace.
-            # - secretName: chart-example-tls
-            #   hosts:
-            #     - chart-example.local
-
-        resources: {}
-          # We usually recommend not to specify default resources and to leave this as a conscious
-          # choice for the user. This also increases chances charts run on environments with little
-          # resources, such as Minikube. If you do want to specify resources, uncomment the following
-          # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-          # limits:
-          #  cpu: 100m
-          #  memory: 128Mi
-          # requests:
-          #  cpu: 100m
-          #  memory: 128Mi
-
-        postgresql:
-          enabled: true
-          nameOverride: "centralkms-postgresql"
-          ## Create a database user
-          postgresUser: kms
-          ## Default: random 10 character string
-          postgresPassword: xD873IyaQB
-
-          service:
-            type: ClusterIP
-            port: 5432
-            externalIPs: []
-
-      postgresql:
-        enabled: true
-        nameOverride: "forensicloggingsidecar-ledger-postgresql"
-        ## Create a database user
-        postgresUser: sidecar
-        ## Default: random 10 character string
-        postgresPassword: Wqt0KlkKvL
-
-        service:
-          type: ClusterIP
-          port: 5432
-          externalIPs: []
+#    forensicloggingsidecar:
+#      enabled: true
+#      nameOverride: "forensicloggingsidecar-ledger"
+#      replicaCount: 1
+#      image:
+#        repository: mojaloop/forensic-logging-sidecar
+#        tag: v2.4
+#        pullPolicy: Always
+#
+#      service:
+#        name: http-api-and-ws
+#        type: ClusterIP
+#        externalPort: 5678
+#        internalPort: 5678
+#
+#        annotations: {}
+#
+#        # This allows one to point the service to an external backend.
+#        # This is useful for local development where one wishes to hijack
+#        # the communication from the service to the node layer and point
+#        # to a specific endpoint (IP, Port, etc).
+#        external:
+#          enabled: false
+#          # 10.0.2.2 is the magic IP for the host on virtualbox's network
+#          ip: 10.0.2.2
+#          ports:
+#            api:
+#              name: http-api-and-ws
+#              externalPort: 5678
+#
+#      readinessProbe:
+#        enabled: true
+#        initialDelaySeconds: 90
+#        periodSeconds: 15
+#
+#      livenessProbe:
+#        enabled: true
+#        initialDelaySeconds: 90
+#        periodSeconds: 15
+#
+#      ingress:
+#        enabled: false
+#        # Used to create an Ingress record.
+#        hosts:
+#          api: forensic-logging-sidecar.local
+#
+#        externalPath: /
+#
+#        annotations:
+#          # kubernetes.io/ingress.class: nginx
+#
+#        tls:
+#          # Secrets must be manually created in the namespace.
+#          # - secretName: chart-example-tls
+#          #   hosts:
+#          #     - chart-example.local
+#      resources: {}
+#        # We usually recommend not to specify default resources and to leave this as a conscious
+#        # choice for the user. This also increases chances charts run on environments with little
+#        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+#        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+#        # limits:
+#        #  cpu: 100m
+#        #  memory: 128Mi
+#        # requests:
+#        #  cpu: 100m
+#        #  memory: 128Mi
+#
+#      config: {}
+#
+#      centralkms:
+#        enabled: true
+#        nameOverride: "centralkms"
+#        replicaCount: 1
+#        image:
+#          repository: mojaloop/central-kms
+#          tag: v2.4
+#          pullPolicy: Always
+#
+#        service:
+#          name: http-api-and-tcp-websocket
+#          type: ClusterIP
+#          externalPort: 8080
+#          internalPort: 8080
+#
+#          annotations: {}
+#
+#          # This allows one to point the service to an external backend.
+#          # This is useful for local development where one wishes to hijack
+#          # the communication from the service to the node layer and point
+#          # to a specific endpoint (IP, Port, etc).
+#          external:
+#            enabled: false
+#            # 10.0.2.2 is the magic IP for the host on virtualbox's network
+#            ip: 10.0.2.2
+#            ports:
+#              api:
+#                name: http-api-and-tcp-websocket
+#                externalPort: 8080
+#
+#        readinessProbe:
+#          enabled: true
+#          httpGet:
+#            path: /sidecars
+#          initialDelaySeconds: 30
+#          periodSeconds: 5
+#
+#        livenessProbe:
+#          enabled: true
+#          httpGet:
+#            path: /sidecars
+#          initialDelaySeconds: 30
+#          periodSeconds: 5
+#
+#        ingress:
+#          enabled: true
+#          # Used to create an Ingress record.
+#          hosts:
+#            - central-kms.local
+#          externalPath: /
+#
+#          annotations:
+#            # kubernetes.io/ingress.class: nginx
+#
+#          tls:
+#            # Secrets must be manually created in the namespace.
+#            # - secretName: chart-example-tls
+#            #   hosts:
+#            #     - chart-example.local
+#
+#        resources: {}
+#          # We usually recommend not to specify default resources and to leave this as a conscious
+#          # choice for the user. This also increases chances charts run on environments with little
+#          # resources, such as Minikube. If you do want to specify resources, uncomment the following
+#          # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+#          # limits:
+#          #  cpu: 100m
+#          #  memory: 128Mi
+#          # requests:
+#          #  cpu: 100m
+#          #  memory: 128Mi
+#
+#        postgresql:
+#          enabled: true
+#          nameOverride: "centralkms-postgresql"
+#          ## Create a database user
+#          postgresUser: kms
+#          ## Default: random 10 character string
+#          postgresPassword: xD873IyaQB
+#
+#          service:
+#            type: ClusterIP
+#            port: 5432
+#            externalIPs: []
+#
+#      postgresql:
+#        enabled: true
+#        nameOverride: "forensicloggingsidecar-ledger-postgresql"
+#        ## Create a database user
+#        postgresUser: sidecar
+#        ## Default: random 10 character string
+#        postgresPassword: Wqt0KlkKvL
+#
+#        service:
+#          type: ClusterIP
+#          port: 5432
+#          externalIPs: []
 
     #postgresql:
     #  enabled: true
