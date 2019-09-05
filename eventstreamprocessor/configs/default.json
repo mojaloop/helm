@@ -3,13 +3,17 @@
 {{- $apmHost := ( .Values.config.apm_host | replace "$release_name" .Release.Name ) -}}
 {
     "efk": {
-        "host": "{{ (default .Values.config.efk_host $efkHost) }}",
-        "port": {{ .Values.config.efk_port }},
+        "host": "{{ (default .Values.config.fluentd_host $efkHost) }}",
+        "port": {{ .Values.config.fluentd_port }},
         "timeout": 3.0,
         "reconnectInterval": 600,
         "requireAckResponse": true,
-        "namespace": "{{ .Values.config.efk_namespace }}"
-        },
+        "namespace": "{{ .Values.config.fluentd_namespace }}"
+    },
+    "efkClient": {
+        "host": "{{ .Values.config.efk_host }}",
+        "log": "{{ .Values.config.efk_log }}"
+    },
     "apm": {
         "serviceName": "{{ .Values.config.apm_service_name }}",
         "serverUrl": "http://{{ (default .Values.config.apm_host $apmHost) }}:{{ .Values.config.apm_port }}"
