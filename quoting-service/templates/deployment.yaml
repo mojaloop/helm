@@ -4,16 +4,25 @@ kind: Deployment
 metadata:
   name: {{ template "quotingservice.fullname" . }}
   labels:
-    app: {{ template "quotingservice.fullname" . }}
+    app.kubernetes.io/name: {{ include "quotingservice.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "quotingservice.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "quotingservice.fullname" . }}
-        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-        release: {{ .Release.Name }}
-        heritage: {{ .Release.Service }}
+        app.kubernetes.io/name: {{ include "quotingservice.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     spec:
 {{- if .Values.global.config.affinity }}
       affinity:
@@ -73,7 +82,7 @@ spec:
       volumes:
         - name: {{ template "quotingservice.fullname" . }}-config-volume
           configMap:
-            name: {{ template "quotingservice.fullname" . }}
+            name: {{ template "quotingservice.fullname" . }}-config
             items:
             - key: default.json
               path: default.json
