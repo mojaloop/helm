@@ -1,19 +1,27 @@
-{{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "transactionrequestservice.fullname" . }}
+  name: {{ template "transactionrequestsservice.fullname" . }}
   labels:
-    app: {{ template "transactionrequestservice.fullname" . }}
+    app.kubernetes.io/name: {{ include "transactionrequestsservice.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "transactionrequestsservice.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "transactionrequestservice.fullname" . }}
-        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-        release: {{ .Release.Name }}
-        heritage: {{ .Release.Service }}
+        app.kubernetes.io/name: {{ include "transactionrequestsservice.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     spec:
 {{- if .Values.global.config.affinity }}
       affinity:
@@ -28,16 +36,8 @@ spec:
 {{ toYaml .Values.global.config.tolerations | indent 8 }}
 {{- end }}
       {{- if .Values.init.enabled }}
-      initContainers:
-        {{- if eq .Values.config.db_type "mysql"}}
-        - name: {{ .Values.init.mysql.name }}
-          image: {{ .Values.init.mysql.repository }}:{{ .Values.init.mysql.tag }}
-          imagePullPolicy: {{ .Values.init.mysql.pullPolicy }}
-          command:
-            - sh
-            - "-c"
-            - {{ (.Values.init.mysql.command | replace "$db_user" (print .Values.config.db_user) | replace "$db_password" (print .Values.config.db_password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.config.db_database) | replace "$db_port" (print .Values.config.db_port) )| quote }}
-        {{- end }}
+      initContainers: {
+      }
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -64,18 +64,16 @@ spec:
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
-          env: 
+          env:
             - name: LOG_LEVEL
               value: {{ .Values.config.log_level }}
           volumeMounts:
-          - name: {{ template "transactionrequestservice.fullname" . }}-config-volume
+          - name: {{ template "transactionrequestsservice.fullname" . }}-config-volume
             mountPath: /opt/transaction-request-service/config
       volumes:
-        - name: {{ template "transactionrequestservice.fullname" . }}-config-volume
+        - name: {{ template "transactionrequestsservice.fullname" . }}-config-volume
           configMap:
-            name: {{ template "transactionrequestservice.fullname" . }}
+            name: {{ template "transactionrequestsservice.fullname" . }}-config
             items:
             - key: default.json
               path: default.json
-#            - key: knexfile.js
-#              path: knexfile.js

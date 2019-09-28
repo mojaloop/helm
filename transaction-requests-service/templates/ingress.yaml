@@ -1,16 +1,17 @@
 {{- if .Values.ingress.enabled -}}
-{{- $serviceName := include "transactionrequestservice.fullname" . -}}
+{{- $serviceName := include "transactionrequestsservice.fullname" . -}}
 {{- $servicePort := .Values.service.ports.api.externalPort -}}
 {{- $servicePath := .Values.ingress.externalPath -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ template "transactionrequestservice.fullname" . }}
+  name: {{ template "transactionrequestsservice.fullname" . }}
   labels:
-    app: {{ template "transactionrequestservice.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "transactionrequestsservice.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   annotations:
     {{- range $key, $value := .Values.ingress.annotations }}
       {{ $key }}: {{ $value | quote }}

@@ -95,6 +95,10 @@ echo "Packaging quoting-service..."
 helm package -u -d ./repo ./quoting-service
 checkCommandResult
 
+echo "Packaging transaction-requests-service..."
+helm package -u -d ./repo ./transaction-requests-service
+checkCommandResult
+
 echo "Updating bulk-centralledger..."
 helm package -u -d ./repo ./bulk-centralledger/
 checkCommandResult
