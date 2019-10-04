@@ -69,10 +69,6 @@ echo "Updating Central-Settlement..."
 helm dep up ./centralsettlement
 checkCommandResult
 
-echo "Updating interop-switch..."
-helm dep up ./interop-switch
-checkCommandResult
-
 echo "Updating ml-api-adapter..."
 helm dep up ./ml-api-adapter
 checkCommandResult
