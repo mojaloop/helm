@@ -3,10 +3,11 @@ kind: Service
 metadata:
   name: {{ template "ml-api-adapter-handler-notification.fullname" . }}
   labels:
-    app: {{ template "ml-api-adapter-handler-notification.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "ml-api-adapter-handler-notification.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -15,5 +16,5 @@ spec:
       protocol: TCP
       name: {{ .Values.service.name }}
   selector:
-    app: {{ template "ml-api-adapter-handler-notification.fullname" . }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ include "ml-api-adapter-handler-notification.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

@@ -8,8 +8,10 @@ const Config = require('/opt/central-ledger/src/lib/config')
 module.exports = {
     client: 'mysql',
     connection: Config.DATABASE_URI,
-    min: Config.DB_CONNECTION_POOL_MIN,
-    max: Config.DB_CONNECTION_POOL_MAX,
+    pool: {
+        min: Config.DB_CONNECTION_POOL_MIN,
+        max: Config.DB_CONNECTION_POOL_MAX
+    },
     migrations: {
         directory: migrationsDirectory,
         tableName: 'migration',

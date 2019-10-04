@@ -1,12 +1,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "simulators.fullname" . }}
+  name: {{ template "simulators.fullname" . }}-config
   labels:
-      app: {{ template "simulators.fullname" . }}
-      chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-      release: {{ .Release.Name }}
-      heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "simulators.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   LOG_LEVEL: {{ .Values.config.LOG_LEVEL | quote }}
   PARTIES_ENDPOINT: {{ (.Values.config.PARTIES_SERVICE_ENDPOINT | replace "$release_name" .Release.Name) }}

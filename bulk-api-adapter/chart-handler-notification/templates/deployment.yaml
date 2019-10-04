@@ -5,20 +5,25 @@ kind: Deployment
 metadata:
   name: {{ template "bulk-api-adapter-handler-notification.fullname" . }}
   labels:
-    app: {{ template "bulk-api-adapter-handler-notification.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-
+    app.kubernetes.io/name: {{ include "bulk-api-adapter-handler-notification.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "bulk-api-adapter-handler-notification.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "bulk-api-adapter-handler-notification.fullname" . }}
-        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-        release: {{ .Release.Name }}
-        heritage: {{ .Release.Service }}
+        app.kubernetes.io/name: {{ include "bulk-api-adapter-handler-notification.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
       {{- if .Values.metrics.enabled }}
       annotations:
         prometheus.io/port: "{{ .Values.service.internalPort }}"
@@ -83,7 +88,7 @@ spec:
       volumes:
         - name: {{ template "bulk-api-adapter-handler-notification.fullname" . }}-config-volume
           configMap:
-            name: {{ template "bulk-api-adapter-handler-notification.fullname" . }}
+            name: {{ template "bulk-api-adapter-handler-notification.fullname" . }}-config
             items:
             - key: default.json
               path: default.json

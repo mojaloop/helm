@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   repository: mojaloop/bulk-api-adapter
-  tag: v7.1.1-snapshot
+  tag: v8.1.0-snapshot
   command: '["node", "src/handlers/index.js", "handler", "--notification"]'
 ## Optionally specify an array of imagePullSecrets.
 ## Secrets must be manually created in the namespace.
@@ -63,6 +63,9 @@ config:
   # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
   kafka_host: '$release_name-kafka'
   kafka_port: 9092
+  mongodbUsername: mojaloop
+  mongodbPassword: password
+  mongodbDatabase: mlos
   central_services_host: '$release_name-centralledger-service'
   central_services_port: 80
   security:
@@ -71,7 +74,7 @@ config:
   log_level: 'info'
 
   ## MongoDB Configuration for Object Store
-  objstore_uri: 'mongodb://$release_name-centralledger-obj:27017/mlos'
+  objstore_uri: 'mongodb://$mongodbUsername:$mongodbPassword@$release_name-centralledger-obj:27017/$mongodbDatabase'
 
 service:
   type: ClusterIP
