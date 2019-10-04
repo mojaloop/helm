@@ -61,10 +61,6 @@ echo "Updating Central-End-User-Registry..."
 helm dep up ./centralenduserregistry
 checkCommandResult
 
-echo "Updating Central-Directory..."
-helm dep up ./centraldirectory
-checkCommandResult
-
 echo "Updating Central-Settlement..."
 helm dep up ./centralsettlement
 checkCommandResult
