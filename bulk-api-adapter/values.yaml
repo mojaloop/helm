@@ -25,7 +25,7 @@ bulk-api-adapter-service:
   replicaCount: 1
   image:
     repository: mojaloop/bulk-api-adapter
-    tag: v7.1.1-snapshot
+    tag: v8.1.0-snapshot
     command: '["node", "src/api/index.js"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -83,6 +83,9 @@ bulk-api-adapter-service:
   config:
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: '$release_name-kafka'
+    mongodbUsername: mojaloop
+    mongodbPassword: password
+    mongodbDatabase: mlos
     kafka_port: 9092
     central_services_host: '$release_name-centralledger-service'
     central_services_port: 80
@@ -92,7 +95,8 @@ bulk-api-adapter-service:
     log_level: 'info'
 
     ## MongoDB Configuration for Object Store
-    objstore_uri: 'mongodb://$release_name-centralledger-obj:27017/mlos'
+    objstore_uri: 'mongodb://$mongodbUsername:$mongodbPassword@$release_name-centralledger-obj:27017/$mongodbDatabase'
+    
 
   service:
     type: ClusterIP
@@ -135,7 +139,7 @@ bulk-api-adapter-handler-notification:
   replicaCount: 1
   image:
     repository: mojaloop/bulk-api-adapter
-    tag: v7.1.1-snapshot
+    tag: v8.1.0-snapshot
     command: '["node", "src/handlers/index.js", "handler", "--notification"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -165,7 +169,7 @@ bulk-api-adapter-handler-notification:
       repository: bitnami/mongodb
       tag: latest
       pullPolicy: Always
-      command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
+      objstore_uri: 'mongodb://$mongodbUsername:$mongodbPassword@$release_name-centralledger-obj:27017/$mongodbDatabase'
 
   readinessProbe:
     enabled: true
@@ -194,6 +198,9 @@ bulk-api-adapter-handler-notification:
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: '$release_name-kafka'
     kafka_port: 9092
+    mongodbUsername: mojaloop
+    mongodbPassword: password
+    mongodbDatabase: mlos
     central_services_host: '$release_name-centralledger-service'
     central_services_port: 80
     security:

@@ -6,9 +6,10 @@ metadata:
   name: {{ include "emailnotifier.fullname" . }}
   labels:
     app.kubernetes.io/name: {{ include "emailnotifier.name" . }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -20,6 +21,9 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "emailnotifier.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     spec:
     {{- if .Values.init.enabled }}
       initContainers:
@@ -68,7 +72,7 @@ spec:
       volumes:
         - name: {{ template "emailnotifier.fullname" . }}-config-volume
           configMap:
-            name: {{ template "emailnotifier.fullname" . }}
+            name: {{ template "emailnotifier.fullname" . }}-config
             items:
               - key: default.json
                 path: default.json

@@ -3,10 +3,11 @@ kind: Service
 metadata:
   name: {{ template "simulators.fullname" . }}
   labels:
-    app: {{ template "simulators.name" . }}
-    chart: {{ template "simulators.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "simulators.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -15,5 +16,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app: {{ template "simulators.name" . }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ include "simulators.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

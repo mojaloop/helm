@@ -6,16 +6,25 @@ kind: Deployment
 metadata:
   name: {{ template "centralledger-handler-bulk-transfer-prepare.fullname" . }}
   labels:
-    app: {{ template "centralledger-handler-bulk-transfer-prepare.fullname" . }}
+    app.kubernetes.io/name: {{ include "centralledger-handler-bulk-transfer-prepare.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "centralledger-handler-bulk-transfer-prepare.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "centralledger-handler-bulk-transfer-prepare.fullname" . }}
-        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-        release: {{ .Release.Name }}
-        heritage: {{ .Release.Service }}
+        app.kubernetes.io/name: {{ include "centralledger-handler-bulk-transfer-prepare.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
       {{- if .Values.metrics.enabled }}
       annotations:
         prometheus.io/port: "{{ .Values.containers.api.service.ports.api.internalPort }}"
@@ -113,7 +122,7 @@ spec:
       volumes:
         - name: {{ template "centralledger-handler-bulk-transfer-prepare.fullname" . }}-config-volume
           configMap:
-            name: {{ template "centralledger-handler-bulk-transfer-prepare.fullname" . }}
+            name: {{ template "centralledger-handler-bulk-transfer-prepare.fullname" . }}-config
             items:
             - key: default.json
               path: default.json

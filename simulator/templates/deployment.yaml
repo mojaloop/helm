@@ -3,21 +3,22 @@ kind: Deployment
 metadata:
   name: {{ template "simulators.fullname" . }}
   labels:
-    app: {{ template "simulators.name" . }}
-    chart: {{ template "simulators.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "simulators.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-#      app: {{ template "simulators.name" . }}
-      release: {{ .Release.Name }}
+      app.kubernetes.io/name: {{ include "simulators.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "simulators.name" . }}
-        release: {{ .Release.Name }}
+        app.kubernetes.io/name: {{ include "simulators.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
         {{- if .Values.metrics.enabled }}
@@ -55,67 +56,67 @@ spec:
             - name: LOG_LEVEL
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}
+                  name: {{ template "simulators.fullname" . }}-config
                   key: LOG_LEVEL
             - name: PARTIES_ENDPOINT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}
+                  name: {{ template "simulators.fullname" . }}-config
                   key: PARTIES_ENDPOINT
             - name: QUOTES_ENDPOINT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}
+                  name: {{ template "simulators.fullname" . }}-config
                   key: QUOTES_ENDPOINT
             - name: TRANSFERS_ENDPOINT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}
+                  name: {{ template "simulators.fullname" . }}-config
                   key: TRANSFERS_ENDPOINT
             - name: TRANSFERS_FULFIL_RESPONSE_DISABLED
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}
+                  name: {{ template "simulators.fullname" . }}-config
                   key: TRANSFERS_FULFIL_RESPONSE_DISABLED
             - name: TRANSFERS_FULFILMENT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}
+                  name: {{ template "simulators.fullname" . }}-config
                   key: TRANSFERS_FULFILMENT
             - name: TRANSFERS_CONDITION
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}
+                  name: {{ template "simulators.fullname" . }}-config
                   key: TRANSFERS_CONDITION
             - name: TRANSFERS_ILPPACKET
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}
+                  name: {{ template "simulators.fullname" . }}-config
                   key: TRANSFERS_ILPPACKET
             - name: MOCK_JWS_SIGNATURE
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}
+                  name: {{ template "simulators.fullname" . }}-config
                   key: MOCK_JWS_SIGNATURE
             - name: METRICS_DISABLED
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}
+                  name: {{ template "simulators.fullname" . }}-config
                   key: METRICS_DISABLED
             - name: METRICS_PREFIX
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}
+                  name: {{ template "simulators.fullname" . }}-config
                   key: METRICS_PREFIX
             - name: METRICS_TIMEOUT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}
+                  name: {{ template "simulators.fullname" . }}-config
                   key: METRICS_TIMEOUT
             - name: METRICS_SERVICENAME
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}
+                  name: {{ template "simulators.fullname" . }}-config
                   key: METRICS_SERVICENAME
           {{- if .Values.resources }}
           resources:
