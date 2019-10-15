@@ -1,0 +1,21 @@
+{{- $dbHost := (.Values.config.db_host | replace "$release_name" .Release.Name) }}
+{
+  "ALS_SERVICE_NAME": {{ template "als-oracle-pathfinder.fullname" . }}
+  "DB_USER": {{ .Values.config.db_user | quote }}
+  "DB_HOST": {{ $dbHost | quote }}
+  "DB_PORT": {{ default "3306" .Values.config.db_port | quote }}
+  "DB_NAME_CENTRAL_LEDGER": {{ .Values.config.db_database.central_ledger | quote }}
+  "DB_NAME_ACCOUNT_LOOKUP": {{ .Values.config.db_database.account_lookup | quote }}
+  "SERVER_PORT": {{ .Values.service.port | quote }}
+  "PATHFINDER_TLS_HOST": {{ .Values.config.pathfinder.host | quote }}
+  "PATHFINDER_TLS_PORT": {{ .Values.config.pathfinder.port | quote }}
+  "PATHFINDER_REJECT_UNAUTHORIZED": {{ (.Values.config.pathfinder.tls.rejectUnauthorized | quote) | default "true" }}
+  "PATHFINDER_QUERY_TIMEOUT_MS": {{ default "10000" .Values.config.pathfinder.queryTimeoutMs | quote }}
+  "PATHFINDER_MAX_QUERIES_PER_SECOND": {{ default "50" .Values.config.pathfinder.maxQueriesPerSecond | quote }}
+  "PATHFINDER_KEEPALIVE_INTERVAL_MS": {{ default "45000" .Values.config.pathfinder.keepAliveIntervalMs | quote }}
+  "PATHFINDER_TIMEOUT_MS": {{ default "5000" .Values.config.pathfinder.timeoutMs | quote }}
+  "PATHFINDER_CLIENT_KEY_FILEPATH": {{ .Values.config.pathfinder.tls.client_key_path | quote }}
+  "PATHFINDER_CLIENT_CERT_FILEPATH": {{ .Values.config.pathfinder.tls.client_cert_path | quote }}
+  "PATHFINDER_CERT_FILEPATH": {{ .Values.config.pathfinder.tls.root_cert_path | quote }}
+  "PATHFINDER_INTERMEDIATE_CHAIN": {{ .Values.config.pathfinder.tls.intermediate_cert_path | quote }}
+}
