@@ -80,21 +80,16 @@ spec:
               secretKeyRef:
                 name: {{ template "als-oracle-pathfinder.fullname" . }}
                 key: db.password
+        envFrom:
+          - configMapRef:
+              name: {{ template "als-oracle-pathfinder.fullname" . }}
         volumeMounts:
-        - name: {{ template "als-oracle-pathfinder.fullname" . }}-config-volume
-          mountPath: /opt/als-oracle-pathfinder/config
         - name: {{ template "als-oracle-pathfinder.fullname" . }}-secrets-volume
-          mountPath: /secrets
+          mountPath: /opt/als-oracle-pathfinder/secrets
           readOnly: true
       volumes:
-        - name: {{ template "als-oracle-pathfinder.fullname" . }}-config-volume
-          configMap:
-            name: {{ template "als-oracle-pathfinder.fullname" . }}-config
-            items:
-            - key: default.json
-              path: default.json
         - name: {{ template "als-oracle-pathfinder.fullname" . }}-secrets-volume
           secret:
-            secretName: {{ .Values.secret_name }}
+            secretName: {{ required "Must supply secret name for the TLS keys using value secret_name" .Values.secret_name }}
       imagePullSecrets:
         - name: {{ .Values.image.imagePullSecrets.name }}
