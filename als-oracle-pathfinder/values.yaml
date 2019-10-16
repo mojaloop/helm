@@ -18,12 +18,13 @@ global:
     tolerations: []
 
 # Declare variables to be passed into your templates.
-
 replicaCount: 1
 image:
   repository: mojaloop/als-oracle-pathfinder
   tag: v10.4.1
   pullPolicy: Always
+  imagePullSecrets:
+    name: dock-casa-secret
 
 readinessProbe:
   enabled: true
@@ -67,7 +68,7 @@ config:
       intermediate_cert_path: 'secrets/pathfinder_intermediate_cert.pem'
 
 init:
-  enabled: true
+  enabled: false
   mysql:
     name: wait-for-mysql
     repository: mysql
@@ -77,8 +78,8 @@ init:
 
 service:
   type: ClusterIP
-  externalPort: 80
-  internalPort: 3002
+  name: http-api
+  port: 80
 
   annotations: {}
 
@@ -93,7 +94,7 @@ service:
     ports:
       provisioning: 
         name: http-api
-        externalPort: 3001
+        externalPort: 3000
 
 ingress:
   enabled: false

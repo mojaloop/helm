@@ -15,12 +15,10 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    {{- range $port := .Values.service.ports }}
-    - port: {{ $port.externalPort }}
-      targetPort: {{ $port.internalPort }}
+    - port: {{ .Values.service.port }}
+      targetPort: http
       protocol: TCP
-      name: {{ $port.name }}
-    {{- end }}
+      name: {{ .Values.service.name }}
 {{- if not .Values.service.external.enabled }}
   selector:
     app.kubernetes.io/name: {{ include "als-oracle-pathfinder.name" . }}
