@@ -1,5 +1,6 @@
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
 {{- $objStoreUri := ( .Values.config.objstore_uri | replace "$release_name" .Release.Name ) -}}
+{{- $dbDeployHost := (.Values.config.db_host | replace "$release_name" .Release.Name) }}
 {
     "PORT": {{ .Values.containers.api.service.ports.api.internalPort }},
     "HOSTNAME": "{{ .Values.ingress.hosts.api }}",
@@ -20,7 +21,7 @@
     },
     "DATABASE": {
         "DIALECT": {{ .Values.config.db_driver }},
-        "HOST": {{ .Values.config.db_host }},
+        "HOST": {{ $dbDeployHost }},
         "PORT": {{ .Values.config.db_port }},
         "USER": {{ .Values.config.db_user }},
         "PASSWORD": {{ .Values.config.db_password }},
