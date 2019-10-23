@@ -3,7 +3,23 @@
 {
     "PORT": {{ .Values.service.ports.api.internalPort }},
     "HOSTNAME": "http://central-settlements.local",
-    "DATABASE_URI": "{{ .Values.config.db_type }}://{{ .Values.config.db_user }}:{{ .Values.config.db_password }}@{{ $dbDeployHost }}:{{ .Values.config.db_port }}/{{ .Values.config.db_database }}", 
+    "DATABASE": {
+      "DIALECT": "{{ .Values.config.db_driver }}",
+      "HOST": "{{ $dbDeployHost }}",
+      "PORT": {{ .Values.config.db_port }},
+      "USER": "{{ .Values.config.db_user }}",
+      "PASSWORD": "{{ .Values.config.db_password }}",
+      "SCHEMA": "{{ .Values.config.db_database }}",
+      "POOL_MIN_SIZE": {{ .Values.config.db_connection_pool_min }},
+      "POOL_MAX_SIZE": {{ .Values.config.db_connection_pool_max }},
+      "ACQUIRE_TIMEOUT_MILLIS": {{ .Values.config.db_acquire_timeout_millis }},
+      "CREATE_TIMEOUT_MILLIS": {{ .Values.config.db_create_timeout_millis }},
+      "DESTROY_TIMEOUT_MILLIS": {{ .Values.config.db_destroy_timeout_millis }},
+      "IDLE_TIMEOUT_MILLIS": {{ .Values.config.db_idle_timeout_millis }},
+      "REAP_INTERVAL_MILLIS": {{ .Values.config.db_reap_interval_millis }},
+      "CREATE_RETRY_INTERVAL_MILLIS": {{ .Values.config.db_create_retry_interval_millis }},
+      "DEBUG": {{ .Values.config.db_debug }}
+    },
     "TRANSFER_VALIDITY_SECONDS": "432000",
     "HUB_PARTICIPANT": {
         "ID": {{ .Values.config.hub_participant.id }},
