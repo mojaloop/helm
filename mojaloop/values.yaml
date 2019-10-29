@@ -3234,6 +3234,96 @@ quoting-service:
     #  cpu: 100m
     #  memory: 128Mi
 
+transaction-requests-service:
+  # Declare variables to be passed into your templates.
+  replicaCount: 1
+  image:
+    repository: mojaloop/transaction-requests-service
+    tag: v8.3.0-snapshot
+    pullPolicy: Always
+
+  readinessProbe:
+    enabled: false
+    httpGet:
+      path: /health
+    initialDelaySeconds: 60
+    periodSeconds: 15
+
+  livenessProbe:
+    enabled: false
+    httpGet:
+      path: /health
+    initialDelaySeconds: 60
+    periodSeconds: 15
+
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: false
+    config:
+      timeout: 5000
+      prefix: moja_
+      defaultLabels:
+        serviceName: transaction-requests
+
+  config:
+    central_services_host: '$release_name-centralledger-service'
+    central_services_port: 80
+    log_level: 'info'
+
+  init:
+    enabled: false
+
+  service:
+    type: ClusterIP
+    ports:
+      api:
+        name: http-api
+        externalPort: 80
+        internalPort: 3002
+
+    annotations: {}
+
+    # This allows one to point the service to an external backend.
+    # This is useful for local development where one wishes to hijack
+    # the communication from the service to the node layer and point
+    # to a specific endpoint (IP, Port, etc).
+    external:
+      enabled: false
+      # 10.0.2.2 is the magic IP for the host on virtualbox's network
+      ip: 10.0.2.2
+      ports:
+        api:
+          name: http-api
+          externalPort: 3002
+
+  ingress:
+    enabled: true
+    externalPath: /
+    # Used to create an Ingress record.
+    hosts:
+      api: transaction-request-service.local
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: '/'
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    tls:
+    # Secrets must be manually created in the namespace.
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
 simulator:
   # Default values for simulators.
   # This is a YAML-formatted file.
