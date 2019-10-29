@@ -41,6 +41,10 @@ echo "Updating Account Lookup Service..."
 helm dep up ./account-lookup-service
 checkCommandResult
 
+echo "Updating ALS Oracle Pathfinder..."
+helm dep up ./als-oracle-pathfinder
+checkCommandResult
+
 echo "Updating Central-KMS..."
 helm dep up ./centralkms
 checkCommandResult

@@ -39,6 +39,10 @@ echo "Packaging Account Lookup Service..."
 helm package -u -d ./repo  ./account-lookup-service
 checkCommandResult
 
+echo "Packaging ALS Oracle Pathfinder..."
+helm package -u -d ./repo  ./als-oracle-pathfinder
+checkCommandResult
+
 echo "Packaging Central-KMS..."
 helm package -u -d ./repo ./centralkms
 checkCommandResult
