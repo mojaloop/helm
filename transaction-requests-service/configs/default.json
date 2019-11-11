@@ -1,0 +1,26 @@
+{{- $centralServicesHost := ( .Values.config.central_services_host | replace "$release_name" .Release.Name ) -}}
+{
+  "PORT": {{ .Values.service.ports.api.internalPort }},
+  "ENDPOINT_CACHE_CONFIG": {
+    "expiresIn": 180000,
+    "generateTimeout": 30000
+  },
+  "SWITCH_ENDPOINT": "http://{{ $centralServicesHost }}:{{ .Values.config.central_services_port }}",
+  "INSTRUMENTATION": {
+  "METRICS": {
+    "DISABLED": {{ not .Values.metrics.enabled }},
+    "labels": {
+      "eventId": "*"
+    },
+    "config": {
+      "timeout": {{ .Values.metrics.config.timeout }},
+      "prefix": {{ .Values.metrics.config.prefix | quote }},
+      "defaultLabels": {
+      {{- range $key, $value := .Values.metrics.config.defaultLabels }}
+      {{ $key  | quote }}: {{ $value | quote }}
+      {{- end }}
+      }
+    }
+  }
+  }
+}
