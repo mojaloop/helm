@@ -37,6 +37,10 @@ echo "Linting Account Lookup Service..."
 helm lint ./account-lookup-service
 checkCommandResult
 
+echo "Linting ALS Oracle Pathfinder..."
+helm lint ./als-oracle-pathfinder
+checkCommandResult
+
 echo "Linting Central-KMS..."
 helm lint ./centralkms
 checkCommandResult
@@ -75,6 +79,10 @@ checkCommandResult
 
 echo "Linting quoting-service..."
 helm lint ./quoting-service
+checkCommandResult
+
+echo "Linting transaction-requests-service..."
+helm lint ./transaction-requests-service
 checkCommandResult
 
 echo "Linting Email Notifier..."

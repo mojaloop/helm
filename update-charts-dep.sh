@@ -41,6 +41,10 @@ echo "Updating Account Lookup Service..."
 helm dep up ./account-lookup-service
 checkCommandResult
 
+echo "Updating ALS Oracle Pathfinder..."
+helm dep up ./als-oracle-pathfinder
+checkCommandResult
+
 echo "Updating Central-KMS..."
 helm dep up ./centralkms
 checkCommandResult
@@ -71,6 +75,10 @@ checkCommandResult
 
 echo "Updating quoting-service..."
 helm dep up ./quoting-service
+checkCommandResult
+
+echo "Updating transaction-request-service..."
+helm dep up ./transaction-requests-service
 checkCommandResult
 
 echo "Updating Email Notifier..."

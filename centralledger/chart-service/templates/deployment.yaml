@@ -69,10 +69,11 @@ spec:
             - "-c"
             - {{ .Values.init.migration.command }}
           env:
-            - name: "CLEDG_DATABASE_URI"
-              value: "{{ .Values.config.db_type }}://{{ .Values.config.db_user }}:{{ .Values.config.db_password }}@{{ (default .Values.config.db_host $dbHost) }}:{{ .Values.config.db_port }}/{{ .Values.config.db_database }}"
             - name: "CLEDG_MIGRATIONS__RUN_DATA_MIGRATIONS"
               value: {{ .Values.init.migration.config.run_data_migration | quote }}
+          volumeMounts:
+            - name: {{ template "centralledger-service.fullname" . }}-config-volume
+              mountPath: /opt/central-ledger/config
         {{- end }}
       {{- end }}
       containers:
@@ -102,11 +103,6 @@ spec:
             periodSeconds: {{ .Values.containers.api.livenessProbe.periodSeconds }}
           {{- end }}
           env:
-            - name: CLEDG_DATABASE_URI
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "centralledger-service.fullname" . }}
-                  key: db.uri
             - name: LOG_LEVEL
               value: {{ .Values.config.log_level }}
             {{- if .Values.sidecar.enabled }}
