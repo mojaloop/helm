@@ -2,6 +2,8 @@
 {{- $efkHost := ( .Values.config.efk_host | replace "$release_name" .Release.Name ) -}}
 {{- $apmHost := ( .Values.config.apm_host | replace "$release_name" .Release.Name ) -}}
 {
+    "CACHE": {{ .Values.config.cache | toPrettyJson }},
+    "SPAN": {{ .Values.config.span | toPrettyJson }},
     "efk": {
         "host": "{{ (default .Values.config.fluentd_host $efkHost) }}",
         "port": {{ .Values.config.fluentd_port }},
