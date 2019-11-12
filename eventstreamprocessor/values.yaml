@@ -22,7 +22,7 @@ global:
 replicaCount: 1
 image:
   repository: mojaloop/event-stream-processor
-  tag: v8.1.0-snapshot
+  tag: v8.4.2-snapshot
   pullPolicy: Always
 
 init:
@@ -110,10 +110,10 @@ config:
   PORT: 3082
   ## Kafka Configuration
   # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-#  kafka_host: '$release_name-kafka'
+  # kafka_host: '$release_name-kafka'
   kafka_host: localhost
   kafka_port: 9092
-#  fluentd_host: '$release_name-fluentd-elasticsearch-tcp-ingest'
+  # fluentd_host: '$release_name-fluentd-elasticsearch-tcp-ingest'
   fluentd_host: efk-fluentd-elasticsearch-tcp-ingest.logging
   fluentd_port: 24224
   fluentd_namespace: logstash
@@ -121,11 +121,39 @@ config:
   efk_log: trace
   efk_index_name: mojaloop
   efk_index_template: '{{index}}-{{date}}'
-#  apm_host: '$release_name-apm-server'
+  # apm_host: '$release_name-apm-server'
   apm_host: efk-apm-server.logging
   apm_port: 8200
   apm_service_name: event-stream-processor
+  # master span cache config
+  cache:
+    ttl: 300000
+    segment: trace
+    expectSpanTimeout: 2000
+  # master span criteria config
+  span:
+    START_CRITERIA:
+      transfer:
+      - prepare:
+          service: ml_transfer_prepare
+      - fulfil:
+          service: ml_transfer_fulfil
+      - abort:
+          service: ml_transfer_abort
+    END_CRITERIA:
+      transfer:
+      - fulfil:
+          service: ml_notification_event
+      - abort:
+          service: ml_notification_event
+      - prepare:
+          service: ml_notification_event
+          isError: true
+      exceptionList:
+      - cl_transfer_timeout
+  # log level config
   log_level: debug
+
 
 # kafka:
 #   enabled: true
