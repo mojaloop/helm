@@ -140,6 +140,8 @@ config:
           service: ml_transfer_fulfil
       - abort:
           service: ml_transfer_abort
+      - timeout-received:
+          service: cl_transfer_timeout
     END_CRITERIA:
       transfer:
       - fulfil:
@@ -149,8 +151,9 @@ config:
       - prepare:
           service: ml_notification_event
           isError: true
-      exceptionList:
-      - cl_transfer_timeout
+      - timeout-received:
+          service: ml_notification_event
+      exceptionList: []
   # log level config
   log_level: debug
 
