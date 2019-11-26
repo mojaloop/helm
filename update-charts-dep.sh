@@ -77,6 +77,10 @@ echo "Updating quoting-service..."
 helm dep up ./quoting-service
 checkCommandResult
 
+echo "Updating finance-portal-ui..."
+helm dep up ./finance-portal-ui
+checkCommandResult
+
 echo "Updating transaction-request-service..."
 helm dep up ./transaction-requests-service
 checkCommandResult
