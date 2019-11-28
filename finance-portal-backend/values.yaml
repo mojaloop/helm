@@ -1,0 +1,75 @@
+# Default values for finance-portal-backend
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: aaronreynoza/finance-portal-backend
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 3000
+
+init:
+  image: example/populate-auth
+  pullPolicy: Always
+
+db:
+  protocol: 'mysql'
+  host: '$release_name-centralledger-mysql'
+  port: '3306'
+  user: 'central_ledger'
+  password: 'oyMxgZChuu'
+  schema: 'central_ledger'
+
+env: 'dev' # env used to determine the deployment env, used for deciding the JWS keys
+
+secretsMountPoint: '/secrets'
+
+imageCredentials:
+  name: pull-secrets
+
+config:
+  settlementsEndpoint: 'centralsettlement:3007/v1'
+  centralLedgerEndpoint: 'centralledger-service:3001'
+  settlementManagementEndpoint: 'casa-settlement-management'
+  settlementManagementPort: '5000'
+  isOauthEnabled: false
+  oauthServer: 'https://localhost'
+  oauthPort: '9443'
+  oauthLoginPath: '/oauth2/token'
+  oauthTokenValidationPath: '/oauth2/introspect'
+  oauthUserInfo: '/oauth2/userinfo'
+  oauthTokenRevoke: '/oauth2/revoke'
+  oauthClientKey: 'testkey'
+  oauthClientSecret: 'testsecret'
+  BypassAuth: 'true'
+  InsecureCookie: 'false'
+  is_populate:
+    http:
+      endpoint: 'scim2'
+      timeout: 60000
+    authentication:
+      type: 'basic'
+      credentials:
+        username: 'admin'
+        password: 'admin'
+  jasperUser: 'user'
+  jasperPassword: 'password'
+
+ingress:
+  enabled: true
+  externalPath: /api
+  # Used to create an Ingress record.
+  hosts:
+    api: finance-portal-backend.local
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: '/'
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  tls:
+    # Secrets must be manually created in the namespace.
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local

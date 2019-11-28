@@ -91,6 +91,10 @@ echo "Packaging finance-portal-ui..."
 helm package -u -d ./repo ./finance-portal-ui
 checkCommandResult
 
+echo "Packaging finance-portal-backend..."
+helm package -u -d ./repo ./finance-portal-backend
+checkCommandResult
+
 echo "Packaging transaction-requests-service..."
 helm package -u -d ./repo ./transaction-requests-service
 checkCommandResult

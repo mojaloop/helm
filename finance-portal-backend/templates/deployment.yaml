@@ -1,0 +1,63 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "finance-portal-backend.fullname" . }}
+  labels:
+    app: {{ template "finance-portal-backend.name" . }}
+    chart: {{ template "finance-portal-backend.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "finance-portal-backend.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "finance-portal-backend.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      {{ if .Values.config.isOauthEnabled }}
+      initContainers:
+        - name: init
+          image: {{ .Values.init.image }}
+          imagePullPolicy: {{ .Values.init.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: wso2is-populate
+            - secretRef:
+                name: {{ template "finance-portal-backend.fullname" . }}
+      {{ end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+        envFrom:
+          - configMapRef:
+              name: {{ template "finance-portal-backend.fullname" . }}
+          - secretRef:
+              name: {{ template "finance-portal-backend.fullname" . }}
+        volumeMounts:
+          - name: {{ template "finance-portal-backend.fullname" . }}-volume
+            mountPath: {{ .Values.secretsMountPoint }}
+        resources:
+      volumes:
+        - name: {{ template "finance-portal-backend.fullname" . }}-volume
+
+      {{ if .Values.config.isOauthEnabled }}
+      imagePullSecrets:
+      - name: {{ .Values.imageCredentials.name }}
+      {{ end }}
