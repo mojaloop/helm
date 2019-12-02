@@ -110,7 +110,6 @@ jobs:
       - run:
           name: Run the license-scanner
           command: |
-            # TODO: get the list of docker images from the helm charts
             source $BASH_ENV
             env | grep docker
             cd /tmp/license-scanner && make run 
@@ -119,6 +118,15 @@ jobs:
           command: |
             node --version
             cd /tmp/license-scanner && make postprocess
+      - run:
+          name: If this is a release, upload the license-scanner file to the github release
+          command: |
+            if [ "${CIRCLE_TAG}" = "" ]; then
+              exit 0
+            fi
+            mv /tmp/license-scanner/results/license-summary.xlsx ./license-summary-${CIRCLE_TAG}.xlsx
+            .circleci/upload-github-release-asset.sh github_api_token=$GITHUB_TOKEN owner=mojaloop repo=helm tag=${CIRCLE_TAG} filename=license-summary-${CIRCLE_TAG}.xlsx
+
       - store_artifacts:
           path: /tmp/license-scanner/results
           prefix: licenses
