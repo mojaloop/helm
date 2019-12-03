@@ -1,0 +1,67 @@
+{{- if .Values.operatorSettlement.ingress.enabled -}}
+{{- $serviceName := include "settlement.fullname" . -}}
+{{- $operatorSettlementPort := .Values.operatorSettlement.service.port -}}
+{{- $operatorSettlementPath := .Values.operatorSettlement.ingress.externalPath -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "settlement.fullname" . }}
+  labels:
+    app: {{ template "settlement.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- range $key, $value := .Values.operatorSettlement.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  rules:
+    {{- range $host := .Values.operatorSettlement.ingress.hosts }}
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: {{ $operatorSettlementPath }}
+            backend:
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $operatorSettlementPort }}
+    {{- end -}}
+  {{- if .Values.operatorSettlement.ingress.tls }}
+  tls:
+    {{ toYaml .Values.operatorSettlement.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}
+{{- if .Values.settlementManagement.ingress.enabled -}}
+{{- $serviceName := include "settlement.fullname" . -}}
+{{- $settlementManagementPort := .Values.settlementManagement.service.port -}}
+{{- $settlementManagementPath := .Values.settlementManagement.ingress.externalPath -}}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "settlement.fullname" . }}
+  labels:
+    app: {{ template "settlement.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- range $key, $value := .Values.settlementManagement.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+      {{- end }}
+spec:
+  rules:
+    {{- range $host := .Values.settlementManagement.ingress.hosts }}
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: {{ $settlementManagementPath }}
+            backend:
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $settlementManagementPort }}
+    {{- end -}}
+  {{- if .Values.settlementManagement.ingress.tls }}
+  tls:
+    {{ toYaml .Values.settlementManagement.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}
