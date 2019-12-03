@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "finance-portal.fullname" . }}
+  labels:
+    app: {{ template "finance-portal.name" . }}
+    chart: {{ template "finance-portal.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.backendPort }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: {{ .Values.service.frontendPort }}
+      targetPort: http
+      protocol: TCP
+      name: http-1
+  selector:
+    app: {{ template "finance-portal.name" . }}
+    release: {{ .Release.Name }}

@@ -87,12 +87,8 @@ echo "Packaging quoting-service..."
 helm package -u -d ./repo ./quoting-service
 checkCommandResult
 
-echo "Packaging finance-portal-ui..."
-helm package -u -d ./repo ./finance-portal-ui
-checkCommandResult
-
-echo "Packaging finance-portal-backend..."
-helm package -u -d ./repo ./finance-portal-backend
+echo "Packaging finance-portal..."
+helm package -u -d ./repo ./finance-portal
 checkCommandResult
 
 echo "Packaging transaction-requests-service..."

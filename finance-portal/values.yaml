@@ -1,15 +1,25 @@
-# Default values for finance-portal-backend
+# Default values for finance-portal
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-image:
+backendImage:
   repository: aaronreynoza/finance-portal-backend
-  tag: log
+  tag: log-1
+  pullPolicy: Always
+
+frontendImage:
+  repository: aaronreynoza/finance-portal-ui
+  tag: latest
   pullPolicy: Always
 
 service:
   type: ClusterIP
-  port: 3000
+  frontendPort: 80
+  backendPort: 3000
+
+imageCredentials:
+  enabled: false
+  name: pull-secrets
 
 init:
   image: example/populate-auth
@@ -26,9 +36,6 @@ db:
 env: 'dev' # env used to determine the deployment env, used for deciding the JWS keys
 
 secretsMountPoint: '/secrets'
-
-imageCredentials:
-  name: pull-secrets
 
 config:
   settlementsEndpoint: 'centralsettlement:3007/v1'
@@ -63,7 +70,7 @@ ingress:
   externalPath: /api
   # Used to create an Ingress record.
   hosts:
-    api: finance-portal-backend.local
+    api: finance-portal.local
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: '/'
     # kubernetes.io/ingress.class: nginx

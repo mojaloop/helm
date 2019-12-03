@@ -1,13 +1,13 @@
 {{- if .Values.ingress.enabled -}}
-{{- $serviceName := include "finance-portal-backend.fullname" . -}}
-{{- $servicePort := .Values.service.port -}}
 {{- $servicePath := .Values.ingress.externalPath -}}
+{{- $backendPort := .Values.service.backendPort -}}
+{{- $frontendPort := .Values.service.frontendPort -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ template "finance-portal-backend.fullname" . }}
+  name: finance-portal
   labels:
-    app: {{ template "finance-portal-backend.fullname" . }}
+    app: finance-portal
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -21,10 +21,14 @@ spec:
     - host: {{ $host }}
       http:
         paths:
-          - path: {{ $servicePath }}
+          - path: {{ $servicePath }}-backend
             backend:
-              serviceName: {{ $serviceName }}
-              servicePort: {{ $servicePort }}
+              serviceName: finance-portal-backend
+              servicePort: {{ $backendPort }}
+          - path: {{ $servicePath }}-ui
+            backend:
+              serviceName: finance-portal-ui
+              servicePort: {{ $frontendPort }}
     {{- end -}}
   {{- if .Values.ingress.tls }}
   tls:

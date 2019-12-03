@@ -81,12 +81,8 @@ echo "Linting quoting-service..."
 helm lint ./quoting-service
 checkCommandResult
 
-echo "Linting finance-portal-ui..."
-helm lint ./finance-portal-ui
-checkCommandResult
-
-echo "Packaging finance-portal-backend..."
-helm package -u -d ./repo ./finance-portal-backend
+echo "Packaging finance-portal..."
+helm package -u -d ./repo ./finance-portal
 checkCommandResult
 
 echo "Linting transaction-requests-service..."
