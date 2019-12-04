@@ -113,6 +113,10 @@ echo "Updating Mojaloop Bulk..."
 helm dep up ./mojaloop-bulk
 checkCommandResult
 
+echo "Updating settlement..."
+helm dep up ./settlement
+checkCommandResult
+
 echo "Updating Mojaloop..."
 helm dep up ./mojaloop
 checkCommandResult
