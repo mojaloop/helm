@@ -1,0 +1,83 @@
+{{- $dbHost := ( .Values.db.host | replace "$release_name" .Release.Name ) -}}
+
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "settlement.fullname" . }}
+  labels:
+    app: {{ template "settlement.name" . }}
+    chart: {{ template "settlement.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "settlement.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "settlement.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      initContainers:
+        {{- if .Values.operatorSettlement.init.enabled }}
+        - name: operator-settlement-init
+          image: {{ .Values.operatorSettlement.init.image.repository }}
+          imagePullPolicy: {{ .Values.operatorSettlement.init.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.operatorSettlement.init.command | replace "$db_user" (print .Values.db.user) | replace "$db_password" (print .Values.db.password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.db.schema) | replace "$db_port" (print .Values.db.port) )| quote }}
+        {{- end }}
+        {{- if .Values.settlementManagement.init.enabled }}
+        - name: settlement-management-init
+          image: {{ .Values.settlementManagement.init.image.repository }}
+          imagePullPolicy: {{ .Values.settlementManagement.init.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.settlementManagement.init.command | replace "$db_user" (print .Values.db.user) | replace "$db_password" (print .Values.db.password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.db.schema) | replace "$db_port" (print .Values.db.port) )| quote }}
+        {{- end }}
+      containers:
+      - name: operator-settlement
+        image: "{{ .Values.operatorSettlement.image.repository }}:{{ .Values.operatorSettlement.image.tag }}"
+        imagePullPolicy: {{ .Values.operatorSettlement.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+        envFrom:
+          - secretRef:
+              name: {{ template "settlement.fullname" . }}
+        resources:
+      - name: settlement-management
+        image: "{{ .Values.settlementManagement.image.repository }}:{{ .Values.settlementManagement.image.tag }}"
+        imagePullPolicy: {{ .Values.settlementManagement.image.pullPolicy }}
+        ports:
+          - name: http
+            containerPort: 5000
+            protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+        envFrom:
+          - configMapRef:
+              name: {{ template "settlement.fullname" . }}
+          - secretRef:
+              name: {{ template "settlement.fullname" . }}
+      imagePullSecrets:
+        - name: {{ .Values.imageCredentials.name }}

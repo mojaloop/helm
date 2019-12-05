@@ -1,37 +1,67 @@
-{{- if .Values.ingress.enabled -}}
-{{- $servicePath := .Values.ingress.externalPath -}}
-{{- $backendPort := .Values.service.backendPort -}}
-{{- $frontendPort := .Values.service.frontendPort -}}
+{{- if .Values.backend.ingress.enabled -}}
+{{- $serviceName := include "finance-portal.fullname" . -}}
+{{- $backendPort := .Values.backend.image.port -}}
+{{- $backendPath := .Values.backend.ingress.externalPath -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: finance-portal
+  name: {{ template "finance-portal.fullname" . }}
   labels:
-    app: finance-portal
+    app: {{ template "finance-portal.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   annotations:
-    {{- range $key, $value := .Values.ingress.annotations }}
+    {{- range $key, $value := .Values.backend.ingress.annotations }}
       {{ $key }}: {{ $value | quote }}
     {{- end }}
 spec:
   rules:
-    {{- range $host := .Values.ingress.hosts }}
+    {{- range $host := .Values.backend.ingress.hosts }}
     - host: {{ $host }}
       http:
         paths:
-          - path: {{ $servicePath }}-backend
+          - path: {{ $backendPath }}
             backend:
-              serviceName: finance-portal-backend
+              serviceName: {{ $serviceName }}
               servicePort: {{ $backendPort }}
-          - path: {{ $servicePath }}-ui
+    {{- end -}}
+  {{- if .Values.backend.ingress.tls }}
+  tls:
+    {{ toYaml .Values.backend.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}
+{{- if .Values.frontend.ingress.enabled -}}
+{{- $serviceName := include "finance-portal.fullname" . -}}
+{{- $frontendPort := .Values.frontend.image.port -}}
+{{- $frontendPath := .Values.frontend.ingress.externalPath -}}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "finance-portal.fullname" . }}
+  labels:
+    app: {{ template "finance-portal.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- range $key, $value := .Values.frontend.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+      {{- end }}
+spec:
+  rules:
+    {{- range $host := .Values.frontend.ingress.hosts }}
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: {{ $frontendPath }}
             backend:
-              serviceName: finance-portal-ui
+              serviceName: {{ $serviceName }}
               servicePort: {{ $frontendPort }}
     {{- end -}}
-  {{- if .Values.ingress.tls }}
+  {{- if .Values.frontend.ingress.tls }}
   tls:
-    {{ toYaml .Values.ingress.tls | indent 4 }}
+    {{ toYaml .Values.frontend.ingress.tls | indent 4 }}
   {{- end -}}
 {{- end -}}

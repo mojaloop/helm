@@ -1,3 +1,4 @@
+{{- $dbHost := ( .Values.db.host | replace "$release_name" .Release.Name ) -}}
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
@@ -18,21 +19,21 @@ spec:
         app: {{ template "finance-portal.name" . }}
         release: {{ .Release.Name }}
     spec:
-      {{ if .Values.config.isOauthEnabled }}
       initContainers:
-        - name: init
-          image: {{ .Values.init.image }}
-          imagePullPolicy: {{ .Values.init.pullPolicy }}
+        {{- if .Values.backend.init.enabled }}
+        - name: finance-portal-backend-init
+          image: {{ .Values.backend.init.image.repository }}
+          imagePullPolicy: {{ .Values.backend.init.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: secret-stuff
+                name: {{ .Values.config.is_populate.name }}
             - secretRef:
                 name: {{ template "finance-portal.fullname" . }}
-      {{ end }}
+        {{- end }}
       containers:
-      - name: {{ .Chart.Name }}-backend
-        image: "{{ .Values.backendImage.repository }}:{{ .Values.backendImage.tag }}"
-        imagePullPolicy: {{ .Values.backendImage.pullPolicy }}
+      - name: backend
+        image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+        imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
         ports:
         - name: http
           containerPort: 3000
@@ -50,17 +51,14 @@ spec:
               name: {{ template "finance-portal.fullname" . }}
           - secretRef:
               name: {{ template "finance-portal.fullname" . }}
-        volumeMounts:
-          - name: {{ template "finance-portal.fullname" . }}-volume
-            mountPath: {{ .Values.secretsMountPoint }}
         resources:
-      - name: {{ .Chart.Name }}-ui
-        image: "{{ .Values.frontendImage.repository }}:{{ .Values.frontendImage.tag }}"
-        imagePullPolicy: {{ .Values.frontendImage.pullPolicy }}
+      - name: frontend
+        image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+        imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
         ports:
-        - name: http
-          containerPort: 80
-          protocol: TCP
+          - name: http
+            containerPort: 80
+            protocol: TCP
         livenessProbe:
           httpGet:
             path: /
@@ -69,10 +67,10 @@ spec:
           httpGet:
             path: /
             port: http
-      volumes:
-        - name: {{ template "finance-portal.fullname" . }}-volume
-
-      {{ if .Values.config.isOauthEnabled }}
+        envFrom:
+          - configMapRef:
+              name: {{ template "finance-portal.fullname" . }}
+          - secretRef:
+              name: {{ template "finance-portal.fullname" . }}
       imagePullSecrets:
-      - name: {{ .Values.imageCredentials.name }}
-      {{ end }}
+        - name: {{ .Values.imageCredentials.name }}

@@ -1,82 +1,78 @@
-# Default values for finance-portal
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
-backendImage:
-  repository: aaronreynoza/finance-portal-backend
-  tag: log-1
-  pullPolicy: Always
-
-frontendImage:
-  repository: aaronreynoza/finance-portal-ui
-  tag: latest
-  pullPolicy: Always
-
 service:
-  type: ClusterIP
-  frontendPort: 80
-  backendPort: 3000
+    type: ClusterIP
 
 imageCredentials:
-  enabled: false
-  name: pull-secrets
-
-init:
-  image: example/populate-auth
-  pullPolicy: Always
+    enabled: false
+    name: pull-secrets
 
 db:
-  protocol: 'mysql'
-  host: '$release_name-centralledger-mysql'
-  port: '3306'
-  user: 'central_ledger'
-  password: 'oyMxgZChuu'
-  schema: 'central_ledger'
-
-env: 'dev' # env used to determine the deployment env, used for deciding the JWS keys
-
-secretsMountPoint: '/secrets'
+    protocol: 'mysql'
+    host: '$release_name-centralledger-mysql'
+    port: '3306'
+    user: 'central_ledger'
+    password: 'oyMxgZChuu'
+    schema: 'central_ledger'
 
 config:
-  settlementsEndpoint: 'centralsettlement:3007/v1'
-  centralLedgerEndpoint: 'centralledger-service:3001'
-  settlementManagementEndpoint: 'casa-settlement-management'
-  settlementManagementPort: '5000'
-  isOauthEnabled: false
-  oauthServer: 'https://localhost'
-  oauthPort: '9443'
-  oauthLoginPath: '/oauth2/token'
-  oauthTokenValidationPath: '/oauth2/introspect'
-  oauthUserInfo: '/oauth2/userinfo'
-  oauthTokenRevoke: '/oauth2/revoke'
-  oauthClientKey: 'testkey'
-  oauthClientSecret: 'testsecret'
-  BypassAuth: 'true'
-  InsecureCookie: 'false'
-  is_populate:
-    http:
-      endpoint: 'scim2'
-      timeout: 60000
-    authentication:
-      type: 'basic'
-      credentials:
-        username: 'admin'
-        password: 'admin'
-  jasperUser: 'user'
-  jasperPassword: 'password'
+    settlementsEndpoint: 'centralsettlement:3007/v1'
+    centralLedgerEndpoint: 'centralledger-service:3001'
+    settlementManagementEndpoint: 'settlement'
+    settlementManagementPort: '5000'
+    isOauthEnabled: false
+    oauthServer: 'https://localhost'
+    oauthPort: 9443
+    oauthLoginPath: '/oauth2/token'
+    oauthTokenValidationPath: '/oauth2/introspect'
+    oauthUserInfo: '/oauth2/userinfo'
+    oauthTokenRevoke: '/oauth2/revoke'
+    oauthClientKey: 'testkey'
+    oauthClientSecret: 'testsecret'
+    BypassAuth: 'true'
+    InsecureCookie: 'false'
+    is_populate:
+      name: ispopulate
+      http:
+        endpoint: 'something'
+        timeout: 30000
+      authentication:
+        type: 'basic'
+        credentials:
+          username: 'admin'
+          password: 'admin'
+    jasperUser: 'user'
+    jasperPassword: 'password'
+    report1: "something"
+    report2: "something"
 
-ingress:
-  enabled: true
-  externalPath: /api
-  # Used to create an Ingress record.
-  hosts:
-    api: finance-portal.local
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: '/'
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  tls:
-    # Secrets must be manually created in the namespace.
-    # - secretName: chart-example-tls
-    #   hosts:
-    #     - chart-example.local
+frontend:
+  image:
+    repository: mojaloop/finance-portal-ui
+    tag: latest
+    pullPolicy: Always
+    port: 80
+  ingress:
+    enabled: true
+    externalPath: /
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: '/'
+
+backend:
+  image:
+    repository: mojaloop/finance-portal-backend-service
+    tag: v0.0.1
+    pullPolicy: Always
+    port: 3000
+  init:
+    enabled: false
+    image:
+      repository: mojaloop/finance-portal-backend
+      tag: latest
+      pullPolicy: Always
+  env: 'dev'
+  secretsMountPoint: '/secrets'
+  ingress:
+    enabled: true
+    externalPath: /api
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: '/'
+    tls:
