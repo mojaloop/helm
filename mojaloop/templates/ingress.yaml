@@ -3,31 +3,31 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/rewrite-target: $1
-  name: {{ .Release.Name }}-ingress-service-finance-portal-backend
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  name: {{ .Release.Name }}-ingress-service-portal-ui
   namespace: {{ .Release.Namespace }}
 spec:
   rules:
   - http:
       paths:
-      - path: /admin-portal-backend(.*)
-        backend:
-          serviceName: {{ .Release.Name }}-finance-portal
-          servicePort: 3000
+        - path: /
+          backend:
+            serviceName: {{ .Release.Name }}-finance-portal
+            servicePort: 80
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/rewrite-target: /
-  name: {{ .Release.Name }}-ingress-service-finance-portal-ui
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  name: {{ .Release.Name }}-ingress-service-portal-backend
   namespace: {{ .Release.Namespace }}
 spec:
   rules:
   - http:
       paths:
-      - path: /
+      - path: /admin-portal-backend/(.*)
         backend:
           serviceName: {{ .Release.Name }}-finance-portal
-          servicePort: 80
+          servicePort: 3000
