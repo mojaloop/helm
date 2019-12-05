@@ -35,7 +35,7 @@ spec:
         image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
         imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
         ports:
-        - name: http
+        - name: backend
           containerPort: 3000
           protocol: TCP
         livenessProbe:
@@ -47,18 +47,18 @@ spec:
             path: /
             port: http
         envFrom:
-          - configMapRef:
-              name: {{ template "finance-portal.fullname" . }}
-          - secretRef:
-              name: {{ template "finance-portal.fullname" . }}
+        - configMapRef:
+            name: {{ template "finance-portal.fullname" . }}
+        - secretRef:
+            name: {{ template "finance-portal.fullname" . }}
         resources:
       - name: frontend
         image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
         imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
         ports:
-          - name: http
-            containerPort: 80
-            protocol: TCP
+        - name: frontend
+          containerPort: 80
+          protocol: TCP
         livenessProbe:
           httpGet:
             path: /
@@ -68,9 +68,9 @@ spec:
             path: /
             port: http
         envFrom:
-          - configMapRef:
-              name: {{ template "finance-portal.fullname" . }}
-          - secretRef:
-              name: {{ template "finance-portal.fullname" . }}
+        - configMapRef:
+            name: {{ template "finance-portal.fullname" . }}
+        - secretRef:
+            name: {{ template "finance-portal.fullname" . }}
       imagePullSecrets:
-        - name: {{ .Values.imageCredentials.name }}
+      - name: {{ .Values.imageCredentials.name }}
