@@ -44,17 +44,17 @@ spec:
         image: "{{ .Values.operatorSettlement.image.repository }}:{{ .Values.operatorSettlement.image.tag }}"
         imagePullPolicy: {{ .Values.operatorSettlement.image.pullPolicy }}
         ports:
-        - name: http
+        - name: operator
           containerPort: 3000
           protocol: TCP
         livenessProbe:
           httpGet:
             path: /
-            port: http
+            port: operator
         readinessProbe:
           httpGet:
             path: /
-            port: http
+            port: operator
         envFrom:
           - secretRef:
               name: {{ template "settlement.fullname" . }}
@@ -63,17 +63,17 @@ spec:
         image: "{{ .Values.settlementManagement.image.repository }}:{{ .Values.settlementManagement.image.tag }}"
         imagePullPolicy: {{ .Values.settlementManagement.image.pullPolicy }}
         ports:
-          - name: http
+          - name: management
             containerPort: 5000
             protocol: TCP
         livenessProbe:
           httpGet:
             path: /
-            port: http
+            port: management
         readinessProbe:
           httpGet:
             path: /
-            port: http
+            port: management
         envFrom:
           - configMapRef:
               name: {{ template "settlement.fullname" . }}
