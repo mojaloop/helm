@@ -61,16 +61,8 @@ echo "Linting Central-End-User-Registry..."
 helm lint ./centralenduserregistry
 checkCommandResult
 
-echo "Linting Central-Directory..."
-helm lint ./centraldirectory
-checkCommandResult
-
 echo "Linting Central-Settlement..."
 helm lint ./centralsettlement
-checkCommandResult
-
-echo "Linting interop-switch..."
-helm lint ./interop-switch
 checkCommandResult
 
 echo "Linting ml-api-adapter..."
