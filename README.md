@@ -65,14 +65,11 @@ Note: Please ensure that you update the Chart dependencies in the order show bel
 - `helm dep up centralkms`
 - `helm dep up forensicloggingsidecar`
 - `helm dep up centralledger`
-- `helm dep up centralhub`
 - `helm dep up mockpathfinder`
 - `helm dep up centralenduserregistry`
-- `helm dep up centraldirectory`
 - `helm dep up centralsettlement`
 - `helm dep up central`
 - `helm dep up ml-api-adapter`
-- `helm dep up interop-switch`
 - `helm dep up mojaloop`
 
 We are quitely waiting on recursive updates: https://github.com/kubernetes/helm/issues/2247

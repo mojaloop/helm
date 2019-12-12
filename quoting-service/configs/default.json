@@ -3,9 +3,14 @@
   "HOSTNAME": "http://quoting-service.local",
   "LISTEN_ADDRESS": "0.0.0.0",
   "PORT": {{ .Values.service.ports.api.internalPort }},
+  "SWITCH_ENDPOINT": "http://{{ .Values.ingress.hosts.api }}",
   "AMOUNT": {
     "PRECISION": 18,
     "SCALE": 4
+  },
+  "ERROR_HANDLING": {
+    "includeCauseExtension": {{ .Values.config.error_handling.include_cause_extension }},
+    "truncateExtensions": {{ .Values.config.error_handling.truncate_extensions }}
   },
   "DATABASE": {
     "DIALECT": "{{ .Values.config.db_driver }}",
@@ -23,10 +28,6 @@
     "REAP_INTERVAL_MILLIS": {{ .Values.config.db_reap_interval_millis }},
     "CREATE_RETRY_INTERVAL_MILLIS": {{ .Values.config.db_create_retry_interval_millis }},
     "DEBUG": {{ .Values.config.db_debug }}
-  },
-  "ERROR_HANDLING": {
-    "includeCauseExtension": {{ .Values.config.include_cause_extension }},
-    "truncateCause": {{ .Values.config.truncate_cause }}
   },
   "SIMPLE_ROUTING_MODE": {{ .Values.config.simple_routing_mode_enabled }}
 }

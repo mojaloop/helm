@@ -5,6 +5,7 @@
   "PORT": {{ .Values.service.internalPort }},
   "HOSTNAME": "{{ .Values.ingress.hosts.api }}",
   "ENDPOINT_SOURCE_URL": "http://{{ $centralServicesHost }}:{{ .Values.config.central_services_port }}/participants/{{"{{"}}fsp{{"}}"}}/endpoints",
+  "ENDPOINT_HEALTH_URL": "http://{{ $centralServicesHost }}:{{ .Values.config.central_services_port }}/health",
   "ENDPOINT_CACHE_CONFIG": {
     "expiresIn": 180000,
     "generateTimeout": 30000
@@ -47,10 +48,6 @@
       "GENERAL_TOPIC_TEMPLATE": {
         "TEMPLATE": "topic-{{"{{"}}functionality{{"}}"}}-{{"{{"}}action{{"}}"}}",
         "REGEX": "topic-(.*)-(.*)"
-      },
-      "NOTIFICATION_TOPIC_TEMPLATE": {
-        "TEMPLATE": "topic-notification-event",
-        "REGEX": "topic-notification-event"
       }
     },
     "CONSUMER": {
