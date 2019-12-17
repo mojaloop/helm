@@ -21,7 +21,7 @@ global:
 replicaCount: 1
 image:
   repository: mojaloop/quoting-service
-  tag: v8.4.0-snapshot
+  tag: v8.7.0-snapshot
   pullPolicy: Always
 
 readinessProbe:
@@ -60,24 +60,44 @@ config:
   db_debug: false
   simple_routing_mode_enabled: true
   log_level: 'info'
-  include_cause_extension: false
-  truncate_cause: true
+  
+  ## Kafka Configuration (used for sidecar)
+  # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+  kafka_host: '$release_name-kafka'
+  kafka_port: 9092
+
+  # Config for tracing
+  event_trace_vendor: mojaloop
+  event_trace_state_enabled: true
+
+  error_handling:
+    include_cause_extension: false
+    truncate_extensions: true
 
 sidecar:
   enabled: true
   image:
     repository: mojaloop/event-sidecar
-    tag: v8.3.0
+    tag: v8.7.0
     pullPolicy: Always
+    command: '["npm", "run", "start"]'
+  service:
+    internalPort: 4001
   readinessProbe:
     enabled: true
+    httpGet:
+      path: /health
     initialDelaySeconds: 120
     periodSeconds: 15
   livenessProbe:
     enabled: true
+    httpGet:
+      path: /health
     initialDelaySeconds: 90
     periodSeconds: 15
   config:
+    event_logger_grpc_host: localhost
+    event_logger_grpc_port: 50051
     log_level: info
 
 rules: []
