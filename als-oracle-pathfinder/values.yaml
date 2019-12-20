@@ -170,12 +170,20 @@ config:
 
 init:
   enabled: false
-  mysql:
+  waitForMysql:
     name: wait-for-mysql
     repository: mysql
     tag: latest
     pullPolicy: Always
     command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+  populateMysql:
+    name: populate-mysql-tables
+    repository: mojaloop/als-oracle-pathfinder
+    tag: latest
+    pullPolicy: Always
+    commands:
+      create: "mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database < /opt/als-oracle-pathfinder/init.sql;"
+      populate: "echo 'Nothing to do populate. Continuing..';"
 
 service:
   type: ClusterIP

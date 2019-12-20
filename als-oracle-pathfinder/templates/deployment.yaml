@@ -39,13 +39,21 @@ spec:
       {{- if .Values.init.enabled }}
       initContainers:
         {{- if eq .Values.config.db_type "mysql"}}
-        - name: {{ .Values.init.mysql.name }}
-          image: {{ .Values.init.mysql.repository }}:{{ .Values.init.mysql.tag }}
-          imagePullPolicy: {{ .Values.init.mysql.pullPolicy }}
+        - name: {{ .Values.init.waitForMysql.name }}
+          image: {{ .Values.init.waitForMysql.repository }}:{{ .Values.init.waitForMysql.tag }}
+          imagePullPolicy: {{ .Values.init.waitForMysql.pullPolicy }}
           command:
             - sh
             - "-c"
-            - {{ (.Values.init.mysql.command | replace "$db_user" (print .Values.config.db_user) | replace "$db_password" (print .Values.config.db_password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.config.db_database) | replace "$db_port" (print .Values.config.db_port) )| quote }}
+            - {{ (.Values.init.waitForMysql.command | replace "$db_user" (print .Values.config.db_user) | replace "$db_password" (print .Values.config.db_password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.config.db_database) | replace "$db_port" (print .Values.config.db_port) )| quote }}
+        - name: {{ .Values.init.populateMysql.name }}
+          image: {{ .Values.init.populateMysql.repository }}:{{ .Values.init.populateMysql.tag }}
+          imagePullPolicy: {{ .Values.init.populateMysql.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.init.populateMysql.commands.create | replace "$db_user" (print .Values.db.user) | replace "$db_password" (print .Values.db.password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.db.schema) | replace "$db_port" (print .Values.db.port) )| quote }}
+            - {{ (.Values.init.populateMysql.commands.populate | replace "$db_user" (print .Values.db.user) | replace "$db_password" (print .Values.db.password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.db.schema) | replace "$db_port" (print .Values.db.port) )| quote }}
         {{- end }}
       {{- end }}
       containers:
