@@ -21,11 +21,10 @@ global:
 replicaCount: 1
 image:
   repository: mojaloop/als-oracle-pathfinder
-  tag: v8.3.0
+  tag: v8.7.1
   pullPolicy: Always
-  command: '["node", "src/api/index.js"]'
-  imagePullSecrets:
-    name: dock-casa-secret
+  command: '["node", "/opt/als-oracle-pathfinder/src/index.js"]'
+  imagePullSecrets: []
 
 readinessProbe:
   enabled: true
@@ -42,120 +41,148 @@ livenessProbe:
   periodSeconds: 15
 
 config:
-  db_type: 'mysql'
-  db_driver: 'mysql'
-  db_host: '$release_name-centralledger-mysql'
-  db_port: '3306'
-  db_user: 'central_ledger'
-  db_password: 'oyMxgZChuu'
-  db_database:
-    central_ledger: 'central_ledger'
-    account_lookup: 'account_lookup'
+  db:
+    type: 'mysql'
+    driver: 'mysql'
+    central_ledger:
+      host: '$release_name-centralledger-mysql'
+      port: '3306'
+      database: 'central_ledger'
+      user: 'central_ledger'
+      password: 'oyMxgZChuu'
+    account_lookup:
+      host: '$release_name-account-lookup-mysql'
+      port: '3306'
+      database: 'account_lookup'
+      user: 'account_lookup'
+      password: 'OdonPianoX'
   log_level: 'info'
 
   pathfinder:
     # Example host IP to be replaced by valid IP
-    host: 'localhost'
+    host: '156.154.59.224'
     port: 7007
     queryTimeoutMs: 10000
     tls:
       certs:
-        # These are example untrusted certificates, please attain valid certificates for your deployment.
-        # These examples will not work in any environment
+        # These are example keys, please get valid keys for your deployment
         client_cert: |-
           -----BEGIN CERTIFICATE-----
-          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
+          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
           -----END CERTIFICATE-----
         client_key: |-
-          -----BEGIN PRIVATE KEY-----
-          MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDgxTiKmKzu+uGw
-          mXoB3SEgX+cQaNM8b/oqWIYTV5oBXE5z8+DDjeq4qO3zjoCrB31igynY0DHvjG9n
-          g6dszBKmMNAZFBsxjseK5uxSIkyquy3pLkBCo8cmhoSuSdWNGi/Q3IBSOJrcdOG2
-          SqtFPnbFOdMZjBzj3O34EqgbiK6u/jSF85N7hvuDcDrgJU0Rl7u36o9sAh7D0xTV
-          fc4PcPSHMpnwyy2p5sttI9Uh+WfNT7wByDiasy9J1/o4695RRt/uvhCZ8L0B6s1W
-          Jr8ZwC9sb8ZT5YQ6cl+n7xcC/6B9LRozalRt2tcuL83Fae/DpuHx76mNsFyWLyuh
-          aauhFsU/AgMBAAECggEAWgPhvu+h4hsrI1Rznid2ysZdfR7d6chWgXruRvTAQmc7
-          LAixLN+67rUIho+9S8E2H6uzqJbISM0PGH+LH3Eiztehn0mEEnbBxwjv/3ypA37u
-          xgG1znpUmUMqA7qiAV5JY/XKliMBMeTFOAHzUUnQuu+LcSHBuCeUTdL66/vzKTT4
-          oCKwB1vcnzfL5NS/7ownAgLsjNj3pgORRAY9sTDzUkjwrrN/m5nEfghycAcyXHDJ
-          lQprc0xX4TI/Vd9ZkG+khAznkRaXiPJ1P1TwadgK5m53Imt2H3F0lmrhNCrul/l7
-          F0Uf2tfNHHgSjyoGQkPryuqyf2NcMiUY1d4uCsnWEQKBgQDziD3gBkjguQZUc3Yb
-          DqiCtaLkavndmRTPaAyUk95dUuiVEMhnDm8L7T+03PhVDjtXdy4PQUm61xr/Kw4J
-          1VUArbIjzcs+OEGNvq99stThRBvszwNRSWS4kYIur3+ggddrewtL7s+hiAqeK88L
-          n6vG4/eSKWJBQwF1001siKf7/QKBgQDsRxXGZkf+yVsuL/hSiadwRdD/OJ1O7gr2
-          j8za6izaUX1anXLdPrvtOkdCgEC0Iy6hY0FMi0GWzklpY4SvZuxXlK6QkKB3SCE9
-          E8RuOSFLouuaxgiau8MnAEUTkInTC+9foOa8znuOGC0JmzztlFf7P7CF8PoNTb4n
-          x4a9dQSE6wKBgAjPfgWT1KEksIDvqG80KY6JCbqf0ChfOGyEhCf/7YSM0lNKRyXL
-          VOMmky507BsPp7/zVNxCbWtwCs7+fMSITkn2/sHi2R6IJH7/ThQLGz6HG0eG+cTA
-          Ff/Da+VKfiCNcgC2c+MsYaCjblbomNX/0dQhPTyxeJeJ2AyuN1fc3c71AoGBAIA2
-          tsc5e3nz9AmlOEA5uGWBTT8hjqNlIwfW0pg8mOhDbh188PbD8yBxDng0tmfJ66Ti
-          Am4x5v6ZpFaPDVJNLJT99pg2Ew2HU5ocHuydDcdIekc7jTHCD80bJWDPfyrKADRJ
-          UMxF0+AwmEftOGvHotKRJg4YzOfpNvXJHQGz/SbPAoGAALJa010eqPHuZKQxpW4z
-          4dpt1Fr16cbLnmIk16zxnvPbPJeCtEx8IkwgLIWP6zPOESIGBTslGMq6xIgYaOXZ
-          G8S+fLF3J9sfE2gCJR1JSBXdlyWmcKJdyvhRt168hxVW1N4uHJ2KBA3vUhC/kRvh
-          3XDCWsEkXqU0KRzt+TkWVOQ=
-          -----END PRIVATE KEY-----
+          -----BEGIN RSA PRIVATE KEY-----
+          MIIEogIBAAKCAQEAy7dOZykrYxEPbFWgIPegHk7nawIKtmyjW7RKLsisogc79Ebz
+          7XfgyiaOYkQRhGw82SZZW10Gfp/a0xU3vFwHmnrs6Xgk4Nn/EIYACjKe8CPWAJFN
+          qXlU7so9buHni0IgRkFstqBbKeHdSczntrHt70sgRzeA2u78avYUuz9YrdUsLz1v
+          LifSs2DsFB3IZ+h1B9hK6GTyK/5Zl7SQJ4J6CVlISqgaNPuzI9xq4DHIkDfkEqjW
+          C6CN43q93qC4IOp8vFWbpQKnNoVozwlaxL9zBjRp8bI3kh7TLoHAktRdREkzS2X0
+          WLluGLKK9kiSWYjH4nqPdqTNMB8QpiJdp/0YKQIDAQABAoIBAArt3qryLn22IJmz
+          Tk/2eQSnPwsipOh8k5cL6R7xbTGUKcdFNzj6QXkW8HSdKkNseyc7Q3f/WaXZdaf1
+          b3QPi+jhx2wPIgteJq0AQ2hIpvZDNev536zD8aaN+xXD0ORLu+eJAwgZOkrY70JS
+          V+wZR6aa5TRs6eDVCX3DjgEtuNg6ivNmSiYm64v167NCJgMahrGF76iigkwn61yA
+          vd8sMpwD9GLpNifU93m2kWiODyNL3hbvpH27S6BZ3/0sNrNrwBKfBz8PzG81v7je
+          ZhsuOj2SlW6H15UKoFWSD6r3lV7/Tj6VCCU6uNYSIBK2kaigjGfw8RY3JiBTN07+
+          Jgcj+/ECgYEA+vhF/8nWH3Kv2PsdlqNvd0ytU+8KItV2Ct8bCDEv3BvHqUXTg6FR
+          SyzH0TUusKSsLA+pgEi9JpvdRLS6p1dzw9Gn3DmvwjCxuMGh5DFFkU2yVolWIbRx
+          GfUym/sTL0nllKIOtytNDjMsYMsj8+pIHescVrAPJYuqBl2hlF6DtaMCgYEAz8yS
+          2DTE6FcCpYFr3FfNB1ak6IQeT0ojktcsJKfUFsbwPrN1Rmjq0hKZeD1A29Nx/R9p
+          reguvFj678SIS6ThWmHcgFv1JupKl2XJZPyW5vpEslf1H7QpZn9S1sG/aFRVQjNw
+          9fNB/pCOvu5fbBvMF7pml8gGDHMjz5VIyztZH8MCgYBfg4mwdbJmOZGvNLLoF79e
+          WfJFVV44L6FDNfHlxkJ+tJviUk7Tc9uqjpplhqYEWEemZTePOR+zx/IIKfg3o9LN
+          HceSyumXME0TEa55WD8vs7BBuvbq0O+Sf30JXB7LCoazcJHFKFelJdin5egC9pEH
+          wekBHPRGx8ansY7DFs1tnQKBgCTXLRWdzWcvve1f06KeAmCRsOz0N3dxOntXIKFj
+          C8v5+y/ymxEfmrohyAm0OmJ+y0/IGPFXH6oO0HZfzpYypi1i+jfblcwPb6gFyL3Z
+          tls+9Zz00SWMyGY+no4qjWfOw8rX2egQ95tNP7GEC3DcQMPYLUYtlTzx0OCFpAE8
+          BWIHAoGALUC9fyvcipxs6C+HYnVxeoPBwaNz22KTLrLIRiDCE/Ag7TZ7bsRi565/
+          xD2e+6FT+f9ZTiF4vW7clIe3e343OYCrYUdYUtMEGEnAT6a+XoxXK9XlOZFHdyzt
+          yg9yPUB7DlZ8ve69Kw5nZs8uqmLczgRpb5gg59jvldfqXjSeYG4=
+          -----END RSA PRIVATE KEY-----
         pathfinder_cert: |-
           -----BEGIN CERTIFICATE-----
-          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
+          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
+          HREEPjA8ghpwYXRoZmluZGVyLXNzbC5uZXVzdGFyLmJpeoIecGF0aGZpbmRlci1j
+          dGUtc3NsLm5ldXN0YXIuYml6MA4GA1UdDwEB/wQEAwIFoDAdBgNVHSUEFjAUBggr
+          BgEFBQcDAQYIKwYBBQUHAwIwPgYDVR0fBDcwNTAzoDGgL4YtaHR0cDovL2NkcC5n
+          ZW90cnVzdC5jb20vR2VvVHJ1c3RSU0FDQTIwMTguY3JsMEwGA1UdIARFMEMwNwYJ
+          YIZIAYb9bAEBMCowKAYIKwYBBQUHAgEWHGh0dHBzOi8vd3d3LmRpZ2ljZXJ0LmNv
+          bS9DUFMwCAYGZ4EMAQICMHUGCCsGAQUFBwEBBGkwZzAmBggrBgEFBQcwAYYaaHR0
+          cDovL3N0YXR1cy5nZW90cnVzdC5jb20wPQYIKwYBBQUHMAKGMWh0dHA6Ly9jYWNl
+          cnRzLmdlb3RydXN0LmNvbS9HZW9UcnVzdFJTQUNBMjAxOC5jcnQwCQYDVR0TBAIw
+          ADCCAfYGCisGAQQB1nkCBAIEggHmBIIB4gHgAHYApLkJkLQYWBSHuxOizGdwCjw1
+          mAT5G9+443fNDsgN3BAAAAFpFiFVvAAABAMARzBFAiEA9sjfAGNdf12MKfjrEbZ3
+          leBomrp5NX6EDzEjntFRV1ACIFTAuvWB1joOomVAjdZJ/N6SiIq5cmDh2kgwSco1
+          mDQVAHYAh3W/51l8+IxDmV+9827/Vo1HVjb/SrVgwbTq/16ggw8AAAFpFiFXBwAA
+          BAMARzBFAiEA6GvIepqPozNDFdsAPzRmZi54+ca5DfFiTZrA4goU67QCIE7psPkD
+          rYe0J5hwlnXOY4fg258my+WZL6jwx67zfBH7AHYARJRlLrDuzq/EQAfYqP4owNrm
+          gr7YyzG1P9MzlrW2gagAAAFpFiFV6wAABAMARzBFAiEAltYOx4KFbyLN6nhwkrAI
+          F1Kyb9zyZ/GuEXS9U3f4lAYCICwIa6eKWvzynXiwOdDeHeA1vvsYFbL0NoqlzvZ/
+          5HqtAHYAVhQGmi/XwuzT9eG9RLI+x0Z2ubyZEVzA75SYVdaJ0N0AAAFpFiFXHgAA
+          BAMARzBFAiEAgj8cUt4qwhQpODoj1kpOm5Jj5/OFMXZFaSJ/c3t3EHwCIAyQDtFB
+          b4xP0k43+HxdoC+IA4fm8lpvmvm+fg7ivu1rMA0GCSqGSIb3DQEBCwUAA4IBAQCT
+          OBEW2mF6mT6KW4FHIOnzoOaNoB56JqGjcUr5T8WAX9UYUK/K+9RikS5hYmy71nZN
+          HWZ2fWR/xSvZwyVb3alNDcAlYq+JUxuspkS1n+wVVOD1KaqZ/OJ80rDsOeGhhoxs
+          Iorc21NsJUTxSdBTgk0i8fYr5hxNCm/3R3+f08XtfeS6wnWgrzCoaQHRm+tovlkW
+          jzFdj3yKdHQrzdRHBvaY9rx9txnyzzlMsLESndHiq3SsJn0hjmhuv4fUdHZ4bOAF
+          gH9xXsp2OkeQC2W4JHMQXREK35dvTbkmdwiv7m1nUFQIsdVCoNLyQgCxE9WeoWVZ
+          swAuMNNA04475W70JPPB
           -----END CERTIFICATE-----
         pathfinder_intermediate_cert: |-
           -----BEGIN CERTIFICATE-----
-          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
+          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
+          BQcDAQYIKwYBBQUHAwIwEgYDVR0TAQH/BAgwBgEB/wIBADA0BggrBgEFBQcBAQQo
+          MCYwJAYIKwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmRpZ2ljZXJ0LmNvbTBCBgNVHR8E
+          OzA5MDegNaAzhjFodHRwOi8vY3JsMy5kaWdpY2VydC5jb20vRGlnaUNlcnRHbG9i
+          YWxSb290Q0EuY3JsMD0GA1UdIAQ2MDQwMgYEVR0gADAqMCgGCCsGAQUFBwIBFhxo
+          dHRwczovL3d3dy5kaWdpY2VydC5jb20vQ1BTMA0GCSqGSIb3DQEBCwUAA4IBAQAw
+          8YdVPYQI/C5earp80s3VLOO+AtpdiXft9OlWwJLwKlUtRfccKj8QW/Pp4b7h6QAl
+          ufejwQMb455OjpIbCZVS+awY/R8pAYsXCnM09GcSVe4ivMswyoCZP/vPEn/LPRhH
+          hdgUPk8MlD979RGoUWz7qGAwqJChi28uRds3thx+vRZZIbEyZ62No0tJPzsSGSz8
+          nQ//jP8BIwrzBAUH5WcBAbmvgWfrKcuv+PyGPqRcc4T55TlzrBnzAzZ3oClo9fTv
+          O9PuiHMKrC6V6mgi0s2sa/gbXlPCD9Z24XUMxJElwIVTDuKB0Q4YMMlnpN/QChJ4
+          B0AFsQ+DU0NCO+f78Xf7
           -----END CERTIFICATE-----
       # rejectUnauthorized should be true in production
       rejectUnauthorized: false
@@ -169,14 +196,32 @@ config:
       intermediate_cert_path: '/opt/als-oracle-pathfinder/secrets/pathfinder_intermediate_cert.pem'
 
 init:
-  enabled: false
-  mysql:
+  enabled: true
+  waitForMysql:
     name: wait-for-mysql
     repository: mysql
     tag: latest
     pullPolicy: Always
     command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
-
+  initMysql:
+    centralLedger:
+      name: init-central-ledger-mysql
+      repository: mojaloop/als-oracle-pathfinder
+      tag: latest
+      pullPolicy: Always
+      command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-central-ledger.sql;";
+    accountLookup:
+      name: init-account-lookup-mysql
+      repository: mojaloop/als-oracle-pathfinder
+      tag: latest
+      pullPolicy: Always
+      command: mysql -h test-account-lookup-mysql -P $db_port -u account_lookup --password=OdonPianoX account_lookup -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-account-lookup.sql;";
+  populateMysql:
+    name: populate-mysql-tables
+    repository: mysql
+    tag: latest
+    pullPolicy: Always
+    command: "echo 'Nothing configured to be populated. Continuing...';"
 service:
   type: ClusterIP
   name: http-api
@@ -204,6 +249,7 @@ ingress:
   hosts:
     api: als-oracle-pathfinder.local
   annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: '/'
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   tls:

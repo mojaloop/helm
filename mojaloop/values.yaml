@@ -2745,43 +2745,46 @@ account-lookup-service:
     replicaCount: 1
     image:
       repository: mojaloop/als-oracle-pathfinder
-      tag: v8.3.0
-      command: '["node", "src/index.js"]'
+      tag: v8.7.1
       pullPolicy: Always
-      imagePullSecrets:
-        name: dock-casa-secret
+      command: '["node", "/opt/als-oracle-pathfinder/src/index.js"]'
+      imagePullSecrets: []
 
     readinessProbe:
-      enabled: false
+      enabled: true
       httpGet:
-        path: /health
-      initialDelaySeconds: 60
+        path: /
+      initialDelaySeconds: 45
       periodSeconds: 15
 
     livenessProbe:
-      enabled: false
+      enabled: true
       httpGet:
-        path: /health
-      initialDelaySeconds: 60
+        path: /
+      initialDelaySeconds: 45
       periodSeconds: 15
 
     config:
-      ## DB Configuration
-      # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
-      db_type: 'mysql'
-      # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-      db_driver: 'mysql'
-      db_host: '$release_name-centralledger-mysql'
-      db_port: '3306'
-      db_user: 'central_ledger'
-      db_password: 'oyMxgZChuu'
-      db_database:
-        central_ledger: 'central_ledger'
-        account_lookup: 'account_lookup'
+      db:
+        type: 'mysql'
+        driver: 'mysql'
+        central_ledger:
+          host: '$release_name-centralledger-mysql'
+          port: '3306'
+          database: 'central_ledger'
+          user: 'central_ledger'
+          password: 'oyMxgZChuu'
+        account_lookup:
+          host: '$release_name-account-lookup-mysql'
+          port: '3306'
+          database: 'account_lookup'
+          user: 'account_lookup'
+          password: 'OdonPianoX'
       log_level: 'info'
 
       pathfinder:
-        host: '10.0.0.1'
+        # Example host IP to be replaced by valid IP
+        host: 'localhost'
         port: 7007
         queryTimeoutMs: 10000
         tls:
@@ -2895,20 +2898,35 @@ account-lookup-service:
 
     init:
       enabled: true
-      mysql:
+      waitForMysql:
         name: wait-for-mysql
         repository: mysql
         tag: latest
         pullPolicy: Always
-        command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
-
+        command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+      initMysql:
+        centralLedger:
+          name: init-central-ledger-mysql
+          repository: mojaloop/als-oracle-pathfinder
+          tag: latest
+          pullPolicy: Always
+          command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-central-ledger.sql;";
+        accountLookup:
+          name: init-account-lookup-mysql
+          repository: mojaloop/als-oracle-pathfinder
+          tag: latest
+          pullPolicy: Always
+          command: mysql -h test-account-lookup-mysql -P $db_port -u account_lookup --password=OdonPianoX account_lookup -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-account-lookup.sql;";
+      populateMysql:
+        name: populate-mysql-tables
+        repository: mysql
+        tag: latest
+        pullPolicy: Always
+        command: "echo 'Nothing configured to be populated. Continuing...';"
     service:
       type: ClusterIP
-      ports:
-        api:
-          name: http-api
-          externalPort: 80
-          internalPort: 3000
+      name: http-api
+      port: 80
 
       annotations: {}
 
@@ -2948,7 +2966,7 @@ account-lookup-service:
       # limits:
       #  cpu: 100m
       #  memory: 128Mi
-    # requests:
+      # requests:
     #  cpu: 100m
     #  memory: 128Mi
 
