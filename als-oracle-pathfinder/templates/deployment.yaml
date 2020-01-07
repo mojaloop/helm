@@ -1,4 +1,5 @@
-{{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
+{{- $dbHost := ( .Values.config.db.central_ledger.host | replace "$release_name" .Release.Name ) -}}
+{{- $serviceName :=  (include "als-oracle-pathfinder.fullname" .) -}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -38,14 +39,35 @@ spec:
 {{- end }}
       {{- if .Values.init.enabled }}
       initContainers:
-        {{- if eq .Values.config.db_type "mysql"}}
-        - name: {{ .Values.init.mysql.name }}
-          image: {{ .Values.init.mysql.repository }}:{{ .Values.init.mysql.tag }}
-          imagePullPolicy: {{ .Values.init.mysql.pullPolicy }}
+        {{- if eq .Values.config.db.type "mysql"}}
+        - name: {{ .Values.init.waitForMysql.name }}
+          image: {{ .Values.init.waitForMysql.repository }}:{{ .Values.init.waitForMysql.tag }}
+          imagePullPolicy: {{ .Values.init.waitForMysql.pullPolicy }}
           command:
             - sh
             - "-c"
-            - {{ (.Values.init.mysql.command | replace "$db_user" (print .Values.config.db_user) | replace "$db_password" (print .Values.config.db_password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.config.db_database) | replace "$db_port" (print .Values.config.db_port) )| quote }}
+            - {{ (.Values.init.waitForMysql.command | replace "$db_user" (print .Values.config.db.central_ledger.user) | replace "$db_password" (print .Values.config.db.central_ledger.password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.config.db.central_ledger.database) | replace "$db_port" (print .Values.config.db.central_ledger.port) )| quote }}
+        - name: {{ .Values.init.initMysql.centralLedger.name }}
+          image: {{ .Values.init.initMysql.centralLedger.repository }}:{{ .Values.init.initMysql.centralLedger.tag }}
+          imagePullPolicy: {{ .Values.init.initMysql.centralLedger.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.init.initMysql.centralLedger.command | replace "$db_user" (print .Values.config.db.central_ledger.user) | replace "$db_password" (print .Values.config.db.central_ledger.password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.config.db.central_ledger.database) | replace "$db_port" (print .Values.config.db.central_ledger.port) | replace "$service_name" $serviceName )| quote }}
+        - name: {{ .Values.init.initMysql.accountLookup.name }}
+          image: {{ .Values.init.initMysql.accountLookup.repository }}:{{ .Values.init.initMysql.accountLookup.tag }}
+          imagePullPolicy: {{ .Values.init.initMysql.accountLookup.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.init.initMysql.accountLookup.command | replace "$db_user" (print .Values.config.db.account_lookup.user) | replace "$db_password" (print .Values.config.db.account_lookup.password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.config.db.account_lookup.database) | replace "$db_port" (print .Values.config.db.account_lookup.port) | replace "$service_name" $serviceName )| quote }}
+        - name: {{ .Values.init.populateMysql.name }}
+          image: {{ .Values.init.populateMysql.repository }}:{{ .Values.init.populateMysql.tag }}
+          imagePullPolicy: {{ .Values.init.populateMysql.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.init.populateMysql.command | replace "$db_user" (print .Values.config.db.central_ledger.user) | replace "$db_password" (print .Values.config.db.central_ledger.password) | replace "$db_host" $dbHost | replace "$db_database" (print .Values.config.db.central_ledger.database) | replace "$db_port" (print .Values.config.db.central_ledger.port) | replace "$service_name" $serviceName )| quote }}
         {{- end }}
       {{- end }}
       containers:
@@ -79,7 +101,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: {{ template "als-oracle-pathfinder.fullname" . }}
-                key: db.password
+                key: db_password
         envFrom:
           - configMapRef:
               name: {{ template "als-oracle-pathfinder.fullname" . }}
@@ -91,5 +113,7 @@ spec:
         - name: {{ template "als-oracle-pathfinder.fullname" . }}-secrets-volume
           secret:
             secretName: {{ template "als-oracle-pathfinder.fullname" . }}-certs
+      {{- if .Values.image.imagePullSecrets }}
       imagePullSecrets:
-        - name: {{ .Values.image.imagePullSecrets.name }}
+      {{ toYaml .Values.image.imagePullSecrets | indent 10 }}
+      {{- end }}
