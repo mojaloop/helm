@@ -77,8 +77,8 @@ echo "Linting finance-portal..."
 helm lint ./finance-portal
 checkCommandResult
 
-echo "Linting portal-settlement..."
-helm lint ./portal-settlement
+echo "Linting finance-portal-settlement-management..."
+helm lint ./finance-portal-settlement-management
 checkCommandResult
 
 echo "Linting transaction-requests-service..."

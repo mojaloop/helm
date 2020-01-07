@@ -81,8 +81,8 @@ echo "Updating finance-portal..."
 helm dep up ./finance-portal
 checkCommandResult
 
-echo "Updating portal-settlement..."
-helm dep up ./portal-settlement
+echo "Updating finance-portal-settlement-management..."
+helm dep up ./finance-portal-settlement-management
 checkCommandResult
 
 echo "Updating transaction-request-service..."
@@ -111,10 +111,6 @@ checkCommandResult
 
 echo "Updating Mojaloop Bulk..."
 helm dep up ./mojaloop-bulk
-checkCommandResult
-
-echo "Updating portal-settlement..."
-helm dep up ./portal-settlement
 checkCommandResult
 
 echo "Updating Mojaloop..."

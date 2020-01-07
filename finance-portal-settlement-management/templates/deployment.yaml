@@ -3,9 +3,9 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "portal-settlement.fullname" . }}
+  name: {{ template "finance-portal-settlement-management.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "portal-settlement.name" . }}
+    app.kubernetes.io/name: {{ include "finance-portal-settlement-management.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -13,12 +13,12 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{ template "portal-settlement.name" . }}
+      app: {{ template "finance-portal-settlement-management.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "portal-settlement.name" . }}
+        app: {{ template "finance-portal-settlement-management.name" . }}
         release: {{ .Release.Name }}
     spec:
       initContainers:
@@ -58,9 +58,9 @@ spec:
             port: operator
         envFrom:
         - configMapRef:
-            name: {{ template "portal-settlement.fullname" . }}
+            name: {{ template "finance-portal-settlement-management.fullname" . }}
         - secretRef:
-            name: {{ template "portal-settlement.fullname" . }}
+            name: {{ template "finance-portal-settlement-management.fullname" . }}
         resources:
       - name: settlement-management
         image: "{{ .Values.settlementManagement.image.repository }}:{{ .Values.settlementManagement.image.tag }}"
@@ -79,8 +79,8 @@ spec:
             port: management
         envFrom:
           - configMapRef:
-              name: {{ template "portal-settlement.fullname" . }}
+              name: {{ template "finance-portal-settlement-management.fullname" . }}
           - secretRef:
-              name: {{ template "portal-settlement.fullname" . }}
+              name: {{ template "finance-portal-settlement-management.fullname" . }}
       imagePullSecrets:
         - name: {{ .Values.imageCredentials.name }}
