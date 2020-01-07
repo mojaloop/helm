@@ -13,7 +13,7 @@ global:
     ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
     nodeSelector: {}
 
-    ## Set toleration for schedular
+    ## Set toleration for scheduler
     ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations: []
 
@@ -92,6 +92,9 @@ config:
   # Condig for tracing
   event_trace_vendor: mojaloop
   event_trace_state_enabled: true
+  # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+  # Any combination of: `log,audit,trace`
+  event_async_override: ''
   
   error_handling:
     include_cause_extension: false
@@ -128,9 +131,11 @@ config:
   kafka_partitioner: 'murmur2_random'
 
   ## Node Configuration
-  log_level: 'info'
+  log_level: info
   ## Enable local logging of events being recorded
   log_events_locally_enabled: false
+  
+  log_transport: file
 
 init:
   enabled: true
