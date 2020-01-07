@@ -3,21 +3,22 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "settlement.fullname" . }}
+  name: {{ template "portal-settlement.fullname" . }}
   labels:
-    app: {{ template "settlement.name" . }}
-    chart: {{ template "settlement.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "portal-settlement.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   selector:
     matchLabels:
-      app: {{ template "settlement.name" . }}
+      app: {{ template "portal-settlement.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "settlement.name" . }}
+        app: {{ template "portal-settlement.name" . }}
         release: {{ .Release.Name }}
     spec:
       initContainers:
@@ -57,9 +58,9 @@ spec:
             port: operator
         envFrom:
         - configMapRef:
-            name: {{ template "settlement.fullname" . }}
+            name: {{ template "portal-settlement.fullname" . }}
         - secretRef:
-            name: {{ template "settlement.fullname" . }}
+            name: {{ template "portal-settlement.fullname" . }}
         resources:
       - name: settlement-management
         image: "{{ .Values.settlementManagement.image.repository }}:{{ .Values.settlementManagement.image.tag }}"
@@ -78,8 +79,8 @@ spec:
             port: management
         envFrom:
           - configMapRef:
-              name: {{ template "settlement.fullname" . }}
+              name: {{ template "portal-settlement.fullname" . }}
           - secretRef:
-              name: {{ template "settlement.fullname" . }}
+              name: {{ template "portal-settlement.fullname" . }}
       imagePullSecrets:
         - name: {{ .Values.imageCredentials.name }}

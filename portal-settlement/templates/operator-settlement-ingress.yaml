@@ -1,0 +1,33 @@
+{{- if .Values.operatorSettlement.ingress.enabled -}}
+{{- $serviceName := include "portal-settlement.fullname" . -}}
+{{- $operatorSettlementPort := .Values.operatorSettlement.service.port -}}
+{{- $operatorSettlementPath := .Values.operatorSettlement.ingress.externalPath -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "portal-settlement.fullname" . }}-operator-settlement
+  labels:
+    app: {{ template "portal-settlement.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- range $key, $value := .Values.operatorSettlement.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  rules:
+    {{- range $host := .Values.operatorSettlement.ingress.hosts }}
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: {{ $operatorSettlementPath }}
+            backend:
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $operatorSettlementPort }}
+    {{- end -}}
+  {{- if .Values.operatorSettlement.ingress.tls }}
+  tls:
+    {{ toYaml .Values.operatorSettlement.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}

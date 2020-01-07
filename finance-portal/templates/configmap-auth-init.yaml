@@ -3,10 +3,11 @@ kind: ConfigMap
 metadata:
   name: {{ .Values.config.is_populate.name | quote }}
   labels:
-    app: {{ template "finance-portal.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "finance-portal.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   HTTP_HOST: {{ .Values.config.oauthServer | quote }}
   HTTP_PORT: {{ .Values.config.oauthPort | quote }}

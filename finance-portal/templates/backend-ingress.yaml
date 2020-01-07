@@ -1,0 +1,33 @@
+{{- if .Values.backend.ingress.enabled -}}
+{{- $serviceName := include "finance-portal.fullname" . -}}
+{{- $backendPort := .Values.backend.service.port -}}
+{{- $backendPath := .Values.backend.ingress.externalPath -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "finance-portal.fullname" . }}-backend
+  labels:
+    app: {{ template "finance-portal.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- range $key, $value := .Values.backend.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+      {{- end }}
+spec:
+  rules:
+    {{- range $host := .Values.backend.ingress.hosts }}
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: {{ $backendPath }}
+            backend:
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $backendPort }}
+    {{- end -}}
+  {{- if .Values.backend.ingress.tls }}
+  tls:
+    {{ toYaml .Values.backend.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}

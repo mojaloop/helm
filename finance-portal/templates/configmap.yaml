@@ -3,10 +3,11 @@ kind: ConfigMap
 metadata:
   name: {{ template "finance-portal.fullname" . }}
   labels:
-    app: {{ template "finance-portal.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "finance-portal.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   SETTLEMENTS_ENDPOINT: {{ (printf "http://%s-%s" .Release.Name .Values.config.settlementsEndpoint) | quote }}
   CENTRAL_LEDGER_ENDPOINT: {{ (printf "http://%s-%s" .Release.Name .Values.config.centralLedgerEndpoint) | quote }}

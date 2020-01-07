@@ -1,12 +1,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "settlement.fullname" . }}
+  name: {{ template "portal-settlement.fullname" . }}
   labels:
-    app: {{ template "settlement.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "portal-settlement.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   ADMIN_ENDPOINT: {{ (printf "%s%s-%s:%s" "http://" .Release.Name .Values.settlementManagement.config.CENTRAL_LEDGER_SERVICE_NAME .Values.settlementManagement.config.CENTRAL_LEDGER_SERVICE_ADMIN_PORT) | quote }}
   MIN_WINDOW_AGE_MS: {{ (printf "%s" .Values.settlementManagement.config.MIN_WINDOW_AGE_MS) | quote }}

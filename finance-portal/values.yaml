@@ -45,6 +45,8 @@ config:
     report2: "something"
 
 frontend:
+  service:
+    port: 80
   image:
     repository: mojaloop/finance-portal-ui
     tag: v0.0.3
@@ -52,17 +54,19 @@ frontend:
     port: 80
   ingress:
     enabled: true
-    externalPath: /
-    hosts:
-      api: finance-portal.local
-    annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: '/'
-    tls:
-
+    externalPath: /(.*)
+    hosts: 
+      api: finance-portal-frontend.local
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # nginx.ingress.kubernetes.io/rewrite-target: /$1
+      
 backend:
+  service:
+    port: 3000
   image:
     repository: mojaloop/finance-portal-backend-service
-    tag: v0.0.4
+    tag: v0.0.5
     pullPolicy: Always
     port: 3000
   init:
@@ -75,9 +79,9 @@ backend:
   secretsMountPoint: '/secrets'
   ingress:
     enabled: true
-    externalPath: /admin-portal-backend
-    hosts:
-      api: finance-portal.local
-    annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: '/'
-    tls:
+    externalPath: /admin-portal-backend/(.*)
+    hosts: 
+      api: finance-portal-backend.local
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # nginx.ingress.kubernetes.io/rewrite-target: /$1
