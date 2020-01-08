@@ -1,0 +1,87 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+# Default values shared by all containers
+db:
+  protocol: 'mysql'
+  host: '$release_name-centralledger-mysql'
+  port: '3306'
+  user: 'central_ledger'
+  password: 'oyMxgZChuu'
+  schema: 'central_ledger'
+
+service:
+  type: ClusterIP
+
+imageCredentials:
+  name: pull-secrets
+
+# Default values for operator-settlement
+operatorSettlement:
+  image:
+    repository: mojaloop/operator-settlement
+    tag: latest
+    pullPolicy: Always
+
+  service:
+    port: 80
+
+  init:
+    enabled: true
+    image:
+      repository: mojaloop/operator-settlement
+      tag: latest
+      pullPolicy: Always
+    command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database < /opt/operator-settlement/init.sql
+
+  ingress:
+    enabled: true
+    externalPath: /
+    hosts:
+      api: operator-settlement.local
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: '/'
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    tls:
+
+# Default values for settlement-management
+settlementManagement:
+  image:
+    repository: mojaloop/settlement-management
+    tag: latest
+    pullPolicy: Always
+
+  service:
+    port: 5000
+
+  init:
+    enabled: true
+    image:
+      repository: mojaloop/settlement-management
+      tag: latest
+      pullPolicy: Always
+    command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database < /opt/settlement-management/init.sql
+
+  config:
+    CENTRAL_LEDGER_SERVICE_NAME: 'centralledger-service'
+    CENTRAL_LEDGER_SERVICE_ADMIN_PORT: '3001'
+    SETTLEMENTS_SERVICE_NAME: 'centralsettlement'
+    SETTLEMENTS_SERVICE_PORT: '80'
+    MIN_WINDOW_AGE_MS: '5000'
+    OPERATOR_SETTLEMENTS_SERVICE_NAME: 'settlement'
+    OPERATOR_SETTLEMENTS_SERVICE_PORT: '80'
+
+  ingress:
+    enabled: true
+    externalPath: /
+    hosts:
+      api: settlement-management.local
+    annotations:  
+      nginx.ingress.kubernetes.io/rewrite-target: '/'
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    tls:
+    # Secrets must be manually created in the namespace.
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local

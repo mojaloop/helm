@@ -1,0 +1,35 @@
+{{- if .Values.frontend.ingress.enabled -}}
+{{- $serviceName := include "finance-portal.fullname" . -}}
+{{- $frontendPort := .Values.frontend.service.port -}}
+{{- $frontendPath := .Values.frontend.ingress.externalPath -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "finance-portal.fullname" . }}-frontend
+  labels:
+    app.kubernetes.io/name: {{ include "finance-portal.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+  annotations:
+    {{- range $key, $value := .Values.frontend.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  rules:
+    {{- range $host := .Values.frontend.ingress.hosts }}
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: {{ $frontendPath }}
+            backend:
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $frontendPort }}
+    {{- end -}}
+  {{- if .Values.frontend.ingress.tls }}
+  tls:
+    {{ toYaml .Values.frontend.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}
+
