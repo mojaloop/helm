@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   repository: mojaloop/ml-api-adapter
-  tag: v8.7.2
+  tag: v8.8.0
   command: '["node", "src/handlers/index.js", "handler", "--notification"]'
 ## Optionally specify an array of imagePullSecrets.
 ## Secrets must be manually created in the namespace.
@@ -18,7 +18,7 @@ sidecar:
   enabled: true
   image:
     repository: mojaloop/event-sidecar
-    tag: v8.7.1
+    tag: v8.8.0
     pullPolicy: Always
     command: '["npm", "run", "start"]'
   service:
@@ -39,6 +39,9 @@ sidecar:
     event_logger_grpc_host: localhost
     event_logger_grpc_port: 50051
     log_level: info
+    log_filter: ''
+    event_log_filter: '*:*'
+    event_log_metadata_only: true
 
 init:
   enabled: true
@@ -91,19 +94,25 @@ config:
       rejectUnauthorized: true
   max_callback_time_lag_dilation_milliseconds: 100
   max_fulfil_timeout_duration_seconds: 240
-  log_level: info
-  log_transport: file
-  ## Enable local logging of events being recorded
-  log_events_locally_enabled: false
+
+  ## Send callback confirmation to PayeeFSP in addition to the Mojaloop v1.0 Spec Callback to PayerFSP
   send_transfer_confirmation_to_payee: true
 
-  # Config for tracing
+  ## Log Configuration
+  log_level: info
+  log_filter: 'error, warning, info'
+  log_transport: file
+
+  ## Tracing Configuration
   event_trace_vendor: mojaloop
-  event_trace_state_enabled: true
+  event_log_filter: 'audit:*, log:warning, log:error'
+  # If set to true, only the metadata object from the event will be printed.
+  event_log_metadata_only: false
   # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
   # Any combination of: `log,audit,trace`
-  event_async_override: ''
+  event_async_override: 'audit'
 
+  ## Error handling Configuration
   error_handling:
     include_cause_extension: false
     truncate_extensions: true
