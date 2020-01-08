@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.config.is_populate.name | quote }}
+  labels:
+    app.kubernetes.io/name: {{ include "finance-portal.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+data:
+  HTTP_HOST: {{ .Values.config.oauthServer | quote }}
+  HTTP_PORT: {{ .Values.config.oauthPort | quote }}
+  HTTP_ENDPOINT: {{ .Values.config.is_populate.http.endpoint | quote }}
+  HTTP_TIMEOUT: {{ .Values.config.is_populate.http.timeout | quote }}
+  AUTHENTICATION_TYPE: {{ .Values.config.is_populate.authentication.type | quote }}
+  AUTHENTICATION_CREDENTIALS_USERNAME: {{ .Values.config.is_populate.authentication.credentials.username | quote }}
+  AUTHENTICATION_CREDENTIALS_PASSWORD: {{ .Values.config.is_populate.authentication.credentials.password | quote }}

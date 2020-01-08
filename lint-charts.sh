@@ -73,6 +73,14 @@ echo "Linting quoting-service..."
 helm lint ./quoting-service
 checkCommandResult
 
+echo "Linting finance-portal..."
+helm lint ./finance-portal
+checkCommandResult
+
+echo "Linting finance-portal-settlement-management..."
+helm lint ./finance-portal-settlement-management
+checkCommandResult
+
 echo "Linting transaction-requests-service..."
 helm lint ./transaction-requests-service
 checkCommandResult
