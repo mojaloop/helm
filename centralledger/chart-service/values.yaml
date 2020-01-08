@@ -24,7 +24,7 @@ containers:
   api:
     image:
       repository: mojaloop/central-ledger
-      tag: v8.7.1
+      tag: v8.8.0
       pullPolicy: Always
       command: '["node", "src/api/index.js"]'
     service:
@@ -50,7 +50,7 @@ sidecar:
   enabled: false
   image:
     repository: mojaloop/event-sidecar
-    tag: v8.7.1
+    tag: v8.8.0
     pullPolicy: Always
     command: '["npm", "run", "start"]'
   service:
@@ -71,6 +71,9 @@ sidecar:
     event_logger_grpc_host: localhost
     event_logger_grpc_port: 50051
     log_level: info
+    log_filter: ''
+    event_log_filter: '*:*'
+    event_log_metadata_only: true
 
 ## metric configuration for prometheus instrumentation
 metrics:
@@ -88,14 +91,8 @@ config:
   forensicloggingsidecar_disabled: true
   forensicloggingsidecar_host: forensicloggingsidecar-ledger
   forensicloggingsidecar_port: 5678
-
-  # Condig for tracing
-  event_trace_vendor: mojaloop
-  event_trace_state_enabled: true
-  # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
-  # Any combination of: `log,audit,trace`
-  event_async_override: ''
   
+  ## Error handling Configuration
   error_handling:
     include_cause_extension: false
     truncate_extensions: true
@@ -130,12 +127,19 @@ config:
   kafka_port: 9092
   kafka_partitioner: 'murmur2_random'
 
-  ## Node Configuration
+  ## Log Configuration
   log_level: info
-  ## Enable local logging of events being recorded
-  log_events_locally_enabled: false
-  
+  log_filter: 'error, warning, info'
   log_transport: file
+
+  ## Tracing Configuration
+  event_trace_vendor: mojaloop
+  event_log_filter: 'audit:*, log:warning, log:error'
+  # If set to true, only the metadata object from the event will be printed.
+  event_log_metadata_only: false
+  # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+  # Any combination of: `log,audit,trace`
+  event_async_override: 'audit'
 
 init:
   enabled: true

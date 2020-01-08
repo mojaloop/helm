@@ -102,25 +102,29 @@ spec:
           {{- end }}
           env:
             - name: LOG_LEVEL
-              value: {{ .Values.config.log_level }}
+              value: {{ .Values.config.log_level | quote}}
+            - name: LOG_FILTER
+              value: {{ .Values.config.log_filter | quote}}
             - name: CSL_LOG_TRANSPORT
-              value: {{ .Values.config.log_transport}}
+              value: {{ .Values.config.log_transport | quote}}
             {{- if .Values.sidecar.enabled }}
+            - name: EVENT_SDK_LOG_FILTER
+              value: {{ .Values.config.event_log_filter | quote }}
+            - name: EVENT_SDK_LOG_METADATA_ONLY
+              value: {{ .Values.config.event_log_metadata_only | quote }}
             - name: EVENT_SDK_SIDECAR_DISABLED
               value: "false"
-            - name: EVENT_SDK_SIDECAR_WITH_LOGGER
-              value: {{ .Values.config.log_events_locally_enabled | quote }}
             - name: EVENT_SDK_SERVER_HOST
               value: {{ .Values.sidecar.config.event_logger_grpc_host | quote }}
             - name: EVENT_SDK_SERVER_PORT
               value: {{ .Values.sidecar.config.event_logger_grpc_port | quote }}
             {{- end }}
             - name: EVENT_SDK_VENDOR_PREFIX
-              value: {{ .Values.config.event_trace_vendor | quote }}
+              value: {{ .Values.event_trace_vendor | quote }}
             - name: EVENT_SDK_TRACESTATE_HEADER_ENABLED
-              value: {{ .Values.config.event_trace_state_enabled | quote }}
+              value: {{ .Values.event_trace_state_enabled | quote }}
             - name: EVENT_SDK_ASYNC_OVERRIDE_EVENTS
-              value: {{ .Values.config.event_async_override }}
+              value: {{ .Values.config.event_async_override | quote }}
           volumeMounts:
           - name: {{ template "centralledger-handler-transfer-position.fullname" . }}-config-volume
             mountPath: /opt/central-ledger/config
@@ -156,7 +160,13 @@ spec:
               mountPath: /opt/event-sidecar/config
           env:
             - name: LOG_LEVEL
-              value: {{ .Values.sidecar.config.log_level }}
+              value: {{ .Values.sidecar.config.log_level | quote }}
+            - name: LOG_FILTER
+              value: {{ .Values.sidecar.config.log_filter | quote }}
+            - name: EVENT_SDK_LOG_FILTER
+              value: {{ .Values.sidecar.config.event_log_filter | quote }}
+            - name: EVENT_SDK_LOG_METADATA_ONLY
+              value: {{ .Values.sidecar.config.event_log_metadata_only | quote }}
         {{- end }}
       volumes:
         - name: {{ template "centralledger-handler-transfer-position.fullname" . }}-config-volume
