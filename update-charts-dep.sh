@@ -57,10 +57,6 @@ echo "Updating Central-Ledger..."
 helm dep up ./centralledger
 checkCommandResult
 
-echo "Updating Mock Pathfinder..."
-helm dep up ./mockpathfinder
-checkCommandResult
-
 echo "Updating Central-End-User-Registry..."
 helm dep up ./centralenduserregistry
 checkCommandResult
