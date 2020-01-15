@@ -52,6 +52,12 @@ spec:
             name: {{ template "finance-portal.fullname" . }}
         - secretRef:
             name: {{ template "finance-portal.fullname" . }}
+        {{- if .Values.JWTKeys }}
+        volumeMounts:
+          - name: {{ template "finance-portal.fullname" . }}-secrets-volume
+            mountPath: /opt/finance-portal-backend-service/secrets
+            readOnly: true
+        {{- end }}
         resources:
       - name: frontend
         image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
@@ -73,5 +79,12 @@ spec:
             name: {{ template "finance-portal.fullname" . }}
         - secretRef:
             name: {{ template "finance-portal.fullname" . }}
+      {{- if .Values.JWTKeys }}
+      volumes:
+        - name: {{ template "finance-portal.fullname" . }}-secrets-volume
+          secret:
+            secretName: {{ template "finance-portal.fullname" . }}-certs
+            defaultMode: 511
+      {{- end}}
       imagePullSecrets:
       - name: {{ .Values.imageCredentials.name }}
