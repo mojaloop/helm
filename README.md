@@ -65,7 +65,6 @@ Note: Please ensure that you update the Chart dependencies in the order show bel
 - `helm dep up centralkms`
 - `helm dep up forensicloggingsidecar`
 - `helm dep up centralledger`
-- `helm dep up mockpathfinder`
 - `helm dep up centralenduserregistry`
 - `helm dep up centralsettlement`
 - `helm dep up central`
