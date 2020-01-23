@@ -3519,9 +3519,12 @@ finance-portal:
       enabled: true
       externalPath: /(.*)
       hosts: 
-        api: finance-portal-frontend.local
-      annotations: {}
-        # kubernetes.io/ingress.class: nginx
+        api: finance-portal.local
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        ## NGINX Ingres Control < v0.22-
+        nginx.ingress.kubernetes.io/rewrite-target: /
+        ## NGINX Ingres Control >= v0.22+
         # nginx.ingress.kubernetes.io/rewrite-target: /$1
         
   backend:
@@ -3543,9 +3546,12 @@ finance-portal:
       enabled: false
       externalPath: /admin-portal-backend/(.*)
       hosts: 
-        api: finance-portal-backend.local
-      annotations: {}
-        # kubernetes.io/ingress.class: nginx
+        api: finance-portal.local
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        ## NGINX Ingres Control < v0.22-
+        nginx.ingress.kubernetes.io/rewrite-target: /
+        ## NGINX Ingres Control >= v0.22+
         # nginx.ingress.kubernetes.io/rewrite-target: /$1
 
 finance-portal-settlement-management:
@@ -3591,8 +3597,11 @@ finance-portal-settlement-management:
       hosts:
         api: operator-settlement.local
       annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: '/'
-        # kubernetes.io/ingress.class: nginx
+        kubernetes.io/ingress.class: nginx
+        ## NGINX Ingres Control < v0.22-
+        nginx.ingress.kubernetes.io/rewrite-target: /
+        ## NGINX Ingres Control >= v0.22+
+        # nginx.ingress.kubernetes.io/rewrite-target: /$1
         # kubernetes.io/tls-acme: "true"
       tls:
 
@@ -3629,8 +3638,11 @@ finance-portal-settlement-management:
       hosts:
         api: settlement-management.local
       annotations:  
-        nginx.ingress.kubernetes.io/rewrite-target: '/'
-        # kubernetes.io/ingress.class: nginx
+        kubernetes.io/ingress.class: nginx
+        ## NGINX Ingres Control < v0.22-
+        nginx.ingress.kubernetes.io/rewrite-target: /
+        ## NGINX Ingres Control >= v0.22+
+        # nginx.ingress.kubernetes.io/rewrite-target: /$1
         # kubernetes.io/tls-acme: "true"
       tls:
       # Secrets must be manually created in the namespace.
