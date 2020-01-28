@@ -55,9 +55,6 @@ echo "Packaging Central-Ledger..."
 helm package -u -d ./repo ./centralledger
 checkCommandResult
 
-echo "Packaging Mock Pathfinder..."
-helm package -u -d ./repo ./mockpathfinder
-checkCommandResult
 
 echo "Packaging Central-End-User-Registry..."
 helm package -u -d ./repo ./centralenduserregistry

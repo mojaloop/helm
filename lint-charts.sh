@@ -53,10 +53,6 @@ echo "Linting Central-Ledger..."
 helm lint ./centralledger
 checkCommandResult
 
-echo "Linting Mock Pathfinder..."
-helm lint ./mockpathfinder
-checkCommandResult
-
 echo "Linting Central-End-User-Registry..."
 helm lint ./centralenduserregistry
 checkCommandResult
