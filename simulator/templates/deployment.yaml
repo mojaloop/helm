@@ -1,9 +1,9 @@
-apiVersion: apps/v1beta2
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "simulators.fullname" . }}
+  name: {{ template "simulator.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "simulators.name" . }}
+    app.kubernetes.io/name: {{ include "simulator.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -12,12 +12,12 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "simulators.name" . }}
+      app.kubernetes.io/name: {{ include "simulator.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "simulators.name" . }}
+        app.kubernetes.io/name: {{ include "simulator.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
@@ -38,6 +38,7 @@ spec:
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
 {{- end }}
+      initContainers: {}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -68,67 +69,67 @@ spec:
             - name: LOG_LEVEL
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}-config
+                  name: {{ template "simulator.fullname" . }}-config
                   key: LOG_LEVEL
             - name: PARTIES_ENDPOINT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}-config
+                  name: {{ template "simulator.fullname" . }}-config
                   key: PARTIES_ENDPOINT
             - name: QUOTES_ENDPOINT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}-config
+                  name: {{ template "simulator.fullname" . }}-config
                   key: QUOTES_ENDPOINT
             - name: TRANSFERS_ENDPOINT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}-config
+                  name: {{ template "simulator.fullname" . }}-config
                   key: TRANSFERS_ENDPOINT
             - name: TRANSFERS_FULFIL_RESPONSE_DISABLED
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}-config
+                  name: {{ template "simulator.fullname" . }}-config
                   key: TRANSFERS_FULFIL_RESPONSE_DISABLED
             - name: TRANSFERS_FULFILMENT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}-config
+                  name: {{ template "simulator.fullname" . }}-config
                   key: TRANSFERS_FULFILMENT
             - name: TRANSFERS_CONDITION
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}-config
+                  name: {{ template "simulator.fullname" . }}-config
                   key: TRANSFERS_CONDITION
             - name: TRANSFERS_ILPPACKET
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}-config
+                  name: {{ template "simulator.fullname" . }}-config
                   key: TRANSFERS_ILPPACKET
             - name: MOCK_JWS_SIGNATURE
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}-config
+                  name: {{ template "simulator.fullname" . }}-config
                   key: MOCK_JWS_SIGNATURE
             - name: METRICS_DISABLED
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}-config
+                  name: {{ template "simulator.fullname" . }}-config
                   key: METRICS_DISABLED
             - name: METRICS_PREFIX
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}-config
+                  name: {{ template "simulator.fullname" . }}-config
                   key: METRICS_PREFIX
             - name: METRICS_TIMEOUT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}-config
+                  name: {{ template "simulator.fullname" . }}-config
                   key: METRICS_TIMEOUT
             - name: METRICS_SERVICENAME
               valueFrom:
                 configMapKeyRef:
-                  name: {{ template "simulators.fullname" . }}-config
+                  name: {{ template "simulator.fullname" . }}-config
                   key: METRICS_SERVICENAME
             - name: EVENT_SDK_VENDOR_PREFIX
               value: {{ .Values.config.event_trace_vendor | quote }}
@@ -148,19 +149,4 @@ spec:
 {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
-{{- end }}
-
-{{- if .Values.affinity }}
-      affinity:
-{{ toYaml .Values.affinity | indent 8 }}
-{{- end }}
-
-{{- if .Values.nodeSelector }}
-      nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 8 }}
-{{- end }}
-
-{{- if .Values.tolerations }}
-      tolerations:
-{{ toYaml .Values.tolerations | indent 8 }}
 {{- end }}
