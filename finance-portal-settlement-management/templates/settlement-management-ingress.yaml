@@ -1,0 +1,34 @@
+{{- if .Values.settlementManagement.ingress.enabled -}}
+{{- $serviceName := include "finance-portal-settlement-management.fullname" . -}}
+{{- $settlementManagementPort := .Values.settlementManagement.service.port -}}
+{{- $settlementManagementPath := .Values.settlementManagement.ingress.externalPath -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "finance-portal-settlement-management.fullname" . }}-settlement-management
+  labels:
+    app.kubernetes.io/name: {{ include "finance-portal-settlement-management.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+  annotations:
+    {{- range $key, $value := .Values.settlementManagement.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+      {{- end }}
+spec:
+  rules:
+    {{- range $host := .Values.settlementManagement.ingress.hosts }}
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: {{ $settlementManagementPath }}
+            backend:
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $settlementManagementPort }}
+    {{- end -}}
+  {{- if .Values.settlementManagement.ingress.tls }}
+  tls:
+    {{ toYaml .Values.settlementManagement.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}

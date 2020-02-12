@@ -12,7 +12,7 @@ global:
     ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
     nodeSelector: {}
 
-    ## Set toleration for schedular
+    ## Set toleration for scheduler
     ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations: []
 
@@ -26,7 +26,7 @@ ml-api-adapter-service:
   replicaCount: 1
   image:
     repository: mojaloop/ml-api-adapter
-    tag: v8.7.2
+    tag: v8.8.2
     command: '["node", "src/api/index.js"]'
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -40,7 +40,7 @@ ml-api-adapter-service:
     enabled: true
     image:
       repository: mojaloop/event-sidecar
-      tag: v8.7.1
+      tag: v8.7.3
       pullPolicy: Always
     readinessProbe:
       enabled: true
@@ -98,13 +98,17 @@ ml-api-adapter-service:
     security:
       callback:
         rejectUnauthorized: true
-    log_level: 'info'
+    log_level: info
+    log_transport: file
     max_callback_time_lag_dilation_milliseconds: 100
     max_fulfil_timeout_duration_seconds: 240
 
     # Config for tracing
     event_trace_vendor: mojaloop
     event_trace_state_enabled: true
+    # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+    # Any combination of: `log,audit,trace`
+    event_async_override: ''
     
     error_handling:
       include_cause_extension: false
@@ -152,7 +156,7 @@ ml-api-adapter-handler-notification:
   replicaCount: 1
   image:
     repository: mojaloop/ml-api-adapter
-    tag: v8.7.2
+    tag: v8.8.2
     command: '["node", "src/handlers/index.js", "handler", "--notification"]'
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -166,7 +170,7 @@ ml-api-adapter-handler-notification:
     enabled: true
     image:
       repository: mojaloop/event-sidecar
-      tag: v8.7.1
+      tag: v8.7.3
       pullPolicy: Always
     readinessProbe:
       enabled: true
@@ -211,7 +215,8 @@ ml-api-adapter-handler-notification:
     security:
       callback:
         rejectUnauthorized: true
-    log_level: 'info'
+    log_level: info
+    log_transport: file
     max_callback_time_lag_dilation_milliseconds: 100
     max_fulfil_timeout_duration_seconds: 240
     send_transfer_confirmation_to_payee: true
@@ -219,6 +224,9 @@ ml-api-adapter-handler-notification:
     # Config for tracing
     event_trace_vendor: mojaloop
     event_trace_state_enabled: true
+    # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+    # Any combination of: `log,audit,trace`
+    event_async_override: ''
     
     error_handling:
       include_cause_extension: false

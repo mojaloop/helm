@@ -1,0 +1,30 @@
+{{- $settlementsEndpoint := ( .Values.config.settlementsEndpoint | replace "$release_name" .Release.Name ) -}}
+{{- $centralLedgerEndpoint := ( .Values.config.centralLedgerEndpoint | replace "$release_name" .Release.Name) -}}
+{{- $settlementManagementEndpoint := ( .Values.config.settlementManagementEndpoint | replace "$release_name" .Release.Name) -}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "finance-portal.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "finance-portal.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+data:
+  SETTLEMENTS_ENDPOINT: {{ (printf "http://%s" $settlementsEndpoint) | quote }}
+  CENTRAL_LEDGER_ENDPOINT: {{ (printf "http://%s" $centralLedgerEndpoint) | quote }}
+  HUB_REPORT_URL_312: {{ (printf "http://%s-%s" .Release.Name .Values.config.report1) | quote }}
+  HUB_REPORT_URL_644: {{ (printf "http://%s-%s" .Release.Name .Values.config.report2) | quote }}
+  SETTLEMENT_MANAGEMENT_ENDPOINT: {{ (printf "%s%s:%s" "http://" $settlementManagementEndpoint .Values.config.settlementManagementPort) | quote }}
+  LISTEN_PORT: "3000"
+  NODE_ENV: "production"
+  BYPASS_AUTH:  {{ .Values.config.BypassAuth | quote }}
+  INSECURE_COOKIE: {{ .Values.config.InsecureCookie | quote }}
+  AUTH_SERVER: {{ .Values.config.oauthServer | quote }}
+  AUTH_SERVER_PORT: {{ .Values.config.oauthPort | quote }}
+  AUTH_SERVICE: {{ .Values.config.oauthLoginPath | quote }}
+  VALIDATE_SERVICE: {{ .Values.config.oauthTokenValidationPath | quote }}
+  USERINFO_SERVICE: {{ .Values.config.oauthUserInfo | quote }}
+  REVOKE_SERVICE: {{ .Values.config.oauthTokenRevoke | quote }}

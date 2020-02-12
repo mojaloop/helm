@@ -53,10 +53,6 @@ echo "Linting Central-Ledger..."
 helm lint ./centralledger
 checkCommandResult
 
-echo "Linting Mock Pathfinder..."
-helm lint ./mockpathfinder
-checkCommandResult
-
 echo "Linting Central-End-User-Registry..."
 helm lint ./centralenduserregistry
 checkCommandResult
@@ -71,6 +67,14 @@ checkCommandResult
 
 echo "Linting quoting-service..."
 helm lint ./quoting-service
+checkCommandResult
+
+echo "Linting finance-portal..."
+helm lint ./finance-portal
+checkCommandResult
+
+echo "Linting finance-portal-settlement-management..."
+helm lint ./finance-portal-settlement-management
 checkCommandResult
 
 echo "Linting transaction-requests-service..."

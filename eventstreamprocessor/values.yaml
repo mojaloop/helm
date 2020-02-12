@@ -13,16 +13,16 @@ global:
     ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
     nodeSelector: {}
 
-    ## Set toleration for schedular
+    ## Set toleration for scheduler
     ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    tolerations: {}
+    tolerations: []
 
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 image:
   repository: mojaloop/event-stream-processor
-  tag: v8.7.1-snapshot
+  tag: v8.8.0-snapshot
   pullPolicy: Always
 
 init:
@@ -49,8 +49,8 @@ service:
 
   annotations: {}
 
-  # This allows one to point the service to an external backend. 
-  # This is useful for local development where one wishes to hijack 
+  # This allows one to point the service to an external backend.
+  # This is useful for local development where one wishes to hijack
   # the communication from the service to the node layer and point
   # to a specific endpoint (IP, Port, etc).
   external:
@@ -58,7 +58,7 @@ service:
     # 10.0.2.2 is the magic IP for the host on virtualbox's network
     ip: 10.0.2.2
     ports:
-      api: 
+      api:
         name: event-stream-processor
         externalPort: 3082
 
@@ -81,13 +81,13 @@ ingress:
   # Used to create an Ingress record.
   hosts:
     api: event-stream-processor.local
-  
+
   externalPath: /
-  
+
   annotations:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  
+
   tls:
     # Secrets must be manually created in the namespace.
     # - secretName: chart-example-tls

@@ -1,4 +1,4 @@
-{{- $dbHost := (.Values.config.db_host | replace "$release_name" .Release.Name) }}
+{{- $dbHost := (.Values.config.db.central_ledger.host | replace "$release_name" .Release.Name) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,11 +11,10 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   "ALS_SERVICE_NAME": {{ template "als-oracle-pathfinder.fullname" . }}
-  "DB_USER": {{ .Values.config.db_user | quote }}
+  "DB_USER": {{ .Values.config.db.central_ledger.user | quote }}
   "DB_HOST": {{ $dbHost | quote }}
-  "DB_PORT": {{ default "3306" .Values.config.db_port | quote }}
-  "DB_NAME_CENTRAL_LEDGER": {{ .Values.config.db_database.central_ledger | quote }}
-  "DB_NAME_ACCOUNT_LOOKUP": {{ .Values.config.db_database.account_lookup | quote }}
+  "DB_PORT": {{ default "3306" .Values.config.db.central_ledger.port | quote }}
+  "DB_NAME": {{ .Values.config.db.central_ledger.database | quote }}
   "SERVER_PORT": {{ .Values.service.port | quote }}
   "PATHFINDER_TLS_HOST": {{ .Values.config.pathfinder.host | quote }}
   "PATHFINDER_TLS_PORT": {{ .Values.config.pathfinder.port | quote }}

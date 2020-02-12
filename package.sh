@@ -55,9 +55,6 @@ echo "Packaging Central-Ledger..."
 helm package -u -d ./repo ./centralledger
 checkCommandResult
 
-echo "Packaging Mock Pathfinder..."
-helm package -u -d ./repo ./mockpathfinder
-checkCommandResult
 
 echo "Packaging Central-End-User-Registry..."
 helm package -u -d ./repo ./centralenduserregistry
@@ -85,6 +82,14 @@ checkCommandResult
 
 echo "Packaging quoting-service..."
 helm package -u -d ./repo ./quoting-service
+checkCommandResult
+
+echo "Packaging finance-portal..."
+helm package -u -d ./repo ./finance-portal
+checkCommandResult
+
+echo "Packaging finance-portal-settlement-management..."
+helm package -u -d ./repo ./finance-portal-settlement-management
 checkCommandResult
 
 echo "Packaging transaction-requests-service..."
