@@ -66,9 +66,10 @@ config:
   db_user: 'central_ledger'
   db_password: 'oyMxgZChuu'
   db_database: 'central_ledger'
-  settlementsEndpoint: 'centralsettlement/v1'
-  centralLedgerEndpoint: 'centralledger-service'
-  settlementManagementEndpoint: 'settlement'
+  fxpEndpoint: '$release_name-fxp-server'
+  settlementsEndpoint: '$release_name-centralsettlement/v1'
+  centralLedgerEndpoint: '$release_name-centralledger-service'
+  settlementManagementEndpoint: '$release_name-finance-portal-settlement-management'
   settlementManagementPort: '5000'
   isOauthEnabled: false
   oauthServer: 'https://localhost'
@@ -79,7 +80,11 @@ config:
   oauthTokenRevoke: '/oauth2/revoke'
   oauthClientKey: 'testkey'
   oauthClientSecret: 'testsecret'
+  # Do not set to true in production
+  corsReflectOrigin: 'false'
+  # Do not set to true in production
   BypassAuth: 'true'
+  # Do not set to true in production
   InsecureCookie: 'false'
   is_populate:
     name: ispopulate
@@ -108,31 +113,37 @@ frontend:
     enabled: true
     externalPath: /(.*)
     hosts: 
-      api: finance-portal-frontend.local
-    annotations: {}
-      # kubernetes.io/ingress.class: nginx
+      api: finance-portal.local
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      ## NGINX Ingres Control < v0.22-
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      ## NGINX Ingres Control >= v0.22+
       # nginx.ingress.kubernetes.io/rewrite-target: /$1
-      
+
 backend:
   service:
     port: 3000
   image:
     repository: mojaloop/finance-portal-backend-service
-    tag: v8.8.0
+    tag: v8.8.8
     pullPolicy: Always
     port: 3000
   init:
-    enabled: false
+    enabled: true
     image:
       repository: mojaloop/finance-portal-backend-service
-      tag: v0.0.1
+      tag: v8.8.8
       pullPolicy: Always
   env: 'dev'
   ingress:
-    enabled: true
-    externalPath: /admin-portal-backend/(.*)
+    enabled: false
+    externalPath: /admin-portal-backend/
     hosts: 
-      api: finance-portal-backend.local
-    annotations: {}
-      # kubernetes.io/ingress.class: nginx
+      api: finance-portal.local
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      ## NGINX Ingres Control < v0.22-
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      ## NGINX Ingres Control >= v0.22+
       # nginx.ingress.kubernetes.io/rewrite-target: /$1
