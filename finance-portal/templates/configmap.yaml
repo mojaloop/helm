@@ -1,4 +1,6 @@
-{{- $settlementsEndpoint := ( .Values.config.settlementsEndpoint | replace "$release_name" .Release.Name ) -}}
+{{- $fxpEndpoint := ( .Values.config.fxpEndpoint | replace "$release_name" .Release.Name ) -}}
+{{- $externalSettlementsEndpoint := ( .Values.config.externalSettlementsEndpoint | replace "$release_name" .Release.Name ) -}}
+{{- $centralSettlementsEndpoint := ( .Values.config.centralSettlementsEndpoint | replace "$release_name" .Release.Name ) -}}
 {{- $centralLedgerEndpoint := ( .Values.config.centralLedgerEndpoint | replace "$release_name" .Release.Name) -}}
 {{- $settlementManagementEndpoint := ( .Values.config.settlementManagementEndpoint | replace "$release_name" .Release.Name) -}}
 
@@ -13,7 +15,9 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
-  SETTLEMENTS_ENDPOINT: {{ (printf "http://%s" $settlementsEndpoint) | quote }}
+  FXP_ENDPOINT: {{ (printf "http://%s" $settlementsEndpoint) | quote }}
+  EXTERNAL_SETTLEMENTS_ENDPOINT: {{ (printf "http://%s" $settlementsEndpoint) | quote }}
+  CENTRAL_SETTLEMENTS_ENDPOINT: {{ (printf "http://%s" $settlementsEndpoint) | quote }}
   CENTRAL_LEDGER_ENDPOINT: {{ (printf "http://%s" $centralLedgerEndpoint) | quote }}
   HUB_REPORT_URL_312: {{ (printf "http://%s-%s" .Release.Name .Values.config.report1) | quote }}
   HUB_REPORT_URL_644: {{ (printf "http://%s-%s" .Release.Name .Values.config.report2) | quote }}
