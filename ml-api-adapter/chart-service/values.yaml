@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   repository: mojaloop/ml-api-adapter
-  tag: v8.8.2
+  tag: v9.1.0
   command: '["node", "src/api/index.js"]'
 ## Optionally specify an array of imagePullSecrets.
 ## Secrets must be manually created in the namespace.
@@ -38,6 +38,8 @@ sidecar:
   config:
     event_logger_grpc_host: localhost
     event_logger_grpc_port: 50051
+    event_logger_log_filter: 'audit:*, log:info, log:warning, log:error'
+    event_logger_log_metadata_only: true
     log_level: info
 
 init:
@@ -91,6 +93,7 @@ config:
   max_callback_time_lag_dilation_milliseconds: 100
   max_fulfil_timeout_duration_seconds: 240
   log_level: info
+  log_filter: 'error, warning, info'
   log_transport: file
   ## Enable local logging of events being recorded
   log_events_locally_enabled: false
@@ -98,6 +101,7 @@ config:
   # Config for tracing
   event_trace_vendor: mojaloop
   event_trace_state_enabled: true
+  event_trace_traceid_per_vendor: false
   # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
   # Any combination of: `log,audit,trace`
   event_async_override: ''

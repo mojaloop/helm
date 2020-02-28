@@ -26,7 +26,7 @@ ml-api-adapter-service:
   replicaCount: 1
   image:
     repository: mojaloop/ml-api-adapter
-    tag: v8.8.2
+    tag: v9.1.0
     command: '["node", "src/api/index.js"]'
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -156,7 +156,7 @@ ml-api-adapter-handler-notification:
   replicaCount: 1
   image:
     repository: mojaloop/ml-api-adapter
-    tag: v8.8.2
+    tag: v9.1.0
     command: '["node", "src/handlers/index.js", "handler", "--notification"]'
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -183,6 +183,8 @@ ml-api-adapter-handler-notification:
     config:
       event_logger_grpc_host: localhost
       event_logger_grpc_port: 50051
+      event_logger_log_filter: 'audit:*, log:info, log:warning, log:error'
+      event_logger_log_metadata_only: true
       log_level: info
 
   init:
@@ -216,6 +218,7 @@ ml-api-adapter-handler-notification:
       callback:
         rejectUnauthorized: true
     log_level: info
+    log_filter: 'error, warning, info'
     log_transport: file
     max_callback_time_lag_dilation_milliseconds: 100
     max_fulfil_timeout_duration_seconds: 240

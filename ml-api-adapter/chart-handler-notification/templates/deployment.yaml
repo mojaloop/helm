@@ -77,11 +77,17 @@ spec:
           env:
             - name: LOG_LEVEL
               value: {{ .Values.config.log_level | quote }}
+            - name: LOG_FILTER
+              value: {{ .Values.config.log_filter }}
             {{- if .Values.sidecar.enabled }}
             - name: EVENT_SDK_SIDECAR_DISABLED
               value: "false"
             - name: EVENT_SDK_SIDECAR_WITH_LOGGER
               value: {{ .Values.config.log_events_locally_enabled | quote }}
+            - name: EVENT_SDK_LOG_FILTER
+              value: {{ .Values.sidecar.config.event_logger_log_filter | quote }}
+            - name: EVENT_SDK_LOG_METADATA_ONLY
+              value: {{ .Values.sidecar.config.event_logger_log_metadata_only | quote }}
             - name: EVENT_SDK_SERVER_HOST
               value: {{ .Values.sidecar.config.event_logger_grpc_host | quote }}
             - name: EVENT_SDK_SERVER_PORT
@@ -89,6 +95,8 @@ spec:
             {{- end }}
             - name: EVENT_SDK_VENDOR_PREFIX
               value: {{ .Values.config.event_trace_vendor | quote }}
+            - name: EVENT_SDK_TRACEID_PER_VENDOR
+              value: {{ .Values.config.event_trace_traceid_per_vendor | quote }}
             - name: EVENT_SDK_TRACESTATE_HEADER_ENABLED
               value: {{ .Values.config.event_trace_state_enabled | quote }}
             - name: EVENT_SDK_ASYNC_OVERRIDE_EVENTS
