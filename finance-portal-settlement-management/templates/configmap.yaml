@@ -1,0 +1,20 @@
+{{- $dbHost := (.Values.config.db_host | replace "$release_name" .Release.Name) }}
+{{- $centralLedger := (.Values.settlementManagement.config.CENTRAL_LEDGER_SERVICE_NAME | replace "$release_name" .Release.Name) }}
+{{- $settlements := (.Values.settlementManagement.config.SETTLEMENTS_SERVICE_NAME | replace "$release_name" .Release.Name) }}
+{{- $operatorSettlement := (.Values.settlementManagement.config.OPERATOR_SETTLEMENTS_SERVICE_NAME | replace "$release_name" .Release.Name) }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "finance-portal-settlement-management.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "finance-portal-settlement-management.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+data:
+  ADMIN_ENDPOINT: {{ (printf "%s%s:%s" "http://"  $centralLedger .Values.settlementManagement.config.CENTRAL_LEDGER_SERVICE_ADMIN_PORT) | quote }}
+  MIN_WINDOW_AGE_MS: {{ (printf "%s" .Values.settlementManagement.config.MIN_WINDOW_AGE_MS) | quote }}
+  SETTLEMENT_ENDPOINT: {{ (printf "%s%s:%s/%s" "http://" $settlements .Values.settlementManagement.config.SETTLEMENTS_SERVICE_PORT "v1") | quote }}
+  OPERATOR_SETTLEMENT_ENDPOINT: {{ (printf "%s%s:%s" "http://" $operatorSettlement .Values.settlementManagement.config.OPERATOR_SETTLEMENTS_SERVICE_PORT) | quote }}

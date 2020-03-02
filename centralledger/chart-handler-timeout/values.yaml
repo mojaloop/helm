@@ -11,7 +11,7 @@ containers:
   api:
     image:
       repository: mojaloop/central-ledger
-      tag: v8.8.0
+      tag: v9.2.1
       pullPolicy: Always
       command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
     service:
@@ -69,6 +69,8 @@ sidecar:
   config:
     event_logger_grpc_host: localhost
     event_logger_grpc_port: 50051
+    event_logger_log_filter: 'audit:*, log:info, log:warning, log:error'
+    event_logger_log_metadata_only: true
     log_level: info
     log_filter: 'error, warn, info'
     event_log_filter: 'audit:*, log:info, log:error, log:warn'
@@ -90,6 +92,14 @@ config:
   forensicloggingsidecar_disabled: true
   forensicloggingsidecar_host: forensicloggingsidecar-ledger
   forensicloggingsidecar_port: 5678
+
+  # Config for tracing
+  event_trace_vendor: mojaloop
+  event_trace_state_enabled: true
+  event_trace_traceid_per_vendor: false
+  # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+  # Any combination of: `log,audit,trace`
+  event_async_override: ''
 
   ## Error handling Configuration
   error_handling:
@@ -144,6 +154,11 @@ config:
   event_async_override: 'log,trace'
   event_trace_state_enabled: true
   event_traceid_per_vendor: false
+
+  ## Cache configuration
+  cache_enabled: false
+  cache_max_byte_size: 10000000
+  cache_expires_in_ms: 1000
 
 init:
   enabled: true

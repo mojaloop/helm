@@ -11,7 +11,7 @@ containers:
   api:
     image:
       repository: mojaloop/central-ledger
-      tag: v8.8.0
+      tag: v9.2.1
       pullPolicy: Always
       command: '["node", "src/handlers/index.js", "handler", "--get"]'
     service:
@@ -69,6 +69,8 @@ sidecar:
   config:
     event_logger_grpc_host: localhost
     event_logger_grpc_port: 50051
+    event_logger_log_filter: 'audit:*, log:info, log:warning, log:error'
+    event_logger_log_metadata_only: true
     log_level: info
     log_filter: 'error, warn, info'
     event_log_filter: 'audit:*, log:info, log:error, log:warn'
@@ -126,12 +128,9 @@ config:
   kafka_port: 9092
   kafka_partitioner: 'murmur2_random'
 
-  ## Cache config
-  cache_max_byte_size: 10000000
-
-  ## Log Configuration
-  log_level: info
-  log_filter: 'error, warn, info'
+  ## Node Configuration
+  log_level: 'info'
+  log_filter: 'error, warning, info'
   log_transport: file
 
   ## Condig for tracing
@@ -144,6 +143,11 @@ config:
   event_async_override: 'log,trace'
   event_trace_state_enabled: true
   event_traceid_per_vendor: false
+
+  ## Cache configuration
+  cache_enabled: false
+  cache_max_byte_size: 10000000
+  cache_expires_in_ms: 1000
 
 init:
   enabled: true

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #
 # Script to update all Helm Chart Dependencies
@@ -57,10 +57,6 @@ echo "Updating Central-Ledger..."
 helm dep up ./centralledger
 checkCommandResult
 
-echo "Updating Mock Pathfinder..."
-helm dep up ./mockpathfinder
-checkCommandResult
-
 echo "Updating Central-End-User-Registry..."
 helm dep up ./centralenduserregistry
 checkCommandResult
@@ -75,6 +71,14 @@ checkCommandResult
 
 echo "Updating quoting-service..."
 helm dep up ./quoting-service
+checkCommandResult
+
+echo "Updating finance-portal..."
+helm dep up ./finance-portal
+checkCommandResult
+
+echo "Updating finance-portal-settlement-management..."
+helm dep up ./finance-portal-settlement-management
 checkCommandResult
 
 echo "Updating transaction-request-service..."
