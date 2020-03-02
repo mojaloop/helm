@@ -2,20 +2,7 @@
 # This is a YAML-formatted file.
 
 # Declare global configurations
-global:
-  config:
-    ## Pod scheduling preferences.
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-    ##
-    affinity: {}
-
-    ## Node labels for pod assignment
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-    nodeSelector: {}
-
-    ## Set toleration for scheduler
-    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    tolerations: []
+global: {}
 
 # Declare variables to be passed into your templates.
 
@@ -46,11 +33,23 @@ containers:
       initialDelaySeconds: 60
       periodSeconds: 15
 
+## Pod scheduling preferences.
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+affinity: {}
+
+## Node labels for pod assignment
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+nodeSelector: {}
+
+## Set toleration for scheduler
+## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: []
+
 sidecar:
   enabled: true
   image:
     repository: mojaloop/event-sidecar
-    tag: v8.7.3
+    tag: v8.8.0
     pullPolicy: Always
     command: '["npm", "run", "start"]'
   service:
@@ -68,11 +67,12 @@ sidecar:
     initialDelaySeconds: 90
     periodSeconds: 15
   config:
-    event_logger_grpc_host: localhost
-    event_logger_grpc_port: 50051
-    event_logger_log_filter: 'audit:*, log:info, log:warning, log:error'
-    event_logger_log_metadata_only: true
+    event_log_grpc_host: localhost
+    event_log_grpc_port: 50051
+    event_log_filter: 'audit:*, log:info, log:warn, log:error'
+    event_log_metadata_only: true
     log_level: info
+    log_filter: 'error, warn, info'
 
 ## metric configuration for prometheus instrumentation
 metrics:
@@ -91,14 +91,7 @@ config:
   forensicloggingsidecar_host: forensicloggingsidecar-ledger
   forensicloggingsidecar_port: 5678
 
-  # Condig for tracing
-  event_trace_vendor: mojaloop
-  event_trace_state_enabled: true
-  event_trace_traceid_per_vendor: false
-  # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
-  # Any combination of: `log,audit,trace`
-  event_async_override: ''
-
+  ## Error handling Configuration
   error_handling:
     include_cause_extension: false
     truncate_extensions: true
@@ -131,13 +124,23 @@ config:
   # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
   kafka_host: '$release_name-kafka'
   kafka_port: 9092
+  kafka_partitioner: 'murmur2_random'
 
   ## Node Configuration
   log_level: 'info'
-  log_filter: 'error, warning, info'
+  log_filter: 'error, warn, info'
   log_transport: file
-  ## Enable local logging of events being recorded
-  log_events_locally_enabled: false
+
+  ## Tracing Configuration
+  event_trace_vendor: mojaloop
+  event_log_filter: 'audit:*, log:warn, log:error'
+  # If set to true, only the metadata object from the event will be printed.
+  event_log_metadata_only: false
+  # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+  # Any combination of: `log,audit,trace`
+  event_async_override: 'log,trace'
+  event_trace_state_enabled: true
+  event_traceid_per_vendor: false
 
   ## Cache configuration
   cache_enabled: false

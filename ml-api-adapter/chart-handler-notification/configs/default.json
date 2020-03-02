@@ -3,10 +3,10 @@
 {
     "PORT": {{ .Values.service.internalPort }},
     "ENDPOINT_SOURCE_URL": "http://{{ $centralServicesHost }}:{{ .Values.config.central_services_port }}",
-    "ENDPOINT_HEALTH_URL": "http://{{ $centralServicesHost }}:{{ .Values.config.central_services_port }}/health",
+    "ENDPOINT_HEALTH_URL": "http://{{ $centralServicesHost }}:{{ .Values.config.central_services_port }}{{ .Values.config.central_services_health_endpoint_param }}",
     "ENDPOINT_CACHE_CONFIG": {
-        "expiresIn": 180000,
-        "generateTimeout": 30000
+        "expiresIn": {{ .Values.config.endpoint_cache_expiresInMs }},
+        "generateTimeout": {{ .Values.config.endpoint_cache_generateTimeoutMs }}
     },
     "ENDPOINT_SECURITY":{
         "TLS": {
@@ -112,7 +112,8 @@
                             "queue.buffering.max.messages": 10000000
                         },
                         "topicConf": {
-                            "request.required.acks": "all"
+                            "request.required.acks": "all",
+                            "partitioner": "{{ .Values.config.kafka_partitioner }}"
                         }
                     }
                 },
@@ -130,7 +131,8 @@
                             "queue.buffering.max.messages": 10000000
                         },
                         "topicConf": {
-                            "request.required.acks": "all"
+                            "request.required.acks": "all",
+                            "partitioner": "{{ .Values.config.kafka_partitioner }}"
                         }
                     }
                 },
@@ -148,7 +150,8 @@
                             "queue.buffering.max.messages": 10000000
                         },
                         "topicConf": {
-                            "request.required.acks": "all"
+                            "request.required.acks": "all",
+                            "partitioner": "{{ .Values.config.kafka_partitioner }}"
                         }
                     }
                 }

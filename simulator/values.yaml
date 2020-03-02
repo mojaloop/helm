@@ -1,4 +1,4 @@
-# Default values for simulators.
+# Default values for simulator.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -11,6 +11,18 @@ image:
 
 imagePullSecrets: []
 #  - name: {{replace with credential}}
+
+## Pod scheduling preferences.
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+affinity: {}
+
+## Node labels for pod assignment
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+nodeSelector: {}
+
+## Set toleration for scheduler
+## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: []
 
 metrics:
   enabled: true
@@ -39,7 +51,10 @@ config:
   # Config for tracing
   event_trace_vendor: mojasim
   event_trace_state_enabled: false
-  
+  event_traceid_per_vendor: false
+  event_async_override: 'log,trace'
+  event_log_filter: 'audit:*, log:warn, log:error'
+
 service:
   type: ClusterIP
   port: 80
@@ -89,8 +104,3 @@ resources: {}
   #  cpu: 100m
   #  memory: 128Mi
 
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
