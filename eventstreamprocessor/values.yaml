@@ -118,7 +118,8 @@ config:
   fluentd_port: 24224
   fluentd_namespace: logstash
   efk_host: elasticsearch-master.logging:9200
-  efk_log: trace
+  efk_log: error
+  efk_compression: gzip
   efk_index_name: mojaloop
   efk_index_template: '{{index}}-{{date}}'
   # apm_host: '$release_name-apm-server'
@@ -130,6 +131,11 @@ config:
     ttl: 300000
     segment: trace
     expectSpanTimeout: 2000
+    CATBOX_MEMORY:
+      partition: trace-cache
+      maxByteSize: 524288000
+      minCleanupIntervalMsec: 100000
+
   # master span criteria config
   span:
     START_CRITERIA:
