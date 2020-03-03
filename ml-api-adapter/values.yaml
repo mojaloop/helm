@@ -1,20 +1,7 @@
 # Default values for central.
 # This is a YAML-formatted file.
 # Declare global configurations
-global:
-  config:
-    ## Pod scheduling preferences.
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-    ##
-    affinity: {}
-
-    ## Node labels for pod assignment
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-    nodeSelector: {}
-
-    ## Set toleration for scheduler
-    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    tolerations: []
+global: {}
 
 # Declare variables to be passed into your templates.
 
@@ -26,7 +13,7 @@ ml-api-adapter-service:
   replicaCount: 1
   image:
     repository: mojaloop/ml-api-adapter
-    tag: v8.8.2
+    tag: v9.3.0
     command: '["node", "src/api/index.js"]'
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -36,11 +23,23 @@ ml-api-adapter-service:
   #    - name: myregistrykey
     pullPolicy: Always
 
+  ## Pod scheduling preferences.
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  affinity: {}
+
+  ## Node labels for pod assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  nodeSelector: {}
+
+  ## Set toleration for scheduler
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations: []
+
   sidecar:
     enabled: true
     image:
       repository: mojaloop/event-sidecar
-      tag: v8.7.3
+      tag: v9.3.0
       pullPolicy: Always
     readinessProbe:
       enabled: true
@@ -51,8 +50,8 @@ ml-api-adapter-service:
       initialDelaySeconds: 90
       periodSeconds: 15
     config:
-      event_logger_grpc_host: localhost
-      event_logger_grpc_port: 50051
+      event_log_grpc_host: localhost
+      event_log_grpc_port: 50051
       log_level: info
 
   init:
@@ -93,23 +92,35 @@ ml-api-adapter-service:
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: '$release_name-kafka'
     kafka_port: 9092
+    kafka_partitioner: 'murmur2_random'
     central_services_host: '$release_name-centralledger-service'
     central_services_port: 80
     security:
       callback:
         rejectUnauthorized: true
-    log_level: info
-    log_transport: file
     max_callback_time_lag_dilation_milliseconds: 100
     max_fulfil_timeout_duration_seconds: 240
 
-    # Config for tracing
+    ## Log Configuration
+    log_level: info
+    log_filter: 'error, warn, info'
+    log_transport: file
+
+    ## Health Check endpoint
+    central_services_health_endpoint_param: '/health'
+
+    ## Tracing Configuration
     event_trace_vendor: mojaloop
     event_trace_state_enabled: true
+    event_log_filter: 'audit:*, log:warn, log:error'
+    # If set to true, only the metadata object from the event will be printed.
+    event_log_metadata_only: false
     # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
     # Any combination of: `log,audit,trace`
-    event_async_override: ''
-    
+    event_async_override: 'log,trace'
+    event_traceid_per_vendor: false
+
+    ## Error handling Configuration
     error_handling:
       include_cause_extension: false
       truncate_extensions: true
@@ -156,7 +167,7 @@ ml-api-adapter-handler-notification:
   replicaCount: 1
   image:
     repository: mojaloop/ml-api-adapter
-    tag: v8.8.2
+    tag: v9.3.0
     command: '["node", "src/handlers/index.js", "handler", "--notification"]'
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -166,11 +177,23 @@ ml-api-adapter-handler-notification:
   #    - name: myregistrykey
     pullPolicy: Always
 
+  ## Pod scheduling preferences.
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  affinity: {}
+
+  ## Node labels for pod assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  nodeSelector: {}
+
+  ## Set toleration for scheduler
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations: []
+
   sidecar:
     enabled: true
     image:
       repository: mojaloop/event-sidecar
-      tag: v8.7.3
+      tag: v9.3.0
       pullPolicy: Always
     readinessProbe:
       enabled: true
@@ -181,8 +204,10 @@ ml-api-adapter-handler-notification:
       initialDelaySeconds: 90
       periodSeconds: 15
     config:
-      event_logger_grpc_host: localhost
-      event_logger_grpc_port: 50051
+      event_log_grpc_host: localhost
+      event_log_grpc_port: 50051
+      event_log_filter: 'audit:*, log:info, log:warn, log:error'
+      event_log_metadata_only: true
       log_level: info
 
   init:
@@ -210,24 +235,41 @@ ml-api-adapter-handler-notification:
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: '$release_name-kafka'
     kafka_port: 9092
+    kafka_partitioner: 'murmur2_random'
     central_services_host: '$release_name-centralledger-service'
     central_services_port: 80
     security:
       callback:
         rejectUnauthorized: true
-    log_level: info
-    log_transport: file
     max_callback_time_lag_dilation_milliseconds: 100
     max_fulfil_timeout_duration_seconds: 240
+
+    ## Endpoint Cache Configuration
+    endpoint_cache_expiresInMs: 180000
+    endpoint_cache_generateTimeoutMs: 30000
+
+    ## Send callback confirmation to PayeeFSP in addition to the Mojaloop v1.0 Spec Callback to PayerFSP
     send_transfer_confirmation_to_payee: true
 
-    # Config for tracing
+    ## Log Configuration
+    log_level: info
+    log_filter: 'error, warn, info'
+    log_transport: file
+
+    ## Health Check endpoint
+    central_services_health_endpoint_param: '/health'
+
+    ## Tracing Configuration
     event_trace_vendor: mojaloop
-    event_trace_state_enabled: true
+    event_log_filter: 'audit:*, log:warn, log:error'
+    # If set to true, only the metadata object from the event will be printed.
+    event_log_metadata_only: false
     # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
     # Any combination of: `log,audit,trace`
-    event_async_override: ''
-    
+    event_async_override: 'log,trace'
+    event_traceid_per_vendor: false
+
+    ## Error handling Configuration
     error_handling:
       include_cause_extension: false
       truncate_extensions: true

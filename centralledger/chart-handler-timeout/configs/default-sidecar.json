@@ -1,8 +1,8 @@
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
 {
   "PORT": {{ .Values.sidecar.service.internalPort }},
-  "EVENT_LOGGER_GRPC_HOST": "{{ .Values.sidecar.config.event_logger_grpc_host }}",
-  "EVENT_LOGGER_GRPC_PORT": {{ .Values.sidecar.config.event_logger_grpc_port }},
+  "EVENT_LOGGER_GRPC_HOST": "{{ .Values.sidecar.config.event_log_grpc_host }}",
+  "EVENT_LOGGER_GRPC_PORT": {{ .Values.sidecar.config.event_log_grpc_port }},
   "INSTRUMENTATION": {
     "METRICS": {
       "DISABLED": false,
@@ -40,7 +40,8 @@
             "queue.buffering.max.messages": 10000000
           },
           "topicConf": {
-            "request.required.acks": "all"
+            "request.required.acks": "all",
+            "partitioner": "{{ .Values.config.kafka_partitioner }}"
           }
         }
       }
