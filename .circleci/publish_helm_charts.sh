@@ -15,6 +15,9 @@ git checkout -b $GITHUB_TARGET_BRANCH $GITHUB_PROJECT_USERNAME/$GITHUB_TARGET_BR
 echo "Merging tagged release code from $GITHUB_TAG..."
 git merge --no-commit $GITHUB_TAG &> git.log
 
+echo "Checking for merge conflicts"
+[[ $(git ls-files -u | wc -l) == 0 ]] || { echo "Merge conflict detected" | tee git.log && exit 1; }
+
 echo "Package helm charts..."
 sh package.sh
 

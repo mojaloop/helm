@@ -67,7 +67,8 @@ config:
   db_password: 'oyMxgZChuu'
   db_database: 'central_ledger'
   fxpEndpoint: '$release_name-fxp-server'
-  settlementsEndpoint: '$release_name-centralsettlement/v1'
+  externalSettlementsEndpoint: '$release_name-external-settlement-server'
+  centralSettlementsEndpoint: '$release_name-centralsettlement/v1'
   centralLedgerEndpoint: '$release_name-centralledger-service'
   settlementManagementEndpoint: '$release_name-finance-portal-settlement-management'
   settlementManagementPort: '5000'
@@ -80,7 +81,11 @@ config:
   oauthTokenRevoke: '/oauth2/revoke'
   oauthClientKey: 'testkey'
   oauthClientSecret: 'testsecret'
+  # Do not set to true in production
+  corsReflectOrigin: 'false'
+  # Do not set to true in production
   BypassAuth: 'true'
+  # Do not set to true in production
   InsecureCookie: 'false'
   is_populate:
     name: ispopulate
@@ -102,13 +107,13 @@ frontend:
     port: 80
   image:
     repository: mojaloop/finance-portal-ui
-    tag: v8.8.0
+    tag: v9.3.0
     pullPolicy: Always
     port: 80
   ingress:
     enabled: true
     externalPath: /(.*)
-    hosts: 
+    hosts:
       api: finance-portal.local
     annotations:
       kubernetes.io/ingress.class: nginx
@@ -122,20 +127,20 @@ backend:
     port: 3000
   image:
     repository: mojaloop/finance-portal-backend-service
-    tag: v8.8.8
+    tag: v9.1.3
     pullPolicy: Always
     port: 3000
   init:
     enabled: true
     image:
       repository: mojaloop/finance-portal-backend-service
-      tag: v8.8.8
+      tag: v9.1.2
       pullPolicy: Always
   env: 'dev'
   ingress:
     enabled: false
     externalPath: /admin-portal-backend/
-    hosts: 
+    hosts:
       api: finance-portal.local
     annotations:
       kubernetes.io/ingress.class: nginx
