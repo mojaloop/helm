@@ -24,10 +24,20 @@
       "CREATE_RETRY_INTERVAL_MILLIS": {{ .Values.config.db_create_retry_interval_millis }},
       "DEBUG": {{ .Values.config.db_debug }}
     },
+    "WINDOW_AGGREGATION": {
+      "RETRY_COUNT": 3,
+      "RETRY_INTERVAL": 3000
+    },
     "TRANSFER_VALIDITY_SECONDS": "432000",
     "HUB_PARTICIPANT": {
         "ID": {{ .Values.config.hub_participant.id }},
         "NAME": "{{ .Values.config.hub_participant.name }}"
+    },
+    "HANDLERS": {
+      "DISABLED": false,
+      "API": {
+        "DISABLED": false
+      }
     },
     "KAFKA": {
         "TOPIC_TEMPLATES": {
@@ -36,6 +46,33 @@
             "REGEX": "topic-(.*)-(.*)"
           }
         },
+        "CONSUMER": {
+          "SETTLEMENTWINDOW": {
+            "CLOSE": {
+              "config": {
+                "options": {
+                  "mode": 2,
+"batchSize": 1,
+"pollFrequency": 10,
+"recursiveTimeout": 100,
+"messageCharset": "utf8",
+"messageAsJSON": true,
+"sync": true,
+"consumeTimeout": 1000
+},
+"rdkafkaConf": {
+"client.id": "cs-con-setlementwindow-close",
+"group.id": "cs-group-setlementwindow-close",
+"metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+"socket.keepalive.enable": true
+},
+"topicConf": {
+"auto.offset.reset": "earliest"
+}
+}
+}
+}
+},
         "PRODUCER": {
           "NOTIFICATION": {
             "EVENT": {
@@ -47,16 +84,44 @@
                   "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                   "client.id": "cs-prod-notification-event",
                   "event_cb": true,
+                  "compression.codec": "none",
+                  "retry.backoff.ms": 100,
+                  "message.send.max.retries": 2,
                   "socket.keepalive.enable": true,
                   "queue.buffering.max.messages": 10000000,
-                  "dr_cb": false
+                  "batch.num.messages": 100,
+                  "dr_cb": false,
+                  "socket.blocking.max.ms": 1,
+                  "queue.buffering.max.ms": 1,
+                  "broker.version.fallback": "0.10.1.0",
+                  "api.version.request": true
                 },
                 "topicConf": {
                     "request.required.acks": "all"
                 }
               }
             }
-          }
+          },
+          "SETTLEMENTWINDOW": {
+"CLOSE": {
+"config": {
+"options": {
+"messageCharset": "utf8"
+},
+"rdkafkaConf": {
+"metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+"client.id": "cs-prod-setlementwindow-close",
+"event_cb": true,
+"dr_cb": true,
+"socket.keepalive.enable": true,
+"queue.buffering.max.messages": 10000000
+},
+"topicConf": {
+"request.required.acks": "all"
+}
+}
+}
+}
         }
   }
 }
