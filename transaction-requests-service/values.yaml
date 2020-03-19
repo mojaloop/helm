@@ -43,11 +43,6 @@ sidecar:
   image:
     repository: mojaloop/event-sidecar
     tag: v9.3.0
-    pullPolicy: Alwayssidecar:
-  enabled: false
-  image:
-    repository: mojaloop/event-sidecar
-    tag: v9.3.0
     pullPolicy: Always
     command: '["npm", "run", "start"]'
   service:
@@ -72,40 +67,6 @@ sidecar:
     log_level: info
     log_filter: 'error, warn, info'
 
-    command: '["npm", "run", "start"]'
-  service:
-    internalPort: 4001
-  readinessProbe:
-    enabled: true
-    httpGet:
-      path: /health
-    initialDelaySeconds: 120
-    periodSeconds: 15
-  livenessProbe:
-    enabled: true
-    httpGet:
-      path: /health
-    initialDelaySeconds: 90
-    periodSeconds: 15
-  config:
-    event_log_grpc_host: localhost
-    event_log_grpc_port: 50051
-    event_log_filter: 'audit:*, log:info, log:warn, log:error'
-    event_log_metadata_only: true
-    log_level: info
-    log_filter: 'error, warn, info'
-
-config:
-  # Central Services
-  central_services_host: '$release_name-centralledger-service'
-  central_services_port: 80
-  log_level: 'info'
-  log_transport: 'file'
-
-  error_handling:
-    include_cause_extension: false
-    truncate_extensions: true
-
 ## metric configuration for prometheus instrumentation
 metrics:
   ## flag to enable/disable the metrics end-points
@@ -114,7 +75,17 @@ metrics:
     timeout: 5000
     prefix: moja_
     defaultLabels:
-      serviceName: transaction-requests  
+      serviceName: transaction-requests
+
+config:
+  central_services_host: '$release_name-centralledger-service'
+  central_services_port: 80
+  log_level: 'info'
+  log_transport: 'file'
+  
+  error_handling:
+    include_cause_extension: false
+    truncate_extensions: true
 
 init:
   enabled: false
