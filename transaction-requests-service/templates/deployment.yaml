@@ -1,9 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "transactionrequestsservice.fullname" . }}
+  name: {{ template "transaction-requests-service.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "transactionrequestsservice.name" . }}
+    app.kubernetes.io/name: {{ include "transaction-requests-service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -12,37 +12,37 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "transactionrequestsservice.name" . }}
+      app.kubernetes.io/name: {{ include "transaction-requests-service.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "transactionrequestsservice.name" . }}
+        app.kubernetes.io/name: {{ include "transaction-requests-service.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/version: {{ .Chart.AppVersion }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     spec:
-      {{- if .Values.global.config.affinity }}
+{{- if .Values.global.config.affinity }}
       affinity:
-        {{ toYaml .Values.global.config.affinity | indent 8 }}
-        {{- end }}
-        {{- if .Values.global.config.nodeSelector }}
+{{ toYaml .Values.global.config.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.global.config.nodeSelector }}
       nodeSelector:
-        {{ toYaml .Values.global.config.nodeSelector | indent 8 }}
-        {{- end }}
-        {{- if .Values.global.config.tolerations }}
+{{ toYaml .Values.global.config.nodeSelector | indent 8 }}
+{{- end }}
+{{- if .Values.global.config.tolerations }}
       tolerations:
-        {{ toYaml .Values.global.config.tolerations | indent 8 }}
-        {{- end }}
-        {{- if .Values.init.enabled }}
-      initContainers: {
-      }
+{{ toYaml .Values.global.config.tolerations | indent 8 }}
+{{- end }}
+      {{- if .Values.init.enabled }}
+      initContainers: []
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ template "transaction-requests-service.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: {{ .Values.image.command }}
           ports:
             {{- range $port := .Values.service.ports }}
             - name: {{ $port.name }}
@@ -69,13 +69,81 @@ spec:
               value: {{ .Values.config.log_level }}
             - name: CSL_LOG_TRANSPORT
               value: {{ .Values.config.log_transport }}
+            - name: EVENT_SDK_LOG_FILTER
+              value: {{ .Values.config.event_log_filter | quote }}
+            - name: EVENT_SDK_LOG_METADATA_ONLY
+              value: {{ .Values.config.event_log_metadata_only | quote }}
+            {{- if .Values.sidecar.enabled }}
+            - name: EVENT_SDK_SIDECAR_DISABLED
+              value: "false"
+            - name: EVENT_SDK_SERVER_HOST
+              value: {{ .Values.sidecar.config.event_log_grpc_host | quote }}
+            - name: EVENT_SDK_SERVER_PORT
+              value: {{ .Values.sidecar.config.event_log_grpc_port | quote }}
+            {{- end }}
+            - name: EVENT_SDK_VENDOR_PREFIX
+              value: {{ .Values.config.event_trace_vendor | quote }}
+            - name: EVENT_SDK_TRACESTATE_HEADER_ENABLED
+              value: {{ .Values.config.event_trace_state_enabled | quote }}
+            - name: EVENT_SDK_ASYNC_OVERRIDE_EVENTS
+              value: {{ .Values.config.event_async_override | quote }}
+            - name: EVENT_SDK_TRACEID_PER_VENDOR
+              value: {{ .Values.config.event_traceid_per_vendor | quote }}
           volumeMounts:
-            - name: {{ template "transactionrequestsservice.fullname" . }}-config-volume
+            - name: {{ template "transaction-requests-service.fullname" . }}-config-volume
               mountPath: /opt/transaction-requests-service/config
+        {{- if .Values.sidecar.enabled }}
+        - name: {{ .Chart.Name }}-sidecar
+          image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
+          imagePullPolicy: {{ .Values.sidecar.image.pullPolicy }}
+          {{- if .Values.sidecar.image.imagePullSecrets }}
+          imagePullSecrets:
+          {{ toYaml .Values.sidecar.image.imagePullSecrets | indent 10 }}
+          {{- end }}
+          command: {{ .Values.sidecar.image.command }}
+          ports:
+            - containerPort: {{ .Values.sidecar.service.internalPort }}
+          {{- if .Values.sidecar.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.sidecar.readinessProbe.httpGet.path }}
+              port: {{ .Values.sidecar.service.internalPort }}
+            initialDelaySeconds: {{ .Values.sidecar.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.sidecar.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{- if .Values.sidecar.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.sidecar.livenessProbe.httpGet.path }}
+              port: {{ .Values.sidecar.service.internalPort }}
+            initialDelaySeconds: {{ .Values.sidecar.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.sidecar.livenessProbe.periodSeconds }}
+          {{- end }}
+          volumeMounts:
+            - name: {{ template "transaction-requests-service.fullname" . }}-sidecar-volume
+              mountPath: /opt/event-sidecar/config
+          env:
+            - name: LOG_LEVEL
+              value: {{ .Values.sidecar.config.log_level | quote }}
+            - name: LOG_FILTER
+              value: {{ .Values.sidecar.config.log_filter | quote }}
+            - name: EVENT_SDK_LOG_FILTER
+              value: {{ .Values.sidecar.config.event_log_filter | quote }}
+            - name: EVENT_SDK_LOG_METADATA_ONLY
+              value: {{ .Values.sidecar.config.event_log_metadata_only | quote }}
+        {{- end }}
       volumes:
-        - name: {{ template "transactionrequestsservice.fullname" . }}-config-volume
+        - name: {{ template "transaction-requests-service.fullname" . }}-config-volume
           configMap:
-            name: {{ template "transactionrequestsservice.fullname" . }}-config
+            name: {{ template "transaction-requests-service.fullname" . }}-config
             items:
               - key: default.json
                 path: default.json
+        {{- if .Values.sidecar.enabled }}
+        - name: {{ template "transaction-requests-service.fullname" . }}-sidecar-volume
+          configMap:
+            name: {{ template "transaction-requests-service.fullname" . }}-sidecar
+            items:
+            - key: default.json
+              path: default.json
+        {{- end }}

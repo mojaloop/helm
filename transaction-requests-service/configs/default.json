@@ -6,21 +6,25 @@
     "generateTimeout": 30000
   },
   "SWITCH_ENDPOINT": "http://{{ (default .Values.config.central_services_host $centralServicesHost) }}:{{ .Values.config.central_services_port }}",
+  "ERROR_HANDLING": {
+    "includeCauseExtension": {{ .Values.config.error_handling.include_cause_extension}},
+    "truncateExtensions": {{ .Values.config.error_handling.truncate_extensions }}
+  },
   "INSTRUMENTATION": {
-  "METRICS": {
-    "DISABLED": {{ not .Values.metrics.enabled }},
-    "labels": {
-      "eventId": "*"
-    },
-    "config": {
-      "timeout": {{ .Values.metrics.config.timeout }},
-      "prefix": {{ .Values.metrics.config.prefix | quote }},
-      "defaultLabels": {
-      {{- range $key, $value := .Values.metrics.config.defaultLabels }}
-      {{ $key  | quote }}: {{ $value | quote }}
-      {{- end }}
+    "METRICS": {
+      "DISABLED": {{ not .Values.metrics.enabled }},
+      "labels": {
+        "eventId": "*"
+      },
+      "config": {
+        "timeout": {{ .Values.metrics.config.timeout }},
+        "prefix": {{ .Values.metrics.config.prefix | quote }},
+        "defaultLabels": {
+        {{- range $key, $value := .Values.metrics.config.defaultLabels }}
+        {{ $key  | quote }}: {{ $value | quote }}
+        {{- end }}
+        }
       }
     }
-  }
   }
 }
