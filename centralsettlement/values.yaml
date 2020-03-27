@@ -21,7 +21,7 @@ global:
 replicaCount: 1
 image:
   repository: mojaloop/central-settlement
-  tag: v9.2.1
+  tag: v9.3.1
   pullPolicy: Always
 
 readinessProbe:
@@ -43,6 +43,55 @@ config:
   # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
   kafka_host: '$release_name-kafka'
   kafka_port: 9092
+  kafka:
+    consumer:
+      settlementwindow:
+        close:
+          config:
+            options:
+              mode: 2
+              batchSize: 1
+              pollFrequency: 10
+              recursiveTimeout: 100
+              messageCharset: 'utf8'
+              messageAsJSON: true
+              sync: true
+              consumeTimeout: 1000
+            rdkafkaConf:
+              socket_keepalive_enable: true
+    producer:
+      notification:
+        event:
+          config:
+            options:
+              messageCharset: 'utf8'
+            rdkafkaConf:
+              event_cb: true
+              compression_codec: 'none'
+              retry_backoff_ms: 100
+              message_send_max_retries: 2
+              socket_keepalive_enable: true
+              batch_num_messages: 100
+              dr_cb: false
+              socket_blocking_max_ms: 1
+              queue_buffering_max_ms: 1
+              broker_version_fallback: '0.10.1.0'
+              api_version_request: true
+            topicConf:
+              request_required_acks: 'all'
+              partitioner: 'murmur2_random'
+      settlementwindow:
+        close:
+          config:
+            options:
+              messageCharset: 'utf8'
+            rdkafkaConf:
+              event_cb: true
+              dr_cb: true
+              socket_keepalive_enable: true
+            topicConf:
+              request_required_acks: "all"
+              partitioner: 'murmur2_random'
   ## DB Configuration
   # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
   db_type: 'mysql'
@@ -62,6 +111,15 @@ config:
   db_reap_interval_millis: 1000
   db_create_retry_interval_millis: 200
   db_debug: false
+  # Api Handler Configuration
+  handlers:
+    disabled: false
+    api:
+      disabled: false
+  # Settlement Window aggregation Configuration
+  window_aggregation:
+    retry_count: 3
+    retry_interval: 3000
   hub_participant:
     id: 1
     name: hub
