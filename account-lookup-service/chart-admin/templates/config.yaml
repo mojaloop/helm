@@ -11,3 +11,18 @@ metadata:
 data:
   default.json: {{ (tpl (.Files.Get "configs/default.json") . ) | quote }}
   knexfile.js: {{ (tpl (.Files.Get "configs/knexfile.js") . ) | quote }}
+{{- if .Values.sidecar.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "account-lookup-service-admin.fullname" . }}-sidecar
+  labels:
+    app.kubernetes.io/name: {{ include "account-lookup-service-admin.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+data:
+  default.json: {{ (tpl (.Files.Get "configs/default-sidecar.json") . ) | quote }}
+{{- end }}
