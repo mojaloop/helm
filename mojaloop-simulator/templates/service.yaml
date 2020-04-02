@@ -1,0 +1,77 @@
+{{- range $name, $customConfig := .Values.simulators }}
+{{- $config := merge $customConfig $.Values.defaults }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: sim-{{ $name }}-backend
+  labels:
+    app: sim-{{ $name }}-backend
+    chart: {{ template "mojaloop-simulator.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+spec:
+   type: ClusterIP
+   ports:
+     - port: 3000
+       protocol: TCP
+       name: simapi
+       targetPort: simapi
+     - port: 3002
+       protocol: TCP
+       name: reportapi
+       targetPort: reportapi
+     - port: 3003
+       protocol: TCP
+       name: testapi
+       targetPort: testapi
+   selector:
+     app: sim-{{ $name }}-backend
+     release: {{ $.Release.Name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sim-{{ $name }}-scheme-adapter
+  labels:
+    app: sim-{{ $name }}-scheme-adapter
+    chart: {{ template "mojaloop-simulator.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+spec:
+   type: ClusterIP
+   ports:
+     - port: 4000
+       protocol: TCP
+       name: inboundapi
+       targetPort: inboundapi
+     - port: 4001
+       protocol: TCP
+       name: outboundapi
+       targetPort: outboundapi
+   selector:
+     app: sim-{{ $name }}-scheme-adapter
+     release: {{ $.Release.Name }}
+---
+{{- if $config.config.cache.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: sim-{{ $name }}-cache
+  labels:
+    app: sim-{{ $name }}-cache
+    chart: {{ template "mojaloop-simulator.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+spec:
+   type: ClusterIP
+   ports:
+     - port: 6379
+       protocol: TCP
+       name: redis
+       targetPort: redis
+   selector:
+     app: sim-{{ $name }}-cache
+     release: {{ $.Release.Name }}
+{{- end }}
+---
+{{ end }}

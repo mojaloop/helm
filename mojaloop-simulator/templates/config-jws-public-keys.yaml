@@ -1,0 +1,26 @@
+{{- if .Values.simulators }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sim-jws-public-keys
+  labels:
+    app: sim
+    chart: {{ template "mojaloop-simulator.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+data:
+  {{- range $name, $customConfig := .Values.simulators }}
+  {{- $config := merge $customConfig $.Values.defaults }}
+  {{- if and (eq ($config.config.schemeAdapter.env.VALIDATE_INBOUND_JWS | upper) "TRUE") (not $config.config.schemeAdapter.secrets.jws.pubKeyConfigMapName) }}
+  {{- if eq $config.config.schemeAdapter.secrets.jws.publicKey "" }}
+    {{- fail (printf "INBOUND_JWS enabled and jws public key not specified for '%s'. You need to specify %s.schemeAdapter.secrets.jws.publicKey or %s.schemeAdapter.secrets.jws.pubKeyConfigMapName." $name $name $name) }}
+  {{- end }}
+  {{ $name }}.pem: |-
+{{ $config.config.schemeAdapter.secrets.jws.publicKey | indent 4 }}
+  {{- end }}
+  {{- end }}
+  {{- range $name, $key := .Values.sharedJWSPubKeys }}
+  {{ $name }}.pem: |-
+{{ $key | indent 4 }}
+  {{- end }}
+{{- end }}
