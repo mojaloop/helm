@@ -8,7 +8,7 @@ containers:
   api:
     image:
       repository: mojaloop/account-lookup-service
-      tag: v9.3.1
+      tag: v9.4.4
       pullPolicy: IfNotPresent
       command: '["node", "src/index.js", "server", "--api"]'
     service:
@@ -19,7 +19,7 @@ containers:
   admin:
     image:
       repository: mojaloop/account-lookup-service
-      tag: v9.3.1
+      tag: v9.4.4
       pullPolicy: IfNotPresent
       command: '["node", "src/index.js", "server", "--admin"]'
     service:
@@ -43,6 +43,49 @@ nodeSelector: {}
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
 
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+  initialDelaySeconds: 60
+  periodSeconds: 15
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+  initialDelaySeconds: 60
+  periodSeconds: 15
+
+sidecar:
+  enabled: true
+  image:
+    repository: mojaloop/event-sidecar
+    tag: v9.3.0
+    pullPolicy: Always
+    command: '["npm", "run", "start"]'
+  service:
+    internalPort: 4003
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 120
+    periodSeconds: 15
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 90
+    periodSeconds: 15
+  config:
+    event_log_grpc_host: localhost
+    event_log_grpc_port: 50051
+    event_log_filter: 'audit:*, log:info, log:warn, log:error'
+    event_log_metadata_only: true
+    log_level: info
+    log_filter: 'error, warn, info'
+
 ## metric configuration for prometheus instrumentation
 metrics:
   ## flag to enable/disable the metrics end-points
@@ -57,10 +100,18 @@ config:
   ## Central-Ledger config
   central_services_host: '$release_name-centralledger-service'
   central_services_port: 80
+  log_level: 'info'
+  log_transport: 'file'
 
   error_handling:
     include_cause_extension: false
     truncate_extensions: true
+
+  ## Kafka Configuration
+  # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+  kafka_host: '$release_name-kafka'
+  kafka_port: 9092
+  kafka_partitioner: 'murmur2_random'
 
   end_point_cache:
     expiresIn: 180000
