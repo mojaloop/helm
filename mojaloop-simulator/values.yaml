@@ -69,7 +69,10 @@
 # * look for references to replicaCount in the charts/values. Is it set, or whatever?
 # * scale Redis
 # * changing JWS_SIGNING_KEY_PATH currently breaks the chart because it's nastily hard-coded. It
-#   should be possible to use the Spring filepath functions to avoid this.
+#   should be possible to use the Spring filepath functions to avoid this. Similarly, changing
+#   RULES_FILE will have a similar effect. Alternatively, make these unconfigured by default. I.e.
+#   comment them out, hard-code them and add a warning to the user in the config. (Is there a
+#   scenario where the user should want to configure them? I don't think so..).
 #   (https://masterminds.github.io/sprig/paths.html)
 # * put sim inbound API on port 80
 # * supply more documentation, especially a range of examples, and preferably documentation that is
@@ -86,6 +89,7 @@
 # * can _probably_ remove port numbers from services to simplify chart (although perhaps not? try
 #   to port-forward with a named port instead of a numbered port?)
 
+
 simulators:
   # Every key added to this `simulators` object will be a simulator that takes on the default
   # config below. The default is deliberately left empty so nothing is deployed by default.
@@ -95,16 +99,16 @@ simulators:
 defaultProbes: &defaultProbes
   livenessProbe:
     enabled: true
-    initialDelaySeconds: 30
+    initialDelaySeconds: 3
     periodSeconds: 30
     timeoutSeconds: 10
     successThreshold: 1
     failureThreshold: 3
   readinessProbe:
     enabled: true
-    initialDelaySeconds: 30
-    periodSeconds: 30
-    timeoutSeconds: 10
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 5
     successThreshold: 1
     failureThreshold: 3
 
@@ -331,6 +335,18 @@ defaults: &defaults
       # Example: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#init-containers-in-use
       initContainers: {}
 
+      # Supply JSON rules here as a string
+      # Example:
+      # rules: |-
+      #   [
+      #     {
+      #       "ruleId": 1,
+      #       .. etc.
+      #     }
+      #   ]
+      rules: |-
+        []
+
       env:
         ##### Section for simulator backend container #####
         # This is the endpoint the backend expects to communicate with the scheme adapter on.
@@ -382,7 +398,7 @@ defaults: &defaults
         # Specifies the location of a rules file for the simulator backend. Rules can be used to produce
         # specific simulator behaviours in response to incoming requests that match certain conditions.
         # e.g. a rule can be used to trigger NDC errors given transfers between certain limits.
-        RULES_FILE: ./rules.json
+        RULES_FILE: /rules/rules.json
 
   ingress:
     enabled: true

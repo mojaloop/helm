@@ -85,11 +85,19 @@ spec:
         - name: tls-secrets
           mountPath: "/secrets/"
         {{- end }}
-        envFrom:
-        - configMapRef:
-            name: sim-{{ $name }}-scheme-adapter
-          resources:
-{{ toYaml $config.config.schemeAdapter.resources | indent 12 }}
+        env:
+        - name: CACHE_HOST
+          value: {{ printf "sim-%s-cache" $name | quote }}
+        - name: BACKEND_ENDPOINT
+          value: {{ printf "sim-%s-backend:3000" $name }}
+        - name: DFSP_ID
+          value: {{ $name | quote }}
+        {{- range $k, $v := $config.config.schemeAdapter.env }}
+        - name: {{ $k }}
+          value: {{ $v | quote }}
+        {{- end }}
+        resources:
+{{ toYaml $config.config.schemeAdapter.resources | indent 10 }}
       imagePullSecrets:
         - name: {{ $config.config.imagePullSecretName }}
     {{- with $config.nodeSelector }}
@@ -104,6 +112,7 @@ spec:
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -160,11 +169,26 @@ spec:
             scheme: HTTP
 {{ $config.config.backend.livenessProbe | toYaml | indent 10 -}}
         {{- end }}
-        envFrom:
-        - configMapRef:
-            name: sim-{{ $name }}-backend
+        env:
+        - name: OUTBOUND_ENDPOINT
+          value: "http://sim-{{ $name }}-scheme-adapter:{{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}"
+        - name: SCHEME_NAME
+          value: {{ $name | quote }}
+        - name: DFSP_ID
+          value: {{ $name | quote }}
+        {{- range $k, $v := $config.config.backend.env }}
+        - name: {{ $k }}
+          value: {{ $v | quote }}
+        {{- end }}
         resources:
-{{ toYaml $config.config.backend.resources | indent 12 }}
+{{ toYaml $config.config.backend.resources | indent 10 }}
+        volumeMounts:
+        - name: sim-rules
+          mountPath: /rules/
+      volumes:
+      - name: sim-rules
+        configMap:
+          name: sim-{{ $name }}-rules
       imagePullSecrets:
         - name: {{ $config.config.imagePullSecretName }}
     {{- with $config.nodeSelector }}

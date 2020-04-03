@@ -1,0 +1,15 @@
+{{- range $name, $customConfig := .Values.simulators }}
+{{- $config := merge $customConfig $.Values.defaults }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sim-{{ $name }}-rules
+  labels:
+    app: sim-{{ $name }}
+    chart: {{ template "mojaloop-simulator.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+data:
+  rules.json: {{ $config.config.backend.rules | quote }}
+---
+{{- end }}
