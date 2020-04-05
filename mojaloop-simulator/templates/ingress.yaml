@@ -21,15 +21,15 @@ spec:
       - host: {{ $host }}
         http:
           paths:
-          - path: /sim/{{ $name }}/outbound{{ if $.Values.ingress.modernIngressController }}(.*){{ end }}
+          - path: /sim/{{ $name }}/outbound{{ if $.Values.ingress.modernIngressController }}{{ $.Values.ingress.modernIngressControllerRegex }}{{ end }}
             backend:
               serviceName: sim-{{ $name }}-scheme-adapter
               servicePort: outboundapi
-          - path: /sim/{{ $name }}/inbound{{ if $.Values.ingress.modernIngressController }}(.*){{ end }}
+          - path: /sim/{{ $name }}/inbound{{ if $.Values.ingress.modernIngressController }}{{ $.Values.ingress.modernIngressControllerRegex }}{{ end }}
             backend:
               serviceName: sim-{{ $name }}-scheme-adapter
               servicePort: inboundapi
-          - path: /sim/{{ $name }}/test{{ if $.Values.ingress.modernIngressController }}(.*){{ end }}
+          - path: /sim/{{ $name }}/test{{ if $.Values.ingress.modernIngressController }}{{ $.Values.ingress.modernIngressControllerRegex }}{{ end }}
             backend:
               serviceName: sim-{{ $name }}-backend
               servicePort: testapi
