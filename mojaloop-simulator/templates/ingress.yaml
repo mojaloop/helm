@@ -1,0 +1,40 @@
+{{ if .Values.simulators }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: simulators
+  labels:
+    app: simulators
+    chart: {{ template "mojaloop-simulator.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+{{- with .Values.ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  rules:
+  {{- range $name, $customConfig := .Values.simulators }}
+  {{- $config := merge $customConfig $.Values.defaults }}
+  {{- if $config.ingress.enabled -}}
+    {{- range $host := $config.ingress.hosts }}
+      - host: {{ $host }}
+        http:
+          paths:
+          - path: /sim/{{ $name }}/outbound{{ $.Values.ingress.ingressPathRewriteRegex }}
+            backend:
+              serviceName: sim-{{ $name }}-scheme-adapter
+              servicePort: outboundapi
+          - path: /sim/{{ $name }}/inbound{{ $.Values.ingress.ingressPathRewriteRegex }}
+            backend:
+              serviceName: sim-{{ $name }}-scheme-adapter
+              servicePort: inboundapi
+          - path: /sim/{{ $name }}/test{{ $.Values.ingress.ingressPathRewriteRegex }}
+            backend:
+              serviceName: sim-{{ $name }}-backend
+              servicePort: testapi
+    {{- end }}
+  {{- end }}
+  {{- end }}
+---
+{{ end }}

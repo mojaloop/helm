@@ -1,0 +1,259 @@
+{{- range $name, $customConfig := .Values.simulators }}
+{{- $config := merge $customConfig $.Values.defaults }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sim-{{ $name }}-scheme-adapter
+  labels:
+    app: sim-{{ $name }}-scheme-adapter
+    chart: {{ template "mojaloop-simulator.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+spec:
+  replicas: {{ $config.replicaCount }}
+  selector:
+    matchLabels:
+      app: sim-{{ $name }}-scheme-adapter
+      release: {{ $.Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: sim-{{ $name }}-scheme-adapter
+        release: {{ $.Release.Name }}
+    spec:
+      volumes:
+      {{- if eq ($config.config.schemeAdapter.env.JWS_SIGN | upper) "TRUE" }}
+      - name: jws-private-key
+        secret:
+          {{- if $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
+          secretName: {{ $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
+          {{- else }}
+          secretName: sim-{{ $name }}-jws-priv-key
+          {{- end }}
+      {{- end }}
+      - name: jws-public-keys
+        configMap:
+          {{- if $config.config.schemeAdapter.secrets.jws.publicKeyConfigMapName }}
+          name: {{ $config.config.schemeAdapter.secrets.jws.publicKeyConfigMapName }}
+          {{- else }}
+          name: sim-jws-public-keys
+          {{- end }}
+      {{- if $config.config.schemeAdapter.secrets.tlsSecretName }}
+      - name: tls-secrets
+        secret:
+          secretName: {{ $config.config.schemeAdapter.secrets.tlsSecretName }}
+      {{- end }}
+      {{- if $config.config.schemeAdapter.initContainers }}
+      initContainers:
+{{ $config.config.schemeAdapter.initContainers | toYaml | indent 6 }}
+      {{- end }}
+      containers:
+      - name: scheme-adapter
+        image: "{{ $config.config.schemeAdapter.image.repository }}:{{ $config.config.schemeAdapter.image.tag }}"
+        imagePullPolicy: {{ $config.config.schemeAdapter.image.pullPolicy }}
+        ports:
+          - name: inboundapi
+            containerPort: 4000
+            protocol: TCP
+          - name: outboundapi
+            containerPort: 4001
+            protocol: TCP
+        {{- if $config.config.schemeAdapter.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 4001
+            scheme: HTTP
+{{ $config.config.backend.readinessProbe | toYaml | indent 10 -}}
+        {{- end }}
+        {{- if $config.config.schemeAdapter.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 4001
+            scheme: HTTP
+{{ $config.config.backend.livenessProbe | toYaml | indent 10 -}}
+        {{- end }}
+        volumeMounts:
+        - name: jws-public-keys
+          mountPath: {{ $config.config.schemeAdapter.env.JWS_VERIFICATION_KEYS_DIRECTORY }}
+        {{- if eq ($config.config.schemeAdapter.env.JWS_SIGN | upper) "TRUE" }}
+        - name: jws-private-key
+          mountPath: "/jwsSigningKey/"
+        {{- end }}
+        {{- if $config.config.schemeAdapter.secrets.tlsSecretName }}
+        - name: tls-secrets
+          mountPath: "/secrets/"
+        {{- end }}
+        env:
+        - name: CACHE_HOST
+          value: {{ printf "sim-%s-cache" $name | quote }}
+        - name: BACKEND_ENDPOINT
+          value: {{ printf "sim-%s-backend:3000" $name }}
+        - name: DFSP_ID
+          value: {{ $name | quote }}
+        {{- range $k, $v := $config.config.schemeAdapter.env }}
+        - name: {{ $k }}
+          value: {{ $v | quote }}
+        {{- end }}
+        resources:
+{{ toYaml $config.config.schemeAdapter.resources | indent 10 }}
+      imagePullSecrets:
+        - name: {{ $config.config.imagePullSecretName }}
+    {{- with $config.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with $config.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with $config.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sim-{{ $name }}-backend
+  labels:
+    app: sim-{{ $name }}-backend
+    chart: {{ template "mojaloop-simulator.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+spec:
+  replicas: {{ $config.replicaCount }}
+  selector:
+    matchLabels:
+      app: sim-{{ $name }}-backend
+      release: {{ $.Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: sim-{{ $name }}-backend
+        release: {{ $.Release.Name }}
+    spec:
+      {{- if $config.config.backend.initContainers }}
+      initContainers:
+{{ $config.config.backend.initContainers | toYaml | indent 6 }}
+      {{- end }}
+      containers:
+      - name: backend
+        image: "{{ $config.config.backend.image.repository }}:{{ $config.config.backend.image.tag }}"
+        imagePullPolicy: {{ $config.config.backend.image.pullPolicy }}
+        ports:
+          - name: simapi
+            containerPort: 3000
+            protocol: TCP
+          - name: reportapi
+            containerPort: 3002
+            protocol: TCP
+          - name: testapi
+            containerPort: 3003
+            protocol: TCP
+        {{- if $config.config.backend.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+            scheme: HTTP
+{{ $config.config.backend.readinessProbe | toYaml | indent 10 -}}
+        {{- end }}
+        {{- if $config.config.backend.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+            scheme: HTTP
+{{ $config.config.backend.livenessProbe | toYaml | indent 10 -}}
+        {{- end }}
+        env:
+        - name: OUTBOUND_ENDPOINT
+          value: "http://sim-{{ $name }}-scheme-adapter:{{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}"
+        - name: SCHEME_NAME
+          value: {{ $name | quote }}
+        - name: DFSP_ID
+          value: {{ $name | quote }}
+        {{- range $k, $v := $config.config.backend.env }}
+        - name: {{ $k }}
+          value: {{ $v | quote }}
+        {{- end }}
+        resources:
+{{ toYaml $config.config.backend.resources | indent 10 }}
+        volumeMounts:
+        - name: sim-rules
+          mountPath: /rules/
+      volumes:
+      - name: sim-rules
+        configMap:
+          name: sim-{{ $name }}-rules
+      imagePullSecrets:
+        - name: {{ $config.config.imagePullSecretName }}
+    {{- with $config.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with $config.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with $config.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+---
+{{- if $config.config.cache.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sim-{{ $name }}-cache
+  labels:
+    app: sim-{{ $name }}-cache
+    chart: {{ template "mojaloop-simulator.chart" $ }}
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+spec:
+  replicas: {{ $config.replicaCount }}
+  selector:
+    matchLabels:
+      app: sim-{{ $name }}-cache
+      release: {{ $.Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: sim-{{ $name }}-cache
+        release: {{ $.Release.Name }}
+    spec:
+      containers:
+      - name: cache
+        image: "{{ $config.config.cache.image.repository }}:{{ $config.config.cache.image.tag }}"
+        imagePullPolicy: {{ $config.config.cache.image.pullPolicy }}
+        ports:
+        - name: redis
+          containerPort: 6379
+          protocol: TCP
+        {{- if $config.config.cache.livenessProbe.enabled }}
+        livenessProbe:
+{{ $config.config.backend.livenessProbe | toYaml | indent 10 -}}
+          exec:
+            command:
+            - sh
+            - -c
+            - redis-cli ping {{ $config.config.cache.livenessProbe.timeoutSeconds }}
+        {{- end }}
+        {{- if $config.config.cache.readinessProbe.enabled}}
+        readinessProbe:
+{{ $config.config.backend.readinessProbe | toYaml | indent 10 -}}
+          exec:
+            command:
+            - sh
+            - -c
+            - redis-cli ping {{ $config.config.cache.readinessProbe.timeoutSeconds }}
+        {{- end }}
+        resources:
+{{ toYaml $config.config.cache.resources | indent 12 }}
+---
+{{- end }}
+{{ end }}
