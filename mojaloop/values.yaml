@@ -2712,7 +2712,7 @@ account-lookup-service:
       api:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v9.3.2
+          tag: v9.4.4
           pullPolicy: Always
           command: '["node", "src/index.js", "server", "--api"]'
         service:
@@ -2723,7 +2723,7 @@ account-lookup-service:
       admin:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v9.3.2
+          tag: v9.4.4
           pullPolicy: Always
           command: '["node", "src/index.js", "server", "--admin"]'
         service:
@@ -2734,6 +2734,35 @@ account-lookup-service:
 
     nameOverride: ""
     fullnameOverride: ""
+
+    sidecar:
+      enabled: true
+      image:
+        repository: mojaloop/event-sidecar
+        tag: v9.3.0
+        pullPolicy: Always
+        command: '["npm", "run", "start"]'
+      service:
+        internalPort: 4003
+      readinessProbe:
+        enabled: true
+        httpGet:
+          path: /health
+        initialDelaySeconds: 120
+        periodSeconds: 15
+      livenessProbe:
+        enabled: true
+        httpGet:
+          path: /health
+        initialDelaySeconds: 90
+        periodSeconds: 15
+      config:
+        event_log_grpc_host: localhost
+        event_log_grpc_port: 50051
+        event_log_filter: 'audit:*, log:info, log:warn, log:error'
+        event_log_metadata_only: true
+        log_level: info
+        log_filter: 'error, warn, info'
 
 
     ## metric configuration for prometheus instrumentation
@@ -2842,7 +2871,7 @@ account-lookup-service:
       api:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v9.3.2
+          tag: v9.4.4
           pullPolicy: Always
           command: '["node", "src/index.js", "server", "--api"]'
         service:
@@ -2853,7 +2882,7 @@ account-lookup-service:
       admin:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v9.3.2
+          tag: v9.4.4
           pullPolicy: Always
           command: '["node", "src/index.js", "server", "--admin"]'
         service:
@@ -2865,6 +2894,34 @@ account-lookup-service:
     nameOverride: ""
     fullnameOverride: ""
 
+    sidecar:
+      enabled: true
+      image:
+        repository: mojaloop/event-sidecar
+        tag: v9.3.0
+        pullPolicy: Always
+        command: '["npm", "run", "start"]'
+      service:
+        internalPort: 4003
+      readinessProbe:
+        enabled: true
+        httpGet:
+          path: /health
+        initialDelaySeconds: 120
+        periodSeconds: 15
+      livenessProbe:
+        enabled: true
+        httpGet:
+          path: /health
+        initialDelaySeconds: 90
+        periodSeconds: 15
+      config:
+        event_log_grpc_host: localhost
+        event_log_grpc_port: 50051
+        event_log_filter: 'audit:*, log:info, log:warn, log:error'
+        event_log_metadata_only: true
+        log_level: info
+        log_filter: 'error, warn, info'
 
     ## metric configuration for prometheus instrumentation
     metrics:
