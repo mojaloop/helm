@@ -17,7 +17,7 @@ defaults_Dependencies: &defaults_Dependencies
     apk --no-cache add ca-certificates
     apk --no-cache add curl
     apk --no-cache add openssh-client
-    apk --no-cache add python
+    apk add --no-cache -t python
     apk add --no-cache -t build-dependencies make gcc g++ libtool autoconf automake
 
 defaults_license_scanner: &defaults_license_scanner
@@ -90,7 +90,7 @@ jobs:
           name: Linting Helm Charts
           command: |
             sh lint-charts.sh
-  
+
   audit-licenses:
     machine: true
     steps:
@@ -100,7 +100,7 @@ jobs:
       - run:
           name: Set up nvm
           command: |
-            # Note: this needs to be separate from the nvm install step 
+            # Note: this needs to be separate from the nvm install step
             echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
             echo "[ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"" >> $BASH_ENV
       - run:
@@ -113,7 +113,7 @@ jobs:
           command: |
             source $BASH_ENV
             env | grep docker
-            cd /tmp/license-scanner && make run 
+            cd /tmp/license-scanner && make run
       - run:
           name: Build and save license-scanner summary
           command: |
