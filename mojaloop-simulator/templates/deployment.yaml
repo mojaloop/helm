@@ -3,9 +3,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sim-{{ $name }}-scheme-adapter
+  name: {{ $config.config.prefix }}-{{ $name }}-scheme-adapter
   labels:
-    app: sim-{{ $name }}-scheme-adapter
+    app: {{ $config.config.prefix }}-{{ $name }}-scheme-adapter
     chart: {{ template "mojaloop-simulator.chart" $ }}
     release: {{ $.Release.Name }}
     heritage: {{ $.Release.Service }}
@@ -13,12 +13,12 @@ spec:
   replicas: {{ $config.replicaCount }}
   selector:
     matchLabels:
-      app: sim-{{ $name }}-scheme-adapter
+      app: {{ $config.config.prefix }}-{{ $name }}-scheme-adapter
       release: {{ $.Release.Name }}
   template:
     metadata:
       labels:
-        app: sim-{{ $name }}-scheme-adapter
+        app: {{ $config.config.prefix }}-{{ $name }}-scheme-adapter
         release: {{ $.Release.Name }}
     spec:
       volumes:
@@ -28,7 +28,7 @@ spec:
           {{- if $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
           secretName: {{ $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
           {{- else }}
-          secretName: sim-{{ $name }}-jws-priv-key
+          secretName: {{ $config.config.prefix }}-{{ $name }}-jws-priv-key
           {{- end }}
       {{- end }}
       - name: jws-public-keys
@@ -36,7 +36,7 @@ spec:
           {{- if $config.config.schemeAdapter.secrets.jws.publicKeyConfigMapName }}
           name: {{ $config.config.schemeAdapter.secrets.jws.publicKeyConfigMapName }}
           {{- else }}
-          name: sim-jws-public-keys
+          name: {{ $config.config.prefix }}-jws-public-keys
           {{- end }}
       {{- if $config.config.schemeAdapter.secrets.tlsSecretName }}
       - name: tls-secrets
@@ -87,9 +87,9 @@ spec:
         {{- end }}
         env:
         - name: CACHE_HOST
-          value: {{ printf "sim-%s-cache" $name | quote }}
+          value: {{ printf "%s-%s-cache" $config.config.prefix $name }}
         - name: BACKEND_ENDPOINT
-          value: {{ printf "sim-%s-backend:3000" $name }}
+          value: {{ printf "%s-%s-backend:3000" $config.config.prefix $name }}
         - name: DFSP_ID
           value: {{ $name | quote }}
         {{- range $k, $v := $config.config.schemeAdapter.env }}
@@ -117,9 +117,9 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sim-{{ $name }}-backend
+  name: {{ $config.config.prefix }}-{{ $name }}-backend
   labels:
-    app: sim-{{ $name }}-backend
+    app: {{ $config.config.prefix }}-{{ $name }}-backend
     chart: {{ template "mojaloop-simulator.chart" $ }}
     release: {{ $.Release.Name }}
     heritage: {{ $.Release.Service }}
@@ -127,12 +127,12 @@ spec:
   replicas: {{ $config.replicaCount }}
   selector:
     matchLabels:
-      app: sim-{{ $name }}-backend
+      app: {{ $config.config.prefix }}-{{ $name }}-backend
       release: {{ $.Release.Name }}
   template:
     metadata:
       labels:
-        app: sim-{{ $name }}-backend
+        app: {{ $config.config.prefix }}-{{ $name }}-backend
         release: {{ $.Release.Name }}
     spec:
       {{- if $config.config.backend.initContainers }}
@@ -171,7 +171,7 @@ spec:
         {{- end }}
         env:
         - name: OUTBOUND_ENDPOINT
-          value: "http://sim-{{ $name }}-scheme-adapter:{{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}"
+          value: "http://{{ $config.config.prefix }}-{{ $name }}-scheme-adapter:{{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}"
         - name: SCHEME_NAME
           value: {{ $name | quote }}
         - name: DFSP_ID
@@ -183,12 +183,12 @@ spec:
         resources:
 {{ toYaml $config.config.backend.resources | indent 10 }}
         volumeMounts:
-        - name: sim-rules
+        - name: {{ $config.config.prefix }}-rules
           mountPath: /rules/
       volumes:
-      - name: sim-rules
+      - name: {{ $config.config.prefix }}-rules
         configMap:
-          name: sim-{{ $name }}-rules
+          name: {{ $config.config.prefix }}-{{ $name }}-rules
       imagePullSecrets:
         - name: {{ $config.config.imagePullSecretName }}
     {{- with $config.nodeSelector }}
@@ -208,9 +208,9 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sim-{{ $name }}-cache
+  name: {{ $config.config.prefix }}-{{ $name }}-cache
   labels:
-    app: sim-{{ $name }}-cache
+    app: {{ $config.config.prefix }}-{{ $name }}-cache
     chart: {{ template "mojaloop-simulator.chart" $ }}
     release: {{ $.Release.Name }}
     heritage: {{ $.Release.Service }}
@@ -218,12 +218,12 @@ spec:
   replicas: {{ $config.replicaCount }}
   selector:
     matchLabels:
-      app: sim-{{ $name }}-cache
+      app: {{ $config.config.prefix }}-{{ $name }}-cache
       release: {{ $.Release.Name }}
   template:
     metadata:
       labels:
-        app: sim-{{ $name }}-cache
+        app: {{ $config.config.prefix }}-{{ $name }}-cache
         release: {{ $.Release.Name }}
     spec:
       containers:

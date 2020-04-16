@@ -3,9 +3,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: sim-{{ $name }}-backend
+  name: {{ $config.config.prefix }}-{{ $name }}-backend
   labels:
-    app: sim-{{ $name }}-backend
+    app: {{ $config.config.prefix }}-{{ $name }}-backend
     chart: {{ template "mojaloop-simulator.chart" $ }}
     release: {{ $.Release.Name }}
     heritage: {{ $.Release.Service }}
@@ -25,15 +25,15 @@ spec:
        name: testapi
        targetPort: testapi
    selector:
-     app: sim-{{ $name }}-backend
+     app: {{ $config.config.prefix }}-{{ $name }}-backend
      release: {{ $.Release.Name }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: sim-{{ $name }}-scheme-adapter
+  name: {{ $config.config.prefix }}-{{ $name }}-scheme-adapter
   labels:
-    app: sim-{{ $name }}-scheme-adapter
+    app: {{ $config.config.prefix }}-{{ $name }}-scheme-adapter
     chart: {{ template "mojaloop-simulator.chart" $ }}
     release: {{ $.Release.Name }}
     heritage: {{ $.Release.Service }}
@@ -49,16 +49,16 @@ spec:
        name: outboundapi
        targetPort: outboundapi
    selector:
-     app: sim-{{ $name }}-scheme-adapter
+     app: {{ $config.config.prefix }}-{{ $name }}-scheme-adapter
      release: {{ $.Release.Name }}
 ---
 {{- if $config.config.cache.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: sim-{{ $name }}-cache
+  name: {{ $config.config.prefix }}-{{ $name }}-cache
   labels:
-    app: sim-{{ $name }}-cache
+    app: {{ $config.config.prefix }}-{{ $name }}-cache
     chart: {{ template "mojaloop-simulator.chart" $ }}
     release: {{ $.Release.Name }}
     heritage: {{ $.Release.Service }}
@@ -70,7 +70,7 @@ spec:
        name: redis
        targetPort: redis
    selector:
-     app: sim-{{ $name }}-cache
+     app: {{ $config.config.prefix }}-{{ $name }}-cache
      release: {{ $.Release.Name }}
 {{- end }}
 ---
