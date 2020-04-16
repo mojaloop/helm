@@ -17,13 +17,14 @@ defaults_Dependencies: &defaults_Dependencies
     apk --no-cache add ca-certificates
     apk --no-cache add curl
     apk --no-cache add openssh-client
-    apk add --no-cache -t build-dependencies make gcc g++ python libtool autoconf automake
+    apk add --no-cache -t python
+    apk add --no-cache -t build-dependencies make gcc g++ libtool autoconf automake
 
 defaults_license_scanner: &defaults_license_scanner
   name: Install and set up license-scanner
   command: |
     git clone https://github.com/mojaloop/license-scanner /tmp/license-scanner
-    cd /tmp/license-scanner && make build default-files set-up    
+    cd /tmp/license-scanner && make build default-files set-up
     echo 'export mode=docker' >> $BASH_ENV
     dockerImages=`cd /home/circleci/project && ./.circleci/format-docker-images.sh`
     echo "dockerImages are $dockerImages"
@@ -89,7 +90,7 @@ jobs:
           name: Linting Helm Charts
           command: |
             sh lint-charts.sh
-  
+
   audit-licenses:
     machine: true
     steps:
@@ -99,7 +100,7 @@ jobs:
       - run:
           name: Set up nvm
           command: |
-            # Note: this needs to be separate from the nvm install step 
+            # Note: this needs to be separate from the nvm install step
             echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
             echo "[ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"" >> $BASH_ENV
       - run:
@@ -112,7 +113,7 @@ jobs:
           command: |
             source $BASH_ENV
             env | grep docker
-            cd /tmp/license-scanner && make run 
+            cd /tmp/license-scanner && make run
       - run:
           name: Build and save license-scanner summary
           command: |
