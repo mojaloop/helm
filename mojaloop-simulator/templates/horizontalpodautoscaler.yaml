@@ -1,12 +1,13 @@
+{{- $prefix := $.Release.Name }}
 {{- range $name, $customConfig := .Values.simulators }}
 {{- $config := merge $customConfig $.Values.defaults }}
 {{- if $config.config.schemeAdapter.scale.enabled }}
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ $config.config.prefix }}-{{ $name }}-scheme-adapter
+  name: {{ $prefix }}-{{ $name }}-scheme-adapter
   labels:
-    app: {{ $config.config.prefix }}-{{ $name }}-scheme-adapter
+    app: {{ $prefix }}-{{ $name }}-scheme-adapter
     chart: {{ template "mojaloop-simulator.chart" $ }}
     release: {{ $.Release.Name }}
     heritage: {{ $.Release.Service }}
@@ -14,7 +15,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ $config.config.prefix }}-{{ $name }}-scheme-adapter
+    name: {{ $prefix }}-{{ $name }}-scheme-adapter
 {{ $config.config.schemeAdapter.scale.spec | toYaml | indent 2 }}
 ---
 {{- end }}
