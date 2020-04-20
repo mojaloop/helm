@@ -1,11 +1,12 @@
 {{- range $name, $customConfig := .Values.simulators }}
 {{- $config := merge $customConfig $.Values.defaults }}
+{{- $prefix := $.Release.Name }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ $config.config.prefix }}-{{ $name }}-rules
+  name: {{ $.Release.Name }}-{{ $name }}-rules
   labels:
-    app: {{ $config.config.prefix }}-{{ $name }}
+    app: {{ $.Release.Name }}-{{ $name }}
     chart: {{ template "mojaloop-simulator.chart" $ }}
     release: {{ $.Release.Name }}
     heritage: {{ $.Release.Service }}

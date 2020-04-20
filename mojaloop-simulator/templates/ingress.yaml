@@ -1,4 +1,5 @@
 {{ if .Values.simulators }}
+{{- $prefix := $.Release.Name }}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -23,15 +24,15 @@ spec:
           paths:
           - path: /sim/{{ $name }}/outbound{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
-              serviceName: {{ $config.config.prefix }}-{{ $name }}-scheme-adapter
+              serviceName: {{ $prefix }}-{{ $name }}-scheme-adapter
               servicePort: outboundapi
           - path: /sim/{{ $name }}/inbound{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
-              serviceName: {{ $config.config.prefix }}-{{ $name }}-scheme-adapter
+              serviceName: {{ $prefix }}-{{ $name }}-scheme-adapter
               servicePort: inboundapi
           - path: /sim/{{ $name }}/test{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
-              serviceName: {{ $config.config.prefix }}-{{ $name }}-backend
+              serviceName: {{ $prefix }}-{{ $name }}-backend
               servicePort: testapi
     {{- end }}
   {{- end }}
