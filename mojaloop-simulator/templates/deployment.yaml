@@ -22,7 +22,7 @@ spec:
         release: {{ $.Release.Name }}
     spec:
       volumes:
-      {{- if eq ($config.config.schemeAdapter.env.JWS_SIGN | upper) "TRUE" }}
+      {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
       - name: jws-private-key
         secret:
           {{- if $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
@@ -53,16 +53,19 @@ spec:
         imagePullPolicy: {{ $config.config.schemeAdapter.image.pullPolicy }}
         ports:
           - name: inboundapi
-            containerPort: 4000
+            containerPort: {{ $config.config.schemeAdapter.env.INBOUND_LISTEN_PORT }}
             protocol: TCP
           - name: outboundapi
-            containerPort: 4001
+            containerPort: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
+            protocol: TCP
+          - name: testapi
+            containerPort: {{ $config.config.schemeAdapter.env.TEST_LISTEN_PORT }}
             protocol: TCP
         {{- if $config.config.schemeAdapter.readinessProbe.enabled }}
         readinessProbe:
           httpGet:
             path: /
-            port: 4001
+            port: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
             scheme: HTTP
 {{ $config.config.backend.readinessProbe | toYaml | indent 10 -}}
         {{- end }}
@@ -70,14 +73,14 @@ spec:
         livenessProbe:
           httpGet:
             path: /
-            port: 4001
+            port: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
             scheme: HTTP
 {{ $config.config.backend.livenessProbe | toYaml | indent 10 -}}
         {{- end }}
         volumeMounts:
         - name: jws-public-keys
           mountPath: {{ $config.config.schemeAdapter.env.JWS_VERIFICATION_KEYS_DIRECTORY }}
-        {{- if eq ($config.config.schemeAdapter.env.JWS_SIGN | upper) "TRUE" }}
+        {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
         - name: jws-private-key
           mountPath: "/jwsSigningKey/"
         {{- end }}
@@ -145,13 +148,13 @@ spec:
         imagePullPolicy: {{ $config.config.backend.image.pullPolicy }}
         ports:
           - name: simapi
-            containerPort: 3000
+            containerPort: 3000 # these are hard-coded in the service
             protocol: TCP
           - name: reportapi
-            containerPort: 3002
+            containerPort: 3002 # these are hard-coded in the service
             protocol: TCP
           - name: testapi
-            containerPort: 3003
+            containerPort: 3003 # these are hard-coded in the service
             protocol: TCP
         {{- if $config.config.backend.readinessProbe.enabled }}
         readinessProbe:
@@ -171,7 +174,7 @@ spec:
         {{- end }}
         env:
         - name: OUTBOUND_ENDPOINT
-          value: "http://sim-{{ $name }}-scheme-adapter:{{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}"
+          value: "http://sim-{{ $name }}-scheme-adapter:{{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT | quote }}"
         - name: SCHEME_NAME
           value: {{ $name | quote }}
         - name: DFSP_ID

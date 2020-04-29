@@ -178,7 +178,7 @@ defaults: &defaults
           publicKey: ''
       image:
         repository: mojaloop/sdk-scheme-adapter
-        tag: v8.6.1
+        tag: v9.4.10
         pullPolicy: Always
       <<: *defaultProbes
 
@@ -201,27 +201,28 @@ defaults: &defaults
                 averageUtilization: 80
 
       env:
-        # This option is presented for consistency with the .env file. However, for the purposes of this chart, this port is _not_ configurable.
-        INBOUND_LISTEN_PORT: "4000"
-
-        # This option is presented for consistency with the .env file. However, for the purposes of this chart, this port is _not_ configurable.
-        OUTBOUND_LISTEN_PORT: "4001"
+        # Ports the scheme adapter listens on. Shouldn't really matter for a user of this chart.
+        # You probably shouldn't bother configuring them- it likely won't do you much good. But it
+        # won't do any harm, either.
+        INBOUND_LISTEN_PORT: 4000
+        OUTBOUND_LISTEN_PORT: 4001
+        TEST_LISTEN_PORT: 4002
 
         # Enable mutual TLS authentication. Useful when not running in a secure
         # environment, i.e. when you're running it locally against your own implementation.
-        MUTUAL_TLS_ENABLED: "false"
+        MUTUAL_TLS_ENABLED: false
 
         # Enable JWS verification and signing
-        VALIDATE_INBOUND_JWS: "false"
-        JWS_SIGN: "false"
+        VALIDATE_INBOUND_JWS: false
+        JWS_SIGN: false
 
-        # applicable only if VALIDATE_INBOUND_JWS is "true"
+        # applicable only if VALIDATE_INBOUND_JWS is `true`
         # allows disabling of validation on incoming PUT /parties/{idType}/{idValue} requests
-        VALIDATE_INBOUND_PUT_PARTIES_JWS: "true"
+        VALIDATE_INBOUND_PUT_PARTIES_JWS: true
 
-        # applicable only if JWS_SIGN is "true"
+        # applicable only if JWS_SIGN is `true`
         # allows disabling of signing on outgoing PUT /parties/{idType}/{idValue} requests
-        JWS_SIGN_PUT_PARTIES: "true"
+        JWS_SIGN_PUT_PARTIES: true
 
         # Path to JWS signing key (private key of THIS DFSP)
         JWS_SIGNING_KEY_PATH: "/jwsSigningKey/private.key" # TODO: do not configure- will break the chart
@@ -236,13 +237,17 @@ defaults: &defaults
         OUT_CLIENT_CERT_PATH: "./secrets/servercert.pem"
         OUT_CLIENT_KEY_PATH: "./secrets/serverkey.pem"
 
+        TEST_CA_CERT_PATH: "./secrets/cacert.pem"
+        TEST_CLIENT_CERT_PATH: "./secrets/servercert.pem"
+        TEST_CLIENT_KEY_PATH: "./secrets/serverkey.pem"
+
         # The number of space characters by which to indent pretty-printed logs. If set to zero, log events
         # will each be printed on a single line.
         LOG_INDENT: "0"
 
         # REDIS CACHE CONNECTION
         # CACHE_HOST: "" # Default is parametrised, but it's possible to override this
-        CACHE_PORT: "6379"
+        CACHE_PORT: 6379
 
         # Switch or DFSP system under test Mojaloop API endpoint
         # The option 'PEER_ENDPOINT' has no effect if the remaining three options 'ALS_ENDPOINT', 'QUOTES_ENDPOINT', 'TRANSFERS_ENDPOINT' are specified.
@@ -255,7 +260,9 @@ defaults: &defaults
         # This value specifies the endpoint the scheme adapter expects to communicate with the
         # backend on. Do not include the protocol, i.e. http.
         # You're very likely to break the functioning of this chart if you configure the following
-        # value.
+        # value. This config item has been copied from the service repo for consistency with that,
+        # so that if you come here and find this variable, with this comment, it's less confusing
+        # than if you come here and it's missing entirely.
         # BACKEND_ENDPOINT: "localhost:3000"
 
         # FSPID of this DFSP
@@ -271,12 +278,12 @@ defaults: &defaults
         # if set to false the SDK will not automatically accept all returned quotes
         # but will halt the transfer after a quote response is received. A further
         # confirmation call will be required to complete the final transfer stage.
-        AUTO_ACCEPT_QUOTES: "false"
+        AUTO_ACCEPT_QUOTES: false
 
         # if set to false the SDK will not automatically accept a resolved party
         # but will halt the transer after a party lookup response is received. A further
         # confirmation call will be required to progress the transfer to quotes state.
-        AUTO_ACCEPT_PARTY: "false"
+        AUTO_ACCEPT_PARTY: false
 
         # when set to true, when sending money via the outbound API, the SDK will use the value
         # of FSPIOP-Source header from the received quote response as the payeeFsp value in the
@@ -285,16 +292,16 @@ defaults: &defaults
         # ecosystem and expects quotes and transfers to be rerouted by the switch to forex
         # entities i.e. forex providing DFSPs. Please see the SDK documentation and switch
         # operator documentation for more information on forex use cases.
-        USE_QUOTE_SOURCE_FSP_AS_TRANSFER_PAYEE_FSP: "false"
+        USE_QUOTE_SOURCE_FSP_AS_TRANSFER_PAYEE_FSP: false
 
         # set to true to validate ILP, otherwise false to ignore ILP
-        CHECK_ILP: "true"
+        CHECK_ILP: true
 
         # set to true to enable test features such as request cacheing and retrieval endpoints
-        ENABLE_TEST_FEATURES: "true"
+        ENABLE_TEST_FEATURES: true
 
         # set to true to mock WSO2 oauth2 token endpoint
-        ENABLE_OAUTH_TOKEN_ENDPOINT: "false"
+        ENABLE_OAUTH_TOKEN_ENDPOINT: false
         OAUTH_TOKEN_ENDPOINT_CLIENT_KEY: "test-client-key"
         OAUTH_TOKEN_ENDPOINT_CLIENT_SECRET: "test-client-secret"
         OAUTH_TOKEN_ENDPOINT_LISTEN_PORT: "6000"
@@ -309,9 +316,9 @@ defaults: &defaults
         OAUTH_REFRESH_SECONDS: "3600"
 
         # Set to true to respect expirity timestamps
-        REJECT_EXPIRED_QUOTE_RESPONSES: "false"
-        REJECT_TRANSFERS_ON_EXPIRED_QUOTES: "false"
-        REJECT_EXPIRED_TRANSFER_FULFILS: "false"
+        REJECT_EXPIRED_QUOTE_RESPONSES: false
+        REJECT_TRANSFERS_ON_EXPIRED_QUOTES: false
+        REJECT_EXPIRED_TRANSFER_FULFILS: false
 
         # Timeout for GET/POST/DELETE - PUT flow processing
         REQUEST_PROCESSING_TIMEOUT_SECONDS: "30"
@@ -319,10 +326,11 @@ defaults: &defaults
         # To allow transfer without a previous quote request, set this value to true.
         # The incoming transfer request should consist of an ILP packet and a matching condition in this case.
         # The fulfilment will be generated from the provided ILP packet, and must hash to the provided condition.
-        ALLOW_TRANSFER_WITHOUT_QUOTE: "false"
+        ALLOW_TRANSFER_WITHOUT_QUOTE: false
 
-        INBOUND_MUTUAL_TLS_ENABLED: "false"
-        OUTBOUND_MUTUAL_TLS_ENABLED: "false"
+        INBOUND_MUTUAL_TLS_ENABLED: false
+        OUTBOUND_MUTUAL_TLS_ENABLED: false
+        TEST_MUTUAL_TLS_ENABLED: false
 
     backend:
       image:
@@ -359,10 +367,10 @@ defaults: &defaults
 
         # Enable mutual TLS authentication. Useful when the simulator is not running in a managed
         # environment, i.e. when you're running it locally against your own implementation.
-        MUTUAL_TLS_ENABLED: "false"
+        MUTUAL_TLS_ENABLED: false
 
         # Enable server-only TLS; i.e. serve on HTTPS instead of HTTP.
-        HTTPS_ENABLED: "false"
+        HTTPS_ENABLED: false
 
         # Location of certs and key required for TLS
         CA_CERT_PATH: ./secrets/cacert.pem
