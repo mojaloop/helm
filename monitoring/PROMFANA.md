@@ -146,3 +146,15 @@ The following example configuration for Ingress-Nginx Controller can be made to 
 Refer to the below links for more information:
 - [client-header-buffer-size](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#client-header-buffer-size)
 - [large-client-header-buffers](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#large-client-header-buffers)
+
+4. MySQL Percona Xtra DB Cluster is not showing metrics on the datastore dashboards
+
+Ensure that the MySQL Percona Xtra DB Cluster has been correctly annotated with the following:
+- prometheus.io/port=9104
+- prometheus.io/scrape=true
+
+Example command to add the annotations to an existing deployment:
+```bash
+kubectl -n <NAMESPACE> annotate pods <RELEASE_NAME>-centralledger-mysql-0 prometheus.io/port=9104
+kubectl -n <NAMESPACE> annotate pods <RELEASE_NAME>-centralledger-mysql-0 prometheus.io/scrape=true
+```
