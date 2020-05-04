@@ -47,7 +47,7 @@ spec:
           secretName: sim-{{ $name }}-tls-creds
           {{- end }}
       initContainers:
-{{ include "mojaloop-simulator.prependDictsToContainerEnv" (dict "initConts" $config.config.schemeAdapter.initContainers "dicts" (list $config.config.schemeAdapter.env $initContainerEnv)) | indent 6 }}
+{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.schemeAdapter.initContainers "dicts" (list $config.config.schemeAdapter.env $initContainerEnv)) | indent 6 }}
       containers:
       - name: scheme-adapter
         image: "{{ $config.config.schemeAdapter.image.repository }}:{{ $config.config.schemeAdapter.image.tag }}"
@@ -154,7 +154,7 @@ spec:
         release: {{ $.Release.Name }}
     spec:
       initContainers:
-{{ include "mojaloop-simulator.prependDictsToContainerEnv" (dict "initConts" $config.config.backend.initContainers "dicts" (list $config.config.backend.env $initContainerEnv)) | indent 6 }}
+{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.backend.initContainers "dict" (merge $config.config.backend.env $initContainerEnv)) | indent 6 }}
       containers:
       - name: backend
         image: "{{ $config.config.backend.image.repository }}:{{ $config.config.backend.image.tag }}"
