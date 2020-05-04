@@ -1,12 +1,12 @@
-{{- $prefix := $.Release.Name }}
+{{- $prefix := printf "%s-" $.Release.Name }}
 {{- range $name, $customConfig := .Values.simulators }}
 {{- $config := merge $customConfig $.Values.defaults }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $prefix }}-{{ $name }}-backend
+  name: {{ $prefix }}{{ $name }}-backend
   labels:
-    app: {{ $prefix }}-{{ $name }}-backend
+    app: {{ $prefix }}{{ $name }}-backend
     chart: {{ template "mojaloop-simulator.chart" $ }}
     release: {{ $.Release.Name }}
     heritage: {{ $.Release.Service }}
@@ -26,15 +26,15 @@ spec:
        name: testapi
        targetPort: testapi
    selector:
-     app: {{ $prefix }}-{{ $name }}-backend
+     app: {{ $prefix }}{{ $name }}-backend
      release: {{ $.Release.Name }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $prefix }}-{{ $name }}-scheme-adapter
+  name: {{ $prefix }}{{ $name }}-scheme-adapter
   labels:
-    app: {{ $prefix }}-{{ $name }}-scheme-adapter
+    app: {{ $prefix }}{{ $name }}-scheme-adapter
     chart: {{ template "mojaloop-simulator.chart" $ }}
     release: {{ $.Release.Name }}
     heritage: {{ $.Release.Service }}
@@ -50,16 +50,16 @@ spec:
        name: outboundapi
        targetPort: outboundapi
    selector:
-     app: {{ $prefix }}-{{ $name }}-scheme-adapter
+     app: {{ $prefix }}{{ $name }}-scheme-adapter
      release: {{ $.Release.Name }}
 ---
 {{- if $config.config.cache.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $prefix }}-{{ $name }}-cache
+  name: {{ $prefix }}{{ $name }}-cache
   labels:
-    app: {{ $prefix }}-{{ $name }}-cache
+    app: {{ $prefix }}{{ $name }}-cache
     chart: {{ template "mojaloop-simulator.chart" $ }}
     release: {{ $.Release.Name }}
     heritage: {{ $.Release.Service }}
@@ -71,7 +71,7 @@ spec:
        name: redis
        targetPort: redis
    selector:
-     app: {{ $prefix }}-{{ $name }}-cache
+     app: {{ $prefix }}{{ $name }}-cache
      release: {{ $.Release.Name }}
 {{- end }}
 ---
