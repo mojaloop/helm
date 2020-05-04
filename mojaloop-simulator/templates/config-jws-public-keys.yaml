@@ -11,8 +11,8 @@ metadata:
 data:
   {{- range $name, $customConfig := .Values.simulators }}
   {{- $config := merge $customConfig $.Values.defaults }}
-  {{- if and (eq ($config.config.schemeAdapter.env.VALIDATE_INBOUND_JWS | upper) "TRUE") (not $config.config.schemeAdapter.secrets.jws.pubKeyConfigMapName) }}
-  {{- if eq $config.config.schemeAdapter.secrets.jws.publicKey "" }}
+  {{- if and ($config.config.schemeAdapter.env.VALIDATE_INBOUND_JWS) (not $config.config.schemeAdapter.secrets.jws.pubKeyConfigMapName) }}
+  {{- if (not $config.config.schemeAdapter.secrets.jws.publicKey) }}
     {{- fail (printf "INBOUND_JWS enabled and jws public key not specified for '%s'. You need to specify %s.schemeAdapter.secrets.jws.publicKey or %s.schemeAdapter.secrets.jws.pubKeyConfigMapName." $name $name $name) }}
   {{- end }}
   {{ $name }}.pem: |-

@@ -22,7 +22,7 @@ spec:
         release: {{ $.Release.Name }}
     spec:
       volumes:
-      {{- if eq ($config.config.schemeAdapter.env.JWS_SIGN | upper) "TRUE" }}
+      {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
       - name: jws-private-key
         secret:
           {{- if $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
@@ -38,11 +38,13 @@ spec:
           {{- else }}
           name: sim-jws-public-keys
           {{- end }}
-      {{- if $config.config.schemeAdapter.secrets.tlsSecretName }}
       - name: tls-secrets
         secret:
+          {{- if $config.config.schemeAdapter.secrets.tlsSecretName }}
           secretName: {{ $config.config.schemeAdapter.secrets.tlsSecretName }}
-      {{- end }}
+          {{- else }}
+          secretName: sim-{{ $name }}-tls-creds
+          {{- end }}
       {{- if $config.config.schemeAdapter.initContainers }}
       initContainers:
 {{ $config.config.schemeAdapter.initContainers | toYaml | indent 6 }}
@@ -53,38 +55,37 @@ spec:
         imagePullPolicy: {{ $config.config.schemeAdapter.image.pullPolicy }}
         ports:
           - name: inboundapi
-            containerPort: 4000
+            containerPort: {{ $config.config.schemeAdapter.env.INBOUND_LISTEN_PORT }}
             protocol: TCP
           - name: outboundapi
-            containerPort: 4001
+            containerPort: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
+            protocol: TCP
+          - name: testapi
+            containerPort: {{ $config.config.schemeAdapter.env.TEST_LISTEN_PORT }}
             protocol: TCP
         {{- if $config.config.schemeAdapter.readinessProbe.enabled }}
         readinessProbe:
           httpGet:
             path: /
-            port: 4001
+            port: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
             scheme: HTTP
-{{ $config.config.backend.readinessProbe | toYaml | indent 10 -}}
         {{- end }}
         {{- if $config.config.schemeAdapter.livenessProbe.enabled }}
         livenessProbe:
           httpGet:
             path: /
-            port: 4001
+            port: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
             scheme: HTTP
-{{ $config.config.backend.livenessProbe | toYaml | indent 10 -}}
         {{- end }}
         volumeMounts:
         - name: jws-public-keys
           mountPath: {{ $config.config.schemeAdapter.env.JWS_VERIFICATION_KEYS_DIRECTORY }}
-        {{- if eq ($config.config.schemeAdapter.env.JWS_SIGN | upper) "TRUE" }}
+        {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
         - name: jws-private-key
           mountPath: "/jwsSigningKey/"
         {{- end }}
-        {{- if $config.config.schemeAdapter.secrets.tlsSecretName }}
         - name: tls-secrets
           mountPath: "/secrets/"
-        {{- end }}
         env:
         - name: CACHE_HOST
           value: {{ printf "sim-%s-cache" $name | quote }}
@@ -92,6 +93,24 @@ spec:
           value: {{ printf "sim-%s-backend:3000" $name }}
         - name: DFSP_ID
           value: {{ $name | quote }}
+        - name: IN_CA_CERT_PATH
+          value: "./secrets/cacert.pem"
+        - name: IN_SERVER_CERT_PATH
+          value: "./secrets/servercert.pem"
+        - name: IN_SERVER_KEY_PATH
+          value: "./secrets/serverkey.pem"
+        - name: OUT_CA_CERT_PATH
+          value: "./secrets/cacert.pem"
+        - name: OUT_CLIENT_CERT_PATH
+          value: "./secrets/servercert.pem"
+        - name: OUT_CLIENT_KEY_PATH
+          value: "./secrets/serverkey.pem"
+        - name: TEST_CA_CERT_PATH
+          value: "./secrets/cacert.pem"
+        - name: TEST_CLIENT_CERT_PATH
+          value: "./secrets/servercert.pem"
+        - name: TEST_CLIENT_KEY_PATH
+          value: "./secrets/serverkey.pem"
         {{- range $k, $v := $config.config.schemeAdapter.env }}
         - name: {{ $k }}
           value: {{ $v | quote }}
@@ -145,13 +164,13 @@ spec:
         imagePullPolicy: {{ $config.config.backend.image.pullPolicy }}
         ports:
           - name: simapi
-            containerPort: 3000
+            containerPort: 3000 # these are hard-coded in the service
             protocol: TCP
           - name: reportapi
-            containerPort: 3002
+            containerPort: 3002 # these are hard-coded in the service
             protocol: TCP
           - name: testapi
-            containerPort: 3003
+            containerPort: 3003 # these are hard-coded in the service
             protocol: TCP
         {{- if $config.config.backend.readinessProbe.enabled }}
         readinessProbe:
@@ -159,7 +178,6 @@ spec:
             path: /
             port: 3000
             scheme: HTTP
-{{ $config.config.backend.readinessProbe | toYaml | indent 10 -}}
         {{- end }}
         {{- if $config.config.backend.livenessProbe.enabled }}
         livenessProbe:
@@ -167,7 +185,6 @@ spec:
             path: /
             port: 3000
             scheme: HTTP
-{{ $config.config.backend.livenessProbe | toYaml | indent 10 -}}
         {{- end }}
         env:
         - name: OUTBOUND_ENDPOINT
@@ -236,7 +253,6 @@ spec:
           protocol: TCP
         {{- if $config.config.cache.livenessProbe.enabled }}
         livenessProbe:
-{{ $config.config.backend.livenessProbe | toYaml | indent 10 -}}
           exec:
             command:
             - sh
@@ -245,7 +261,6 @@ spec:
         {{- end }}
         {{- if $config.config.cache.readinessProbe.enabled}}
         readinessProbe:
-{{ $config.config.backend.readinessProbe | toYaml | indent 10 -}}
           exec:
             command:
             - sh
