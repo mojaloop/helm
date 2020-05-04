@@ -10,6 +10,7 @@ Create chart name and version as used by the chart label.
 {{/*
 We prefix deployment components with the release name by default.
 This can be overriden by setting .Values.prefix value.
+Set .Values.prefix to ' ' (space) to eliminate the prefix completely.
 Prefix is limited to 10 characters long.
 */}}
 {{- define "prefix" -}}
