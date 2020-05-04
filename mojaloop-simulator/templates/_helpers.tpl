@@ -8,17 +8,32 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
-First, we prepend the backend env. _Then_ we prepend some init env vars. This way, Kubernetes
-takes care of deduplication in the order we want. The order of precedence is this:
-  1. env vars defined in the initContainer
-  2. env vars defined in the backend config
-  3. env vars defined in $initContainerEnv
+Prepend a list of dictionaries to a list of container env vars. Prepended in such an order that the
+env vars in the containers will take precedence over any env vars in the dictionaries. Then each
+dictionary provided will take precedence over subsequent dictionaries. Put another way, the
+dictionary list is in order of highest precedence to lowest precedence.
 */}}
-{{- define "mojaloop-simulator.buildInitContainerEnv" -}}
+{{- define "mojaloop-simulator.prependDictsToContainerEnv" -}}
 {{- $ctx := . }}
-{{- $initContainerEnv := dict "SIM_NAME" .name "SIM_SCHEME_ADAPTER_SERVICE_NAME" (printf "sim-%s-scheme-adapter" .name) "SIM_BACKEND_SERVICE_NAME" (printf "sim-%s-backend" .name) "SIM_CACHE_SERVICE_NAME" (printf "sim-%s-cache" .name) -}}
-{{- range $varName, $varVal := merge .env $initContainerEnv -}}
-  {{- $_ := set $ctx.initCont "env" (prepend $ctx.initCont.env (dict "name" $varName "value" $varVal)) }}
+{{- range $_, $initCont := $ctx.initConts -}}
+  {{- range $_, $dict := $ctx.dicts -}}
+    {{- range $varName, $varVal := $dict -}}
+      {{- $_ := set $initCont "env" (prepend $initCont.env (dict "name" $varName "value" $varVal)) -}}
+    {{- end -}}
+  {{- end -}}
+{{/*
+Because we need to quote the env vars, we'll print them manually, then print every _other_ key on
+the init container afterward.
+*/}}
+- env:
+  {{- range $_, $envVal := $initCont.env }}
+  - name: {{ $envVal.name }}
+    value: {{ $envVal.value | quote }}
+  {{- end }}
+{{- range $k, $v := $initCont }}
+{{- if not (eq $k "env") }}
+{{ (dict $k $v) | toYaml | indent 2 }}
+{{ end -}}
 {{- end -}}
-{{ .initCont | toYaml }}
+{{- end -}}
 {{- end -}}
