@@ -156,21 +156,7 @@ spec:
     spec:
       {{- range $_, $initContainer := $config.config.backend.initContainers }}
       initContainers:
-      {{- /*
-      First, we prepend the backend env. _Then_ we prepend some init env vars. This way, Kubernetes
-      takes care of deduplication in the order we want. The order of precedence is this:
-        1. env vars defined in the initContainer
-        2. env vars defined in the backend config
-        3. env vars defined below, e.g. "SIM_NAME"
-      */ -}}
-      {{- range $name, $val := $config.config.backend.env }}
-        {{- $_ := set $initContainer "env" (prepend $initContainer.env (dict "name" $name "value" $val)) }}
-      {{- end }}
-      {{- $_ := set $initContainer "env" (prepend $initContainer.env (dict "name" "SIM_NAME" "value" $name)) }}
-      {{- $_ := set $initContainer "env" (prepend $initContainer.env (dict "name" "SIM_SCHEME_ADAPTER_SERVICE_NAME" "value" (printf "sim-%s-scheme-adapter" $name))) }}
-      {{- $_ := set $initContainer "env" (prepend $initContainer.env (dict "name" "SIM_BACKEND_SERVICE_NAME" "value" (printf "sim-%s-backend" $name))) }}
-      {{- $_ := set $initContainer "env" (prepend $initContainer.env (dict "name" "SIM_CACHE_SERVICE_NAME" "value" (printf "sim-%s-cache" $name))) }}
-{{ $initContainer | toYaml | indent 8 }}
+{{ include "mojaloop-simulator.buildInitContainerEnv" (dict "name" $name "initCont" $initContainer "env" $config.config.backend.env) | indent 8 }}
       {{- end }}
       containers:
       - name: backend
