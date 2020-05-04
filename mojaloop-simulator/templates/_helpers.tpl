@@ -8,7 +8,7 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
-We prefix deployments artifacts with the release name by default.
+We prefix deployment components with the release name by default.
 This can be overriden by setting .Values.prefix value.
 Prefix is limited to 10 characters long.
 */}}
