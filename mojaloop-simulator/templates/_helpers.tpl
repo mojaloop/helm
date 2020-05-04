@@ -14,7 +14,7 @@ Prefix is limited to 10 characters long.
 */}}
 {{- define "prefix" -}}
 {{- if .Values.prefix -}}
-{{- .Values.prefix | trunc 10 -}}
+{{- .Values.prefix | trunc 10 | trimAll " " -}}
 {{- else -}}
 {{- printf "%s-" .Release.Name | trunc 10 -}}
 {{- end -}}
