@@ -9,15 +9,13 @@ Create chart name and version as used by the chart label.
 
 {{/*
 We prefix deployment components with the release name by default.
-This can be overriden by setting .Values.prefix value.
-Set .Values.prefix to ' ' (space character) to eliminate the prefix completely, 
-'' (empty string) will cause a fallback to .Release.Name being used as prefix.
+This can be overriden by setting .Values.prefix value to empty string.
 Prefix is limited to 10 characters long.
 */}}
 {{- define "prefix" -}}
-{{- if .Values.prefix -}}
-{{- .Values.prefix | trunc 10 | trimAll " " -}}
-{{- else -}}
+{{- if kindIs "invalid" .Values.prefix -}}
 {{- printf "%s-" .Release.Name | trunc 10 -}}
+{{- else -}}
+{{- .Values.prefix | trunc 10 | trimAll " " -}}
 {{- end -}}
 {{- end -}}
