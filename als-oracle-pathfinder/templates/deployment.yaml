@@ -48,6 +48,7 @@ spec:
             - sh
             - "-c"
             - {{ (.Values.init.waitForMysql.command | replace "$db_user" (print .Values.config.db.central_ledger.user) | replace "$db_password" (print .Values.config.db.central_ledger.password) | replace "$db_host" $dbHostCentralLedger | replace "$db_database" (print .Values.config.db.central_ledger.database) | replace "$db_port" (print .Values.config.db.central_ledger.port) )| quote }}
+        {{- if .Values.init.initMysql.centralLedger.enabled }}
         - name: {{ .Values.init.initMysql.centralLedger.name }}
           image: {{ .Values.init.initMysql.centralLedger.repository }}:{{ .Values.init.initMysql.centralLedger.tag }}
           imagePullPolicy: {{ .Values.init.initMysql.centralLedger.pullPolicy }}
@@ -55,6 +56,8 @@ spec:
             - sh
             - "-c"
             - {{ (.Values.init.initMysql.centralLedger.command | replace "$db_user" (print .Values.config.db.central_ledger.user) | replace "$db_password" (print .Values.config.db.central_ledger.password) | replace "$db_host" $dbHostCentralLedger | replace "$db_database" (print .Values.config.db.central_ledger.database) | replace "$db_port" (print .Values.config.db.central_ledger.port) | replace "$service_name" $serviceName )| quote }}
+        {{- end }}
+        {{- if .Values.init.initMysql.accountLookup.enabled }}
         - name: {{ .Values.init.initMysql.accountLookup.name }}
           image: {{ .Values.init.initMysql.accountLookup.repository }}:{{ .Values.init.initMysql.accountLookup.tag }}
           imagePullPolicy: {{ .Values.init.initMysql.accountLookup.pullPolicy }}
@@ -62,6 +65,8 @@ spec:
             - sh
             - "-c"
             - {{ (.Values.init.initMysql.accountLookup.command | replace "$db_user" (print .Values.config.db.account_lookup.user) | replace "$db_password" (print .Values.config.db.account_lookup.password) | replace "$db_host" $dbHostAccountLookup | replace "$db_database" (print .Values.config.db.account_lookup.database) | replace "$db_port" (print .Values.config.db.account_lookup.port) | replace "$service_name" $serviceName )| quote }}
+        {{- end }}
+        {{- if .Values.init.populateMysql.enabled }}
         - name: {{ .Values.init.populateMysql.name }}
           image: {{ .Values.init.populateMysql.repository }}:{{ .Values.init.populateMysql.tag }}
           imagePullPolicy: {{ .Values.init.populateMysql.pullPolicy }}
@@ -69,6 +74,7 @@ spec:
             - sh
             - "-c"
             - {{ (.Values.init.populateMysql.command | replace "$db_user" (print .Values.config.db.central_ledger.user) | replace "$db_password" (print .Values.config.db.central_ledger.password) | replace "$db_host" $dbHostCentralLedger | replace "$db_database" (print .Values.config.db.central_ledger.database) | replace "$db_port" (print .Values.config.db.central_ledger.port) | replace "$service_name" $serviceName )| quote }}
+        {{- end }}
         {{- end }}
       {{- end }}
       containers:

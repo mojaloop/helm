@@ -3184,18 +3184,21 @@ account-lookup-service:
         command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
       initMysql:
         centralLedger:
+          enabled: true
           name: init-central-ledger-mysql
           repository: mojaloop/als-oracle-pathfinder
           tag: latest
           pullPolicy: Always
           command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-central-ledger.sql;";
         accountLookup:
+          enabled: true
           name: init-account-lookup-mysql
           repository: mojaloop/als-oracle-pathfinder
           tag: latest
           pullPolicy: Always
           command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password $db_database -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-account-lookup.sql;";
       populateMysql:
+        enabled: true
         name: populate-mysql-tables
         repository: mysql
         tag: latest
@@ -3797,6 +3800,20 @@ finance-portal:
       -----END RSA PUBLIC KEY-----
 
   config:
+    azureLogAnalytics:
+      authTokenEndpoint: 'https://login.microsoftonline.com'
+      clientId: 'ec3b168c-91db-4aa0-a7d3-ea9f6f999999'
+      clientSecret: 'secret'
+      grantType: 'client_credentials'
+      kafkaMessagePattern: "Producer.sendMessage::messageProtocol:'({.*?})'"
+      logApiEndpoint: 'https://api.loganalytics.io/v1/'
+      redirectUri: 'http://localhost:5000'
+      resource: 'https://api.loganalytics.io/'
+      searchQueryTemplate:
+        regex: "search '(.*)' | where LogEntry matches regex '.*Producer.sendMessage::messageProtocol:.*' | where LogEntry matches regex '.*transferId.*' | where LogEntry matches regex '.*fspiop-signature.*' | take 1 | project LogEntry"
+        template: "search '{{transferId}}' | where LogEntry matches regex '.*Producer.sendMessage::messageProtocol:.*' | where LogEntry matches regex '.*transferId.*' | where LogEntry matches regex '.*fspiop-signature.*' | take 1 | project LogEntry"
+      tenantId: 'ec3b168c-91db-4aa0-a7d3-ea9f6f999999'
+      workspaceId: 'e16d055b-7a9a-4e9b-bb4b-abcdef999999'
     db_host: '$release_name-centralledger-mysql'
     db_port: '3306'
     db_user: 'central_ledger'
@@ -3863,14 +3880,14 @@ finance-portal:
       port: 3000
     image:
       repository: mojaloop/finance-portal-backend-service
-      tag: v9.1.3
+      tag: v9.4.5
       pullPolicy: Always
       port: 3000
     init:
       enabled: false
       image:
         repository: mojaloop/finance-portal-backend-service
-        tag: v9.1.2
+        tag: v9.4.5
         pullPolicy: Always
     env: 'dev'
     ingress:

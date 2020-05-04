@@ -10,6 +10,10 @@ Refer to the [Metrics for Mojaloop](METRICS.md) for information on the specific 
 
 - [Dashboard Documentation](./dashboards/README.md)
 
-## EFK - ElasticSearch FluendtD & Kabana Monitoring for Mojaloop
+## EFK - ElasticSearch FluendtD, Kabana & APM Monitoring for Mojaloop
 
 - [EFK Documentation](./EFK.md)
+
+## JMeter
+
+- [JMeter Documentation](./EFK.md)
