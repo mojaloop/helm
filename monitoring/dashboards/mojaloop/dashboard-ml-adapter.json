@@ -14,25 +14,25 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.3.1"
+      "version": "6.4.2"
     },
     {
       "type": "panel",
       "id": "graph",
       "name": "Graph",
-      "version": "5.0.0"
+      "version": ""
     },
     {
       "type": "datasource",
       "id": "prometheus",
       "name": "Prometheus",
-      "version": "5.0.0"
+      "version": "1.0.0"
     },
     {
       "type": "panel",
       "id": "singlestat",
       "name": "Singlestat",
-      "version": "5.0.0"
+      "version": ""
     }
   ],
   "annotations": {
@@ -56,51 +56,55 @@
   "panels": [
     {
       "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 42,
+      "id": 73,
       "panels": [],
-      "title": "Kafka",
+      "title": "Summary",
       "type": "row"
     },
     {
       "aliasColors": {},
-      "bars": false,
+      "bars": true,
+      "cacheTimeout": null,
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_PROMETHEUS}",
-      "description": "ML API Lag by  Consumer Group",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 5,
         "w": 24,
         "x": 0,
         "y": 1
       },
-      "id": 44,
+      "id": 64,
       "legend": {
         "alignAsTable": true,
-        "avg": true,
+        "avg": false,
         "current": true,
-        "hideEmpty": true,
-        "hideZero": true,
-        "max": true,
+        "max": false,
         "min": false,
         "rightSide": true,
         "show": true,
         "total": false,
         "values": true
       },
-      "lines": true,
+      "lines": false,
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
-      "pointradius": 5,
+      "pluginVersion": "6.4.2",
+      "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
@@ -109,31 +113,57 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(kafka_consumergroup_lag{topic=~\"topic-.*\", consumergroup=~\"ml-group.*\"}) by (consumergroup, topic)",
-          "format": "time_series",
-          "instant": false,
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "{{topic}}",
-          "refId": "A"
+          "expr": "sum(increase(moja_tx_transfer_bucket{le=\"+Inf\"}[${__range_s}s]))",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "Total",
+          "refId": "C"
+        },
+        {
+          "expr": "sum(increase(moja_tx_transfer_bucket{le=\"1\"}[${__range_s}s]))",
+          "hide": false,
+          "legendFormat": "Less than 1 sec",
+          "refId": "G"
+        },
+        {
+          "expr": "sum(increase(moja_tx_transfer_bucket{le=\"+Inf\"}[${__range_s}s])) - sum(increase(moja_tx_transfer_bucket{le=\"1\"}[${__range_s}s]))",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "More than 1 sec",
+          "refId": "D"
+        },
+        {
+          "expr": "sum(increase(moja_tx_transfer_bucket{le=\"+Inf\"}[${__range_s}s])) - sum(increase(moja_tx_transfer_bucket{le=\"2\"}[${__range_s}s]))",
+          "hide": false,
+          "legendFormat": "More than 2 sec",
+          "refId": "E"
+        },
+        {
+          "expr": "sum(increase(moja_tx_transfer_bucket{le=\"+Inf\"}[${__range_s}s])) - sum(increase(moja_tx_transfer_bucket{le=\"5\"}[${__range_s}s]))",
+          "hide": false,
+          "legendFormat": "More than 5 sec",
+          "refId": "F"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
-      "title": "ML API Lag by  Consumer Group",
+      "title": "Processing time stats",
       "tooltip": {
-        "shared": true,
+        "shared": false,
         "sort": 0,
         "value_type": "individual"
       },
       "type": "graph",
       "xaxis": {
         "buckets": null,
-        "mode": "time",
+        "mode": "series",
         "name": null,
         "show": true,
-        "values": []
+        "values": [
+          "current"
+        ]
       },
       "yaxes": [
         {
@@ -149,7 +179,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         }
       ],
@@ -160,15 +190,16 @@
     },
     {
       "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 6
       },
-      "id": 32,
+      "id": 66,
       "panels": [],
-      "title": "Processing",
+      "title": "Mojaloop",
       "type": "row"
     },
     {
@@ -177,26 +208,30 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_PROMETHEUS}",
-      "decimals": 1,
+      "decimals": null,
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 9,
-        "w": 21,
+        "w": 24,
         "x": 0,
         "y": 7
       },
       "hideTimeOverride": false,
       "id": 20,
+      "interval": "",
       "legend": {
         "alignAsTable": true,
         "avg": true,
         "current": true,
-        "hideEmpty": false,
-        "hideZero": false,
+        "hideEmpty": true,
+        "hideZero": true,
         "max": true,
         "min": true,
         "rightSide": true,
         "show": true,
+        "sort": null,
+        "sortDesc": null,
         "total": false,
         "values": true
       },
@@ -204,6 +239,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": true,
       "pointradius": 5,
       "points": false,
@@ -214,53 +252,70 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(moja_transfer_prepare_count{serviceName=\"ml-service\"}[120s])) by (app)",
-          "format": "time_series",
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "Transfers API Prepare",
-          "refId": "D"
+          "expr": "sum(rate(moja_tx_transfer_count[30s])) by (success)",
+          "hide": true,
+          "legendFormat": "moja_tx_transfer - success:{{success}}",
+          "refId": "I"
         },
         {
-          "expr": "sum(rate(moja_transfer_fulfil_count{serviceName=\"ml-service\"}[120s])) by (app)",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "Transfers API Fulfill",
+          "expr": "sum(rate(moja_tx_transfer_prepare_count[30s])) by (success)",
+          "hide": true,
+          "legendFormat": "moja_tx_transfer_prepare - success:{{success}}",
+          "refId": "J"
+        },
+        {
+          "expr": "sum(rate(moja_tx_transfer_fulfil_count[30s])) by (success)",
+          "hide": true,
+          "legendFormat": "moja_tx_transfer_fulfil - success:{{success}}",
+          "refId": "K"
+        },
+        {
+          "expr": "sum(rate(moja_tx_transfer_count[30s]))",
+          "hide": false,
+          "legendFormat": "moja_tx_transfer - avg",
+          "refId": "L"
+        },
+        {
+          "expr": "sum(rate(moja_tx_transfer_prepare_count[30s]))",
+          "hide": false,
+          "legendFormat": "moja_tx_transfer_prepare - avg",
+          "refId": "M"
+        },
+        {
+          "expr": "sum(rate(moja_tx_transfer_fulfil_count[30s]))",
+          "hide": false,
+          "legendFormat": "moja_tx_transfer_fulfil - avg",
+          "refId": "N"
+        },
+        {
+          "expr": "sum(rate(moja_transfer_prepare_count{serviceName=\"ml-service\"}[30s])) by (app, success)",
+          "hide": false,
+          "legendFormat": "Transfers API Prepare - success:{{success}}",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(moja_notification_event_count{serviceName=\"ml-handler-notification\"}[120s])) by (app)",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "Notification Events",
+          "expr": "sum(rate(moja_transfer_fulfil_count{serviceName=\"ml-service\"}[30s])) by (app, success)",
+          "hide": false,
+          "legendFormat": "Transfers API Fulfill - success:{{success}}",
           "refId": "B"
         },
         {
-          "expr": "sum(rate(moja_notification_event_count{serviceName=\"ml-handler-notification\"}[120s])) by (kubernetes_pod_name)",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{kubernetes_pod_name}}",
-          "refId": "C"
-        },
-        {
-          "expr": "sum(rate(moja_transfer_prepare_count{serviceName=\"ml-service\"}[120s])) by (kubernetes_pod_name)",
-          "format": "time_series",
+          "expr": "sum(rate(moja_notification_event_delivery_count{serviceName=\"ml-handler-notification\"}[30s])) by (app, action, status, success)",
           "hide": false,
-          "intervalFactor": 1,
-          "legendFormat": "{{kubernetes_pod_name}}",
-          "refId": "E"
+          "legendFormat": "Notification Delivery - {{action}} - {{status}} - success:{{success}}",
+          "refId": "G"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
-      "title": "ML-API - Processed per sec",
+      "title": "Mojaloop - Processed per sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
         "value_type": "individual"
       },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -271,7 +326,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "ops",
           "label": "",
           "logBase": 1,
           "max": null,
@@ -293,6 +348,183 @@
       }
     },
     {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 71,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": false,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "sort": "avg",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "avg(rate(moja_transfer_prepare_sum{serviceName=\"ml-service\"}[30s]) / rate(moja_transfer_prepare_count{serviceName=\"ml-service\"}[30s]))",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "Transfer API Prepare - Average",
+          "refId": "A"
+        },
+        {
+          "expr": "avg(rate(moja_transfer_fulfil_sum{serviceName=\"ml-service\"}[30s]) / rate(moja_transfer_fulfil_count{serviceName=\"ml-service\"}[30s]))",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "Transfer API Fulfil - Average",
+          "refId": "B"
+        },
+        {
+          "expr": "avg(rate(moja_notification_event_delivery_sum{serviceName=\"ml-handler-notification\"}[30s]) / rate(moja_notification_event_delivery_count{serviceName=\"ml-handler-notification\"}[30s])) by (action, status, success)",
+          "hide": false,
+          "legendFormat": "Notification Deliveries - {{action}} - {{status}} - success:{{success}}",
+          "refId": "F"
+        },
+        {
+          "expr": "avg(rate(moja_notification_event_delivery_sum{serviceName=\"ml-handler-notification\"}[30s]) / rate(moja_notification_event_delivery_count{serviceName=\"ml-handler-notification\"}[30s])) by (kubernetes_pod_name, action, status, success)",
+          "hide": true,
+          "instant": false,
+          "legendFormat": "Notification Deliveries - {{kubernetes_pod_name}} - {{action}} - {{status}} - success:{{success}}",
+          "refId": "E"
+        },
+        {
+          "expr": "avg(rate(moja_tx_transfer_sum[30s]) / rate(moja_tx_transfer_count[30s])) by (success)",
+          "hide": true,
+          "legendFormat": "moja_tx_transfer - success:{{success}}",
+          "refId": "I"
+        },
+        {
+          "expr": "avg(rate(moja_tx_transfer_prepare_sum[30s]) / rate(moja_tx_transfer_prepare_count[30s])) by (success)",
+          "hide": true,
+          "legendFormat": "moja_tx_transfer_prepare - success:{{success}}",
+          "refId": "J"
+        },
+        {
+          "expr": "avg(rate(moja_tx_transfer_fulfil_sum[30s]) / rate(moja_tx_transfer_fulfil_count[30s])) by (success)",
+          "hide": true,
+          "legendFormat": "moja_tx_transfer_fulfil - success:{{success}}",
+          "refId": "K"
+        },
+        {
+          "expr": "avg(rate(moja_tx_transfer_sum[30s]) / irate(moja_tx_transfer_count[30s]))",
+          "legendFormat": "moja_tx_transfer - avg",
+          "refId": "L"
+        },
+        {
+          "expr": "avg(rate(moja_tx_transfer_prepare_sum[30s]) / rate(moja_tx_transfer_prepare_count[30s]))",
+          "interval": "",
+          "legendFormat": "moja_tx_transfer_prepare - avg",
+          "refId": "M"
+        },
+        {
+          "expr": "avg(rate(moja_tx_transfer_fulfil_sum[30s]) / rate(moja_tx_transfer_fulfil_count[30s]))",
+          "legendFormat": "moja_tx_transfer_fulfil - avg",
+          "refId": "N"
+        }
+      ],
+      "thresholds": [
+        {
+          "colorMode": "critical",
+          "fill": true,
+          "fillColor": "rgba(50, 116, 217, 0.2)",
+          "line": true,
+          "lineColor": "rgba(31, 96, 196, 0.6)",
+          "op": "gt",
+          "value": 1,
+          "yaxis": "left"
+        }
+      ],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Mojaloop - Processing Time",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "s",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "id": 50,
+      "panels": [],
+      "title": "Current OP/s",
+      "type": "row"
+    },
+    {
       "cacheTimeout": null,
       "colorBackground": false,
       "colorValue": false,
@@ -302,8 +534,8 @@
         "#d44a3a"
       ],
       "datasource": "${DS_PROMETHEUS}",
-      "description": "Transfers API Prepares / sec",
-      "format": "none",
+      "description": "Financial Transfers / Sec",
+      "format": "ops",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -314,8 +546,266 @@
       "gridPos": {
         "h": 3,
         "w": 3,
-        "x": 21,
-        "y": 7
+        "x": 0,
+        "y": 26
+      },
+      "id": 52,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "options": {},
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false,
+        "ymax": null,
+        "ymin": null
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "sum(irate(moja_tx_transfer_count[30s]))",
+          "instant": true,
+          "legendFormat": "Financial Transfers / sec",
+          "refId": "A"
+        }
+      ],
+      "thresholds": "",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Financial Transfers / Sec",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "${DS_PROMETHEUS}",
+      "description": "Financial Prepares / sec",
+      "format": "ops",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 3,
+        "y": 26
+      },
+      "id": 54,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "options": {},
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false,
+        "ymax": null,
+        "ymin": null
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "sum(irate(moja_tx_transfer_prepare_count[30s]))",
+          "instant": true,
+          "legendFormat": "Transfers / Sec",
+          "refId": "A"
+        }
+      ],
+      "thresholds": "",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Financial Prepares / sec",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "${DS_PROMETHEUS}",
+      "description": "Financial Fulils / sec",
+      "format": "ops",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 6,
+        "y": 26
+      },
+      "id": 56,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "options": {},
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false,
+        "ymax": null,
+        "ymin": null
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "sum(irate(moja_tx_transfer_fulfil_count[30s]))",
+          "instant": true,
+          "legendFormat": "Financial Fulfils / sec",
+          "refId": "A"
+        }
+      ],
+      "thresholds": "",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Financial Fulils / sec",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "0",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "${DS_PROMETHEUS}",
+      "description": "Transfers API Prepares / sec",
+      "format": "ops",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 9,
+        "y": 26
       },
       "id": 22,
       "interval": null,
@@ -334,6 +824,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -387,7 +878,7 @@
       ],
       "datasource": "${DS_PROMETHEUS}",
       "description": "Transfers API Fullfills / sec",
-      "format": "none",
+      "format": "ops",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -398,8 +889,8 @@
       "gridPos": {
         "h": 3,
         "w": 3,
-        "x": 21,
-        "y": 10
+        "x": 12,
+        "y": 26
       },
       "id": 24,
       "interval": null,
@@ -418,6 +909,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -469,7 +961,7 @@
       ],
       "datasource": "${DS_PROMETHEUS}",
       "description": "Notification Events / Sec",
-      "format": "none",
+      "format": "ops",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -480,8 +972,8 @@
       "gridPos": {
         "h": 3,
         "w": 3,
-        "x": 21,
-        "y": 13
+        "x": 15,
+        "y": 26
       },
       "id": 26,
       "interval": null,
@@ -500,6 +992,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -524,6 +1017,7 @@
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
+          "legendFormat": "Notification Events / sec",
           "refId": "A"
         }
       ],
@@ -541,19 +1035,204 @@
       "valueName": "current"
     },
     {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "${DS_PROMETHEUS}",
+      "description": "Financial Transfers 95th Quantile",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 18,
+        "y": 26
+      },
+      "id": 60,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "options": {},
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false,
+        "ymax": null,
+        "ymin": null
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(moja_tx_transfer_bucket[${__range_s}s])) by (le))",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "thresholds": "",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Financial Transfers 95th Quantile",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "total"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "${DS_PROMETHEUS}",
+      "decimals": 2,
+      "format": "percentunit",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 21,
+        "y": 26
+      },
+      "id": 62,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "options": {},
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false,
+        "ymax": null,
+        "ymin": null
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "expr": "(sum(increase(moja_tx_transfer_bucket{le=\"+Inf\"}[${__range_s}s])) - sum(increase(moja_tx_transfer_bucket{le=\"1\"}[${__range_s}s]))) / sum(increase(moja_tx_transfer_bucket{le=\"+Inf\"}[${__range_s}s]))",
+          "refId": "A"
+        }
+      ],
+      "thresholds": "0.005, 0.01",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "% > 1 Sec",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 29
+      },
+      "id": 42,
+      "panels": [],
+      "title": "Kafka",
+      "type": "row"
+    },
+    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_PROMETHEUS}",
+      "description": "ML API Lag by  Consumer Group",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
-        "h": 9,
+        "h": 5,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 30
       },
-      "id": 8,
+      "id": 44,
       "legend": {
         "alignAsTable": true,
         "avg": true,
@@ -561,7 +1240,7 @@
         "hideEmpty": true,
         "hideZero": true,
         "max": true,
-        "min": true,
+        "min": false,
         "rightSide": true,
         "show": true,
         "total": false,
@@ -571,6 +1250,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -581,32 +1263,547 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(irate(moja_transfer_prepare_sum{serviceName=\"ml-service\"}[120s]) / irate(moja_transfer_prepare_count{serviceName=\"ml-service\"}[120s]))",
+          "expr": "sum(kafka_consumergroup_lag{topic=~\"topic-.*\", consumergroup=~\"ml-group.*\"}) by (consumergroup, topic)",
           "format": "time_series",
-          "hide": false,
+          "instant": false,
+          "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "Transfer API Prepare - Average",
+          "legendFormat": "{{topic}}",
           "refId": "A"
         },
         {
-          "expr": "avg(irate(moja_transfer_fulfil_sum{serviceName=\"ml-service\"}[120s]) / irate(moja_transfer_fulfil_count{serviceName=\"ml-service\"}[120s]))",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "Transfer API Fulfil - Average",
+          "expr": "sum(kafka_consumergroup_lag{topic=~\"topic-event\"}) by (consumergroup, topic)",
+          "hide": true,
+          "legendFormat": "{{topic}}",
           "refId": "B"
         },
         {
-          "expr": "avg(irate(moja_notification_event_sum{serviceName=\"ml-handler-notification\"}[120s]) / irate(moja_notification_event_count{serviceName=\"ml-handler-notification\"}[120s]))",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "Notification Events - Average",
-          "refId": "D"
+          "expr": "sum(kafka_consumergroup_lag{topic=~\"topic-.*\", consumergroup=~\"cl-group-.*\"}) by (consumergroup, topic)",
+          "hide": true,
+          "legendFormat": "{{topic}}",
+          "refId": "C"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
-      "title": "ML-API - Processing Time",
+      "title": "ML API Lag by  Consumer Group",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "collapsed": true,
+      "datasource": "${DS_PROMETHEUS}",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "id": 32,
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "${DS_PROMETHEUS}",
+          "decimals": null,
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 18
+          },
+          "hideTimeOverride": false,
+          "id": 70,
+          "interval": "",
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": true,
+            "min": true,
+            "rightSide": true,
+            "show": true,
+            "sort": null,
+            "sortDesc": null,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": true,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(moja_tx_transfer_count[30s])) by (success)",
+              "hide": false,
+              "legendFormat": "moja_tx_transfer - success:{{success}}",
+              "refId": "I"
+            },
+            {
+              "expr": "sum(rate(moja_tx_transfer_prepare_count[30s])) by (success)",
+              "hide": false,
+              "legendFormat": "moja_tx_transfer_prepare - success:{{success}}",
+              "refId": "J"
+            },
+            {
+              "expr": "sum(rate(moja_tx_transfer_fulfil_count[30s])) by (success)",
+              "hide": false,
+              "legendFormat": "moja_tx_transfer_fulfil - success:{{success}}",
+              "refId": "K"
+            },
+            {
+              "expr": "sum(rate(moja_transfer_prepare_count{serviceName=\"ml-service\"}[30s])) by (app, success)",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Transfers API Prepare - success:{{success}}",
+              "refId": "D"
+            },
+            {
+              "expr": "sum(rate(moja_transfer_fulfil_count{serviceName=\"ml-service\"}[30s])) by (app, success)",
+              "format": "time_series",
+              "hide": false,
+              "intervalFactor": 1,
+              "legendFormat": "Transfers API Fulfill - success:{{success}}",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(moja_notification_event_count{serviceName=\"ml-handler-notification\"}[30s])) by (app, success)",
+              "format": "time_series",
+              "hide": false,
+              "intervalFactor": 1,
+              "legendFormat": "Notification Events - success:{{success}}",
+              "refId": "B"
+            },
+            {
+              "expr": "sum(rate(moja_notification_event_process_msg_count{serviceName=\"ml-handler-notification\"}[30s])) by (app, action, success)",
+              "hide": false,
+              "legendFormat": "Notification Events - {{action}} - success:{{success}}",
+              "refId": "F"
+            },
+            {
+              "expr": "sum(rate(moja_notification_event_delivery_count{serviceName=\"ml-handler-notification\"}[30s])) by (app, action, status, success)",
+              "hide": false,
+              "legendFormat": "Notification Delivery - {{action}} - {{status}} - success:{{success}}",
+              "refId": "G"
+            },
+            {
+              "expr": "sum(rate(moja_notification_event_count{serviceName=\"ml-handler-notification\"}[30s])) by (kubernetes_pod_name, success)",
+              "format": "time_series",
+              "hide": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{kubernetes_pod_name}} - success:{{success}}",
+              "refId": "C"
+            },
+            {
+              "expr": "sum(rate(moja_transfer_prepare_count{serviceName=\"ml-service\"}[30s])) by (kubernetes_pod_name, success)",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{kubernetes_pod_name}} - success:{{success}}",
+              "refId": "E"
+            },
+            {
+              "expr": "sum(rate(moja_notification_event_getEndpoint_count{serviceName=\"ml-handler-notification\"}[30s])) by (success)",
+              "hide": false,
+              "legendFormat": "Notification GetEndpoint - success:{{success}}",
+              "refId": "H"
+            },
+            {
+              "expr": "sum(rate(moja_tx_transfer_count[30s]))",
+              "legendFormat": "moja_tx_transfer - avg",
+              "refId": "L"
+            },
+            {
+              "expr": "sum(rate(moja_tx_transfer_prepare_count[30s]))",
+              "legendFormat": "moja_tx_transfer_prepare - avg",
+              "refId": "M"
+            },
+            {
+              "expr": "sum(rate(moja_tx_transfer_fulfil_count[30s]))",
+              "legendFormat": "moja_tx_transfer_fulfil - avg",
+              "refId": "N"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "ML-API - Processed per sec",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "ops",
+              "label": "",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "${DS_PROMETHEUS}",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 27
+          },
+          "id": 8,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": false,
+            "max": true,
+            "min": true,
+            "rightSide": true,
+            "show": true,
+            "sort": "avg",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "avg(rate(moja_transfer_prepare_sum{serviceName=\"ml-service\"}[30s]) / rate(moja_transfer_prepare_count{serviceName=\"ml-service\"}[30s]))",
+              "format": "time_series",
+              "hide": false,
+              "intervalFactor": 1,
+              "legendFormat": "Transfer API Prepare - Average",
+              "refId": "A"
+            },
+            {
+              "expr": "avg(rate(moja_transfer_fulfil_sum{serviceName=\"ml-service\"}[30s]) / rate(moja_transfer_fulfil_count{serviceName=\"ml-service\"}[30s]))",
+              "format": "time_series",
+              "hide": false,
+              "intervalFactor": 1,
+              "legendFormat": "Transfer API Fulfil - Average",
+              "refId": "B"
+            },
+            {
+              "expr": "avg(rate(moja_notification_event_sum{serviceName=\"ml-handler-notification\"}[30s]) / rate(moja_notification_event_count{serviceName=\"ml-handler-notification\"}[30s]))",
+              "format": "time_series",
+              "hide": false,
+              "intervalFactor": 1,
+              "legendFormat": "Notification Events - Average",
+              "refId": "D"
+            },
+            {
+              "expr": "avg(rate(moja_notification_event_delivery_sum{serviceName=\"ml-handler-notification\"}[30s]) / rate(moja_notification_event_delivery_count{serviceName=\"ml-handler-notification\"}[30s])) by (action, status, success)",
+              "hide": false,
+              "legendFormat": "Notification Deliveries - {{action}} - {{status}} - success:{{success}}",
+              "refId": "F"
+            },
+            {
+              "expr": "avg(rate(moja_notification_event_delivery_sum{serviceName=\"ml-handler-notification\"}[30s]) / rate(moja_notification_event_delivery_count{serviceName=\"ml-handler-notification\"}[30s])) by (kubernetes_pod_name, action, status, success)",
+              "hide": true,
+              "instant": false,
+              "legendFormat": "Notification Deliveries - {{kubernetes_pod_name}} - {{action}} - {{status}} - success:{{success}}",
+              "refId": "E"
+            },
+            {
+              "expr": "rate(moja_notification_event_sum{serviceName=\"ml-handler-notification\"}[30s]) / rate(moja_notification_event_count{serviceName=\"ml-handler-notification\"}[30s])",
+              "hide": true,
+              "legendFormat": "Notification Events  - {{kubernetes_pod_name}}",
+              "refId": "C"
+            },
+            {
+              "expr": "avg(rate(moja_notification_event_getEndpoint_sum{serviceName=\"ml-handler-notification\"}[30s]) / rate(moja_notification_event_getEndpoint_count{serviceName=\"ml-handler-notification\"}[30s])) by (kubernetes_pod_name)",
+              "hide": true,
+              "legendFormat": "Notification GetEndPoint - {{kubernetes_pod_name}}",
+              "refId": "G"
+            },
+            {
+              "expr": "avg(rate(moja_notification_event_getEndpoint_sum{serviceName=\"ml-handler-notification\"}[30s]) / rate(moja_notification_event_getEndpoint_count{serviceName=\"ml-handler-notification\"}[30s]))",
+              "hide": true,
+              "legendFormat": "Notification GetEndPoint ",
+              "refId": "H"
+            },
+            {
+              "expr": "avg(rate(moja_tx_transfer_sum[30s]) / rate(moja_tx_transfer_count[30s])) by (success)",
+              "legendFormat": "moja_tx_transfer - success:{{success}}",
+              "refId": "I"
+            },
+            {
+              "expr": "avg(rate(moja_tx_transfer_prepare_sum[30s]) / rate(moja_tx_transfer_prepare_count[30s])) by (success)",
+              "legendFormat": "moja_tx_transfer_prepare - success:{{success}}",
+              "refId": "J"
+            },
+            {
+              "expr": "avg(rate(moja_tx_transfer_fulfil_sum[30s]) / rate(moja_tx_transfer_fulfil_count[30s])) by (success)",
+              "legendFormat": "moja_tx_transfer_fulfil - success:{{success}}",
+              "refId": "K"
+            },
+            {
+              "expr": "avg(rate(moja_tx_transfer_sum[30s]) / irate(moja_tx_transfer_count[30s]))",
+              "legendFormat": "moja_tx_transfer - avg",
+              "refId": "L"
+            },
+            {
+              "expr": "avg(rate(moja_tx_transfer_prepare_sum[30s]) / rate(moja_tx_transfer_prepare_count[30s]))",
+              "legendFormat": "moja_tx_transfer_prepare - avg",
+              "refId": "M"
+            },
+            {
+              "expr": "avg(rate(moja_tx_transfer_fulfil_sum[30s]) / rate(moja_tx_transfer_fulfil_count[30s]))",
+              "legendFormat": "moja_tx_transfer_fulfil - avg",
+              "refId": "N"
+            }
+          ],
+          "thresholds": [
+            {
+              "colorMode": "critical",
+              "fill": true,
+              "fillColor": "rgba(50, 116, 217, 0.2)",
+              "line": true,
+              "lineColor": "rgba(31, 96, 196, 0.6)",
+              "op": "gt",
+              "value": 1,
+              "yaxis": "left"
+            }
+          ],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "ML-API - Processing Time",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": null,
+              "format": "s",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        }
+      ],
+      "title": "Processing",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "id": 75,
+      "panels": [],
+      "title": "Errors",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 13,
+        "x": 0,
+        "y": 37
+      },
+      "id": 48,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
+        "max": true,
+        "min": true,
+        "rightSide": false,
+        "show": true,
+        "total": true,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum_over_time(moja_notification_event_count{serviceName=\"ml-handler-notification\", success!='true'}[$__interval]) by (app, success, error)",
+          "hide": true,
+          "legendFormat": "{{error}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(moja_notification_event_count{serviceName=\"ml-handler-notification\", success!='true'}[30s])) by (app, success, error)",
+          "hide": false,
+          "legendFormat": "{{error}}",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(rate(moja_notification_event_count{serviceName=\"ml-handler-notification\", success!='true'}[30s])) by (app, success, error, kubernetes_pod_name)",
+          "hide": true,
+          "legendFormat": "{{kubernetes_pod_name}} - {{error}}",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(moja_notification_event_sum{serviceName=\"ml-handler-notification\", success!='true'}[30s]) / rate(moja_notification_event_count{serviceName=\"ml-handler-notification\", success!='true'}[30s])",
+          "hide": true,
+          "refId": "D"
+        },
+        {
+          "expr": "rate(moja_notification_event_sum{serviceName=\"ml-handler-notification\", success!='false'}[30s]) / rate(moja_notification_event_count{serviceName=\"ml-handler-notification\", success!='false'}[30s])",
+          "hide": true,
+          "refId": "E"
+        },
+        {
+          "expr": "sum(rate(moja_tx_transfer_bucket[30s])) by (le)",
+          "hide": true,
+          "refId": "F"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "ML-API- Notification Handler Error Rate",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -631,7 +1828,7 @@
         },
         {
           "format": "short",
-          "label": null,
+          "label": "",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -644,309 +1841,45 @@
       }
     },
     {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 25
-      },
-      "id": 30,
-      "panels": [],
-      "title": "CPU Usage by App",
-      "type": "row"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_PROMETHEUS}",
-      "description": "Mojaloop API Adapter Total CPU Usage",
-      "format": "percent",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 4,
-        "x": 0,
-        "y": 26
-      },
-      "id": 40,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
-          "format": "time_series",
-          "instant": true,
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-      ],
-      "thresholds": "50,80",
-      "title": "Mojaloop API Adapter Total CPU Usage",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_PROMETHEUS}",
-      "description": "ML API Service CPU Usage",
-      "format": "percent",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 4,
-        "x": 4,
-        "y": 26
-      },
-      "id": 38,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-service.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
-          "format": "time_series",
-          "instant": true,
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-      ],
-      "thresholds": "50,80",
-      "title": "ML API Service CPU Usage",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_PROMETHEUS}",
-      "description": "ML API Notification CPU Usage",
-      "format": "percent",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 4,
-        "x": 8,
-        "y": 26
-      },
-      "id": 36,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-handler-notification.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
-          "format": "time_series",
-          "instant": true,
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-      ],
-      "thresholds": "50, 80",
-      "title": "ML API Notification CPU Usage",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 29
-      },
-      "id": 28,
-      "panels": [],
-      "title": "CPU Usage by Pods",
-      "type": "row"
-    },
-    {
       "aliasColors": {},
-      "bars": false,
+      "bars": true,
+      "cacheTimeout": null,
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_PROMETHEUS}",
-      "description": "ML-API  -  CPU Usage in Seconds by Pod",
+      "description": "Total Notification Handler Errors for range ",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
-        "h": 7,
-        "w": 24,
-        "x": 0,
-        "y": 30
+        "h": 6,
+        "w": 11,
+        "x": 13,
+        "y": 37
       },
-      "id": 2,
+      "id": 68,
       "legend": {
         "alignAsTable": true,
-        "avg": true,
+        "avg": false,
         "current": true,
-        "max": true,
+        "hideEmpty": true,
+        "hideZero": true,
+        "max": false,
         "min": false,
-        "rightSide": true,
+        "rightSide": false,
         "show": true,
         "total": false,
         "values": true
       },
-      "lines": true,
+      "lines": false,
       "linewidth": 1,
       "links": [],
-      "nullPointMode": "null",
+      "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
-      "pointradius": 5,
+      "pluginVersion": "6.4.2",
+      "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
@@ -955,54 +1888,40 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum (rate (moja_process_cpu_seconds_total{serviceName=~\"ml-.*\"}[2m])) by (app)",
+          "expr": "sum(increase(moja_notification_event_bucket{le=\"+Inf\", serviceName=\"ml-handler-notification\", success!='true'}[${__range_s}s])) by (app, success, error)",
           "format": "time_series",
-          "hide": false,
-          "intervalFactor": 1,
-          "legendFormat": "{{app}}",
-          "refId": "A"
-        },
-        {
-          "expr": "sum(\n    rate(container_cpu_usage_seconds_total{pod_name=~'.*ml.*'}[2m]))\nby (pod_name)",
-          "format": "time_series",
-          "hide": true,
-          "intervalFactor": 1,
-          "legendFormat": "{{pod_name}}",
-          "refId": "C"
-        },
-        {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{pod_name=~'.*ml.*'}[2m]))",
-          "format": "time_series",
-          "hide": false,
-          "intervalFactor": 1,
-          "legendFormat": "All Total",
-          "refId": "D"
+          "instant": false,
+          "legendFormat": "{{error}}",
+          "refId": "B"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
-      "title": "ML-API  -  CPU Usage in Seconds by Pod",
+      "title": "Total Notification Handler Errors for range ",
       "tooltip": {
-        "shared": true,
+        "shared": false,
         "sort": 0,
         "value_type": "individual"
       },
       "type": "graph",
       "xaxis": {
         "buckets": null,
-        "mode": "time",
+        "mode": "series",
         "name": null,
         "show": true,
-        "values": []
+        "values": [
+          "current"
+        ]
       },
       "yaxes": [
         {
-          "format": "percent",
+          "format": "short",
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -1020,12 +1939,521 @@
       }
     },
     {
-      "collapsed": false,
+      "collapsed": true,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 43
+      },
+      "id": 30,
+      "panels": [
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "${DS_PROMETHEUS}",
+          "description": "Mojaloop API Adapter Total CPU Usage",
+          "format": "percent",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": true,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 0,
+            "y": 41
+          },
+          "id": 40,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api.*'}[2m])) * 100",
+              "format": "time_series",
+              "hide": true,
+              "instant": true,
+              "intervalFactor": 1,
+              "refId": "A"
+            },
+            {
+              "expr": "sum(irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api.*'}[2m]))",
+              "refId": "B"
+            }
+          ],
+          "thresholds": "50,80",
+          "title": "Mojaloop API Adapter Total CPU Usage",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "avg"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "${DS_PROMETHEUS}",
+          "description": "ML API Service CPU Usage",
+          "format": "percent",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": true,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 4,
+            "y": 41
+          },
+          "id": 38,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-service.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
+              "format": "time_series",
+              "hide": true,
+              "instant": true,
+              "intervalFactor": 1,
+              "refId": "A"
+            },
+            {
+              "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-service.*'}[2m]))",
+              "refId": "B"
+            }
+          ],
+          "thresholds": "50,80",
+          "title": "ML API Service CPU Usage",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "avg"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "${DS_PROMETHEUS}",
+          "description": "ML API Notification CPU Usage",
+          "format": "percent",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": true,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 4,
+            "x": 8,
+            "y": 41
+          },
+          "id": 36,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-handler-notification.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
+              "format": "time_series",
+              "hide": true,
+              "instant": true,
+              "intervalFactor": 1,
+              "refId": "A"
+            },
+            {
+              "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-handler-notification.*'}[2m]))",
+              "refId": "B"
+            }
+          ],
+          "thresholds": "50, 80",
+          "title": "ML API Notification CPU Usage",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "avg"
+        }
+      ],
+      "title": "CPU Usage by App",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "datasource": "${DS_PROMETHEUS}",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 44
+      },
+      "id": 28,
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "${DS_PROMETHEUS}",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 37
+          },
+          "id": 46,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "moja_nodejs_heap_size_total_bytes{serviceName=~\"ml-s.*\"}",
+              "legendFormat": "heap_total-{{kubernetes_pod_name}}",
+              "refId": "A"
+            },
+            {
+              "expr": "moja_nodejs_heap_size_used_bytes{serviceName=~\"ml-s.*\"}",
+              "legendFormat": "heap_used-{{kubernetes_pod_name}}",
+              "refId": "B"
+            },
+            {
+              "expr": "moja_nodejs_external_memory_bytes{serviceName=~\"ml-s.*\"}",
+              "legendFormat": "ext_memory-{{kubernetes_pod_name}}",
+              "refId": "C"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "ML API - Memoy Usage by Pod",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "decbytes",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "${DS_PROMETHEUS}",
+          "description": "ML-API  -  CPU Usage in Seconds by Pod",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 45
+          },
+          "id": 2,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "max",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum (rate (moja_process_cpu_seconds_total{serviceName=~\"ml-.*\"}[2m])) by (kubernetes_pod_name)",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{kubernetes_pod_name}}",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(\n    rate(container_cpu_usage_seconds_total{pod_name=~'.*ml.*'}[2m]))\nby (pod_name)",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{pod_name}}",
+              "refId": "C"
+            },
+            {
+              "expr": "sum(rate(container_cpu_usage_seconds_total{pod_name=~'.*ml.*'}[2m]))",
+              "format": "time_series",
+              "hide": true,
+              "intervalFactor": 1,
+              "legendFormat": "All Total",
+              "refId": "D"
+            },
+            {
+              "expr": "rate(moja_process_cpu_seconds_total{serviceName=~\"ml-.*\"}[30s]) * 100",
+              "legendFormat": "{{kubernetes_pod_name}}",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "ML-API  -  CPU Usage in Seconds by Pod",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "percent",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        }
+      ],
+      "title": "Resource Usage by Pods",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 45
       },
       "id": 34,
       "panels": [],
@@ -1040,11 +2468,12 @@
       "datasource": "${DS_PROMETHEUS}",
       "decimals": 0,
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 46
       },
       "id": 18,
       "legend": {
@@ -1065,6 +2494,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1081,10 +2513,16 @@
           "intervalFactor": 1,
           "legendFormat": "{{deployment}}",
           "refId": "A"
+        },
+        {
+          "expr": "kube_deployment_spec_replicas{deployment=~\".*simnotifhandler.*\"}",
+          "legendFormat": "{{deployment}}",
+          "refId": "B"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "ML-API - # Nodes for each Components",
       "tooltip": {
@@ -1131,11 +2569,12 @@
       "dashes": false,
       "datasource": "${DS_PROMETHEUS}",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 42
+        "y": 50
       },
       "id": 10,
       "legend": {
@@ -1151,6 +2590,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1170,6 +2612,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "ML-API  - Event Loop Lag in Seconds",
       "tooltip": {
@@ -1209,8 +2652,8 @@
       }
     }
   ],
-  "refresh": "10s",
-  "schemaVersion": 16,
+  "refresh": "",
+  "schemaVersion": 20,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -1247,6 +2690,6 @@
   },
   "timezone": "",
   "title": "Mojaloop - ML-API",
-  "uid": "5z9mkZ-mz",
-  "version": 8
+  "uid": "5z9mkZ-msa",
+  "version": 121
 }
