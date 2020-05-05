@@ -4,10 +4,11 @@ kind: ConfigMap
 metadata:
   name: {{ include "mojaloop-simulator.prefix" . }}jws-public-keys
   labels:
-    app: sim
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: {{ include "mojaloop-simulator.prefix" . }}jws-public-keys
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 data:
   {{- range $name, $customConfig := .Values.simulators }}
   {{- $config := merge $customConfig $.Values.defaults }}

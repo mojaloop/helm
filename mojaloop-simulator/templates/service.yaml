@@ -6,10 +6,11 @@ kind: Service
 metadata:
   name: {{ $fullName }}-backend
   labels:
-    app: {{ $fullName }}-backend
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: {{ $fullName }}-backend
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 spec:
    type: ClusterIP
    ports:
@@ -26,18 +27,19 @@ spec:
        name: testapi
        targetPort: testapi
    selector:
-     app: {{ $fullName }}-backend
-     release: {{ $.Release.Name }}
+      app.kubernetes.io/name: {{ $fullName }}-backend
+      app.kubernetes.io/instance: {{ $.Release.Name }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $fullName }}-scheme-adapter
   labels:
-    app: {{ $fullName }}-scheme-adapter
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: {{ $fullName }}-scheme-adapter
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 spec:
    type: ClusterIP
    ports:
@@ -56,8 +58,8 @@ spec:
        targetPort: testapi
      {{- end }}
    selector:
-     app: {{ $fullName }}-scheme-adapter
-     release: {{ $.Release.Name }}
+      app.kubernetes.io/name: {{ $fullName }}-scheme-adapter
+      app.kubernetes.io/instance: {{ $.Release.Name }}
 ---
 {{- if $config.config.cache.enabled }}
 apiVersion: v1
@@ -65,10 +67,11 @@ kind: Service
 metadata:
   name: {{ $fullName }}-cache
   labels:
-    app: {{ $fullName }}-cache
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: {{ $fullName }}-cache
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 spec:
    type: ClusterIP
    ports:
@@ -77,8 +80,8 @@ spec:
        name: redis
        targetPort: redis
    selector:
-     app: {{ $fullName }}-cache
-     release: {{ $.Release.Name }}
+      app.kubernetes.io/name: {{ $fullName }}-cache
+      app.kubernetes.io/instance: {{ $.Release.Name }}
 {{- end }}
 ---
 {{ end }}

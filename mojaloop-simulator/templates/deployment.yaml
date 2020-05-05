@@ -21,8 +21,11 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ $fullName }}-scheme-adapter
-        release: {{ $.Release.Name }}
+        app.kubernetes.io/name: {{ $fullName }}-scheme-adapter
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+        app.kubernetes.io/managed-by: {{ $.Release.Service }}
+        helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
     spec:
       volumes:
       {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
@@ -141,21 +144,25 @@ kind: Deployment
 metadata:
   name: {{ $fullName }}-backend
   labels:
-    app: {{ $fullName }}-backend
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: {{ $fullName }}-backend
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 spec:
   replicas: {{ $config.replicaCount }}
   selector:
     matchLabels:
-      app: {{ $fullName }}-backend
-      release: {{ $.Release.Name }}
+      app.kubernetes.io/name: {{ $fullName }}-backend
+      app.kubernetes.io/instance: {{ $.Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ $fullName }}-backend
-        release: {{ $.Release.Name }}
+        app.kubernetes.io/name: {{ $fullName }}-backend
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+        app.kubernetes.io/managed-by: {{ $.Release.Service }}
+        helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
     spec:
       {{- if $config.config.backend.initContainers }}
       initContainers:
@@ -230,21 +237,25 @@ kind: Deployment
 metadata:
   name: {{ $fullName }}-cache
   labels:
-    app: {{ $fullName }}-cache
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: {{ $fullName }}-cache
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 spec:
   replicas: {{ $config.replicaCount }}
   selector:
     matchLabels:
-      app: {{ $fullName }}-cache
-      release: {{ $.Release.Name }}
+      app.kubernetes.io/name: {{ $fullName }}-cache
+      app.kubernetes.io/instance: {{ $.Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ $fullName }}-cache
-        release: {{ $.Release.Name }}
+        app.kubernetes.io/name: {{ $fullName }}-cache
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+        app.kubernetes.io/managed-by: {{ $.Release.Service }}
+        helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
     spec:
       containers:
       - name: cache

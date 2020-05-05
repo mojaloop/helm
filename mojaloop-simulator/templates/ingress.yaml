@@ -4,10 +4,11 @@ kind: Ingress
 metadata:
   name: simulators
   labels:
-    app: simulators
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: simulators
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 {{- with .Values.ingress.annotations }}
   annotations:
 {{ toYaml . | indent 4 }}
