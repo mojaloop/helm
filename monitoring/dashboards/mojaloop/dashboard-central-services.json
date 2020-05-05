@@ -14,25 +14,25 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.3.1"
+      "version": "6.4.2"
     },
     {
       "type": "panel",
       "id": "graph",
       "name": "Graph",
-      "version": "5.0.0"
+      "version": ""
     },
     {
       "type": "datasource",
       "id": "prometheus",
       "name": "Prometheus",
-      "version": "5.0.0"
+      "version": "1.0.0"
     },
     {
       "type": "panel",
       "id": "singlestat",
       "name": "Singlestat",
-      "version": "5.0.0"
+      "version": ""
     }
   ],
   "annotations": {
@@ -55,232 +55,16 @@
   "links": [],
   "panels": [
     {
-      "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 50,
-      "panels": [],
-      "title": "Kafka",
+      "id": 56,
+      "title": "Current OP/s",
       "type": "row"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
-      "description": "Central Ledger Lag by Consumer Group",
-      "fill": 1,
-      "gridPos": {
-        "h": 5,
-        "w": 24,
-        "x": 0,
-        "y": 1
-      },
-      "id": 52,
-      "legend": {
-        "alignAsTable": true,
-        "avg": true,
-        "current": true,
-        "hideEmpty": false,
-        "hideZero": false,
-        "max": true,
-        "min": false,
-        "rightSide": true,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null as zero",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(kafka_consumergroup_lag{topic=~\"topic-.*\", consumergroup=~\"cl-group-.*\"}) by (consumergroup, topic)",
-          "format": "time_series",
-          "hide": false,
-          "instant": false,
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "{{topic}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Central Ledger Lag by Consumer Group",
-      "tooltip": {
-        "shared": true,
-        "sort": 2,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 6
-      },
-      "id": 44,
-      "panels": [],
-      "title": "Processing",
-      "type": "row"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "${DS_PROMETHEUS}",
-      "fill": 1,
-      "gridPos": {
-        "h": 9,
-        "w": 21,
-        "x": 0,
-        "y": 7
-      },
-      "id": 20,
-      "legend": {
-        "alignAsTable": true,
-        "avg": true,
-        "current": true,
-        "max": true,
-        "min": true,
-        "rightSide": true,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null as zero",
-      "percentage": true,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(rate(moja_transfer_prepare_count{serviceName=\"central-handler-prepare\"}[120s])) by (app)",
-          "format": "time_series",
-          "hide": false,
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "{{app}}",
-          "refId": "D"
-        },
-        {
-          "expr": "sum(rate(moja_transfer_position_count{serviceName=\"central-handler-position\"}[120s])) by (app)",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{app}}",
-          "refId": "E"
-        },
-        {
-          "expr": "sum(rate(moja_transfer_fulfil_count{serviceName=\"central-handler-fulfil\"}[120s])) by (app)",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{app}}",
-          "refId": "I"
-        },
-        {
-          "expr": "sum(rate(moja_transfer_position_count{serviceName=\"central-handler-position\"}[120s]))",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "Positions - Average",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Central-Service - Processed per sec",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": false,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": "",
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
     },
     {
       "cacheTimeout": null,
@@ -292,8 +76,9 @@
         "#d44a3a"
       ],
       "datasource": "${DS_PROMETHEUS}",
+      "decimals": null,
       "description": "Transfers Prepares / sec",
-      "format": "none",
+      "format": "ops",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -304,8 +89,8 @@
       "gridPos": {
         "h": 3,
         "w": 3,
-        "x": 21,
-        "y": 7
+        "x": 0,
+        "y": 1
       },
       "id": 22,
       "interval": null,
@@ -324,6 +109,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -376,7 +162,7 @@
       ],
       "datasource": "${DS_PROMETHEUS}",
       "description": "Transfer Positions / sec",
-      "format": "none",
+      "format": "ops",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -387,8 +173,8 @@
       "gridPos": {
         "h": 3,
         "w": 3,
-        "x": 21,
-        "y": 10
+        "x": 3,
+        "y": 1
       },
       "id": 26,
       "interval": null,
@@ -407,6 +193,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -469,8 +256,8 @@
       "gridPos": {
         "h": 3,
         "w": 3,
-        "x": 21,
-        "y": 13
+        "x": 6,
+        "y": 1
       },
       "id": 24,
       "interval": null,
@@ -489,6 +276,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -531,17 +319,293 @@
       "valueName": "current"
     },
     {
+      "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 50,
+      "panels": [],
+      "title": "Kafka",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "description": "Central Ledger Lag by Consumer Group",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 52,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": false,
+        "hideZero": false,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(kafka_consumergroup_lag{topic=~\"topic-.*\", consumergroup=~\"cl-group-.*\"}) by (consumergroup, topic)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "{{topic}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Central Ledger Lag by Consumer Group",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "id": 44,
+      "panels": [],
+      "title": "Processing",
+      "type": "row"
+    },
+    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_PROMETHEUS}",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 11
+      },
+      "id": 20,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "sort": null,
+        "sortDesc": null,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": true,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(irate(moja_transfer_prepare_count{serviceName=\"central-handler-prepare\"}[120s])) by (app_kubernetes_io_name, success)",
+          "format": "time_series",
+          "hide": false,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "{{app_kubernetes_io_name}} - success:{{success}}",
+          "refId": "D"
+        },
+        {
+          "expr": "sum(irate(moja_transfer_position_count{serviceName=\"central-handler-position\"}[120s])) by (app_kubernetes_io_name, action, success)",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{app_kubernetes_io_name}} - {{action}} - success:{{success}}",
+          "refId": "E"
+        },
+        {
+          "expr": "sum(irate(moja_transfer_position_count{serviceName=\"central-handler-position\"}[120s])) by (app_kubernetes_io_name, success)",
+          "hide": false,
+          "legendFormat": "{{app_kubernetes_io_name}}  Avg - success:{{success}}",
+          "refId": "G"
+        },
+        {
+          "expr": "sum(irate(moja_transfer_fulfil_count{serviceName=\"central-handler-fulfil\"}[120s])) by (app_kubernetes_io_name, success)",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{app_kubernetes_io_name}} - success:{{success}}",
+          "refId": "I"
+        },
+        {
+          "expr": "sum(irate(moja_transfer_position_count{serviceName=\"central-handler-position\"}[120s])) by (success)",
+          "format": "time_series",
+          "hide": true,
+          "intervalFactor": 1,
+          "legendFormat": "Positions - Average - success:{{success}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(irate(moja_transfer_prepare_count{serviceName=\"central-handler-prepare\"}[120s])) by (kubernetes_pod_name, success)",
+          "hide": false,
+          "legendFormat": "{{kubernetes_pod_name}} - success:{{success}}",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(irate(moja_transfer_fulfil_count{serviceName=\"central-handler-fulfil\"}[120s])) by (kubernetes_pod_name, success)",
+          "hide": false,
+          "legendFormat": "{{kubernetes_pod_name}} - success:{{success}}",
+          "refId": "C"
+        },
+        {
+          "expr": "sum(irate(moja_transfer_position_count{serviceName=\"central-handler-position\"}[120s])) by (kubernetes_pod_name, success)",
+          "hide": false,
+          "legendFormat": "{{kubernetes_pod_name}} - success:{{success}}",
+          "refId": "F"
+        },
+        {
+          "expr": "sum(irate(moja_transfer_prepare_count{serviceName=\"ml-service\"}[120s])) by (app, success)",
+          "hide": true,
+          "legendFormat": "ML Transfers API Prepare - success:{{success}}",
+          "refId": "H"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Central-Service - Processed per sec",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "ops",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 20
       },
       "hideTimeOverride": false,
       "id": 8,
@@ -555,6 +619,8 @@
         "min": true,
         "rightSide": true,
         "show": true,
+        "sort": null,
+        "sortDesc": null,
         "total": false,
         "values": true
       },
@@ -562,6 +628,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -572,45 +641,56 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "irate(moja_transfer_prepare_sum{serviceName=\"central-handler-prepare\"}[120s]) / irate(moja_transfer_prepare_count{serviceName=\"central-handler-prepare\"}[120s])",
+          "expr": "avg(irate(moja_transfer_prepare_sum{serviceName=\"central-handler-prepare\"}[30s]) / irate(moja_transfer_prepare_count{serviceName=\"central-handler-prepare\"}[30s])) by (success)",
           "format": "time_series",
           "hide": false,
+          "instant": false,
           "intervalFactor": 1,
-          "legendFormat": "Transfer Prepare - {{kubernetes_pod_name}}",
-          "refId": "A"
-        },
-        {
-          "expr": "irate(moja_transfer_position_sum{serviceName=\"central-handler-position\"}[120s]) / irate(moja_transfer_position_count{serviceName=\"central-handler-position\"}[120s])",
-          "format": "time_series",
-          "hide": false,
-          "intervalFactor": 1,
-          "legendFormat": "Transfer Position",
-          "refId": "E"
-        },
-        {
-          "expr": "avg(irate(moja_transfer_prepare_sum{serviceName=\"central-handler-prepare\"}[120s]) / irate(moja_cl_prep_hand_transfer_prepare_count{serviceName=\"central-handler-prepare\"}[120s]))",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "Transfer Prepare - Average",
+          "legendFormat": "Transfer Prepare - Average - success:{{success}}",
           "refId": "B"
         },
         {
-          "expr": "avg(irate(moja_transfer_position_sum{serviceName=\"central-handler-position\"}[120s]) / irate(moja_transfer_position_count{serviceName=\"central-handler-position\"}[120s]))",
+          "expr": "avg(irate(moja_transfer_position_sum{serviceName=\"central-handler-position\"}[30s]) / irate(moja_transfer_position_count{serviceName=\"central-handler-position\"}[30s])) by (success)",
           "format": "time_series",
+          "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "Transfer Position - Average",
+          "legendFormat": "Transfer Position - Average - success:{{success}}",
           "refId": "C"
         },
         {
-          "expr": "avg(irate(moja_transfer_fulfil_sum{serviceName=\"central-handler-fulfil\"}[120s]) / irate(moja_transfer_fulfil_count{serviceName=\"central-handler-fulfil\"}[120s]))",
+          "expr": "avg(irate(moja_transfer_fulfil_sum{serviceName=\"central-handler-fulfil\"}[30s]) / irate(moja_transfer_fulfil_count{serviceName=\"central-handler-fulfil\"}[30s])) by (success)",
           "format": "time_series",
+          "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "Transfer Fulfil - Average",
+          "legendFormat": "Transfer Fulfil - Average - success:{{success}}",
           "refId": "D"
+        },
+        {
+          "expr": "avg(irate(moja_transfer_prepare_sum{serviceName=\"central-handler-prepare\"}[30s]) / irate(moja_transfer_prepare_count{serviceName=\"central-handler-prepare\"}[30s])) by (kubernetes_pod_name, success)",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "Transfer Prepare - {{kubernetes_pod_name}} - success:{{success}}",
+          "refId": "A"
+        },
+        {
+          "expr": "avg(irate(moja_transfer_position_sum{serviceName=\"central-handler-position\"}[30s]) / irate(moja_transfer_position_count{serviceName=\"central-handler-position\"}[30s]) ) by (kubernetes_pod_name, success)",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "Transfer Position - {{kubernetes_pod_name}} - success:{{success}}",
+          "refId": "E"
+        },
+        {
+          "expr": "avg(irate(moja_transfer_fulfil_sum{serviceName=\"central-handler-fulfil\"}[30s]) / irate(moja_transfer_fulfil_count{serviceName=\"central-handler-fulfil\"}[30s])) by (kubernetes_pod_name, success)",
+          "hide": false,
+          "legendFormat": "Transfer Fulfil - {{kubernetes_pod_name}} - success:{{success}}",
+          "refId": "F"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Central-Service - Processing Time",
       "tooltip": {
@@ -618,7 +698,6 @@
         "sort": 0,
         "value_type": "individual"
       },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -651,365 +730,508 @@
       }
     },
     {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 25
-      },
-      "id": 42,
-      "panels": [],
-      "title": "CPU Usage by App",
-      "type": "row"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorPostfix": false,
-      "colorPrefix": false,
-      "colorValue": true,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
+      "collapsed": true,
       "datasource": "${DS_PROMETHEUS}",
-      "description": "Central Services Total CPU Usage",
-      "format": "percent",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 5,
-        "x": 0,
-        "y": 26
-      },
-      "id": 40,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*centralledger.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
-          "format": "time_series",
-          "hide": false,
-          "instant": true,
-          "intervalFactor": 1,
-          "legendFormat": "Central Services Total CPU Usage",
-          "refId": "A"
-        }
-      ],
-      "thresholds": "50, 80",
-      "title": "Central Services Total CPU Usage",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "0",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_PROMETHEUS}",
-      "description": "Transfer Prepare Handler CPU Usage",
-      "format": "percent",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 5,
-        "x": 5,
-        "y": 26
-      },
-      "id": 36,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*centralledger-handler-transfer-prepare.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
-          "format": "time_series",
-          "instant": true,
-          "intervalFactor": 1,
-          "legendFormat": "Transfer Prepare Handler CPU Usage",
-          "refId": "A"
-        }
-      ],
-      "thresholds": "50,80",
-      "title": "Transfer Prepare Handler CPU Usage",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "0",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_PROMETHEUS}",
-      "description": "Transfer Position Handler CPU Usage",
-      "format": "percent",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 5,
-        "x": 10,
-        "y": 26
-      },
-      "id": 34,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*centralledger-handler-transfer-position.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
-          "format": "time_series",
-          "instant": true,
-          "intervalFactor": 1,
-          "legendFormat": "Transfer Position Handler CPU Usage",
-          "refId": "A"
-        }
-      ],
-      "thresholds": "50,80",
-      "title": "Transfer Position Handler CPU Usage",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "0",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_PROMETHEUS}",
-      "description": "Transfer Fulfil Handler CPU Usage",
-      "format": "percent",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 5,
-        "x": 15,
-        "y": 26
-      },
-      "id": 38,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*centralledger-handler-transfer-fulfil.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
-          "format": "time_series",
-          "instant": true,
-          "intervalFactor": 1,
-          "legendFormat": "Transfer Fulfil Handler CPU Usage",
-          "refId": "A"
-        }
-      ],
-      "thresholds": "50,80",
-      "title": "Transfer Fulfil Handler CPU Usage",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "0",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 29
       },
+      "id": 42,
+      "panels": [
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorPostfix": false,
+          "colorPrefix": false,
+          "colorValue": true,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "${DS_PROMETHEUS}",
+          "description": "Central Services Total CPU Usage",
+          "format": "percent",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": true,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 5,
+            "x": 0,
+            "y": 26
+          },
+          "id": 40,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*centralledger.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
+              "format": "time_series",
+              "hide": true,
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "Central Services Total CPU Usage",
+              "refId": "A"
+            },
+            {
+              "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*centralledger.*'}[2m]))",
+              "refId": "B"
+            }
+          ],
+          "thresholds": "50, 80",
+          "title": "Central Services Total CPU Usage",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "0",
+              "value": "null"
+            }
+          ],
+          "valueName": "avg"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "${DS_PROMETHEUS}",
+          "description": "Transfer Prepare Handler CPU Usage",
+          "format": "percent",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": true,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 5,
+            "x": 5,
+            "y": 26
+          },
+          "id": 36,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*centralledger-handler-transfer-prepare.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
+              "format": "time_series",
+              "hide": true,
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "Transfer Prepare Handler CPU Usage",
+              "refId": "A"
+            },
+            {
+              "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*centralledger-handler-transfer-prepare.*'}[2m]))",
+              "refId": "B"
+            }
+          ],
+          "thresholds": "50,80",
+          "title": "Transfer Prepare Handler CPU Usage",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "0",
+              "value": "null"
+            }
+          ],
+          "valueName": "avg"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "${DS_PROMETHEUS}",
+          "description": "Transfer Position Handler CPU Usage",
+          "format": "percent",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": true,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 5,
+            "x": 10,
+            "y": 26
+          },
+          "id": 34,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*centralledger-handler-transfer-position.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
+              "format": "time_series",
+              "hide": true,
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "Transfer Position Handler CPU Usage",
+              "refId": "A"
+            },
+            {
+              "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*centralledger-handler-transfer-position.*'}[2m]))",
+              "refId": "B"
+            }
+          ],
+          "thresholds": "50,80",
+          "title": "Transfer Position Handler CPU Usage",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "0",
+              "value": "null"
+            }
+          ],
+          "valueName": "avg"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "${DS_PROMETHEUS}",
+          "description": "Transfer Fulfil Handler CPU Usage",
+          "format": "percent",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": true,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 5,
+            "x": 15,
+            "y": 26
+          },
+          "id": 38,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*centralledger-handler-transfer-fulfil.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
+              "format": "time_series",
+              "hide": true,
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "Transfer Fulfil Handler CPU Usage",
+              "refId": "A"
+            },
+            {
+              "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*centralledger-handler-transfer-fulfil.*'}[2m]))",
+              "refId": "B"
+            }
+          ],
+          "thresholds": "50,80",
+          "title": "Transfer Fulfil Handler CPU Usage",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "0",
+              "value": "null"
+            }
+          ],
+          "valueName": "avg"
+        }
+      ],
+      "title": "CPU Usage by App",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
       "id": 48,
       "panels": [],
-      "title": "CPU Usage by Pods",
+      "title": "Resource Usage by Pods",
       "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_PROMETHEUS}",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 31
+      },
+      "id": 54,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": true,
+        "hideZero": true,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "moja_nodejs_heap_space_size_available_bytes{serviceName=~\"central-handler.*\"}",
+          "hide": true,
+          "legendFormat": "heap_space_free-{{kubernetes_pod_name}}",
+          "refId": "A"
+        },
+        {
+          "expr": "moja_nodejs_heap_space_size_used_bytes{serviceName=~\"central-handler.*\"}",
+          "hide": true,
+          "legendFormat": "heap_space_used-{{kubernetes_pod_name}}",
+          "refId": "B"
+        },
+        {
+          "expr": "moja_nodejs_heap_size_total_bytes{serviceName=~\"central-handler.*\"}",
+          "hide": false,
+          "legendFormat": "heap_total-{{kubernetes_pod_name}}",
+          "refId": "C"
+        },
+        {
+          "expr": "moja_nodejs_heap_size_used_bytes{serviceName=~\"central-handler.*\"}",
+          "hide": false,
+          "legendFormat": "heap_used-{{kubernetes_pod_name}}",
+          "refId": "D"
+        },
+        {
+          "expr": "moja_nodejs_external_memory_bytes{serviceName=~\"central-handler.*\"}",
+          "hide": true,
+          "legendFormat": "ext_memory-{{kubernetes_pod_name}}",
+          "refId": "E"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Central Services - Memory Usage by Pod",
+      "tooltip": {
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "decbytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -1019,11 +1241,12 @@
       "datasource": "${DS_PROMETHEUS}",
       "description": "Central-Service  - CPU Usage in Seconds by Pod",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 39
       },
       "id": 2,
       "legend": {
@@ -1036,6 +1259,8 @@
         "min": false,
         "rightSide": true,
         "show": true,
+        "sort": "avg",
+        "sortDesc": true,
         "total": false,
         "values": true
       },
@@ -1043,6 +1268,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": true,
       "pointradius": 5,
       "points": false,
@@ -1053,26 +1281,26 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum (irate (moja_process_cpu_seconds_total{serviceName=~\"central.*\"}[120s])) by (app)",
+          "expr": "sum (irate (moja_process_cpu_seconds_total{serviceName=~\"central.*\"}[30s])) by (app)",
           "format": "time_series",
-          "hide": false,
+          "hide": true,
           "intervalFactor": 1,
           "legendFormat": "{{app}}",
           "refId": "A"
         },
         {
-          "expr": "sum(\n    irate(container_cpu_usage_seconds_total{pod_name=~'.*centralledger-handler-transfer-.*|.*centralledger-service.*'}[120s]))\nby (pod_name)",
+          "expr": "sum(\n    irate(container_cpu_usage_seconds_total{pod_name=~'.*centralledger-handler-transfer-.*|.*centralledger-service.*'}[30s]))\nby (pod_name)",
           "format": "time_series",
-          "hide": false,
+          "hide": true,
           "instant": false,
           "intervalFactor": 1,
           "legendFormat": "{{pod_name}}",
           "refId": "B"
         },
         {
-          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*centralledger-handler-transfer-.*|.*centralledger-service.*'}[120s]))",
+          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*centralledger-handler-transfer-.*|.*centralledger-service.*'}[30s]))",
           "format": "time_series",
-          "hide": false,
+          "hide": true,
           "instant": false,
           "intervalFactor": 1,
           "legendFormat": "All Total",
@@ -1141,10 +1369,16 @@
           "hide": true,
           "intervalFactor": 1,
           "refId": "N"
+        },
+        {
+          "expr": "rate(moja_process_cpu_seconds_total{serviceName=~\"central.*\"}[30s]) * 100",
+          "legendFormat": "{{kubernetes_pod_name}}",
+          "refId": "E"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Central-Service  - CPU Usage in Seconds by Pod",
       "tooltip": {
@@ -1185,11 +1419,12 @@
     },
     {
       "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 39
+        "y": 48
       },
       "id": 46,
       "panels": [],
@@ -1203,11 +1438,12 @@
       "dashes": false,
       "datasource": "${DS_PROMETHEUS}",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 49
       },
       "id": 10,
       "legend": {
@@ -1223,6 +1459,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1242,6 +1481,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Central-Service  - Event Loop Lag in Seconds",
       "tooltip": {
@@ -1288,11 +1528,12 @@
       "datasource": "${DS_PROMETHEUS}",
       "decimals": 0,
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 47
+        "y": 56
       },
       "id": 18,
       "legend": {
@@ -1313,6 +1554,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1333,6 +1577,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Central-Service - # Pods for each Components",
       "tooltip": {
@@ -1373,8 +1618,8 @@
       }
     }
   ],
-  "refresh": false,
-  "schemaVersion": 16,
+  "refresh": "5s",
+  "schemaVersion": 20,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -1412,5 +1657,5 @@
   "timezone": "",
   "title": "Mojaloop - Central-Ledger",
   "uid": "5z9mkZ-pr",
-  "version": 4
+  "version": 45
 }

@@ -4,6 +4,7 @@
 - **ElasticSearch**: Elasticsearch is a distributed, RESTful search and analytics engine. 
 - **FluentD**: Open source data collector for unified logging layer, with ingestions into Elasticsearch.
 - **Kibana**: Kibana lets you visualize your Elasticsearch data and navigate the Elastic Stack.
+- **APM**: Application Performance Monitoring lets you visualize your Tracing information.
 
 **Why?**
 - Central location and storage of all Mojaloop log files
@@ -11,6 +12,7 @@
 - Management of alert/events based on log data
 - Assist with tracing & trouble shooting Mojaloop’s distributed micro-service logs
 - Produces real-time metrics or alerts to Prometheus
+- Provides Tracing monitoring and visualization
 
 ## EFK Installation
 
@@ -36,6 +38,10 @@ ___Note: Target namespace in the above command can be changed as required.___
     - Click "Discover" on the top left
     - Enter `fluentd*`, then click `Next step`
     - Select `@timestamp` from the drop down, then click `Create index pattern`
+
+### 3. Custom Dashboard
+
+
 
 ## Known issues
 
