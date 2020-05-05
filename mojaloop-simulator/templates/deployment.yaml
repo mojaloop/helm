@@ -1,26 +1,27 @@
-{{- $prefix := include "prefix" . -}}
+{{- $prefix := include "mojaloop-simulator.prefix" . -}}
 {{- range $name, $customConfig := .Values.simulators }}
+{{- $fullName := printf "%s%s" $prefix $name }}
 {{- $config := merge $customConfig $.Values.defaults }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $prefix }}{{ $name }}-scheme-adapter
+  name: {{ $fullName }}-scheme-adapter
   labels:
-    app.kubernetes.io/name: {{ $prefix }}{{ $name }}-scheme-adapter
+    app.kubernetes.io/name: {{ $fullName }}-scheme-adapter
     app.kubernetes.io/instance: {{ $.Release.Name }}
-    app.kubernetes.io/version: {{ $.Chart.AppVersion }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
     helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 spec:
   replicas: {{ $config.replicaCount }}
   selector:
     matchLabels:
-      app: {{ $prefix }}{{ $name }}-scheme-adapter
+      app: {{ $fullName }}-scheme-adapter
       release: {{ $.Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ $prefix }}{{ $name }}-scheme-adapter
+        app: {{ $fullName }}-scheme-adapter
         release: {{ $.Release.Name }}
     spec:
       volumes:
@@ -30,7 +31,7 @@ spec:
           {{- if $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
           secretName: {{ $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
           {{- else }}
-          secretName: {{ $prefix }}{{ $name }}-jws-priv-key
+          secretName: {{ $fullName }}-jws-priv-key
           {{- end }}
       {{- end }}
       - name: jws-public-keys
@@ -45,7 +46,7 @@ spec:
           {{- if $config.config.schemeAdapter.secrets.tlsSecretName }}
           secretName: {{ $config.config.schemeAdapter.secrets.tlsSecretName }}
           {{- else }}
-          secretName: sim-{{ $name }}-tls-creds
+          secretName: {{ $fullName }}-tls-creds
           {{- end }}
       {{- if $config.config.schemeAdapter.initContainers }}
       initContainers:
@@ -90,11 +91,11 @@ spec:
           mountPath: "/secrets/"
         env:
         - name: CACHE_HOST
-          value: {{ printf "%s%s-cache" $prefix $name }}
+          value: {{ printf "%s-cache" $fullName }}
         - name: BACKEND_ENDPOINT
-          value: {{ printf "%s%s-backend:3000" $prefix $name }}
+          value: {{ printf "%s-backend:3000" $fullName }}
         - name: DFSP_ID
-          value: {{ $name | quote }}
+          value: {{ $fullName | quote }}
         - name: IN_CA_CERT_PATH
           value: "./secrets/cacert.pem"
         - name: IN_SERVER_CERT_PATH
@@ -138,9 +139,9 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $prefix }}{{ $name }}-backend
+  name: {{ $fullName }}-backend
   labels:
-    app: {{ $prefix }}{{ $name }}-backend
+    app: {{ $fullName }}-backend
     chart: {{ template "mojaloop-simulator.chart" $ }}
     release: {{ $.Release.Name }}
     heritage: {{ $.Release.Service }}
@@ -148,12 +149,12 @@ spec:
   replicas: {{ $config.replicaCount }}
   selector:
     matchLabels:
-      app: {{ $prefix }}{{ $name }}-backend
+      app: {{ $fullName }}-backend
       release: {{ $.Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ $prefix }}{{ $name }}-backend
+        app: {{ $fullName }}-backend
         release: {{ $.Release.Name }}
     spec:
       {{- if $config.config.backend.initContainers }}
@@ -190,11 +191,11 @@ spec:
         {{- end }}
         env:
         - name: OUTBOUND_ENDPOINT
-          value: "http://{{ $prefix }}{{ $name }}-scheme-adapter:{{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}"
+          value: "http://{{ $fullName }}-scheme-adapter:{{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}"
         - name: SCHEME_NAME
-          value: {{ $name | quote }}
+          value: {{ $fullName | quote }}
         - name: DFSP_ID
-          value: {{ $name | quote }}
+          value: {{ $fullName | quote }}
         {{- range $k, $v := $config.config.backend.env }}
         - name: {{ $k }}
           value: {{ $v | quote }}
@@ -207,7 +208,7 @@ spec:
       volumes:
       - name: {{ $prefix }}rules
         configMap:
-          name: {{ $prefix }}{{ $name }}-rules
+          name: {{ $fullName }}-rules
       imagePullSecrets:
         - name: {{ $config.config.imagePullSecretName }}
     {{- with $config.nodeSelector }}
@@ -227,9 +228,9 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $prefix }}{{ $name }}-cache
+  name: {{ $fullName }}-cache
   labels:
-    app: {{ $prefix }}{{ $name }}-cache
+    app: {{ $fullName }}-cache
     chart: {{ template "mojaloop-simulator.chart" $ }}
     release: {{ $.Release.Name }}
     heritage: {{ $.Release.Service }}
@@ -237,12 +238,12 @@ spec:
   replicas: {{ $config.replicaCount }}
   selector:
     matchLabels:
-      app: {{ $prefix }}{{ $name }}-cache
+      app: {{ $fullName }}-cache
       release: {{ $.Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ $prefix }}{{ $name }}-cache
+        app: {{ $fullName }}-cache
         release: {{ $.Release.Name }}
     spec:
       containers:

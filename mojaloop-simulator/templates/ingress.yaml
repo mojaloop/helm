@@ -1,5 +1,4 @@
 {{ if .Values.simulators }}
-{{- $prefix := include "prefix" . -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -16,27 +15,28 @@ metadata:
 spec:
   rules:
   {{- range $name, $customConfig := .Values.simulators }}
+  {{- $fullName := printf "%s%s" (include "mojaloop-simulator.prefix" $) $name -}}
   {{- $config := merge $customConfig $.Values.defaults }}
   {{- if $config.ingress.enabled -}}
     {{- range $host := $config.ingress.hosts }}
       - host: {{ $host }}
         http:
           paths:
-          - path: /sim/{{ $name }}/outbound{{ $.Values.ingress.ingressPathRewriteRegex }}
+          - path: /sim/{{ $fullName }}/outbound{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
-              serviceName: {{ $prefix }}{{ $name }}-scheme-adapter
+              serviceName: {{ $fullName }}-scheme-adapter
               servicePort: outboundapi
-          - path: /sim/{{ $name }}/inbound{{ $.Values.ingress.ingressPathRewriteRegex }}
+          - path: /sim/{{ $fullName }}/inbound{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
-              serviceName: {{ $prefix }}{{ $name }}-scheme-adapter
+              serviceName: {{ $fullName }}-scheme-adapter
               servicePort: inboundapi
-          - path: /sim/{{ $name }}/sdktest{{ $.Values.ingress.ingressPathRewriteRegex }}
+          - path: /sim/{{ $fullName }}/sdktest{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
-              serviceName: sim-{{ $name }}-scheme-adapter
+              serviceName: {{ $fullName }}-scheme-adapter
               servicePort: testapi
-          - path: /sim/{{ $name }}/test{{ $.Values.ingress.ingressPathRewriteRegex }}
+          - path: /sim/{{ $fullName }}/test{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
-              serviceName: {{ $prefix }}{{ $name }}-backend
+              serviceName: {{ $fullName }}-backend
               servicePort: testapi
     {{- end }}
   {{- end }}
