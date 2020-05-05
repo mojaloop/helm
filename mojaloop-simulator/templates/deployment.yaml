@@ -2,6 +2,7 @@
 {{- range $name, $customConfig := .Values.simulators }}
 {{- $fullName := printf "%s%s" $prefix $name }}
 {{- $config := merge $customConfig $.Values.defaults }}
+{{- $initContainerEnv := dict "SIM_NAME" $name "SIM_SCHEME_ADAPTER_SERVICE_NAME" (printf "sim-%s-scheme-adapter" $name) "SIM_BACKEND_SERVICE_NAME" (printf "sim-%s-backend" $name) "SIM_CACHE_SERVICE_NAME" (printf "sim-%s-cache" $name) -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -51,10 +52,8 @@ spec:
           {{- else }}
           secretName: {{ $fullName }}-tls-creds
           {{- end }}
-      {{- if $config.config.schemeAdapter.initContainers }}
       initContainers:
-{{ $config.config.schemeAdapter.initContainers | toYaml | indent 6 }}
-      {{- end }}
+{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.schemeAdapter.initContainers "dicts" (list $config.config.schemeAdapter.env $initContainerEnv)) | indent 6 }}
       containers:
       - name: scheme-adapter
         image: "{{ $config.config.schemeAdapter.image.repository }}:{{ $config.config.schemeAdapter.image.tag }}"
@@ -164,10 +163,8 @@ spec:
         app.kubernetes.io/managed-by: {{ $.Release.Service }}
         helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
     spec:
-      {{- if $config.config.backend.initContainers }}
       initContainers:
-{{ $config.config.backend.initContainers | toYaml | indent 6 }}
-      {{- end }}
+{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.backend.initContainers "dict" (merge $config.config.backend.env $initContainerEnv)) | indent 6 }}
       containers:
       - name: backend
         image: "{{ $config.config.backend.image.repository }}:{{ $config.config.backend.image.tag }}"
@@ -257,6 +254,8 @@ spec:
         app.kubernetes.io/managed-by: {{ $.Release.Service }}
         helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
     spec:
+      initContainers:
+{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.cache.initContainers "dict" $initContainerEnv) | indent 6 }}
       containers:
       - name: cache
         image: "{{ $config.config.cache.image.repository }}:{{ $config.config.cache.image.tag }}"
