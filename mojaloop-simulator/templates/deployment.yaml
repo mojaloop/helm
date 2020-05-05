@@ -240,6 +240,8 @@ spec:
         app: sim-{{ $name }}-cache
         release: {{ $.Release.Name }}
     spec:
+      initContainers:
+{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.cache.initContainers "dict" $initContainerEnv) | indent 6 }}
       containers:
       - name: cache
         image: "{{ $config.config.cache.image.repository }}:{{ $config.config.cache.image.tag }}"
