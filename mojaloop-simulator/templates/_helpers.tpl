@@ -9,7 +9,7 @@ Create chart name and version as used by the chart label.
 
 {{/*
 We prefix deployment components with the release name by default.
-This can be overridden by setting .Values.prefix value to empty string.
+This can be overridden by setting .Values.prefix value to your preferred value, including an empty string for no prefix. If you require a dash separator in your custom prefix, you must include this yourself, e.g. `.Values.prefix: prefix-`.
 Prefix is limited to 10 characters long.
 */}}
 {{- define "mojaloop-simulator.prefix" -}}
