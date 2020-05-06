@@ -1,7 +1,5 @@
 #!/bin/bash
 
-LOCAL_HELM_MOJALOOP_REPO_URI=${HELM_MOJALOOP_REPO_URI:-'https://docs.mojaloop.io/helm/repo'}
-
 #
 # Script to Package all charts, and created an index.yaml in ./repo directory
 #
@@ -128,8 +126,8 @@ checkCommandResult
 
 cd ./repo
 
-echo "Creating Helm repo index for '$LOCAL_HELM_MOJALOOP_REPO_URI'..."
-helm repo index . --url $LOCAL_HELM_MOJALOOP_REPO_URI
+echo "Creating Helm repo index..."
+helm repo index .
 checkCommandResult
 
 echo "\
