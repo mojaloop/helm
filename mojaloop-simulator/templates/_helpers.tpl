@@ -8,6 +8,19 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
+We prefix deployment components with the release name by default.
+This can be overridden by setting .Values.prefix value to your preferred value, including an empty string for no prefix. If you require a dash separator in your custom prefix, you must include this yourself, e.g. `.Values.prefix: prefix-`.
+Prefix is truncated to 10 characters long.
+*/}}
+{{- define "mojaloop-simulator.prefix" -}}
+{{- if kindIs "invalid" .Values.prefix -}}
+{{- printf "%s-" .Release.Name | trunc 10 -}}
+{{- else -}}
+{{- .Values.prefix | trunc 10 | trimAll " " -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Prepend a dictionary to a list of container env vars. Prepended in such an order that the env vars
 in the containers will take precedence over any env vars in the dictionary.
 Usage, where `$keyVals` is a dictionary:

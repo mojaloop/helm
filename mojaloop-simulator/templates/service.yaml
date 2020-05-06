@@ -1,14 +1,16 @@
 {{- range $name, $customConfig := .Values.simulators }}
 {{- $config := merge $customConfig $.Values.defaults }}
+{{- $fullName := printf "%s%s" (include "mojaloop-simulator.prefix" $) $name -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: sim-{{ $name }}-backend
+  name: {{ $fullName }}-backend
   labels:
-    app: sim-{{ $name }}-backend
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: {{ $fullName }}-backend
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 spec:
    type: ClusterIP
    ports:
@@ -25,18 +27,19 @@ spec:
        name: testapi
        targetPort: testapi
    selector:
-     app: sim-{{ $name }}-backend
-     release: {{ $.Release.Name }}
+      app.kubernetes.io/name: {{ $fullName }}-backend
+      app.kubernetes.io/instance: {{ $.Release.Name }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: sim-{{ $name }}-scheme-adapter
+  name: {{ $fullName }}-scheme-adapter
   labels:
-    app: sim-{{ $name }}-scheme-adapter
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: {{ $fullName }}-scheme-adapter
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 spec:
    type: ClusterIP
    ports:
@@ -55,19 +58,20 @@ spec:
        targetPort: testapi
      {{- end }}
    selector:
-     app: sim-{{ $name }}-scheme-adapter
-     release: {{ $.Release.Name }}
+      app.kubernetes.io/name: {{ $fullName }}-scheme-adapter
+      app.kubernetes.io/instance: {{ $.Release.Name }}
 ---
 {{- if $config.config.cache.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: sim-{{ $name }}-cache
+  name: {{ $fullName }}-cache
   labels:
-    app: sim-{{ $name }}-cache
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: {{ $fullName }}-cache
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 spec:
    type: ClusterIP
    ports:
@@ -76,8 +80,8 @@ spec:
        name: redis
        targetPort: redis
    selector:
-     app: sim-{{ $name }}-cache
-     release: {{ $.Release.Name }}
+      app.kubernetes.io/name: {{ $fullName }}-cache
+      app.kubernetes.io/instance: {{ $.Release.Name }}
 {{- end }}
 ---
 {{ end }}

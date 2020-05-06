@@ -1,20 +1,22 @@
 {{- range $name, $customConfig := .Values.simulators }}
 {{- $config := merge $customConfig $.Values.defaults }}
+{{- $fullName := printf "%s%s" (include "mojaloop-simulator.prefix" $) $name -}}
 {{- if $config.config.schemeAdapter.scale.enabled }}
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: sim-{{ $name }}-scheme-adapter
+  name: {{ $fullName }}-scheme-adapter
   labels:
-    app: sim-{{ $name }}-scheme-adapter
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: {{ $fullName }}-scheme-adapter
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: sim-{{ $name }}-scheme-adapter
+    name: {{ $fullName }}-scheme-adapter
 {{ $config.config.schemeAdapter.scale.spec | toYaml | indent 2 }}
 ---
 {{- end }}
