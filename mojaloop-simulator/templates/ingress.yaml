@@ -4,10 +4,11 @@ kind: Ingress
 metadata:
   name: simulators
   labels:
-    app: simulators
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: simulators
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 {{- with .Values.ingress.annotations }}
   annotations:
 {{ toYaml . | indent 4 }}
@@ -15,27 +16,28 @@ metadata:
 spec:
   rules:
   {{- range $name, $customConfig := .Values.simulators }}
+  {{- $fullName := printf "%s%s" (include "mojaloop-simulator.prefix" $) $name -}}
   {{- $config := merge $customConfig $.Values.defaults }}
   {{- if $config.ingress.enabled -}}
     {{- range $host := $config.ingress.hosts }}
       - host: {{ $host }}
         http:
           paths:
-          - path: /sim/{{ $name }}/outbound{{ $.Values.ingress.ingressPathRewriteRegex }}
+          - path: /sim/{{ $fullName }}/outbound{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
-              serviceName: sim-{{ $name }}-scheme-adapter
+              serviceName: {{ $fullName }}-scheme-adapter
               servicePort: outboundapi
-          - path: /sim/{{ $name }}/inbound{{ $.Values.ingress.ingressPathRewriteRegex }}
+          - path: /sim/{{ $fullName }}/inbound{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
-              serviceName: sim-{{ $name }}-scheme-adapter
+              serviceName: {{ $fullName }}-scheme-adapter
               servicePort: inboundapi
-          - path: /sim/{{ $name }}/sdktest{{ $.Values.ingress.ingressPathRewriteRegex }}
+          - path: /sim/{{ $fullName }}/sdktest{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
-              serviceName: sim-{{ $name }}-scheme-adapter
+              serviceName: {{ $fullName }}-scheme-adapter
               servicePort: testapi
-          - path: /sim/{{ $name }}/test{{ $.Values.ingress.ingressPathRewriteRegex }}
+          - path: /sim/{{ $fullName }}/test{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
-              serviceName: sim-{{ $name }}-backend
+              serviceName: {{ $fullName }}-backend
               servicePort: testapi
     {{- end }}
   {{- end }}

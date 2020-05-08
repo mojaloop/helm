@@ -1,25 +1,32 @@
+{{- $prefix := include "mojaloop-simulator.prefix" . -}}
 {{- range $name, $customConfig := .Values.simulators }}
+{{- $fullName := printf "%s%s" $prefix $name }}
 {{- $config := merge $customConfig $.Values.defaults }}
+{{- $initContainerEnv := dict "SIM_NAME" $name "SIM_SCHEME_ADAPTER_SERVICE_NAME" (printf "sim-%s-scheme-adapter" $name) "SIM_BACKEND_SERVICE_NAME" (printf "sim-%s-backend" $name) "SIM_CACHE_SERVICE_NAME" (printf "sim-%s-cache" $name) -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sim-{{ $name }}-scheme-adapter
+  name: {{ $fullName }}-scheme-adapter
   labels:
-    app: sim-{{ $name }}-scheme-adapter
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: {{ $fullName }}-scheme-adapter
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 spec:
   replicas: {{ $config.replicaCount }}
   selector:
     matchLabels:
-      app: sim-{{ $name }}-scheme-adapter
-      release: {{ $.Release.Name }}
+      app.kubernetes.io/name: {{ $fullName }}-scheme-adapter
+      app.kubernetes.io/instance: {{ $.Release.Name }}
   template:
     metadata:
       labels:
-        app: sim-{{ $name }}-scheme-adapter
-        release: {{ $.Release.Name }}
+        app.kubernetes.io/name: {{ $fullName }}-scheme-adapter
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+        app.kubernetes.io/managed-by: {{ $.Release.Service }}
+        helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
     spec:
       volumes:
       {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
@@ -28,7 +35,7 @@ spec:
           {{- if $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
           secretName: {{ $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
           {{- else }}
-          secretName: sim-{{ $name }}-jws-priv-key
+          secretName: {{ $fullName }}-jws-priv-key
           {{- end }}
       {{- end }}
       - name: jws-public-keys
@@ -36,19 +43,17 @@ spec:
           {{- if $config.config.schemeAdapter.secrets.jws.publicKeyConfigMapName }}
           name: {{ $config.config.schemeAdapter.secrets.jws.publicKeyConfigMapName }}
           {{- else }}
-          name: sim-jws-public-keys
+          name: {{ $prefix }}jws-public-keys
           {{- end }}
       - name: tls-secrets
         secret:
           {{- if $config.config.schemeAdapter.secrets.tlsSecretName }}
           secretName: {{ $config.config.schemeAdapter.secrets.tlsSecretName }}
           {{- else }}
-          secretName: sim-{{ $name }}-tls-creds
+          secretName: {{ $fullName }}-tls-creds
           {{- end }}
-      {{- if $config.config.schemeAdapter.initContainers }}
       initContainers:
-{{ $config.config.schemeAdapter.initContainers | toYaml | indent 6 }}
-      {{- end }}
+{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.schemeAdapter.initContainers "dicts" (list $config.config.schemeAdapter.env $initContainerEnv)) | indent 6 }}
       containers:
       - name: scheme-adapter
         image: "{{ $config.config.schemeAdapter.image.repository }}:{{ $config.config.schemeAdapter.image.tag }}"
@@ -88,11 +93,11 @@ spec:
           mountPath: "/secrets/"
         env:
         - name: CACHE_HOST
-          value: {{ printf "sim-%s-cache" $name | quote }}
+          value: {{ printf "%s-cache" $fullName }}
         - name: BACKEND_ENDPOINT
-          value: {{ printf "sim-%s-backend:3000" $name }}
+          value: {{ printf "%s-backend:3000" $fullName }}
         - name: DFSP_ID
-          value: {{ $name | quote }}
+          value: {{ $fullName | quote }}
         - name: IN_CA_CERT_PATH
           value: "./secrets/cacert.pem"
         - name: IN_SERVER_CERT_PATH
@@ -136,28 +141,30 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sim-{{ $name }}-backend
+  name: {{ $fullName }}-backend
   labels:
-    app: sim-{{ $name }}-backend
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: {{ $fullName }}-backend
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 spec:
   replicas: {{ $config.replicaCount }}
   selector:
     matchLabels:
-      app: sim-{{ $name }}-backend
-      release: {{ $.Release.Name }}
+      app.kubernetes.io/name: {{ $fullName }}-backend
+      app.kubernetes.io/instance: {{ $.Release.Name }}
   template:
     metadata:
       labels:
-        app: sim-{{ $name }}-backend
-        release: {{ $.Release.Name }}
+        app.kubernetes.io/name: {{ $fullName }}-backend
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+        app.kubernetes.io/managed-by: {{ $.Release.Service }}
+        helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
     spec:
-      {{- if $config.config.backend.initContainers }}
       initContainers:
-{{ $config.config.backend.initContainers | toYaml | indent 6 }}
-      {{- end }}
+{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.backend.initContainers "dict" (merge $config.config.backend.env $initContainerEnv)) | indent 6 }}
       containers:
       - name: backend
         image: "{{ $config.config.backend.image.repository }}:{{ $config.config.backend.image.tag }}"
@@ -188,11 +195,11 @@ spec:
         {{- end }}
         env:
         - name: OUTBOUND_ENDPOINT
-          value: "http://sim-{{ $name }}-scheme-adapter:{{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}"
+          value: "http://{{ $fullName }}-scheme-adapter:{{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}"
         - name: SCHEME_NAME
-          value: {{ $name | quote }}
+          value: {{ $fullName | quote }}
         - name: DFSP_ID
-          value: {{ $name | quote }}
+          value: {{ $fullName | quote }}
         {{- range $k, $v := $config.config.backend.env }}
         - name: {{ $k }}
           value: {{ $v | quote }}
@@ -200,12 +207,12 @@ spec:
         resources:
 {{ toYaml $config.config.backend.resources | indent 10 }}
         volumeMounts:
-        - name: sim-rules
+        - name: {{ $prefix }}rules
           mountPath: /rules/
       volumes:
-      - name: sim-rules
+      - name: {{ $prefix }}rules
         configMap:
-          name: sim-{{ $name }}-rules
+          name: {{ $fullName }}-rules
       imagePullSecrets:
         - name: {{ $config.config.imagePullSecretName }}
     {{- with $config.nodeSelector }}
@@ -225,24 +232,30 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sim-{{ $name }}-cache
+  name: {{ $fullName }}-cache
   labels:
-    app: sim-{{ $name }}-cache
-    chart: {{ template "mojaloop-simulator.chart" $ }}
-    release: {{ $.Release.Name }}
-    heritage: {{ $.Release.Service }}
+    app.kubernetes.io/name: {{ $fullName }}-cache
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
 spec:
   replicas: {{ $config.replicaCount }}
   selector:
     matchLabels:
-      app: sim-{{ $name }}-cache
-      release: {{ $.Release.Name }}
+      app.kubernetes.io/name: {{ $fullName }}-cache
+      app.kubernetes.io/instance: {{ $.Release.Name }}
   template:
     metadata:
       labels:
-        app: sim-{{ $name }}-cache
-        release: {{ $.Release.Name }}
+        app.kubernetes.io/name: {{ $fullName }}-cache
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+        app.kubernetes.io/managed-by: {{ $.Release.Service }}
+        helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
     spec:
+      initContainers:
+{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.cache.initContainers "dict" $initContainerEnv) | indent 6 }}
       containers:
       - name: cache
         image: "{{ $config.config.cache.image.repository }}:{{ $config.config.cache.image.tag }}"
