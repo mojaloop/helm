@@ -61,7 +61,18 @@ spec:
             name: {{ template "finance-portal-settlement-management.fullname" . }}
         - secretRef:
             name: {{ template "finance-portal-settlement-management.fullname" . }}
-        resources:
+        resources: {}
+        ## Pod scheduling preferences.
+        ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+        affinity: {}
+
+        ## Node labels for pod assignment
+        ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+        nodeSelector: {}
+
+        ## Set toleration for scheduler
+        ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+        tolerations: []
       - name: settlement-management
         image: "{{ .Values.settlementManagement.image.repository }}:{{ .Values.settlementManagement.image.tag }}"
         imagePullPolicy: {{ .Values.settlementManagement.image.pullPolicy }}
@@ -82,5 +93,16 @@ spec:
               name: {{ template "finance-portal-settlement-management.fullname" . }}
           - secretRef:
               name: {{ template "finance-portal-settlement-management.fullname" . }}
+        ## Pod scheduling preferences.
+        ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+        affinity: {}
+
+        ## Node labels for pod assignment
+        ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+        nodeSelector: {}
+
+        ## Set toleration for scheduler
+        ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+        tolerations: []
       imagePullSecrets:
         - name: {{ .Values.imageCredentials.name }}

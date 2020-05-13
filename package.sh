@@ -127,7 +127,7 @@ checkCommandResult
 cd ./repo
 
 echo "Creating Helm repo index..."
-helm repo index . --url http://mojaloop.io/helm/repo
+helm repo index .
 checkCommandResult
 
 echo "\
