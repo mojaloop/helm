@@ -133,11 +133,20 @@ spec:
           volumeMounts:
             - name: {{ template "quotingservice.fullname" . }}-sidecar-volume
               mountPath: /opt/event-sidecar/config
+            {{- if .Values.config.endpointSecurity.jwsSign }}
+            - name: jws-signing-key
+              mountPath: /secrets
+            {{- end }}
           env:
             - name: LOG_LEVEL
               value: {{ .Values.sidecar.config.log_level }}
         {{- end }}
       volumes:
+        {{- if .Values.config.endpointSecurity.jwsSign }}
+        - name: jws-signing-key
+          secret:
+            secretName: {{ template "quotingservice.fullname" . }}-jws-signing-key
+        {{- end }}
         - name: {{ template "quotingservice.fullname" . }}-config-volume
           configMap:
             name: {{ template "quotingservice.fullname" . }}-config
