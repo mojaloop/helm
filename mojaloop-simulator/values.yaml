@@ -113,13 +113,23 @@ defaultProbes: &defaultProbes
     failureThreshold: 3
 
 ingress:
-  annotations: {}
-  # If you're using nginx ingress controller >= v0.22.0 set this to (/|$)(.*).
-  # If you're using nginx ingress controller < v0.22.0 set this to an empty string.
+  # If you're using nginx ingress controller >= v0.22.0 set this to (/|$)(.*). Ensure that you set the `"nginx.ingress.kubernetes.io/rewrite-target": "/$2"`
+  # If you're using nginx ingress controller < v0.22.0 set this to an empty string or "/". Ensure that you set the `"nginx.ingress.kubernetes.io/rewrite-target": "/"`
   # This affects the way your rewrite target will work.
   # For more information see "Breaking changes" here:
   # https://github.com/kubernetes/ingress-nginx/blob/master/Changelog.md#0220
+
+  ## nginx ingress controller >= v0.22.0
+  annotations: {
+    "nginx.ingress.kubernetes.io/rewrite-target": "/$2"
+  }
   ingressPathRewriteRegex: (/|$)(.*)
+
+  ## nginx ingress controller < v0.22.0
+  # annotations: {
+  #   "nginx.ingress.kubernetes.io/rewrite-target": "/"
+  # }
+  # ingressPathRewriteRegex: "/"
 
 # If you enable JWS validation and intend to communicate via a switch you will almost certainly
 # want to put your switch JWS public key in this array. The name of the property in this object
@@ -430,36 +440,26 @@ defaults: &defaults
         # e.g. a rule can be used to trigger NDC errors given transfers between certain limits.
         RULES_FILE: /rules/rules.json
 
-  ingress:
-    enabled: true
-    path: /
-    hosts:
-      - mojaloop-simulators.local
-    tls: []
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+      # requests:
+      #  cpu: 100m
+      #  memory: 128Mi
 
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
-    #  memory: 128Mi
+    ## Pod scheduling preferences.
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity: {}
 
-  ## Pod scheduling preferences.
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  affinity: {}
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector: {}
 
-  ## Node labels for pod assignment
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  nodeSelector: {}
-
-  ## Set toleration for scheduler
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  tolerations: []
+    ## Set toleration for scheduler
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations: []
