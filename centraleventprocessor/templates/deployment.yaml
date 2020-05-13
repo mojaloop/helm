@@ -79,6 +79,18 @@ spec:
               value: {{ .Values.config.log_level }}
             - name: CSL_LOG_TRANSPORT
               value: {{ .Values.config.log_transport}}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
       volumes:
         - name: {{ template "centraleventprocessor.fullname" . }}-config-volume
           configMap:

@@ -14,7 +14,7 @@ Prefix is truncated to 10 characters long.
 */}}
 {{- define "mojaloop-simulator.prefix" -}}
 {{- if kindIs "invalid" .Values.prefix -}}
-{{- printf "%s-" .Release.Name | trunc 10 -}}
+{{- printf "%s-sim-" .Release.Name -}}
 {{- else -}}
 {{- .Values.prefix | trunc 10 | trimAll " " -}}
 {{- end -}}

@@ -1,8 +1,9 @@
 {{ if .Values.simulators }}
+{{- $prefix := include "mojaloop-simulator.prefix" . -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: simulators
+  name: {{ $prefix }}simulators
   labels:
     app.kubernetes.io/name: simulators
     app.kubernetes.io/instance: {{ $.Release.Name }}
@@ -23,19 +24,19 @@ spec:
       - host: {{ $host }}
         http:
           paths:
-          - path: /sim/{{ $fullName }}/outbound{{ $.Values.ingress.ingressPathRewriteRegex }}
+          - path: /sim/{{ $name }}/outbound{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
               serviceName: {{ $fullName }}-scheme-adapter
               servicePort: outboundapi
-          - path: /sim/{{ $fullName }}/inbound{{ $.Values.ingress.ingressPathRewriteRegex }}
+          - path: /sim/{{ $name }}/inbound{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
               serviceName: {{ $fullName }}-scheme-adapter
               servicePort: inboundapi
-          - path: /sim/{{ $fullName }}/sdktest{{ $.Values.ingress.ingressPathRewriteRegex }}
+          - path: /sim/{{ $name }}/sdktest{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
               serviceName: {{ $fullName }}-scheme-adapter
               servicePort: testapi
-          - path: /sim/{{ $fullName }}/test{{ $.Values.ingress.ingressPathRewriteRegex }}
+          - path: /sim/{{ $name }}/test{{ $.Values.ingress.ingressPathRewriteRegex }}
             backend:
               serviceName: {{ $fullName }}-backend
               servicePort: testapi
