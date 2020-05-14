@@ -1,0 +1,287 @@
+{{- $prefix := include "mojaloop-simulator.prefix" . -}}
+{{- range $name, $customConfig := .Values.simulators }}
+{{- $fullName := printf "%s%s" $prefix $name }}
+{{- $config := merge $customConfig $.Values.defaults }}
+{{- $initContainerEnv := dict "SIM_NAME" $name "SIM_SCHEME_ADAPTER_SERVICE_NAME" (printf "sim-%s-scheme-adapter" $name) "SIM_BACKEND_SERVICE_NAME" (printf "sim-%s-backend" $name) "SIM_CACHE_SERVICE_NAME" (printf "sim-%s-cache" $name) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-scheme-adapter
+  labels:
+    app.kubernetes.io/name: {{ $fullName }}-scheme-adapter
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
+spec:
+  replicas: {{ $config.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ $fullName }}-scheme-adapter
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ $fullName }}-scheme-adapter
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+        app.kubernetes.io/managed-by: {{ $.Release.Service }}
+        helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
+    spec:
+      volumes:
+      {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
+      - name: jws-private-key
+        secret:
+          {{- if $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
+          secretName: {{ $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
+          {{- else }}
+          secretName: {{ $fullName }}-jws-priv-key
+          {{- end }}
+      {{- end }}
+      - name: jws-public-keys
+        configMap:
+          {{- if $config.config.schemeAdapter.secrets.jws.publicKeyConfigMapName }}
+          name: {{ $config.config.schemeAdapter.secrets.jws.publicKeyConfigMapName }}
+          {{- else }}
+          name: {{ $prefix }}jws-public-keys
+          {{- end }}
+      - name: tls-secrets
+        secret:
+          {{- if $config.config.schemeAdapter.secrets.tlsSecretName }}
+          secretName: {{ $config.config.schemeAdapter.secrets.tlsSecretName }}
+          {{- else }}
+          secretName: {{ $fullName }}-tls-creds
+          {{- end }}
+      initContainers:
+{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.schemeAdapter.initContainers "dicts" (list $config.config.schemeAdapter.env $initContainerEnv)) | indent 6 }}
+      containers:
+      - name: scheme-adapter
+        image: "{{ $config.config.schemeAdapter.image.repository }}:{{ $config.config.schemeAdapter.image.tag }}"
+        imagePullPolicy: {{ $config.config.schemeAdapter.image.pullPolicy }}
+        ports:
+          - name: inboundapi
+            containerPort: {{ $config.config.schemeAdapter.env.INBOUND_LISTEN_PORT }}
+            protocol: TCP
+          - name: outboundapi
+            containerPort: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
+            protocol: TCP
+          - name: testapi
+            containerPort: {{ $config.config.schemeAdapter.env.TEST_LISTEN_PORT }}
+            protocol: TCP
+        {{- if $config.config.schemeAdapter.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
+            scheme: HTTP
+        {{- end }}
+        {{- if $config.config.schemeAdapter.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
+            scheme: HTTP
+        {{- end }}
+        volumeMounts:
+        - name: jws-public-keys
+          mountPath: {{ $config.config.schemeAdapter.env.JWS_VERIFICATION_KEYS_DIRECTORY }}
+        {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
+        - name: jws-private-key
+          mountPath: "/jwsSigningKey/"
+        {{- end }}
+        - name: tls-secrets
+          mountPath: "/secrets/"
+        env:
+        - name: CACHE_HOST
+          value: {{ printf "%s-cache" $fullName }}
+        - name: BACKEND_ENDPOINT
+          value: {{ printf "%s-backend:3000" $fullName }}
+        - name: DFSP_ID
+          value: {{ $name | quote }}
+        - name: IN_CA_CERT_PATH
+          value: "./secrets/cacert.pem"
+        - name: IN_SERVER_CERT_PATH
+          value: "./secrets/servercert.pem"
+        - name: IN_SERVER_KEY_PATH
+          value: "./secrets/serverkey.pem"
+        - name: OUT_CA_CERT_PATH
+          value: "./secrets/cacert.pem"
+        - name: OUT_CLIENT_CERT_PATH
+          value: "./secrets/servercert.pem"
+        - name: OUT_CLIENT_KEY_PATH
+          value: "./secrets/serverkey.pem"
+        - name: TEST_CA_CERT_PATH
+          value: "./secrets/cacert.pem"
+        - name: TEST_CLIENT_CERT_PATH
+          value: "./secrets/servercert.pem"
+        - name: TEST_CLIENT_KEY_PATH
+          value: "./secrets/serverkey.pem"
+        {{- range $k, $v := $config.config.schemeAdapter.env }}
+        - name: {{ $k }}
+          value: {{ $v | quote }}
+        {{- end }}
+        resources:
+{{ toYaml $config.config.schemeAdapter.resources | indent 10 }}
+      imagePullSecrets:
+        - name: {{ $config.config.imagePullSecretName }}
+    {{- with $config.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with $config.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with $config.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-backend
+  labels:
+    app.kubernetes.io/name: {{ $fullName }}-backend
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
+spec:
+  replicas: {{ $config.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ $fullName }}-backend
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ $fullName }}-backend
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+        app.kubernetes.io/managed-by: {{ $.Release.Service }}
+        helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
+    spec:
+      initContainers:
+{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.backend.initContainers "dict" (merge $config.config.backend.env $initContainerEnv)) | indent 6 }}
+      containers:
+      - name: backend
+        image: "{{ $config.config.backend.image.repository }}:{{ $config.config.backend.image.tag }}"
+        imagePullPolicy: {{ $config.config.backend.image.pullPolicy }}
+        ports:
+          - name: simapi
+            containerPort: 3000 # these are hard-coded in the service
+            protocol: TCP
+          - name: reportapi
+            containerPort: 3002 # these are hard-coded in the service
+            protocol: TCP
+          - name: testapi
+            containerPort: 3003 # these are hard-coded in the service
+            protocol: TCP
+        {{- if $config.config.backend.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+            scheme: HTTP
+        {{- end }}
+        {{- if $config.config.backend.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+            scheme: HTTP
+        {{- end }}
+        env:
+        - name: OUTBOUND_ENDPOINT
+          value: "http://{{ $fullName }}-scheme-adapter:{{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}"
+        - name: SCHEME_NAME
+          value: {{ $fullName | quote }}
+        - name: DFSP_ID
+          value: {{ $name | quote }}
+        {{- range $k, $v := $config.config.backend.env }}
+        - name: {{ $k }}
+          value: {{ $v | quote }}
+        {{- end }}
+        resources:
+{{ toYaml $config.config.backend.resources | indent 10 }}
+        volumeMounts:
+        - name: {{ $prefix }}rules
+          mountPath: /rules/
+      volumes:
+      - name: {{ $prefix }}rules
+        configMap:
+          name: {{ $fullName }}-rules
+      imagePullSecrets:
+        - name: {{ $config.config.imagePullSecretName }}
+    {{- with $config.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with $config.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with $config.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+---
+{{- if $config.config.cache.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-cache
+  labels:
+    app.kubernetes.io/name: {{ $fullName }}-cache
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
+spec:
+  replicas: {{ $config.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ $fullName }}-cache
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ $fullName }}-cache
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+        app.kubernetes.io/managed-by: {{ $.Release.Service }}
+        helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
+    spec:
+      initContainers:
+{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.cache.initContainers "dict" $initContainerEnv) | indent 6 }}
+      containers:
+      - name: cache
+        image: "{{ $config.config.cache.image.repository }}:{{ $config.config.cache.image.tag }}"
+        imagePullPolicy: {{ $config.config.cache.image.pullPolicy }}
+        ports:
+        - name: redis
+          containerPort: 6379
+          protocol: TCP
+        {{- if $config.config.cache.livenessProbe.enabled }}
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - redis-cli ping {{ $config.config.cache.livenessProbe.timeoutSeconds }}
+        {{- end }}
+        {{- if $config.config.cache.readinessProbe.enabled}}
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - redis-cli ping {{ $config.config.cache.readinessProbe.timeoutSeconds }}
+        {{- end }}
+        resources:
+{{ toYaml $config.config.cache.resources | indent 12 }}
+---
+{{- end }}
+{{ end }}

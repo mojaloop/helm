@@ -113,6 +113,10 @@ echo "Updating Mojaloop..."
 helm dep up ./mojaloop
 checkCommandResult
 
+echo "Updating Mojaloop Simulator..."
+helm dep up ./mojaloop-simulator
+checkCommandResult
+
 echo "\
 Chart updates completed.\n \
 Ensure you check the output for any errors. \n \

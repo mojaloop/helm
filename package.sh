@@ -120,10 +120,14 @@ echo "Packaging ntpd..."
 helm package -u -d ./repo ./kube-system/ntpd/
 checkCommandResult
 
+echo "Packaging Mojaloop Simulator..."
+helm package -u -d ./repo ./mojaloop-simulator
+checkCommandResult
+
 cd ./repo
 
 echo "Creating Helm repo index..."
-helm repo index . --url http://mojaloop.io/helm/repo
+helm repo index .
 checkCommandResult
 
 echo "\

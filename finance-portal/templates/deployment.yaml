@@ -5,7 +5,7 @@ metadata:
   name: {{ template "finance-portal.fullname" . }}
   labels:
     app.kubernetes.io/name: {{ include "finance-portal.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}001
+    app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -79,6 +79,17 @@ spec:
             name: {{ template "finance-portal.fullname" . }}
         - secretRef:
             name: {{ template "finance-portal.fullname" . }}
+      ## Pod scheduling preferences.
+      ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+      affinity: {}
+
+      ## Node labels for pod assignment
+      ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+      nodeSelector: {}
+
+      ## Set toleration for scheduler
+      ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+      tolerations: []
       {{- if .Values.JWTKeys }}
       volumes:
         - name: {{ template "finance-portal.fullname" . }}-secrets-volume

@@ -14,25 +14,25 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.3.1"
+      "version": "6.4.2"
     },
     {
       "type": "panel",
       "id": "graph",
       "name": "Graph",
-      "version": "5.0.0"
+      "version": ""
     },
     {
       "type": "datasource",
       "id": "prometheus",
       "name": "Prometheus",
-      "version": "5.0.0"
+      "version": "1.0.0"
     },
     {
       "type": "panel",
       "id": "singlestat",
       "name": "Singlestat",
-      "version": "5.0.0"
+      "version": ""
     }
   ],
   "annotations": {
@@ -56,6 +56,7 @@
   "panels": [
     {
       "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -75,6 +76,7 @@
       "datasource": "${DS_PROMETHEUS}",
       "description": "Simulator - Processed per sec",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 9,
         "w": 22,
@@ -99,6 +101,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -109,15 +114,15 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(irate(moja_sim_request_count[120s])) by (source, operation)",
+          "expr": "sum(rate(moja_sim_request_count[120s])) by (fsp, source, operation)",
           "format": "time_series",
-          "hide": false,
+          "hide": true,
           "intervalFactor": 1,
           "legendFormat": "{{fsp}} - {{operation}}",
           "refId": "A"
         },
         {
-          "expr": "sum(irate(moja_sim_request_count[120s])) by (kubernetes_pod_name)",
+          "expr": "sum(rate(moja_sim_request_count[120s])) by (kubernetes_pod_name)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -125,7 +130,7 @@
           "refId": "E"
         },
         {
-          "expr": "sum(irate(moja_sim_request_count[120s])) by (source, operation, kubernetes_pod_name)",
+          "expr": "sum(rate(moja_sim_request_count[120s])) by (fsp, source, operation, kubernetes_pod_name)",
           "format": "time_series",
           "hide": true,
           "intervalFactor": 1,
@@ -135,13 +140,20 @@
         {
           "expr": "sum(irate(moja_sim_request_count[120s])) by (app)",
           "format": "time_series",
+          "hide": false,
           "intervalFactor": 1,
           "legendFormat": "{{app}}",
           "refId": "C"
+        },
+        {
+          "expr": "sum(rate(moja_sim_request_count[120s])) by (operation)",
+          "legendFormat": "{{operation}}",
+          "refId": "D"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Simulator - Processed per sec",
       "tooltip": {
@@ -222,6 +234,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -242,7 +255,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(moja_sim_request_count{fsp='payee', operation='postTransfers'}[120s]))",
+          "expr": "sum(irate(moja_sim_request_count{operation='postTransfers'}[120s]))",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -304,6 +317,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -324,12 +338,18 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(moja_sim_request_count{fsp='payee', operation='putTransfersById'}[120s]))",
+          "expr": "sum(irate(moja_sim_request_count{fsp=\"payee\", operation=\"putTransfersById\"}[120s]))",
           "format": "time_series",
+          "hide": true,
           "instant": true,
           "intervalFactor": 1,
           "legendFormat": "",
           "refId": "A"
+        },
+        {
+          "expr": "sum(irate(moja_sim_request_count{operation=\"putTransfersById\"}[120s]))",
+          "hide": false,
+          "refId": "B"
         }
       ],
       "thresholds": "",
@@ -387,6 +407,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
+      "options": {},
       "postfix": "",
       "postfixFontSize": "50%",
       "prefix": "",
@@ -407,7 +428,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(moja_sim_request_count{fsp='payee'}[120s]))",
+          "expr": "sum(irate(moja_sim_request_count[120s]))",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -435,6 +456,7 @@
       "datasource": "${DS_PROMETHEUS}",
       "description": "Simulators - Processing Time",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 9,
         "w": 24,
@@ -461,6 +483,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null as zero",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -513,6 +538,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Simulators - Processing Time",
       "tooltip": {
@@ -553,6 +579,7 @@
     },
     {
       "collapsed": false,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -572,6 +599,7 @@
       "datasource": "${DS_PROMETHEUS}",
       "description": "Simulators - Event Loop Lag in Seconds",
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 7,
         "w": 24,
@@ -592,6 +620,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -610,6 +641,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Simulators - Event Loop Lag in Seconds",
       "tooltip": {
@@ -656,6 +688,7 @@
       "datasource": "${DS_PROMETHEUS}",
       "decimals": 0,
       "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 9,
         "w": 24,
@@ -680,6 +713,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -700,6 +736,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Simulators - # Pods for each Components",
       "tooltip": {
@@ -740,8 +777,8 @@
       }
     }
   ],
-  "refresh": "5s",
-  "schemaVersion": 16,
+  "refresh": false,
+  "schemaVersion": 20,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -779,5 +816,5 @@
   "timezone": "",
   "title": "Mojaloop - Simulators",
   "uid": "-Sr0y8fip",
-  "version": 3
+  "version": 14
 }

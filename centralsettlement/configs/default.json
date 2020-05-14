@@ -1,62 +1,129 @@
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
 {{- $dbDeployHost := (.Values.config.db_host | replace "$release_name" .Release.Name) }}
 {
-    "PORT": {{ .Values.service.ports.api.internalPort }},
-    "HOSTNAME": "http://central-settlements.local",
-    "ERROR_HANDLING": {
-      "includeCauseExtension": {{ .Values.config.error_handling.include_cause_extension }},
-      "truncateExtensions": {{ .Values.config.error_handling.truncate_extensions }}
+  "PORT": {{ .Values.service.ports.api.internalPort }},
+  "HOSTNAME": "http://central-settlements.local",
+  "ERROR_HANDLING": {
+    "includeCauseExtension": {{ .Values.config.error_handling.include_cause_extension }},
+    "truncateExtensions": {{ .Values.config.error_handling.truncate_extensions }}
+  },
+  "DATABASE": {
+    "DIALECT": "{{ .Values.config.db_driver }}",
+    "HOST": "{{ $dbDeployHost }}",
+    "PORT": {{ .Values.config.db_port }},
+    "USER": "{{ .Values.config.db_user }}",
+    "PASSWORD": "{{ .Values.config.db_password }}",
+    "SCHEMA": "{{ .Values.config.db_database }}",
+    "POOL_MIN_SIZE": {{ .Values.config.db_connection_pool_min }},
+    "POOL_MAX_SIZE": {{ .Values.config.db_connection_pool_max }},
+    "ACQUIRE_TIMEOUT_MILLIS": {{ .Values.config.db_acquire_timeout_millis }},
+    "CREATE_TIMEOUT_MILLIS": {{ .Values.config.db_create_timeout_millis }},
+    "DESTROY_TIMEOUT_MILLIS": {{ .Values.config.db_destroy_timeout_millis }},
+    "IDLE_TIMEOUT_MILLIS": {{ .Values.config.db_idle_timeout_millis }},
+    "REAP_INTERVAL_MILLIS": {{ .Values.config.db_reap_interval_millis }},
+    "CREATE_RETRY_INTERVAL_MILLIS": {{ .Values.config.db_create_retry_interval_millis }},
+    "DEBUG": {{ .Values.config.db_debug }}
+  },
+  "WINDOW_AGGREGATION": {
+    "RETRY_COUNT": {{ .Values.config.window_aggregation.retry_count }},
+    "RETRY_INTERVAL": {{ .Values.config.window_aggregation.retry_interval }}
+  },
+  "TRANSFER_VALIDITY_SECONDS": "432000",
+  "HUB_PARTICIPANT": {
+      "ID": {{ .Values.config.hub_participant.id }},
+      "NAME": "{{ .Values.config.hub_participant.name }}"
+  },
+  "HANDLERS": {
+    "DISABLED": {{ .Values.config.handlers.disabled }},
+    "API": {
+      "DISABLED": {{ .Values.config.handlers.api.disabled }}
+    }
+  },
+  "KAFKA": {
+    "TOPIC_TEMPLATES": {
+      "GENERAL_TOPIC_TEMPLATE": {
+        "TEMPLATE": "topic-{{"{{"}}functionality{{"}}"}}-{{"{{"}}action{{"}}"}}",
+        "REGEX": "topic-(.*)-(.*)"
+      }
     },
-    "DATABASE": {
-      "DIALECT": "{{ .Values.config.db_driver }}",
-      "HOST": "{{ $dbDeployHost }}",
-      "PORT": {{ .Values.config.db_port }},
-      "USER": "{{ .Values.config.db_user }}",
-      "PASSWORD": "{{ .Values.config.db_password }}",
-      "SCHEMA": "{{ .Values.config.db_database }}",
-      "POOL_MIN_SIZE": {{ .Values.config.db_connection_pool_min }},
-      "POOL_MAX_SIZE": {{ .Values.config.db_connection_pool_max }},
-      "ACQUIRE_TIMEOUT_MILLIS": {{ .Values.config.db_acquire_timeout_millis }},
-      "CREATE_TIMEOUT_MILLIS": {{ .Values.config.db_create_timeout_millis }},
-      "DESTROY_TIMEOUT_MILLIS": {{ .Values.config.db_destroy_timeout_millis }},
-      "IDLE_TIMEOUT_MILLIS": {{ .Values.config.db_idle_timeout_millis }},
-      "REAP_INTERVAL_MILLIS": {{ .Values.config.db_reap_interval_millis }},
-      "CREATE_RETRY_INTERVAL_MILLIS": {{ .Values.config.db_create_retry_interval_millis }},
-      "DEBUG": {{ .Values.config.db_debug }}
-    },
-    "TRANSFER_VALIDITY_SECONDS": "432000",
-    "HUB_PARTICIPANT": {
-        "ID": {{ .Values.config.hub_participant.id }},
-        "NAME": "{{ .Values.config.hub_participant.name }}"
-    },
-    "KAFKA": {
-        "TOPIC_TEMPLATES": {
-          "GENERAL_TOPIC_TEMPLATE": {
-            "TEMPLATE": "topic-{{"{{"}}functionality{{"}}"}}-{{"{{"}}action{{"}}"}}",
-            "REGEX": "topic-(.*)-(.*)"
-          }
-        },
-        "PRODUCER": {
-          "NOTIFICATION": {
-            "EVENT": {
-              "config": {
-                "options": {
-                  "messageCharset": "utf8"
-                },
-                "rdkafkaConf": {
-                  "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
-                  "client.id": "cs-prod-notification-event",
-                  "event_cb": true,
-                  "socket.keepalive.enable": true,
-                  "queue.buffering.max.messages": 10000000,
-                  "dr_cb": false
-                },
-                "topicConf": {
-                    "request.required.acks": "all"
-                }
-              }
+    "CONSUMER": {
+      "SETTLEMENTWINDOW": {
+        "CLOSE": {
+          "config": {
+            "options": {
+              "mode": {{ .Values.config.kafka.consumer.settlementwindow.close.config.options.mode }},
+              "batchSize": {{ .Values.config.kafka.consumer.settlementwindow.close.config.options.batchSize }},
+              "pollFrequency": {{ .Values.config.kafka.consumer.settlementwindow.close.config.options.pollFrequency }},
+              "recursiveTimeout": {{ .Values.config.kafka.consumer.settlementwindow.close.config.options.recursiveTimeout }},
+              "messageCharset": "{{ .Values.config.kafka.consumer.settlementwindow.close.config.options.messageCharset }}",
+              "messageAsJSON": {{ .Values.config.kafka.consumer.settlementwindow.close.config.options.messageAsJSON }},
+              "sync": {{ .Values.config.kafka.consumer.settlementwindow.close.config.options.sync }},
+              "consumeTimeout": {{ .Values.config.kafka.consumer.settlementwindow.close.config.options.consumeTimeout }}
+            },
+            "rdkafkaConf": {
+              "client.id": "cs-con-setlementwindow-close",
+              "group.id": "cs-group-setlementwindow-close",
+              "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+              "socket.keepalive.enable": {{ .Values.config.kafka.consumer.settlementwindow.close.config.rdkafkaConf.socket_keepalive_enable }}
+            },
+            "topicConf": {
+              "auto.offset.reset": "earliest"
             }
           }
         }
+      }
+    },
+    "PRODUCER": {
+      "NOTIFICATION": {
+        "EVENT": {
+          "config": {
+            "options": {
+              "messageCharset": "{{ .Values.config.kafka.producer.notification.event.config.options.messageCharset }}"
+            },
+            "rdkafkaConf": {
+              "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+              "client.id": "cs-prod-notification-event",
+              "event_cb": {{ .Values.config.kafka.producer.notification.event.config.rdkafkaConf.event_cb }},
+              "compression.codec": "{{ .Values.config.kafka.producer.notification.event.config.rdkafkaConf.compression_codec }}",
+              "retry.backoff.ms": {{ .Values.config.kafka.producer.notification.event.config.rdkafkaConf.retry_backoff_ms }},
+              "message.send.max.retries": {{ .Values.config.kafka.producer.notification.event.config.rdkafkaConf.message_send_max_retries }},
+              "socket.keepalive.enable": {{ .Values.config.kafka.producer.notification.event.config.rdkafkaConf.socket_keepalive_enable }},
+              "queue.buffering.max.messages": 10000000,
+              "batch.num.messages": {{ .Values.config.kafka.producer.notification.event.config.rdkafkaConf.batch_num_messages }},
+              "dr_cb": {{ .Values.config.kafka.producer.notification.event.config.rdkafkaConf.dr_cb }},
+              "socket.blocking.max.ms": {{ .Values.config.kafka.producer.notification.event.config.rdkafkaConf.socket_blocking_max_ms }},
+              "queue.buffering.max.ms": {{ .Values.config.kafka.producer.notification.event.config.rdkafkaConf.queue_buffering_max_ms }},
+              "broker.version.fallback": "{{ .Values.config.kafka.producer.notification.event.config.rdkafkaConf.broker_version_fallback }}",
+              "api.version.request": {{ .Values.config.kafka.producer.notification.event.config.rdkafkaConf.api_version_request }}
+            },
+            "topicConf": {
+                "request.required.acks": "{{ .Values.config.kafka.producer.notification.event.config.topicConf.request_required_acks }}",
+                "partitioner": "{{ .Values.config.kafka.producer.notification.event.config.topicConf.partitioner }}"
+            }
+          }
+        }
+      },
+      "SETTLEMENTWINDOW": {
+        "CLOSE": {
+          "config": {
+            "options": {
+              "messageCharset": "{{ .Values.config.kafka.producer.settlementwindow.close.config.options.messageCharset }}"
+            },
+            "rdkafkaConf": {
+              "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+              "client.id": "cs-prod-setlementwindow-close",
+              "event_cb": {{ .Values.config.kafka.producer.settlementwindow.close.config.rdkafkaConf.event_cb }},
+              "dr_cb": {{ .Values.config.kafka.producer.settlementwindow.close.config.rdkafkaConf.dr_cb }},
+              "socket.keepalive.enable": {{ .Values.config.kafka.producer.settlementwindow.close.config.rdkafkaConf.socket_keepalive_enable }},
+              "queue.buffering.max.messages": 10000000
+            },
+            "topicConf": {
+              "request.required.acks": "{{ .Values.config.kafka.producer.settlementwindow.close.config.topicConf.request_required_acks }}",
+              "partitioner": "{{ .Values.config.kafka.producer.settlementwindow.close.config.topicConf.partitioner }}"
+            }
+          }
+        }
+      }
+    }
   }
 }
