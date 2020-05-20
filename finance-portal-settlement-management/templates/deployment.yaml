@@ -21,6 +21,18 @@ spec:
         app.kubernetes.io/name: {{ include "finance-portal-settlement-management.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+    {{- if .Values.affinity }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+{{- end }}
+{{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+{{- end }}
       initContainers:
         {{- if .Values.operatorSettlement.init.enabled }}
         - name: operator-settlement-init
@@ -61,7 +73,7 @@ spec:
             name: {{ template "finance-portal-settlement-management.fullname" . }}
         - secretRef:
             name: {{ template "finance-portal-settlement-management.fullname" . }}
-        resources:
+        resources: {}
       - name: settlement-management
         image: "{{ .Values.settlementManagement.image.repository }}:{{ .Values.settlementManagement.image.tag }}"
         imagePullPolicy: {{ .Values.settlementManagement.image.pullPolicy }}
