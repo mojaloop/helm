@@ -2764,7 +2764,6 @@ account-lookup-service:
         log_level: info
         log_filter: 'error, warn, info'
 
-
     ## metric configuration for prometheus instrumentation
     metrics:
       ## flag to enable/disable the metrics end-points
@@ -2779,6 +2778,9 @@ account-lookup-service:
       ## Central-Ledger config
       central_services_host: '$release_name-centralledger-service'
       central_services_port: 80
+      # Log config
+      log_level: 'info'
+      log_transport: 'file'
 
       end_point_cache:
         expiresIn: 180000
@@ -2810,9 +2812,22 @@ account-lookup-service:
       display_routes: true
       run_migrations: false
 
-      # Log config
-      log_level: 'info'
-      log_transport: 'file'
+      endpointSecurity:
+        jwsSign: false
+        fspiopSourceSigningName: 'switch'
+        jwsSigningKey:
+          # To generate this key:
+          # Private:
+          # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+          # Public:
+          # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+          # Should look like:
+          # -----BEGIN RSA PRIVATE KEY-----
+          # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+          # ..
+          # ..
+          # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+          # -----END RSA PRIVATE KEY-----
 
     init:
       enabled: true
@@ -3832,29 +3847,29 @@ mojaloop-simulator:
     # payerfsp: {}
     # payeefsp: {}
     ## Default FSPs for Mojaloop Postman Scripts
-    payerfsp: 
+    payerfsp:
       ingress:
-        hosts: 
+        hosts:
           - sim-payerfsp.local
     payeefsp:
       ingress:
-        hosts: 
+        hosts:
           - sim-payeefsp.local
     testfsp1:
       ingress:
-        hosts: 
+        hosts:
           - sim-testfsp1.local
     testfsp2:
       ingress:
-        hosts: 
+        hosts:
           - sim-testfsp2.local
     testfsp3:
       ingress:
-        hosts: 
+        hosts:
           - sim-testfsp3.local
     testfsp4:
       ingress:
-        hosts: 
+        hosts:
           - sim-testfsp4.local
 
   defaultProbes: &defaultProbes
