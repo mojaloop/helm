@@ -103,6 +103,10 @@ spec:
           volumeMounts:
           - name: {{ template "quotingservice.fullname" . }}-config-volume
             mountPath: /opt/quoting-service/config
+          {{- if .Values.config.endpointSecurity.jwsSign }}
+          - name: jws-signing-key
+            mountPath: /secrets
+          {{- end }}
         {{- if .Values.sidecar.enabled }}
         - name: {{ .Chart.Name }}-sidecar
           image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
@@ -133,10 +137,6 @@ spec:
           volumeMounts:
             - name: {{ template "quotingservice.fullname" . }}-sidecar-volume
               mountPath: /opt/event-sidecar/config
-            {{- if .Values.config.endpointSecurity.jwsSign }}
-            - name: jws-signing-key
-              mountPath: /secrets
-            {{- end }}
           env:
             - name: LOG_LEVEL
               value: {{ .Values.sidecar.config.log_level }}
