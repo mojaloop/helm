@@ -86,6 +86,10 @@ spec:
           volumeMounts:
             - name: {{ template "ml-api-adapter-handler-notification.fullname" . }}-config-volume
               mountPath: /opt/ml-api-adapter/config
+            {{- if .Values.config.endpointSecurity.jwsSign }}
+            - name: jws-signing-key
+              mountPath: /opt/ml-api-adapter/secrets
+            {{- end }}
           env:
             - name: LOG_LEVEL
               value: {{ .Values.config.log_level | quote}}
@@ -143,10 +147,6 @@ spec:
           volumeMounts:
             - name: {{ template "ml-api-adapter-handler-notification.fullname" . }}-sidecar-volume
               mountPath: /opt/event-sidecar/config
-            {{- if .Values.config.endpointSecurity.jwsSign }}
-            - name: jws-signing-key
-              mountPath: /secrets
-            {{- end }}
           env:
             - name: LOG_LEVEL
               value: {{ .Values.sidecar.config.log_level | quote }}
