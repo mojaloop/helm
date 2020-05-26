@@ -20,7 +20,8 @@ spec:
   {{- $fullName := printf "%s%s" (include "mojaloop-simulator.prefix" $) $name -}}
   {{- $config := merge $customConfig $.Values.defaults }}
   {{- if $config.ingress.enabled -}}
-    {{- range $host := $config.ingress.hosts }}
+    {{ $hosts := default (list nil) $config.ingress.hosts }}
+    {{- range $host := $hosts }}
       - host: {{ $host }}
         http:
           paths:
