@@ -1,6 +1,6 @@
 {{- if .Values.ingress.enabled -}}
 {{- $serviceFullName := include "ml-testing-toolkit-backend.fullname" . -}}
-{{- $servicePort := .Values.service.specApi.externalPort -}}
+{{- $serviceRef := .Values.service -}}
 {{- $servicePath := .Values.ingress.externalPath -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -25,7 +25,7 @@ spec:
           - path: {{ $servicePath }}
             backend:
               serviceName: {{ $serviceFullName }}
-              servicePort: {{ .Values.service.{{ $serviceName }}.externalPort }}
+              servicePort: {{ get (get $serviceRef (printf "%s" $serviceName)) "externalPort" }}
     {{- end -}}
   {{- if .Values.ingress.tls }}
   tls:
