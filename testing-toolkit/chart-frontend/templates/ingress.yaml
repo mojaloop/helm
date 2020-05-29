@@ -1,13 +1,13 @@
 {{- if .Values.ingress.enabled -}}
-{{- $serviceName := include "ml-testing-toolkit-ui.fullname" . -}}
+{{- $serviceFullName := include "ml-testing-toolkit-frontend.fullname" . -}}
 {{- $servicePort := .Values.service.externalPort -}}
 {{- $servicePath := .Values.ingress.externalPath -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ template "ml-testing-toolkit-ui.fullname" . }}
+  name: {{ template "ml-testing-toolkit-frontend.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "ml-testing-toolkit-ui.name" . }}
+    app.kubernetes.io/name: {{ include "ml-testing-toolkit-frontend.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -18,13 +18,13 @@ metadata:
     {{- end }}
 spec:
   rules:
-    {{- range $host := .Values.ingress.hosts }}
+    {{- range $serviceName, $host := .Values.ingress.hosts }}
     - host: {{ $host }}
       http:
         paths:
           - path: {{ $servicePath }}
             backend:
-              serviceName: {{ $serviceName }}
+              serviceName: {{ $serviceFullName }}
               servicePort: {{ $servicePort }}
     {{- end -}}
   {{- if .Values.ingress.tls }}

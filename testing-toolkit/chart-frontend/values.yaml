@@ -3,9 +3,9 @@
 # Declare variables to be passed into your templates.
 replicaCount: 1
 image:
-  repository: mojaloop/ml-api-adapter
-  tag: v10.2.0
-  command: '["node", "src/api/index.js"]'
+  repository: mojaloop/ml-testing-toolkit-ui
+  tag: v10.2.1-snapshot
+  command: '["nginx", "-g", "daemon off;"]'
 ## Optionally specify an array of imagePullSecrets.
 ## Secrets must be manually created in the namespace.
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
@@ -26,122 +26,35 @@ nodeSelector: {}
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
 
-sidecar:
-  enabled: true
-  image:
-    repository: mojaloop/event-sidecar
-    tag: v9.5.1
-    pullPolicy: Always
-    command: '["npm", "run", "start"]'
-  service:
-    internalPort: 4001
-  readinessProbe:
-    enabled: true
-    httpGet:
-      path: /health
-    initialDelaySeconds: 120
-    periodSeconds: 15
-  livenessProbe:
-    enabled: true
-    httpGet:
-      path: /health
-    initialDelaySeconds: 90
-    periodSeconds: 15
-  config:
-    event_log_grpc_host: localhost
-    event_log_grpc_port: 50051
-    event_log_filter: 'audit:*, log:info, log:warn, log:error'
-    event_log_metadata_only: true
-    log_level: info
-    log_filter: 'error, warn, info'
-
-init:
-  enabled: true
-  image:
-    name: wait-for-kafka
-    repository: solsson/kafka
-    tag: latest
-    pullPolicy: Always
-    command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
-    env: {}
-    ## Env example
-    # env:
-    #   envItem1:
-    #     name: hello
-    #     value: world
-    #
-
 readinessProbe:
-  enabled: true
+  enabled: false
   httpGet:
     path: /health
   initialDelaySeconds: 120
   periodSeconds: 15
 livenessProbe:
-  enabled: true
+  enabled: false
   httpGet:
     path: /health
   initialDelaySeconds: 90
   periodSeconds: 15
 
-## metric configuration for prometheus instrumentation
-metrics:
-  ## flag to enable/disable the metrics end-points
-  enabled: true
-  config:
-    timeout: 5000
-    prefix: moja_
-    defaultLabels:
-      serviceName: ml-service
-
 config:
   # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-  kafka_host: '$release_name-kafka'
-  kafka_port: 9092
-  kafka_partitioner: 'murmur2_random'
-  central_services_host: '$release_name-centralledger-service'
-  central_services_port: 80
-  security:
-    callback:
-      rejectUnauthorized: true
-  max_callback_time_lag_dilation_milliseconds: 100
-  max_fulfil_timeout_duration_seconds: 240
-
-  ## Log Configuration
-  log_level: info
-  log_filter: 'error, warn, info'
-  log_transport: file
-
-  ## Health Check endpoint
-  central_services_health_endpoint_param: '/health'
-
-  ## Tracing Configuration
-  event_trace_vendor: mojaloop
-  event_trace_state_enabled: true
-  event_log_filter: 'audit:*, log:warn, log:error'
-  # If set to true, only the metadata object from the event will be printed.
-  event_log_metadata_only: false
-  # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
-  # Any combination of: `log,audit,trace`
-  event_async_override: 'log,trace'
-  event_traceid_per_vendor: false
-
-  ## Error handling Configuration
-  error_handling:
-    include_cause_extension: false
-    truncate_extensions: true
+  API_BASE_URL: http://testing-toolkit-adminapi.local:5050
 
 service:
   type: ClusterIP
-  externalPort: 80
-  internalPort: 3000
+  name: webui
+  externalPort: 6060
+  internalPort: 6060
 
 ingress:
   enabled: true
   externalPath: /
   # Used to create an Ingress record.
   hosts:
-    api: ml-api-adapter.local
+    webui: testing-toolkit-webui.local
 
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: '/'
