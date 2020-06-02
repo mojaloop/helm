@@ -3,9 +3,9 @@
 # Declare variables to be passed into your templates.
 replicaCount: 1
 image:
-  repository: mojaloop/ml-testing-toolkit-ui
-  tag: v10.2.1-snapshot
-  command: '["nginx", "-g", "daemon off;"]'
+  repository: mojaloop/ml-testing-toolkit
+  tag: v10.3.3-snapshot
+  command: '["npm", "run", "start"]'
 ## Optionally specify an array of imagePullSecrets.
 ## Secrets must be manually created in the namespace.
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
@@ -41,20 +41,44 @@ livenessProbe:
 
 config:
   # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-  API_BASE_URL: http://testing-toolkit-adminapi.local:5050
+  CALLBACK_ENDPOINT: http://scheme-adapter:4000
+  SEND_CALLBACK_ENABLE: true
+  FSPID: testingtoolkitdfsp
+  TRANSFERS_VALIDATION_WITH_PREVIOUS_QUOTES: true
+  TRANSFERS_VALIDATION_ILP_PACKET: true
+  TRANSFERS_VALIDATION_CONDITION: true
+  ILP_SECRET: secret
+  VERSIONING_SUPPORT_ENABLE: true
+  VALIDATE_INBOUND_JWS: false
+  VALIDATE_INBOUND_PUT_PARTIES_JWS: false
+  JWS_SIGN: false
+  JWS_SIGN_PUT_PARTIES: false
+  CONNECTION_MANAGER_API_URL: http://connection-manager-api:5061
+  INBOUND_MUTUAL_TLS_ENABLED: false
+  OUTBOUND_MUTUAL_TLS_ENABLED: false
+  ADVANCED_FEATURES_ENABLED: true
+  CALLBACK_TIMEOUT: 10000
+
 
 service:
   type: ClusterIP
-  name: webui
-  externalPort: 6060
-  internalPort: 6060
+  specApi:
+    name: spec-api
+    externalPort: 5000
+    internalPort: 5000
+  adminApi:
+    name: admin-api
+    externalPort: 5050
+    internalPort: 5050
+
 
 ingress:
   enabled: true
   externalPath: /
   # Used to create an Ingress record.
   hosts:
-    webui: testing-toolkit-webui.local
+    specApi: testing-toolkit-specapi.local
+    adminApi: testing-toolkit-adminapi.local
 
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: '/'
