@@ -4,8 +4,9 @@
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit
-  tag: v10.3.3-snapshot
-  command: '["npm", "run", "start"]'
+  tag: v10.3.4-snapshot
+  command: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ ! -d /opt/ttk-data/spec_files ]; then cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; npm run start;"]'
+  # command: '["npm", "run", "start"]'
 ## Optionally specify an array of imagePullSecrets.
 ## Secrets must be manually created in the namespace.
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
@@ -100,4 +101,18 @@ resources: {}
   # requests:
   #  cpu: 100m
   #  memory: 128Mi
+
+## Persist data to a persistent volume
+persistence:
+  enabled: false
+  ## percona data Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  # storageClass: "-"
+  accessMode: ReadWriteOnce
+  size: 1Gi
 

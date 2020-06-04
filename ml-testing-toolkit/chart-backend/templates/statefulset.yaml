@@ -1,5 +1,5 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: apps/v1beta2
+kind: StatefulSet
 metadata:
   name: {{ template "ml-testing-toolkit-backend.fullname" . }}
   labels:
@@ -14,6 +14,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "ml-testing-toolkit-backend.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+  serviceName: {{ template "ml-testing-toolkit-backend.fullname" . }}
   template:
     metadata:
       labels:
@@ -66,5 +67,30 @@ spec:
           envFrom:
           - configMapRef:
               name: {{ template "ml-testing-toolkit-backend.fullname" . }}-config
-
-
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: ttk-data
+              mountPath: /opt/ttk-data
+          {{- end }}
+      {{- if .Values.persistence.enabled }}
+      volumes:
+        - name: ttk-data
+          emptyDir: {}  
+      {{- end }}
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: ttk-data
+    spec:
+      accessModes: [{{ .Values.persistence.accessMode | quote }}]
+      {{- if .Values.persistence.storageClass }}
+      {{- if (eq "-" .Values.persistence.storageClass) }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: "{{ .Values.persistence.storageClass }}"
+      {{- end }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.persistence.size | quote }}
+  {{- end -}}
