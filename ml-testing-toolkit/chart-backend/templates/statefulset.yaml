@@ -44,7 +44,11 @@ spec:
           imagePullSecrets:
           {{ toYaml .Values.image.imagePullSecrets | indent 10 }}
           {{- end }}
+          {{- if .Values.persistence.enabled }}
+          command: {{ .Values.image.commandPersistence }}
+          {{- else }}
           command: {{ .Values.image.command }}
+          {{- end }}
           ports:
             - containerPort: {{ .Values.service.specApi.internalPort }}
             - containerPort: {{ .Values.service.adminApi.internalPort }}
@@ -66,17 +70,28 @@ spec:
           {{- end }}
           envFrom:
           - configMapRef:
-              name: {{ template "ml-testing-toolkit-backend.fullname" . }}-config
-          {{- if .Values.persistence.enabled }}
+              name: {{ template "ml-testing-toolkit-backend.fullname" . }}-config-env
           volumeMounts:
+          {{- if .Values.persistence.enabled }}
             - name: ttk-data
               mountPath: /opt/ttk-data
           {{- end }}
-      {{- if .Values.persistence.enabled }}
+            - name: {{ template "ml-testing-toolkit-backend.fullname" . }}-volume-extra-environments
+              mountPath: /opt/mojaloop-testing-toolkit/examples/environments
       volumes:
+      {{- if .Values.persistence.enabled }}
         - name: ttk-data
           emptyDir: {}  
       {{- end }}
+        - name: {{ template "ml-testing-toolkit-backend.fullname" . }}-volume-extra-environments
+          configMap:
+            name: {{ template "ml-testing-toolkit-backend.fullname" . }}-config-extra-environments
+            items:
+              {{- range $k, $v := .Values.extraEnvironments }}
+              - key: {{ $k }}
+                path: {{ $k }}
+              {{- end }}
+
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
   - metadata:
