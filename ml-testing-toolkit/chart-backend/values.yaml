@@ -1,0 +1,124 @@
+# Default values for ml-api-adapter.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+image:
+  repository: mojaloop/ml-testing-toolkit
+  tag: v10.3.5-snapshot
+  commandPersistence: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; fi; npm run start;"]'
+  command: '["npm", "run", "start"]'
+
+  # command: '["npm", "run", "start"]'
+## Optionally specify an array of imagePullSecrets.
+## Secrets must be manually created in the namespace.
+## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+##
+#  imagePullSecrets:
+#    - name: myregistrykey
+  pullPolicy: Always
+
+## Pod scheduling preferences.
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+affinity: {}
+
+## Node labels for pod assignment
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+nodeSelector: {}
+
+## Set toleration for scheduler
+## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: []
+
+readinessProbe:
+  enabled: false
+  httpGet:
+    path: /health
+  initialDelaySeconds: 120
+  periodSeconds: 15
+livenessProbe:
+  enabled: false
+  httpGet:
+    path: /health
+  initialDelaySeconds: 90
+  periodSeconds: 15
+
+config:
+  # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+  CALLBACK_ENDPOINT: http://scheme-adapter:4000
+  SEND_CALLBACK_ENABLE: true
+  FSPID: testingtoolkitdfsp
+  TRANSFERS_VALIDATION_WITH_PREVIOUS_QUOTES: true
+  TRANSFERS_VALIDATION_ILP_PACKET: true
+  TRANSFERS_VALIDATION_CONDITION: true
+  ILP_SECRET: secret
+  VERSIONING_SUPPORT_ENABLE: true
+  VALIDATE_INBOUND_JWS: false
+  VALIDATE_INBOUND_PUT_PARTIES_JWS: false
+  JWS_SIGN: false
+  JWS_SIGN_PUT_PARTIES: false
+  CONNECTION_MANAGER_API_URL: http://connection-manager-api:5061
+  INBOUND_MUTUAL_TLS_ENABLED: false
+  OUTBOUND_MUTUAL_TLS_ENABLED: false
+  ADVANCED_FEATURES_ENABLED: true
+  CALLBACK_TIMEOUT: 10000
+
+extraEnvironments: {}
+
+
+
+service:
+  type: ClusterIP
+  specApi:
+    name: spec-api
+    externalPort: 5000
+    internalPort: 5000
+  adminApi:
+    name: admin-api
+    externalPort: 5050
+    internalPort: 5050
+
+
+ingress:
+  enabled: true
+  externalPath: /
+  # Used to create an Ingress record.
+  hosts:
+    specApi: testing-toolkit-specapi.local
+    adminApi: testing-toolkit-adminapi.local
+
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: '/'
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  tls:
+    # Secrets must be manually created in the namespace.
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+## Persist data to a persistent volume
+persistence:
+  enabled: false
+  ## percona data Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  # storageClass: "-"
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+
