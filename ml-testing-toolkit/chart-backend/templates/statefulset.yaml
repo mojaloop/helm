@@ -1,3 +1,4 @@
+{{- $serviceFullName := include "ml-testing-toolkit-backend.fullname" . -}}
 apiVersion: apps/v1beta2
 kind: StatefulSet
 metadata:
@@ -76,8 +77,11 @@ spec:
             - name: ttk-data
               mountPath: /opt/ttk-data
           {{- end }}
-            - name: {{ template "ml-testing-toolkit-backend.fullname" . }}-volume-extra-environments
-              mountPath: /opt/mojaloop-testing-toolkit/examples/environments
+            {{- range $k, $v := .Values.extraEnvironments }}
+            - name: {{ $serviceFullName }}-volume-extra-environments
+              mountPath: /opt/mojaloop-testing-toolkit/examples/environments/{{ $k }}
+              subPath: {{ $k }}
+            {{- end }}
       volumes:
       {{- if .Values.persistence.enabled }}
         - name: ttk-data
