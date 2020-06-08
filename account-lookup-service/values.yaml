@@ -9,7 +9,7 @@ account-lookup-service:
     api:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v10.1.1
+        tag: v10.3.1
         pullPolicy: Always
         command: '["node", "src/index.js", "server", "--api"]'
       service:
@@ -20,7 +20,7 @@ account-lookup-service:
     admin:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v10.1.1
+        tag: v10.3.1
         pullPolicy: Always
         command: '["node", "src/index.js", "server", "--admin"]'
       service:
@@ -159,7 +159,7 @@ account-lookup-service-admin:
     api:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v10.1.1
+        tag: v10.3.1
         pullPolicy: IfNotPresent
         command: '["node", "src/index.js", "server", "--api"]'
       service:
@@ -170,7 +170,7 @@ account-lookup-service-admin:
     admin:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v10.1.1
+        tag: v10.3.1
         pullPolicy: IfNotPresent
         command: '["node", "src/index.js", "server", "--admin"]'
       service:
@@ -239,6 +239,22 @@ account-lookup-service-admin:
 
     display_routes: true
     run_migrations: false
+    endpointSecurity:
+      jwsSign: false
+      fspiopSourceSigningName: switch
+      jwsSigningKey:
+        # To generate this key:
+        # Private:
+        # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+        # Public:
+        # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+        # Should look like:
+        # -----BEGIN RSA PRIVATE KEY-----
+        # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+        # ..
+        # ..
+        # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+        # -----END RSA PRIVATE KEY-----
 
     # Log config
     log_level: info
