@@ -69,24 +69,31 @@ spec:
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
-          envFrom:
-          - configMapRef:
-              name: {{ template "ml-testing-toolkit-backend.fullname" . }}-config-env
           volumeMounts:
           {{- if .Values.persistence.enabled }}
             - name: ttk-data
               mountPath: /opt/ttk-data
           {{- end }}
-            {{- range $k, $v := .Values.extraEnvironments }}
+          {{- range $k, $v := .Values.extraEnvironments }}
             - name: {{ $serviceFullName }}-volume-extra-environments
               mountPath: /opt/mojaloop-testing-toolkit/examples/environments/{{ $k }}
               subPath: {{ $k }}
-            {{- end }}
+          {{- end }}
+            - name: {{ $serviceFullName }}-volume-config-default
+              mountPath: /opt/default_config
       volumes:
       {{- if .Values.persistence.enabled }}
         - name: ttk-data
           emptyDir: {}  
       {{- end }}
+        - name: {{ template "ml-testing-toolkit-backend.fullname" . }}-volume-config-default
+          configMap:
+            name: {{ template "ml-testing-toolkit-backend.fullname" . }}-config-default
+            items:
+              {{- range $k, $v := .Values.config }}
+              - key: {{ $k }}
+                path: {{ $k }}
+              {{- end }}
         - name: {{ template "ml-testing-toolkit-backend.fullname" . }}-volume-extra-environments
           configMap:
             name: {{ template "ml-testing-toolkit-backend.fullname" . }}-config-extra-environments
