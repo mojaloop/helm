@@ -4,9 +4,9 @@
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit
-  tag: v10.3.5-snapshot
+  tag: v10.4.0-snapshot
   commandPersistence: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; fi; npm run start;"]'
-  command: '["npm", "run", "start"]'
+  command: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; npm run start;"]'
 
   # command: '["npm", "run", "start"]'
 ## Optionally specify an array of imagePullSecrets.
@@ -43,24 +43,45 @@ livenessProbe:
   periodSeconds: 15
 
 config:
-  # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-  CALLBACK_ENDPOINT: http://scheme-adapter:4000
-  SEND_CALLBACK_ENABLE: true
-  FSPID: testingtoolkitdfsp
-  TRANSFERS_VALIDATION_WITH_PREVIOUS_QUOTES: true
-  TRANSFERS_VALIDATION_ILP_PACKET: true
-  TRANSFERS_VALIDATION_CONDITION: true
-  ILP_SECRET: secret
-  VERSIONING_SUPPORT_ENABLE: true
-  VALIDATE_INBOUND_JWS: false
-  VALIDATE_INBOUND_PUT_PARTIES_JWS: false
-  JWS_SIGN: false
-  JWS_SIGN_PUT_PARTIES: false
-  CONNECTION_MANAGER_API_URL: http://connection-manager-api:5061
-  INBOUND_MUTUAL_TLS_ENABLED: false
-  OUTBOUND_MUTUAL_TLS_ENABLED: false
-  ADVANCED_FEATURES_ENABLED: true
-  CALLBACK_TIMEOUT: 10000
+  user_config.json: {
+    "CALLBACK_ENDPOINT": "http://localhost:4000",
+    "CALLBACK_RESOURCE_ENDPOINTS": {
+      "enabled": false,
+      "endpoints": [
+        {
+          "method": "put",
+          "path": "/parties/{Type}/{ID}",
+          "endpoint": "http://localhost1:4002"
+        },
+        {
+          "method": "put",
+          "path": "/quotes/{ID}",
+          "endpoint": "http://localhost1:3002"
+        },
+        {
+          "method": "put",
+          "path": "/transfers/{ID}",
+          "endpoint": "http://localhost1:3000"
+        }
+      ]
+    },
+    "SEND_CALLBACK_ENABLE": true,
+    "FSPID": "testingtoolkitdfsp",
+    "TRANSFERS_VALIDATION_WITH_PREVIOUS_QUOTES": true,
+    "TRANSFERS_VALIDATION_ILP_PACKET": true,
+    "TRANSFERS_VALIDATION_CONDITION": true,
+    "ILP_SECRET": "secret",
+    "VERSIONING_SUPPORT_ENABLE": true,
+    "VALIDATE_INBOUND_JWS": false,
+    "VALIDATE_INBOUND_PUT_PARTIES_JWS": false,
+    "JWS_SIGN": false,
+    "JWS_SIGN_PUT_PARTIES": false,
+    "CONNECTION_MANAGER_API_URL": "http://localhost:5061",
+    "INBOUND_MUTUAL_TLS_ENABLED": false,
+    "OUTBOUND_MUTUAL_TLS_ENABLED": false,
+    "ADVANCED_FEATURES_ENABLED": true,
+    "CALLBACK_TIMEOUT": 10000
+  }
 
 extraEnvironments: {}
 
