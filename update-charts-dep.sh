@@ -1,10 +1,12 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 #
 # Script to update all Helm Chart Dependencies
 #
 
 set -e
+
+trap 'echo "Dep update failed...exiting. Please fix me!"' ERR
 
 echo "Removing old charts..."
 find ./ -name "charts"| xargs rm -Rf
