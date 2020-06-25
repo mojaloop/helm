@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 #
 # Script to update all Helm Chart Dependencies
@@ -13,7 +13,7 @@ find ./ -name "charts"| xargs rm -Rf
 find ./ -name "tmpcharts"| xargs rm -Rf
 
 echo "Updating all Charts..."
-declare -a arr=(
+declare -a charts=(
     eventstreamprocessor
     monitoring/promfana
     monitoring/efk
@@ -39,7 +39,7 @@ declare -a arr=(
     mojaloop
 )
 
-for chart in "${arr[@]}"
+for chart in "${charts[@]}"
 do
     echo "Updating $chart"
     helm dep up "$chart"
