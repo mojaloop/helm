@@ -6,7 +6,8 @@
 
 set -e
 
-trap 'echo "Dep update failed...exiting. Please fix me!"' ERR
+message() { echo "Dep update failed...exiting. Please fix me!"; }
+trap message ERR
 
 echo "Removing old charts..."
 find ./ -name "charts"| xargs rm -Rf
