@@ -101,6 +101,10 @@ echo "Linting Mojaloop Simulator Service..."
 helm lint ./mojaloop-simulator
 checkCommandResult
 
+echo "Linting Mojaloop Testing Toolkit..."
+helm lint ./ml-testing-toolkit
+checkCommandResult
+
 echo "\
 Chart linting completed.\n \
 Ensure you check the output for any errors. \n \

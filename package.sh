@@ -126,6 +126,11 @@ echo "Packaging Mojaloop Simulator..."
 helm package -u -d ./repo ./mojaloop-simulator
 checkCommandResult
 
+echo "Packaging Mojaloop Testing Toolkit..."
+helm package -u -d ./repo ./ml-testing-toolkit
+checkCommandResult
+
+
 cd ./repo
 
 echo "Creating Helm repo index for '$LOCAL_HELM_MOJALOOP_REPO_URI'..."

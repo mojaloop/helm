@@ -73,7 +73,7 @@ spec:
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
-          env: 
+          env:
             - name: LOG_LEVEL
               value: {{ .Values.config.log_level | quote}}
             - name: LOG_FILTER
@@ -103,6 +103,10 @@ spec:
           volumeMounts:
           - name: {{ template "quotingservice.fullname" . }}-config-volume
             mountPath: /opt/quoting-service/config
+          {{- if .Values.config.endpointSecurity.jwsSign }}
+          - name: jws-signing-key
+            mountPath: /opt/quoting-service/secrets
+          {{- end }}
         {{- if .Values.sidecar.enabled }}
         - name: {{ .Chart.Name }}-sidecar
           image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
@@ -138,6 +142,11 @@ spec:
               value: {{ .Values.sidecar.config.log_level }}
         {{- end }}
       volumes:
+        {{- if .Values.config.endpointSecurity.jwsSign }}
+        - name: jws-signing-key
+          secret:
+            secretName: {{ template "quotingservice.fullname" . }}-jws-signing-key
+        {{- end }}
         - name: {{ template "quotingservice.fullname" . }}-config-volume
           configMap:
             name: {{ template "quotingservice.fullname" . }}-config

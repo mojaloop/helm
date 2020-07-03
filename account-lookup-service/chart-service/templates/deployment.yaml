@@ -83,6 +83,10 @@ spec:
           volumeMounts:
           - name: {{ template "account-lookup-service-api.fullname" . }}-config-volume
             mountPath: /opt/account-lookup-service/config
+          {{- if .Values.config.endpointSecurity.jwsSign }}
+          - name: jws-signing-key
+            mountPath: /opt/account-lookup-service/secrets
+          {{- end }}
       {{- if .Values.sidecar.enabled }}
         - name: {{ .Chart.Name }}-sidecar
           image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
@@ -144,6 +148,11 @@ spec:
               path: default.json
             - key: knexfile.js
               path: knexfile.js
+        {{- if .Values.config.endpointSecurity.jwsSign }}
+        - name: jws-signing-key
+          secret:
+            secretName: {{ template "account-lookup-service-api.fullname" . }}-jws-signing-key
+        {{- end }}
         {{- if .Values.sidecar.enabled }}
         - name: {{ template "account-lookup-service-api.fullname" . }}-sidecar-volume
           configMap:

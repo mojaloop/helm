@@ -1,0 +1,122 @@
+{{- $serviceFullName := include "ml-testing-toolkit-backend.fullname" . -}}
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: {{ template "ml-testing-toolkit-backend.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "ml-testing-toolkit-backend.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "ml-testing-toolkit-backend.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  serviceName: {{ template "ml-testing-toolkit-backend.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "ml-testing-toolkit-backend.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    spec:
+{{- if .Values.affinity }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+{{- end }}
+{{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+{{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.image.imagePullSecrets }}
+          imagePullSecrets:
+          {{ toYaml .Values.image.imagePullSecrets | indent 10 }}
+          {{- end }}
+          {{- if .Values.persistence.enabled }}
+          command: {{ .Values.image.commandPersistence }}
+          {{- else }}
+          command: {{ .Values.image.command }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.specApi.internalPort }}
+            - containerPort: {{ .Values.service.adminApi.internalPort }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.httpGet.path }}
+              port: {{ .Values.service.adminApi.internalPort }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.httpGet.path }}
+              port: {{ .Values.service.adminApi.internalPort }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          {{- end }}
+          volumeMounts:
+          {{- if .Values.persistence.enabled }}
+            - name: ttk-data
+              mountPath: /opt/ttk-data
+          {{- end }}
+          {{- range $k, $v := .Values.extraEnvironments }}
+            - name: {{ $serviceFullName }}-volume-extra-environments
+              mountPath: /opt/mojaloop-testing-toolkit/examples/environments/{{ $k }}
+              subPath: {{ $k }}
+          {{- end }}
+            - name: {{ $serviceFullName }}-volume-config-default
+              mountPath: /opt/default_config
+      volumes:
+      {{- if .Values.persistence.enabled }}
+        - name: ttk-data
+          emptyDir: {}  
+      {{- end }}
+        - name: {{ template "ml-testing-toolkit-backend.fullname" . }}-volume-config-default
+          configMap:
+            name: {{ template "ml-testing-toolkit-backend.fullname" . }}-config-default
+            items:
+              {{- range $k, $v := .Values.config }}
+              - key: {{ $k }}
+                path: {{ $k }}
+              {{- end }}
+        - name: {{ template "ml-testing-toolkit-backend.fullname" . }}-volume-extra-environments
+          configMap:
+            name: {{ template "ml-testing-toolkit-backend.fullname" . }}-config-extra-environments
+            items:
+              {{- range $k, $v := .Values.extraEnvironments }}
+              - key: {{ $k }}
+                path: {{ $k }}
+              {{- end }}
+
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: ttk-data
+    spec:
+      accessModes: [{{ .Values.persistence.accessMode | quote }}]
+      {{- if .Values.persistence.storageClass }}
+      {{- if (eq "-" .Values.persistence.storageClass) }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: "{{ .Values.persistence.storageClass }}"
+      {{- end }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.persistence.size | quote }}
+  {{- end -}}

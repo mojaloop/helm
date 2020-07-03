@@ -5,7 +5,7 @@
 
 Mojaloop published Helm Repo: http://mojaloop.io/helm/repo/
 
-Mojaloop deployment documentation: http://mojaloop.io/documentation/deployment-guide/
+Mojaloop deployment documentation: https://docs.mojaloop.io/documentation/deployment-guide
 
 Refer to Helm docs for more information: https://docs.helm.sh/
 

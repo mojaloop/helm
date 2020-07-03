@@ -88,6 +88,8 @@
 #   payeefsp) "sim-component" (e.g. backend, scheme-adapter, cache)
 # * can _probably_ remove port numbers from services to simplify chart (although perhaps not? try
 #   to port-forward with a named port instead of a numbered port?)
+# * It is likely possible to have the user supply a CA cert + key and use those to generate and
+#   sign automatically generated per-simulator keys.
 
 
 simulators: {}
@@ -149,6 +151,9 @@ sharedJWSPubKeys:
 defaults: &defaults
   # Changes to this object in the parent chart, for example 'mojaloop-simulator.defaults' will be
   # applied to all simulators deployed by this child chart.
+  ingress:
+    enabled: false
+
   config:
     imagePullSecretName: dock-casa-secret
 
@@ -180,6 +185,46 @@ defaults: &defaults
 
     schemeAdapter:
       secrets:
+        tls:
+          # In order to enable TLS with your supplied credentials, you will need to:
+          # 1. set all three of the `cert`, `key`, `cacert` fields appropriately for each of
+          # `inbound`, `outbound` and `test` as per your preference.
+          # 2. optionally specify `schemeAdapter.env.INBOUND_MUTUAL_TLS_ENABLED: true`
+          # 3. optionally specify `schemeAdapter.env.OUTBOUND_MUTUAL_TLS_ENABLED: true`
+          # 4. optionally specify `schemeAdapter.env.TEST_MUTUAL_TLS_ENABLED: true`
+          # It probably makes sense to set your CA cert in defaults. Note that the default is that
+          # the CA, cert and key will be generated for you by this chart. To use this functionality
+          # you only need specify the config documented in steps (2, 3, 4) a few lines up.
+          #
+          # inbound:
+          #   key: |
+          #     -----BEGIN CERTIFICATE-----
+          #     ...
+          #     -----END CERTIFICATE-----
+          #   cacert: |
+          #     -----BEGIN CERTIFICATE-----
+          #     ...
+          #     -----END CERTIFICATE-----
+          #   cert: |
+          #     -----BEGIN RSA PRIVATE KEY-----
+          #     ...
+          #     -----END RSA PRIVATE KEY-----
+          #
+          # To set the same values for each of inbound, outbound and test, specify the values for
+          # inbound as above, then the values for outbound and test using yaml anchors:
+          #
+          # inbound: &inbound
+          #   key: |
+          #     ..
+          #   cacert: |
+          #     ..
+          #   cert: |
+          #     ..
+          # outbound: *inbound
+          # test: *inbound
+          inbound: &inbound
+          outbound: *inbound
+          test: *inbound
         jws:
           # Use the privKeySecretName field if you would like to supply a JWS private key external
           # to this chart.
@@ -206,7 +251,7 @@ defaults: &defaults
           publicKey: ''
       image:
         repository: mojaloop/sdk-scheme-adapter
-        tag: v10.1.0
+        tag: v10.5.0
         pullPolicy: Always
       <<: *defaultProbes
 
@@ -263,18 +308,19 @@ defaults: &defaults
         JWS_VERIFICATION_KEYS_DIRECTORY: "/jwsVerificationKeys"
 
         # Location of certs and key required for TLS. It is possible to configure these- however,
-        # at the time of writing, it's not supported by this chart.
-        # IN_CA_CERT_PATH: "./secrets/cacert.pem"
-        # IN_SERVER_CERT_PATH: "./secrets/servercert.pem"
-        # IN_SERVER_KEY_PATH: "./secrets/serverkey.pem"
-        #
-        # OUT_CA_CERT_PATH: "./secrets/cacert.pem"
-        # OUT_CLIENT_CERT_PATH: "./secrets/servercert.pem"
-        # OUT_CLIENT_KEY_PATH: "./secrets/serverkey.pem"
-        #
-        # TEST_CA_CERT_PATH: "./secrets/cacert.pem"
-        # TEST_CLIENT_CERT_PATH: "./secrets/servercert.pem"
-        # TEST_CLIENT_KEY_PATH: "./secrets/serverkey.pem"
+        # at the time of writing, it's not supported by this chart and will likely cause breakage.
+        # You should probably not do it unless you know what you're doing.
+          # IN_CA_CERT_PATH: ./secrets/inbound-cacert.pem
+          # IN_SERVER_CERT_PATH: ./secrets/inbound-cert.pem
+          # IN_SERVER_KEY_PATH: ./secrets/inbound-key.pem
+
+          # OUT_CA_CERT_PATH: ./secrets/outbound-cacert.pem
+          # OUT_CLIENT_CERT_PATH: ./secrets/outbound-cert.pem
+          # OUT_CLIENT_KEY_PATH: ./secrets/outbound-key.pem
+
+          # TEST_CA_CERT_PATH: ./secrets/test-cacert.pem
+          # TEST_CLIENT_CERT_PATH: ./secrets/test-cert.pem
+          # TEST_CLIENT_KEY_PATH: ./secrets/test-key.pem
 
         # The number of space characters by which to indent pretty-printed logs. If set to zero, log events
         # will each be printed on a single line.
@@ -283,6 +329,8 @@ defaults: &defaults
         # REDIS CACHE CONNECTION
         # CACHE_HOST: "" # Default is parametrised, but it's possible to override this
         CACHE_PORT: 6379
+        # CACHE_SHOULD_EXPIRE=false
+        # CACHE_EXPIRY_SECONDS=3600
 
         # Switch or DFSP system under test Mojaloop API endpoint
         # The option 'PEER_ENDPOINT' has no effect if the remaining three options 'ALS_ENDPOINT', 'QUOTES_ENDPOINT', 'TRANSFERS_ENDPOINT' are specified.
@@ -366,7 +414,7 @@ defaults: &defaults
     backend:
       image:
         repository: mojaloop/mojaloop-simulator
-        tag: v9.4.1
+        tag: v10.4.1
         pullPolicy: Always
       <<: *defaultProbes
 

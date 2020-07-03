@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ml-testing-toolkit-backend.fullname" . }}-config-default
+  labels:
+    app.kubernetes.io/name: {{ include "ml-testing-toolkit-backend.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+data:
+  {{- range $k, $v := .Values.config }}
+    {{ $k }}: {{ $v | toPrettyJson | quote }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ml-testing-toolkit-backend.fullname" . }}-config-extra-environments
+  labels:
+    app.kubernetes.io/name: {{ include "ml-testing-toolkit-backend.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+data:
+  {{- range $k, $v := .Values.extraEnvironments }}
+    {{ $k }}: {{ $v | toPrettyJson | quote }}
+  {{- end }}

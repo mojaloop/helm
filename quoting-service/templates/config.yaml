@@ -10,7 +10,15 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   default.json: {{ (tpl (.Files.Get "configs/default.json") . ) | quote }}
+  {{- if .Values.rules }}
+  {{- if (typeIs "string" .Values.rules) }}
+  rules.json: {{ .Values.rules | quote }}
+  {{- else }}
   rules.json: {{ .Values.rules | toPrettyJson | quote }}
+  {{- end }}
+  {{- else }}
+  rules.json: "[]"
+  {{- end }}
   
 {{- if .Values.sidecar.enabled }}
 ---

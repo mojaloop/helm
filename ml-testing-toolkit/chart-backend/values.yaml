@@ -1,0 +1,194 @@
+# Default values for ml-api-adapter.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+image:
+  repository: mojaloop/ml-testing-toolkit
+  tag: v10.4.1
+  commandPersistence: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; elif [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; npm run start;"]'
+  command: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; npm run start;"]'
+
+  # command: '["npm", "run", "start"]'
+## Optionally specify an array of imagePullSecrets.
+## Secrets must be manually created in the namespace.
+## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+##
+#  imagePullSecrets:
+#    - name: myregistrykey
+  pullPolicy: Always
+
+## Pod scheduling preferences.
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+affinity: {}
+
+## Node labels for pod assignment
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+nodeSelector: {}
+
+## Set toleration for scheduler
+## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: []
+
+readinessProbe:
+  enabled: false
+  httpGet:
+    path: /health
+  initialDelaySeconds: 120
+  periodSeconds: 15
+livenessProbe:
+  enabled: false
+  httpGet:
+    path: /health
+  initialDelaySeconds: 90
+  periodSeconds: 15
+
+config:
+  user_config.json: {
+    "CALLBACK_ENDPOINT": "http://localhost:4000",
+    "CALLBACK_RESOURCE_ENDPOINTS": {
+      "enabled": true,
+      "endpoints": [
+        {
+          "method": "put",
+          "path": "/parties/{Type}/{ID}",
+          "endpoint": "http://moja-account-lookup-service.demo"
+        },
+        {
+          "method": "put",
+          "path": "/quotes/{ID}",
+          "endpoint": "http://moja-quoting-service.demo"
+        },
+        {
+          "method": "put",
+          "path": "/transfers/{ID}",
+          "endpoint": "http://moja-ml-api-adapter-service.demo"
+        }
+      ]
+    },
+    "SEND_CALLBACK_ENABLE": true,
+    "FSPID": "testingtoolkitdfsp",
+    "TRANSFERS_VALIDATION_WITH_PREVIOUS_QUOTES": true,
+    "TRANSFERS_VALIDATION_ILP_PACKET": true,
+    "TRANSFERS_VALIDATION_CONDITION": true,
+    "ILP_SECRET": "secret",
+    "VERSIONING_SUPPORT_ENABLE": true,
+    "VALIDATE_INBOUND_JWS": false,
+    "VALIDATE_INBOUND_PUT_PARTIES_JWS": false,
+    "JWS_SIGN": false,
+    "JWS_SIGN_PUT_PARTIES": false,
+    "CONNECTION_MANAGER_API_URL": "http://localhost:5061",
+    "INBOUND_MUTUAL_TLS_ENABLED": false,
+    "OUTBOUND_MUTUAL_TLS_ENABLED": false,
+    "ADVANCED_FEATURES_ENABLED": true,
+    "CALLBACK_TIMEOUT": 10000
+  }
+
+extraEnvironments: {
+  "hub-k8s-local-environment.json": {
+    "inputValues": {
+      "fromIdType": "MSISDN",
+      "fromIdValue": "44123456789",
+      "fromFirstName": "Firstname-Test",
+      "fromLastName": "Lastname-Test",
+      "fromDOB": "1984-01-01",
+      "note": "test",
+      "currency": "USD",
+      "amount": "100",
+      "homeTransactionId": "123ABC",
+      "fromFspId": "testingtoolkitdfsp",
+      "accept": "application/vnd.interoperability.parties+json;version=1.0",
+      "contentType": "application/vnd.interoperability.parties+json;version=1.0",
+      "toIdValue": "27713803912",
+      "toIdType": "MSISDN",
+      "toFspId": "payeefsp",
+      "acceptQuotes": "application/vnd.interoperability.quotes+json;version=1.0",
+      "contentTypeQuotes": "application/vnd.interoperability.quotes+json;version=1.0",
+      "acceptTransfers": "application/vnd.interoperability.transfers+json;version=1.0",
+      "contentTransfers": "application/vnd.interoperability.transfers+json;version=1.0",
+      "hub_operator": "NOT_APPLICABLE",
+      "payerfsp": "testingtoolkitdfsp",
+      "accountId": "6",
+      "payeefsp": "payeefsp",
+      "receiverMSISDN": "27713803912",
+      "ilpPacket": "AQAAAAAAAADIEHByaXZhdGUucGF5ZWVmc3CCAiB7InRyYW5zYWN0aW9uSWQiOiIyZGY3NzRlMi1mMWRiLTRmZjctYTQ5NS0yZGRkMzdhZjdjMmMiLCJxdW90ZUlkIjoiMDNhNjA1NTAtNmYyZi00NTU2LThlMDQtMDcwM2UzOWI4N2ZmIiwicGF5ZWUiOnsicGFydHlJZEluZm8iOnsicGFydHlJZFR5cGUiOiJNU0lTRE4iLCJwYXJ0eUlkZW50aWZpZXIiOiIyNzcxMzgwMzkxMyIsImZzcElkIjoicGF5ZWVmc3AifSwicGVyc29uYWxJbmZvIjp7ImNvbXBsZXhOYW1lIjp7fX19LCJwYXllciI6eyJwYXJ0eUlkSW5mbyI6eyJwYXJ0eUlkVHlwZSI6Ik1TSVNETiIsInBhcnR5SWRlbnRpZmllciI6IjI3NzEzODAzOTExIiwiZnNwSWQiOiJwYXllcmZzcCJ9LCJwZXJzb25hbEluZm8iOnsiY29tcGxleE5hbWUiOnt9fX0sImFtb3VudCI6eyJjdXJyZW5jeSI6IlVTRCIsImFtb3VudCI6IjIwMCJ9LCJ0cmFuc2FjdGlvblR5cGUiOnsic2NlbmFyaW8iOiJERVBPU0lUIiwic3ViU2NlbmFyaW8iOiJERVBPU0lUIiwiaW5pdGlhdG9yIjoiUEFZRVIiLCJpbml0aWF0b3JUeXBlIjoiQ09OU1VNRVIiLCJyZWZ1bmRJbmZvIjp7fX19",
+      "condition": "HOr22-H3AfTDHrSkPjJtVPRdKouuMkDXTR4ejlQa8Ks",
+      "validFulfillment": "UNlJ98hZTY_dsw0cAqw4i_UN3v4utt7CZFB4yfLbVFA",
+      "validCondition": "GRzLaTP7DJ9t4P-a_BA0WA9wzzlsugf00-Tn6kESAfM",
+      "invalidFulfillment": "_3cco-YN5OGpRKVWV3n6x6uNpBTH9tYUdOYmHA",
+      "fspiopSignature": "{\"signature\":\"iU4GBXSfY8twZMj1zXX1CTe3LDO8Zvgui53icrriBxCUF_wltQmnjgWLWI4ZUEueVeOeTbDPBZazpBWYvBYpl5WJSUoXi14nVlangcsmu2vYkQUPmHtjOW-yb2ng6_aPfwd7oHLWrWzcsjTF-S4dW7GZRPHEbY_qCOhEwmmMOnE1FWF1OLvP0dM0r4y7FlnrZNhmuVIFhk_pMbEC44rtQmMFv4pm4EVGqmIm3eyXz0GkX8q_O1kGBoyIeV_P6RRcZ0nL6YUVMhPFSLJo6CIhL2zPm54Qdl2nVzDFWn_shVyV0Cl5vpcMJxJ--O_Zcbmpv6lxqDdygTC782Ob3CNMvg\\\",\\\"protectedHeader\\\":\\\"eyJhbGciOiJSUzI1NiIsIkZTUElPUC1VUkkiOiIvdHJhbnNmZXJzIiwiRlNQSU9QLUhUVFAtTWV0aG9kIjoiUE9TVCIsIkZTUElPUC1Tb3VyY2UiOiJPTUwiLCJGU1BJT1AtRGVzdGluYXRpb24iOiJNVE5Nb2JpbGVNb25leSIsIkRhdGUiOiIifQ\"}",
+      "HUB_OPERATOR_BEARER_TOKEN": "NOT_APPLICABLE",
+      "BASE_CENTRAL_LEDGER_ADMIN": "",
+      "HOST_ML_API_ADAPTER": "http://moja-ml-api-adapter-service.demo",
+      "HOST_CENTRAL_LEDGER": "http://moja-centralledger-service.demo",
+      "HOST_QUOTING_SERVICE": "http://moja-quoting-service.demo",
+      "HOST_ACCOUNT_LOOKUP_SERVICE": "http://moja-account-lookup-service.demo",
+      "HOST_SIMULATOR": "http://moja-simulator.demo",
+      "HOST_CENTRAL_SETTLEMENT": "http://moja-centralsettlement.demo/v1",
+      "HOST_TRANSACTION_REQUESTS_SERVICE": "http://moja-transaction-requests-service.demo",
+      "payerIdType": "MSISDN",
+      "payerIdentifier": "22507008181",
+      "payeeIdType": "MSISDN",
+      "payeeIdentifier": "22556999125",
+      "CALLBACK_ENDPOINT_BASE_URL": "http://test1-ml-testing-toolkit-backend.ttk:5000"
+    }
+  }
+}
+
+
+
+service:
+  type: ClusterIP
+  specApi:
+    name: spec-api
+    externalPort: 5000
+    internalPort: 5000
+  adminApi:
+    name: admin-api
+    externalPort: 5050
+    internalPort: 5050
+
+
+ingress:
+  enabled: true
+  externalPath: /
+  # Used to create an Ingress record.
+  hosts:
+    specApi: testing-toolkit-specapi.local
+    adminApi: testing-toolkit-adminapi.local
+
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: '/'
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  tls:
+    # Secrets must be manually created in the namespace.
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+## Persist data to a persistent volume
+persistence:
+  enabled: false
+  ## percona data Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  # storageClass: "-"
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+
