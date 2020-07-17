@@ -36,6 +36,7 @@ declare -a charts=(
     bulk-api-adapter
     mojaloop-bulk
     mojaloop-simulator
+    ml-testing-toolkit
     mojaloop
 )
 

@@ -30,3 +30,11 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
     {{- print "extensions/v1beta1" -}}
   {{- end -}}
 {{- end -}}
+
+{{- define "ml-testing-toolkit-backend.apiVersion.StatefulSet" -}}
+  {{- if .Capabilities.APIVersions.Has "apps/v1/StatefulSet" -}}
+    {{- print "apps/v1" -}}
+  {{- else -}}
+    {{- print "apps/v1beta2" -}}
+  {{- end -}}
+{{- end -}}

@@ -46,3 +46,11 @@ Create chart name and version as used by the chart label.
     {{- print "extensions/v1beta1" -}}
   {{- end -}}
 {{- end -}}
+
+{{- define "ntpd.apiVersion.DaemonSet" -}}
+  {{- if .Capabilities.APIVersions.Has "apps/v1/DaemonSet" -}}
+    {{- print "apps/v1" -}}
+  {{- else -}}
+    {{- print "apps/v1beta2" -}}
+  {{- end -}}
+{{- end -}}
