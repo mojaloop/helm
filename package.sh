@@ -13,7 +13,7 @@ trap 'echo "Command failed...exiting. Please fix me!"' ERR
 echo "Removing old charts..."
 find ./ -name "charts"| xargs rm -Rf
 
-mkdir -p ./repo
+mkdir ./repo
 
 declare -a charts=(
     eventstreamprocessor
