@@ -47,7 +47,10 @@ declare -a charts=(
 
 for chart in "${charts[@]}"
 do
-    if [ -z $GITHUB_TAG ]; then
+    if [ -z $BUILD_NUM ] || [ -z $GIT_SHA1 ]; then # we're most likely not running in CI
+        # Probably running on someone's machine
+        helm package -u -d ./repo "$chart"
+    elif [ -z $GITHUB_TAG ]; then # we're probably running in CI, but this is not a job triggered by a tag
         set -u
         # When $GITHUB_TAG is not present, we'll build a development version. This versioning
         # scheme, utilising the incrementing "BUILD_NUM" means users can request the latest
@@ -58,7 +61,7 @@ do
         NEW_VERSION="$CURRENT_VERSION-$BUILD_NUM.$GIT_SHA1"
         helm package -u -d ./repo "$chart" --version="$NEW_VERSION"
         set +u
-    else
+    else # we're probably running in CI, this is a job triggered by a tag/release
         # When $GITHUB_TAG is present, we're actually releasing the chart- so we won't modify any
         # versions
         helm package -u -d ./repo "$chart"
