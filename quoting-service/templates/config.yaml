@@ -11,7 +11,9 @@ metadata:
 data:
   default.json: {{ (tpl (.Files.Get "configs/default.json") . ) | quote }}
   {{- if .Values.rules }}
-  {{- if (typeIs "string" .Values.rules) }}
+  {{- if (typeIs "string" .Values.rules.template) }}
+  rules.json: {{ (tpl .Values.rules.template . ) }}
+  {{- else if (typeIs "string" .Values.rules) }}
   rules.json: {{ .Values.rules | quote }}
   {{- else }}
   rules.json: {{ .Values.rules | toPrettyJson | quote }}
@@ -19,7 +21,7 @@ data:
   {{- else }}
   rules.json: "[]"
   {{- end }}
-  
+
 {{- if .Values.sidecar.enabled }}
 ---
 apiVersion: v1
