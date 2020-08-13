@@ -61,6 +61,8 @@ e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloo
 
     The `--devel` flag can also be supplied to `helm search` and `helm upgrade` commands.
 
+    Development versions can be specified in a `requirements.yaml` file if you're using Mojaloop as a child chart.
+
 ## Upgrading Deployments from Repo
 
 `helm upgrade --debug <release-name> --repo=http://mojaloop.io/helm/repo <chart_name>`
