@@ -59,7 +59,7 @@ e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloo
 
 This is useful if you've had some work merged into master but it has not yet been released.
 
-2. The `--devel` flag can also be supplied to `helm search` and `helm upgrade` commands.
+The `--devel` flag can also be supplied to `helm search` and `helm upgrade` commands.
 
 ## Upgrading Deployments from Repo
 
