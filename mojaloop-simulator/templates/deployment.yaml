@@ -53,7 +53,7 @@ spec:
           secretName: {{ $fullName }}-tls-creds
           {{- end }}
       initContainers:
-{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.schemeAdapter.initContainers "dicts" (list $config.config.schemeAdapter.env $initContainerEnv)) | indent 6 }}
+{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.schemeAdapter.initContainers "dict" (merge $config.config.schemeAdapter.env $initContainerEnv)) | indent 6 }}
       containers:
       - name: scheme-adapter
         image: "{{ $config.config.schemeAdapter.image.repository }}:{{ $config.config.schemeAdapter.image.tag }}"
@@ -99,23 +99,25 @@ spec:
         - name: DFSP_ID
           value: {{ $name | quote }}
         - name: IN_CA_CERT_PATH
-          value: "./secrets/inbound-cacert.pem"
+          value: "/secrets/inbound-cacert.pem"
         - name: IN_SERVER_CERT_PATH
-          value: "./secrets/inbound-cert.pem"
+          value: "/secrets/inbound-cert.pem"
         - name: IN_SERVER_KEY_PATH
-          value: "./secrets/inbound-key.pem"
+          value: "/secrets/inbound-key.pem"
         - name: OUT_CA_CERT_PATH
-          value: "./secrets/outbound-cacert.pem"
+          value: "/secrets/outbound-cacert.pem"
         - name: OUT_CLIENT_CERT_PATH
-          value: "./secrets/outbound-cert.pem"
+          value: "/secrets/outbound-cert.pem"
         - name: OUT_CLIENT_KEY_PATH
-          value: "./secrets/outbound-key.pem"
+          value: "/secrets/outbound-key.pem"
         - name: TEST_CA_CERT_PATH
-          value: "./secrets/test-cacert.pem"
+          value: "/secrets/test-cacert.pem"
         - name: TEST_CLIENT_CERT_PATH
-          value: "./secrets/test-cert.pem"
+          value: "/secrets/test-cert.pem"
         - name: TEST_CLIENT_KEY_PATH
-          value: "./secrets/test-key.pem"
+          value: "/secrets/test-key.pem"
+        - name: JWS_SIGNING_KEY_PATH
+          value: "/jwsSigningKey/private.key"
         {{- range $k, $v := $config.config.schemeAdapter.env }}
         - name: {{ $k }}
           value: {{ $v | quote }}
