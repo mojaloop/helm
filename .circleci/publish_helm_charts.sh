@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 echo "Setting BASH_ENV..." | tee git.log 
 source $BASH_ENV
@@ -25,7 +25,7 @@ else
 fi
 
 echo "Package helm charts..." | tee git.log 
-sh package.sh
+bash package.sh
 
 echo "Staging general changes..." | tee git.log 
 git add -A
