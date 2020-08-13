@@ -34,7 +34,11 @@ echo "Staging packaged Helm charts..." | tee git.log
 git add -f repo/*.*
 
 echo "Commiting changes..." | tee git.log 
-git commit -a -m "Updating release to $RELEASE"
+if [ -z $GITHUB_TAG ]; then
+    git commit -a -m "Updating release to $GITHUB_TAG"
+else
+    git commit -a -m "Updating development release to $GIT_SHA1"
+fi
 
 echo "Publishing $REVISION release to $GITHUB_TARGET_BRANCH on github..." | tee git.log 
 git push -q $GITHUB_PROJECT_USERNAME $GITHUB_TARGET_BRANCH &> git.log
