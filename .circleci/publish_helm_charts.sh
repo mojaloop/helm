@@ -13,7 +13,7 @@ echo "Checking out $GITHUB_TARGET_BRANCH" | tee git.log
 git checkout -b $GITHUB_TARGET_BRANCH $GITHUB_PROJECT_USERNAME/$GITHUB_TARGET_BRANCH &> git.log
 
 REVISION=${GITHUB_TAG:-$GIT_SHA1}
-echo "Merging tagged release code from $REVISION..." | tee git.log 
+echo "Merging code from $REVISION..." | tee git.log 
 git merge --no-commit $REVISION &> git.log
 
 echo "Checking for merge conflicts" | tee git.log 
@@ -34,7 +34,7 @@ echo "Staging packaged Helm charts..." | tee git.log
 git add -f repo/*.*
 
 echo "Commiting changes..." | tee git.log 
-git commit -a -m "Updating release to $GITHUB_TAG"
+git commit -a -m "Updating release to $RELEASE"
 
 echo "Publishing $REVISION release to $GITHUB_TARGET_BRANCH on github..." | tee git.log 
 git push -q $GITHUB_PROJECT_USERNAME $GITHUB_TARGET_BRANCH &> git.log
