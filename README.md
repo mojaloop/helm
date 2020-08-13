@@ -52,6 +52,17 @@ Refer to the following default chart config file for values: http://mojaloop.io/
 
 e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo mojaloop`
 
+### Deploying development versions
+
+1. To deploy the latest development version, use the `--devel` flag:
+- `helm install --devel --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo <chart_name>`
+
+    This is useful if you've had some work merged into master but it has not yet been released.
+
+    The `--devel` flag can also be supplied to `helm search` and `helm upgrade` commands.
+
+    Development versions can be specified in a `requirements.yaml` file if you're using Mojaloop as a child chart.
+
 ## Upgrading Deployments from Repo
 
 `helm upgrade --debug <release-name> --repo=http://mojaloop.io/helm/repo <chart_name>`
