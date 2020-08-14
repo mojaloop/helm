@@ -1,15 +1,19 @@
-# CircleCI v2 Config
-version: 2
+# CircleCI v2.1 Config
+version: 2.1
 
-defaults_working_directory: &defaults_working_directory
-  working_directory: /home/circleci/project
+##
+# orbs
+#
+# Orbs used in this pipeline
+##
+orbs:
+  slack: circleci/slack@3.4.2
 
-#TODO: add proper defaults for node, rename this to defaults_docker_helm
-
-defaults_docker_helm: &defaults_docker_helm
-  docker:
-    - image: alpine/helm:2.13.1
-
+##
+# defaults
+#
+# yaml templates to be shared across jobs
+##
 defaults_Dependencies: &defaults_Dependencies
   name: Install default dependencies
   command: |
@@ -41,36 +45,29 @@ defaults_Environment: &defaults_environment
     helm repo add kiwigrid https://kiwigrid.github.io
     helm repo add elastic https://helm.elastic.co
 
-defaults_slack_announcement: &defaults_slack_announcement
-  name: Slack announcement for tag releases
-  command: |
-    curl -X POST \
-      $SLACK_WEBHOOK_ANNOUNCEMENT \
-      -H 'Content-type: application/json' \
-      -H 'cache-control: no-cache' \
-      -d "{
-      \"text\": \"*${CIRCLE_PROJECT_REPONAME}* - Release \`${CIRCLE_TAG}\`: https://github.com/mojaloop/${CIRCLE_PROJECT_REPONAME}/releases/tag/${CIRCLE_TAG}\"
-    }"
+##
+# Executors
+#
+# CircleCI Executors
+##
+executors:
+  default-docker-helm:
+    working_directory: /home/circleci/project
+    docker:
+      - image: alpine/helm:2.13.1
 
-defaults_git_identity_setup: &defaults_git_identity_setup
-  name: Setup Git Identity
-  command: |
-    echo "Setting BASH_ENV..."
-    source $BASH_ENV
+  default-machine:
+    machine:
+      image: ubuntu-1604:201903-01
 
-    git config --global user.email "$GIT_CI_USER"
-    git config --global user.password "$GIT_CI_PASSWORD"
-    git config --global user.name "$GIT_CI_EMAIL"
-    git remote add $GITHUB_PROJECT_USERNAME https://$GIT_CI_USER:$GITHUB_TOKEN@github.com/$GITHUB_PROJECT_USERNAME/$GITHUB_PROJECT_REPONAME.git
-
-defaults_publish: &defaults_publish
-  name: Publish helm charts
-  command: bash $CIRCLE_WORKING_DIRECTORY/.circleci/publish_helm_charts.sh
-
+##
+# Jobs
+#
+# A map of CircleCI jobs
+##
 jobs:
   setup:
-    <<: *defaults_working_directory
-    <<: *defaults_docker_helm
+    executor: default-docker-helm
     steps:
       - checkout
       - run:
@@ -78,8 +75,7 @@ jobs:
           command: echo "Placeholder for setup - Nothing to do here"
 
   test:
-    <<: *defaults_working_directory
-    <<: *defaults_docker_helm
+    executor: default-docker-helm
     steps:
       - checkout
       - run:
@@ -92,7 +88,7 @@ jobs:
             sh lint-charts.sh
 
   audit-licenses:
-    machine: true
+    executor: default-machine
     steps:
       - checkout
       - run:
@@ -133,8 +129,7 @@ jobs:
           prefix: licenses
 
   build:
-    <<: *defaults_working_directory
-    <<: *defaults_docker_helm
+    executor: default-docker-helm
     steps:
       - checkout
       - run:
@@ -147,8 +142,7 @@ jobs:
             bash update-charts-dep.sh
 
   deploy:
-    <<: *defaults_working_directory
-    <<: *defaults_docker_helm
+    executor: default-docker-helm
     steps:
       - checkout
       - run:
@@ -168,11 +162,25 @@ jobs:
             echo 'export GIT_SHA1=$CIRCLE_SHA1' >> $BASH_ENV
             echo 'export BUILD_NUM=$CIRCLE_BUILD_NUM' >> $BASH_ENV
       - run:
-          <<: *defaults_git_identity_setup
+          name: Setup Git Identity
+          command: |
+            echo "Setting BASH_ENV..."
+            source $BASH_ENV
+
+            git config --global user.email "$GIT_CI_USER"
+            git config --global user.password "$GIT_CI_PASSWORD"
+            git config --global user.name "$GIT_CI_EMAIL"
+            git remote add $GITHUB_PROJECT_USERNAME https://$GIT_CI_USER:$GITHUB_TOKEN@github.com/$GITHUB_PROJECT_USERNAME/$GITHUB_PROJECT_REPONAME.git
       - run:
-          <<: *defaults_publish
-      - run:
-          <<: *defaults_slack_announcement
+          name: Publish Helm Charts
+          command: .circleci/publish_helm_charts.sh
+
+  slack-announcement:
+    executor: default-docker-helm
+    steps:
+      - slack/status:
+          webhook: "$SLACK_WEBHOOK_ANNOUNCEMENT"
+          success_message: '*"${CIRCLE_PROJECT_REPONAME}"* - Release \`"${CIRCLE_TAG}"\` \nhttps://github.com/mojaloop/"${CIRCLE_PROJECT_REPONAME}"/releases/tag/"${CIRCLE_TAG}"'
 
 workflows:
   version: 2
@@ -200,23 +208,24 @@ workflows:
                 - /feature.*/
                 - /bugfix.*/
                 - gh-pages
-      - audit-licenses:
-          context: org-global
-          requires:
-            - setup
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              ignore:
-                - /feature.*/
-                - /bugfix.*/
-                - gh-pages
+      # TODO: reenable
+      # - audit-licenses:
+      #     context: org-global
+      #     requires:
+      #       - setup
+      #     filters:
+      #       tags:
+      #         only: /.*/
+      #       branches:
+      #         ignore:
+      #           - /feature.*/
+      #           - /bugfix.*/
+      #           - gh-pages
       - build:
           context: org-global
           requires:
             - test
-            - audit-licenses
+            # - audit-licenses
           filters:
             tags:
               only: /.*/
@@ -234,3 +243,12 @@ workflows:
               only: /v[0-9]+(\.[0-9]+)*/
             branches:
               only: master
+      - slack-announcement:
+          context: org-global
+          requires:
+            - deploy
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/
