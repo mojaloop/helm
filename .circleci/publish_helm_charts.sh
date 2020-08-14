@@ -42,7 +42,7 @@ echo "Staging packaged Helm charts..." | tee git.log
 git add -f repo/*.*
 
 echo "Commiting changes..." | tee git.log 
-git commit -a -m $COMMIT_MESSAGE
+git commit -a -m "'$COMMIT_MESSAGE'"
 
 echo "Publishing $REVISION release to $GITHUB_TARGET_BRANCH on github..." | tee git.log 
 git push -q $GITHUB_PROJECT_USERNAME $GITHUB_TARGET_BRANCH &> git.log
