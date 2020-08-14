@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euox pipefail
+
 echo "Setting BASH_ENV..." | tee git.log 
 source $BASH_ENV
 
