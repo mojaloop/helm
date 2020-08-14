@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 echo "Setting BASH_ENV..." | tee git.log 
 source $BASH_ENV
@@ -12,8 +12,9 @@ git fetch -q --tags $GITHUB_PROJECT_USERNAME &> git.log
 echo "Checking out $GITHUB_TARGET_BRANCH" | tee git.log 
 git checkout -b $GITHUB_TARGET_BRANCH $GITHUB_PROJECT_USERNAME/$GITHUB_TARGET_BRANCH &> git.log
 
-echo "Merging tagged release code from $GITHUB_TAG..." | tee git.log 
-git merge --no-commit $GITHUB_TAG &> git.log
+REVISION=${GITHUB_TAG:-$GIT_SHA1}
+echo "Merging code from $REVISION..." | tee git.log 
+git merge --no-commit $REVISION &> git.log
 
 echo "Checking for merge conflicts" | tee git.log 
 if [ $(git ls-files -u | wc -l) == 0 ]
@@ -24,7 +25,7 @@ else
 fi
 
 echo "Package helm charts..." | tee git.log 
-sh package.sh
+bash package.sh
 
 echo "Staging general changes..." | tee git.log 
 git add -A
@@ -33,7 +34,11 @@ echo "Staging packaged Helm charts..." | tee git.log
 git add -f repo/*.*
 
 echo "Commiting changes..." | tee git.log 
-git commit -a -m "Updating release to $GITHUB_TAG"
+if [ -z $GITHUB_TAG ]; then
+    git commit -a -m "Updating release to $GITHUB_TAG"
+else
+    git commit -a -m "Updating development release to $GIT_SHA1"
+fi
 
-echo "Publishing $GITHUB_TAG release to $GITHUB_TARGET_BRANCH on github..." | tee git.log 
+echo "Publishing $REVISION release to $GITHUB_TARGET_BRANCH on github..." | tee git.log 
 git push -q $GITHUB_PROJECT_USERNAME $GITHUB_TARGET_BRANCH &> git.log
