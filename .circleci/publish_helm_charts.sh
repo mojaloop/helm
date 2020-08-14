@@ -2,7 +2,7 @@
 
 REVISION=${GITHUB_TAG:-$GIT_SHA1}
 if [ -n ${GITHUB_TAG} ]; then
-  COMMIT_MESSAGE="Updating release to $REVISION"
+  COMMIT_MESSAGE="Updating development release to $REVISION"
 else 
   COMMIT_MESSAGE="Updating release to $REVISION"
 fi
