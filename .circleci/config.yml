@@ -18,6 +18,7 @@ defaults_Dependencies: &defaults_Dependencies
   name: Install default dependencies
   command: |
     apk --no-cache add git
+    apk --no-cache add bash
     apk --no-cache add ca-certificates
     apk --no-cache add curl
     apk --no-cache add openssh-client
@@ -178,6 +179,8 @@ jobs:
   slack-announcement:
     executor: default-docker-helm
     steps:
+      - run:
+          <<: *defaults_Dependencies
       - slack/status:
           webhook: "$SLACK_WEBHOOK_ANNOUNCEMENT"
           success_message: '*"${CIRCLE_PROJECT_REPONAME}"* - Release \`"${CIRCLE_TAG}"\` \nhttps://github.com/mojaloop/"${CIRCLE_PROJECT_REPONAME}"/releases/tag/"${CIRCLE_TAG}"'
