@@ -142,9 +142,9 @@ Expected output:
 
 ## Removing Deployments
 
-- `helm del --purge <release-name>`
+- `helm del <release-name>`
 
-e.g. `helm del --purge dev`
+e.g. `helm del dev`
 
 ## Debugging Charts
 
