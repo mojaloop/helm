@@ -82,9 +82,9 @@ e.g. `helm --namespace moja install dev mojaloop/mojaloop`
 
 ## Upgrading Deployments from Repo
 
-`helm upgrade <release-name> mojaloop/<chart_name>`
+`helm --namespace <namespace> upgrade <release-name> mojaloop/<chart_name>`
 
-e.g. `helm upgrade dev mojaloop/centralenduserregistry`
+e.g. `helm --namespace moja upgrade dev mojaloop/centralenduserregistry`
 
 
 ## Deployment from Source for local repo deployments
@@ -101,7 +101,7 @@ This script will ensure that all dependencies and child-dependencies are updated
 
 - `helm --namespace <namespace> install <release_name> <chart_folder>`
 
-e.g. `helm --namespace=mojaloop install dev ./centralledger`
+e.g. `helm --namespace mojaloop install dev ./centralledger`
 
 2. Deploy mojaloop componenets
 
@@ -109,14 +109,14 @@ e.g. `helm --namespace=mojaloop install dev ./centralledger`
 
 - `helm --namespace <namespace> install <release_name> mojaloop`
 
-e.g. `helm --namespace=mojaloop install dev ./mojaloop`
+e.g. `helm --namespace mojaloop install dev ./mojaloop`
 
 
 ## Upgrading Deployments from Source
 
-- `helm upgrade <release-name> <chart_folder>`
+- `helm --namespace <namespace> upgrade <release-name> <chart_folder>`
 
-e.g. `helm upgrade dev ./centralenduserregistry`
+e.g. `helm --namespace mojaloop upgrade dev ./centralenduserregistry`
 
 ## Testing Deployments
 
@@ -142,9 +142,9 @@ Expected output:
 
 ## Removing Deployments
 
-- `helm del <release-name>`
+- `helm --namespace <namespace> del <release-name>`
 
-e.g. `helm del dev`
+e.g. `helm --namespace mojaloop del dev`
 
 ## Debugging Charts
 
@@ -152,8 +152,11 @@ e.g. `helm del dev`
 
 - `helm --namespace <namespace> install <release_name> <chart_folder> --dry-run`
 
+2. Enable debug to display raw configurations that will be injected into Helm templates
 
-2. Use Helm Linter to check for any issues
+- `helm --namespace <namespace> install <release_name> <chart_folder> --dry-run --debug`
+
+3. Use Helm Linter to check for any issues
 
 - `helm lint --strict <chart_folder>`
 
