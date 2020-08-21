@@ -13,24 +13,24 @@ echo "Setting BASH_ENV..." | tee git.log
 source $BASH_ENV
 
 echo "Fetching info from remote $GITHUB_PROJECT_USERNAME" | tee git.log 
-git fetch -q $GITHUB_PROJECT_USERNAME &> git.log
+#git fetch -q $GITHUB_PROJECT_USERNAME &> git.log
 
 echo "Fetching tags from remote $GITHUB_PROJECT_USERNAME" | tee git.log 
-git fetch -q --tags $GITHUB_PROJECT_USERNAME &> git.log
+#git fetch -q --tags $GITHUB_PROJECT_USERNAME &> git.log
 
 echo "Checking out $GITHUB_TARGET_BRANCH" | tee git.log 
-git checkout -b $GITHUB_TARGET_BRANCH $GITHUB_PROJECT_USERNAME/$GITHUB_TARGET_BRANCH &> git.log
+#git checkout -b $GITHUB_TARGET_BRANCH $GITHUB_PROJECT_USERNAME/$GITHUB_TARGET_BRANCH &> git.log
 
 echo "Merging code from $REVISION..." | tee git.log 
-git merge --no-commit $REVISION &> git.log
+#git merge --no-commit $REVISION &> git.log
 
-echo "Checking for merge conflicts" | tee git.log 
-if [ $(git ls-files -u | wc -l) == 0 ]
-then
-  echo "Merge conflict not-detected. Continuing..." | tee git.log
-else
-  echo "Merge conflict detected. Abort!" | tee git.log && exit 1
-fi
+#echo "Checking for merge conflicts" | tee git.log 
+#if [ $(git ls-files -u | wc -l) == 0 ]
+#then
+#  echo "Merge conflict not-detected. Continuing..." | tee git.log
+#else
+#  echo "Merge conflict detected. Abort!" | tee git.log && exit 1
+#fi
 
 echo "Package helm charts..." | tee git.log 
 bash package.sh
