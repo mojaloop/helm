@@ -7,15 +7,16 @@ Mojaloop published Helm Repo: http://mojaloop.io/helm/repo/
 
 Mojaloop deployment documentation: https://docs.mojaloop.io/documentation/deployment-guide
 
-Refer to Helm docs for more information: https://docs.helm.sh/
+Refer to Helm v3 docs for more information: https://docs.helm.sh/
 
 ## Pre-requisites
 
 1. Add Helm dependency repositories:
 ```bash
-helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator;
-helm repo add kiwigrid https://kiwigrid.github.io;
-helm repo add elastic https://helm.elastic.co
+   helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator
+   helm repo add kiwigrid https://kiwigrid.github.io	   helm repo add kiwigrid https://kiwigrid.github.io
+   helm repo add elastic https://helm.elastic.co	   helm repo add elastic https://helm.elastic.co
+   helm repo add bitnami https://charts.bitnami.com/bitnami 
 ```
 
 ## Configure remote Mojaloop Helm repo on your Helm Client
@@ -26,36 +27,52 @@ helm repo add elastic https://helm.elastic.co
 
 2. Keep your local Mojaloop repo up to date
 
-`helm repo up mojaloop`
+`helm repo update`
 
-## Deployment from remote Mojaloop repo
+## Deployment
 
 1. Deploy specific chart
 
-- `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo <chart_name>`
+- `helm --namespace <namespace> install <release_name> mojaloop/<chart_name>`
 
-e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo centralledger`
+e.g. `helm --namespace moja install dev mojaloop/centralledger`
+
+Alternative directly from remote repo:
+
+- `helm --namespace <namespace> install <release_name> --repo=http://mojaloop.io/helm/repo <chart_name>`
 
 2. Deploy specific chart overriding values
 
-- `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo -f <values_file> <chart_name>`
+- `helm --namespace <namespace> install <release_name> mojaloop/<chart_name> -f {custom-values.yaml}`
 
-e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo -f ./values.yaml centralledger`
+e.g. `helm --namespace moja install dev mojaloop/centralledger -f ./values.yaml`
 
 Refer to the following default chart config file for values: http://mojaloop.io/helm/<chart_name>/values.yaml
 
-3. Deploy Mojaloop components
+Alternatively one can set specific values via cli arguments based on the config file above:
+- `helm --namespace <namespace> install <release_name> mojaloop/<chart_name> --set foo=bar --set {key.subkey.subsubkey}={value}`
 
-*Warning: This will deploy all charts.*
+3. Deploy specific version for a chart
 
-- `helm install --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo mojaloop`
+- `helm --namespace <namespace> install <release_name> mojaloop/<chart_name> --version {version}`
 
-e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloop.io/helm/repo mojaloop`
+e.g. `helm --namespace moja install dev mojaloop/centralledger --version v1.0.0`
+
+Refer to the following default chart config file for values: http://mojaloop.io/helm/<chart_name>/values.yaml
+
+4. Deploy Mojaloop components
+
+*Warning: This will deploy all core Mojaloop charts.*
+
+- `helm --namespace <namespace> install <release_name> mojaloop/mojaloop`
+
+e.g. `helm --namespace moja install dev mojaloop/mojaloop`
 
 ### Deploying development versions
 
 1. To deploy the latest development version, use the `--devel` flag:
-- `helm install --devel --debug --namespace=<namespace> --name=<release-name> --repo=http://mojaloop.io/helm/repo <chart_name>`
+
+- `helm --namespace <namespace> install <release_name> mojaloop/mojaloop --devel`
 
     This is useful if you've had some work merged into master but it has not yet been released.
 
@@ -65,56 +82,41 @@ e.g. `helm install --debug --namespace=mojaloop --name=dev --repo=http://mojaloo
 
 ## Upgrading Deployments from Repo
 
-`helm upgrade --debug <release-name> --repo=http://mojaloop.io/helm/repo <chart_name>`
+`helm --namespace <namespace> upgrade <release-name> mojaloop/<chart_name>`
 
-e.g. `helm upgrade --debug dev --repo=http://mojaloop.io/helm/repo centralenduserregistry`
+e.g. `helm --namespace moja upgrade dev mojaloop/centralenduserregistry`
 
-## Update Chart Dependencies for Source for local repo deployments
-
-Note: Please ensure that you update the Chart dependencies in the order show below.
-
-- `helm dep up centralkms`
-- `helm dep up forensicloggingsidecar`
-- `helm dep up centralledger`
-- `helm dep up centralenduserregistry`
-- `helm dep up centralsettlement`
-- `helm dep up central`
-- `helm dep up ml-api-adapter`
-- `helm dep up mojaloop`
-
-We are quitely waiting on recursive updates: https://github.com/kubernetes/helm/issues/2247
-
-Alternatively please use the helper script `sh ./update-charts-dep.sh`. 
-
-This script will ensure the correct order is maintained.
 
 ## Deployment from Source for local repo deployments
 
+### Update Chart Dependencies for Source for local repo deployments (i.e. from the cloned github repository)
+
+Run the following script `sh ./update-charts-dep.sh` in the helm root folder. 
+
+This script will ensure that all dependencies and child-dependencies are updated correctly. This is temporary until recursive updates is supported in future: https://github.com/kubernetes/helm/issues/2247.
+
+### Deployment
+
 1. Deploy specific chart
 
-- `helm install --debug --namespace=<namespace> --name=<release-name> <chart_directory>`
+- `helm --namespace <namespace> install <release_name> <chart_folder>`
 
-e.g. `helm install --debug --namespace=mojaloop --name=dev ./centralledger`
+e.g. `helm --namespace mojaloop install dev ./centralledger`
 
 2. Deploy mojaloop componenets
 
-*Warning: This will deploy all charts.*
+*Warning: This will deploy all core Mojaloop charts.*
 
-- `helm install --debug --namespace=<namespace> --name=<release-name> ./mojaloop`
+- `helm --namespace <namespace> install <release_name> mojaloop`
 
-e.g. `helm install --debug --namespace=mojaloop --name=dev ./mojaloop`
+e.g. `helm --namespace mojaloop install dev ./mojaloop`
 
-3. Deploy Ingress
-
-- `helm install --debug --namespace=<namespace> --name=<release-name> ./kube-public/ingress-nginx`
-
-e.g. `helm install --debug --namespace=kube-public --name=<release-name> ./kube-public/ingress-nginx`
 
 ## Upgrading Deployments from Source
 
-`helm upgrade --debug <release-name> <chart_directory>`
+- `helm --namespace <namespace> upgrade <release-name> <chart_folder>`
 
-e.g. `helm upgrade --debug dev ./centralenduserregistry/`
+e.g. `helm --namespace mojaloop upgrade dev ./centralenduserregistry`
 
 ## Testing Deployments
 
@@ -124,7 +126,7 @@ e.g. `helm upgrade --debug dev ./centralenduserregistry/`
 
 2. Curl Health End-points for ML-API-Adapter
 
-`curl http://ml-api-adapter.local/health`
+- `curl http://ml-api-adapter.local/health`
 
 Expected output:
 
@@ -132,7 +134,7 @@ Expected output:
 
 3. Curl Health End-points for Central Ledger
 
-`curl http://central-ledger.local/health`
+- `curl http://central-ledger.local/health`
 
 Expected output:
 
@@ -140,19 +142,23 @@ Expected output:
 
 ## Removing Deployments
 
-`helm del --purge <release-name>`
+- `helm --namespace <namespace> del <release-name>`
 
-e.g. `helm del --purge dev`
+e.g. `helm --namespace mojaloop del dev`
 
 ## Debugging Charts
 
 1. Execute a dry-run to display all the Kubernetes deployment files
 
- `helm install --dry-run --debug --namespace=<namespace> --name=<release-name> <chart_directory>`
+- `helm --namespace <namespace> install <release_name> <chart_folder> --dry-run`
 
-2. Use Helm Linter to check for any issues
+2. Enable debug to display raw configurations that will be injected into Helm templates
 
-`helm lint --strict <chart_directory>`
+- `helm --namespace <namespace> install <release_name> <chart_folder> --dry-run --debug`
+
+3. Use Helm Linter to check for any issues
+
+- `helm lint --strict <chart_folder>`
 
 ## Helper scripts
 
