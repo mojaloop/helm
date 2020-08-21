@@ -7,7 +7,7 @@ else
   COMMIT_MESSAGE="Updating release to $REVISION"
 fi
 
-set -euox pipefail
+set -eox pipefail
 
 echo "Setting BASH_ENV..." | tee git.log 
 source $BASH_ENV
