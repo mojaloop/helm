@@ -3,7 +3,7 @@
 {{- $fullName := printf "%s%s" $prefix $name }}
 {{- $config := merge $customConfig $.Values.defaults }}
 {{- $initContainerEnv := dict "SIM_NAME" $name "SIM_SCHEME_ADAPTER_SERVICE_NAME" (printf "sim-%s-scheme-adapter" $name) "SIM_BACKEND_SERVICE_NAME" (printf "sim-%s-backend" $name) "SIM_CACHE_SERVICE_NAME" (printf "sim-%s-cache" $name) -}}
-apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" . }}
+apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
 kind: Deployment
 metadata:
   name: {{ $fullName }}-scheme-adapter
@@ -140,7 +140,7 @@ spec:
     {{- end }}
 
 ---
-apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" . }}
+apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
 kind: Deployment
 metadata:
   name: {{ $fullName }}-backend
@@ -231,7 +231,7 @@ spec:
     {{- end }}
 ---
 {{- if $config.config.cache.enabled }}
-apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" . }}
+apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
 kind: Deployment
 metadata:
   name: {{ $fullName }}-cache
