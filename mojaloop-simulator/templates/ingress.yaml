@@ -1,0 +1,48 @@
+{{ if .Values.simulators }}
+{{- $prefix := include "mojaloop-simulator.prefix" . -}}
+apiVersion: {{ template "mojaloop-simulator.apiVersion.Ingress" . }}
+kind: Ingress
+metadata:
+  name: {{ $prefix }}simulators
+  labels:
+    app.kubernetes.io/name: simulators
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/version: "{{ $.Chart.AppVersion }}"
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
+{{- with .Values.ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  rules:
+  {{- range $name, $customConfig := .Values.simulators }}
+  {{- $fullName := printf "%s%s" (include "mojaloop-simulator.prefix" $) $name -}}
+  {{- $config := merge $customConfig $.Values.defaults }}
+  {{- if $config.ingress.enabled -}}
+    {{ $hosts := default (list nil) $config.ingress.hosts }}
+    {{- range $host := $hosts }}
+      - host: {{ $host }}
+        http:
+          paths:
+          - path: /sim/{{ $name }}/outbound{{ $.Values.ingress.ingressPathRewriteRegex }}
+            backend:
+              serviceName: {{ $fullName }}-scheme-adapter
+              servicePort: outboundapi
+          - path: /sim/{{ $name }}/inbound{{ $.Values.ingress.ingressPathRewriteRegex }}
+            backend:
+              serviceName: {{ $fullName }}-scheme-adapter
+              servicePort: inboundapi
+          - path: /sim/{{ $name }}/sdktest{{ $.Values.ingress.ingressPathRewriteRegex }}
+            backend:
+              serviceName: {{ $fullName }}-scheme-adapter
+              servicePort: testapi
+          - path: /sim/{{ $name }}/test{{ $.Values.ingress.ingressPathRewriteRegex }}
+            backend:
+              serviceName: {{ $fullName }}-backend
+              servicePort: testapi
+    {{- end }}
+  {{- end }}
+  {{- end }}
+---
+{{ end }}

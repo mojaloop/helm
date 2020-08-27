@@ -9,7 +9,7 @@ account-lookup-service:
     api:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v9.3.1
+        tag: v11.0.1
         pullPolicy: Always
         command: '["node", "src/index.js", "server", "--api"]'
       service:
@@ -20,7 +20,7 @@ account-lookup-service:
     admin:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v9.3.1
+        tag: v11.0.1
         pullPolicy: Always
         command: '["node", "src/index.js", "server", "--admin"]'
       service:
@@ -58,6 +58,9 @@ account-lookup-service:
     ## Central-Ledger config
     central_services_host: '$release_name-centralledger-service'
     central_services_port: 80
+    # Log config
+    log_level: info
+    log_transport: file
 
     error_handling:
       include_cause_extension: false
@@ -88,9 +91,22 @@ account-lookup-service:
     display_routes: true
     run_migrations: false
 
-    # Log config
-    log_level: info
-    log_transport: file
+    endpointSecurity:
+      jwsSign: false
+      fspiopSourceSigningName: switch
+      jwsSigningKey:
+        # To generate this key:
+        # Private:
+        # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+        # Public:
+        # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+        # Should look like:
+        # -----BEGIN RSA PRIVATE KEY-----
+        # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+        # ..
+        # ..
+        # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+        # -----END RSA PRIVATE KEY-----
 
   init:
     enabled: true
@@ -143,7 +159,7 @@ account-lookup-service-admin:
     api:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v9.3.1
+        tag: v11.0.1
         pullPolicy: IfNotPresent
         command: '["node", "src/index.js", "server", "--api"]'
       service:
@@ -154,7 +170,7 @@ account-lookup-service-admin:
     admin:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v9.3.1
+        tag: v11.0.1
         pullPolicy: IfNotPresent
         command: '["node", "src/index.js", "server", "--admin"]'
       service:
@@ -223,6 +239,22 @@ account-lookup-service-admin:
 
     display_routes: true
     run_migrations: false
+    endpointSecurity:
+      jwsSign: false
+      fspiopSourceSigningName: switch
+      jwsSigningKey:
+        # To generate this key:
+        # Private:
+        # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+        # Public:
+        # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+        # Should look like:
+        # -----BEGIN RSA PRIVATE KEY-----
+        # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+        # ..
+        # ..
+        # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+        # -----END RSA PRIVATE KEY-----
 
     # Log config
     log_level: info
@@ -276,7 +308,7 @@ als-oracle-pathfinder:
   replicaCount: 1
   image:
     repository: mojaloop/als-oracle-pathfinder
-    tag: v8.7.1
+    tag: v9.4.0
     pullPolicy: Always
     command: '["node", "/opt/als-oracle-pathfinder/src/index.js"]'
     imagePullSecrets: []
@@ -609,6 +641,8 @@ mysql:
   metricsExporter:
     enabled: true
     tag: v0.11.0
+    commandOverrides: []
+    argsOverrides: []
 
   ## When set to true will create sidecar to tail mysql log
   logTail: true

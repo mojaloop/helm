@@ -8,7 +8,7 @@ global: {}
 replicaCount: 1
 image:
   repository: mojaloop/quoting-service
-  tag: v9.3.2-snapshot
+  tag: v10.5.5
   pullPolicy: Always
 
 readinessProbe:
@@ -41,7 +41,7 @@ sidecar:
   enabled: true
   image:
     repository: mojaloop/event-sidecar
-    tag: v9.3.0
+    tag: v9.5.1
     pullPolicy: Always
     command: '["npm", "run", "start"]'
   service:
@@ -105,6 +105,23 @@ config:
   event_async_override: 'log,trace'
   event_trace_state_enabled: true
   event_traceid_per_vendor: false
+
+  endpointSecurity:
+    jwsSign: false
+    fspiopSourceSigningName: 'switch'
+    jwsSigningKey:
+      # To generate this key:
+      # Private:
+      # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+      # Public:
+      # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+      # Should look like:
+      # -----BEGIN RSA PRIVATE KEY-----
+      # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+      # ..
+      # ..
+      # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+      # -----END RSA PRIVATE KEY-----
 
   error_handling:
     include_cause_extension: false

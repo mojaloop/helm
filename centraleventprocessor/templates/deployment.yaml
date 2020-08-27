@@ -1,7 +1,6 @@
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
 {{- $mongodbHost := ( .Values.config.mongo_host | replace "$release_name" .Release.Name ) -}}
-
-apiVersion: apps/v1beta2
+apiVersion: {{ template "centraleventprocessor.apiVersion.Deployment" . }}
 kind: Deployment
 metadata:
   name: {{ include "centraleventprocessor.fullname" . }}
@@ -79,6 +78,18 @@ spec:
               value: {{ .Values.config.log_level }}
             - name: CSL_LOG_TRANSPORT
               value: {{ .Values.config.log_transport}}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
       volumes:
         - name: {{ template "centraleventprocessor.fullname" . }}-config-volume
           configMap:

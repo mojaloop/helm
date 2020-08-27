@@ -1,6 +1,6 @@
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
 {{- $objStoreUri := ( .Values.config.objstore_uri | replace "$release_name" .Release.Name ) -}}
-apiVersion: extensions/v1beta1
+apiVersion: {{ template "bulk-api-adapter-service.apiVersion.Deployment" . }}
 kind: Deployment
 metadata:
   name: {{ template "bulk-api-adapter-service.fullname" . }}
@@ -87,6 +87,18 @@ spec:
               value: {{ .Values.config.log_level }}
             - name: CSL_LOG_TRANSPORT
               value: {{ .Values.config.log_transport}}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
       volumes:
         - name: {{ template "bulk-api-adapter-service.fullname" . }}-config-volume
           configMap:
