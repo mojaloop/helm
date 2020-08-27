@@ -4,7 +4,7 @@
 # Script to update all Helm Chart Dependencies
 #
 
-set -e
+set -eux
 
 trap 'echo "Dep update failed...exiting. Please fix me!"' ERR
 
@@ -12,7 +12,6 @@ echo "Removing old charts..."
 find ./ -name "charts"| xargs rm -Rf
 find ./ -name "tmpcharts"| xargs rm -Rf
 
-echo "Updating all Charts..."
 declare -a charts=(
     eventstreamprocessor
     monitoring/promfana
@@ -36,14 +35,17 @@ declare -a charts=(
     bulk-api-adapter
     mojaloop-bulk
     mojaloop-simulator
+    ml-testing-toolkit
     mojaloop
 )
 
+echo "Updating all Charts..."
 for chart in "${charts[@]}"
 do
-    echo "Updating $chart"
     helm dep up "$chart"
 done
+
+set +x
 
 echo "\
 Chart updates completed.\n \

@@ -1,7 +1,7 @@
 {{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
 {{- $objStoreUri := ( .Values.config.objstore_uri | replace "$release_name" .Release.Name ) -}}
-apiVersion: extensions/v1beta1
+apiVersion: {{ template "centralledger-handler-bulk-transfer-fulfil.apiVersion.Deployment" . }}
 kind: Deployment
 metadata:
   name: {{ template "centralledger-handler-bulk-transfer-fulfil.fullname" . }}
@@ -15,7 +15,7 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "centralledger-handler-admin-transfer.name" . }}
+      app.kubernetes.io/name: {{ include "centralledger-handler-bulk-transfer-fulfil.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
