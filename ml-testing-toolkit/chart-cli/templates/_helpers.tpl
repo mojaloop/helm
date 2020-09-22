@@ -23,3 +23,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
   {{- end -}}
 {{- end -}}
 
+{{- define "ml-testing-toolkit-cli.apiVersion.CronJob" -}}
+  {{- print "batch/v1beta1" -}}
+{{- end -}}
+
