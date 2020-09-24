@@ -1,3 +1,10 @@
+{{- $RELEASE_NAME := .Release.Name -}}
+{{- $MONGODB_HOST := (.Values.dependencies.mongodb.host) -}}
+{{- $MONGODB_PORT := (print .Values.dependencies.mongodb.port) -}}
+{{- $KEYCLOAK_HOST := (.Values.dependencies.keycloak.host) -}}
+{{- $KEYCLOAK_PORT := (print .Values.dependencies.keycloak.port) -}}
+{{- $CONNECTION_MANAGER_HOST := (.Values.dependencies.connectionManager.host) -}}
+{{- $CONNECTION_MANAGER_PORT := (print .Values.dependencies.connectionManager.port) -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,7 +17,7 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   {{- range $k, $v := .Values.config }}
-    {{ $k }}: {{ $v | toPrettyJson | quote }}
+    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$mongodb_host" $MONGODB_HOST | replace "$mongodb_port" $MONGODB_PORT | replace "$keycloak_host" $KEYCLOAK_HOST | replace "$keycloak_port" $KEYCLOAK_PORT | replace "$connection_manager_host" $CONNECTION_MANAGER_HOST | replace "$connection_manager_port" $CONNECTION_MANAGER_PORT | replace "$release_name" $RELEASE_NAME)  }}
   {{- end }}
 ---
 apiVersion: v1
@@ -25,5 +32,5 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   {{- range $k, $v := .Values.extraEnvironments }}
-    {{ $k }}: {{ $v | toPrettyJson | quote }}
+    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$mongodb_host" $MONGODB_HOST | replace "$mongodb_port" $MONGODB_PORT | replace "$keycloak_host" $KEYCLOAK_HOST | replace "$keycloak_port" $KEYCLOAK_PORT | replace "$connection_manager_host" $CONNECTION_MANAGER_HOST | replace "$connection_manager_port" $CONNECTION_MANAGER_PORT | replace "$release_name" $RELEASE_NAME)  }}
   {{- end }}

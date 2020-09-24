@@ -1,7 +1,6 @@
 # This is a YAML-formatted file.
 # Declare global configurations
 global: {}
-
 # Declare variables to be passed into your templates.
 
 ml-testing-toolkit-frontend:
@@ -10,3 +9,609 @@ ml-testing-toolkit-frontend:
 ml-testing-toolkit-backend:
   enabled: true
 
+connection-manager-frontend:
+  enabled: true
+
+connection-manager-backend:
+  enabled: true
+
+mysql:
+  enabled: true
+  nameOverride: connection-manager-db
+  # Default values for Percona XtraDB Cluster
+
+  ## percona image and version
+  ## ref: https://hub.docker.com/r/percona/percona-xtradb-cluster/tags/
+  image:
+    repository: "percona/percona-xtradb-cluster"
+    tag: "5.7.19"
+    pullPolicy: Always
+
+  # Desired number of members of xtradb cluster
+  replicas: 1
+
+  ## Specify password for root user
+  ##
+  # mysqlRootPassword: not-a-secure-password
+
+  ## Specify password for xtradb backup user
+  ##
+  # xtraBackupPassword: replicate-my-data
+
+  ## Uncomment to create a database user
+  ##
+  mysqlUser: mcm
+  mysqlPassword: mcm
+
+  ## Allow unauthenticated access, uncomment to enable
+  ##
+  # mysqlAllowEmptyPassword: true
+
+  ## Uncomment to Create a database
+  ##
+  mysqlDatabase: mcm
+
+  ## hosts to allow root user access from
+  # set to "127.0.0.1" to deny remote root.
+  allowRootFrom: "%"
+
+  ## Persist data to a persitent volume
+  persistence:
+    enabled: false
+    ## percona data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+    accessMode: ReadWriteOnce
+    size: 8Gi
+
+  ## Node labels for pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod annotations
+  ## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+
+  ## Tolerations labels for pod assignment
+  ## Allow the scheduling on tainted nodes (requires Kubernetes >= 1.6)
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+
+  ## Configure resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  # resources:
+  #  requests:
+  #    memory: 256Mi
+  #    cpu: 100m
+
+  ## Configure the following values below if required
+  #   performance_schema=ON
+  #   max_connections=999
+  #   max_user_connections=999
+  #   thread_cache_size=999
+  configFiles:
+    node.cnf: |+
+      [mysqld]
+      datadir=/var/lib/mysql
+      default_storage_engine=InnoDB
+      binlog_format=ROW
+      innodb_flush_log_at_trx_commit  = 0
+      innodb_flush_method             = O_DIRECT
+      innodb_file_per_table           = 1
+      innodb_autoinc_lock_mode=2
+      bind_address = 0.0.0.0
+      wsrep_slave_threads=2
+      wsrep_cluster_address=gcomm://
+      wsrep_provider=/usr/lib/galera3/libgalera_smm.so
+      wsrep_cluster_name=galera
+      wsrep_sst_method=xtrabackup-v2
+      pxc_strict_mode=DISABLED
+      max_connections=999
+      max_user_connections=994
+      thread_cache_size=999
+  ## When set to true will create sidecar for `prom/mysqld-exporter`
+  ## metrics exporting
+  metricsExporter:
+    enabled: true
+    tag: v0.11.0
+    commandOverrides: []
+    argsOverrides: []
+
+  ## When set to true will create sidecar to tail mysql log
+  logTail: true
+
+  service:
+    type: ClusterIP
+    port: 3306
+    externalIPs: []
+
+
+mongodb:
+  ## Global Docker image registry
+  ## Please, note that this will override the image registry for all the images, including dependencies, configured to use the global value
+  ##
+  # global:
+  #   imageRegistry:
+  enabled: true
+  nameOverride: ml-testing-toolkit-db
+
+  image:
+    ## Bitnami MongoDB registry
+    ##
+    registry: docker.io
+    ## Bitnami MongoDB image name
+    ##
+    repository: bitnami/mongodb
+    ## Bitnami MongoDB image tag
+    ## ref: https://hub.docker.com/r/bitnami/mongodb/tags/
+    ##
+    tag: latest
+
+    ## Specify a imagePullPolicy
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: Always
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ##
+    # pullSecrets:
+    #   - myRegistrKeySecretName
+
+  ## Enable authentication
+  ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
+  #
+  usePassword: true
+  # existingSecret: name-of-existing-secret
+
+  ## MongoDB admin password
+  ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
+  ##
+  mongodbRootPassword: adminpass
+
+  ## MongoDB custom user and database
+  ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run
+  ##
+  mongodbUsername: ttk
+  mongodbPassword: ttk
+  mongodbDatabase: dfsps
+
+
+  ## Whether enable/disable IPv6 on MongoDB
+  ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#enabling/disabling-ipv6
+  ##
+  mongodbEnableIPv6: true
+
+  ## MongoDB additional command line flags
+  ##
+  ## Can be used to specify command line flags, for example:
+  ##
+  ## mongodbExtraFlags:
+  ##  - "--wiredTigerCacheSizeGB=2"
+  mongodbExtraFlags: []
+
+  ## Pod Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  ##
+  securityContext:
+    enabled: true
+    fsGroup: 1001
+    runAsUser: 1001
+
+  ## Kubernetes Cluster Domain
+  clusterDomain: cluster.local
+
+  ## Kubernetes service type
+  service:
+    annotations: {}
+    type: ClusterIP
+    # clusterIP: None
+    port: 27017
+
+    ## Specify the nodePort value for the LoadBalancer and NodePort service types.
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+    ##
+    # nodePort:
+
+  ## Setting up replication
+  ## ref: https://github.com/bitnami/bitnami-docker-mongodb#setting-up-a-replication
+  #
+  replicaSet:
+    ## Whether to create a MongoDB replica set for high availability or not
+    enabled: false
+    useHostnames: true
+
+    ## Name of the replica set
+    ##
+    name: rs0
+
+    ## Key used for replica set authentication
+    ##
+    # key: key
+
+    ## Number of replicas per each node type
+    ##
+    replicas:
+      secondary: 1
+      arbiter: 1
+    ## Pod Disruption Budget
+    ## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
+    pdb:
+      minAvailable:
+        primary: 1
+        secondary: 1
+        arbiter: 1
+
+  # Annotations to be added to MongoDB pods
+  podAnnotations: {}
+
+  # Additional pod labels to apply
+  podLabels: {}
+
+  ## Configure resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources: {}
+  # limits:
+  #   cpu: 500m
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 256Mi
+
+  ## Node selector
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  nodeSelector: {}
+
+  ## Affinity
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  affinity: {}
+
+  ## Tolerations
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations: []
+
+  ## Enable persistence using Persistent Volume Claims
+  ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+  ##
+  persistence:
+    enabled: false
+    ## A manually managed Persistent Volume and Claim
+    ## Requires persistence.enabled: true
+    ## If defined, PVC must be created manually before volume will be bound
+    # existingClaim:
+
+    ## mongodb data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
+    annotations: {}
+
+  ## Configure extra options for liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+
+  # # Entries for the MongoDB config file
+  # configmap:
+  #  # Where and how to store data.
+  #  storage:
+  #    dbPath: /opt/bitnami/mongodb/data/db
+  #    journal:
+  #      enabled: true
+  #    #engine:
+  #    #wiredTiger:
+  #  # where to write logging data.
+  #  systemLog:
+  #    destination: file
+  #    logAppend: true
+  #    path: /opt/bitnami/mongodb/logs/mongodb.log
+  #  # network interfaces
+  #  net:
+  #    port: 27017
+  #    bindIp: 0.0.0.0
+  #    unixDomainSocket:
+  #      enabled: true
+  #      pathPrefix: /opt/bitnami/mongodb/tmp
+  #  # replica set options
+  #  #replication:
+  #  #  replSetName: replicaset
+  #  # process management options
+  #  processManagement:
+  #     fork: false
+  #     pidFilePath: /opt/bitnami/mongodb/tmp/mongodb.pid
+  #  # set parameter options
+  #  setParameter:
+  #     enableLocalhostAuthBypass: true
+  #  # security options
+  #  security:
+  #  authorization: enabled
+  #keyFile: /opt/bitnami/mongodb/conf/keyfile
+
+  ## Prometheus Exporter / Metrics
+  ##
+  metrics:
+    enabled: false
+
+  #   image:
+  #     registry: docker.io
+  #     repository: forekshub/percona-mongodb-exporter
+  #     tag: latest
+  #     pullPolicy: IfNotPresent
+  #     ## Optionally specify an array of imagePullSecrets.
+  #     ## Secrets must be manually created in the namespace.
+  #     ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  #     ##
+  #     # pullSecrets:
+  #     #   - myRegistrKeySecretName
+
+  #   ## Metrics exporter resource requests and limits
+  #   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  #   ##
+  #   # resources: {}
+
+  #   ## Metrics exporter pod Annotation
+  #   podAnnotations:
+  #     prometheus.io/scrape: "true"
+  #     prometheus.io/port: "9216"
+
+  #   ## Prometheus Service Monitor
+  #   ## ref: https://github.com/coreos/prometheus-operator
+  #   ##      https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md
+    serviceMonitor:
+      ## If the operator is installed in your cluster, set to true to create a Service Monitor Entry
+      enabled: false
+  #     ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Service Monitors to work with
+  #     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
+  #     additionalLabels: {}
+
+  #     ## Specify Metric Relabellings to add to the scrape endpoint
+  #     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
+  #     # relabellings:
+
+  #     alerting:
+  #       ## Define individual alerting rules as required
+  #       ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#rulegroup
+  #       ##      https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
+  #       rules: {}
+
+  #       ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Prometheus Rules to work with
+  #       ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
+  # additionalLabels: {}
+
+
+
+
+
+keycloak:
+  ## Enable Chart
+  enabled: true
+  # ## Optionally override the fully qualified name
+  # fullnameOverride: ""
+  # ## Optionally override the name
+  # nameOverride: ""
+  # ## The number of replicas to create
+  # replicas: 1
+  image:
+    ## The Keycloak image repository
+    repository: quay.io/keycloak/keycloak
+    ## Overrides the Keycloak image tag whose default is the chart version
+    tag: "10.0.2"
+    # ## The Keycloak image pull policy
+    # pullPolicy: IfNotPresent
+  # ## Image pull secrets for the Pod
+  # imagePullSecrets:
+  # ## Mapping between IPs and hostnames that will be injected as entries in the Pod's hosts files
+  # hostAliases: []
+  # ## Indicates whether information about services should be injected into Pod's environment variables, 
+  # ## matching the syntax of Docker links
+  # enableServiceLinks: true
+  # ## Pod management policy. One of Parallel or OrderedReady
+  # podManagementPolicy: Parallel
+  # ## Pod restart policy. One of Always, OnFailure, or Never
+  # restartPolicy: Always
+  # serviceAccount:
+  #   ## Specifies whether a ServiceAccount should be created
+  #   create: false
+  #   ## The name of the service account to use. If not set and create is true, a name is generated using the fullname template
+  #   name: ""
+  #   ## Additional annotations for the ServiceAccount
+  #   annotations: {}
+  #   ## Additional labels for the ServiceAccount
+  #   labels: {}
+  #   ## Image pull secrets that are attached to the ServiceAccount
+  #   imagePullSecrets: []
+  # rbac:
+  #   ## Specifies whether RBAC resources are to be created
+  #   create: false
+  #   ## Custom RBAC rules, e. g. for KUBE_PING
+  #   rules: []
+  # ## SecurityContext for the entire Pod. Every container running in the Pod will inherit this SecurityContext. 
+  # ## This might be relevant when other components of the environment inject additional containers into running Pods 
+  # ## (service meshes are the most prominent example for this)
+  # podSecurityContext: {"fsGroup":1000}
+  # ## SecurityContext for the Keycloak container
+  # securityContext: {"runAsNonRoot":true,"runAsUser":1000}
+  # ## Additional init containers, e. g. for providing custom themes
+  # extraInitContainers: ""
+  # ## Additional sidecar containers, e. g. for a database proxy, such as Google's cloudsql-proxy
+  # extraContainers: ""
+  # ## Lifecycle hooks for the Keycloak container
+  # lifecycleHooks: {}
+  # ## Termination grace period in seconds for Keycloak shutdown. 
+  # ## Clusters with a large cache might need to extend this to give Infinispan more time to rebalance
+  # terminationGracePeriodSeconds: 60
+  # ## The internal Kubernetes cluster domain
+  # clusterDomain: cluster.local
+  # ## Overrides the default entrypoint of the Keycloak container
+  # command: []
+  # ## Overrides the default args for the Keycloak container
+  # args: []
+  # ## Additional environment variables for Keycloak
+  extraEnv: |
+    - name: KEYCLOAK_USER
+      value: admin
+    - name: KEYCLOAK_PASSWORD
+      value: admin
+    - name: KEYCLOAK_IMPORT
+      value: /realm/realm.json
+  # ## Additional environment variables for Keycloak mapped from a Secret or ConfigMap
+  # extraEnvFrom: ""
+  # ## Pod priority class name
+  # priorityClassName: ""
+  # ## Pod affinity
+  # affinity: ""
+  # ## Node labels for Pod assignment
+  # nodeSelector: {}
+  # ## Node taints to tolerate
+  # tolerations: []
+  # ## Additional Pod labels
+  # podLabels: {}
+  # ## Additional Pod annotations
+  # podAnnotations: {}
+  # ## Liveness probe configuration
+  # livenessProbe: '{"httpGet":{"path":"/health/live","port":"http"},"initialDelaySeconds":300,"timeoutSeconds":5}'
+  # ## Readiness probe configuration
+  # readinessProbe: '{"httpGet":{"path":"/auth/realms/master","port":"http"},"initialDelaySeconds":30,"timeoutSeconds":1}'
+  # ## Pod resource requests and limits
+  # resources: {}
+  # ## Startup scripts to run before Keycloak starts up
+  # ## startupScripts: '{"keycloak.cli":"{{- .Files.Get \"scripts/keycloak.cli\" nindent 2 }}\n"}'
+  ## Add additional volumes, e. g. for custom themes
+  extraVolumes: |
+    - name: realm-secret
+      secret:
+        secretName: realm-secret
+  ## Add additional volumes mounts, e. g. for custom themes
+  extraVolumeMounts: |
+    - name: realm-secret
+      mountPath: "/realm/"
+      readOnly: true
+  # ## Add additional ports, e. g. for admin console or exposing JGroups ports
+  # extraPorts: []
+  # ## Pod disruption budget
+  # podDisruptionBudget: {}
+  # ## Annotations for the StatefulSet
+  # statefulsetAnnotations: {}
+  # ## Additional labels for the StatefulSet
+  # statefulsetLabels: {}
+  # ## Configuration for secrets that should be created
+  # secrets: {}
+  service:
+    # ## Annotations for headless and HTTP Services
+    # annotations: {}
+    # ## Additional labels for headless and HTTP Services
+    # labels: {}
+    # ## The Service type
+    type: ClusterIP
+    # ## Optional IP for the load balancer. Used for services of type LoadBalancer only
+    # loadBalancerIP: ""
+    ## The http Service port
+    httpPort: 7080
+    # ## The HTTP Service node port if type is NodePort
+    # httpNodePort: ""
+    # ## The HTTPS Service port
+    # httpsPort: 8443
+    # ## The HTTPS Service node port if type is NodePort
+    # httpsNodePort: ""
+    # ## The WildFly management Service port
+    # httpManagementPort: 8443
+    # ## The WildFly management node port if type is NodePort
+    # httpManagementNodePort: ""
+    # ## Additional Service ports, e. g. for custom admin console
+    # extraPorts: []
+    ## List of Ingress Ingress rule
+    rules: 
+      - host: testing-toolkit-keycloak.local
+        paths: [/]
+    ## The Service port targeted by the Ingress
+    servicePort: 7080
+    # ## Ingress annotations
+    # annotations: {}
+    # ## Additional Ingress labels
+    # labels: {}
+    # ## TLS configuration
+    tls: []
+    #   - hosts: [keycloak.example.com]
+    #     secretName: ""
+  ingress:
+    enabled: true
+    rules:
+      - host: testing-toolkit-keycloak.local
+        paths: [/]
+    servicePort: 7080
+    # annotations: {}
+    # labels: {}
+    tls: []
+    #   - hosts: [keycloak.example.com]
+    #   - secretName: ""
+  # networkPolicy:
+    # ## If true, the ingress network policy is deployed
+    # enabled: true
+    # ## Allows to define allowed external traffic (see Kubernetes doc for network policy from format)
+    # extraFrom: []
+  # route:
+  #   ## If true, an OpenShift Route is created
+  #   enabled: false
+  #   ## Path for the Route
+  #   path: /
+  #   ## Route annotations
+  #   annotations: {}
+  #   ## Additional Route labels
+  #   labels: {}
+  #   ## Host name for the Route
+  #   host: ""
+  #   tls:
+  #     ## If true, TLS is enabled for the Route
+  #     enabled: false
+  #     # ## Insecure edge termination policy of the Route. Can be None, Redirect, or Allow
+  #     # insecureEdgeTerminationPolicy: Redirect
+  #     # ## TLS termination of the route. Can be edge, passthrough, or reencrypt
+  #     # termination: edge
+  # pgchecker:
+  #   enabled: false
+  # postgresql:
+  #   enabled: true
+  #   ## If true, the Postgresql dependency is enabled
+  #   postgresqlUsername: keycloak
+  #   ## PostgreSQL Password for the new user
+  #   postgresqlPassword: keycloak
+  #   ## PostgreSQL Database to create
+  #   postgresqlDatabase: keycloak
+  # serviceMonitor:
+  #   ## If true, a ServiceMonitor resource for the prometheus-operator is created
+  #   enabled: false
+  # prometheusRule: 
+  #   ## If true, a PrometheusRule resource for the prometheus-operator is created
+  #   enabled: false
+  # test:
+  #   ## If true, test resources are created
+  #   enabled: false

@@ -1,4 +1,8 @@
 {{- $serviceFullName := include "ml-testing-toolkit-backend.fullname" . -}}
+{{- $MONGODB_COMMAND := (.Values.init.mongodb.command | replace "$mongodb_host" (.Values.dependencies.mongodb.host) | replace "$mongodb_port" (print .Values.dependencies.mongodb.port) | replace "$release_name" (.Release.Name) ) -}}
+{{- $KEYCLOAK_COMMAND := (.Values.init.keycloak.command | replace "$keycloak_host" (.Values.dependencies.keycloak.host) | replace "$keycloak_port" (print .Values.dependencies.keycloak.port) | replace "$release_name" (.Release.Name) ) -}}
+{{- $CONNECTION_MANAGER_COMMAND := (.Values.init.connectionManager.command | replace "$connection_manager_host" (.Values.dependencies.connectionManager.host) | replace "$connection_manager_port" (print .Values.dependencies.connectionManager.port) | replace "$release_name" (.Release.Name) ) -}}
+
 apiVersion: {{ template "ml-testing-toolkit-backend.apiVersion.StatefulSet" . }}
 kind: StatefulSet
 metadata:
@@ -37,6 +41,36 @@ spec:
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
 {{- end }}
+      {{- if .Values.init.enabled }}
+      initContainers:
+        {{- if .Values.init.mongodb.enabled }}
+        - name: mongodb-checker
+          image: "docker.io/busybox:1.32"
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - {{ $MONGODB_COMMAND }}
+        {{- end }}
+        {{- if .Values.init.keycloak.enabled }}
+        - name: keycloak-checker
+          image: "docker.io/busybox:1.32"
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - {{ $KEYCLOAK_COMMAND }}
+        {{- end }}
+        {{- if .Values.init.connectionManager.enabled }}
+        - name: connection-manager-checker
+          image: "docker.io/busybox:1.32"
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - {{ $CONNECTION_MANAGER_COMMAND }}
+        {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -51,13 +85,13 @@ spec:
           command: {{ .Values.image.command }}
           {{- end }}
           ports:
-            - containerPort: {{ .Values.service.specApi.internalPort }}
-            - containerPort: {{ .Values.service.adminApi.internalPort }}
+            - containerPort: {{ .Values.service.ports.specApi.internalPort }}
+            - containerPort: {{ .Values.service.ports.adminApi.internalPort }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
               path: {{ .Values.readinessProbe.httpGet.path }}
-              port: {{ .Values.service.adminApi.internalPort }}
+              port: {{ .Values.service.ports.adminApi.internalPort }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
           {{- end }}
@@ -65,7 +99,7 @@ spec:
           livenessProbe:
             httpGet:
               path: {{ .Values.livenessProbe.httpGet.path }}
-              port: {{ .Values.service.adminApi.internalPort }}
+              port: {{ .Values.service.ports.adminApi.internalPort }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}

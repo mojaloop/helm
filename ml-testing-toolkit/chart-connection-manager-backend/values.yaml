@@ -1,0 +1,59 @@
+replicaCount: 1
+enabled: true
+image:
+  repository: modusbox/connection-manager-api
+  version: 1.6.5
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  ports:
+    adminApi:
+      name: admin-api
+      externalPort: 5061
+      internalPort: 3001
+
+ingress:
+  enabled: true
+  hosts:
+    connection-manager.local:
+      port: 5061
+      paths: ['/api/']
+  tls:
+  annotations:
+
+dependencies:
+  mysql: 
+    host: "$release_name-connection-manager-db"
+    port: "3306"
+  keycloak:
+    host: "$release_name-keycloak-http"
+    port: "7080"
+
+config:
+  DATABASE_HOST: "$mysql_host"
+  DATABASE_PORT: "$mysql_port"
+  DATABASE_USER: "mcm"
+  DATABASE_PASSWORD: "mcm"
+  DATABASE_SCHEMA: "mcm"
+  MYSQL_ROOT_PASSWORD: "modus123"
+  PORT: "5061"
+  P12_PASS_PHRASE: "SOME_S3C4R3_P@SS"
+  OAUTH2_ISSUER: "http://$keycloak_host:$keycloak_port/auth/realms/testingtoolkit/protocol/openid-connect/token"
+  OAUTH2_TOKEN_ISS: "http://$keycloak_host:$keycloak_port/auth/realms/testingtoolkit"
+  AUTH_ENABLED: "TRUE"
+  APP_OAUTH_CLIENT_KEY: "ttk"
+  MTA_ROLE: "Application/MTA"
+  PTA_ROLE: "Application/PTA"
+  EVERYONE_ROLE: "Internal/everyone"
+  APP_OAUTH_CLIENT_SECRET: "d61556d2-d941-430b-b1f7-416541056f47"
+  EMBEDDED_CERTIFICATE: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuSCqUXQikwYe1SGDSfjNYSKIa6Qsa54sS25V5/lNTQS7TsfMJWgodT335gkPxh7KNf7mK4SkO1xWxDQBe9h0Ee5e2hTBmZ5hkIC21PN3gOVRWvsgNBTrn7WTiOeIzCETNaLmFN3XWL9tSotWh1Oe/h251ZrlSw8Ack9OhA/xVJ7JCwgct08h8jOOeYTNU5LvNK5USuEljHHLL3VkNgnW1wh8268obpTEyOUp6Eo15DIMomFJW6hMmrlw24aDeQ5FZfjUbRHHJLvPKNEKVHxcAUfODpJ01VGQDx8aaKJ5CX12RMQ1ljUby5Ynpg6aTn5WMkCIjgS5iQINQOLhb6GV6wIDAQAB\n-----END PUBLIC KEY-----"
+
+init:
+  enabled: true
+  mysql:
+    enabled: true
+    command: until printf "." && nc -z -w 2 $mysql_host $mysql_port; do sleep 2; done;
+  keycloak:
+    enabled: true
+    command: until printf "." && nc -z -w 2 $keycloak_host $keycloak_port; do sleep 2; done;

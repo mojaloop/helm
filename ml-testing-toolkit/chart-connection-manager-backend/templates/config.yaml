@@ -1,0 +1,19 @@
+{{- $releaseName := .Release.Name -}}
+{{- $MYSQL_HOST := (.Values.dependencies.mysql.host) -}}
+{{- $MYSQL_PORT := (print .Values.dependencies.mysql.port) -}}
+{{- $KEYCLOAK_HOST := (.Values.dependencies.keycloak.host) -}}
+{{- $KEYCLOAK_PORT := (print .Values.dependencies.keycloak.port) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "connection-manager-backend.fullname" . }}-config
+  labels:
+    app.kubernetes.io/name: {{ include "connection-manager-backend.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+data:
+  {{- range $k, $v := .Values.config }}
+    {{ $k }}: {{ ($v | quote | replace "$mysql_host" $MYSQL_HOST | replace "$mysql_port" $MYSQL_PORT | replace "$keycloak_host" $KEYCLOAK_HOST | replace "$keycloak_port" $KEYCLOAK_PORT | replace "$release_name" $releaseName)  }}
+  {{- end }}

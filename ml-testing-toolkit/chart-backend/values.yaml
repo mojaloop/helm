@@ -4,9 +4,9 @@
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit
-  tag: v11.0.1
-  commandPersistence: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; elif [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; npm run start;"]'
-  command: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; npm run start;"]'
+  tag: v11.1.1
+  commandPersistence: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; else; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; npm run start;"]'
+  command: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; npm run start;"]'
 
   # command: '["npm", "run", "start"]'
 ## Optionally specify an array of imagePullSecrets.
@@ -41,6 +41,17 @@ livenessProbe:
     path: /health
   initialDelaySeconds: 90
   periodSeconds: 15
+
+dependencies:
+  mongodb: 
+    host: "$release_name-ml-testing-toolkit-db"
+    port: "27017"
+  keycloak:
+    host: "$release_name-keycloak-http"
+    port: "7080"
+  connectionManager:
+    host: "$release_name-connection-manager-backend"
+    port: "5061"
 
 config:
   user_config.json: {
@@ -91,14 +102,64 @@ config:
     "VALIDATE_INBOUND_PUT_PARTIES_JWS": false,
     "JWS_SIGN": false,
     "JWS_SIGN_PUT_PARTIES": false,
-    "CONNECTION_MANAGER_API_URL": "http://localhost:5061",
-    "CONNECTION_MANAGER_AUTH_ENABLED": false,
+    "CONNECTION_MANAGER_API_URL": "http://$connection_manager_host:$connection_manager_port",
+    "CONNECTION_MANAGER_AUTH_ENABLED": true,
     "CONNECTION_MANAGER_HUB_USERNAME": "hub",
     "CONNECTION_MANAGER_HUB_PASSWORD": "hub",
     "INBOUND_MUTUAL_TLS_ENABLED": false,
     "OUTBOUND_MUTUAL_TLS_ENABLED": false,
     "ADVANCED_FEATURES_ENABLED": true,
-    "CALLBACK_TIMEOUT": 10000
+    "CALLBACK_TIMEOUT": 15000
+  }
+  system_config.json: {
+    "API_PORT": 5000,
+    "HOSTING_ENABLED": true,
+    "CONFIG_VERSIONS": {
+      "response": 1,
+      "callback": 1,
+      "validation": 1,
+      "forward": 1,
+      "userSettings": 1
+    },
+    "DB": {
+      "URI": "mongodb://ttk:ttk@$mongodb_host:$mongodb_port/dfsps"
+    },
+    "OAUTH": {
+      "AUTH_ENABLED": true,
+      "APP_OAUTH_CLIENT_KEY": "ttk",
+      "APP_OAUTH_CLIENT_SECRET": "d61556d2-d941-430b-b1f7-416541056f47",
+      "MTA_ROLE": "Application/MTA",
+      "PTA_ROLE": "Application/PTA",
+      "EVERYONE_ROLE": "Internal/everyone",
+      "OAUTH2_TOKEN_ISS": "http://$keycloak_host:$keycloak_port/auth/realms/testingtoolkit",
+      "OAUTH2_ISSUER": "http://$keycloak_host:$keycloak_port/auth/realms/testingtoolkit/protocol/openid-connect/token",
+      "JWT_COOKIE_NAME": "TTK-API_ACCESS_TOKEN",
+      "EMBEDDED_CERTIFICATE": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuSCqUXQikwYe1SGDSfjNYSKIa6Qsa54sS25V5/lNTQS7TsfMJWgodT335gkPxh7KNf7mK4SkO1xWxDQBe9h0Ee5e2hTBmZ5hkIC21PN3gOVRWvsgNBTrn7WTiOeIzCETNaLmFN3XWL9tSotWh1Oe/h251ZrlSw8Ack9OhA/xVJ7JCwgct08h8jOOeYTNU5LvNK5USuEljHHLL3VkNgnW1wh8268obpTEyOUp6Eo15DIMomFJW6hMmrlw24aDeQ5FZfjUbRHHJLvPKNEKVHxcAUfODpJ01VGQDx8aaKJ5CX12RMQ1ljUby5Ynpg6aTn5WMkCIjgS5iQINQOLhb6GV6wIDAQAB\n-----END PUBLIC KEY-----"
+    },
+    "API_DEFINITIONS": [
+      {
+        "type": "fspiop",
+        "version": "1.0",
+        "folderPath": "fspiop_1.0",
+        "asynchronous": true
+      },
+      {
+        "type": "fspiop",
+        "version": "1.1",
+        "folderPath": "fspiop_1.1",
+        "asynchronous": true
+      },
+      {
+        "type": "settlements",
+        "version": "1.0",
+        "folderPath": "settlements_1.0"
+      },
+      {
+        "type": "central_admin",
+        "version": "9.3",
+        "folderPath": "central_admin_9.3"
+      }
+    ]
   }
 
 extraEnvironments: {
@@ -147,7 +208,7 @@ extraEnvironments: {
       "payerIdentifier": "22507008181",
       "payeeIdType": "MSISDN",
       "payeeIdentifier": "22556999125",
-      "CALLBACK_ENDPOINT_BASE_URL": "http://test1-ml-testing-toolkit-backend.ttk:5000"
+      "CALLBACK_ENDPOINT_BASE_URL": "http://$release_name-ml-testing-toolkit-backend:5000"
     }
   }
 }
@@ -156,26 +217,30 @@ extraEnvironments: {
 
 service:
   type: ClusterIP
-  specApi:
-    name: spec-api
-    externalPort: 5000
-    internalPort: 5000
-  adminApi:
-    name: admin-api
-    externalPort: 5050
-    internalPort: 5050
+  ports:
+    specApi:
+      name: "spec-api"
+      externalPort: 5000
+      internalPort: 5000
+    adminApi:
+      name: "admin-api"
+      externalPort: 5050
+      internalPort: 5050
 
 
 ingress:
   enabled: true
-  externalPath: /
   # Used to create an Ingress record.
   hosts:
-    specApi: testing-toolkit-specapi.local
-    adminApi: testing-toolkit-adminapi.local
+    testing-toolkit-specapi.local:
+      port: 5000
+      paths: ['/']
+    testing-toolkit.local:
+      port: 5050
+      paths: ['/api/', '/socket.io/']
 
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: '/'
+    # nginx.ingress.kubernetes.io/rewrite-target: '/'
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   tls:
@@ -209,4 +274,14 @@ persistence:
   accessMode: ReadWriteOnce
   size: 1Gi
 
-
+init:
+  enabled: true
+  keycloak:
+    enabled: true
+    command: until printf "." && nc -z -w 2 $keycloak_host $keycloak_port; do sleep 2; done;
+  mongodb:
+    enabled: true
+    command: until printf "." && nc -z -w 2 $mongodb_host $mongodb_port; do sleep 2; done;
+  connectionManager:
+    enabled: true
+    command: until printf "." && nc -z -w 2 $connection_manager_host $connection_manager_port; do sleep 2; done;

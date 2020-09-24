@@ -1,11 +1,11 @@
 {{- if .Values.ingress.enabled -}}
-{{- $SERVICE_FULL_NAME := include "ml-testing-toolkit-backend.fullname" . -}}
-apiVersion: {{ template "ml-testing-toolkit-backend.apiVersion.Ingress" . }}
+{{- $serviceFullName := include "connection-manager-backend.fullname" . -}}
+apiVersion: {{ template "connection-manager-backend.apiVersion.Ingress" . }}
 kind: Ingress
 metadata:
-  name: {{ template "ml-testing-toolkit-backend.fullname" . }}
+  name: {{ template "connection-manager-backend.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "ml-testing-toolkit-backend.name" . }}
+    app.kubernetes.io/name: {{ include "connection-manager-backend.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -23,12 +23,8 @@ spec:
           {{- range $path := (index $service "paths") }}
           - path: {{ $path }}
             backend:
-              serviceName: {{ $SERVICE_FULL_NAME }}
+              serviceName: {{ $serviceFullName }}
               servicePort: {{ index $service "port" }}
           {{- end -}}
     {{- end -}}
-  {{- if .Values.ingress.tls }}
-  tls:
-    {{ toYaml .Values.ingress.tls | indent 4 }}
-  {{- end -}}
 {{- end -}}

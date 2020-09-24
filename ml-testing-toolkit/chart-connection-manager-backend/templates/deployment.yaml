@@ -1,0 +1,59 @@
+{{- if .Values.enabled -}}
+{{- $MYSQL_COMMAND := (.Values.init.mysql.command | replace "$mysql_host" (.Values.dependencies.mysql.host) | replace "$mysql_port" (print .Values.dependencies.mysql.port) | replace "$release_name" (.Release.Name) ) -}}
+{{- $KEYCLOAK_COMMAND := (.Values.init.keycloak.command | replace "$keycloak_host" (.Values.dependencies.keycloak.host) | replace "$keycloak_port" (print .Values.dependencies.keycloak.port) | replace "$release_name" (.Release.Name) ) -}}
+apiVersion: {{ template "connection-manager-backend.apiVersion.Deployment" . }}
+kind: Deployment
+metadata:
+  name: {{ include "connection-manager-backend.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "connection-manager-backend.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "connection-manager-backend.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "connection-manager-backend.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    spec:
+      {{- if .Values.init.enabled }}
+      initContainers:
+        {{- if .Values.init.mysql.enabled }}
+        - name: mysql-checker
+          image: "docker.io/busybox:1.32"
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - {{ $MYSQL_COMMAND }}
+        {{- end }}
+        {{- if .Values.init.keycloak.enabled }}
+        - name: keycloak-checker
+          image: "docker.io/busybox:1.32"
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - {{ $KEYCLOAK_COMMAND }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.version }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.ports.adminApi.internalPort }}
+          envFrom:
+          - configMapRef:
+              name: {{ template "connection-manager-backend.fullname" . }}-config
+{{- end -}}
