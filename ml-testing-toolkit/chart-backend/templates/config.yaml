@@ -1,10 +1,18 @@
 {{- $RELEASE_NAME := .Release.Name -}}
-{{- $MONGODB_HOST := (.Values.dependencies.mongodb.host) -}}
-{{- $MONGODB_PORT := (print .Values.dependencies.mongodb.port) -}}
-{{- $KEYCLOAK_HOST := (.Values.dependencies.keycloak.host) -}}
-{{- $KEYCLOAK_PORT := (print .Values.dependencies.keycloak.port) -}}
-{{- $CONNECTION_MANAGER_HOST := (.Values.dependencies.connectionManager.host) -}}
-{{- $CONNECTION_MANAGER_PORT := (print .Values.dependencies.connectionManager.port) -}}
+{{- $HOSTING_MODE_ENABLED := (print .Values.global.hostingMode.enabled) -}}
+{{- $MONGODB_HOST := (.Values.global.mongodb.host) -}}
+{{- $MONGODB_PORT := (print .Values.global.mongodb.port) -}}
+{{- $CONNECTION_MANAGER_HOST := (.Values.global.connectionManagerBackend.host) -}}
+{{- $CONNECTION_MANAGER_PORT := (print .Values.global.connectionManagerBackend.port) -}}
+{{- $KEYCLOAK_ENABLED := (.Values.global.keycloak.enabled) -}}
+{{- $KEYCLOAK_HOST := (.Values.global.keycloak.host) -}}
+{{- $KEYCLOAK_PORT := (print .Values.global.keycloak.port) -}}
+{{- $KEYCLOAK_ISSUER_PATH := (print .Values.global.keycloak.paths.issuer) -}}
+{{- $KEYCLOAK_TOKEN_ISS_PATH := (print .Values.global.keycloak.paths.token_iss) -}}
+{{- $DEFAULT_AUTH_HOST := (.Values.global.defaultAuth.host) -}}
+{{- $DEFAULT_AUTH_PORT := (print .Values.global.defaultAuth.port) -}}
+{{- $DEFAULT_AUTH_ISSUER_PATH := (print .Values.global.defaultAuth.paths.issuer) -}}
+{{- $DEFAULT_AUTH_TOKEN_ISS_PATH := (print .Values.global.defaultAuth.paths.token_iss) -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -17,7 +25,11 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   {{- range $k, $v := .Values.config }}
-    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$mongodb_host" $MONGODB_HOST | replace "$mongodb_port" $MONGODB_PORT | replace "$keycloak_host" $KEYCLOAK_HOST | replace "$keycloak_port" $KEYCLOAK_PORT | replace "$connection_manager_host" $CONNECTION_MANAGER_HOST | replace "$connection_manager_port" $CONNECTION_MANAGER_PORT | replace "$release_name" $RELEASE_NAME)  }}
+    {{- if $KEYCLOAK_ENABLED }}
+    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$mongodb_host" $MONGODB_HOST | replace "$mongodb_port" $MONGODB_PORT | replace "$auth_host" $KEYCLOAK_HOST  | replace "$auth_port" $KEYCLOAK_PORT | replace "$auth_issuer_path" $KEYCLOAK_ISSUER_PATH | replace "$auth_token_iss_path" $KEYCLOAK_TOKEN_ISS_PATH | replace "$connection_manager_host" $CONNECTION_MANAGER_HOST | replace "$connection_manager_port" $CONNECTION_MANAGER_PORT | replace "$hosting_mode_enabled" $HOSTING_MODE_ENABLED | replace "$release_name" $RELEASE_NAME)  }}
+    {{- else}}
+    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$mongodb_host" $MONGODB_HOST | replace "$mongodb_port" $MONGODB_PORT | replace "$auth_host" $DEFAULT_AUTH_HOST  | replace "$auth_port" $DEFAULT_AUTH_PORT | replace "$auth_issuer_path" $DEFAULT_AUTH_ISSUER_PATH | replace "$connection_manager_host" $CONNECTION_MANAGER_HOST | replace "$connection_manager_port" $CONNECTION_MANAGER_PORT | replace "$hosting_mode_enabled" $HOSTING_MODE_ENABLED | replace "$release_name" $RELEASE_NAME)  }}
+    {{- end }}
   {{- end }}
 ---
 apiVersion: v1
@@ -32,5 +44,5 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   {{- range $k, $v := .Values.extraEnvironments }}
-    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$mongodb_host" $MONGODB_HOST | replace "$mongodb_port" $MONGODB_PORT | replace "$keycloak_host" $KEYCLOAK_HOST | replace "$keycloak_port" $KEYCLOAK_PORT | replace "$connection_manager_host" $CONNECTION_MANAGER_HOST | replace "$connection_manager_port" $CONNECTION_MANAGER_PORT | replace "$release_name" $RELEASE_NAME)  }}
+    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$release_name" $RELEASE_NAME)  }}
   {{- end }}

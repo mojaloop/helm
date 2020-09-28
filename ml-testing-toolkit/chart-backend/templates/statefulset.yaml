@@ -1,7 +1,7 @@
 {{- $serviceFullName := include "ml-testing-toolkit-backend.fullname" . -}}
-{{- $MONGODB_COMMAND := (.Values.init.mongodb.command | replace "$mongodb_host" (.Values.dependencies.mongodb.host) | replace "$mongodb_port" (print .Values.dependencies.mongodb.port) | replace "$release_name" (.Release.Name) ) -}}
-{{- $KEYCLOAK_COMMAND := (.Values.init.keycloak.command | replace "$keycloak_host" (.Values.dependencies.keycloak.host) | replace "$keycloak_port" (print .Values.dependencies.keycloak.port) | replace "$release_name" (.Release.Name) ) -}}
-{{- $CONNECTION_MANAGER_COMMAND := (.Values.init.connectionManager.command | replace "$connection_manager_host" (.Values.dependencies.connectionManager.host) | replace "$connection_manager_port" (print .Values.dependencies.connectionManager.port) | replace "$release_name" (.Release.Name) ) -}}
+{{- $MONGODB_COMMAND := (.Values.global.mongodb.command | replace "$mongodb_host" (.Values.global.mongodb.host) | replace "$mongodb_port" (print .Values.global.mongodb.port) | replace "$release_name" (.Release.Name) ) -}}
+{{- $KEYCLOAK_COMMAND := (.Values.global.keycloak.command | replace "$keycloak_host" (.Values.global.keycloak.host) | replace "$keycloak_port" (print .Values.global.keycloak.port) | replace "$release_name" (.Release.Name) ) -}}
+{{- $CONNECTION_MANAGER_COMMAND := (.Values.global.connectionManagerBackend.command | replace "$connection_manager_host" (.Values.global.connectionManagerBackend.host) | replace "$connection_manager_port" (print .Values.global.connectionManagerBackend.port) | replace "$release_name" (.Release.Name) ) -}}
 
 apiVersion: {{ template "ml-testing-toolkit-backend.apiVersion.StatefulSet" . }}
 kind: StatefulSet
@@ -41,9 +41,8 @@ spec:
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
 {{- end }}
-      {{- if .Values.init.enabled }}
       initContainers:
-        {{- if .Values.init.mongodb.enabled }}
+        {{- if .Values.global.mongodb.enabled }}
         - name: mongodb-checker
           image: "docker.io/busybox:1.32"
           imagePullPolicy: Always
@@ -52,7 +51,7 @@ spec:
             - -c
             - {{ $MONGODB_COMMAND }}
         {{- end }}
-        {{- if .Values.init.keycloak.enabled }}
+        {{- if .Values.global.keycloak.enabled }}
         - name: keycloak-checker
           image: "docker.io/busybox:1.32"
           imagePullPolicy: Always
@@ -61,7 +60,7 @@ spec:
             - -c
             - {{ $KEYCLOAK_COMMAND }}
         {{- end }}
-        {{- if .Values.init.connectionManager.enabled }}
+        {{- if .Values.global.connectionManagerBackend.enabled }}
         - name: connection-manager-checker
           image: "docker.io/busybox:1.32"
           imagePullPolicy: Always
@@ -70,7 +69,6 @@ spec:
             - -c
             - {{ $CONNECTION_MANAGER_COMMAND }}
         {{- end }}
-      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

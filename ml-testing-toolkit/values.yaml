@@ -1,23 +1,47 @@
 # This is a YAML-formatted file.
 # Declare global configurations
-global: {}
-# Declare variables to be passed into your templates.
-
-ml-testing-toolkit-frontend:
-  enabled: true
-
-ml-testing-toolkit-backend:
-  enabled: true
-
-connection-manager-frontend:
-  enabled: true
-
-connection-manager-backend:
-  enabled: true
+global:
+  hostingMode:
+    enabled: false
+  mlTestingToolkitFrontend:
+    enabled: true
+  mlTestingToolkitBackend:
+    enabled: true
+    host: "$release_name-ml-testing-toolkit-backend"
+    port: "5050"
+  connectionManagerFrontend:
+    enabled: false
+  connectionManagerBackend:
+    enabled: false
+    host: "$release_name-connection-manager-backend"
+    port: "5061"
+  mysql:
+    ## disable when using external mysql database or connection manager is disabled
+    enabled: true
+    host: "$release_name-mysql"
+    port: "3306"
+  mongodb:
+    ## disable when using external mongodb database or hosting mode is disabled
+    enabled: true
+    host: "$release_name-mongodb"
+    port: "27017"
+  keycloak:
+    # disable to use default auth server
+    enabled: false
+    host: "$release_name-keycloak-http"
+    port: "7080"
+    paths:
+      issuer: /auth/realms/testingtoolkit/protocol/openid-connect/token
+      token_iss: /auth/realms/testingtoolkit
+  defaultAuth:
+    host: "$release_name-ml-testing-toolkit-backend"
+    port: "5050"
+    paths:
+      issuer: /api/oauth2/token
+      token_iss: /api/oauth2/token
 
 mysql:
-  enabled: true
-  nameOverride: connection-manager-db
+  nameOverride: mysql
   # Default values for Percona XtraDB Cluster
 
   ## percona image and version
@@ -30,26 +54,11 @@ mysql:
   # Desired number of members of xtradb cluster
   replicas: 1
 
-  ## Specify password for root user
+  ## Mysql custom user and database
   ##
-  # mysqlRootPassword: not-a-secure-password
-
-  ## Specify password for xtradb backup user
-  ##
-  # xtraBackupPassword: replicate-my-data
-
-  ## Uncomment to create a database user
-  ##
-  mysqlUser: mcm
-  mysqlPassword: mcm
-
-  ## Allow unauthenticated access, uncomment to enable
-  ##
-  # mysqlAllowEmptyPassword: true
-
-  ## Uncomment to Create a database
-  ##
-  mysqlDatabase: mcm
+  mysqlUser: some_mysql_user
+  mysqlPassword: some_mysql_password
+  mysqlDatabase: some_mysql_database
 
   ## hosts to allow root user access from
   # set to "127.0.0.1" to deny remote root.
@@ -139,73 +148,58 @@ mongodb:
   ## Global Docker image registry
   ## Please, note that this will override the image registry for all the images, including dependencies, configured to use the global value
   ##
-  # global:
-  #   imageRegistry:
-  enabled: true
-  nameOverride: ml-testing-toolkit-db
+  nameOverride: mongodb
 
   image:
     ## Bitnami MongoDB registry
-    ##
     registry: docker.io
     ## Bitnami MongoDB image name
-    ##
     repository: bitnami/mongodb
     ## Bitnami MongoDB image tag
     ## ref: https://hub.docker.com/r/bitnami/mongodb/tags/
-    ##
     tag: latest
 
     ## Specify a imagePullPolicy
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    ##
     pullPolicy: Always
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
     ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ##
     # pullSecrets:
     #   - myRegistrKeySecretName
 
   ## Enable authentication
   ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
-  #
   usePassword: true
   # existingSecret: name-of-existing-secret
 
   ## MongoDB admin password
   ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
-  ##
   mongodbRootPassword: adminpass
 
   ## MongoDB custom user and database
   ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run
-  ##
-  mongodbUsername: ttk
-  mongodbPassword: ttk
-  mongodbDatabase: dfsps
+  mongodbUsername: some_monbodb_username
+  mongodbPassword: some_monbodb_password
+  mongodbDatabase: some_monbodb_database
 
 
   ## Whether enable/disable IPv6 on MongoDB
   ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#enabling/disabling-ipv6
-  ##
   mongodbEnableIPv6: true
 
   ## MongoDB additional command line flags
-  ##
   ## Can be used to specify command line flags, for example:
-  ##
   ## mongodbExtraFlags:
   ##  - "--wiredTigerCacheSizeGB=2"
   mongodbExtraFlags: []
 
   ## Pod Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-  ##
-  securityContext:
-    enabled: true
-    fsGroup: 1001
-    runAsUser: 1001
+  # securityContext:
+  #   enabled: true
+  #   fsGroup: 1001
+  #   runAsUser: 1001
 
   ## Kubernetes Cluster Domain
   clusterDomain: cluster.local
@@ -219,27 +213,22 @@ mongodb:
 
     ## Specify the nodePort value for the LoadBalancer and NodePort service types.
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
-    ##
     # nodePort:
 
   ## Setting up replication
   ## ref: https://github.com/bitnami/bitnami-docker-mongodb#setting-up-a-replication
-  #
   replicaSet:
     ## Whether to create a MongoDB replica set for high availability or not
     enabled: false
     useHostnames: true
 
     ## Name of the replica set
-    ##
     name: rs0
 
     ## Key used for replica set authentication
-    ##
     # key: key
 
     ## Number of replicas per each node type
-    ##
     replicas:
       secondary: 1
       arbiter: 1
@@ -251,15 +240,14 @@ mongodb:
         secondary: 1
         arbiter: 1
 
-  # Annotations to be added to MongoDB pods
+  ## Annotations to be added to MongoDB pods
   podAnnotations: {}
 
-  # Additional pod labels to apply
+  ## Additional pod labels to apply
   podLabels: {}
 
   ## Configure resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-  ##
   resources: {}
   # limits:
   #   cpu: 500m
@@ -282,7 +270,6 @@ mongodb:
 
   ## Enable persistence using Persistent Volume Claims
   ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
-  ##
   persistence:
     enabled: false
     ## A manually managed Persistent Volume and Claim
@@ -296,7 +283,6 @@ mongodb:
     ## If undefined (the default) or set to null, no storageClassName spec is
     ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
     ##   GKE, AWS & OpenStack)
-    ##
     # storageClass: "-"
     accessModes:
       - ReadWriteOnce
@@ -320,46 +306,46 @@ mongodb:
     failureThreshold: 6
     successThreshold: 1
 
-  # # Entries for the MongoDB config file
-  # configmap:
-  #  # Where and how to store data.
-  #  storage:
-  #    dbPath: /opt/bitnami/mongodb/data/db
-  #    journal:
-  #      enabled: true
-  #    #engine:
-  #    #wiredTiger:
-  #  # where to write logging data.
-  #  systemLog:
-  #    destination: file
-  #    logAppend: true
-  #    path: /opt/bitnami/mongodb/logs/mongodb.log
-  #  # network interfaces
-  #  net:
-  #    port: 27017
-  #    bindIp: 0.0.0.0
-  #    unixDomainSocket:
-  #      enabled: true
-  #      pathPrefix: /opt/bitnami/mongodb/tmp
-  #  # replica set options
-  #  #replication:
-  #  #  replSetName: replicaset
-  #  # process management options
-  #  processManagement:
-  #     fork: false
-  #     pidFilePath: /opt/bitnami/mongodb/tmp/mongodb.pid
-  #  # set parameter options
-  #  setParameter:
-  #     enableLocalhostAuthBypass: true
-  #  # security options
-  #  security:
-  #  authorization: enabled
-  #keyFile: /opt/bitnami/mongodb/conf/keyfile
+# ## Entries for the MongoDB config file
+# configmap:
+#   ## Where and how to store data.
+#   storage:
+#     dbPath: /opt/bitnami/mongodb/data/db
+#     journal:
+#       enabled: true
+#       engine:
+#       wiredTiger:
+#   ## where to write logging data.
+#   systemLog:
+#     destination: file
+#     logAppend: true
+#     path: /opt/bitnami/mongodb/logs/mongodb.log
+#   ## network interfaces
+#   net:
+#     port: 27017
+#     bindIp: 0.0.0.0
+#     unixDomainSocket:
+#       enabled: true
+#       pathPrefix: /opt/bitnami/mongodb/tmp
+#   ## replica set options
+#   replication:
+#     replSetName: replicaset
+#   ## process management options
+#   processManagement:
+#     fork: false
+#     pidFilePath: /opt/bitnami/mongodb/tmp/mongodb.pid
+#   ## set parameter options
+#   setParameter:
+#     enableLocalhostAuthBypass: true
+#   ## security options
+#   security:
+#   authorization: enabled
+# keyFile: /opt/bitnami/mongodb/conf/keyfile
 
-  ## Prometheus Exporter / Metrics
-  ##
-  metrics:
-    enabled: false
+  # ## Prometheus Exporter / Metrics
+  # ##
+  # metrics:
+  #   enabled: false
 
   #   image:
   #     registry: docker.io
@@ -386,9 +372,9 @@ mongodb:
   #   ## Prometheus Service Monitor
   #   ## ref: https://github.com/coreos/prometheus-operator
   #   ##      https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md
-    serviceMonitor:
-      ## If the operator is installed in your cluster, set to true to create a Service Monitor Entry
-      enabled: false
+  #   serviceMonitor:
+  #     ## If the operator is installed in your cluster, set to true to create a Service Monitor Entry
+  #     enabled: false
   #     ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Service Monitors to work with
   #     ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
   #     additionalLabels: {}
@@ -407,13 +393,7 @@ mongodb:
   #       ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
   # additionalLabels: {}
 
-
-
-
-
 keycloak:
-  ## Enable Chart
-  enabled: true
   # ## Optionally override the fully qualified name
   # fullnameOverride: ""
   # ## Optionally override the name

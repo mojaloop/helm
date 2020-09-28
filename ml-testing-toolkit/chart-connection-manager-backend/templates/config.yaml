@@ -1,8 +1,15 @@
 {{- $releaseName := .Release.Name -}}
-{{- $MYSQL_HOST := (.Values.dependencies.mysql.host) -}}
-{{- $MYSQL_PORT := (print .Values.dependencies.mysql.port) -}}
-{{- $KEYCLOAK_HOST := (.Values.dependencies.keycloak.host) -}}
-{{- $KEYCLOAK_PORT := (print .Values.dependencies.keycloak.port) -}}
+{{- $MYSQL_HOST := (.Values.global.mysql.host) -}}
+{{- $MYSQL_PORT := (print .Values.global.mysql.port) -}}
+{{- $KEYCLOAK_ENABLED := (print .Values.global.keycloak.enabled) -}}
+{{- $KEYCLOAK_HOST := (.Values.global.keycloak.host) -}}
+{{- $KEYCLOAK_PORT := (print .Values.global.keycloak.port) -}}
+{{- $KEYCLOAK_ISSUER_PATH := (print .Values.global.keycloak.paths.issuer) -}}
+{{- $KEYCLOAK_TOKEN_ISS_PATH := (print .Values.global.keycloak.paths.token_iss) -}}
+{{- $DEFAULT_AUTH_HOST := (.Values.global.defaultAuth.host) -}}
+{{- $DEFAULT_AUTH_PORT := (print .Values.global.defaultAuth.port) -}}
+{{- $DEFAULT_AUTH_ISSUER_PATH := (print .Values.global.defaultAuth.paths.issuer) -}}
+{{- $DEFAULT_AUTH_TOKEN_ISS_PATH := (print .Values.global.defaultAuth.paths.token_iss) -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -14,6 +21,15 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
-  {{- range $k, $v := .Values.config }}
-    {{ $k }}: {{ ($v | quote | replace "$mysql_host" $MYSQL_HOST | replace "$mysql_port" $MYSQL_PORT | replace "$keycloak_host" $KEYCLOAK_HOST | replace "$keycloak_port" $KEYCLOAK_PORT | replace "$release_name" $releaseName)  }}
+  {{- range $k, $v := .Values.config.default }}
+    {{ $k }}: {{ ($v | quote | replace "$mysql_host" $MYSQL_HOST | replace "$mysql_port" $MYSQL_PORT | replace "$release_name" $releaseName)  }}
   {{- end }}
+{{- if .Values.global.keycloak.enabled }}
+  {{- range $k, $v := .Values.config.keycloak.enabled }}
+    {{ $k }}: {{ ($v | quote | replace "$auth_host" $KEYCLOAK_HOST  | replace "$auth_port" $KEYCLOAK_PORT | replace "$auth_issuer_path" $KEYCLOAK_ISSUER_PATH | replace "$auth_token_iss_path" $KEYCLOAK_TOKEN_ISS_PATH | replace "$release_name" $releaseName)  }}
+  {{- end }}
+{{- else}}
+  {{- range $k, $v := .Values.config.keycloak.disabled }}
+    {{ $k }}: {{ ($v | quote | replace "$auth_host" $DEFAULT_AUTH_HOST  | replace "$auth_port" $DEFAULT_AUTH_PORT | replace "$auth_issuer_path" $DEFAULT_AUTH_ISSUER_PATH | replace "$auth_token_iss_path" $DEFAULT_AUTH_TOKEN_ISS_PATH | replace "$release_name" $releaseName)  }}
+  {{- end }}
+{{- end }}
