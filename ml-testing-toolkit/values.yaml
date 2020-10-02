@@ -4,24 +4,42 @@ global: {}
 
 ml-testing-toolkit-backend:
   enabled: true
-  ## depends on connection-manager-backend, keycloak and mongodb
-  ## you could disable them in the values.yaml of the sub chart
+  hostedMode: 
+    enabled: false
+  adminApiAuthentication: 
+    enabled: true
+  dependencies:
+    keycloak:
+      enabled: false
+    mongodb:
+      enabled: false
+    connectionManagerBackend:
+      enabled: false
 
 ml-testing-toolkit-frontend:
   enabled: true
+  adminApiAuthentication:
+    enabled: "TRUE" ## "TRUE" or "FALSE"
 
 connection-manager-backend:
   enabled: false
-  ## keycloak and mysql
-  ## you could disable them in the values.yaml of the sub chart
+  apiAuthentication:
+    enabled: "DISABLED" ## "TRUE" or "DISABLED"
+  dependencies:
+    mysql:
+      enabled: true
+    keycloak:
+      enabled: false
+  
 connection-manager-frontend:
   enabled: false
+  apiAuthentication:
+    enabled: "FALSE" ## "TRUE" or "FALSE"
 
 mysql:
   ## repo and documentation https://github.com/helm/charts/tree/master/stable/percona-xtradb-cluster
 
   ## disable when connection-manager-backend is disabled
-  ## there is a dependency check in connection-manager-backend sub chart so make sure that values are matching
   enabled: false
   image:
     repository: "percona/percona-xtradb-cluster"
@@ -86,8 +104,8 @@ mysql:
 mongodb:
   ## repo and documentation https://github.com/bitnami/charts/tree/master/bitnami/mysql
 
-  ## there is a dependency check in ml-testing-toolkit-backend sub chart so make sure that values are matching
   enabled: false
+
   nameOverride: mongodb
 
   image:
@@ -165,12 +183,11 @@ keycloak:
   ## repo and documentation https://github.com/codecentric/helm-charts/tree/master/charts/keycloak
   ## check the documentation in the repo for additional details
 
-  ## there is a dependency check in ml-testing-toolkit-backend and connection-manager-backend sub charts so make sure that values are matching
   enabled: false
+
   image:
     repository: quay.io/keycloak/keycloak
     tag: "10.0.2"
-  ## -Dkeycloak.profile.feature.upload_scripts=enabled
   extraEnv: |
     - name: KEYCLOAK_USER
       value: admin

@@ -1,8 +1,11 @@
 {{- $RELEASE_NAME := .Release.Name -}}
-{{- $MONGODB := (.Values.global.mongodb) -}}
-{{- $CONNECTION_MANAGER := (.Values.global.connectionManagerBackend) -}}
-{{- $KEYCLOAK := (.Values.global.keycloak) -}}
-{{- $DEFAULT_AUTH := (.Values.global.defaultAuth) -}}
+{{- $MONGODB := (.Values.dependencies.mongodb) -}}
+{{- $CONNECTION_MANAGER := (.Values.dependencies.connectionManagerBackend) -}}
+{{- $KEYCLOAK := (.Values.dependencies.keycloak) -}}
+{{- $HOSTED_MODE_ENABLED := (print .Values.hostedMode.enabled) -}}
+{{- $ADMIN_API_AUTHENTICATION := (.Values.adminApiAuthentication) -}}
+{{- $ADMIN_API_AUTHENTICATION_ENABLED := (print .Values.adminApiAuthentication.enabled) -}}
+{{- $DEFAULT_AUTH := (.Values.adminApiAuthentication.default) -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -16,11 +19,11 @@ metadata:
 data:
 {{- if (index $KEYCLOAK "enabled") }}
   {{- range $k, $v := .Values.config }}
-    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$mongodb_host" (index $MONGODB "host") | replace "$mongodb_port" (index $MONGODB "port") | replace "$auth_host" (index $KEYCLOAK "host")  | replace "$auth_port" (index $KEYCLOAK "port") | replace "$auth_issuer_path" (index $KEYCLOAK "paths" "issuer") | replace "$auth_token_iss_path" (index $KEYCLOAK "paths" "tokenIss") | replace "$auth_embedded_certificate" (index $KEYCLOAK "embeddedCertificate") | replace "$connection_manager_host" (index $CONNECTION_MANAGER "host") | replace "$connection_manager_port" (index $CONNECTION_MANAGER "port") | replace "$release_name" $RELEASE_NAME)  }}
+    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$hosted_mode_enabled" ($HOSTED_MODE_ENABLED)  | replace "$admin_api_authentication_enabled" $ADMIN_API_AUTHENTICATION_ENABLED | replace "$mongodb_host" (index $MONGODB "host") | replace "$mongodb_port" (index $MONGODB "port") | replace "$auth_host" (index $KEYCLOAK "host")  | replace "$auth_port" (index $KEYCLOAK "port") | replace "$auth_issuer_path" (index $KEYCLOAK "paths" "issuer") | replace "$auth_token_iss_path" (index $KEYCLOAK "paths" "tokenIss") | replace "$auth_embedded_certificate" (index $KEYCLOAK "embeddedCertificate") | replace "$connection_manager_host" (index $CONNECTION_MANAGER "host") | replace "$connection_manager_port" (index $CONNECTION_MANAGER "port") | replace "$release_name" $RELEASE_NAME)  }}
   {{- end }}
 {{- else}}
   {{- range $k, $v := .Values.config }}
-    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$mongodb_host" (index $MONGODB "host") | replace "$mongodb_port" (index $MONGODB "port") | replace "$auth_host" (index $DEFAULT_AUTH "host")  | replace "$auth_port" (index $DEFAULT_AUTH "port") | replace "$auth_issuer_path" (index $DEFAULT_AUTH "paths" "issuer") | replace "$auth_token_iss_path" (index $DEFAULT_AUTH "paths" "tokenIss") | replace "$auth_embedded_certificate" (index $DEFAULT_AUTH "embeddedCertificate") | replace "$connection_manager_host" (index $CONNECTION_MANAGER "host") | replace "$connection_manager_port" (index $CONNECTION_MANAGER "port") | replace "$release_name" $RELEASE_NAME)  }}
+    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$hosted_mode_enabled" ($HOSTED_MODE_ENABLED)  | replace "$admin_api_authentication_enabled" $ADMIN_API_AUTHENTICATION_ENABLED | replace "$mongodb_host" (index $MONGODB "host") | replace "$mongodb_port" (index $MONGODB "port") | replace "$auth_host" (index $DEFAULT_AUTH "host")  | replace "$auth_port" (index $DEFAULT_AUTH "port") | replace "$auth_issuer_path" (index $DEFAULT_AUTH "paths" "issuer") | replace "$auth_token_iss_path" (index $DEFAULT_AUTH "paths" "tokenIss") | replace "$auth_embedded_certificate" (index $DEFAULT_AUTH "embeddedCertificate") | replace "$connection_manager_host" (index $CONNECTION_MANAGER "host") | replace "$connection_manager_port" (index $CONNECTION_MANAGER "port") | replace "$release_name" $RELEASE_NAME)  }}
   {{- end }}
 {{- end }}
 ---

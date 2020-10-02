@@ -1,4 +1,5 @@
 {{- $releaseName := .Release.Name -}}
+{{- $ADMIN_API_AUTHENTICATION_ENABLED := (.Values.adminApiAuthentication.enabled) -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,5 +12,5 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   {{- range $k, $v := .Values.config }}
-    {{ $k }}: {{ $v | quote | replace "$release_name" $releaseName }}
+    {{ $k }}: {{ $v | quote | replace "$admin_api_authentication_enabled" $ADMIN_API_AUTHENTICATION_ENABLED | replace "$release_name" $releaseName }}
   {{- end }}

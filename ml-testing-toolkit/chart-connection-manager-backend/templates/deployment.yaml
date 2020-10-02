@@ -1,6 +1,6 @@
 {{- if .Values.enabled -}}
-{{- $MYSQL_COMMAND := (.Values.global.mysql.command | replace "$mysql_host" (.Values.global.mysql.host) | replace "$mysql_port" (print .Values.global.mysql.port) | replace "$release_name" (.Release.Name) ) -}}
-{{- $KEYCLOAK_COMMAND := (.Values.global.keycloak.command | replace "$keycloak_host" (.Values.global.keycloak.host) | replace "$keycloak_port" (print .Values.global.keycloak.port) | replace "$release_name" (.Release.Name) ) -}}
+{{- $MYSQL_COMMAND := ("until printf \".\" && nc -z -w 2 $mysql_host $mysql_port; do sleep 2; done;" | replace "$mysql_host" (.Values.dependencies.mysql.host) | replace "$mysql_port" (print .Values.dependencies.mysql.port) | replace "$release_name" (.Release.Name) ) -}}
+{{- $KEYCLOAK_COMMAND := ("until printf \".\" && nc -z -w 2 $keycloak_host $keycloak_port; do sleep 2; done;" | replace "$keycloak_host" (.Values.dependencies.keycloak.host) | replace "$keycloak_port" (print .Values.dependencies.keycloak.port) | replace "$release_name" (.Release.Name) ) -}}
 apiVersion: {{ template "connection-manager-backend.apiVersion.Deployment" . }}
 kind: Deployment
 metadata:
@@ -27,7 +27,7 @@ spec:
         helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     spec:
       initContainers:
-        {{- if .Values.global.mysql.enabled }}
+        {{- if .Values.dependencies.mysql.enabled }}
         - name: mysql-checker
           image: "docker.io/busybox:1.32"
           imagePullPolicy: Always
@@ -36,7 +36,7 @@ spec:
             - -c
             - {{ $MYSQL_COMMAND }}
         {{- end }}
-        {{- if .Values.global.keycloak.enabled }}
+        {{- if .Values.dependencies.keycloak.enabled }}
         - name: keycloak-checker
           image: "docker.io/busybox:1.32"
           imagePullPolicy: Always

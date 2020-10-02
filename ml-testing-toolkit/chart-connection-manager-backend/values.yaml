@@ -1,10 +1,21 @@
-global:
-  # commands are used in 
+enabled: true
+
+apiAuthentication: 
+  enabled: "DISABLED" ## TRUE or DISABLED
+  host: "$release_name-ml-testing-toolkit-backend"
+  port: "5050"
+  paths:
+    issuer: /api/oauth2/token
+    token_iss: /api/oauth2/token
+  embeddedCertificate: password
+
+dependencies:
   mysql:
     enabled: true
     command: until printf "." && nc -z -w 2 $mysql_host $mysql_port; do sleep 2; done;
     host: "$release_name-mysql"
     port: "3306"
+  
   keycloak:
     enabled: false
     command: until printf "." && nc -z -w 2 $keycloak_host $keycloak_port; do sleep 2; done;
@@ -17,15 +28,9 @@ global:
     paths:
       issuer: /auth/realms/testingtoolkit/protocol/openid-connect/token
       token_iss: /auth/realms/testingtoolkit
-  defaultAuth:
-    host: "$release_name-ml-testing-toolkit-backend"
-    port: "5050"
-    paths:
-      issuer: /api/oauth2/token
-      token_iss: /api/oauth2/token
-    embeddedCertificate: password
+
 replicaCount: 1
-enabled: true
+
 image:
   repository: modusbox/connection-manager-api
   version: 1.6.5
@@ -48,7 +53,6 @@ ingress:
   tls:
   annotations:
 
-## $snake_case values are dynamic
 config:
   DATABASE_HOST: "$mysql_host"
   DATABASE_PORT: "$mysql_port"
@@ -60,7 +64,7 @@ config:
   MTA_ROLE: "Application/MTA"
   PTA_ROLE: "Application/PTA"
   EVERYONE_ROLE: "Internal/everyone"
-  AUTH_ENABLED: "DISABLED" ## TRUE or DISABLED
+  AUTH_ENABLED: $api_authentication_enabled
   P12_PASS_PHRASE: "SOME_S3C4R3_P@SS"
   OAUTH2_ISSUER: "http://$auth_host:$auth_port$auth_issuer_path"
   OAUTH2_TOKEN_ISS: "http://$auth_host:$auth_port$auth_token_iss_path"
