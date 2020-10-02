@@ -1,7 +1,7 @@
 {{- $serviceFullName := include "ml-testing-toolkit-backend.fullname" . -}}
-{{- $MONGODB_COMMAND := (.Values.global.mongodb.command | replace "$mongodb_host" (.Values.global.mongodb.host) | replace "$mongodb_port" (print .Values.global.mongodb.port) | replace "$release_name" (.Release.Name) ) -}}
-{{- $KEYCLOAK_COMMAND := (.Values.global.keycloak.command | replace "$keycloak_host" (.Values.global.keycloak.host) | replace "$keycloak_port" (print .Values.global.keycloak.port) | replace "$release_name" (.Release.Name) ) -}}
-{{- $CONNECTION_MANAGER_COMMAND := (.Values.global.connectionManagerBackend.command | replace "$connection_manager_host" (.Values.global.connectionManagerBackend.host) | replace "$connection_manager_port" (print .Values.global.connectionManagerBackend.port) | replace "$release_name" (.Release.Name) ) -}}
+{{- $MONGODB_COMMAND := ("until printf \".\" && nc -z -w 2 $mongodb_host $mongodb_port; do sleep 2; done;" | replace "$mongodb_host" (.Values.global.mongodb.host) | replace "$mongodb_port" (print .Values.global.mongodb.port) | replace "$release_name" (.Release.Name) ) -}}
+{{- $KEYCLOAK_COMMAND := ("until printf \".\" && nc -z -w 2 $keycloak_host $keycloak_port; do sleep 2; done;" | replace "$keycloak_host" (.Values.global.keycloak.host) | replace "$keycloak_port" (print .Values.global.keycloak.port) | replace "$release_name" (.Release.Name) ) -}}
+{{- $CONNECTION_MANAGER_COMMAND := ("until printf \".\" && nc -z -w 2 $connection_manager_host $connection_manager_port; do sleep 2; done;" | replace "$connection_manager_host" (.Values.global.connectionManagerBackend.host) | replace "$connection_manager_port" (print .Values.global.connectionManagerBackend.port) | replace "$release_name" (.Release.Name) ) -}}
 
 apiVersion: {{ template "ml-testing-toolkit-backend.apiVersion.StatefulSet" . }}
 kind: StatefulSet

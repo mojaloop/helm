@@ -27,6 +27,7 @@ spec:
         helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     spec:
       initContainers:
+        {{- if .Values.global.mysql.enabled }}
         - name: mysql-checker
           image: "docker.io/busybox:1.32"
           imagePullPolicy: Always
@@ -34,6 +35,7 @@ spec:
             - sh
             - -c
             - {{ $MYSQL_COMMAND }}
+        {{- end }}
         {{- if .Values.global.keycloak.enabled }}
         - name: keycloak-checker
           image: "docker.io/busybox:1.32"

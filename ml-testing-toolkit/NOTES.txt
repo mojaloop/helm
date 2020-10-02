@@ -1,8 +1,33 @@
 1. $snake_case syntax: used in templates to set the value dynamicly
-2. global object in main values.yaml is used to:
-  - enable/disable specific charts
-  - enable/disable init containers in StatefulSet or Deployment job
-    - for example when hosting mode is enable
-  - forward data to the sub-charts
-  - change values dynamicly by using $snake_case syntax
-  - enable/disable init containers
+  - examples: $release_name, $connection_manager_host etc.
+2. chart dependencies - 
+  - notes:
+    - dependency check in init containers in StatefulSet or Deployment job.
+    - enable/disable from global object in the specific chart
+    - make sure that conditions matched in main values.yaml and the values.yaml in the sub charts
+      - example:
+        if
+          values.yaml/keycloak.enabled: true
+        then 
+          chart-backend/values.yaml/global.keycloak.enabled: true
+          chart-connection-manager-backend/values.yaml/global.keycloak.enabled: true
+  2.1 chard-backend
+    - chart-connection-manager-backend
+    - mongodb
+    - keycloak
+  2.2 chard-connection-manager-backend
+    - mysql
+    - keycloak
+3. hosted mode:
+    - update authentication for databases or keycloak server details if needed
+    - chart-backend/values.yaml/config.'system_config.json'.HOSTED_MODE: true
+    - chart-backend/values.yaml/config.'system_config.json'.AUTH.OAUTH_ENABLED: true
+    - update chart-backend/values.yaml/config.'system_config.json'.AUTH if needed
+    - when keycloak is enabled then mocked auth server is used
+      - check chart-backend/values.yaml/global.defaultAuth for details
+      - check chart-connection-manager-backend/values.yaml/global.defaultAuth for details
+
+4. setup
+  kubectl create secret generic realm-secret --from-file=./ml-testing-toolkit/realm/realm.json -n <NAMESPACE>
+  helm dep up
+  helm install dev ./ml-testing-toolkit/ -n <NAMESPACE>

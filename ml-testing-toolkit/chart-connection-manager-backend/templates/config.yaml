@@ -21,15 +21,12 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
-  {{- range $k, $v := .Values.config.default }}
-    {{ $k }}: {{ ($v | quote | replace "$mysql_host" $MYSQL_HOST | replace "$mysql_port" $MYSQL_PORT | replace "$release_name" $releaseName)  }}
-  {{- end }}
 {{- if .Values.global.keycloak.enabled }}
-  {{- range $k, $v := .Values.config.keycloak.enabled }}
-    {{ $k }}: {{ ($v | quote | replace "$auth_host" $KEYCLOAK_HOST  | replace "$auth_port" $KEYCLOAK_PORT | replace "$auth_issuer_path" $KEYCLOAK_ISSUER_PATH | replace "$auth_token_iss_path" $KEYCLOAK_TOKEN_ISS_PATH | replace "$release_name" $releaseName)  }}
+  {{- range $k, $v := .Values.config }}
+    {{ $k }}: {{ ($v | quote | replace "$mysql_host" $MYSQL_HOST  | replace "$mysql_port" $MYSQL_PORT | replace "$auth_host" $KEYCLOAK_HOST  | replace "$auth_port" $KEYCLOAK_PORT | replace "$auth_issuer_path" $KEYCLOAK_ISSUER_PATH | replace "$auth_token_iss_path" $KEYCLOAK_TOKEN_ISS_PATH | replace "$release_name" $releaseName)  }}
   {{- end }}
 {{- else}}
-  {{- range $k, $v := .Values.config.keycloak.disabled }}
-    {{ $k }}: {{ ($v | quote | replace "$auth_host" $DEFAULT_AUTH_HOST  | replace "$auth_port" $DEFAULT_AUTH_PORT | replace "$auth_issuer_path" $DEFAULT_AUTH_ISSUER_PATH | replace "$auth_token_iss_path" $DEFAULT_AUTH_TOKEN_ISS_PATH | replace "$release_name" $releaseName)  }}
+  {{- range $k, $v := .Values.config }}
+    {{ $k }}: {{ ($v | quote | replace "$mysql_host" $MYSQL_HOST  | replace "$mysql_port" $MYSQL_PORT | replace "$auth_host" $DEFAULT_AUTH_HOST  | replace "$auth_port" $DEFAULT_AUTH_PORT | replace "$auth_issuer_path" $DEFAULT_AUTH_ISSUER_PATH | replace "$auth_token_iss_path" $DEFAULT_AUTH_TOKEN_ISS_PATH | replace "$release_name" $releaseName)  }}
   {{- end }}
 {{- end }}

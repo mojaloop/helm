@@ -3,14 +3,26 @@
 # Declare variables to be passed into your templates.
 global:
   keycloak:
-    enabled: false
-    command: until printf "." && nc -z -w 2 $keycloak_host $keycloak_port; do sleep 2; done;
+    enabled: true
+    host: "$release_name-keycloak-http"
+    port: "7080"
+    paths:
+      issuer: /auth/realms/testingtoolkit/protocol/openid-connect/token
+      token_iss: /auth/realms/testingtoolkit
+  defaultAuth:
+    host: "$release_name-ml-testing-toolkit-backend"
+    port: "5050"
+    paths:
+      issuer: /api/oauth2/token
+      token_iss: /api/oauth2/token
   mongodb:
-    enabled: false
-    command: until printf "." && nc -z -w 2 $mongodb_host $mongodb_port; do sleep 2; done;
+    enabled: true
+    host: "$release_name-mongodb"
+    port: "27017"
   connectionManagerBackend:
-    enabled: false
-    command: until printf "." && nc -z -w 2 $connection_manager_host $connection_manager_port; do sleep 2; done;
+    enabled: true
+    host: "$release_name-connection-manager-backend"
+    port: "5061"
 
 replicaCount: 1
 image:
@@ -105,8 +117,8 @@ config:
     "JWS_SIGN_PUT_PARTIES": false,
     "CONNECTION_MANAGER_API_URL": "http://$connection_manager_host:$connection_manager_port",
     "CONNECTION_MANAGER_AUTH_ENABLED": true,
-    "CONNECTION_MANAGER_HUB_USERNAME": "some_hub_username",
-    "CONNECTION_MANAGER_HUB_PASSWORD": "some_hub_password",
+    "CONNECTION_MANAGER_HUB_USERNAME": "hub",
+    "CONNECTION_MANAGER_HUB_PASSWORD": "hub",
     "INBOUND_MUTUAL_TLS_ENABLED": false,
     "OUTBOUND_MUTUAL_TLS_ENABLED": false,
     "ADVANCED_FEATURES_ENABLED": true,
@@ -114,7 +126,7 @@ config:
   }
   system_config.json: {
     "API_PORT": 5000,
-    "HOSTING_ENABLED": $hosting_mode_enabled,
+    "HOSTING_ENABLED": true,
     "CONFIG_VERSIONS": {
       "response": 1,
       "callback": 1,
@@ -123,20 +135,20 @@ config:
       "userSettings": 1
     },
     "DB": {
-      "URI": "mongodb://some_mongodb_username:some_mongodb_paswword@$mongodb_host:$mongodb_port/some_mongodb_database"
+      "URI": "mongodb://ttk:ttk@$mongodb_host:$mongodb_port/ttk"
     },
     "OAUTH": {
-      "AUTH_ENABLED": false,
-      "APP_OAUTH_CLIENT_KEY": "some_client_key",
-      "APP_OAUTH_CLIENT_SECRET": "some_client_secret",
+      "AUTH_ENABLED": true,
+      "APP_OAUTH_CLIENT_KEY": "ttk",
+      "APP_OAUTH_CLIENT_SECRET": "23b898a5-63d2-4055-bbe1-54efcda37e7d",
       "MTA_ROLE": "Application/MTA",
       "PTA_ROLE": "Application/PTA",
       "EVERYONE_ROLE": "Internal/everyone",
-      "P12_PASS_PHRASE": "SOME_S3C4R3_P@SS"
+      "P12_PASS_PHRASE": "SOME_S3C4R3_P@SS",
       "OAUTH2_TOKEN_ISS": "http://$auth_host:$auth_port$auth_token_iss_path",
-      "OAUTH2_ISSUER": "http://$auth_host:$auth_port$token_issuer_path",
+      "OAUTH2_ISSUER": "http://$auth_host:$auth_port$auth_issuer_path",
       "JWT_COOKIE_NAME": "TTK-API_ACCESS_TOKEN",
-      "EMBEDDED_CERTIFICATE": "some_embedded_certificate"
+      "EMBEDDED_CERTIFICATE": "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDda1T6cyWogfG/xlUb3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHIc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7oCweP68CPbIrTWjR9gyjmSHfYhwIDAQAB\n-----END PUBLIC KEY-----"
     },
     "API_DEFINITIONS": [
       {
@@ -214,8 +226,6 @@ extraEnvironments: {
     }
   }
 }
-
-
 
 service:
   type: ClusterIP
