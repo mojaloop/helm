@@ -17,6 +17,7 @@ helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubato
 helm repo add kiwigrid https://kiwigrid.github.io
 helm repo add elastic https://helm.elastic.co
 helm repo add bitnami https://charts.bitnami.com/bitnami 
+helm repo add codecentric https://codecentric.github.io/helm-charts
 
 # ## Add Mojaloop repo
 helm repo add mojaloop http://mojaloop.io/helm/repo/

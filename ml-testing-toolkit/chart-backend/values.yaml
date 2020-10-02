@@ -3,31 +3,36 @@
 # Declare variables to be passed into your templates.
 global:
   keycloak:
-    enabled: true
+    enabled: false
     host: "$release_name-keycloak-http"
     port: "7080"
     paths:
       issuer: /auth/realms/testingtoolkit/protocol/openid-connect/token
-      token_iss: /auth/realms/testingtoolkit
+      tokenIss: /auth/realms/testingtoolkit
+    embeddedCertificate: |-
+      -----BEGIN PUBLIC KEY-----
+      MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDda1T6cyWogfG/xlUb3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHIc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7oCweP68CPbIrTWjR9gyjmSHfYhwIDAQAB
+      -----END PUBLIC KEY-----
   defaultAuth:
-    host: "$release_name-ml-testing-toolkit-backend"
+    host: "localhost"
     port: "5050"
     paths:
       issuer: /api/oauth2/token
-      token_iss: /api/oauth2/token
+      tokenIss: /api/oauth2/token
+    embeddedCertificate: password
   mongodb:
-    enabled: true
+    enabled: false
     host: "$release_name-mongodb"
     port: "27017"
   connectionManagerBackend:
-    enabled: true
+    enabled: false
     host: "$release_name-connection-manager-backend"
     port: "5061"
 
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit
-  tag: v11.1.1
+  tag: v11.2.3
   commandPersistence: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; else; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; npm run start;"]'
   command: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; npm run start;"]'
 
@@ -148,7 +153,7 @@ config:
       "OAUTH2_TOKEN_ISS": "http://$auth_host:$auth_port$auth_token_iss_path",
       "OAUTH2_ISSUER": "http://$auth_host:$auth_port$auth_issuer_path",
       "JWT_COOKIE_NAME": "TTK-API_ACCESS_TOKEN",
-      "EMBEDDED_CERTIFICATE": "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDda1T6cyWogfG/xlUb3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHIc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7oCweP68CPbIrTWjR9gyjmSHfYhwIDAQAB\n-----END PUBLIC KEY-----"
+      "EMBEDDED_CERTIFICATE": "$auth_embedded_certificate"
     },
     "API_DEFINITIONS": [
       {

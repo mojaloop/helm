@@ -1,17 +1,8 @@
 {{- $RELEASE_NAME := .Release.Name -}}
-{{- $MONGODB_HOST := (.Values.global.mongodb.host) -}}
-{{- $MONGODB_PORT := (print .Values.global.mongodb.port) -}}
-{{- $CONNECTION_MANAGER_HOST := (.Values.global.connectionManagerBackend.host) -}}
-{{- $CONNECTION_MANAGER_PORT := (print .Values.global.connectionManagerBackend.port) -}}
-{{- $KEYCLOAK_ENABLED := (.Values.global.keycloak.enabled) -}}
-{{- $KEYCLOAK_HOST := (.Values.global.keycloak.host) -}}
-{{- $KEYCLOAK_PORT := (print .Values.global.keycloak.port) -}}
-{{- $KEYCLOAK_ISSUER_PATH := (print .Values.global.keycloak.paths.issuer) -}}
-{{- $KEYCLOAK_TOKEN_ISS_PATH := (print .Values.global.keycloak.paths.token_iss) -}}
-{{- $DEFAULT_AUTH_HOST := (.Values.global.defaultAuth.host) -}}
-{{- $DEFAULT_AUTH_PORT := (print .Values.global.defaultAuth.port) -}}
-{{- $DEFAULT_AUTH_ISSUER_PATH := (print .Values.global.defaultAuth.paths.issuer) -}}
-{{- $DEFAULT_AUTH_TOKEN_ISS_PATH := (print .Values.global.defaultAuth.paths.token_iss) -}}
+{{- $MONGODB := (.Values.global.mongodb) -}}
+{{- $CONNECTION_MANAGER := (.Values.global.connectionManagerBackend) -}}
+{{- $KEYCLOAK := (.Values.global.keycloak) -}}
+{{- $DEFAULT_AUTH := (.Values.global.defaultAuth) -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -23,13 +14,15 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
+{{- if (index $KEYCLOAK "enabled") }}
   {{- range $k, $v := .Values.config }}
-    {{- if $KEYCLOAK_ENABLED }}
-    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$mongodb_host" $MONGODB_HOST | replace "$mongodb_port" $MONGODB_PORT | replace "$auth_host" $KEYCLOAK_HOST  | replace "$auth_port" $KEYCLOAK_PORT | replace "$auth_issuer_path" $KEYCLOAK_ISSUER_PATH | replace "$auth_token_iss_path" $KEYCLOAK_TOKEN_ISS_PATH | replace "$connection_manager_host" $CONNECTION_MANAGER_HOST | replace "$connection_manager_port" $CONNECTION_MANAGER_PORT | replace "$release_name" $RELEASE_NAME)  }}
-    {{- else}}
-    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$mongodb_host" $MONGODB_HOST | replace "$mongodb_port" $MONGODB_PORT | replace "$auth_host" $DEFAULT_AUTH_HOST  | replace "$auth_port" $DEFAULT_AUTH_PORT | replace "$auth_issuer_path" $DEFAULT_AUTH_ISSUER_PATH | replace "$connection_manager_host" $CONNECTION_MANAGER_HOST | replace "$connection_manager_port" $CONNECTION_MANAGER_PORT | replace "$release_name" $RELEASE_NAME)  }}
-    {{- end }}
+    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$mongodb_host" (index $MONGODB "host") | replace "$mongodb_port" (index $MONGODB "port") | replace "$auth_host" (index $KEYCLOAK "host")  | replace "$auth_port" (index $KEYCLOAK "port") | replace "$auth_issuer_path" (index $KEYCLOAK "paths" "issuer") | replace "$auth_token_iss_path" (index $KEYCLOAK "paths" "tokenIss") | replace "$auth_embedded_certificate" (index $KEYCLOAK "embeddedCertificate") | replace "$connection_manager_host" (index $CONNECTION_MANAGER "host") | replace "$connection_manager_port" (index $CONNECTION_MANAGER "port") | replace "$release_name" $RELEASE_NAME)  }}
   {{- end }}
+{{- else}}
+  {{- range $k, $v := .Values.config }}
+    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$mongodb_host" (index $MONGODB "host") | replace "$mongodb_port" (index $MONGODB "port") | replace "$auth_host" (index $DEFAULT_AUTH "host")  | replace "$auth_port" (index $DEFAULT_AUTH "port") | replace "$auth_issuer_path" (index $DEFAULT_AUTH "paths" "issuer") | replace "$auth_token_iss_path" (index $DEFAULT_AUTH "paths" "tokenIss") | replace "$auth_embedded_certificate" (index $DEFAULT_AUTH "embeddedCertificate") | replace "$connection_manager_host" (index $CONNECTION_MANAGER "host") | replace "$connection_manager_port" (index $CONNECTION_MANAGER "port") | replace "$release_name" $RELEASE_NAME)  }}
+  {{- end }}
+{{- end }}
 ---
 apiVersion: v1
 kind: ConfigMap
