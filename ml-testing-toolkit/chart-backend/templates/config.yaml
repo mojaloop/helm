@@ -1,11 +1,7 @@
 {{- $RELEASE_NAME := .Release.Name -}}
 {{- $MONGODB := (.Values.dependencies.mongodb) -}}
 {{- $CONNECTION_MANAGER := (.Values.dependencies.connectionManagerBackend) -}}
-{{- $KEYCLOAK := (.Values.dependencies.keycloak) -}}
-{{- $HOSTED_MODE_ENABLED := (print .Values.hostedMode.enabled) -}}
-{{- $ADMIN_API_AUTHENTICATION := (.Values.adminApiAuthentication) -}}
-{{- $ADMIN_API_AUTHENTICATION_ENABLED := (print .Values.adminApiAuthentication.enabled) -}}
-{{- $DEFAULT_AUTH := (.Values.adminApiAuthentication.default) -}}
+{{- $API_AUTHENTICATION := index .Values.dependencies (ternary "keycloak" "adminApiAuthentication" .Values.dependencies.keycloak.enabled) -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -17,14 +13,8 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
-{{- if (index $KEYCLOAK "enabled") }}
-  {{- range $k, $v := .Values.config }}
-    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$hosted_mode_enabled" ($HOSTED_MODE_ENABLED)  | replace "$admin_api_authentication_enabled" $ADMIN_API_AUTHENTICATION_ENABLED | replace "$mongodb_host" (index $MONGODB "host") | replace "$mongodb_port" (index $MONGODB "port") | replace "$auth_host" (index $KEYCLOAK "host")  | replace "$auth_port" (index $KEYCLOAK "port") | replace "$auth_issuer_path" (index $KEYCLOAK "paths" "issuer") | replace "$auth_token_iss_path" (index $KEYCLOAK "paths" "tokenIss") | replace "$auth_embedded_certificate" (index $KEYCLOAK "embeddedCertificate") | replace "$connection_manager_host" (index $CONNECTION_MANAGER "host") | replace "$connection_manager_port" (index $CONNECTION_MANAGER "port") | replace "$release_name" $RELEASE_NAME)  }}
-  {{- end }}
-{{- else}}
-  {{- range $k, $v := .Values.config }}
-    {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$hosted_mode_enabled" ($HOSTED_MODE_ENABLED)  | replace "$admin_api_authentication_enabled" $ADMIN_API_AUTHENTICATION_ENABLED | replace "$mongodb_host" (index $MONGODB "host") | replace "$mongodb_port" (index $MONGODB "port") | replace "$auth_host" (index $DEFAULT_AUTH "host")  | replace "$auth_port" (index $DEFAULT_AUTH "port") | replace "$auth_issuer_path" (index $DEFAULT_AUTH "paths" "issuer") | replace "$auth_token_iss_path" (index $DEFAULT_AUTH "paths" "tokenIss") | replace "$auth_embedded_certificate" (index $DEFAULT_AUTH "embeddedCertificate") | replace "$connection_manager_host" (index $CONNECTION_MANAGER "host") | replace "$connection_manager_port" (index $CONNECTION_MANAGER "port") | replace "$release_name" $RELEASE_NAME)  }}
-  {{- end }}
+{{- range $k, $v := .Values.config }}
+  {{ $k }}: {{ ($v | toPrettyJson | quote | replace "$mongodb_host" (index $MONGODB "host") | replace "$mongodb_port" (index $MONGODB "port") | replace "$auth_host" (index $API_AUTHENTICATION "host")  | replace "$auth_port" (index $API_AUTHENTICATION "port") | replace "$auth_issuer_path" (index $API_AUTHENTICATION "paths" "issuer") | replace "$auth_token_iss_path" (index $API_AUTHENTICATION "paths" "tokenIss") | replace "$auth_embedded_certificate" (index $API_AUTHENTICATION "embeddedCertificate") | replace "$connection_manager_host" (index $CONNECTION_MANAGER "host") | replace "$connection_manager_port" (index $CONNECTION_MANAGER "port") | replace "$release_name" $RELEASE_NAME)  }}
 {{- end }}
 ---
 apiVersion: v1

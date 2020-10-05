@@ -18,10 +18,13 @@ Mojaloop deployment documentation: https://docs.mojaloop.io/documentation/deploy
 
 ### 1.1 ml-testing-toolkit-backend
 
-- enabled/disable - enabled by default
+- enabled/disabled - enabled by default:
     - `ml-testing-toolkit-backend.enabled: true/false`
 
-- dependency-checks
+- admin api authentication:
+    - `ml-testing-toolkit-backend.config.'system_config.json'.OAUTH.AUTH_ENABLED: true/false`
+
+- dependency-checks:
     - keycloak
         - `ml-testing-toolkit-backend.dependencies.keycloak.enabled: true/false`
     - mongodb
@@ -31,57 +34,60 @@ Mojaloop deployment documentation: https://docs.mojaloop.io/documentation/deploy
 
 ### 1.2 ml-testing-toolkit-frontend
 
-- enabled/disable - enabled by default
+- enabled/disable - enabled by default:
     - `ml-testing-toolkit-frontend.enabled: true/false`
+
+- admin api authentication:
+    - `ml-testing-toolkit-frontend.config.AUTH_ENABLED: TRUE/FALSE`
 
 ### 1.3 connection-manager-backend
 
-- enabled/disable - disabled by default
+- enabled/disable - disabled by default:
     - `connection-manager-backend.enabled: true/false`
 
-- dependency-checks
-    - keycloak
+- admin api authentication:
+    - `connection-manager-backend.config.AUTH_ENABLED: TRUE/DISABLED`
+
+- dependency-checks:
+    - keycloak:
         - `connection-manager-backend.dependencies.keycloak.enabled: true/false`
-    - mysql
+    - mysql:
         - `connection-manager-backend.dependencies.mysql.enabled: true/false`
 
 ### 1.4 connection-manager-frontend
-- enabled/disable - disabled by default
+
+- enabled/disable - disabled by default:
     - `connection-manager-frontend.enabled: true/false`
+
+- admin api authentication:
+    - `connection-manager-frontend-frontend.config.AUTH_ENABLED: TRUE/FALSE`
 
 ### 1.5 mysql
 
-- enabled/disable - disabled by default
+- enabled/disable - disabled by default:
     - `mysql.enabled: true/false`
 
 ### 1.6 mongodb
 
-- enabled/disable - disabled by default
+- enabled/disable - disabled by default:
     - `mongodb.enabled: true/false`
 
 ### 1.7 keycloak
 
-- setup 
+- enable/disalbe - disabled by default:
+    - `keycloak.enabled: true/false`
+
+- requirements: 
     - `kubectl create secret generic realm-secret --from-file=<PATH_TO_REALM_FILE> -n <NAMESPACE>`
         - '/ml-testing-toolkit/realm/realm.json'
 
-- enable/disalbe - disabled by default
-    - `keycloak.enabled: true/false`
-
-## 2. Authentication
-
-- enabled/disable - disabled by default
-    - `./chart-backend/values.yaml/config.'system_config.json'.OAUTH.AUTH_ENABLED: true/false`
-    - `ml-testing-toolkit-frontend.adminApiAuthentication: TRUE/FALSE`
-
-if it's enabled then mocked auth server is used by default. There is an option to use a [keycloak](#17-keycloak) server
-
-- mocked server contains several users: - password is not validated
-    - userdfsp, userdfsp1, userdfsp2
+- notes:
+    - when keylcloak is disabled there are 3 default users - userdsfp, userdfsp1 userdfsp2 - and password is not validated
 
 ## 3. Hosted mode
 
-- enabled/disable - disabled by default
-    - `./chart-backend/values.yaml/config.'system_config.json'.HOSTED_MODE: true`
+- enabled/disable - disabled by default:
+    - `ml-testing-toolkit-backend.config.'system_config.json'.HOSTED_MODE: true`
     - [mongodb](#16-mongodb) must be enabled
-    - [authentication](#2-authentication) must be enabled
+    - [ml-testing-toolkit backend authentication](#11-ml-testing-toolkit-backend) must be enabled
+    - [ml-testing-toolkit frontend authentication](#12-ml-testing-toolkit-frontend) must be enabled
