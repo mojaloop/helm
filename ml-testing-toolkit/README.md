@@ -77,10 +77,6 @@ Mojaloop deployment documentation: https://docs.mojaloop.io/documentation/deploy
 - enable/disalbe - disabled by default:
     - `keycloak.enabled: true/false`
 
-- requirements: 
-    - `kubectl create secret generic realm-secret --from-file=<PATH_TO_REALM_FILE> -n <NAMESPACE>`
-        - '/ml-testing-toolkit/realm/realm.json'
-
 - notes:
     - when keylcloak is disabled there are 3 default users - userdsfp, userdfsp1 userdfsp2 - and password is not validated
 
