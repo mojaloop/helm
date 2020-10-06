@@ -458,18 +458,23 @@
   "webAuthnPolicyPasswordlessAcceptableAaguids": [],
   "users": [
     {
-      "username" : "hub",
+      "username" : "{{ .Values.keycloak.realmConfig.hub.username }}",
       "enabled": true,
-      "firstName": "hub",
-      "lastName": "hub",
-      "credentials" : [{ "type" : "password", "value" : "hub" }],
+      "totp": false,
+      "emailVerified": false,
+      "firstName": "{{ .Values.keycloak.realmConfig.hub.firstname }}",
+      "lastName": "{{ .Values.keycloak.realmConfig.hub.lastname }}",
+      "credentials" : [{ "type" : "password", "value" : "{{ .Values.keycloak.realmConfig.hub.password }}" }],
       "realmRoles": ["offline_access", "uma_auhtorization"],
+      "clientRoles": {
+        "realm-management": [ "view-users" ]
+      },
       "groups": [
         "Application/PTA",
         "Internal/everyone"
       ],
       "attributes": {
-        "dfspId": "hub"
+        "dfspId": "{{ .Values.keycloak.realmConfig.hub.username }}"
       }
     },
     {
@@ -528,7 +533,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "23b898a5-63d2-4055-bbe1-54efcda37e7d",
+      "secret": "{{ .Values.keycloak.realmConfig.client.secret }}",
       "defaultRoles": [
         "manage-account",
         "view-profile"
@@ -575,7 +580,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "23b898a5-63d2-4055-bbe1-54efcda37e7d",
+      "secret": "{{ .Values.keycloak.realmConfig.client.secret }}",
       "redirectUris": [
         "/realms/testingtoolkit/account/*"
       ],
@@ -628,7 +633,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "23b898a5-63d2-4055-bbe1-54efcda37e7d",
+      "secret": "{{ .Values.keycloak.realmConfig.client.secret }}",
       "redirectUris": [],
       "webOrigins": [],
       "notBefore": 0,
@@ -667,7 +672,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "23b898a5-63d2-4055-bbe1-54efcda37e7d",
+      "secret": "{{ .Values.keycloak.realmConfig.client.secret }}",
       "redirectUris": [],
       "webOrigins": [],
       "notBefore": 0,
@@ -706,7 +711,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "23b898a5-63d2-4055-bbe1-54efcda37e7d",
+      "secret": "{{ .Values.keycloak.realmConfig.client.secret }}",
       "redirectUris": [],
       "webOrigins": [],
       "notBefore": 0,
@@ -747,7 +752,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "23b898a5-63d2-4055-bbe1-54efcda37e7d",
+      "secret": "{{ .Values.keycloak.realmConfig.client.secret }}",
       "redirectUris": [
         "/admin/testingtoolkit/console/*"
       ],
@@ -808,7 +813,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "23b898a5-63d2-4055-bbe1-54efcda37e7d",
+      "secret": "{{ .Values.keycloak.realmConfig.client.secret }}",
       "redirectUris": [
         "http://ml-testing-toolkit-keycloak.local"
       ],
@@ -1635,10 +1640,10 @@
         "subComponents": {},
         "config": {
           "privateKey": [
-            "-----BEGIN RSA PRIVATE KEY-----\nMIICWwIBAAKBgQDda1T6cyWogfG/xlUb3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A\n2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHIc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI\n6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7oCweP68CPbIrTWjR9gyjmSHfYhwIDAQAB\nAoGAexcdAbIboEbE7xjB3aIm8rPpZovkOAkGJVKRm4OwN4S77FubPIoCjk631cWn\npcdoWBuqcGzcNfNDZL2szIPmdZU/Cx9I1wjFKRI1pKVS6E8giFLxKDg4KytLDUB2\nToU63yIGQ3lw2GL9Uj66AztAbcJcjsbWLPgtDiiEJlqFzVECQQDvr8pC1lChqgAQ\n8lWxh0LhuXBpGOpnnylWzloZ/kj9Xjh7ZNCRTRSGLDlANL040tzqOeJw3gvwLPtS\nKueUOCBZAkEA7H1B4dShqsXEKVMsy/7BqjT9EMUadYatJel47V5Hql9SO2Z0iK4f\nA22WWokXARb2bXk0awEw2lI6H2GgP3Oj3wJABM1PzxD+Io8GW1CPmPPtyhnt/50J\nLTRKHrwZoAWxLqpRlV9Ksm6J57pBF2E3HUlUNbkdKUe5k4FDM706UITjWQJAc4hp\n9Drd1EETqSCyROKrmEyUyWmRmJL36gqaglRJ7Kju0ogmLFPsYM9b4dURgP3H3AmX\nmyMUy8PaE1StZfJHvwJAA+SRSj+FFajdzrIlYFo7TirFWyQ/wdQ3+IKVGohOFQms\nYEi2xYZD4hWgztz4AbyHVFPLnS1mhwoO/uE2qbNHjw==\n-----END RSA PRIVATE KEY-----"
+            "{{ .Values.keycloak.realmConfig.keyProvider.privateKey }}"
           ],
           "certificate": [
-            "-----BEGIN CERTIFICATE-----\nMIICrDCCAhWgAwIBAgIUBQ88qYAqQ1+I+ISsaIgYPqbya9QwDQYJKoZIhvcNAQEL\nBQAwaDELMAkGA1UEBhMCVUsxDzANBgNVBAgMBkxvbmRvbjEPMA0GA1UEBwwGTG9u\nZG9uMREwDwYDVQQKDAhNb2R1c2JveDERMA8GA1UECwwITW9kdXNib3gxETAPBgNV\nBAMMCE1vZHVzYm94MB4XDTIwMDkzMDE3MDYwNloXDTIxMDkzMDE3MDYwNlowaDEL\nMAkGA1UEBhMCVUsxDzANBgNVBAgMBkxvbmRvbjEPMA0GA1UEBwwGTG9uZG9uMREw\nDwYDVQQKDAhNb2R1c2JveDERMA8GA1UECwwITW9kdXNib3gxETAPBgNVBAMMCE1v\nZHVzYm94MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDda1T6cyWogfG/xlUb\n3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHI\nc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7o\nCweP68CPbIrTWjR9gyjmSHfYhwIDAQABo1MwUTAdBgNVHQ4EFgQUEE+og3aDjUzC\nywQo45Fhjp5S9EowHwYDVR0jBBgwFoAUEE+og3aDjUzCywQo45Fhjp5S9EowDwYD\nVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOBgQC2a7sxisCTQa9oRGMZRmJs\nFMZjia126qlRYm6ljjM2wWlqIBdxjzLhLJbAiWMyzGKTZdMOG51Ujc+NapKRLS4K\nHVnzcbtgRNq6GZk5C1L8BEzR6NxU/CdOkm2Vx811CTOT/YijpjtjF01K1aIZE+z8\nmdzyVY9ZybXqbNclLU7rwA==\n-----END CERTIFICATE-----\n"
+            "{{ .Values.keycloak.realmConfig.keyProvider.embeddedCertificate }}"
           ],
           "active": [
             "true"
