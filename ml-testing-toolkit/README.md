@@ -80,7 +80,7 @@ Mojaloop deployment documentation: https://docs.mojaloop.io/documentation/deploy
 - notes:
     - when keylcloak is disabled there are 3 default users - userdsfp, userdfsp1 userdfsp2 - and password is not validated
 
-## 3. Hosted mode
+## 2. Hosted mode
 
 - enabled/disable - disabled by default:
     - `ml-testing-toolkit-backend.config.'system_config.json'.HOSTED_MODE: true`
