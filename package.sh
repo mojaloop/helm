@@ -43,7 +43,7 @@ declare -a charts=(
     kube-system/ntpd/
     mojaloop-simulator
     ml-testing-toolkit
-    ml-testing-toolkit/chart-cli
+    ml-testing-toolkit-cli
 )
 
 for chart in "${charts[@]}"
