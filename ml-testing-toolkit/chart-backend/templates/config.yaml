@@ -1,3 +1,4 @@
+{{- $releaseName := .Release.Name -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -25,5 +26,5 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   {{- range $k, $v := .Values.extraEnvironments }}
-    {{ $k }}: {{ $v | toPrettyJson | quote }}
+    {{ $k }}: {{ $v | toPrettyJson | replace "$release_name" $releaseName | quote }}
   {{- end }}
