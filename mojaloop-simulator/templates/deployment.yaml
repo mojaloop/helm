@@ -1,4 +1,5 @@
 {{- $prefix := include "mojaloop-simulator.prefix" . -}}
+{{- $releaseName := .Release.Name -}}
 {{- range $name, $customConfig := .Values.simulators }}
 {{- $fullName := printf "%s%s" $prefix $name }}
 {{- $config := merge $customConfig $.Values.defaults }}
@@ -120,7 +121,7 @@ spec:
           value: "/jwsSigningKey/private.key"
         {{- range $k, $v := $config.config.schemeAdapter.env }}
         - name: {{ $k }}
-          value: {{ $v | quote }}
+          value: {{ $v | quote | replace "$release_name" $releaseName }}
         {{- end }}
         resources:
 {{ toYaml $config.config.schemeAdapter.resources | indent 10 }}
