@@ -26,7 +26,7 @@
               wget {{ .Values.config.testCasesZipUrl }} -O downloaded-test-collections.zip;
               mkdir tmp_test_cases;
               unzip -d tmp_test_cases -o downloaded-test-collections.zip;
-              npm run cli -- -c cli-default-config.json -e cli-testcase-environment.json -i tmp_test_cases/{{ .Values.config.testCasesPathInZip }} -u {{ .Values.config.ttkBackendURL }} --report-format html --report-target s3://{{ .Values.config.awsS3BucketName }}/{{ .Values.config.awsS3FilePath }}/asdf.html --report-auto-filename-enable true --slack-webhook-url $SLACK_WEBHOOK_URL --extra-summary-information="Test Suite:{{ .Values.config.testSuiteName }},Environment:{{ .Values.config.environmentName }}";
+              npm run cli -- -c cli-default-config.json -e cli-testcase-environment.json -i tmp_test_cases/{{ .Values.config.testCasesPathInZip }} -u {{ .Values.config.ttkBackendURL | replace "$release_name" .Release.Name }} --report-format html {{- if .Values.config.awsS3BucketName }} --report-target s3://{{ .Values.config.awsS3BucketName }}/{{ .Values.config.awsS3FilePath }}/report.html {{- end }} --report-auto-filename-enable true {{- if .Values.configCreds.SLACK_WEBHOOK_URL }} --slack-webhook-url $SLACK_WEBHOOK_URL {{- end }} --extra-summary-information="Test Suite:{{ .Values.config.testSuiteName }},Environment:{{ .Values.config.environmentName }}";
               echo "Done";
             envFrom:
             - secretRef:
@@ -69,5 +69,11 @@ apiVersion: {{ template "ml-testing-toolkit-cli.apiVersion.Job" . }}
 kind: Job
 metadata:
   name: {{ template "ml-testing-toolkit-cli.fullname" . }}
+  {{- if .Values.postInstallHook.enabled }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": {{ .Values.postInstallHook.weight | quote }}
+    "helm.sh/hook-delete-policy": {{ .Values.postInstallHook.deletePolicy }}
+  {{- end }}
 {{ include "ttkCLI.jobTemplate" . }}
 {{- end }}
