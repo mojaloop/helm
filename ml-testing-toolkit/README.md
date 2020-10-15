@@ -81,9 +81,24 @@ Mojaloop deployment documentation: https://docs.mojaloop.io/documentation/deploy
     - when keylcloak is disabled there are 3 default users - userdsfp, userdfsp1 userdfsp2 - and password is not validated
 
 ## 2. Hosted mode
+- ml-testing-toolkit-backend
+    - `ml-testing-toolkit-backend.config.'system_config.json'.HOSTING_ENABLED: true`
+    - `ml-testing-toolkit-backend.config.'system_config.json'.OAUTH.AUTH_ENABLED: true`
+    - `ml-testing-toolkit-backend.dependencies.mongodb.enabled: true`
+    - `ml-testing-toolkit-backend.dependencies.keycloak.enabled: true`
+    - `ml-testing-toolkit-backend.dependencies.connectionManager.enabled: true`
+- ml-testing-toolkit-frontend
+    - `ml-testing-toolkit-frontend.enabled: true`
+    - `ml-testing-toolkit-frontend.config.AUTH_ENABLED: TRUE`
+- mongodb
+    - `mongodb.enabled: true`
+- keycloak
+    - `keycloak.enabled: true`
+- connection-manager-backend
+    - `connection-manager-backend.enabled: true`
+    - `connection-manager-backend.config.AUTH_ENABLED: TRUE`
+    - `connection-manager-backend.dependencies.keycloak.enabled: true`
+- connection-manager-frontend
+    - `connection-manager-frontend.enabled: true`
+    - `connection-manager-frontend.config.AUTH_ENABLED: TRUE`
 
-- enabled/disable - disabled by default:
-    - `ml-testing-toolkit-backend.config.'system_config.json'.HOSTED_MODE: true`
-    - [mongodb](#16-mongodb) must be enabled
-    - [ml-testing-toolkit backend authentication](#11-ml-testing-toolkit-backend) must be enabled
-    - [ml-testing-toolkit frontend authentication](#12-ml-testing-toolkit-frontend) must be enabled
