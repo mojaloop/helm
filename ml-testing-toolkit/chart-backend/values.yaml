@@ -7,7 +7,7 @@ dependencies:
   keycloak:
     enabled: false
     host: "$release_name-keycloak-http"
-    port: "80"
+    port: "7080"
     paths:
       issuer: /auth/realms/testingtoolkit/protocol/openid-connect/token
       tokenIss: /auth/realms/testingtoolkit
@@ -32,7 +32,7 @@ dependencies:
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit
-  tag: v11.2.3
+  tag: v11.2.4
   commandPersistence: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; else if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; fi; npm run start;"]'
   command: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; npm run start;"]'
 
@@ -154,6 +154,13 @@ config:
       "OAUTH2_ISSUER": "http://$auth_host:$auth_port$auth_issuer_path",
       "JWT_COOKIE_NAME": "TTK-API_ACCESS_TOKEN",
       "EMBEDDED_CERTIFICATE": "$auth_embedded_certificate"
+    },
+    "KEYCLOAK": {
+      "ENABLED": false,
+      "API_URL": "http://$auth_host:$auth_port",
+      "REALM": "testingtoolkit",
+      "USERNAME": "hub",
+      "PASSWORD": "hub"
     },
     "API_DEFINITIONS": [
       {
