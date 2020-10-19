@@ -11,14 +11,14 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.specApi.externalPort }}
-      targetPort: {{ .Values.service.specApi.internalPort }}
-      protocol: TCP
-      name: {{ .Values.service.specApi.name }}
-    - port: {{ .Values.service.adminApi.externalPort }}
-      targetPort: {{ .Values.service.adminApi.internalPort }}
-      protocol: TCP
-      name: {{ .Values.service.adminApi.name }}
+    {{- with .Values.service.ports }}
+    - port: {{ .specApi.externalPort }}
+      targetPort: {{ .specApi.internalPort }}
+      name: {{ .specApi.name }}
+    - port: {{ .adminApi.externalPort }}
+      targetPort: {{ .adminApi.internalPort }}
+      name: {{ .adminApi.name }}
+    {{- end }}
   selector:
     app.kubernetes.io/name: {{ include "ml-testing-toolkit-backend.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

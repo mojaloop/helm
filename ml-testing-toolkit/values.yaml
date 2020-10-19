@@ -2,11 +2,228 @@
 # Declare global configurations
 global: {}
 
-# Declare variables to be passed into your templates.
+ml-testing-toolkit-backend:
+  enabled: true
+  config:
+    system_config.json:
+      HOSTING_ENABLED: false
+      OAUTH:
+        AUTH_ENABLED: false
+    user_config.json:
+      CONNECTION_MANAGER_AUTH_ENABLED: false
+  dependencies:
+    keycloak:
+      enabled: false
+      embeddedCertificate: -----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDda1T6cyWogfG/xlUb3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHIc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7oCweP68CPbIrTWjR9gyjmSHfYhwIDAQAB\n-----END PUBLIC KEY-----
+    mongodb:
+      enabled: false
+    connectionManagerBackend:
+      enabled: false
 
 ml-testing-toolkit-frontend:
   enabled: true
+  config:
+    AUTH_ENABLED: "FALSE" ## "TRUE" or "FALSE"
 
-ml-testing-toolkit-backend:
-  enabled: true
+connection-manager-backend:
+  enabled: false
+  config:
+    AUTH_ENABLED: "DISABLED" ## TRUE or DISABLED
+  dependencies:
+    mysql:
+      enabled: true
+    keycloak:
+      enabled: false
+      embeddedCertificate: -----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDda1T6cyWogfG/xlUb3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHIc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7oCweP68CPbIrTWjR9gyjmSHfYhwIDAQAB\n-----END PUBLIC KEY-----
+  
+connection-manager-frontend:
+  enabled: false
+  config:
+    AUTH_ENABLED: "FALSE" ## TRUE or FALSE
 
+mysql:
+  ## repo and documentation https://github.com/helm/charts/tree/master/stable/percona-xtradb-cluster
+
+  ## disable when connection-manager-backend is disabled
+  enabled: false
+  image:
+    repository: "percona/percona-xtradb-cluster"
+    tag: "5.7.19"
+    pullPolicy: Always
+
+  nameOverride: mysql
+
+  replicas: 1
+
+  mysqlUser: mcm
+  mysqlPassword: mcm
+  mysqlDatabase: mcm
+  allowRootFrom: "%"
+
+  persistence:
+    enabled: false
+    accessMode: ReadWriteOnce
+    size: 8Gi
+
+  nodeSelector: {}
+
+  podAnnotations: {}
+
+  tolerations: []
+
+  configFiles:
+    node.cnf: |+
+      [mysqld]
+      datadir=/var/lib/mysql
+      default_storage_engine=InnoDB
+      binlog_format=ROW
+      innodb_flush_log_at_trx_commit  = 0
+      innodb_flush_method             = O_DIRECT
+      innodb_file_per_table           = 1
+      innodb_autoinc_lock_mode=2
+      bind_address = 0.0.0.0
+      wsrep_slave_threads=2
+      wsrep_cluster_address=gcomm://
+      wsrep_provider=/usr/lib/galera3/libgalera_smm.so
+      wsrep_cluster_name=galera
+      wsrep_sst_method=xtrabackup-v2
+      pxc_strict_mode=DISABLED
+      max_connections=999
+      max_user_connections=994
+      thread_cache_size=999
+
+  # metricsExporter:
+  #   enabled: true
+  #   tag: v0.11.0
+  #   commandOverrides: []
+  #   argsOverrides: []
+
+  # logTail: true
+
+  service:
+    type: ClusterIP
+    port: 3306
+    externalIPs: []
+
+
+mongodb:
+  ## repo and documentation https://github.com/bitnami/charts/tree/master/bitnami/mysql
+
+  enabled: false
+
+  nameOverride: mongodb
+
+  image:
+    registry: docker.io
+    repository: bitnami/mongodb
+    tag: latest
+    pullPolicy: Always
+
+
+  usePassword: true
+  mongodbRootPassword: adminpass
+  mongodbUsername: ttk
+  mongodbPassword: ttk
+  mongodbDatabase: ttk
+
+  mongodbEnableIPv6: true
+
+  mongodbExtraFlags: []
+
+  clusterDomain: cluster.local
+
+  service:
+    annotations: {}
+    type: ClusterIP
+    port: 27017
+
+  replicaSet:
+    enabled: false
+    useHostnames: true
+    name: rs0
+    replicas:
+      secondary: 1
+      arbiter: 1
+    pdb:
+      minAvailable:
+        primary: 1
+        secondary: 1
+        arbiter: 1
+
+  podAnnotations: {}
+
+  podLabels: {}
+
+  resources: {}
+
+  nodeSelector: {}
+
+  affinity: {}
+
+  tolerations: []
+
+  persistence:
+    enabled: false
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
+    annotations: {}
+
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+
+keycloak:
+  ## repo and documentation https://github.com/codecentric/helm-charts/tree/master/charts/keycloak
+  ## check the documentation in the repo for additional details
+
+  enabled: false
+  image:
+    repository: quay.io/keycloak/keycloak
+    tag: "11.0.2"
+  extraEnv: |
+    - name: KEYCLOAK_USER
+      value: admin
+    - name: KEYCLOAK_PASSWORD
+      value: admin
+    - name: KEYCLOAK_IMPORT
+      value: /realm/realm.json -Dkeycloak.profile.feature.upload_scripts=enabled
+  
+  extraVolumes: |
+    - name: realm-secret
+      secret:
+        secretName: realm-secret
+  extraVolumeMounts: |
+    - name: realm-secret
+      mountPath: "/realm/"
+      readOnly: true
+  service:
+    type: ClusterIP
+    httpPort: 7080
+    rules: 
+      - host: testing-toolkit-keycloak.local
+        paths: [/]
+    tls: []
+  ingress:
+    enabled: true
+    rules:
+      - host: testing-toolkit-keycloak.local
+        paths: [/]
+    tls: []
+  ## secrets used in config/keycloak-realm.json
+  realmConfig:
+    privateKey: -----BEGIN RSA PRIVATE KEY-----\nMIICWwIBAAKBgQDda1T6cyWogfG/xlUb3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A\n2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHIc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI\n6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7oCweP68CPbIrTWjR9gyjmSHfYhwIDAQAB\nAoGAexcdAbIboEbE7xjB3aIm8rPpZovkOAkGJVKRm4OwN4S77FubPIoCjk631cWn\npcdoWBuqcGzcNfNDZL2szIPmdZU/Cx9I1wjFKRI1pKVS6E8giFLxKDg4KytLDUB2\nToU63yIGQ3lw2GL9Uj66AztAbcJcjsbWLPgtDiiEJlqFzVECQQDvr8pC1lChqgAQ\n8lWxh0LhuXBpGOpnnylWzloZ/kj9Xjh7ZNCRTRSGLDlANL040tzqOeJw3gvwLPtS\nKueUOCBZAkEA7H1B4dShqsXEKVMsy/7BqjT9EMUadYatJel47V5Hql9SO2Z0iK4f\nA22WWokXARb2bXk0awEw2lI6H2GgP3Oj3wJABM1PzxD+Io8GW1CPmPPtyhnt/50J\nLTRKHrwZoAWxLqpRlV9Ksm6J57pBF2E3HUlUNbkdKUe5k4FDM706UITjWQJAc4hp\n9Drd1EETqSCyROKrmEyUyWmRmJL36gqaglRJ7Kju0ogmLFPsYM9b4dURgP3H3AmX\nmyMUy8PaE1StZfJHvwJAA+SRSj+FFajdzrIlYFo7TirFWyQ/wdQ3+IKVGohOFQms\nYEi2xYZD4hWgztz4AbyHVFPLnS1mhwoO/uE2qbNHjw==\n-----END RSA PRIVATE KEY-----
+    embeddedCertificate: -----BEGIN CERTIFICATE-----\nMIICrDCCAhWgAwIBAgIUBQ88qYAqQ1+I+ISsaIgYPqbya9QwDQYJKoZIhvcNAQEL\nBQAwaDELMAkGA1UEBhMCVUsxDzANBgNVBAgMBkxvbmRvbjEPMA0GA1UEBwwGTG9u\nZG9uMREwDwYDVQQKDAhNb2R1c2JveDERMA8GA1UECwwITW9kdXNib3gxETAPBgNV\nBAMMCE1vZHVzYm94MB4XDTIwMDkzMDE3MDYwNloXDTIxMDkzMDE3MDYwNlowaDEL\nMAkGA1UEBhMCVUsxDzANBgNVBAgMBkxvbmRvbjEPMA0GA1UEBwwGTG9uZG9uMREw\nDwYDVQQKDAhNb2R1c2JveDERMA8GA1UECwwITW9kdXNib3gxETAPBgNVBAMMCE1v\nZHVzYm94MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDda1T6cyWogfG/xlUb\n3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHI\nc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7o\nCweP68CPbIrTWjR9gyjmSHfYhwIDAQABo1MwUTAdBgNVHQ4EFgQUEE+og3aDjUzC\nywQo45Fhjp5S9EowHwYDVR0jBBgwFoAUEE+og3aDjUzCywQo45Fhjp5S9EowDwYD\nVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOBgQC2a7sxisCTQa9oRGMZRmJs\nFMZjia126qlRYm6ljjM2wWlqIBdxjzLhLJbAiWMyzGKTZdMOG51Ujc+NapKRLS4K\nHVnzcbtgRNq6GZk5C1L8BEzR6NxU/CdOkm2Vx811CTOT/YijpjtjF01K1aIZE+z8\nmdzyVY9ZybXqbNclLU7rwA==\n-----END CERTIFICATE-----
+    clientSecret: 23b898a5-63d2-4055-bbe1-54efcda37e7d
+    hubPassword: hub

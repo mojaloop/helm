@@ -11,10 +11,11 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.externalPort }}
-      targetPort: {{ .Values.service.internalPort }}
-      protocol: TCP
-      name: {{ .Values.service.name }}
+    {{- with .Values.service.ports }}
+    - port: {{ .webUi.externalPort }}
+      targetPort: {{ .webUi.internalPort }}
+      name: {{ .webUi.name }}
+    {{- end }}
   selector:
     app.kubernetes.io/name: {{ include "ml-testing-toolkit-frontend.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
