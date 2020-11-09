@@ -25,7 +25,6 @@ cat ${DIR}/../**/values.yaml \
   | grep -v "mojaloop/central-kms" \
   | grep -v "mojaloop/interop-switch" \
   | grep -v "mojaloop/forensic-logging-sidecar" \
-  | grep -v "mojaloop/ml-testing-toolkit" \
   | grep -v "^#" \
   | sort -u \
   | tr -d '\n' \
