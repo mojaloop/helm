@@ -13,17 +13,17 @@ Refer to Helm v3 docs for more information: https://docs.helm.sh/
 
 1. Add Helm dependency repositories:
 ```bash
-   helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator
-   helm repo add kiwigrid https://kiwigrid.github.io	   helm repo add kiwigrid https://kiwigrid.github.io
-   helm repo add elastic https://helm.elastic.co	   helm repo add elastic https://helm.elastic.co
+   helm repo add stable https://charts.helm.sh/stable
+   helm repo add incubator https://charts.helm.sh/incubator
+   helm repo add kiwigrid https://kiwigrid.github.io
+   helm repo add elastic https://helm.elastic.co
    helm repo add bitnami https://charts.bitnami.com/bitnami
-   helm repo add stable https://kubernetes-charts.storage.googleapis.com/
    helm repo add codecentric https://codecentric.github.io/helm-charts
 ```
 
 ## Configure remote Mojaloop Helm repo on your Helm Client
 
-1. Add Mojaloop repo 
+1. Add Mojaloop repo
 
 `helm repo add mojaloop http://mojaloop.io/helm/repo/`
 
