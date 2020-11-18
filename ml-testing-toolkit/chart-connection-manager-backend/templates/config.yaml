@@ -1,0 +1,17 @@
+{{- $RELEASE_NAME := .Release.Name -}}
+{{- $MYSQL := (.Values.dependencies.mysql) -}}
+{{- $API_AUTHENTICATION := index .Values.dependencies (ternary "keycloak" "adminApiAuthentication" .Values.dependencies.keycloak.enabled) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "connection-manager-backend.fullname" . }}-config
+  labels:
+    app.kubernetes.io/name: {{ include "connection-manager-backend.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+data:
+{{- range $k, $v := .Values.config }}
+  {{ $k }}: {{ ($v | toPrettyJson | replace "$mysql_host" (index $MYSQL "host") | replace "$mysql_port" (index $MYSQL "port") | replace "$auth_host" (index $API_AUTHENTICATION "host") | replace "$auth_port" (index $API_AUTHENTICATION "port") | replace "$auth_issuer_path" (index $API_AUTHENTICATION "paths" "issuer") | replace "$auth_token_iss_path" (index $API_AUTHENTICATION "paths" "tokenIss") | replace "$auth_embedded_certificate" (index $API_AUTHENTICATION "embeddedCertificate") | replace "$release_name" $RELEASE_NAME) }}
+{{- end }}

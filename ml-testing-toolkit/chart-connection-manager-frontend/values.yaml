@@ -1,0 +1,27 @@
+replicaCount: 1
+enabled: true
+image:
+  repository: modusbox/connection-manager-ui
+  version: 1.6.9
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  ports:
+    webUi:
+      name: web-ui
+      externalPort: 5060
+      internalPort: 8080
+
+ingress:
+  enabled: true
+  hosts:
+    connection-manager.local:
+      port: 5060
+      paths: ['/']
+  tls:
+  annotations:
+
+config:
+  API_BASE_URL: http://connection-manager.local
+  AUTH_ENABLED: "FALSE"

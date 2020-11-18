@@ -1,0 +1,30 @@
+{{- if .Values.ingress.enabled -}}
+{{- $serviceFullName := include "connection-manager-backend.fullname" . -}}
+apiVersion: {{ template "connection-manager-backend.apiVersion.Ingress" . }}
+kind: Ingress
+metadata:
+  name: {{ template "connection-manager-backend.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "connection-manager-backend.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  rules:
+    {{- range $hostname, $service := .Values.ingress.hosts }}
+    - host: {{ $hostname }}
+      http:
+        paths:
+          {{- range $path := (index $service "paths") }}
+          - path: {{ $path }}
+            backend:
+              serviceName: {{ $serviceFullName }}
+              servicePort: {{ index $service "port" }}
+          {{- end -}}
+    {{- end -}}
+{{- end -}}

@@ -1,7 +1,6 @@
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
 {{- $mongodbHost := ( .Values.config.mongo_host | replace "$release_name" .Release.Name ) -}}
-
-apiVersion: apps/v1beta2
+apiVersion: {{ template "centraleventprocessor.apiVersion.Deployment" . }}
 kind: Deployment
 metadata:
   name: {{ include "centraleventprocessor.fullname" . }}
@@ -55,6 +54,8 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
+              name: http
+              protocol: TCP
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:

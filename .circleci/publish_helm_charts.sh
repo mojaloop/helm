@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+REVISION=${GITHUB_TAG:-$GIT_SHA1}
+if [ -n ${GITHUB_TAG} ]; then
+  COMMIT_MESSAGE="Updating development release to $REVISION"
+else 
+  COMMIT_MESSAGE="Updating release to $REVISION"
+fi
+
+set -eox pipefail
+
 echo "Setting BASH_ENV..." | tee git.log 
 source $BASH_ENV
 
@@ -12,7 +21,6 @@ git fetch -q --tags $GITHUB_PROJECT_USERNAME &> git.log
 echo "Checking out $GITHUB_TARGET_BRANCH" | tee git.log 
 git checkout -b $GITHUB_TARGET_BRANCH $GITHUB_PROJECT_USERNAME/$GITHUB_TARGET_BRANCH &> git.log
 
-REVISION=${GITHUB_TAG:-$GIT_SHA1}
 echo "Merging code from $REVISION..." | tee git.log 
 git merge --no-commit $REVISION &> git.log
 
@@ -34,11 +42,7 @@ echo "Staging packaged Helm charts..." | tee git.log
 git add -f repo/*.*
 
 echo "Commiting changes..." | tee git.log 
-if [ -z $GITHUB_TAG ]; then
-    git commit -a -m "Updating release to $GITHUB_TAG"
-else
-    git commit -a -m "Updating development release to $GIT_SHA1"
-fi
+git commit -a -m "'$COMMIT_MESSAGE'"
 
 echo "Publishing $REVISION release to $GITHUB_TARGET_BRANCH on github..." | tee git.log 
 git push -q $GITHUB_PROJECT_USERNAME $GITHUB_TARGET_BRANCH &> git.log

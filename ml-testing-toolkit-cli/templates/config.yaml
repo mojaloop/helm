@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ml-testing-toolkit-cli.fullname" . }}-config-file-defaults
+  labels:
+    app.kubernetes.io/name: {{ include "ml-testing-toolkit-cli.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+data:
+  "cli-default-config.json": {{ .Values.configFileDefaults | toPrettyJson | quote }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ml-testing-toolkit-cli.fullname" . }}-config-testcase-environment-file
+  labels:
+    app.kubernetes.io/name: {{ include "ml-testing-toolkit-cli.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+data:
+  "cli-testcase-environment.json": {{ .Values.testCaseEnvironmentFile | toPrettyJson | replace "$release_name" .Release.Name | quote }}

@@ -188,10 +188,9 @@ defaults: &defaults
         tls:
           # In order to enable TLS with your supplied credentials, you will need to:
           # 1. set all three of the `cert`, `key`, `cacert` fields appropriately for each of
-          # `inbound`, `outbound` and `test` as per your preference.
+          # `inbound` and `outbound` as per your preference.
           # 2. optionally specify `schemeAdapter.env.INBOUND_MUTUAL_TLS_ENABLED: true`
           # 3. optionally specify `schemeAdapter.env.OUTBOUND_MUTUAL_TLS_ENABLED: true`
-          # 4. optionally specify `schemeAdapter.env.TEST_MUTUAL_TLS_ENABLED: true`
           # It probably makes sense to set your CA cert in defaults. Note that the default is that
           # the CA, cert and key will be generated for you by this chart. To use this functionality
           # you only need specify the config documented in steps (2, 3, 4) a few lines up.
@@ -210,8 +209,8 @@ defaults: &defaults
           #     ...
           #     -----END RSA PRIVATE KEY-----
           #
-          # To set the same values for each of inbound, outbound and test, specify the values for
-          # inbound as above, then the values for outbound and test using yaml anchors:
+          # To set the same values for each of inbound and outbound, specify the values for
+          # inbound as above, then the values for outbound using yaml anchors:
           #
           # inbound: &inbound
           #   key: |
@@ -221,10 +220,8 @@ defaults: &defaults
           #   cert: |
           #     ..
           # outbound: *inbound
-          # test: *inbound
           inbound: &inbound
           outbound: *inbound
-          test: *inbound
         jws:
           # Use the privKeySecretName field if you would like to supply a JWS private key external
           # to this chart.
@@ -251,7 +248,7 @@ defaults: &defaults
           publicKey: ''
       image:
         repository: mojaloop/sdk-scheme-adapter
-        tag: v10.6.3
+        tag: v11.8.0
         pullPolicy: Always
       <<: *defaultProbes
 
@@ -289,7 +286,6 @@ defaults: &defaults
         # environment, i.e. when you're running it locally against your own implementation.
         INBOUND_MUTUAL_TLS_ENABLED: false
         OUTBOUND_MUTUAL_TLS_ENABLED: false
-        TEST_MUTUAL_TLS_ENABLED: false
 
         # Enable JWS verification and signing
         VALIDATE_INBOUND_JWS: false
@@ -318,10 +314,6 @@ defaults: &defaults
           # OUT_CLIENT_CERT_PATH: ./secrets/outbound-cert.pem
           # OUT_CLIENT_KEY_PATH: ./secrets/outbound-key.pem
 
-          # TEST_CA_CERT_PATH: ./secrets/test-cacert.pem
-          # TEST_CLIENT_CERT_PATH: ./secrets/test-cert.pem
-          # TEST_CLIENT_KEY_PATH: ./secrets/test-key.pem
-
         # The number of space characters by which to indent pretty-printed logs. If set to zero, log events
         # will each be printed on a single line.
         LOG_INDENT: "0"
@@ -333,7 +325,8 @@ defaults: &defaults
         # CACHE_EXPIRY_SECONDS=3600
 
         # Switch or DFSP system under test Mojaloop API endpoint
-        # The option 'PEER_ENDPOINT' has no effect if the remaining three options 'ALS_ENDPOINT', 'QUOTES_ENDPOINT', 'TRANSFERS_ENDPOINT' are specified.
+        # The option 'PEER_ENDPOINT' has no effect if the remaining options 'ALS_ENDPOINT', 'QUOTES_ENDPOINT',
+        # 'BULK_QUOTES_ENDPOINT', 'TRANSFERS_ENDPOINT', 'BULK_TRANSFERS_ENDPOINT', 'TRANSACTION_REQUESTS_ENDPOINT' are specified.
         # Do not include the protocol, i.e. http.
         PEER_ENDPOINT: "mojaloop-switch"
         # ALS_ENDPOINT="mojaloop-switch-als"
@@ -341,6 +334,7 @@ defaults: &defaults
         # TRANSFERS_ENDPOINT="mojaloop-switch-transfers"
         # BULK_TRANSFERS_ENDPOINT="mojaloop-switch-bulk-transfers"
         # BULK_QUOTES_ENDPOINT="mojaloop-switch-bulk-quotes"
+        # TRANSACTION_REQUESTS_ENDPOINT=transaction-requests-service
 
         # This value specifies the endpoint the scheme adapter expects to communicate with the
         # backend on. Do not include the protocol, i.e. http.
@@ -400,6 +394,10 @@ defaults: &defaults
         OAUTH_CLIENT_SECRET: ""
         OAUTH_REFRESH_SECONDS: "3600"
 
+        # When WSO2 auth is enabled and a request fails with a 401, the SDK can attempt to retrieve
+        # a new auth token and retry the request
+        WSO2_AUTH_FAILURE_REQUEST_RETRIES: "0"
+
         # Set to true to respect expirity timestamps
         REJECT_EXPIRED_QUOTE_RESPONSES: false
         REJECT_TRANSFERS_ON_EXPIRED_QUOTES: false
@@ -412,11 +410,11 @@ defaults: &defaults
         # The incoming transfer request should consist of an ILP packet and a matching condition in this case.
         # The fulfilment will be generated from the provided ILP packet, and must hash to the provided condition.
         ALLOW_TRANSFER_WITHOUT_QUOTE: false
-
+        RESOURCE_VERSIONS: transfers=1.1,quotes=1.0
     backend:
       image:
         repository: mojaloop/mojaloop-simulator
-        tag: v10.6.5
+        tag: v11.2.1
         pullPolicy: Always
       <<: *defaultProbes
 

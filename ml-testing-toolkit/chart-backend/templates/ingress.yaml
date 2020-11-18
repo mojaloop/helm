@@ -1,8 +1,6 @@
 {{- if .Values.ingress.enabled -}}
-{{- $serviceFullName := include "ml-testing-toolkit-backend.fullname" . -}}
-{{- $serviceRef := .Values.service -}}
-{{- $servicePath := .Values.ingress.externalPath -}}
-apiVersion: extensions/v1beta1
+{{- $SERVICE_FULL_NAME := include "ml-testing-toolkit-backend.fullname" . -}}
+apiVersion: {{ template "ml-testing-toolkit-backend.apiVersion.Ingress" . }}
 kind: Ingress
 metadata:
   name: {{ template "ml-testing-toolkit-backend.fullname" . }}
@@ -18,14 +16,16 @@ metadata:
     {{- end }}
 spec:
   rules:
-    {{- range $serviceName, $host := .Values.ingress.hosts }}
-    - host: {{ $host }}
+    {{- range $hostname, $service := .Values.ingress.hosts }}
+    - host: {{ $hostname }}
       http:
         paths:
-          - path: {{ $servicePath }}
+          {{- range $path := (index $service "paths") }}
+          - path: {{ $path }}
             backend:
-              serviceName: {{ $serviceFullName }}
-              servicePort: {{ get (get $serviceRef (printf "%s" $serviceName)) "externalPort" }}
+              serviceName: {{ $SERVICE_FULL_NAME }}
+              servicePort: {{ index $service "port" }}
+          {{- end -}}
     {{- end -}}
   {{- if .Values.ingress.tls }}
   tls:

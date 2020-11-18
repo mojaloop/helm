@@ -1,9 +1,10 @@
 {{- $prefix := include "mojaloop-simulator.prefix" . -}}
+{{- $releaseName := .Release.Name -}}
 {{- range $name, $customConfig := .Values.simulators }}
 {{- $fullName := printf "%s%s" $prefix $name }}
 {{- $config := merge $customConfig $.Values.defaults }}
 {{- $initContainerEnv := dict "SIM_NAME" $name "SIM_SCHEME_ADAPTER_SERVICE_NAME" (printf "sim-%s-scheme-adapter" $name) "SIM_BACKEND_SERVICE_NAME" (printf "sim-%s-backend" $name) "SIM_CACHE_SERVICE_NAME" (printf "sim-%s-cache" $name) -}}
-apiVersion: apps/v1
+apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
 kind: Deployment
 metadata:
   name: {{ $fullName }}-scheme-adapter
@@ -110,17 +111,11 @@ spec:
           value: "/secrets/outbound-cert.pem"
         - name: OUT_CLIENT_KEY_PATH
           value: "/secrets/outbound-key.pem"
-        - name: TEST_CA_CERT_PATH
-          value: "/secrets/test-cacert.pem"
-        - name: TEST_CLIENT_CERT_PATH
-          value: "/secrets/test-cert.pem"
-        - name: TEST_CLIENT_KEY_PATH
-          value: "/secrets/test-key.pem"
         - name: JWS_SIGNING_KEY_PATH
           value: "/jwsSigningKey/private.key"
         {{- range $k, $v := $config.config.schemeAdapter.env }}
         - name: {{ $k }}
-          value: {{ $v | quote }}
+          value: {{ $v | quote | replace "$release_name" $releaseName }}
         {{- end }}
         resources:
 {{ toYaml $config.config.schemeAdapter.resources | indent 10 }}
@@ -140,7 +135,7 @@ spec:
     {{- end }}
 
 ---
-apiVersion: apps/v1
+apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
 kind: Deployment
 metadata:
   name: {{ $fullName }}-backend
@@ -231,7 +226,7 @@ spec:
     {{- end }}
 ---
 {{- if $config.config.cache.enabled }}
-apiVersion: apps/v1
+apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
 kind: Deployment
 metadata:
   name: {{ $fullName }}-cache

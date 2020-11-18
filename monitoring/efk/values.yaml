@@ -4,14 +4,14 @@
 
 global: {}
 
-# Declare variables to be passed into your templates.
 fluentd-elasticsearch:
+  enabled: true
   image:
     repository: quay.io/fluentd_elasticsearch/fluentd
-    ## Specify an imagePullPolicy (Required)
-    ## It's recommended to change this to 'Always' if the image tag is 'latest'
-    ## ref: http://kubernetes.io/docs/user-guide/images/#updating-images
-    tag: v2.6.0
+  ## Specify an imagePullPolicy (Required)
+  ## It's recommended to change this to 'Always' if the image tag is 'latest'
+  ## ref: http://kubernetes.io/docs/user-guide/images/#updating-images
+    tag: v3.0.4
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -19,28 +19,39 @@ fluentd-elasticsearch:
     ##
     # pullSecrets:
     #   - myRegistrKeySecretName
-
+  
   ## If using AWS Elasticsearch, all requests to ES need to be signed regardless of whether
   ## one is using Cognito or not. By setting this to true, this chart will install a sidecar
   ## proxy that takes care of signing all requests being sent to the AWS ES Domain.
   awsSigningSidecar:
     enabled: false
+    resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 500Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 200Mi
+    network:
+      port: 8080
+      address: localhost
+      remoteReadTimeoutSeconds: 15
     image:
       repository: abutaha/aws-es-proxy
-      tag: 0.9
-
+      tag: v1.0
+  
   # Specify to use specific priorityClass for pods
   # ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
   # If a Pod cannot be scheduled, the scheduler tries to preempt (evict) lower priority
   # Pods to make scheduling of the pending Pod possible.
   priorityClassName: ""
-
+  
   # Specify where fluentd can find logs
   hostLogDir:
     varLog: /var/log
     dockerContainers: /var/lib/docker/containers
     libSystemdDir: /usr/lib64
-
+  
   ## Configure resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
   ##
@@ -49,51 +60,102 @@ fluentd-elasticsearch:
     #   cpu: 100m
     #   memory: 500Mi
     # requests:
-  #   cpu: 100m
-  #   memory: 200Mi
-
+    #   cpu: 100m
+    #   memory: 200Mi
+  
   elasticsearch:
     auth:
       enabled: false
       user: "yourUser"
       password: "yourPass"
-    bufferChunkLimit: "2M"
-    bufferQueueLimit: 8
-    host: "elasticsearch-master"
-    logstashPrefix: "logstash"
-    port: 9200
+    includeTagKey: true
+    setOutputHostEnvVar: true
+    # If setOutputHostEnvVar is false this value is ignored
+    hosts: ["elasticsearch-master:9200"]
+    indexName: "fluentd"
+    logstash:
+      enabled: true
+      prefix: "logstash"
+      prefixSeparator: "-"
+      dateformat: "%Y.%m.%d"
+    ilm:
+      enabled: false
+      policy_id: logstash-policy
+      policy: {}
+        # example for ilm policy config
+        # phases:
+        #   hot:
+        #     min_age: 0ms
+        #     actions:
+        #       rollover:
+        #         max_age: 30d
+        #         max_size: 20gb
+        #       set_priority:
+        #           priority: 100
+        #   delete:
+        #     min_age: 60d
+        #     actions:
+        #       delete:
+      policies: {}
+        # example for ilm policies config
+        # ilm_policy_id1: {}
+        # ilm_policy_id2: {}
+      policy_overwrite: false
+    path: ""
     scheme: "http"
     sslVerify: true
     sslVersion: "TLSv1_2"
-
+    outputType: "elasticsearch"
+    typeName: "_doc"
+    logLevel: "info"
+    reconnectOnError: true
+    reloadOnFailure: false
+    reloadConnections: false
+    requestTimeout: "5s"
+    suppressTypeName: false
+    buffer:
+      enabled: true
+      type: "file"
+      path: "/var/log/fluentd-buffers/kubernetes.system.buffer"
+      flushMode: "interval"
+      retryType: "exponential_backoff"
+      flushThreadCount: 2
+      flushInterval: "5s"
+      retryForever: true
+      retryMaxInterval: 30
+      chunkLimitSize: "2M"
+      queueLimitLength: 8
+      overflowAction: "block"
+  
   # If you want to change args of fluentd process
   # by example you can add -vv to launch with trace log
   fluentdArgs: "--no-supervisor -q"
-
+  
   # If you want to add custom environment variables, use the env dict
   # You can then reference these in your config file e.g.:
   #     user "#{ENV['OUTPUT_USER']}"
-  env:
-  # OUTPUT_USER: my_user
-  # LIVENESS_THRESHOLD_SECONDS: 300
-  # STUCK_THRESHOLD_SECONDS: 900
-
+  env: {}
+    # OUTPUT_USER: my_user
+    # LIVENESS_THRESHOLD_SECONDS: 300
+    # STUCK_THRESHOLD_SECONDS: 900
+  
   # If you want to add custom environment variables from secrets, use the secret list
-  secret:
+  secret: []
   # - name: ELASTICSEARCH_PASSWORD
   #   secret_name: elasticsearch
   #   secret_key: password
-
+  
   rbac:
     create: true
-
+  
   serviceAccount:
     # Specifies whether a ServiceAccount should be created
     create: true
     # The name of the ServiceAccount to use.
     # If not set and create is true, a name is generated using the fullname template
     name: ""
-
+    annotations: {}
+  
   ## Specify if a Pod Security Policy for node-exporter must be created
   ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/
   ##
@@ -106,50 +168,76 @@ fluentd-elasticsearch:
       ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#sysctl
       ##
       # seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
-    # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
-    # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
-
+      # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
+      # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+  
   livenessProbe:
     enabled: true
-
+    initialDelaySeconds: 600
+    periodSeconds: 60
+    kind:
+      exec:
+        command:
+        # Liveness probe is aimed to help in situations where fluentd
+        # silently hangs for no apparent reasons until manual restart.
+        # The idea of this probe is that if fluentd is not queueing or
+        # flushing chunks for 5 minutes, something is not right. If
+        # you want to change the fluentd configuration, reducing amount of
+        # logs fluentd collects, consider changing the threshold or turning
+        # liveness probe off completely.
+        - '/bin/sh'
+        - '-c'
+        - >
+          LIVENESS_THRESHOLD_SECONDS=${LIVENESS_THRESHOLD_SECONDS:-300};
+          STUCK_THRESHOLD_SECONDS=${STUCK_THRESHOLD_SECONDS:-900};
+          if [ ! -e /var/log/fluentd-buffers ];
+          then
+            exit 1;
+          fi;
+          touch -d "${STUCK_THRESHOLD_SECONDS} seconds ago" /tmp/marker-stuck;
+          if [ -z "$(find /var/log/fluentd-buffers -type d -newer /tmp/marker-stuck -print -quit)" ];
+          then
+            rm -rf /var/log/fluentd-buffers;
+            exit 1;
+          fi;
+          touch -d "${LIVENESS_THRESHOLD_SECONDS} seconds ago" /tmp/marker-liveness;
+          if [ -z "$(find /var/log/fluentd-buffers -type d -newer /tmp/marker-liveness -print -quit)" ];
+          then
+            exit 1;
+          fi;
+  
   annotations: {}
-
+  
   podAnnotations: {}
-  # prometheus.io/scrape: "true"
-  # prometheus.io/port: "24231"
-
+    # prometheus.io/scrape: "true"
+    # prometheus.io/port: "24231"
+  
   ## DaemonSet update strategy
   ## Ref: https://kubernetes.io/docs/tasks/manage-daemon/update-daemon-set/
   updateStrategy:
     type: RollingUpdate
-
-  tolerations: {}
+  
+  tolerations: []
     # - key: node-role.kubernetes.io/master
-  #   operator: Exists
-  #   effect: NoSchedule
-
+    #   operator: Exists
+    #   effect: NoSchedule
+  
   affinity: {}
     # nodeAffinity:
     #   requiredDuringSchedulingIgnoredDuringExecution:
     #     nodeSelectorTerms:
     #     - matchExpressions:
-  #       - key: node-role.kubernetes.io/master
-  #         operator: DoesNotExist
-
+    #       - key: node-role.kubernetes.io/master
+    #         operator: DoesNotExist
+  
   nodeSelector: {}
-
-  service:
-    ports:
-      - name: "monitor-agent"
-        type: ClusterIP
-        port: 24231
-      - name: "tcp-ingest"
-        type: ClusterIP
-        port: 24224
-  #      - name: "http-ingest"
-  #        type: ClusterIP
-  #        port: 9880
-
+  
+  service: {}
+    # ports:
+    #   - name: "monitor-agent"
+    #     type: ClusterIP
+    #     port: 24231
+  
   serviceMonitor:
     ## If true, a ServiceMonitor CRD is created for a prometheus operator
     ## https://github.com/coreos/prometheus-operator
@@ -159,7 +247,17 @@ fluentd-elasticsearch:
     path: /metrics
     port: 24231
     labels: {}
-
+    metricRelabelings: []
+    relabelings: []
+    jobLabel: "app.kubernetes.io/instance"
+    type: ClusterIP
+  
+  serviceMetric:
+    ## If true, the metrics service will be created
+    ## Alternative to implicit creation through serviceMonitor.enabled
+    ##
+    enabled: false
+  
   prometheusRule:
     ## If true, a PrometheusRule CRD is created for a prometheus operator
     ## https://github.com/coreos/prometheus-operator
@@ -168,45 +266,30 @@ fluentd-elasticsearch:
     prometheusNamespace: monitoring
     labels: {}
     #  role: alert-rules
-
+  
   configMaps:
     useDefaults:
       systemConf: true
       containersInputConf: true
       systemInputConf: true
-      forwardInputConf: false
+      forwardInputConf: true
       monitoringConf: true
       outputConf: true
-
+  
   # can be used to add new config or overwrite the default configmaps completely after the configmaps default has been disabled above
-  extraConfigMaps:
-    #   system.conf: |-
-    #     <system>
-    #       root_dir /tmp/fluentd-buffers/
-    #     </system>
-    forward.input.conf: |-
-      # Forwards the messages sent over TCP and sends it to elasticsearch - https://docs.fluentd.org/input/forward
-      <source>
-        @id forward
-        @type forward
-        bind 0.0.0.0
-        port 24224
-      </source>
-  #      # Takes the messages sent over HTTP and sends it to elasticsearch - https://docs.fluentd.org/input/http
-  #      <source>
-  #        @type http
-  #        bind 0.0.0.0
-  #        port 9880
-  #        body_size_limit 32m
-  #        keepalive_timeout 10s
-  #      </source>
-
-  # extraVolumes:
+  extraConfigMaps: {}
+    # system.conf: |-
+    #   <system>
+    #     root_dir /tmp/fluentd-buffers/
+    #   </system>
+  
+  extraVolumes: []
   #   - name: es-certs
   #     secret:
   #       defaultMode: 420
   #       secretName: es-certs
-  # extraVolumeMounts:
+  
+  extraVolumeMounts: []
   #   - name: es-certs
   #     mountPath: /certs
   #     readOnly: true
@@ -215,25 +298,27 @@ elasticsearch:
   # Default values for elasticsearch.
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
+  enabled: true
+  
   clusterName: "elasticsearch"
   nodeGroup: "master"
-
+  
   # The service that non master groups will try to connect to when joining the cluster
   # This should be set to clusterName + "-" + nodeGroup for your master group
   masterService: ""
-
+  
   # Elasticsearch roles that will be applied to this nodeGroup
   # These will be set as environment variables. E.g. node.master=true
   roles:
     master: "true"
     ingest: "true"
     data: "true"
-
+  
   replicas: 3
   minimumMasterNodes: 2
-
+  
   esMajorVersion: ""
-
+  
   # Allows you to add any config files in /usr/share/elasticsearch/config/
   # such as elasticsearch.yml and log4j2.properties
   esConfig: {}
@@ -242,14 +327,21 @@ elasticsearch:
   #      nestedkey: value
   #  log4j2.properties: |
   #    key = value
-
+  
   # Extra environment variables to append to this nodeGroup
   # This will be appended to the current 'env:' key. You can use any of the kubernetes env
   # syntax here
   extraEnvs: []
   #  - name: MY_ENVIRONMENT_VAR
   #    value: the_value_goes_here
-
+  
+  # Allows you to load environment variables from kubernetes secret or config map
+  envFrom: []
+  # - secretRef:
+  #     name: env-secret
+  # - configMapRef:
+  #     name: config-map
+  
   # A list of secrets and their paths to mount inside the pod
   # This is useful for mounting certificates for security and for mounting
   # the X-Pack license
@@ -257,16 +349,20 @@ elasticsearch:
   #  - name: elastic-certificates
   #    secretName: elastic-certificates
   #    path: /usr/share/elasticsearch/config/certs
-
+  #    defaultMode: 0755
+  
   image: "docker.elastic.co/elasticsearch/elasticsearch"
-  imageTag: "7.2.0"
+  imageTag: "7.7.1"
   imagePullPolicy: "IfNotPresent"
-
+  
   podAnnotations: {}
-  # iam.amazonaws.com/role: es-cluster
-
+    # iam.amazonaws.com/role: es-cluster
+  
+  # additionals labels
+  labels: {}
+  
   esJavaOpts: "-Xmx1g -Xms1g"
-
+  
   resources:
     requests:
       cpu: "100m"
@@ -274,132 +370,170 @@ elasticsearch:
     limits:
       cpu: "1000m"
       memory: "2Gi"
-
+  
   initResources: {}
     # limits:
     #   cpu: "25m"
     #   # memory: "128Mi"
-  # requests:
-  #   cpu: "25m"
-  #   memory: "128Mi"
-
+    # requests:
+    #   cpu: "25m"
+    #   memory: "128Mi"
+  
   sidecarResources: {}
     # limits:
     #   cpu: "25m"
     #   # memory: "128Mi"
-  # requests:
-  #   cpu: "25m"
-  #   memory: "128Mi"
-
+    # requests:
+    #   cpu: "25m"
+    #   memory: "128Mi"
+  
   networkHost: "0.0.0.0"
-
+  
   volumeClaimTemplate:
     accessModes: [ "ReadWriteOnce" ]
-    storageClassName: "awsgp2"
     resources:
       requests:
-        storage: 100Gi
-
+        storage: 30Gi
+  
+  rbac:
+    create: false
+    serviceAccountAnnotations: {}
+    serviceAccountName: ""
+  
+  podSecurityPolicy:
+    create: false
+    name: ""
+    spec:
+      privileged: true
+      fsGroup:
+        rule: RunAsAny
+      runAsUser:
+        rule: RunAsAny
+      seLinux:
+        rule: RunAsAny
+      supplementalGroups:
+        rule: RunAsAny
+      volumes:
+        - secret
+        - configMap
+        - persistentVolumeClaim
+  
   persistence:
     enabled: false
+    labels:
+      # Add default labels for the volumeClaimTemplate fo the StatefulSet
+      enabled: false
     annotations: {}
-
+  
   extraVolumes: []
-  # - name: extras
-  #   emptyDir: {}
-
+    # - name: extras
+    #   emptyDir: {}
+  
   extraVolumeMounts: []
-  # - name: extras
-  #   mountPath: /usr/share/extras
-  #   readOnly: true
-
+    # - name: extras
+    #   mountPath: /usr/share/extras
+    #   readOnly: true
+  
+  extraContainers: []
+    # - name: do-something
+    #   image: busybox
+    #   command: ['do', 'something']
+  
   extraInitContainers: []
-  # - name: do-something
-  #   image: busybox
-  #   command: ['do', 'something']
-
+    # - name: do-something
+    #   image: busybox
+    #   command: ['do', 'something']
+  
   # This is the PriorityClass settings as defined in
   # https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
   priorityClassName: ""
-
+  
   # By default this will make sure two pods don't end up on the same node
   # Changing this to a region would allow you to spread pods across regions
   antiAffinityTopologyKey: "kubernetes.io/hostname"
-
+  
   # Hard means that by default pods will only be scheduled if there are enough nodes for them
   # and that they will never end up on the same node. Setting this to soft will do this "best effort"
   antiAffinity: "hard"
-
+  
   # This is the node affinity settings as defined in
   # https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#node-affinity-beta-feature
   nodeAffinity: {}
-
+  
   # The default is to deploy all pods serially. By setting this to parallel all pods are started at
   # the same time when bootstrapping the cluster
   podManagementPolicy: "Parallel"
-
+  
+  # The environment variables injected by service links are not used, but can lead to slow Elasticsearch boot times when
+  # there are many services in the current namespace.
+  # If you experience slow pod startups you probably want to set this to `false`.
+  enableServiceLinks: true
+  
   protocol: http
   httpPort: 9200
   transportPort: 9300
-
+  
   service:
+    labels: {}
+    labelsHeadless: {}
     type: ClusterIP
-    nodePort:
+    nodePort: ""
     annotations: {}
-
+    httpPortName: http
+    transportPortName: transport
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+  
   updateStrategy: RollingUpdate
-
+  
   # This is the max unavailable setting for the pod disruption budget
   # The default value of 1 will make sure that kubernetes won't allow more than 1
   # of your pods to be unavailable during maintenance
   maxUnavailable: 1
-
+  
   podSecurityContext:
     fsGroup: 1000
-
-  # The following value is deprecated,
-  # please use the above podSecurityContext.fsGroup instead
-  fsGroup: ""
-
+    runAsUser: 1000
+  
   securityContext:
     capabilities:
       drop:
-        - ALL
+      - ALL
     # readOnlyRootFilesystem: true
     runAsNonRoot: true
     runAsUser: 1000
-
+  
   # How long to wait for elasticsearch to stop gracefully
   terminationGracePeriod: 120
-
+  
   sysctlVmMaxMapCount: 262144
-
+  
   readinessProbe:
     failureThreshold: 3
     initialDelaySeconds: 10
     periodSeconds: 10
     successThreshold: 3
     timeoutSeconds: 5
-
+  
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html#request-params wait_for_status
   clusterHealthCheckParams: "wait_for_status=green&timeout=1s"
-
+  
   ## Use an alternate scheduler.
   ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
   ##
   schedulerName: ""
-
+  
   imagePullSecrets: []
   nodeSelector: {}
   tolerations: []
-
+  
   # Enabling this will publically expose your Elasticsearch instance.
   # Only enable this if you have security enabled on your cluster
   ingress:
     enabled: false
     annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
     path: /
     hosts:
       - elasticsearch.local
@@ -407,126 +541,158 @@ elasticsearch:
     #  - secretName: chart-example-tls
     #    hosts:
     #      - chart-example.local
-
+  
   nameOverride: ""
   fullnameOverride: ""
-
+  
   # https://github.com/elastic/helm-charts/issues/63
   masterTerminationFix: false
-
+  
   lifecycle: {}
     # preStop:
     #   exec:
     #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
-  # postStart:
-  #   exec:
-  #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
-
+    # postStart:
+    #   exec:
+    #     command:
+    #       - bash
+    #       - -c
+    #       - |
+    #         #!/bin/bash
+    #         # Add a template to adjust number of shards/replicas
+    #         TEMPLATE_NAME=my_template
+    #         INDEX_PATTERN="logstash-*"
+    #         SHARD_COUNT=8
+    #         REPLICA_COUNT=1
+    #         ES_URL=http://localhost:9200
+    #         while [[ "$(curl -s -o /dev/null -w '%{http_code}\n' $ES_URL)" != "200" ]]; do sleep 1; done
+    #         curl -XPUT "$ES_URL/_template/$TEMPLATE_NAME" -H 'Content-Type: application/json' -d'{"index_patterns":['\""$INDEX_PATTERN"\"'],"settings":{"number_of_shards":'$SHARD_COUNT',"number_of_replicas":'$REPLICA_COUNT'}}'
+  
   sysctlInitContainer:
     enabled: true
+  
+  keystore: []
+  
+  # Deprecated
+  # please use the above podSecurityContext.fsGroup instead
+  fsGroup: ""
 
 kibana:
-  elasticsearchURL: "" # "http://elasticsearch-master:9200"
+  enabled: true
+
   elasticsearchHosts: "http://elasticsearch-master:9200"
-
+  
   replicas: 1
-
+  
   # Extra environment variables to append to this nodeGroup
   # This will be appended to the current 'env:' key. You can use any of the kubernetes env
   # syntax here
-  extraEnvs: []
+  extraEnvs:
+    - name: "NODE_OPTIONS"
+      value: "--max-old-space-size=1800"
   #  - name: MY_ENVIRONMENT_VAR
   #    value: the_value_goes_here
-
+  
+  # Allows you to load environment variables from kubernetes secret or config map
+  envFrom: []
+  # - secretRef:
+  #     name: env-secret
+  # - configMapRef:
+  #     name: config-map
+  
   # A list of secrets and their paths to mount inside the pod
   # This is useful for mounting certificates for security and for mounting
   # the X-Pack license
   secretMounts: []
-  #  - name: elastic-certificates
-  #    secretName: elastic-certificates
-  #    path: /usr/share/elasticsearch/config/certs
-
+  #  - name: kibana-keystore
+  #    secretName: kibana-keystore
+  #    path: /usr/share/kibana/data/kibana.keystore
+  #    subPath: kibana.keystore # optional
+  
   image: "docker.elastic.co/kibana/kibana"
-  imageTag: "7.2.0"
+  imageTag: "7.7.1"
   imagePullPolicy: "IfNotPresent"
-
+  
+  # additionals labels
+  labels: {}
+  
   podAnnotations: {}
-  # iam.amazonaws.com/role: es-cluster
-
+    # iam.amazonaws.com/role: es-cluster
+  
   resources:
     requests:
-      cpu: "100m"
-      memory: "500m"
+      cpu: "1000m"
+      memory: "2Gi"
     limits:
       cpu: "1000m"
-      memory: "1Gi"
-
+      memory: "2Gi"
+  
   protocol: http
-
+  
   serverHost: "0.0.0.0"
-
+  
   healthCheckPath: "/app/kibana"
-
+  
   # Allows you to add any config files in /usr/share/kibana/config/
   # such as kibana.yml
   kibanaConfig: {}
   #   kibana.yml: |
   #     key:
   #       nestedkey: value
-
+  
   # If Pod Security Policy in use it may be required to specify security context as well as service account
-
+  
   podSecurityContext:
     fsGroup: 1000
-
+  
   securityContext:
     capabilities:
       drop:
-        - ALL
+      - ALL
     # readOnlyRootFilesystem: true
     runAsNonRoot: true
     runAsUser: 1000
-
+  
   serviceAccount: ""
-
+  
   # This is the PriorityClass settings as defined in
   # https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
   priorityClassName: ""
-
-  # By default this will make sure two pods don't end up on the same node
-  # Changing this to a region would allow you to spread pods across regions
-  antiAffinityTopologyKey: "kubernetes.io/hostname"
-
-  # Hard means that by default pods will only be scheduled if there are enough nodes for them
-  # and that they will never end up on the same node. Setting this to soft will do this "best effort"
-  antiAffinity: "hard"
-
+  
   httpPort: 5601
-
-  # This is the max unavailable setting for the pod disruption budget
-  # The default value of 1 will make sure that kubernetes won't allow more than 1
-  # of your pods to be unavailable during maintenance
-  maxUnavailable: 1
-
+  
+  extraContainers: ""
+  # - name: dummy-init
+  #   image: busybox
+  #   command: ['echo', 'hey']
+  
+  extraInitContainers: ""
+  # - name: dummy-init
+  #   image: busybox
+  #   command: ['echo', 'hey']
+  
   updateStrategy:
     type: "Recreate"
-
+  
   service:
     type: ClusterIP
     port: 5601
-    nodePort:
+    nodePort: ""
+    labels: {}
     annotations: {}
       # cloud.google.com/load-balancer-type: "Internal"
       # service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
-    # service.beta.kubernetes.io/azure-load-balancer-internal: "true"
-    # service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
-    # service.beta.kubernetes.io/cce-load-balancer-internal-vpc: "true"
-
+      # service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+      # service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
+      # service.beta.kubernetes.io/cce-load-balancer-internal-vpc: "true"
+    loadBalancerSourceRanges: []
+      # 0.0.0.0/0
+  
   ingress:
-    enabled: true
+    enabled: false
     annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
     path: /
     hosts:
       - kibana.local
@@ -534,217 +700,196 @@ kibana:
     #  - secretName: chart-example-tls
     #    hosts:
     #      - chart-example.local
-
+  
   readinessProbe:
     failureThreshold: 3
     initialDelaySeconds: 10
     periodSeconds: 10
     successThreshold: 3
     timeoutSeconds: 5
-
+  
   imagePullSecrets: []
   nodeSelector: {}
   tolerations: []
   affinity: {}
-
+  
   nameOverride: ""
   fullnameOverride: ""
+  
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+    # postStart:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+  
+  # Deprecated - use only with versions < 6.6
+  # elasticsearchURL: "" # "http://elasticsearch-master:9200"
 
 apm-server:
-  image:
-    repository: docker.elastic.co/apm/apm-server
-    tag: 7.0.0
-    pullPolicy: IfNotPresent
+  enabled: true
 
-  # DaemonSet or Deployment
-  kind: DaemonSet
-
-  # Number of replicas when kind is Deployment
-  replicaCount: 1
-
-  # Create HorizontalPodAutoscaler object when kind is Deployment
+  apmConfig:
+    apm-server.yml: |
+      apm-server:
+        host: "0.0.0.0:8200"
+  
+      queue: {}
+  
+      output.elasticsearch:
+        hosts: ["http://elasticsearch-master:9200"]
+        ## If you have security enabled- you'll need to add the credentials
+        ## as environment variables
+        # username: "${ELASTICSEARCH_USERNAME}"
+        # password: "${ELASTICSEARCH_PASSWORD}"
+        ## If SSL is enabled
+        # protocol: https
+        # ssl.certificate_authorities:
+        #  - /usr/share/apm-server/config/certs/elastic-ca.pem
+  
+  replicas: 1
+  
+  extraContainers: ""
+  # - name: dummy-init
+  #   image: busybox
+  #   command: ['echo', 'hey']
+  
+  extraInitContainers: ""
+  # - name: dummy-init
+  #   image: busybox
+  #   command: ['echo', 'hey']
+  
+  # Extra environment variables to append to the DaemonSet pod spec.
+  # This will be appended to the current 'env:' key. You can use any of the kubernetes env
+  # syntax here
+  extraEnvs: []
+    #  - name: 'ELASTICSEARCH_USERNAME'
+    #    valueFrom:
+    #      secretKeyRef:
+    #        name: elastic-credentials
+    #        key: username
+    #  - name: 'ELASTICSEARCH_PASSWORD'
+    #    valueFrom:
+    #      secretKeyRef:
+    #        name: elastic-credentials
+    #        key: password
+  
+  # Allows you to load environment variables from kubernetes secret or config map
+  envFrom: []
+  # - secretRef:
+  #     name: env-secret
+  # - configMapRef:
+  #     name: config-map
+  
+  extraVolumeMounts: []
+    # - name: extras
+    #   mountPath: /usr/share/extras
+    #   readOnly: true
+  
+  extraVolumes: []
+    # - name: extras
+    #   emptyDir: {}
+  
+  image: "docker.elastic.co/apm/apm-server"
+  imageTag: "7.7.1"
+  imagePullPolicy: "IfNotPresent"
+  imagePullSecrets: []
+  
+  # Whether this chart should self-manage its service account, role, and associated role binding.
+  managedServiceAccount: true
+  
+  podAnnotations: {}
+    # iam.amazonaws.com/role: es-cluster
+  
+  # additionals labels
+  labels: {}
+  
+  podSecurityContext:
+    runAsUser: 0
+    privileged: false
+  
+  livenessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+  
+  readinessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+  
+  resources:
+      requests:
+        cpu: "100m"
+        memory: "100Mi"
+      limits:
+        cpu: "1000m"
+        memory: "200Mi"
+  
+  # Custom service account override that the pod will use
+  serviceAccount: ""
+  
+  # A list of secrets and their paths to mount inside the pod
+  secretMounts: []
+  #  - name: elastic-certificate-pem
+  #    secretName: elastic-certificates
+  #    path: /usr/share/apm-server/config/certs
+  
+  terminationGracePeriod: 30
+  
+  tolerations: []
+  
+  nodeSelector: {}
+  
+  affinity: {}
+  
+  # This is the PriorityClass settings as defined in
+  # https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+  priorityClassName: ""
+  
+  updateStrategy:
+    type: "RollingUpdate"
+  
+  # Override various naming aspects of this chart
+  # Only edit these if you know what you're doing
+  nameOverride: ""
+  fullnameOverride: ""
+  
   autoscaling:
     enabled: false
-    minReplicas: 2
-    maxReplicas: 10
-    metrics:
-      - type: Resource
-        resource:
-          name: cpu
-          targetAverageUtilization: 60
-      - type: Resource
-        resource:
-          name: memory
-          targetAverageUtilization: 60
-
-  # The update strategy to apply to the Deployment or DaemonSet
-  updateStrategy: {}
-  # rollingUpdate:
-  #   maxUnavailable: 1
-  # type: RollingUpdate
-
-  service:
-    enabled: true
-    type: ClusterIP
-    port: 8200
-    # portName: apm-server-svc
-    # clusterIP: None
-    ## External IP addresses of service
-    ## Default: nil
-    # externalIPs:
-    # - 192.168.0.1
-    #
-    ## LoadBalancer IP if service.type is LoadBalancer
-    ## Default: nil
-    # loadBalancerIP: 10.2.2.2
-    ## Limit load balancer source ips to list of CIDRs (where available)
-    # loadBalancerSourceRanges: []
-
-    annotations: {}
-    # Annotation example: setup ssl with aws cert when service.type is LoadBalancer
-    # service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:EXAMPLE_CERT
-    labels: {}
-    ## Label example: show service URL in `kubectl cluster-info`
-    # kubernetes.io/cluster-service: "true"
-
+  
   ingress:
     enabled: false
     annotations: {}
-    # Annotation example: set nginx ingress type
-    # kubernetes.io/ingress.class: nginx-public
-    labels: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    path: /
     hosts:
-      - apm-server.local
+      - chart-example.local
     tls: []
     #  - secretName: chart-example-tls
     #    hosts:
     #      - chart-example.local
-
-  config:
-    apm-server:
-      ### Defines the host and port the server is listening on
-      host: "0.0.0.0:8200"
-
-      ## Maximum permitted size in bytes of an unzipped request accepted by the server to be processed.
-      # max_unzipped_size: 52428800
-      ## Maximum permitted size in bytes of a request's header accepted by the server to be processed.
-      # max_header_size: 1048576
-
-      ## Maximum permitted duration in seconds for reading an entire request.
-      # read_timeout: 2s
-      ## Maximum permitted duration in seconds for writing a response.
-      # write_timeout: 2s
-
-      ## Maximum duration in seconds before releasing resources when shutting down the server.
-      # shutdown_timeout: 5s
-
-      ## Maximum number of requests permitted to be sent to the server concurrently.
-      # concurrent_requests: 40
-
-      ## Authorization token to be checked. If a token is set here the agents must
-      ## send their token in the following format: Authorization: Bearer <secret-token>.
-      ## It is recommended to use an authorization token in combination with SSL enabled.
-      # secret_token:
-      # ssl.enabled: false
-      # ssl.certificate : "path/to/cert"
-      # ssl.key : "path/to/private_key"
-
-    queue: {}
-      ## Queue type by name (default 'mem')
-      ## The memory queue will present all available events (up to the outputs
-      ## bulk_max_size) to the output, the moment the output is ready to server
-      ## another batch of events.
-      # mem:
-      ## Max number of events the queue can buffer.
-      # events: 4096
-
-      ## Hints the minimum number of events stored in the queue,
-      ## before providing a batch of events to the outputs.
-      ## A value of 0 (the default) ensures events are immediately available
-    ## to be sent to the outputs.
-    # flush.min_events: 2048
-
-    ## Maximum duration after which events are available to the outputs,
-    ## if the number of events stored in the queue is < min_flush_events.
-    # flush.timeout: 1s
-
-    # When a key contains a period, use this format for setting values on the command line:
-    # --set config."output\.file".enabled=false
-    output.file:
-      enabled: false
-    #      path: "/usr/share/apm-server/data"
-    #      filename: apm-server
-    #      rotate_every_kb: 10000
-    #      number_of_files: 5
-
-    ## Set output.file.enabled to false to enable elasticsearch
-    output.elasticsearch:
-      hosts: ["elasticsearch-master:9200"]
-      protocol: "http"
-  #      protocol: "https"
-  #      username: "elastic"
-  #      password: "changeme"
-
-  # List of beat plugins
-  plugins: []
-  # - kinesis.so
-
-  # Additional container arguments
-  extraArgs: []
-  # - -d
-  # - *
-
-  # A map of additional environment variables
-  extraVars: {}
-  # test1: "test2"
-
-  # Add additional volumes and mounts, for example to read other log files on the host
-  extraVolumes: []
-  # - hostPath:
-  #     path: /var/log
-  #   name: varlog
-  extraVolumeMounts: []
-  # - name: varlog
-  #   mountPath: /host/var/log
-  #   readOnly: true
-
-  ## Labels to be added to pods
-  podLabels: {}
-
-  ## Annotations to be added to pods
-  podAnnotations: {}
-
-  resources: {}
-    ## We usually recommend not to specify default resources and to leave this as a conscious
-    ## choice for the user. This also increases chances charts run on environments with little
-    ## resources, such as Minikube. If you do want to specify resources, uncomment the following
-    ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-  #  cpu: 100m
-  #  memory: 200Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 100Mi
-
-  ## Node labels for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  nodeSelector: {}
-
-  # Tolerations for pod assignment
-  # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  tolerations: []
-
-  ## Affinity configuration for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  affinity: {}
-
-  rbac:
-    # Specifies whether RBAC resources should be created
-    create: true
-
-  serviceAccount:
-    # Specifies whether a ServiceAccount should be created
-    create: true
-    # The name of the ServiceAccount to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name:
+  
+  service:
+    type: ClusterIP
+    port: 8200
+    nodePort: ""
+    annotations: {}
+      # cloud.google.com/load-balancer-type: "Internal"
+      # service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
+      # service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+      # service.beta.kubernetes.io/openstack-internal-load-balancer: "true"
+      # service.beta.kubernetes.io/cce-load-balancer-internal-vpc: "true"
+  
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+    # postStart:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+    

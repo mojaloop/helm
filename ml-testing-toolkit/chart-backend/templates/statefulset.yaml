@@ -1,5 +1,10 @@
+{{- if .Values.enabled -}}
 {{- $serviceFullName := include "ml-testing-toolkit-backend.fullname" . -}}
-apiVersion: apps/v1beta2
+{{- $MONGODB_COMMAND := ("until printf \".\" && nc -z -w 2 $mongodb_host $mongodb_port; do sleep 2; done;" | replace "$mongodb_host" (.Values.dependencies.mongodb.host) | replace "$mongodb_port" (print .Values.dependencies.mongodb.port) | replace "$release_name" (.Release.Name) ) -}}
+{{- $KEYCLOAK_COMMAND := ("until printf \".\" && nc -z -w 2 $keycloak_host $keycloak_port; do sleep 2; done;" | replace "$keycloak_host" (.Values.dependencies.keycloak.host) | replace "$keycloak_port" (print .Values.dependencies.keycloak.port) | replace "$release_name" (.Release.Name) ) -}}
+{{- $CONNECTION_MANAGER_COMMAND := ("until printf \".\" && nc -z -w 2 $connection_manager_host $connection_manager_port; do sleep 2; done;" | replace "$connection_manager_host" (.Values.dependencies.connectionManagerBackend.host) | replace "$connection_manager_port" (print .Values.dependencies.connectionManagerBackend.port) | replace "$release_name" (.Release.Name) ) -}}
+
+apiVersion: {{ template "ml-testing-toolkit-backend.apiVersion.StatefulSet" . }}
 kind: StatefulSet
 metadata:
   name: {{ template "ml-testing-toolkit-backend.fullname" . }}
@@ -37,6 +42,34 @@ spec:
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
 {{- end }}
+      initContainers:
+        {{- if .Values.dependencies.mongodb.enabled }}
+        - name: mongodb-checker
+          image: "docker.io/busybox:1.32"
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - {{ $MONGODB_COMMAND }}
+        {{- end }}
+        {{- if .Values.dependencies.keycloak.enabled }}
+        - name: keycloak-checker
+          image: "docker.io/busybox:1.32"
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - {{ $KEYCLOAK_COMMAND }}
+        {{- end }}
+        {{- if .Values.dependencies.connectionManagerBackend.enabled }}
+        - name: connection-manager-checker
+          image: "docker.io/busybox:1.32"
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - {{ $CONNECTION_MANAGER_COMMAND }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -51,13 +84,13 @@ spec:
           command: {{ .Values.image.command }}
           {{- end }}
           ports:
-            - containerPort: {{ .Values.service.specApi.internalPort }}
-            - containerPort: {{ .Values.service.adminApi.internalPort }}
+            - containerPort: {{ .Values.service.ports.specApi.internalPort }}
+            - containerPort: {{ .Values.service.ports.adminApi.internalPort }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
               path: {{ .Values.readinessProbe.httpGet.path }}
-              port: {{ .Values.service.adminApi.internalPort }}
+              port: {{ .Values.service.ports.adminApi.internalPort }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
           {{- end }}
@@ -65,7 +98,7 @@ spec:
           livenessProbe:
             httpGet:
               path: {{ .Values.livenessProbe.httpGet.path }}
-              port: {{ .Values.service.adminApi.internalPort }}
+              port: {{ .Values.service.ports.adminApi.internalPort }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
@@ -120,3 +153,4 @@ spec:
         requests:
           storage: {{ .Values.persistence.size | quote }}
   {{- end -}}
+{{- end -}}

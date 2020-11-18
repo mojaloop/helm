@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: {{ template "ml-testing-toolkit-frontend.apiVersion.Deployment" . }}
 kind: Deployment
 metadata:
   name: {{ template "ml-testing-toolkit-frontend.fullname" . }}
@@ -45,7 +45,7 @@ spec:
           {{- end }}
           command: {{ .Values.image.command }}
           ports:
-            - containerPort: {{ .Values.service.internalPort }}
+            - containerPort: {{ .Values.service.ports.webUi.internalPort }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:

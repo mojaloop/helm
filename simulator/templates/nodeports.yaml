@@ -1,0 +1,17 @@
+{{- range $name, $fsp := .Values.simulators }}
+{{- if $fsp.config.schemeAdapter.nodePort.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}nodeport
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: {{ $name }}-scheme-adapter
+  ports:
+    - port: {{ $fsp.config.schemeAdapter.nodePort.port | quote }}
+      targetPort: {{ $fsp.config.schemeAdapter.nodePort.targetPort | quote }}
+      nodePort: {{ $fsp.config.schemeAdapter.nodePort.nodePort | quote }}
+---
+{{- end }}
+{{- end }}
