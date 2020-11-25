@@ -36,7 +36,6 @@ declare -a charts=(
     bulk-api-adapter/
     mojaloop-bulk/
     mojaloop
-    kube-public/ingress-nginx/
     kube-system/ntpd/
     mojaloop-simulator
     ml-testing-toolkit

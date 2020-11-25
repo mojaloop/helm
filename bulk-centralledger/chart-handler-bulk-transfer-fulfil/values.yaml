@@ -11,7 +11,7 @@ containers:
   api:
     image:
       repository: mojaloop/central-ledger
-      tag: v11.2.3
+      tag: v11.3.1
       pullPolicy: Always
       command: '["node", "src/handlers/index.js", "handler", "--bulkfulfil"]'
     service:
@@ -161,11 +161,15 @@ ingress:
   # Used to create an Ingress record.
   hosts:
     api: central-ledger-transfer-bulkfulfil.local
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: '/'
+  annotations: {}
+    ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+    # nginx.ingress.kubernetes.io/rewrite-target: '/'
+    # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+    ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
     # kubernetes.io/ingress.class: nginx
+    ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
     # kubernetes.io/tls-acme: "true"
-  tls:
+  tls: []
     # Secrets must be manually created in the namespace.
     # - secretName: chart-example-tls
     #   hosts:
