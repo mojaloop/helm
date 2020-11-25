@@ -22,7 +22,7 @@ dependencies:
     embeddedCertificate: password
   mongodb:
     enabled: false
-    host: "$release_name-mongodb"
+    host: "$release_name-ttk-mongodb"
     port: "27017"
   connectionManagerBackend:
     enabled: false
@@ -32,7 +32,7 @@ dependencies:
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit
-  tag: v11.3.0
+  tag: v11.5.0
   commandPersistence: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; else if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; fi; npm run start;"]'
   command: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; npm run start;"]'
 
@@ -220,11 +220,15 @@ ingress:
       port: 5050
       paths: ['/api/', '/socket.io/']
 
-  annotations:
+  annotations: {}
+    ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
     # nginx.ingress.kubernetes.io/rewrite-target: '/'
+    # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+    ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
     # kubernetes.io/ingress.class: nginx
+    ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
     # kubernetes.io/tls-acme: "true"
-  tls:
+  tls: []
     # Secrets must be manually created in the namespace.
     # - secretName: chart-example-tls
     #   hosts:
