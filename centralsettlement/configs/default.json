@@ -71,6 +71,31 @@
             }
           }
         }
+      },
+      "NOTIFICATION": {
+        "EVENT": {
+          "config": {
+            "options": {
+              "mode": {{ .Values.config.kafka.consumer.notification.event.config.options.mode }},
+              "batchSize": {{ .Values.config.kafka.consumer.notification.event.config.options.batchSize }},
+              "pollFrequency": {{ .Values.config.kafka.consumer.notification.event.config.options.pollFrequency }},
+              "recursiveTimeout": {{ .Values.config.kafka.consumer.notification.event.config.options.recursiveTimeout }},
+              "messageCharset": "{{ .Values.config.kafka.consumer.notification.event.config.options.messageCharset }}",
+              "messageAsJSON": {{ .Values.config.kafka.consumer.notification.event.config.options.messageAsJSON }},
+              "sync": {{ .Values.config.kafka.consumer.notification.event.config.options.sync }},
+              "consumeTimeout": {{ .Values.config.kafka.consumer.notification.event.config.options.consumeTimeout }}
+            },
+            "rdkafkaConf": {
+              "client.id": "cs-con-transferfulfil-process",
+              "group.id": "cs-group-transferfulfil-process",
+              "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+              "socket.keepalive.enable": {{ .Values.config.kafka.consumer.notification.event.config.rdkafkaConf.socket_keepalive_enable }}
+            },
+            "topicConf": {
+              "auto.offset.reset": "earliest"
+            }
+          }
+        }
       }
     },
     "PRODUCER": {
