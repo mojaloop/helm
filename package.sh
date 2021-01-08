@@ -38,11 +38,11 @@ declare -a charts=(
     bulk-centralledger/
     bulk-api-adapter/
     mojaloop-bulk/
-    mojaloop
-    kube-system/ntpd/
     mojaloop-simulator
     ml-testing-toolkit
     ml-testing-toolkit-cli
+    mojaloop
+    kube-system/ntpd/
 )
 
 for chart in "${charts[@]}"
