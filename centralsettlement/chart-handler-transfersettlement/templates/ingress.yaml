@@ -1,0 +1,35 @@
+{{- if .Values.ingress.enabled -}}
+{{- $serviceName := include "centralsettlement-handler-transfersettlement.fullname" . -}}
+apiVersion: {{ template "centralsettlement-handler-transfersettlement.apiVersion.Ingress" . }}
+{{- $servicePath := .Values.ingress.externalPath.api -}}
+{{- $servicePort := .Values.service.ports.api.externalPort -}}
+
+kind: Ingress
+metadata:
+  name: {{ template "centralsettlement-handler-transfersettlement.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "centralsettlement-handler-transfersettlement.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  rules:
+    {{- range $host := .Values.ingress.hosts }}
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: {{ $servicePath }}
+            backend:
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $servicePort }}
+    {{- end -}}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{ toYaml .Values.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}

@@ -1,0 +1,161 @@
+---
+# Source: centralsettlement-handler-settlementwindow/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: patchtry-centralsettlement-handler-settlementwindow
+  labels:
+    app.kubernetes.io/name: centralsettlement-handler-settlementwindow
+    app.kubernetes.io/instance: patchtry
+    app.kubernetes.io/version: 10.5.0
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: centralsettlement-handler-settlementwindow-11.0.0
+  annotations:
+spec:
+  type: ClusterIP
+  ports:
+     - port: 80
+        targetPort: 3007
+        protocol: TCP
+        name: http-api
+  selector:
+    app.kubernetes.io/name: centralsettlement-handler-settlementwindow
+    app.kubernetes.io/instance: patchtry
+---
+# Source: centralsettlement-handler-settlementwindow/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: patchtry-centralsettlement-handler-settlementwindow
+  labels:
+    app.kubernetes.io/name: centralsettlement-handler-settlementwindow
+    app.kubernetes.io/instance: patchtry
+    app.kubernetes.io/version: 10.5.0
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: centralsettlement-handler-settlementwindow-11.0.0
+type: Opaque
+data:
+  # base64 encoded string
+  db.uri: bXlzcWw6Ly9jZW50cmFsX2xlZGdlcjpveU14Z1pDaHV1QHBhdGNodHJ5LWNlbnRyYWxsZWRnZXItbXlzcWw6MzMwNi9jZW50cmFsX2xlZGdlcg==
+
+---
+# Source: centralsettlement-handler-settlementwindow/templates/ingress.yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: patchtry-centralsettlement-handler-settlementwindow
+  labels:
+    app.kubernetes.io/name: centralsettlement-handler-settlementwindow
+    app.kubernetes.io/instance: patchtry
+    app.kubernetes.io/version: 10.5.0
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: centralsettlement-handler-settlementwindow-11.0.0
+  annotations:
+spec:
+  rules:
+    - host: central-settlement-settlementwindow.local
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: patchtry-centralsettlement-handler-settlementwindow
+              servicePort: 80
+---
+# Source: centralsettlement-handler-settlementwindow/templates/deployment.yaml
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: patchtry-centralsettlement-handler-settlementwindow
+  labels:
+    app.kubernetes.io/name: centralsettlement-handler-settlementwindow
+    app.kubernetes.io/instance: patchtry
+    app.kubernetes.io/version: 10.5.0
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: centralsettlement-handler-settlementwindow-11.0.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: centralsettlement-handler-settlementwindow
+      app.kubernetes.io/instance: patchtry
+  template:
+    metadata: 
+      labels:
+        app.kubernetes.io/name: centralsettlement-handler-settlementwindow
+        app.kubernetes.io/instance: patchtry
+        app.kubernetes.io/version: 10.5.0
+        app.kubernetes.io/managed-by: Helm
+        helm.sh/chart: centralsettlement-handler-settlementwindow-11.0.0
+    spec:
+      initContainers:
+        - name: wait-for-mysql
+          image: mysql:latest
+          imagePullPolicy: Always
+          command:
+            - sh
+            - "-c"
+            - "until result=$(mysql -h patchtry-centralledger-mysql -P 3306 -u central_ledger --password=oyMxgZChuu  central_ledger -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+        - name: wait-for-kafka
+          image: solsson/kafka:latest
+          imagePullPolicy: Always
+          command:
+            - sh
+            - "-c"
+            - "until ./bin/kafka-broker-api-versions.sh --bootstrap-server patchtry-kafka:9092; do echo waiting for Kafka; sleep 2; done;"
+          env:
+      containers:
+        - name: centralsettlement-handler-settlementwindow
+          image: "mojaloop/central-settlement:v01"
+          imagePullPolicy: Always
+          command: ["node", "src/handlers/index.js", "h", "--settlementwindow"]
+          ports:
+            - name: http-api
+              containerPort: 3007
+          env: 
+            - name: LOG_LEVEL
+              value: info
+            - name: CSL_LOG_TRANSPORT
+              value: file
+## UNCOMMENT AFTER EVENTSDK IS IMPLEMENTED
+            #
+            # - name: EVENT_SDK_VENDOR_PREFIX
+            #   value: 
+            # - name: EVENT_SDK_TRACESTATE_HEADER_ENABLED
+            #   value: 
+            # - name: EVENT_SDK_ASYNC_OVERRIDE_EVENTS
+            #   value: 
+            # - name: EVENT_SDK_TRACEID_PER_VENDOR
+            #   value: 
+            # - name: LIB_RESOURCE_VERSIONS
+            #   value: 
+          volumeMounts:
+          - name: patchtry-centralsettlement-handler-settlementwindow-config-volume
+            mountPath: /opt/central-settlement/config
+## UNCOMMENT AFTER EVENTSDK IS IMPLEMENTED
+        #
+
+      volumes:
+        - name: patchtry-centralsettlement-handler-settlementwindow-config-volume
+          configMap:
+            name: patchtry-centralsettlement-handler-settlementwindow-config
+            items:
+            - key: default.json
+              path: default.json
+#            - key: knexfile.js
+#              path: knexfile.js
+## UNCOMMENT AFTER EVENTSDK IS IMPLEMENTED
+        #
+---
+# Source: centralsettlement-handler-settlementwindow/templates/config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: patchtry-centralsettlement-handler-settlementwindow-config
+  labels:
+    app.kubernetes.io/name: centralsettlement-handler-settlementwindow
+    app.kubernetes.io/instance: patchtry
+    app.kubernetes.io/version: 10.5.0
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: centralsettlement-handler-settlementwindow-11.0.0
+data:
+  default.json: "\n{\n  \"PORT\": 3007,\n  \"HOSTNAME\": \"central-settlement-settlementwindow.local\",\n  \"ERROR_HANDLING\": {\n    \"includeCauseExtension\": false,\n    \"truncateExtensions\": true\n  },\n  \"DATABASE\": {\n    \"DIALECT\": \"mysql\",\n    \"HOST\": \"patchtry-centralledger-mysql\",\n    \"PORT\": 3306,\n    \"USER\": \"central_ledger\",\n    \"PASSWORD\": \"oyMxgZChuu\",\n    \"SCHEMA\": \"central_ledger\",\n    \"POOL_MIN_SIZE\": 10,\n    \"POOL_MAX_SIZE\": 30,\n    \"ACQUIRE_TIMEOUT_MILLIS\": 30000,\n    \"CREATE_TIMEOUT_MILLIS\": 30000,\n    \"DESTROY_TIMEOUT_MILLIS\": 5000,\n    \"IDLE_TIMEOUT_MILLIS\": 30000,\n    \"REAP_INTERVAL_MILLIS\": 1000,\n    \"CREATE_RETRY_INTERVAL_MILLIS\": 200,\n    \"DEBUG\": false\n  },\n  \"WINDOW_AGGREGATION\": {\n    \"RETRY_COUNT\": 3,\n    \"RETRY_INTERVAL\": 3000\n  },\n  \"TRANSFER_VALIDITY_SECONDS\": \"432000\",\n  \"HUB_PARTICIPANT\": {\n      \"ID\": 1,\n      \"NAME\": \"hub\"\n  },\n  \"HANDLERS\": {\n    \"DISABLED\": false,\n    \"API\": {\n      \"DISABLED\": false\n    }\n  },\n  \"KAFKA\": {\n    \"TOPIC_TEMPLATES\": {\n      \"GENERAL_TOPIC_TEMPLATE\": {\n        \"TEMPLATE\": \"topic-{{functionality}}-{{action}}\",\n        \"REGEX\": \"topic-(.*)-(.*)\"\n      }\n    },\n    \"CONSUMER\": {\n      \"SETTLEMENTWINDOW\": {\n        \"CLOSE\": {\n          \"config\": {\n            \"options\": {\n              \"mode\": 2,\n              \"batchSize\": 1,\n              \"pollFrequency\": 10,\n              \"recursiveTimeout\": 100,\n              \"messageCharset\": \"utf8\",\n              \"messageAsJSON\": true,\n              \"sync\": true,\n              \"consumeTimeout\": 1000\n            },\n            \"rdkafkaConf\": {\n              \"client.id\": \"cs-con-setlementwindow-close\",\n              \"group.id\": \"cs-group-setlementwindow-close\",\n              \"metadata.broker.list\": \"patchtry-kafka:9092\",\n              \"socket.keepalive.enable\": true\n            },\n            \"topicConf\": {\n              \"auto.offset.reset\": \"earliest\"\n            }\n          }\n        }\n      },\n      \"NOTIFICATION\": {\n        \"EVENT\": {\n          \"config\": {\n            \"options\": {\n              \"mode\": 2,\n              \"batchSize\": 1,\n              \"pollFrequency\": 10,\n              \"recursiveTimeout\": 100,\n              \"messageCharset\": \"utf8\",\n              \"messageAsJSON\": true,\n              \"sync\": true,\n              \"consumeTimeout\": 1000\n            },\n            \"rdkafkaConf\": {\n              \"client.id\": \"cs-con-transferfulfil-process\",\n              \"group.id\": \"cs-group-transferfulfil-process\",\n              \"metadata.broker.list\": \"patchtry-kafka:9092\",\n              \"socket.keepalive.enable\": true\n            },\n            \"topicConf\": {\n              \"auto.offset.reset\": \"earliest\"\n            }\n          }\n        }\n      }\n    },\n    \"PRODUCER\": {\n      \"NOTIFICATION\": {\n        \"EVENT\": {\n          \"config\": {\n            \"options\": {\n              \"messageCharset\": \"utf8\"\n            },\n            \"rdkafkaConf\": {\n              \"metadata.broker.list\": \"patchtry-kafka:9092\",\n              \"client.id\": \"cs-prod-notification-event\",\n              \"event_cb\": true,\n              \"compression.codec\": \"none\",\n              \"retry.backoff.ms\": 100,\n              \"message.send.max.retries\": 2,\n              \"socket.keepalive.enable\": true,\n              \"queue.buffering.max.messages\": 10000000,\n              \"batch.num.messages\": 100,\n              \"dr_cb\": false,\n              \"socket.blocking.max.ms\": 1,\n              \"queue.buffering.max.ms\": 1,\n              \"broker.version.fallback\": \"0.10.1.0\",\n              \"api.version.request\": true\n            },\n            \"topicConf\": {\n                \"request.required.acks\": \"all\",\n                \"partitioner\": \"murmur2_random\"\n            }\n          }\n        }\n      },\n      \"SETTLEMENTWINDOW\": {\n        \"CLOSE\": {\n          \"config\": {\n            \"options\": {\n              \"messageCharset\": \"utf8\"\n            },\n            \"rdkafkaConf\": {\n              \"metadata.broker.list\": \"patchtry-kafka:9092\",\n              \"client.id\": \"cs-prod-setlementwindow-close\",\n              \"event_cb\": true,\n              \"dr_cb\": true,\n              \"socket.keepalive.enable\": true,\n              \"queue.buffering.max.messages\": 10000000\n            },\n            \"topicConf\": {\n              \"request.required.acks\": \"all\",\n              \"partitioner\": \"murmur2_random\"\n            }\n          }\n        }\n      }\n    }\n  }\n}\n"
