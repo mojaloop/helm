@@ -9,7 +9,7 @@ replicaCount: 1
 image:
   repository: mojaloop/als-oracle-pathfinder
   tag: v10.2.0
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   command: '["node", "/opt/als-oracle-pathfinder/src/index.js"]'
   imagePullSecrets: []
 
@@ -200,7 +200,7 @@ init:
     name: wait-for-mysql
     repository: mysql
     tag: latest
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
   initMysql:
     centralLedger:
@@ -208,21 +208,21 @@ init:
       name: init-central-ledger-mysql
       repository: mojaloop/als-oracle-pathfinder
       tag: latest
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
       command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-central-ledger.sql;";
     accountLookup:
       enabled: true
       name: init-account-lookup-mysql
       repository: mojaloop/als-oracle-pathfinder
       tag: latest
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
       command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password $db_database -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-account-lookup.sql;";
   populateMysql:
     enabled: true
     name: populate-mysql-tables
     repository: mysql
     tag: latest
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     command: "echo 'Nothing configured to be populated. Continuing...';"
 service:
   type: ClusterIP
