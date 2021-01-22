@@ -10,36 +10,3 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   default.json: {{ (tpl (.Files.Get "configs/default.json") . ) | quote }}
-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ template "centralsettlement-handler-transfersettlement.fullname" . }}-scripts
-  labels:
-    app.kubernetes.io/name: {{ $fullName }}-scripts
-    app.kubernetes.io/instance: {{ $.Release.Name }}
-    app.kubernetes.io/version: {{ .Chart.AppVersion }}
-    app.kubernetes.io/managed-by: {{ $.Release.Service }}
-    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}
-data:
-  rules.json: {{ $config.config.backend.rules | quote }}
----
-{{- end }}
-
-
-## UNCOMENNT WHEN EVENT FRAMEWORK IS IMPLEMENTED
-# {{- if .Values.sidecar.enabled }}
-# ---
-# apiVersion: v1
-# kind: ConfigMap
-# metadata:
-#   name: {{ template "centralledger-handler-timeout.fullname" . }}-sidecar
-#   labels:
-#     app.kubernetes.io/name: {{ include "centralledger-handler-timeout.name" . }}
-#     app.kubernetes.io/instance: {{ .Release.Name }}
-#     app.kubernetes.io/version: {{ .Chart.AppVersion }}
-#     app.kubernetes.io/managed-by: {{ .Release.Service }}
-#     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-# data:
-#   default.json: {{ (tpl (.Files.Get "configs/default-sidecar.json") . ) | quote }}
-# {{- end }}

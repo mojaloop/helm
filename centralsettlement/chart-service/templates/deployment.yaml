@@ -1,10 +1,10 @@
 {{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
-apiVersion: {{ template "centralsettlement.apiVersion.Deployment" . }}
+apiVersion: {{ template "centralsettlement-service.apiVersion.Deployment" . }}
 kind: Deployment
 metadata:
-  name: {{ template "centralsettlement.fullname" . }}
+  name: {{ template "centralsettlement-service.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "centralsettlement.name" . }}
+    app.kubernetes.io/name: {{ include "centralsettlement-service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -13,12 +13,12 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "centralsettlement.name" . }}
+      app.kubernetes.io/name: {{ include "centralsettlement-service.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "centralsettlement.name" . }}
+        app.kubernetes.io/name: {{ include "centralsettlement-service.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/version: {{ .Chart.AppVersion }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}

@@ -22,18 +22,18 @@ centralsettlement-service:
             externalPort: 80
             internalPort: 3007
         annotations: {}
-      # This allows one to point the service to an external backend.
-      # This is useful for local development where one wishes to hijack
-      # the communication from the service to the node layer and point
-      # to a specific endpoint (IP, Port, etc).
-      external:
-        enabled: false
-        # 10.0.2.2 is the magic IP for the host on virtualbox's network
-        ip: 10.0.2.2
-        ports:
-          api:
-            name: http-api
-            externalPort: 3007
+        # This allows one to point the service to an external backend.
+        # This is useful for local development where one wishes to hijack
+        # the communication from the service to the node layer and point
+        # to a specific endpoint (IP, Port, etc).
+        external:
+          enabled: false
+          # 10.0.2.2 is the magic IP for the host on virtualbox's network
+          ip: 10.0.2.2
+          ports:
+            api:
+              name: http-api
+              externalPort: 3007
       readinessProbe:
         enabled: false
         httpGet:
@@ -60,8 +60,8 @@ centralsettlement-service:
   tolerations: []
 
   ## UNCOMMENT AFTER THE EVENT SDK AND METRICS ARE IMPLEMENTED
-  # sidecar:
-  #   enabled: true
+  sidecar:
+    enabled: false
   #   image:
   #     repository: mojaloop/event-sidecar
   #     tag: v9.5.1
@@ -89,15 +89,15 @@ centralsettlement-service:
   #     log_level: info
   #     log_filter: 'error, warn, info'
 
-  # ## metric configuration for prometheus instrumentation
-  # metrics:
-  #   ## flag to enable/disable the metrics end-points
-  #   enabled: true
-  #   config:
-  #     timeout: 5000
-  #     prefix: moja_
-  #     defaultLabels:
-  #       serviceName: central-handler-position
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: false
+    config:
+      timeout: 5000
+      prefix: moja_
+      defaultLabels:
+        serviceName: central-handler-position
 
   config:
     ## Kafka Configuration
@@ -106,6 +106,33 @@ centralsettlement-service:
     kafka_port: 9092
     kafka:
       consumer:
+        notification:
+          close:
+            config:
+              options:
+                mode: 2
+                batchSize: 1
+                pollFrequency: 10
+                recursiveTimeout: 100
+                messageCharset: 'utf8'
+                messageAsJSON: true
+                sync: true
+                consumeTimeout: 1000
+              rdkafkaConf:
+                socket_keepalive_enable: true
+          event:
+            config:
+              options:
+                mode: 2
+                batchSize: 1
+                pollFrequency: 10
+                recursiveTimeout: 100
+                messageCharset: 'utf8'
+                messageAsJSON: true
+                sync: true
+                consumeTimeout: 1000
+              rdkafkaConf:
+                socket_keepalive_enable: true
         settlementwindow:
           close:
             config:
@@ -223,7 +250,8 @@ centralsettlement-service:
           externalPort: 3007
   ingress:
     enabled: true
-    externalPath: /
+    externalPath:
+      api: /
     # Used to create an Ingress record.
     hosts:
       api: central-settlement-service.local
@@ -251,6 +279,7 @@ centralsettlement-service:
     # requests:
     #  cpu: 100m
     #  memory: 128Mi
+
 
 centralsettlement-handler-settlementwindow:
   enabled: true
@@ -283,18 +312,18 @@ centralsettlement-handler-settlementwindow:
             api:
               name: http-api
               externalPort: 3007
-        readinessProbe:
-          enabled: false
-          httpGet:
-            path: /health
-          initialDelaySeconds: 60
-          periodSeconds: 15
-        livenessProbe:
-          enabled: false
-          httpGet:
-            path: /health
-          initialDelaySeconds: 60
-          periodSeconds: 15
+      readinessProbe:
+        enabled: false
+        httpGet:
+          path: /health
+        initialDelaySeconds: 60
+        periodSeconds: 15
+      livenessProbe:
+        enabled: false
+        httpGet:
+          path: /health
+        initialDelaySeconds: 60
+        periodSeconds: 15
 
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -309,8 +338,8 @@ centralsettlement-handler-settlementwindow:
   tolerations: []
 
   ## UNCOMMENT AFTER THE EVENT SDK AND METRICS ARE IMPLEMENTED
-  # sidecar:
-  #   enabled: true
+  sidecar:
+    enabled: false
   #   image:
   #     repository: mojaloop/event-sidecar
   #     tag: v9.5.1
@@ -338,15 +367,15 @@ centralsettlement-handler-settlementwindow:
   #     log_level: info
   #     log_filter: 'error, warn, info'
 
-  # ## metric configuration for prometheus instrumentation
-  # metrics:
-  #   ## flag to enable/disable the metrics end-points
-  #   enabled: true
-  #   config:
-  #     timeout: 5000
-  #     prefix: moja_
-  #     defaultLabels:
-  #       serviceName: central-handler-position
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: false
+    config:
+      timeout: 5000
+      prefix: moja_
+      defaultLabels:
+        serviceName: central-handler-position
 
   config:
     ## Kafka Configuration
@@ -355,6 +384,33 @@ centralsettlement-handler-settlementwindow:
     kafka_port: 9092
     kafka:
       consumer:
+        notification:
+          close:
+            config:
+              options:
+                mode: 2
+                batchSize: 1
+                pollFrequency: 10
+                recursiveTimeout: 100
+                messageCharset: 'utf8'
+                messageAsJSON: true
+                sync: true
+                consumeTimeout: 1000
+              rdkafkaConf:
+                socket_keepalive_enable: true
+          event:
+            config:
+              options:
+                mode: 2
+                batchSize: 1
+                pollFrequency: 10
+                recursiveTimeout: 100
+                messageCharset: 'utf8'
+                messageAsJSON: true
+                sync: true
+                consumeTimeout: 1000
+              rdkafkaConf:
+                socket_keepalive_enable: true
         settlementwindow:
           close:
             config:
@@ -455,9 +511,31 @@ centralsettlement-handler-settlementwindow:
         pullPolicy: Always
         command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
         env: {}
+  service:
+    type: ClusterIP
+    ports:
+      api:
+        name: http-api
+        externalPort: 80
+        internalPort: 3007
+    annotations: {}
+
+    # This allows one to point the service to an external backend.
+    # This is useful for local development where one wishes to hijack
+    # the communication from the service to the node layer and point
+    # to a specific endpoint (IP, Port, etc).
+    external:
+      enabled: false
+      # 10.0.2.2 is the magic IP for the host on virtualbox's network
+      ip: 10.0.2.2
+      ports:
+        api:
+          name: http-api
+          externalPort: 3007
   ingress:
     enabled: true
-    externalPath: /
+    externalPath:
+      api: /
     # Used to create an Ingress record.
     hosts:
       api: central-settlement-settlementwindow.local
@@ -485,6 +563,7 @@ centralsettlement-handler-settlementwindow:
     # requests:
     #  cpu: 100m
     #  memory: 128Mi
+
 
 centralsettlement-handler-transfersettlement:
   enabled: false
@@ -516,18 +595,18 @@ centralsettlement-handler-transfersettlement:
             api:
               name: http-api
               externalPort: 3007
-        readinessProbe:
-          enabled: false
-          httpGet:
-            path: /health
-          initialDelaySeconds: 60
-          periodSeconds: 15
-        livenessProbe:
-          enabled: false
-          httpGet:
-            path: /health
-          initialDelaySeconds: 60
-          periodSeconds: 15
+      readinessProbe:
+        enabled: false
+        httpGet:
+          path: /health
+        initialDelaySeconds: 60
+        periodSeconds: 15
+      livenessProbe:
+        enabled: false
+        httpGet:
+          path: /health
+        initialDelaySeconds: 60
+        periodSeconds: 15
 
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -542,8 +621,8 @@ centralsettlement-handler-transfersettlement:
   tolerations: []
 
   ## UNCOMMENT AFTER THE EVENT SDK AND METRICS ARE IMPLEMENTED
-  # sidecar:
-  #   enabled: true
+  sidecar:
+    enabled: false
   #   image:
   #     repository: mojaloop/event-sidecar
   #     tag: v9.5.1
@@ -571,15 +650,15 @@ centralsettlement-handler-transfersettlement:
   #     log_level: info
   #     log_filter: 'error, warn, info'
 
-  # ## metric configuration for prometheus instrumentation
-  # metrics:
-  #   ## flag to enable/disable the metrics end-points
-  #   enabled: true
-  #   config:
-  #     timeout: 5000
-  #     prefix: moja_
-  #     defaultLabels:
-  #       serviceName: central-handler-position
+  ## metric configuration for prometheus instrumentation
+  metrics:
+    ## flag to enable/disable the metrics end-points
+    enabled: false
+    config:
+      timeout: 5000
+      prefix: moja_
+      defaultLabels:
+        serviceName: central-handler-position
 
   config:
     ## Kafka Configuration
@@ -588,6 +667,33 @@ centralsettlement-handler-transfersettlement:
     kafka_port: 9092
     kafka:
       consumer:
+        notification:
+          close:
+            config:
+              options:
+                mode: 2
+                batchSize: 1
+                pollFrequency: 10
+                recursiveTimeout: 100
+                messageCharset: 'utf8'
+                messageAsJSON: true
+                sync: true
+                consumeTimeout: 1000
+              rdkafkaConf:
+                socket_keepalive_enable: true
+          event:
+            config:
+              options:
+                mode: 2
+                batchSize: 1
+                pollFrequency: 10
+                recursiveTimeout: 100
+                messageCharset: 'utf8'
+                messageAsJSON: true
+                sync: true
+                consumeTimeout: 1000
+              rdkafkaConf:
+                socket_keepalive_enable: true
         settlementwindow:
           close:
             config:
@@ -688,9 +794,31 @@ centralsettlement-handler-transfersettlement:
         pullPolicy: Always
         command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
         env: {}
+  service:
+    type: ClusterIP
+    ports:
+      api:
+        name: http-api
+        externalPort: 80
+        internalPort: 3007
+    annotations: {}
+
+    # This allows one to point the service to an external backend.
+    # This is useful for local development where one wishes to hijack
+    # the communication from the service to the node layer and point
+    # to a specific endpoint (IP, Port, etc).
+    external:
+      enabled: false
+      # 10.0.2.2 is the magic IP for the host on virtualbox's network
+      ip: 10.0.2.2
+      ports:
+        api:
+          name: http-api
+          externalPort: 3007
   ingress:
     enabled: true
-    externalPath: /
+    externalPath:
+      api: /
     # Used to create an Ingress record.
     hosts:
       api: central-settlement-transfersettlement.local
@@ -718,5 +846,3 @@ centralsettlement-handler-transfersettlement:
     # requests:
     #  cpu: 100m
     #  memory: 128Mi
-
-

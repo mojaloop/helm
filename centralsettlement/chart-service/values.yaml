@@ -6,6 +6,7 @@ global: {}
 
 # Declare variables to be passed into your templates.
 replicaCount: 1
+
 containers:
   api:
     image:
@@ -58,7 +59,7 @@ nodeSelector: {}
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
 
- ## UNCOMMENT AFTER THE EVENT SDK AND METRICS ARE IMPLEMENTED
+## UNCOMMENT AFTER THE EVENT SDK AND METRICS ARE IMPLEMENTED
 sidecar:
   enabled: false
 #   image:
@@ -105,6 +106,33 @@ config:
   kafka_port: 9092
   kafka:
     consumer:
+      notification:
+        close:
+          config:
+            options:
+              mode: 2
+              batchSize: 1
+              pollFrequency: 10
+              recursiveTimeout: 100
+              messageCharset: 'utf8'
+              messageAsJSON: true
+              sync: true
+              consumeTimeout: 1000
+            rdkafkaConf:
+              socket_keepalive_enable: true
+        event:
+          config:
+            options:
+              mode: 2
+              batchSize: 1
+              pollFrequency: 10
+              recursiveTimeout: 100
+              messageCharset: 'utf8'
+              messageAsJSON: true
+              sync: true
+              consumeTimeout: 1000
+            rdkafkaConf:
+              socket_keepalive_enable: true
       settlementwindow:
         close:
           config:
