@@ -8,6 +8,16 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
+Common labels
+*/}}
+{{- define "mojaloop-simulator.common-labels" -}}
+app.kubernetes.io/instance: {{ $.Release.Name }}
+app.kubernetes.io/version: "{{ $.Chart.AppVersion | trunc 63 }}"
+app.kubernetes.io/managed-by: {{ $.Release.Service }}
+helm.sh/chart: {{ printf "%s-%s" $.Chart.Name $.Chart.Version | replace "+" "_" | trunc 63 }}
+{{- end -}}
+
+{{/*
 We prefix deployment components with the release name by default.
 This can be overridden by setting .Values.prefix value to your preferred value, including an empty string for no prefix. If you require a dash separator in your custom prefix, you must include this yourself, e.g. `.Values.prefix: prefix-`.
 Prefix is truncated to 10 characters long.
