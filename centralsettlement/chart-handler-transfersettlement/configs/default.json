@@ -2,7 +2,7 @@
 {{- $dbDeployHost := (.Values.config.db_host | replace "$release_name" .Release.Name) }}
 {
   "PORT": {{ .Values.service.ports.api.internalPort }},
-  "HOSTNAME": "http://central-settlements.local",
+  "HOSTNAME": "{{ .Values.ingress.hosts.api }}",
   "ERROR_HANDLING": {
     "includeCauseExtension": {{ .Values.config.error_handling.include_cause_extension }},
     "truncateExtensions": {{ .Values.config.error_handling.truncate_extensions }}
@@ -34,9 +34,12 @@
       "NAME": "{{ .Values.config.hub_participant.name }}"
   },
   "HANDLERS": {
-    "DISABLED": {{ .Values.config.handlers.disabled }},
+    "DISABLED": false,
     "API": {
       "DISABLED": {{ .Values.config.handlers.api.disabled }}
+    },
+    "SETTINGS": {
+      "SCRIPTS_FOLDER": {{ .Values.config.handlers.settings.scripts_folder }}
     }
   },
   "KAFKA": {
@@ -65,6 +68,31 @@
               "group.id": "cs-group-setlementwindow-close",
               "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
               "socket.keepalive.enable": {{ .Values.config.kafka.consumer.settlementwindow.close.config.rdkafkaConf.socket_keepalive_enable }}
+            },
+            "topicConf": {
+              "auto.offset.reset": "earliest"
+            }
+          }
+        }
+      },
+      "NOTIFICATION": {
+        "EVENT": {
+          "config": {
+            "options": {
+              "mode": {{ .Values.config.kafka.consumer.notification.event.config.options.mode }},
+              "batchSize": {{ .Values.config.kafka.consumer.notification.event.config.options.batchSize }},
+              "pollFrequency": {{ .Values.config.kafka.consumer.notification.event.config.options.pollFrequency }},
+              "recursiveTimeout": {{ .Values.config.kafka.consumer.notification.event.config.options.recursiveTimeout }},
+              "messageCharset": "{{ .Values.config.kafka.consumer.notification.event.config.options.messageCharset }}",
+              "messageAsJSON": {{ .Values.config.kafka.consumer.notification.event.config.options.messageAsJSON }},
+              "sync": {{ .Values.config.kafka.consumer.notification.event.config.options.sync }},
+              "consumeTimeout": {{ .Values.config.kafka.consumer.notification.event.config.options.consumeTimeout }}
+            },
+            "rdkafkaConf": {
+              "client.id": "cs-con-transferfulfil-process",
+              "group.id": "cs-group-transferfulfil-process",
+              "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+              "socket.keepalive.enable": {{ .Values.config.kafka.consumer.notification.event.config.rdkafkaConf.socket_keepalive_enable }}
             },
             "topicConf": {
               "auto.offset.reset": "earliest"
