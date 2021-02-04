@@ -1,0 +1,55 @@
+{{- if .Values.tests.enabled }}
+{{- $serviceFullName := include "ml-testing-toolkit-cli.fullname" . -}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "ml-testing-toolkit-cli.fullname" . }}
+  labels:
+      {{- include "ml-testing-toolkit-cli.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: {{ .Values.tests.weight | quote }}
+    helm.sh/hook-delete-policy: {{ .Values.tests.deletePolicy }}
+spec:
+  restartPolicy: Never
+  containers:
+    - name: {{ .Chart.Name }}
+      image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+      imagePullPolicy: {{ .Values.image.pullPolicy }}
+      {{- if .Values.image.imagePullSecrets }}
+      imagePullSecrets:
+      {{ toYaml .Values.image.imagePullSecrets | indent 10 }}
+      {{- end }}
+      command: ["/bin/sh", "-c"]
+      args:
+      - |
+        echo "Downloading the test collection..." &&
+        wget {{ .Values.config.testCasesZipUrl }} -O downloaded-test-collections.zip &&
+        mkdir tmp_test_cases &&
+        unzip -d tmp_test_cases -o downloaded-test-collections.zip &&
+        npm run cli -- -c cli-default-config.json -e cli-testcase-environment.json -i tmp_test_cases/{{ .Values.config.testCasesPathInZip }} -u {{ .Values.config.ttkBackendURL | replace "$release_name" .Release.Name }} --report-format html {{- if .Values.config.awsS3BucketName }} --report-target s3://{{ .Values.config.awsS3BucketName }}/{{ .Values.config.awsS3FilePath }}/report.html {{- end }} --report-auto-filename-enable true {{- if .Values.configCreds.SLACK_WEBHOOK_URL }} --slack-webhook-url $SLACK_WEBHOOK_URL {{- end }} --extra-summary-information="Test Suite:{{ .Values.config.testSuiteName }},Environment:{{ .Values.config.environmentName }}";
+        echo "Done with exit code: $?";
+      envFrom:
+      - secretRef:
+          name: {{ template "ml-testing-toolkit-cli.fullname" . }}-aws-creds
+      volumeMounts:
+        - name: {{ template "ml-testing-toolkit-cli.fullname" . }}-volume-testcase-environment-file
+          mountPath: /opt/mojaloop-testing-toolkit/cli-testcase-environment.json
+          subPath: cli-testcase-environment.json
+        - name: {{ template "ml-testing-toolkit-cli.fullname" . }}-volume-file-defaults
+          mountPath: /opt/mojaloop-testing-toolkit/cli-default-config.json
+          subPath: cli-default-config.json
+  volumes:
+    - name: {{ template "ml-testing-toolkit-cli.fullname" . }}-volume-file-defaults
+      configMap:
+        name: {{ template "ml-testing-toolkit-cli.fullname" . }}-config-file-defaults
+        items:
+          - key: cli-default-config.json
+            path: cli-default-config.json
+    - name: {{ template "ml-testing-toolkit-cli.fullname" . }}-volume-testcase-environment-file
+      configMap:
+        name: {{ template "ml-testing-toolkit-cli.fullname" . }}-config-testcase-environment-file
+        items:
+          - key: cli-testcase-environment.json
+            path: cli-testcase-environment.json
+{{- end }}
