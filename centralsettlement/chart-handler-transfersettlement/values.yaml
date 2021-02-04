@@ -204,6 +204,8 @@ config:
     disabled: false
     api:
       disabled: false
+    settings:
+      scripts_folder: '/opt/central-settlement/scripts/transferSettlementTemp'
   # Settlement Window aggregation Configuration
   window_aggregation:
     retry_count: 3
@@ -217,6 +219,25 @@ config:
   error_handling:
     include_cause_extension: false
     truncate_extensions: true
+
+  rules: 
+    interchangeFeeCalculation.js: |
+      const payerFspId = transfer.payer.partyIdInfo.fspId
+      const payeeFspId = transfer.payee.partyIdInfo.fspId
+      if ((payeeFspId !== payerFspId) &&
+        (getExtensionValue(transfer.payee.partyIdInfo.extensionList.extension, 'accountType') === 'Wallet' &&
+          getExtensionValue(transfer.payer.partyIdInfo.extensionList.extension, 'accountType') === 'Wallet') &&
+        (transfer.transactionType.scenario === 'TRANSFER' &&
+          transfer.transactionType.initiator === 'PAYER' &&
+          transfer.transactionType.initiatorType === 'CONSUMER')) {
+        log(`Adding an interchange fee for Wallet to Wallet from ${payerFspId} to ${payeeFspId}`)
+        addLedgerEntry(payload.id, 'INTERCHANGE_FEE', // Ledger account type Id
+          'INTERCHANGE_FEE', // Ledger entry type Id
+          multiply(transfer.amount.amount, 0.006, 2),
+          transfer.amount.currency,
+          payerFspId,
+          payeeFspId)
+      }
 
 init:
   enabled: true
