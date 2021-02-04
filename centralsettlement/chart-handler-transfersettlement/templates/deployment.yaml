@@ -117,8 +117,10 @@ spec:
             # - name: LIB_RESOURCE_VERSIONS
             #   value: {{ .Values.config.resource_versions}}
           volumeMounts:
-          - name: {{ template "centralsettlement-handler-transfersettlement.fullname" . }}-config-volume
+          - name: {{ template "centralsettlement-handler-transfersettlement.fullname" . }}-cfg-vol
             mountPath: /opt/central-settlement/config
+          - name: {{ template "centralsettlement-handler-transfersettlement.fullname" . }}-rules-vol
+            mountPath: {{ .Values.config.handlers.settings.scripts_folder }}
 ## UNCOMMENT AFTER EVENTSDK IS IMPLEMENTED
         # {{- if .Values.sidecar.enabled }}
         # - name: {{ .Chart.Name }}-sidecar
@@ -162,7 +164,7 @@ spec:
         # {{- end }}
 
       volumes:
-        - name: {{ template "centralsettlement-handler-transfersettlement.fullname" . }}-config-volume
+        - name: {{ template "centralsettlement-handler-transfersettlement.fullname" . }}-cfg-vol
           configMap:
             name: {{ template "centralsettlement-handler-transfersettlement.fullname" . }}-config
             items:
@@ -179,3 +181,6 @@ spec:
         #     - key: default.json
         #       path: default.json
         # {{- end }}
+        - name: {{ template "centralsettlement-handler-transfersettlement.fullname" . }}-rules-vol
+          configMap:
+            name: {{ template "centralsettlement-handler-transfersettlement.fullname" . }}-rules
