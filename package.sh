@@ -75,8 +75,8 @@ helm repo index . --url $LOCAL_HELM_MOJALOOP_REPO_URI
 
 set +x
 
-echo "\
-Packaging completed.\n \
+echo -e "\
+ Packaging completed.\n \
 Ensure you check the output for any errors. \n \
 Ignore any http errors when connecting to \"local\" chart repository.\n \
 \n \

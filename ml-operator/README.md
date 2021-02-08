@@ -6,8 +6,6 @@ See [mojaloop/ml-operator](https://github.com/mojaloop/ml-operator) for more inf
 
 ## Installing with Helm
 
-
-
 ```bash
 # from project root (./helm)
 ./package.sh
