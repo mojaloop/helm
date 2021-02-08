@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-operator
+  labels:
+    app: ml-operator
+    app.kubernetes.io/name: ml-operator
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 # exeed the replicas by 1 pod
+  selector:
+    matchLabels:
+      app: ml-operator
+  template:
+    metadata:
+      labels:
+        app: ml-operator
+    spec:
+      containers:
+        - name: ml-operator
+          image: mojaloop/ml-operator:v0.1.2
+          # command: [ "tail", "-f", "/dev/null" ]
+          volumeMounts:
+            - name: ml-operator-config-volume
+              mountPath: /opt/ml-operator/config
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: LOG_LEVEL
+              value: debug
+            - name: SLACK_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ml-operator-secrets
+                  key: SLACK_WEBHOOK_URL
+      volumes:
+        - name: ml-operator-config-volume
+          configMap:
+            name: ml-operator-config
+            items:
+            - key: production.json
+              path: production.json
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ml-operator-config
+data:
+  production.json: {{ (.Files.Get "configs/ml-operator.json") | quote }}
+---

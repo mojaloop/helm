@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-watcher-redis
+  labels:
+    app: image-watcher-redis
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 # exeed the replicas by 1 pod
+  selector:
+    matchLabels:
+      app: image-watcher-redis
+  template:
+    metadata:
+      labels:
+        app: image-watcher-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:5.0.4-alpine
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-watcher-redis
+spec:
+  ports:
+    - port: 6379
+  selector:
+    app: image-watcher-redis
+  clusterIP: None
