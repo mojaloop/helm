@@ -5,93 +5,6 @@ global: {}
 
 # Declare variables to be passed into your templates.
 
-tests:
-  postmanRunner:
-    enabled: false
-    image:
-      repository: mojaloop/test-runner
-      tag: v0.1
-      pullPolicy: Always
-
-    ## Ref: https://helm.sh/docs/topics/charts_hooks/#hook-deletion-policies
-    deletePolicy: before-hook-creation
-
-    cases: []
-      ### Example
-      # - name: setup-hub
-      #   collection: https://raw.githubusercontent.com/mojaloop/postman/master/MojaloopHub_Setup.postman_collection.json
-      #   environment: https://raw.githubusercontent.com/mojaloop/postman/master/environments/Mojaloop-Local-MojaSims.postman_environment.json
-      #   delay: 100
-      #   ## Ref: https://learning.postman.com/docs/running-collections/using-newman-cli/command-line-integration-with-newman/#misc
-      #   options: ""
-      # - name: setup-onboarding-mojasim
-      #   collection: https://raw.githubusercontent.com/mojaloop/postman/master/MojaloopSims_Onboarding.postman_collection.json
-      #   environment: https://raw.githubusercontent.com/mojaloop/postman/master/environments/Mojaloop-Local-MojaSims.postman_environment.json
-      #   delay: 100
-      #   ## Ref: https://learning.postman.com/docs/running-collections/using-newman-cli/command-line-integration-with-newman/#misc
-      #   options: ""
-      # - name: golden-path-mojasim
-      #   collection: https://raw.githubusercontent.com/mojaloop/postman/master/Golden_Path_Mojaloop.postman_collection.json
-      #   environment: https://raw.githubusercontent.com/mojaloop/postman/master/environments/Mojaloop-Local-MojaSims.postman_environment.json
-      #   delay: 100
-      #   ## Ref: https://learning.postman.com/docs/running-collections/using-newman-cli/command-line-integration-with-newman/#misc
-      #   options: ""
-
-  ttkRunner:
-    enabled: false
-
-    image:
-      repository: mojaloop/ml-testing-toolkit
-      tag: v11.7.0
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
-    ##
-    #  imagePullSecrets:
-    #    - name: myregistrykey
-      pullPolicy: Always
-
-    ## Ref: https://helm.sh/docs/topics/charts_hooks/#hook-deletion-policies
-    deletePolicy: before-hook-creation
-
-    config:
-      testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/master.zip
-      testCasesPathInZip: testing-toolkit-test-cases-master/collections/hub/sequence
-      # awsS3BucketName: 's3_bucket_name'
-      # awsS3FilePath: ttk-tests/reports
-      ttkBackendURL: http://$release-ml-testing-toolkit-backend:5050
-      testSuiteName: GP Tests
-      environmentName: Development
-
-    configCreds:
-      ## Define AWS Config
-      AWS_ACCESS_KEY_ID: 'some_aws_access_key'
-      AWS_SECRET_ACCESS_KEY: 'some_aws_secret_key'
-      AWS_REGION: 'us-west-2'
-      ## Define Slack Webhook URL for announcements
-      # SLACK_WEBHOOK_URL: 'slack_inbound_webhook'
-
-    ## Optionally specify the config file defaults for TTK CLI
-    ## You should specify at least mode here
-    # configFileDefaults: {
-    #   "mode": "outbound",
-    #   "reportFormat": "html",
-    #   "baseURL": "",
-    #   "reportTarget": "",
-    #   "reportAutoFilenameEnable": true,
-    #   "slackWebhookUrl": "",
-    #   "slackPassedImage": "",
-    #   "slackFailedImage": ""
-    # }
-    configFileDefaults: {
-    "mode": "outbound"
-    }
-
-    testCaseEnvironmentFile:  {
-      "inputValues": {}
-    }
-
-
 central:
 
   centralledger:
@@ -3629,7 +3542,7 @@ account-lookup-service:
       api:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.1.2
+          tag: v11.1.7
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--api"]'
         service:
@@ -3640,7 +3553,7 @@ account-lookup-service:
       admin:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.1.2
+          tag: v11.1.7
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--admin"]'
         service:
@@ -3838,7 +3751,7 @@ account-lookup-service:
       api:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.1.2
+          tag: v11.1.7
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--api"]'
         service:
@@ -3849,7 +3762,7 @@ account-lookup-service:
       admin:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.1.2
+          tag: v11.1.7
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--admin"]'
         service:
@@ -4380,7 +4293,7 @@ quoting-service:
   replicaCount: 1
   image:
     repository: mojaloop/quoting-service
-    tag: v11.1.4
+    tag: v11.2.0
     pullPolicy: IfNotPresent
 
   readinessProbe:
@@ -4570,7 +4483,7 @@ transaction-requests-service:
   replicaCount: 1
   image:
     repository: mojaloop/transaction-requests-service
-    tag: v11.1.2
+    tag: v11.1.3
     pullPolicy: IfNotPresent
     command: '["node", "src/index.js", "api"]'
 
@@ -5860,7 +5773,7 @@ mojaloop-bulk:
       replicaCount: 1
       image:
         repository: mojaloop/bulk-api-adapter
-        tag: v11.0.2
+        tag: v11.1.0
         command: '["node", "src/api/index.js"]'
         ## Optionally specify an array of imagePullSecrets.
         ## Secrets must be manually created in the namespace.
@@ -5974,7 +5887,7 @@ mojaloop-bulk:
       replicaCount: 1
       image:
         repository: mojaloop/bulk-api-adapter
-        tag: v11.0.2
+        tag: v11.1.0
         command: '["node", "src/handlers/index.js", "handler", "--notification"]'
         ## Optionally specify an array of imagePullSecrets.
         ## Secrets must be manually created in the namespace.
@@ -6591,6 +6504,7 @@ mojaloop-bulk:
       # requests:
       #  cpu: 100m
       #  memory: 128Mi
+    
     cl-handler-bulk-transfer-get:
       enabled: true
       # Default values for centralledger-handler-bulk-transfer-get.
