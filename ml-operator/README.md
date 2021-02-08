@@ -8,7 +8,7 @@ See [mojaloop/ml-operator](https://github.com/mojaloop/ml-operator) for more inf
 
 ```bash
 # from project root (./helm)
-./package.sh
+./package.sh ml-operator
 
 # create and edit the .env file:
 cd ml-operator

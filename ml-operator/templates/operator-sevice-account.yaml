@@ -1,0 +1,127 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mojaloop-operator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: mojaloop-operator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mojaloop-operator-cluster
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: mojaloop-operator
+rules:
+  - apiGroups: ['*']
+    resources: ['*']
+    verbs: ['*']
+  - nonResourceURLs: ['*']
+    verbs: ['*']
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: mojaloop-operator-cluster
+  namespace: {{ .Release.Name }}
+  labels:
+    app.kubernetes.io/name: mojaloop-operator
+subjects:
+  - kind: ServiceAccount
+    name: mojaloop-operator
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: mojaloop-operator-cluster
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  creationTimestamp: null
+  name: mojaloop-operator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: mojaloop-operator
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - services
+      - services/finalizers
+      - endpoints
+      - persistentvolumeclaims
+      - events
+      - configmaps
+      - secrets
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+      - daemonsets
+      - replicasets
+      - statefulsets
+      - customresourcedefinitions
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - servicemonitors
+    verbs:
+      - get
+      - create
+  - apiGroups:
+      - apps
+    resourceNames:
+      - mojaloop-operator
+    resources:
+      - deployments/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+  - apiGroups:
+      - apps
+    resources:
+      - replicasets
+      - deployments
+    verbs:
+      - get
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: mojaloop-operator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: mojaloop-operator
+subjects:
+  - kind: ServiceAccount
+    name: mojaloop-operator
+roleRef:
+  kind: Role
+  name: mojaloop-operator
+  apiGroup: rbac.authorization.k8s.io
+---
