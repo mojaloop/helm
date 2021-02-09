@@ -22,6 +22,8 @@ spec:
       containers:
       - name: central-ledger
         image: mojaloop/central-ledger:v11.1.4.0-pisp
+        # runs only the admin api
+        command: ["node", "src/api/index.js"]
         livenessProbe:
           initialDelaySeconds: 30
           httpGet:
@@ -37,37 +39,9 @@ spec:
             value: mysql-cl
           - name: CLEDG_DATABASE__PORT
             value: "3306"
-        # TODO: configure this to run only the admin api... no need for Kafka here
-          - name: CLEDG_KAFKA__PRODUCER__BULK__PROCESSING__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
-          - name: CLEDG_KAFKA__PRODUCER__TRANSFER__PREPARE__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
-          - name: CLEDG_KAFKA__PRODUCER__TRANSFER__FULFIL__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
-          - name: CLEDG_KAFKA__PRODUCER__TRANSFER__POSITION__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
-          - name: CLEDG_KAFKA__PRODUCER__NOTIFICATION__EVENT__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
-          - name: CLEDG_KAFKA__PRODUCER__ADMIN__TRANSFER__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
-          - name: CLEDG_KAFKA__CONSUMER__BULK__PREPARE__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
-          - name: CLEDG_KAFKA__CONSUMER__BULK__PROCESSING__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
-          - name: CLEDG_KAFKA__CONSUMER__BULK__FULFIL__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
-          - name: CLEDG_KAFKA__CONSUMER__BULK__GET__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
-          - name: CLEDG_KAFKA__CONSUMER__TRANSFER__PREPARE__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
-          - name: CLEDG_KAFKA__CONSUMER__TRANSFER__GET__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
-          - name: CLEDG_KAFKA__CONSUMER__TRANSFER__FULFIL__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
-          - name: CLEDG_KAFKA__CONSUMER__TRANSFER__POSITION__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
-          - name: CLEDG_KAFKA__CONSUMER__ADMIN__TRANSFER__config__rdkafkaConf__metadata.broker.list
-            value: kafka:9092
+          - name: CLEDG_HANDLERS__DISABLED
+            value: "true"
+      
           # - name: LOG_LEVEL
             # value: debug
         # command: [ "sh", "-c", "tail -f /dev/null" ]
