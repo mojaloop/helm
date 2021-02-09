@@ -1,0 +1,204 @@
+# prerequisites for a working thirdparty deployment
+# 3x mysql databases
+
+# mysql: endpoint-registry
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-cl-pv-claim
+spec:
+  storageClassName: awsgp2
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-cl
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql-cl
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-cl
+spec:
+  selector:
+    matchLabels:
+      app: mysql-cl
+  serviceName: mysql-cl-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mysql-cl
+    spec:
+      containers:
+      - image: mysql:5.6
+        name: mysql-cl
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: password
+        - name: MYSQL_USER
+          value: central_ledger
+        - name: MYSQL_PASSWORD
+          value: password
+        - name: MYSQL_DATABASE
+          value: central_ledger
+        ports:
+        - containerPort: 3306
+          name: mysql-cl
+        volumeMounts:
+        - name: mysql-cl-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-cl-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-cl-pv-claim
+---
+# mysql-als
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-als-pv-claim
+spec:
+  storageClassName: awsgp2
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-als
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql-als
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-als
+spec:
+  selector:
+    matchLabels:
+      app: mysql-als
+  serviceName: mysql-als-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mysql-als
+    spec:
+      containers:
+      - image: mysql:5.6
+        name: mysql-als
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: password
+        - name: MYSQL_USER
+          value: account_lookup
+        - name: MYSQL_PASSWORD
+          value: password
+        - name: MYSQL_DATABASE
+          value: account_lookup
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-als-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-als-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-als-pv-claim
+---
+# mysql-oracle-consent
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-oracle-consent-pv-claim
+spec:
+  storageClassName: awsgp2
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-oracle-consent
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql-oracle-consent
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-oracle-consent
+spec:
+  selector:
+    matchLabels:
+      app: mysql-oracle-consent
+  serviceName: mysql-oracle-consent-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mysql-oracle-consent
+    spec:
+      containers:
+      - image: mysql:5.6
+        name: mysql-oracle-consent
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: password
+        - name: MYSQL_USER
+          value: oracle_consent
+        - name: MYSQL_PASSWORD
+          value: password
+        - name: MYSQL_DATABASE
+          value: oracle_consent
+        - name: NODE_ENV
+          value: development
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-oracle-consent-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-oracle-consent-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-oracle-consent-pv-claim
+---
+# Kafka util:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: testclient
+spec:
+  containers:
+  - name: kafka
+    image: confluentinc/cp-kafka:5.0.1
+    command: [ "sh", "-c", "tail -f /dev/null" ]
+
+---

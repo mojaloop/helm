@@ -11,6 +11,11 @@ Charts to enable Thirdparty APIs
 ## Installing this chart helm repo
 
 ```bash
+cd thirdparty
+# install the databases separately
+kubectl apply -f ./thirdparty_deployment_base.yaml
+
+# install the chart
 helm upgrade install thirdparty mojaloop/thirdparty
 ```
 
@@ -19,6 +24,10 @@ helm upgrade install thirdparty mojaloop/thirdparty
 
 ```bash
 cd thirdparty
+# install the databases separately
+kubectl apply -f ./thirdparty_deployment_base.yaml
+
+# install the chart
 helm upgrade --install thirdparty ./
 ```
 
