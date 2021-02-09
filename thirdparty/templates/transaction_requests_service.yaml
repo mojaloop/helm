@@ -1,9 +1,10 @@
+{{- if .Values.transaction_requests_service.enabled -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: transaction-requests-service
+  name: 3p-transaction-requests-service
   labels:
-    app: transaction-requests-service
+    app: 3p-transaction-requests-service
 spec:
   replicas: 1
   strategy:
@@ -12,14 +13,14 @@ spec:
       maxSurge: 1 # exeed the replicas by 1 pod
   selector:
     matchLabels:
-      app: transaction-requests-service
+      app: 3p-transaction-requests-service
   template:
     metadata:
       labels:
-        app: transaction-requests-service
+        app: 3p-transaction-requests-service
     spec:
       containers:
-      - name: transaction-requests-service
+      - name: 3p-transaction-requests-service
         image: mojaloop/transaction-requests-service:v10.6.1.1-pisp
         livenessProbe:
           initialDelaySeconds: 30
@@ -39,18 +40,18 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: transaction-requests-service
+  name: 3p-transaction-requests-service
 spec:
   ports:
   - port: 4003
   selector:
-    app: transaction-requests-service
+    app: 3p-transaction-requests-service
   clusterIP: None
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: transaction-requests-service
+  name: 3p-transaction-requests-service
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/use-regex: "true"
@@ -58,7 +59,8 @@ spec:
   rules:
     - http:
         paths:
-          - path: /transaction-requests-service(/|$)(.*)
+          - path: /3p-transaction-requests-service(/|$)(.*)
             backend:
-              serviceName: transaction-requests-service
+              serviceName: 3p-transaction-requests-service
               servicePort: 4003
+{{- end -}}

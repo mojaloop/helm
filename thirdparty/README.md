@@ -11,14 +11,15 @@ Charts to enable Thirdparty APIs
 ## Installing this chart helm repo
 
 ```bash
-helm upgrade install mojaloop/thirdparty
+helm upgrade install thirdparty mojaloop/thirdparty
 ```
 
 
 ## Installing this chart from source
 
 ```bash
-helm upgrade --install ./
+cd thirdparty
+helm upgrade --install thirdparty ./
 ```
 
 ## Components
