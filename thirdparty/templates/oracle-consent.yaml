@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: als-consent-oracle
+  labels:
+    app: als-consent-oracle
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 # exeed the replicas by 1 pod
+  selector:
+    matchLabels:
+      app: als-consent-oracle
+  template:
+    metadata:
+      labels:
+        app: als-consent-oracle
+    spec:
+      containers:
+        - name: als-consent-oracle
+          image: mojaloop/als-consent-oracle:v0.0.3
+          # command: [ "tail", "-f", "/dev/null" ]
+          livenessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              path: /health
+              port: 3000
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              path: /health
+              port: 3000
+          volumeMounts:
+            - name: als-consent-oracle-config-volume
+              mountPath: /opt/als-consent-oracle/config/development_db.json
+              subPath: development_db.json
+          env:
+            - name: NODE_ENV
+              value: development
+      volumes:
+        - name: als-consent-oracle-config-volume
+          configMap:
+            name: als-consent-oracle-config
+            items:
+            - key: development_db.json
+              path: development_db.json
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: als-consent-oracle-config
+data:
+  development_db.json: {{ (.Files.Get "configs/consent-oracle-production_db.json") | quote }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: als-consent-oracle
+spec:
+  ports:
+  - port: 3000
+  selector:
+    app: als-consent-oracle
+  clusterIP: None
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: als-consent-oracle
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /als-consent-oracle(/|$)(.*)
+            backend:
+              serviceName: als-consent-oracle
+              servicePort: 3000

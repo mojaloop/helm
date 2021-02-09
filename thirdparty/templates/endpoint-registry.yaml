@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: central-ledger
+  labels:
+    app: central-ledger
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 # exeed the replicas by 1 pod
+  selector:
+    matchLabels:
+      app: central-ledger
+  template:
+    metadata:
+      labels:
+        app: central-ledger
+    spec:
+      containers:
+      - name: central-ledger
+        image: mojaloop/central-ledger:v11.1.4.0-pisp
+        livenessProbe:
+          initialDelaySeconds: 30
+          httpGet:
+            path: /health
+            port: 3001
+        readinessProbe:
+          initialDelaySeconds: 30
+          httpGet:
+            path: /health
+            port: 3001
+        env:
+          - name: CLEDG_DATABASE__HOST
+            value: mysql-cl
+          - name: CLEDG_DATABASE__PORT
+            value: "3306"
+          - name: CLEDG_KAFKA__PRODUCER__BULK__PROCESSING__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          - name: CLEDG_KAFKA__PRODUCER__TRANSFER__PREPARE__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          - name: CLEDG_KAFKA__PRODUCER__TRANSFER__FULFIL__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          - name: CLEDG_KAFKA__PRODUCER__TRANSFER__POSITION__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          - name: CLEDG_KAFKA__PRODUCER__NOTIFICATION__EVENT__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          - name: CLEDG_KAFKA__PRODUCER__ADMIN__TRANSFER__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          - name: CLEDG_KAFKA__CONSUMER__BULK__PREPARE__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          - name: CLEDG_KAFKA__CONSUMER__BULK__PROCESSING__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          - name: CLEDG_KAFKA__CONSUMER__BULK__FULFIL__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          - name: CLEDG_KAFKA__CONSUMER__BULK__GET__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          - name: CLEDG_KAFKA__CONSUMER__TRANSFER__PREPARE__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          - name: CLEDG_KAFKA__CONSUMER__TRANSFER__GET__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          - name: CLEDG_KAFKA__CONSUMER__TRANSFER__FULFIL__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          - name: CLEDG_KAFKA__CONSUMER__TRANSFER__POSITION__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          - name: CLEDG_KAFKA__CONSUMER__ADMIN__TRANSFER__config__rdkafkaConf__metadata.broker.list
+            value: kafka:9092
+          # - name: LOG_LEVEL
+            # value: debug
+        # command: [ "sh", "-c", "tail -f /dev/null" ]
+        securityContext:
+          runAsUser: 0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: central-ledger
+spec:
+  ports:
+  - port: 3001
+  selector:
+    app: central-ledger
+  clusterIP: None
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: central-ledger
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /central-ledger(/|$)(.*)
+            backend:
+              serviceName: central-ledger
+              servicePort: 3001
