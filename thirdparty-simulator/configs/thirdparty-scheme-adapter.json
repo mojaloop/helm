@@ -1,0 +1,72 @@
+{{- $participantId := .Values.participantId }}
+{
+  "INBOUND": {
+    "PORT": 4005,
+    "HOST": "0.0.0.0"
+  },
+  "OUTBOUND": {
+    "PORT": 4006,
+    "HOST": "0.0.0.0"
+  },
+  "WSO2_AUTH": {
+    "staticToken": "0706c62f-c022-3c42-8d14-8b5df128876d",
+    "tokenEndpoint": "",
+    "clientKey": "test-client-key",
+    "clientSecret": "test-client-secret",
+    "refreshSeconds": 3600
+  },
+  "REDIS": {
+    "PORT": 6379,
+    "HOST": "dfspa-redis",
+    "TIMEOUT": 100
+  },
+  "INSPECT": {
+    "DEPTH": 4,
+    "SHOW_HIDDEN": false,
+    "COLOR": true
+  },
+  "SHARED": {
+    "PEER_ENDPOINT": "transaction-requests-service:4003",
+    "ALS_ENDPOINT": "account-lookup-service:4001",
+    "QUOTES_ENDPOINT": "quoting-service:3002",
+    "TRANSFERS_ENDPOINT": "ml-api-adapter:3000",
+    "BULK_TRANSFERS_ENDPOINT": "",
+    "DFSP_ID": "{{ $participantId }}",
+    "DFSP_BACKEND_URI": "{{ $participantId }}-mojaloop-simulator:3000",
+    "DFSP_BACKEND_HTTP_SCHEME": "http",
+    "JWS_SIGN": false,
+    "JWS_SIGNING_KEY": "./secrets/jwsSigningKey.key",
+    "TLS": {
+      "inbound": {
+        "mutualTLS": {
+          "enabled": false
+        },
+        "creds": {
+          "ca": "./secrets/dfsp_a_client.crt",
+          "cert": "./secrets/dfsp_a_client.crt",
+          "key": "./secrets/dfsp_a_client.crt"
+        }
+      },
+      "outbound": {
+        "mutualTLS": {
+          "enabled": false
+        },
+        "creds": {
+          "ca": "./secrets/dfsp_a_client.crt",
+          "cert": "./secrets/dfsp_a_client.crt",
+          "key": "./secrets/dfsp_a_client.crt"
+        }
+      },
+      "test": {
+        "mutualTLS": {
+          "enabled": false
+        },
+        "creds": {
+          "ca": "./secrets/dfsp_a_client.crt",
+          "cert": "./secrets/dfsp_a_client.crt",
+          "key": "./secrets/dfsp_a_client.crt"
+        }
+      }
+    }
+  }
+}

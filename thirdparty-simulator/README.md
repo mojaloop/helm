@@ -1,3 +1,3 @@
 # helm/thirdparty-simulator
 
-Charts for thirdparty simulators and testing
+Charts for testing and simulating thirdparty API scenarios

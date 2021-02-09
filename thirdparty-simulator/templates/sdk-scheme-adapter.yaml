@@ -1,0 +1,87 @@
+{{- $participantId := .Values.participantId }}
+{{- if .Values.mojaloopApiSupport }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $participantId }}-sdk-scheme-adapter
+  labels:
+    app: {{ $participantId }}-sdk-scheme-adapter
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 # exeed the replicas by 1 pod
+  selector:
+    matchLabels:
+      app: {{ $participantId }}-sdk-scheme-adapter
+  template:
+    metadata:
+      labels:
+        app: {{ $participantId }}-sdk-scheme-adapter
+    spec:
+      containers:
+        - name: sdk-scheme-adapter
+          image: mojaloop/sdk-scheme-adapter:v10.6.2.1-pisp
+          livenessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              path: /
+              port: 4001
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              path: /
+              port: 4001
+          env:
+          - name: CACHE_HOST
+            value: {{ $participantId }}-redis
+          - name: BACKEND_ENDPOINT
+            # TODO this is the /simulator api, not sure if that's correct
+            value: {{ $participantId }}-mojaloop-simulator:3000
+          - name: DFSP_ID
+            value: {{ $participantId | quote }}
+          {{- range $k, $v := .Values.sdk_scheme_adapter.env }}
+          - name: {{ $k }}
+            value: {{ $v | quote }}
+          {{- end }}
+      # TODO: volumes setup?
+      # volumes:
+      # - "./dfsp_a/secrets:/secrets"
+      # - "./dfsp_a/jwsVerificationKeys:/jwsVerificationKeys"
+      # TODO: rules file
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $participantId }}-sdk-scheme-adapter
+spec:
+  ports:
+    - port: 4000
+      name: inbound
+    - port: 4001
+      name: outbound
+  selector:
+    app: {{ $participantId }}-sdk-scheme-adapter
+  clusterIP: None
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $participantId }}-sdk-scheme-adapter
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /{{ $participantId }}/sdk-scheme-adapter/inbound(/|$)(.*)
+            backend:
+              serviceName: {{ $participantId }}-sdk-scheme-adapter
+              servicePort: 4000
+          - path: /{{ $participantId }}/sdk-scheme-adapter/outbound(/|$)(.*)
+            backend:
+              serviceName: {{ $participantId }}-sdk-scheme-adapter
+              servicePort: 4001
+{{- end }}

@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oracle-simulator
+  labels:
+    app: oracle-simulator
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 # exeed the replicas by 1 pod
+  selector:
+    matchLabels:
+      app: oracle-simulator
+  template:
+    metadata:
+      labels:
+        app: oracle-simulator
+    spec:
+      containers:
+      - name: oracle-simulator
+        image: mojaloop/simulator:v9.5.0
+        livenessProbe:
+          initialDelaySeconds: 30
+          httpGet:
+            path: /health
+            port: 8444
+        readinessProbe:
+          initialDelaySeconds: 30
+          httpGet:
+            path: /health
+            port: 8444
+        env:
+          - name: LOG_LEVEL
+            value: info
+          - name: TRANSFERS_ENDPOINT
+            value: http://ml-api-adapter:3000
+          - name: QUOTES_ENDPOINT
+            value: http://quoting-service:3002
+          - name: PARTIES_ENDPOINT
+            value: http://account-lookup-service:4002
+          - name: TRANSACTION_REQUESTS_ENDPOINT
+            value: http://transaction-request-service:4003
+          - name: TRANSFERS_FULFIL_RESPONSE_DISABLED
+            value: 'false'
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oracle-simulator
+spec:
+  ports:
+  - port: 8444
+  selector:
+    app: oracle-simulator
+  clusterIP: None
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: oracle-simulator
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /oracle-simulator(/|$)(.*)
+            backend:
+              serviceName: oracle-simulator
+              servicePort: 8444

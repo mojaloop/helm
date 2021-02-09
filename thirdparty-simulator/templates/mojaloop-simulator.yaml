@@ -1,0 +1,99 @@
+{{- $participantId := .Values.participantId }}
+{{- $jwsSigningKey := .Values.mojaloop_simulator.jwsSigningKey }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $participantId }}-mojaloop-simulator
+  labels:
+    app: {{ $participantId }}-mojaloop-simulator
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 # exeed the replicas by 1 pod
+  selector:
+    matchLabels:
+      app: {{ $participantId }}-mojaloop-simulator
+  template:
+    metadata:
+      labels:
+        app: {{ $participantId }}-mojaloop-simulator
+    spec:
+      # volumes:
+      #   - name: jws-private-key
+      #     secret:
+      #       secretName: {{ $participantId }}-jws-private-key
+      containers:
+        - name: mojaloop-simulator
+          image: mojaloop/mojaloop-simulator:v9.4.1.7-pisp
+          livenessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              path: /
+              port: 3000
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              path: /
+              port: 3000
+          env:
+            - name: DFSP_ID
+              value: {{ $participantId }}
+            - name: OUTBOUND_ENDPOINT
+              value: http://{{ $participantId }}-sdk-scheme-adapter:4001
+            - name: THIRDPARTY_OUTBOUND_ENDPOINT
+              value: http://{{ $participantId }}-thirdparty-scheme-adapter:4005
+            - name: HTTPS_ENABLED
+              value: 'false'
+            - name: MUTUAL_TLS_ENABLED
+              value: 'false'
+            # - name: VALIDATE_INBOUND_JWS
+              # value: 'FALSE'
+            # - name: JWS_SIGN
+              # value: 'FALSE'
+          # volumeMounts:
+          #   - name: jws-private-key
+          #     mountPath: "/jwsSigningKey/"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $participantId }}-mojaloop-simulator
+spec:
+  ports:
+    - port: 3000
+      name: simulator
+    - port: 3002
+      name: report
+    - port: 3003
+      name: test
+  selector:
+    app: {{ $participantId }}-mojaloop-simulator
+  clusterIP: None
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $participantId }}-mojaloop-simulator
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /{{ $participantId }}/mojaloop-simulator/simulator(/|$)(.*)
+            backend:
+              serviceName: {{ $participantId }}-mojaloop-simulator
+              servicePort: 3000
+          - path: /{{ $participantId }}/mojaloop-simulator/report(/|$)(.*)
+            backend:
+              serviceName: {{ $participantId }}-mojaloop-simulator
+              servicePort: 3002
+          - path: /{{ $participantId }}/mojaloop-simulator/test(/|$)(.*)
+            backend:
+              serviceName: {{ $participantId }}-mojaloop-simulator
+              servicePort: 3003
+

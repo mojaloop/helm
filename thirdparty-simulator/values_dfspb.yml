@@ -1,0 +1,135 @@
+
+participantName: 'B Bank'
+participantId: 'dfspb'
+
+# Set both to true if DFSP, set only `thirdpartyApiSupport` to true if PISP
+thirdpartyApiSupport: true
+mojaloopApiSupport: true
+
+mojaloop_simulator:
+  jwsSigningKey: ''
+
+sdk_scheme_adapter:
+  # Note: copied from `mojaloop/helm`
+  env:
+    # Ports the scheme adapter listens on. Shouldn't really matter for a user of this chart.
+    # You probably shouldn't bother configuring them- it likely won't do you much good. But it
+    # won't do any harm, either.
+    INBOUND_LISTEN_PORT: 4000
+    OUTBOUND_LISTEN_PORT: 4001
+    TEST_LISTEN_PORT: 4002
+
+    # Enable mutual TLS authentication. Useful when not running in a secure
+    # environment, i.e. when you're running it locally against your own implementation.
+    INBOUND_MUTUAL_TLS_ENABLED: false
+    OUTBOUND_MUTUAL_TLS_ENABLED: false
+    TEST_MUTUAL_TLS_ENABLED: false
+
+    # Enable JWS verification and signing
+    VALIDATE_INBOUND_JWS: false
+    JWS_SIGN: false
+    CACHE_PORT: 6379
+
+    # applicable only if VALIDATE_INBOUND_JWS is `true`
+    # allows disabling of validation on incoming PUT /parties/{idType}/{idValue} requests
+    VALIDATE_INBOUND_PUT_PARTIES_JWS: true
+
+    # applicable only if JWS_SIGN is `true`
+    # allows disabling of signing on outgoing PUT /parties/{idType}/{idValue} requests
+    JWS_SIGN_PUT_PARTIES: true
+
+    # Path to JWS signing key (private key of THIS DFSP)
+    JWS_SIGNING_KEY_PATH: "/jwsSigningKey.key" # do not configure- will break the chart
+    JWS_VERIFICATION_KEYS_DIRECTORY: "/jwsVerificationKeys"
+
+    # The number of space characters by which to indent pretty-printed logs. If set to zero, log events
+    # will each be printed on a single line.
+    LOG_INDENT: "0"
+
+    # TODO: these values only work for the sdk-scheme-adapter running inside the same
+    # cluster as the switch
+    #
+    # ideally we would deploy this with proper dns, and be able to
+    # give these better values
+
+    ALS_ENDPOINT: "account-lookup-service:4002"
+    QUOTES_ENDPOINT: "quoting-service:3002"
+    TRANSFERS_ENDPOINT: "ml-api-adapter:3000"
+    # TRANSACTION_REQUESTS_ENDPOINT is not yet added in SDK, so using PEER_ENDPOINT
+    TRANSACTION_REQUESTS_ENDPOINT: "transaction-requests-service:4003"
+    PEER_ENDPOINT: "transaction-requests-service:4003"
+
+    # PEER_ENDPOINT: "mlapiadapter"
+    # BULK_TRANSFERS_ENDPOINT="mojaloop-switch-bulk-transfers"
+    # BULK_QUOTES_ENDPOINT="mojaloop-switch-bulk-quotes"
+
+    # This value specifies the endpoint the scheme adapter expects to communicate with the
+    # backend on. Do not include the protocol, i.e. http.
+    # You're very likely to break the functioning of this chart if you configure the following
+    # value. This config item has been copied from the service repo for consistency with that,
+    # so that if you come here and find this variable, with this comment, it's less confusing
+    # than if you come here and it's missing entirely.
+    # BACKEND_ENDPOINT: "localhost:3000"
+
+    # FSPID of this DFSP
+    # Commented by default- you're likely to break the chart if you configure this value.
+    # DFSP_ID: "mojaloop-sdk"
+
+    # Secret used for generation and verification of secure ILP
+    ILP_SECRET: "Quaixohyaesahju3thivuiChai5cahng"
+
+    # expiry period in seconds for quote and transfers issued by the SDK
+    EXPIRY_SECONDS: "60"
+
+    # if set to false the SDK will not automatically accept all returned quotes
+    # but will halt the transfer after a quote response is received. A further
+    # confirmation call will be required to complete the final transfer stage.
+    AUTO_ACCEPT_QUOTES: false
+
+    # if set to false the SDK will not automatically accept a resolved party
+    # but will halt the transer after a party lookup response is received. A further
+    # confirmation call will be required to progress the transfer to quotes state.
+    AUTO_ACCEPT_PARTY: false
+
+    # when set to true, when sending money via the outbound API, the SDK will use the value
+    # of FSPIOP-Source header from the received quote response as the payeeFsp value in the
+    # transfer prepare request body instead of the value received in the payee party lookup.
+    # This behaviour should be enabled when the SDK user DFSP is in a forex enabled switch
+    # ecosystem and expects quotes and transfers to be rerouted by the switch to forex
+    # entities i.e. forex providing DFSPs. Please see the SDK documentation and switch
+    # operator documentation for more information on forex use cases.
+    USE_QUOTE_SOURCE_FSP_AS_TRANSFER_PAYEE_FSP: false
+
+    # set to true to validate ILP, otherwise false to ignore ILP
+    CHECK_ILP: true
+
+    # set to true to enable test features such as request cacheing and retrieval endpoints
+    ENABLE_TEST_FEATURES: true
+
+    # set to true to mock WSO2 oauth2 token endpoint
+    ENABLE_OAUTH_TOKEN_ENDPOINT: false
+    OAUTH_TOKEN_ENDPOINT_CLIENT_KEY: "test-client-key"
+    OAUTH_TOKEN_ENDPOINT_CLIENT_SECRET: "test-client-secret"
+    OAUTH_TOKEN_ENDPOINT_LISTEN_PORT: "6000"
+
+    # WS02 Bearer Token specific to golden-fsp instance and environment
+    WS02_BEARER_TOKEN: "7718fa9b-be13-3fe7-87f0-a12cf1628168"
+
+    # OAuth2 data used to obtain WSO2 bearer token
+    OAUTH_TOKEN_ENDPOINT: ""
+    OAUTH_CLIENT_KEY: ""
+    OAUTH_CLIENT_SECRET: ""
+    OAUTH_REFRESH_SECONDS: "3600"
+
+    # Set to true to respect expirity timestamps
+    REJECT_EXPIRED_QUOTE_RESPONSES: false
+    REJECT_TRANSFERS_ON_EXPIRED_QUOTES: false
+    REJECT_EXPIRED_TRANSFER_FULFILS: false
+
+    # Timeout for GET/POST/DELETE - PUT flow processing
+    REQUEST_PROCESSING_TIMEOUT_SECONDS: "30"
+
+    # To allow transfer without a previous quote request, set this value to true.
+    # The incoming transfer request should consist of an ILP packet and a matching condition in this case.
+    # The fulfilment will be generated from the provided ILP packet, and must hash to the provided condition.
+    ALLOW_TRANSFER_WITHOUT_QUOTE: false

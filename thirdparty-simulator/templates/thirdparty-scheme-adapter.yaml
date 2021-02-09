@@ -1,0 +1,123 @@
+{{- if .Values.thirdpartyApiSupport }}
+{{- $participantId := .Values.participantId }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $participantId }}-thirdparty-scheme-adapter
+  labels:
+    app: {{ $participantId }}-thirdparty-scheme-adapter
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 # exeed the replicas by 1 pod
+  selector:
+    matchLabels:
+      app: {{ $participantId }}-thirdparty-scheme-adapter
+  template:
+    metadata:
+      labels:
+        app: {{ $participantId }}-thirdparty-scheme-adapter
+    spec:
+      containers:
+        # Inbound Container
+        - name: inbound
+          image: mojaloop/thirdparty-scheme-adapter:v11.15.0
+          livenessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              path: /health
+              port: 4005
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              path: /health
+              port: 4005
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: REDIS_HOST
+              value: {{ $participantId }}-redis
+          volumeMounts:
+            - name: {{ $participantId }}-config-volume
+              mountPath: /opt/thirdparty-scheme-adapter/config
+          command: [ "npm", "run", "start:inbound" ]
+          # command: [ "tail", "-f", "/dev/null" ]
+
+        # Outbound Container
+        - name: outbound
+          image: mojaloop/thirdparty-scheme-adapter:v11.15.0
+          livenessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              path: /health
+              port: 4006
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              path: /health
+              port: 4006
+          env:
+            - name: NODE_ENV
+              # set to development so we don't need to specify a
+              # config file from scratch
+              value: production
+            - name: REDIS_HOST
+              value: {{ $participantId }}-redis
+          volumeMounts:
+            - name: {{ $participantId }}-config-volume
+              mountPath: /opt/thirdparty-scheme-adapter/config
+          command: [ "npm", "run", "start:outbound" ]
+          # command: [ "tail", "-f", "/dev/null" ]
+      volumes:
+        - name: {{ $participantId }}-config-volume
+          configMap:
+            name: {{ $participantId }}-config-map
+            items:
+            - key: production.json
+              path: production.json
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $participantId }}-config-map
+data:
+  production.json: {{ (tpl (.Files.Get "configs/thirdparty-scheme-adapter.json") . ) | quote }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $participantId }}-thirdparty-scheme-adapter
+spec:
+  ports:
+    - port: 4005
+      name: inbound
+    - port: 4006
+      name: outbound
+  selector:
+    app: {{ $participantId }}-thirdparty-scheme-adapter
+  clusterIP: None
+---
+# TODO: ingress rules for each of the 3 apis...
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $participantId }}-thirdparty-scheme-adapter
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /{{ $participantId }}/thirdparty-scheme-adapter/inbound(/|$)(.*)
+            backend:
+              serviceName: {{ $participantId }}-thirdparty-scheme-adapter
+              servicePort: 4005
+          - path: /{{ $participantId }}/thirdparty-scheme-adapter/outbound(/|$)(.*)
+            backend:
+              serviceName: {{ $participantId }}-thirdparty-scheme-adapter
+              servicePort: 4006
+
+{{- end }}
