@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "centralsettlement.name" -}}
+{{- define "centralsettlement-service.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -10,12 +10,12 @@ Expand the name of the chart.
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
-{{- define "centralsettlement.fullname" -}}
+{{- define "centralsettlement-service.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "centralsettlement.apiVersion.Deployment" -}}
+{{- define "centralsettlement-service.apiVersion.Deployment" -}}
   {{- if .Capabilities.APIVersions.Has "apps/v1/Deployment" -}}
     {{- print "apps/v1" -}}
   {{- else -}}
@@ -23,7 +23,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
   {{- end -}}
 {{- end -}}
 
-{{- define "centralsettlement.apiVersion.Ingress" -}}
+{{- define "centralsettlement-service.apiVersion.Ingress" -}}
   {{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" -}}
     {{- print "networking.k8s.io/v1beta1" -}}
   {{- else -}}

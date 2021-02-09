@@ -1,0 +1,11 @@
+{{- if .Values.tests.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ template "ml-testing-toolkit-cli.fullname" . }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: {{ .Values.tests.weight | quote }}
+    helm.sh/hook-delete-policy: {{ .Values.tests.deletePolicy }}
+{{ include "ttkCLI.jobTemplate" . }}
+{{- end}}

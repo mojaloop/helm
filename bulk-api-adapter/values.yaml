@@ -12,7 +12,7 @@ bulk-api-adapter-service:
   replicaCount: 1
   image:
     repository: mojaloop/bulk-api-adapter
-    tag: v11.0.2
+    tag: v11.1.1
     command: '["node", "src/api/index.js"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -20,7 +20,7 @@ bulk-api-adapter-service:
     ##
     #  imagePullSecrets:
     #    - name: myregistrykey
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
 
   init:
     enabled: true
@@ -28,7 +28,7 @@ bulk-api-adapter-service:
       name: wait-for-kafka
       repository: solsson/kafka
       tag: latest
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
       command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
       env: {}
       ## Env example
@@ -41,7 +41,7 @@ bulk-api-adapter-service:
       name: wait-for-mongodb
       repository: bitnami/mongodb
       tag: latest
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
       command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
 
   readinessProbe:
@@ -131,7 +131,7 @@ bulk-api-adapter-handler-notification:
   replicaCount: 1
   image:
     repository: mojaloop/bulk-api-adapter
-    tag: v11.0.2
+    tag: v11.1.1
     command: '["node", "src/handlers/index.js", "handler", "--notification"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -139,7 +139,7 @@ bulk-api-adapter-handler-notification:
     ##
     #  imagePullSecrets:
     #    - name: myregistrykey
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
 
   init:
     enabled: true
@@ -147,7 +147,7 @@ bulk-api-adapter-handler-notification:
       name: wait-for-kafka
       repository: solsson/kafka
       tag: latest
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
       command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
       env: {}
       ## Env example
@@ -160,7 +160,7 @@ bulk-api-adapter-handler-notification:
       name: wait-for-mongodb
       repository: bitnami/mongodb
       tag: latest
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
       objstore_uri: 'mongodb://$mongodbUsername:$mongodbPassword@$release_name-centralledger-obj:27017/$mongodbDatabase'
 
   readinessProbe:
