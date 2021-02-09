@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: account-lookup-service
+  name: 3p-als
   labels:
-    app: account-lookup-service
+    app: 3p-als
 spec:
   replicas: 1
   strategy:
@@ -12,11 +12,11 @@ spec:
       maxSurge: 1 # exeed the replicas by 1 pod
   selector:
     matchLabels:
-      app: account-lookup-service
+      app: 3p-als
   template:
     metadata:
       labels:
-        app: account-lookup-service
+        app: 3p-als
     spec:
       containers:
       - name: account-lookup-service
@@ -33,36 +33,36 @@ spec:
             port: 4001
         env:
           - name: ALS_SWITCH_ENDPOINT
-            value: http://central-ledger:3001
+            value: http://endpoint-registry:3001
           - name: ALS_DATABASE__HOST
-            value: mysql-als
+            value: mysql-3p-als
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: account-lookup-service-admin
+  name: 3p-als-admin
 spec:
   ports:
   - port: 4001
   selector:
-    app: account-lookup-service
+    app: 3p-als
   clusterIP: None
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: account-lookup-service
+  name: 3p-als
 spec:
   ports:
   - port: 4002
   selector:
-    app: account-lookup-service
+    app: 3p-als
   clusterIP: None
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: account-lookup-service
+  name: 3p-als
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/use-regex: "true"
@@ -72,9 +72,9 @@ spec:
         paths:
           - path: /account-lookup-service-admin(/|$)(.*)
             backend:
-              serviceName: account-lookup-service-admin
+              serviceName: 3p-als-admin
               servicePort: 4001
           - path: /account-lookup-service(/|$)(.*)
             backend:
-              serviceName: account-lookup-service
+              serviceName: 3p-als
               servicePort: 4002

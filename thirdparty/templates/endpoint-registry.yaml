@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: central-ledger
+  name: endpoint-registry
   labels:
-    app: central-ledger
+    app: endpoint-registry
 spec:
   replicas: 1
   strategy:
@@ -12,11 +12,11 @@ spec:
       maxSurge: 1 # exeed the replicas by 1 pod
   selector:
     matchLabels:
-      app: central-ledger
+      app: endpoint-registry
   template:
     metadata:
       labels:
-        app: central-ledger
+        app: endpoint-registry
     spec:
       containers:
       - name: central-ledger
@@ -36,6 +36,7 @@ spec:
             value: mysql-cl
           - name: CLEDG_DATABASE__PORT
             value: "3306"
+        # TODO: configure this to run only the admin api... no need for Kafka here
           - name: CLEDG_KAFKA__PRODUCER__BULK__PROCESSING__config__rdkafkaConf__metadata.broker.list
             value: kafka:9092
           - name: CLEDG_KAFKA__PRODUCER__TRANSFER__PREPARE__config__rdkafkaConf__metadata.broker.list
@@ -75,18 +76,18 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: central-ledger
+  name: endpoint-registry
 spec:
   ports:
   - port: 3001
   selector:
-    app: central-ledger
+    app: endpoint-registry
   clusterIP: None
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: central-ledger
+  name: endpoint-registry
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/use-regex: "true"
@@ -94,7 +95,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /central-ledger(/|$)(.*)
+          - path: /endpoint-registry(/|$)(.*)
             backend:
-              serviceName: central-ledger
+              serviceName: endpoint-registry
               servicePort: 3001
