@@ -8,7 +8,9 @@ spec:
   successfulJobsHistoryLimit: 7
   failedJobsHistoryLimit: 7
   jobTemplate:
-  {{ include "ttkCLI.jobTemplate" . | indent 2 }}
+    spec:
+      backoffLimit: 0
+      {{- include "ml-testing-toolkit-cli.jobtemplate" . | nindent 6 }}
 {{- else if not .Values.tests.enabled }}
 apiVersion: {{ template "ml-testing-toolkit-cli.apiVersion.Job" . }}
 kind: Job
@@ -20,5 +22,7 @@ metadata:
     "helm.sh/hook-weight": {{ .Values.postInstallHook.weight | quote }}
     "helm.sh/hook-delete-policy": {{ .Values.postInstallHook.deletePolicy }}
   {{- end }}
-{{ include "ttkCLI.jobTemplate" . }}
+spec:
+  backoffLimit: 0
+  {{- include "ml-testing-toolkit-cli.jobtemplate" . | indent 2 }}
 {{- end }}

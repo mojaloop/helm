@@ -2,10 +2,15 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: {{ template "ml-testing-toolkit-cli.fullname" . }}
+  name: {{ include "ml-testing-toolkit-cli.fullname" . }}
+  labels:
+      {{- include "ml-testing-toolkit-cli.labels" . | nindent 4 }}
   annotations:
     helm.sh/hook: test
     helm.sh/hook-weight: {{ .Values.tests.weight | quote }}
     helm.sh/hook-delete-policy: {{ .Values.tests.deletePolicy }}
-{{ include "ttkCLI.jobTemplate" . }}
+spec:
+  restartPolicy: Never
+  {{- include "ml-testing-toolkit-cli.template.containers" . | nindent 2 -}}
+  {{- include "ml-testing-toolkit-cli.template.volumes" . | nindent 2 -}}
 {{- end}}
