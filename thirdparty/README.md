@@ -19,7 +19,6 @@ kubectl apply -f ./thirdparty_deployment_base.yaml
 helm upgrade install thirdparty mojaloop/thirdparty
 ```
 
-
 ## Installing this chart from source
 
 ```bash
@@ -29,6 +28,13 @@ kubectl apply -f ./thirdparty_deployment_base.yaml
 
 # install the chart
 helm upgrade --install thirdparty ./
+```
+
+## Cleanup
+
+```bash
+helm delete thirdparty
+kubectl delete -f ./thirdparty_deployment_base.yaml
 ```
 
 ## Components
