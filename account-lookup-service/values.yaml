@@ -9,8 +9,8 @@ account-lookup-service:
     api:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v11.1.2
-        pullPolicy: Always
+        tag: v11.2.0
+        pullPolicy: IfNotPresent
         command: '["node", "src/index.js", "server", "--api"]'
       service:
         ports:
@@ -20,8 +20,8 @@ account-lookup-service:
     admin:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v11.1.2
-        pullPolicy: Always
+        tag: v11.2.0
+        pullPolicy: IfNotPresent
         command: '["node", "src/index.js", "server", "--admin"]'
       service:
         ports:
@@ -115,7 +115,7 @@ account-lookup-service:
       name: wait-for-mysql
       repository: mysql
       tag: latest
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
       command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
   service:
@@ -164,7 +164,7 @@ account-lookup-service-admin:
     api:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v11.1.2
+        tag: v11.2.0
         pullPolicy: IfNotPresent
         command: '["node", "src/index.js", "server", "--api"]'
       service:
@@ -175,7 +175,7 @@ account-lookup-service-admin:
     admin:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v11.1.2
+        tag: v11.2.0
         pullPolicy: IfNotPresent
         command: '["node", "src/index.js", "server", "--admin"]'
       service:
@@ -271,7 +271,7 @@ account-lookup-service-admin:
       name: wait-for-mysql
       repository: mysql
       tag: latest
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
       command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password $db_database -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
     migration:
       enabled: true
@@ -318,8 +318,8 @@ als-oracle-pathfinder:
   replicaCount: 1
   image:
     repository: mojaloop/als-oracle-pathfinder
-    tag: v10.2.0
-    pullPolicy: Always
+    tag: v11.0.0
+    pullPolicy: IfNotPresent
     command: '["node", "/opt/als-oracle-pathfinder/src/index.js"]'
     imagePullSecrets: []
 
@@ -475,26 +475,26 @@ als-oracle-pathfinder:
       name: wait-for-mysql
       repository: mysql
       tag: latest
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
       command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
     initMysql:
       centralLedger:
         name: init-central-ledger-mysql
         repository: mojaloop/als-oracle-pathfinder
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-central-ledger.sql;";
       accountLookup:
         name: init-account-lookup-mysql
         repository: mojaloop/als-oracle-pathfinder
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password $db_database -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-account-lookup.sql;";
     populateMysql:
       name: populate-mysql-tables
       repository: mysql
       tag: latest
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
       command: "echo 'Nothing configured to be populated. Continuing...';"
   service:
     type: ClusterIP
@@ -557,7 +557,7 @@ mysql:
   image:
     repository: "percona/percona-xtradb-cluster"
     tag: "5.7.19"
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
 
   # Desired number of members of xtradb cluster
   replicas: 1
