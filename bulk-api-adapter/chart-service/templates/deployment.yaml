@@ -39,15 +39,15 @@ spec:
             - sh
             - "-c"
             - {{ (.Values.init.mongodb.command | replace "$mongouri" $objStoreUri) | quote }}
-        - name: {{ .Values.init.image.name }}
-          image: {{ .Values.init.image.repository }}:{{ .Values.init.image.tag }}
-          imagePullPolicy: {{ .Values.init.image.pullPolicy }}
+        - name: {{ .Values.init.kafka.name }}
+          image: {{ .Values.init.kafka.repository }}:{{ .Values.init.kafka.tag }}
+          imagePullPolicy: {{ .Values.init.kafka.pullPolicy }}
           command:
             - sh
             - "-c"
-            - {{ (.Values.init.image.command | replace "$kafka_host" $kafkaHost | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) ) | quote }}
+            - {{ (.Values.init.kafka.command | replace "$kafka_host" $kafkaHost | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) ) | quote }}
           env:
-          {{- range $envItem := .Values.init.image.env }}
+          {{- range $envItem := .Values.init.kafka.env }}
           - name: {{ $envItem.name }}
             value: {{ $envItem.value }}
           {{- end }}
