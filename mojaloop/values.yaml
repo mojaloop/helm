@@ -6,6 +6,7 @@ global: {}
 # Declare variables to be passed into your templates.
 
 central:
+  enabled: true
 
   centralledger:
     enabled: true
@@ -24,8 +25,8 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v11.3.1
-            pullPolicy: Always
+            tag: v13.0.0
+            pullPolicy: IfNotPresent
             command: '["node", "src/api/index.js"]'
           service:
             ports:
@@ -62,8 +63,8 @@ central:
         enabled: false
         image:
           repository: mojaloop/event-sidecar
-          tag: v9.5.1
-          pullPolicy: Always
+          tag: v11.0.0
+          pullPolicy: IfNotPresent
         readinessProbe:
           enabled: true
           initialDelaySeconds: 120
@@ -135,12 +136,12 @@ central:
           name: wait-for-postgres
           repository: bowerswilkins/awaitpostgres
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
         mysql:
           name: wait-for-mysql
           repository: mysql
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
         migration:
           enabled: true
@@ -211,8 +212,8 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v11.3.1
-            pullPolicy: Always
+            tag: v13.0.0
+            pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
           service:
             ports:
@@ -249,8 +250,8 @@ central:
         enabled: true
         image:
           repository: mojaloop/event-sidecar
-          tag: v9.5.1
-          pullPolicy: Always
+          tag: v11.0.0
+          pullPolicy: IfNotPresent
         readinessProbe:
           enabled: true
           initialDelaySeconds: 120
@@ -326,7 +327,7 @@ central:
           name: wait-for-kafka
           repository: solsson/kafka
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
           env: {}
           ## Env example
@@ -339,12 +340,12 @@ central:
           name: wait-for-postgres
           repository: bowerswilkins/awaitpostgres
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
         mysql:
           name: wait-for-mysql
           repository: mysql
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
       service:
@@ -409,8 +410,8 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v11.3.1
-            pullPolicy: Always
+            tag: v13.0.0
+            pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--admin"]'
           service:
             ports:
@@ -447,8 +448,8 @@ central:
         enabled: false
         image:
           repository: mojaloop/event-sidecar
-          tag: v9.5.1
-          pullPolicy: Always
+          tag: v11.0.0
+          pullPolicy: IfNotPresent
         readinessProbe:
           enabled: true
           initialDelaySeconds: 120
@@ -521,7 +522,7 @@ central:
           name: wait-for-kafka
           repository: solsson/kafka
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
           env: {}
           ## Env example
@@ -534,12 +535,12 @@ central:
           name: wait-for-postgres
           repository: bowerswilkins/awaitpostgres
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
         mysql:
           name: wait-for-mysql
           repository: mysql
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
       service:
@@ -604,8 +605,8 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v11.3.1
-            pullPolicy: Always
+            tag: v13.0.0
+            pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--position"]'
           service:
             ports:
@@ -642,8 +643,8 @@ central:
         enabled: true
         image:
           repository: mojaloop/event-sidecar
-          tag: v9.5.1
-          pullPolicy: Always
+          tag: v11.0.0
+          pullPolicy: IfNotPresent
         readinessProbe:
           enabled: true
           initialDelaySeconds: 120
@@ -716,7 +717,7 @@ central:
           name: wait-for-kafka
           repository: solsson/kafka
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
           env: {}
           ## Env example
@@ -729,12 +730,12 @@ central:
           name: wait-for-postgres
           repository: bowerswilkins/awaitpostgres
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
         mysql:
           name: wait-for-mysql
           repository: mysql
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
       service:
@@ -799,8 +800,8 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v11.3.1
-            pullPolicy: Always
+            tag: v13.0.0
+            pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--get"]'
           service:
             ports:
@@ -837,8 +838,8 @@ central:
         enabled: false
         image:
           repository: mojaloop/event-sidecar
-          tag: v9.5.1
-          pullPolicy: Always
+          tag: v11.0.0
+          pullPolicy: IfNotPresent
         readinessProbe:
           enabled: true
           initialDelaySeconds: 120
@@ -911,7 +912,7 @@ central:
           name: wait-for-kafka
           repository: solsson/kafka
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
           env: {}
           ## Env example
@@ -924,12 +925,12 @@ central:
           name: wait-for-postgres
           repository: bowerswilkins/awaitpostgres
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
         mysql:
           name: wait-for-mysql
           repository: mysql
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
       service:
@@ -994,8 +995,8 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v11.3.1
-            pullPolicy: Always
+            tag: v13.0.0
+            pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
           service:
             ports:
@@ -1032,8 +1033,8 @@ central:
         enabled: true
         image:
           repository: mojaloop/event-sidecar
-          tag: v9.5.1
-          pullPolicy: Always
+          tag: v11.0.0
+          pullPolicy: IfNotPresent
         readinessProbe:
           enabled: true
           initialDelaySeconds: 120
@@ -1106,7 +1107,7 @@ central:
           name: wait-for-kafka
           repository: solsson/kafka
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
           env: {}
           ## Env example
@@ -1119,12 +1120,12 @@ central:
           name: wait-for-postgres
           repository: bowerswilkins/awaitpostgres
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
         mysql:
           name: wait-for-mysql
           repository: mysql
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
       service:
@@ -1189,8 +1190,8 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v11.3.1
-            pullPolicy: Always
+            tag: v13.0.0
+            pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
           service:
             ports:
@@ -1227,8 +1228,8 @@ central:
         enabled: true
         image:
           repository: mojaloop/event-sidecar
-          tag: v9.5.1
-          pullPolicy: Always
+          tag: v11.0.0
+          pullPolicy: IfNotPresent
         readinessProbe:
           enabled: true
           initialDelaySeconds: 120
@@ -1301,7 +1302,7 @@ central:
           name: wait-for-kafka
           repository: solsson/kafka
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
           env: {}
           ## Env example
@@ -1314,12 +1315,12 @@ central:
           name: wait-for-postgres
           repository: bowerswilkins/awaitpostgres
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
         mysql:
           name: wait-for-mysql
           repository: mysql
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
       service:
@@ -1383,7 +1384,7 @@ central:
       image:
         repository: "percona/percona-xtradb-cluster"
         tag: "5.7.19"
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
 
       # Desired number of members of xtradb cluster
       replicas: 1
@@ -1488,6 +1489,7 @@ central:
 
     kafka:
       enabled: true
+      testsEnabled: false
       nameOverride: kafka
       # ------------------------------------------------------------------------------
       # Kafka:
@@ -1815,195 +1817,915 @@ central:
         #           release: zookeeper
 
   centralsettlement:
-    # Declare variables to be passed into your templates.
-    replicaCount: 1
-    image:
-      repository: mojaloop/central-settlement
-      tag: v10.5.0
-      pullPolicy: Always
-
-    readinessProbe:
-      enabled: false
-      httpGet:
-        path: /health
-      initialDelaySeconds: 60
-      periodSeconds: 15
-
-    livenessProbe:
-      enabled: false
-      httpGet:
-        path: /health
-      initialDelaySeconds: 60
-      periodSeconds: 15
-
-    config:
-      ## Kafka Configuration
-      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-      kafka_host: '$release_name-kafka'
-      kafka_port: 9092
-      kafka:
-        consumer:
-          settlementwindow:
-            close:
-              config:
-                options:
-                  mode: 2
-                  batchSize: 1
-                  pollFrequency: 10
-                  recursiveTimeout: 100
-                  messageCharset: 'utf8'
-                  messageAsJSON: true
-                  sync: true
-                  consumeTimeout: 1000
-                rdkafkaConf:
-                  socket_keepalive_enable: true
-        producer:
-          notification:
-            event:
-              config:
-                options:
-                  messageCharset: 'utf8'
-                rdkafkaConf:
-                  event_cb: true
-                  compression_codec: 'none'
-                  retry_backoff_ms: 100
-                  message_send_max_retries: 2
-                  socket_keepalive_enable: true
-                  batch_num_messages: 100
-                  dr_cb: false
-                  socket_blocking_max_ms: 1
-                  queue_buffering_max_ms: 1
-                  broker_version_fallback: '0.10.1.0'
-                  api_version_request: true
-                topicConf:
-                  request_required_acks: 'all'
-                  partitioner: 'murmur2_random'
-          settlementwindow:
-            close:
-              config:
-                options:
-                  messageCharset: 'utf8'
-                rdkafkaConf:
-                  event_cb: true
-                  dr_cb: true
-                  socket_keepalive_enable: true
-                topicConf:
-                  request_required_acks: "all"
-                  partitioner: 'murmur2_random'
-      ## DB Configuration
-      # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
-      db_type: 'mysql'
-      # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-      db_driver: 'mysql'
-      db_host: '$release_name-centralledger-mysql'
-      db_port: 3306
-      db_user: central_ledger
-      db_password: oyMxgZChuu
-      db_database: central_ledger
-      db_connection_pool_min: 10
-      db_connection_pool_max: 30
-      db_acquire_timeout_millis: 30000
-      db_create_timeout_millis: 30000
-      db_destroy_timeout_millis: 5000
-      db_idle_timeout_millis: 30000
-      db_reap_interval_millis: 1000
-      db_create_retry_interval_millis: 200
-      db_debug: false
-      # Api Handler Configuration
-      handlers:
-        disabled: false
-        api:
-          disabled: false
-      # Settlement Window aggregation Configuration
-      window_aggregation:
-        retry_count: 3
-        retry_interval: 3000
-      hub_participant:
-        id: 1
-        name: hub
-      log_level: info
-      log_transport: file
-
-      error_handling:
-        include_cause_extension: false
-        truncate_extensions: true
-
-    init:
+    centralsettlement-service:
       enabled: true
-      mysql:
-        name: wait-for-mysql
-        repository: mysql
-        tag: latest
-        pullPolicy: Always
-        command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
-
-    service:
-      type: ClusterIP
-      ports:
+      replicaCount: 1
+      containers:
         api:
-          name: http-api
-          externalPort: 80
-          internalPort: 3007
+          image:
+            repository: mojaloop/central-settlement
+            tag: v12.0.1
+            pullPolicy: IfNotPresent
+            command: '["node", "src/api/index.js"]'
+          service:
+            type: ClusterIP
+            ports:
+              api:
+                name: http-api
+                externalPort: 80
+                internalPort: 3007
+            annotations: {}
+            # This allows one to point the service to an external backend.
+            # This is useful for local development where one wishes to hijack
+            # the communication from the service to the node layer and point
+            # to a specific endpoint (IP, Port, etc).
+            external:
+              enabled: false
+              # 10.0.2.2 is the magic IP for the host on virtualbox's network
+              ip: 10.0.2.2
+              ports:
+                api:
+                  name: http-api
+                  externalPort: 3007
+          readinessProbe:
+            enabled: true
+            httpGet:
+              path: /v2/health
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          livenessProbe:
+            enabled: true
+            httpGet:
+              path: /v2/health
+            initialDelaySeconds: 60
+            periodSeconds: 15
 
-      annotations: {}
+      ## Pod scheduling preferences.
+      ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+      affinity: {}
 
-      # This allows one to point the service to an external backend.
-      # This is useful for local development where one wishes to hijack
-      # the communication from the service to the node layer and point
-      # to a specific endpoint (IP, Port, etc).
-      external:
+      ## Node labels for pod assignment
+      ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+      nodeSelector: {}
+
+      ## Set toleration for scheduler
+      ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+      tolerations: []
+
+      ## UNCOMMENT AFTER THE EVENT SDK AND METRICS ARE IMPLEMENTED
+      sidecar:
         enabled: false
-        # 10.0.2.2 is the magic IP for the host on virtualbox's network
-        ip: 10.0.2.2
+      #   image:
+      #     repository: mojaloop/event-sidecar
+      #     tag: v11.0.0
+      #     pullPolicy: IfNotPresent
+      #     command: '["npm", "run", "start"]'
+      #   service:
+      #     internalPort: 4001
+      #   readinessProbe:
+      #     enabled: true
+      #     httpGet:
+      #       path: /health
+      #     initialDelaySeconds: 120
+      #     periodSeconds: 15
+      #   livenessProbe:
+      #     enabled: true
+      #     httpGet:
+      #       path: /health
+      #     initialDelaySeconds: 90
+      #     periodSeconds: 15
+      #   config:
+      #     event_log_grpc_host: localhost
+      #     event_log_grpc_port: 50051
+      #     event_log_filter: 'audit:*, log:info, log:warn, log:error'
+      #     event_log_metadata_only: true
+      #     log_level: info
+      #     log_filter: 'error, warn, info'
+
+      ## metric configuration for prometheus instrumentation
+      metrics:
+        ## flag to enable/disable the metrics end-points
+        enabled: false
+        config:
+          timeout: 5000
+          prefix: moja_
+          defaultLabels:
+            serviceName: central-settlement-service
+
+      config:
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: '$release_name-kafka'
+        kafka_port: 9092
+        kafka:
+          consumer:
+            notification:
+              close:
+                config:
+                  options:
+                    mode: 2
+                    batchSize: 1
+                    pollFrequency: 10
+                    recursiveTimeout: 100
+                    messageCharset: 'utf8'
+                    messageAsJSON: true
+                    sync: true
+                    consumeTimeout: 1000
+                  rdkafkaConf:
+                    socket_keepalive_enable: true
+              event:
+                config:
+                  options:
+                    mode: 2
+                    batchSize: 1
+                    pollFrequency: 10
+                    recursiveTimeout: 100
+                    messageCharset: 'utf8'
+                    messageAsJSON: true
+                    sync: true
+                    consumeTimeout: 1000
+                  rdkafkaConf:
+                    socket_keepalive_enable: true
+            settlementwindow:
+              close:
+                config:
+                  options:
+                    mode: 2
+                    batchSize: 1
+                    pollFrequency: 10
+                    recursiveTimeout: 100
+                    messageCharset: 'utf8'
+                    messageAsJSON: true
+                    sync: true
+                    consumeTimeout: 1000
+                  rdkafkaConf:
+                    socket_keepalive_enable: true
+          producer:
+            notification:
+              event:
+                config:
+                  options:
+                    messageCharset: 'utf8'
+                  rdkafkaConf:
+                    event_cb: true
+                    compression_codec: 'none'
+                    retry_backoff_ms: 100
+                    message_send_max_retries: 2
+                    socket_keepalive_enable: true
+                    batch_num_messages: 100
+                    dr_cb: false
+                    socket_blocking_max_ms: 1
+                    queue_buffering_max_ms: 1
+                    broker_version_fallback: '0.10.1.0'
+                    api_version_request: true
+                  topicConf:
+                    request_required_acks: 'all'
+                    partitioner: 'murmur2_random'
+            settlementwindow:
+              close:
+                config:
+                  options:
+                    messageCharset: 'utf8'
+                  rdkafkaConf:
+                    event_cb: true
+                    dr_cb: true
+                    socket_keepalive_enable: true
+                  topicConf:
+                    request_required_acks: "all"
+                    partitioner: 'murmur2_random'
+        ## DB Configuration
+        # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+        db_type: 'mysql'
+        # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+        db_driver: 'mysql'
+        db_host: '$release_name-centralledger-mysql'
+        db_port: 3306
+        db_user: central_ledger
+        db_password: oyMxgZChuu
+        db_database: central_ledger
+        db_connection_pool_min: 10
+        db_connection_pool_max: 30
+        db_acquire_timeout_millis: 30000
+        db_create_timeout_millis: 30000
+        db_destroy_timeout_millis: 5000
+        db_idle_timeout_millis: 30000
+        db_reap_interval_millis: 1000
+        db_create_retry_interval_millis: 200
+        db_debug: false
+        # Api Handler Configuration
+        handlers:
+          disabled: true
+          api:
+            disabled: false
+        # Settlement Window aggregation Configuration
+        window_aggregation:
+          retry_count: 3
+          retry_interval: 3000
+        hub_participant:
+          id: 1
+          name: hub
+        log_level: info
+        log_transport: file
+
+        error_handling:
+          include_cause_extension: false
+          truncate_extensions: true
+
+      init:
+        enabled: true
+        mysql:
+          name: wait-for-mysql
+          repository: mysql
+          tag: latest
+          pullPolicy: IfNotPresent
+          command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+
+      service:
+        type: ClusterIP
         ports:
           api:
             name: http-api
-            externalPort: 3007
+            externalPort: 80
+            internalPort: 3007
+        annotations: {}
 
-    ingress:
+        # This allows one to point the service to an external backend.
+        # This is useful for local development where one wishes to hijack
+        # the communication from the service to the node layer and point
+        # to a specific endpoint (IP, Port, etc).
+        external:
+          enabled: false
+          # 10.0.2.2 is the magic IP for the host on virtualbox's network
+          ip: 10.0.2.2
+          ports:
+            api:
+              name: http-api
+              externalPort: 3007
+      ingress:
+        enabled: true
+        externalPath:
+          api: /
+        # Used to create an Ingress record.
+        hosts:
+          api: central-settlement-service.local
+        annotations: {}
+          ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+          # nginx.ingress.kubernetes.io/rewrite-target: '/'
+          # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+          ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+          # kubernetes.io/ingress.class: nginx
+          ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
+          # kubernetes.io/tls-acme: "true"
+        tls: []
+          # Secrets must be manually created in the namespace.
+          # - secretName: chart-example-tls
+          #   hosts:
+          #     - chart-example.local
+      resources: {}
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This also increases chances charts run on environments with little
+        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+        #  cpu: 100m
+        #  memory: 128Mi
+        # requests:
+        #  cpu: 100m
+        #  memory: 128Mi
+
+    centralsettlement-handler-settlementwindow:
       enabled: true
-      externalPath: /
-      # Used to create an Ingress record.
-      hosts:
-        api: central-settlement.local
-      annotations: {}
-        ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
-        # nginx.ingress.kubernetes.io/rewrite-target: '/'
-        # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
-        ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
-        # kubernetes.io/ingress.class: nginx
-        ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
-        # kubernetes.io/tls-acme: "true"
-      tls: []
-        # Secrets must be manually created in the namespace.
-        # - secretName: chart-example-tls
-        #   hosts:
-        #     - chart-example.local
-    resources: {}
-      # We usually recommend not to specify default resources and to leave this as a conscious
-      # choice for the user. This also increases chances charts run on environments with little
-      # resources, such as Minikube. If you do want to specify resources, uncomment the following
-      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-      # limits:
-      #  cpu: 100m
-      #  memory: 128Mi
-      # requests:
-      #  cpu: 100m
-      #  memory: 128Mi
+      replicaCount: 1
+
+      containers:
+        api:
+          image:
+            repository: mojaloop/central-settlement
+            tag: v12.0.1
+            pullPolicy: IfNotPresent
+            command: '["node", "src/handlers/index.js", "h", "--settlementwindow"]'
+          service:
+            type: ClusterIP
+            ports:
+              api:
+                name: http-api
+                externalPort: 80
+                internalPort: 3007
+            annotations: {}
+            # This allows one to point the service to an external backend.
+            # This is useful for local development where one wishes to hijack
+            # the communication from the service to the node layer and point
+            # to a specific endpoint (IP, Port, etc).
+            external:
+              enabled: false
+              # 10.0.2.2 is the magic IP for the host on virtualbox's network
+              ip: 10.0.2.2
+              ports:
+                api:
+                  name: http-api
+                  externalPort: 3007
+          readinessProbe:
+            enabled: true
+            httpGet:
+              path: /v2/health
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          livenessProbe:
+            enabled: true
+            httpGet:
+              path: /v2/health
+            initialDelaySeconds: 60
+            periodSeconds: 15
+
+      ## Pod scheduling preferences.
+      ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+      affinity: {}
+
+      ## Node labels for pod assignment
+      ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+      nodeSelector: {}
+
+      ## Set toleration for scheduler
+      ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+      tolerations: []
+
+      ## UNCOMMENT AFTER THE EVENT SDK AND METRICS ARE IMPLEMENTED
+      sidecar:
+        enabled: false
+      #   image:
+      #     repository: mojaloop/event-sidecar
+      #     tag: v11.0.0
+      #     pullPolicy: IfNotPresent
+      #     command: '["npm", "run", "start"]'
+      #   service:
+      #     internalPort: 4001
+      #   readinessProbe:
+      #     enabled: true
+      #     httpGet:
+      #       path: /health
+      #     initialDelaySeconds: 120
+      #     periodSeconds: 15
+      #   livenessProbe:
+      #     enabled: true
+      #     httpGet:
+      #       path: /health
+      #     initialDelaySeconds: 90
+      #     periodSeconds: 15
+      #   config:
+      #     event_log_grpc_host: localhost
+      #     event_log_grpc_port: 50051
+      #     event_log_filter: 'audit:*, log:info, log:warn, log:error'
+      #     event_log_metadata_only: true
+      #     log_level: info
+      #     log_filter: 'error, warn, info'
+
+      ## metric configuration for prometheus instrumentation
+      metrics:
+        ## flag to enable/disable the metrics end-points
+        enabled: false
+        config:
+          timeout: 5000
+          prefix: moja_
+          defaultLabels:
+            serviceName: central-settlement-handler-settlementwindow
+
+      config:
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: '$release_name-kafka'
+        kafka_port: 9092
+        kafka:
+          consumer:
+            notification:
+              close:
+                config:
+                  options:
+                    mode: 2
+                    batchSize: 1
+                    pollFrequency: 10
+                    recursiveTimeout: 100
+                    messageCharset: 'utf8'
+                    messageAsJSON: true
+                    sync: true
+                    consumeTimeout: 1000
+                  rdkafkaConf:
+                    socket_keepalive_enable: true
+              event:
+                config:
+                  options:
+                    mode: 2
+                    batchSize: 1
+                    pollFrequency: 10
+                    recursiveTimeout: 100
+                    messageCharset: 'utf8'
+                    messageAsJSON: true
+                    sync: true
+                    consumeTimeout: 1000
+                  rdkafkaConf:
+                    socket_keepalive_enable: true
+            settlementwindow:
+              close:
+                config:
+                  options:
+                    mode: 2
+                    batchSize: 1
+                    pollFrequency: 10
+                    recursiveTimeout: 100
+                    messageCharset: 'utf8'
+                    messageAsJSON: true
+                    sync: true
+                    consumeTimeout: 1000
+                  rdkafkaConf:
+                    socket_keepalive_enable: true
+          producer:
+            notification:
+              event:
+                config:
+                  options:
+                    messageCharset: 'utf8'
+                  rdkafkaConf:
+                    event_cb: true
+                    compression_codec: 'none'
+                    retry_backoff_ms: 100
+                    message_send_max_retries: 2
+                    socket_keepalive_enable: true
+                    batch_num_messages: 100
+                    dr_cb: false
+                    socket_blocking_max_ms: 1
+                    queue_buffering_max_ms: 1
+                    broker_version_fallback: '0.10.1.0'
+                    api_version_request: true
+                  topicConf:
+                    request_required_acks: 'all'
+                    partitioner: 'murmur2_random'
+            settlementwindow:
+              close:
+                config:
+                  options:
+                    messageCharset: 'utf8'
+                  rdkafkaConf:
+                    event_cb: true
+                    dr_cb: true
+                    socket_keepalive_enable: true
+                  topicConf:
+                    request_required_acks: "all"
+                    partitioner: 'murmur2_random'
+        ## DB Configuration
+        # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+        db_type: 'mysql'
+        # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+        db_driver: 'mysql'
+        db_host: '$release_name-centralledger-mysql'
+        db_port: 3306
+        db_user: central_ledger
+        db_password: oyMxgZChuu
+        db_database: central_ledger
+        db_connection_pool_min: 10
+        db_connection_pool_max: 30
+        db_acquire_timeout_millis: 30000
+        db_create_timeout_millis: 30000
+        db_destroy_timeout_millis: 5000
+        db_idle_timeout_millis: 30000
+        db_reap_interval_millis: 1000
+        db_create_retry_interval_millis: 200
+        db_debug: false
+        # Api Handler Configuration
+        handlers:
+          disabled: false
+          api:
+            disabled: false
+        # Settlement Window aggregation Configuration
+        window_aggregation:
+          retry_count: 3
+          retry_interval: 3000
+        hub_participant:
+          id: 1
+          name: hub
+        log_level: info
+        log_transport: file
+
+        error_handling:
+          include_cause_extension: false
+          truncate_extensions: true
+
+      init:
+        enabled: true
+        mysql:
+          name: wait-for-mysql
+          repository: mysql
+          tag: latest
+          pullPolicy: IfNotPresent
+          command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+        kafka:
+            name: wait-for-kafka
+            repository: solsson/kafka
+            tag: latest
+            pullPolicy: IfNotPresent
+            command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
+            env: {}
+      service:
+        type: ClusterIP
+        ports:
+          api:
+            name: http-api
+            externalPort: 80
+            internalPort: 3007
+        annotations: {}
+
+        # This allows one to point the service to an external backend.
+        # This is useful for local development where one wishes to hijack
+        # the communication from the service to the node layer and point
+        # to a specific endpoint (IP, Port, etc).
+        external:
+          enabled: false
+          # 10.0.2.2 is the magic IP for the host on virtualbox's network
+          ip: 10.0.2.2
+          ports:
+            api:
+              name: http-api
+              externalPort: 3007
+      ingress:
+        enabled: false
+        externalPath:
+          api: /
+        # Used to create an Ingress record.
+        hosts:
+          api: central-settlement-settlementwindow.local
+        annotations: {}
+          ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+          # nginx.ingress.kubernetes.io/rewrite-target: '/'
+          # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+          ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+          # kubernetes.io/ingress.class: nginx
+          ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
+          # kubernetes.io/tls-acme: "true"
+        tls: []
+          # Secrets must be manually created in the namespace.
+          # - secretName: chart-example-tls
+          #   hosts:
+          #     - chart-example.local
+      resources: {}
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This also increases chances charts run on environments with little
+        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+        #  cpu: 100m
+        #  memory: 128Mi
+        # requests:
+        #  cpu: 100m
+        #  memory: 128Mi
+
+    centralsettlement-handler-transfersettlement:
+      enabled: false
+      replicaCount: 1
+      containers:
+        api:
+          image:
+            repository: mojaloop/central-settlement
+            tag: v12.0.1
+            pullPolicy: IfNotPresent
+            command: '["node", "src/handlers/index.js", "h", "--transfersettlement"]'
+          service:
+            type: ClusterIP
+            ports:
+              api:
+                name: http-api
+                externalPort: 80
+                internalPort: 3007
+            annotations: {}
+            # This allows one to point the service to an external backend.
+            # This is useful for local development where one wishes to hijack
+            # the communication from the service to the node layer and point
+            # to a specific endpoint (IP, Port, etc).
+            external:
+              enabled: false
+              # 10.0.2.2 is the magic IP for the host on virtualbox's network
+              ip: 10.0.2.2
+              ports:
+                api:
+                  name: http-api
+                  externalPort: 3007
+          readinessProbe:
+            enabled: true
+            httpGet:
+              path: /v2/health
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          livenessProbe:
+            enabled: true
+            httpGet:
+              path: /v2/health
+            initialDelaySeconds: 60
+            periodSeconds: 15
+
+      ## Pod scheduling preferences.
+      ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+      affinity: {}
+
+      ## Node labels for pod assignment
+      ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+      nodeSelector: {}
+
+      ## Set toleration for scheduler
+      ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+      tolerations: []
+
+      ## UNCOMMENT AFTER THE EVENT SDK AND METRICS ARE IMPLEMENTED
+      sidecar:
+        enabled: false
+      #   image:
+      #     repository: mojaloop/event-sidecar
+      #     tag: v11.0.0
+      #     pullPolicy: IfNotPresent
+      #     command: '["npm", "run", "start"]'
+      #   service:
+      #     internalPort: 4001
+      #   readinessProbe:
+      #     enabled: true
+      #     httpGet:
+      #       path: /health
+      #     initialDelaySeconds: 120
+      #     periodSeconds: 15
+      #   livenessProbe:
+      #     enabled: true
+      #     httpGet:
+      #       path: /health
+      #     initialDelaySeconds: 90
+      #     periodSeconds: 15
+      #   config:
+      #     event_log_grpc_host: localhost
+      #     event_log_grpc_port: 50051
+      #     event_log_filter: 'audit:*, log:info, log:warn, log:error'
+      #     event_log_metadata_only: true
+      #     log_level: info
+      #     log_filter: 'error, warn, info'
+
+      ## metric configuration for prometheus instrumentation
+      metrics:
+        ## flag to enable/disable the metrics end-points
+        enabled: false
+        config:
+          timeout: 5000
+          prefix: moja_
+          defaultLabels:
+            serviceName: central-settlement-handler-transfersettlement
+
+      config:
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: '$release_name-kafka'
+        kafka_port: 9092
+        kafka:
+          consumer:
+            notification:
+              close:
+                config:
+                  options:
+                    mode: 2
+                    batchSize: 1
+                    pollFrequency: 10
+                    recursiveTimeout: 100
+                    messageCharset: 'utf8'
+                    messageAsJSON: true
+                    sync: true
+                    consumeTimeout: 1000
+                  rdkafkaConf:
+                    socket_keepalive_enable: true
+              event:
+                config:
+                  options:
+                    mode: 2
+                    batchSize: 1
+                    pollFrequency: 10
+                    recursiveTimeout: 100
+                    messageCharset: 'utf8'
+                    messageAsJSON: true
+                    sync: true
+                    consumeTimeout: 1000
+                  rdkafkaConf:
+                    socket_keepalive_enable: true
+            settlementwindow:
+              close:
+                config:
+                  options:
+                    mode: 2
+                    batchSize: 1
+                    pollFrequency: 10
+                    recursiveTimeout: 100
+                    messageCharset: 'utf8'
+                    messageAsJSON: true
+                    sync: true
+                    consumeTimeout: 1000
+                  rdkafkaConf:
+                    socket_keepalive_enable: true
+          producer:
+            notification:
+              event:
+                config:
+                  options:
+                    messageCharset: 'utf8'
+                  rdkafkaConf:
+                    event_cb: true
+                    compression_codec: 'none'
+                    retry_backoff_ms: 100
+                    message_send_max_retries: 2
+                    socket_keepalive_enable: true
+                    batch_num_messages: 100
+                    dr_cb: false
+                    socket_blocking_max_ms: 1
+                    queue_buffering_max_ms: 1
+                    broker_version_fallback: '0.10.1.0'
+                    api_version_request: true
+                  topicConf:
+                    request_required_acks: 'all'
+                    partitioner: 'murmur2_random'
+            settlementwindow:
+              close:
+                config:
+                  options:
+                    messageCharset: 'utf8'
+                  rdkafkaConf:
+                    event_cb: true
+                    dr_cb: true
+                    socket_keepalive_enable: true
+                  topicConf:
+                    request_required_acks: "all"
+                    partitioner: 'murmur2_random'
+        ## DB Configuration
+        # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+        db_type: 'mysql'
+        # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+        db_driver: 'mysql'
+        db_host: '$release_name-centralledger-mysql'
+        db_port: 3306
+        db_user: central_ledger
+        db_password: oyMxgZChuu
+        db_database: central_ledger
+        db_connection_pool_min: 10
+        db_connection_pool_max: 30
+        db_acquire_timeout_millis: 30000
+        db_create_timeout_millis: 30000
+        db_destroy_timeout_millis: 5000
+        db_idle_timeout_millis: 30000
+        db_reap_interval_millis: 1000
+        db_create_retry_interval_millis: 200
+        db_debug: false
+        # Api Handler Configuration
+        handlers:
+          disabled: false
+          api:
+            disabled: false
+        # Settlement Window aggregation Configuration
+        window_aggregation:
+          retry_count: 3
+          retry_interval: 3000
+        hub_participant:
+          id: 1
+          name: hub
+        log_level: info
+        log_transport: file
+
+        error_handling:
+          include_cause_extension: false
+          truncate_extensions: true
+
+        rules: {}
+          ## The rules object defines rules files represented as key-value pairs. These rules will be executed per commited transfer.   
+          ## Expected key-value format for the rules object:
+          ##  nameOfFile.js: fileContents 
+          ## See below example of interchange fee rule.
+
+          # interchangeFeeCalculation.js: |
+          #   /* eslint-disable no-undef */
+          #   // ********************************************************
+          #   // Name: Interchange fee calculation
+          #   // Type: notification
+          #   // Action: commit
+          #   // Status: success
+          #   // Start: 2020-06-01T00:00:00.000Z
+          #   // End: 2100-12-31T23:59:59.999Z
+          #   // Description: This script calculates the interchange fees between DFSPs where the account type is "Wallet"
+          #   // ********************************************************
+
+          #   // ## Globals:
+          #   // payload: The contents of the message from the Kafka topic.
+          #   // transfer: The transfer object.
+
+          #   // # Functions:
+          #   // ## Data retrieval functions:
+          #   // getTransfer(transferId): Retrieves a mojaloop transfer from the central-ledger API.
+
+          #   // ## Helper functions:
+          #   // getExtensionValue(list, key): Gets a value from an extension list
+          #   // log(message): allows the script to log to standard out for debugging purposes
+
+          #   // Math functions:
+          #   // multiply(number1, number2, decimalPlaces): Uses ml-number to handle multiplication of money values
+
+          #   // Ledger functions:
+          #   // addLedgerEntry: Adds a debit and credit ledger entry to the specified account to the specified DFSPs
+
+          #   log(JSON.stringify(transfer))
+          #   const payerFspId = transfer.payer.partyIdInfo.fspId
+          #   const payeeFspId = transfer.payee.partyIdInfo.fspId
+
+          #   if ((payeeFspId !== payerFspId) &&
+          #     (getExtensionValue(transfer.payee.partyIdInfo.extensionList.extension, 'accountType') === 'Wallet' &&
+          #       getExtensionValue(transfer.payer.partyIdInfo.extensionList.extension, 'accountType') === 'Wallet') &&
+          #     (transfer.transactionType.scenario === 'TRANSFER' &&
+          #       transfer.transactionType.initiator === 'PAYER' &&
+          #       transfer.transactionType.initiatorType === 'CONSUMER')) {
+          #     log(`Adding an interchange fee for Wallet to Wallet from ${payerFspId} to ${payeeFspId}`)
+          #     addLedgerEntry(payload.id, 'INTERCHANGE_FEE', // Ledger account type Id
+          #       'INTERCHANGE_FEE', // Ledger entry type Id
+          #       multiply(transfer.amount.amount, 0.006, 2),
+          #       transfer.amount.currency,
+          #       payerFspId,
+          #       payeeFspId)
+          #   }
+
+      init:
+        enabled: true
+        mysql:
+          name: wait-for-mysql
+          repository: mysql
+          tag: latest
+          pullPolicy: IfNotPresent
+          command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+        kafka:
+            name: wait-for-kafka
+            repository: solsson/kafka
+            tag: latest
+            pullPolicy: IfNotPresent
+            command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
+            env: {}
+      service:
+        type: ClusterIP
+        ports:
+          api:
+            name: http-api
+            externalPort: 80
+            internalPort: 3007
+        annotations: {}
+
+        # This allows one to point the service to an external backend.
+        # This is useful for local development where one wishes to hijack
+        # the communication from the service to the node layer and point
+        # to a specific endpoint (IP, Port, etc).
+        external:
+          enabled: false
+          # 10.0.2.2 is the magic IP for the host on virtualbox's network
+          ip: 10.0.2.2
+          ports:
+            api:
+              name: http-api
+              externalPort: 3007
+      ingress:
+        enabled: false
+        externalPath:
+          api: /
+        # Used to create an Ingress record.
+        hosts:
+          api: central-settlement-transfersettlement.local
+        annotations: {}
+          ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+          # nginx.ingress.kubernetes.io/rewrite-target: '/'
+          # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+          ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+          # kubernetes.io/ingress.class: nginx
+          ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
+          # kubernetes.io/tls-acme: "true"
+        tls: []
+          # Secrets must be manually created in the namespace.
+          # - secretName: chart-example-tls
+          #   hosts:
+          #     - chart-example.local
+      resources: {}
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This also increases chances charts run on environments with little
+        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+        #  cpu: 100m
+        #  memory: 128Mi
+        # requests:
+        #  cpu: 100m
+        #  memory: 128Mi
 
   centraleventprocessor:
     replicaCount: 1
     image:
       repository: mojaloop/central-event-processor
-      tag: v10.5.0
-      pullPolicy: Always
+      tag: v11.0.1
+      pullPolicy: IfNotPresent
     init:
       enabled: true
       kafka:
         name: wait-for-kafka
         repository: solsson/kafka
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
         env: {}
         ## Env example
@@ -2016,7 +2738,7 @@ central:
         name: wait-for-mongodb
         repository: bitnami/mongodb
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "mongo mongodb://$mongo_host:$mongo_port --eval \"db.adminCommand('ping')\""
 
     service:
@@ -2131,7 +2853,7 @@ central:
         ## Specify a imagePullPolicy
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
         ##
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         ## Optionally specify an array of imagePullSecrets.
         ## Secrets must be manually created in the namespace.
         ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -2380,6 +3102,8 @@ central:
       additionalLabels: {}
 
 ml-api-adapter:
+  enabled: true
+
   ml-api-adapter-service:
     enabled: true
     # Default values for ml-api-adapter.
@@ -2388,7 +3112,7 @@ ml-api-adapter:
     replicaCount: 1
     image:
       repository: mojaloop/ml-api-adapter
-      tag: v11.1.2
+      tag: v11.1.4
       command: '["node", "src/api/index.js"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -2396,7 +3120,7 @@ ml-api-adapter:
     ##
     #  imagePullSecrets:
     #    - name: myregistrykey
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
 
     ## Pod scheduling preferences.
     ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -2414,8 +3138,8 @@ ml-api-adapter:
       enabled: true
       image:
         repository: mojaloop/event-sidecar
-        tag: v9.5.1
-        pullPolicy: Always
+        tag: v11.0.0
+        pullPolicy: IfNotPresent
       readinessProbe:
         enabled: true
         initialDelaySeconds: 120
@@ -2433,7 +3157,7 @@ ml-api-adapter:
         name: wait-for-kafka
         repository: solsson/kafka
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
         env: {}
         ## Env example
@@ -2525,7 +3249,7 @@ ml-api-adapter:
     replicaCount: 1
     image:
       repository: mojaloop/ml-api-adapter
-      tag: v11.1.2
+      tag: v11.1.4
       command: '["node", "src/handlers/index.js", "handler", "--notification"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -2533,7 +3257,7 @@ ml-api-adapter:
     ##
     #  imagePullSecrets:
     #    - name: myregistrykey
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
 
     ## Pod scheduling preferences.
     ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -2551,8 +3275,8 @@ ml-api-adapter:
       enabled: true
       image:
         repository: mojaloop/event-sidecar
-        tag: v9.5.1
-        pullPolicy: Always
+        tag: v11.0.0
+        pullPolicy: IfNotPresent
       readinessProbe:
         enabled: true
         initialDelaySeconds: 120
@@ -2703,7 +3427,7 @@ emailnotifier:
   image:
     repository: mojaloop/email-notifier
     tag: v9.5.0
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
 
   init:
     enabled: true
@@ -2711,7 +3435,7 @@ emailnotifier:
       name: wait-for-kafka
       repository: solsson/kafka
       tag: latest
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
       command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
       env: {}
       ## Env example
@@ -2809,6 +3533,7 @@ emailnotifier:
     #  memory: 128Mi
 
 account-lookup-service:
+  enabled: true
 
   account-lookup-service:
     enabled: true
@@ -2821,8 +3546,8 @@ account-lookup-service:
       api:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.1.2
-          pullPolicy: Always
+          tag: v11.2.0
+          pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--api"]'
         service:
           ports:
@@ -2832,8 +3557,8 @@ account-lookup-service:
       admin:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.1.2
-          pullPolicy: Always
+          tag: v11.2.0
+          pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--admin"]'
         service:
           ports:
@@ -2848,8 +3573,8 @@ account-lookup-service:
       enabled: true
       image:
         repository: mojaloop/event-sidecar
-        tag: v9.5.1
-        pullPolicy: Always
+        tag: v11.0.0
+        pullPolicy: IfNotPresent
         command: '["npm", "run", "start"]'
       service:
         internalPort: 4003
@@ -2975,7 +3700,7 @@ account-lookup-service:
         name: wait-for-mysql
         repository: mysql
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select * from oracleEndpoint;' ; do echo waiting for MySQL; sleep 2; done;"
 
     service:
@@ -3030,8 +3755,8 @@ account-lookup-service:
       api:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.1.2
-          pullPolicy: Always
+          tag: v11.2.0
+          pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--api"]'
         service:
           ports:
@@ -3041,8 +3766,8 @@ account-lookup-service:
       admin:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.1.2
-          pullPolicy: Always
+          tag: v11.2.0
+          pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--admin"]'
         service:
           ports:
@@ -3057,8 +3782,8 @@ account-lookup-service:
       enabled: true
       image:
         repository: mojaloop/event-sidecar
-        tag: v9.5.1
-        pullPolicy: Always
+        tag: v11.0.0
+        pullPolicy: IfNotPresent
         command: '["npm", "run", "start"]'
       service:
         internalPort: 4003
@@ -3170,7 +3895,7 @@ account-lookup-service:
         name: wait-for-mysql
         repository: mysql
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
 
     service:
@@ -3219,8 +3944,8 @@ account-lookup-service:
     replicaCount: 1
     image:
       repository: mojaloop/als-oracle-pathfinder
-      tag: v10.2.0
-      pullPolicy: Always
+      tag: v11.0.0
+      pullPolicy: IfNotPresent
       command: '["node", "/opt/als-oracle-pathfinder/src/index.js"]'
       imagePullSecrets: []
 
@@ -3376,7 +4101,7 @@ account-lookup-service:
         name: wait-for-mysql
         repository: mysql
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
       initMysql:
         centralLedger:
@@ -3384,21 +4109,21 @@ account-lookup-service:
           name: init-central-ledger-mysql
           repository: mojaloop/als-oracle-pathfinder
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-central-ledger.sql;";
         accountLookup:
           enabled: true
           name: init-account-lookup-mysql
           repository: mojaloop/als-oracle-pathfinder
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password $db_database -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-account-lookup.sql;";
       populateMysql:
         enabled: true
         name: populate-mysql-tables
         repository: mysql
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "echo 'Nothing configured to be populated. Continuing...';"
     service:
       type: ClusterIP
@@ -3461,7 +4186,7 @@ account-lookup-service:
     image:
       repository: "percona/percona-xtradb-cluster"
       tag: "5.7.19"
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
 
     # Desired number of members of xtradb cluster
     replicas: 1
@@ -3572,8 +4297,8 @@ quoting-service:
   replicaCount: 1
   image:
     repository: mojaloop/quoting-service
-    tag: v11.1.4
-    pullPolicy: Always
+    tag: v11.2.2
+    pullPolicy: IfNotPresent
 
   readinessProbe:
     enabled: false
@@ -3679,8 +4404,8 @@ quoting-service:
     enabled: true
     image:
       repository: mojaloop/event-sidecar
-      tag: v9.5.1
-      pullPolicy: Always
+      tag: v11.0.0
+      pullPolicy: IfNotPresent
     readinessProbe:
       enabled: true
       initialDelaySeconds: 120
@@ -3700,7 +4425,7 @@ quoting-service:
       name: wait-for-mysql
       repository: mysql
       tag: latest
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
       command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
 
   service:
@@ -3762,8 +4487,8 @@ transaction-requests-service:
   replicaCount: 1
   image:
     repository: mojaloop/transaction-requests-service
-    tag: v11.1.2
-    pullPolicy: Always
+    tag: v11.1.4
+    pullPolicy: IfNotPresent
     command: '["node", "src/index.js", "api"]'
 
   readinessProbe:
@@ -3784,8 +4509,8 @@ transaction-requests-service:
     enabled: true
     image:
       repository: mojaloop/event-sidecar
-      tag: v9.5.1
-      pullPolicy: Always
+      tag: v11.0.0
+      pullPolicy: IfNotPresent
       command: '["npm", "run", "start"]'
     service:
       internalPort: 4001
@@ -3896,8 +4621,8 @@ simulator:
 
   image:
     repository: mojaloop/simulator
-    tag: v11.0.2
-    pullPolicy: Always
+    tag: v11.1.0
+    pullPolicy: IfNotPresent
 
   imagePullSecrets: []
   #  - name: {{replace with credential}}
@@ -3990,7 +4715,6 @@ simulator:
     # requests:
     #  cpu: 100m
     #  memory: 128Mi
-
 
 mojaloop-simulator:
   enabled: true
@@ -4455,7 +5179,7 @@ mojaloop-simulator:
         image:
           repository: redis
           tag: 5.0.4-alpine
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
         <<: *defaultProbes
         livenessProbe:
           enabled: true
@@ -4492,8 +5216,8 @@ mojaloop-simulator:
             publicKey: ''
         image:
           repository: mojaloop/sdk-scheme-adapter
-          tag: v11.8.0
-          pullPolicy: Always
+          tag: v11.11.2
+          pullPolicy: IfNotPresent
         <<: *defaultProbes
 
         # These will be supplied directly to the init containers array in the deployment for the
@@ -4659,8 +5383,8 @@ mojaloop-simulator:
       backend:
         image:
           repository: mojaloop/mojaloop-simulator
-          tag: v11.2.1
-          pullPolicy: Always
+          tag: v11.3.0
+          pullPolicy: IfNotPresent
         <<: *defaultProbes
 
         # These will be supplied directly to the init containers array in the deployment for the
@@ -4773,7 +5497,7 @@ mojaloop-simulator:
     tolerations: []
 
 finance-portal:
-  enabled: true
+  enabled: false
   service:
     type: ClusterIP
 
@@ -4878,7 +5602,7 @@ finance-portal:
     # Do not set to true in production
     InsecureCookie: 'false'
     is_populate:
-      name: ispopulate
+      name: $release_name-ispopulate
       http:
         endpoint: 'something'
         timeout: 30000
@@ -4897,8 +5621,8 @@ finance-portal:
       port: 80
     image:
       repository: mojaloop/finance-portal-ui
-      tag: v10.4.0
-      pullPolicy: Always
+      tag: v10.4.3
+      pullPolicy: IfNotPresent
       port: 80
     ingress:
       enabled: true
@@ -4919,15 +5643,15 @@ finance-portal:
       port: 3000
     image:
       repository: mojaloop/finance-portal-backend-service
-      tag: v10.4.0
-      pullPolicy: Always
+      tag: v10.5.1
+      pullPolicy: IfNotPresent
       port: 3000
     init:
       enabled: false
       image:
         repository: mojaloop/finance-portal-backend-service
-        tag: v10.4.0
-        pullPolicy: Always
+        tag: v10.5.1
+        pullPolicy: IfNotPresent
     env: 'dev'
     ingress:
       enabled: true
@@ -4944,7 +5668,7 @@ finance-portal:
         # kubernetes.io/tls-acme: "true"
 
 finance-portal-settlement-management:
-  enabled: true
+  enabled: false
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
   # Default values shared by all containers
@@ -4966,8 +5690,8 @@ finance-portal-settlement-management:
   operatorSettlement:
     image:
       repository: mojaloop/operator-settlement
-      tag: v9.2.1
-      pullPolicy: Always
+      tag: v11.0.0
+      pullPolicy: IfNotPresent
 
     service:
       port: 80
@@ -4976,8 +5700,8 @@ finance-portal-settlement-management:
       enabled: true
       image:
         repository: mojaloop/operator-settlement
-        tag: v9.2.1
-        pullPolicy: Always
+        tag: v11.0.0
+        pullPolicy: IfNotPresent
       command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database < /opt/operator-settlement/init.sql
 
     ingress:
@@ -4999,8 +5723,8 @@ finance-portal-settlement-management:
   settlementManagement:
     image:
       repository: mojaloop/settlement-management
-      tag: v8.8.2
-      pullPolicy: Always
+      tag: v11.0.0
+      pullPolicy: IfNotPresent
 
     service:
       port: 5000
@@ -5009,8 +5733,8 @@ finance-portal-settlement-management:
       enabled: true
       image:
         repository: mojaloop/settlement-management
-        tag: v8.8.2
-        pullPolicy: Always
+        tag: v11.0.0
+        pullPolicy: IfNotPresent
       command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database < /opt/settlement-management/init.sql
 
     config:
@@ -5053,7 +5777,7 @@ mojaloop-bulk:
       replicaCount: 1
       image:
         repository: mojaloop/bulk-api-adapter
-        tag: v11.0.2
+        tag: v11.1.2
         command: '["node", "src/api/index.js"]'
         ## Optionally specify an array of imagePullSecrets.
         ## Secrets must be manually created in the namespace.
@@ -5061,15 +5785,15 @@ mojaloop-bulk:
         ##
         #  imagePullSecrets:
         #    - name: myregistrykey
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
 
       init:
         enabled: true
-        image:
+        kafka:
           name: wait-for-kafka
           repository: solsson/kafka
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
           env: {}
           ## Env example
@@ -5082,7 +5806,7 @@ mojaloop-bulk:
           name: wait-for-mongodb
           repository: bitnami/mongodb
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
 
       readinessProbe:
@@ -5167,7 +5891,7 @@ mojaloop-bulk:
       replicaCount: 1
       image:
         repository: mojaloop/bulk-api-adapter
-        tag: v11.0.2
+        tag: v11.1.2
         command: '["node", "src/handlers/index.js", "handler", "--notification"]'
         ## Optionally specify an array of imagePullSecrets.
         ## Secrets must be manually created in the namespace.
@@ -5175,15 +5899,15 @@ mojaloop-bulk:
         ##
         #  imagePullSecrets:
         #    - name: myregistrykey
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
 
       init:
         enabled: true
-        image:
+        kafka:
           name: wait-for-kafka
           repository: solsson/kafka
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
           env: {}
           ## Env example
@@ -5196,7 +5920,7 @@ mojaloop-bulk:
           name: wait-for-mongodb
           repository: bitnami/mongodb
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
 
       readinessProbe:
@@ -5285,8 +6009,8 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v11.3.1
-            pullPolicy: Always
+            tag: v13.0.0
+            pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkprepare"]'
           service:
             ports:
@@ -5369,7 +6093,7 @@ mojaloop-bulk:
           name: wait-for-kafka
           repository: solsson/kafka
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
           env: {}
           ## Env example
@@ -5382,18 +6106,18 @@ mojaloop-bulk:
           name: wait-for-postgres
           repository: bowerswilkins/awaitpostgres
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
         mysql:
           name: wait-for-mysql
           repository: mysql
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
         mongodb:
           name: wait-for-mongodb
           repository: bitnami/mongodb
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
 
       service:
@@ -5457,8 +6181,8 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v11.3.1
-            pullPolicy: Always
+            tag: v13.0.0
+            pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkfulfil"]'
           service:
             ports:
@@ -5538,7 +6262,7 @@ mojaloop-bulk:
           name: wait-for-kafka
           repository: solsson/kafka
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
           env: {}
           ## Env example
@@ -5551,18 +6275,18 @@ mojaloop-bulk:
           name: wait-for-postgres
           repository: bowerswilkins/awaitpostgres
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
         mysql:
           name: wait-for-mysql
           repository: mysql
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
         mongodb:
           name: wait-for-mongodb
           repository: bitnami/mongodb
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
 
       service:
@@ -5626,8 +6350,8 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v11.3.1
-            pullPolicy: Always
+            tag: v13.0.0
+            pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkprocessing"]'
           service:
             ports:
@@ -5707,7 +6431,7 @@ mojaloop-bulk:
           name: wait-for-kafka
           repository: solsson/kafka
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
           env: {}
           ## Env example
@@ -5720,18 +6444,18 @@ mojaloop-bulk:
           name: wait-for-postgres
           repository: bowerswilkins/awaitpostgres
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
         mysql:
           name: wait-for-mysql
           repository: mysql
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
         mongodb:
           name: wait-for-mongodb
           repository: bitnami/mongodb
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
 
       service:
@@ -5784,6 +6508,7 @@ mojaloop-bulk:
       # requests:
       #  cpu: 100m
       #  memory: 128Mi
+    
     cl-handler-bulk-transfer-get:
       enabled: true
       # Default values for centralledger-handler-bulk-transfer-get.
@@ -5794,8 +6519,8 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v11.3.1
-            pullPolicy: Always
+            tag: v13.0.0
+            pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkget"]'
           service:
             ports:
@@ -5875,7 +6600,7 @@ mojaloop-bulk:
           name: wait-for-kafka
           repository: solsson/kafka
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
           env: {}
           ## Env example
@@ -5888,18 +6613,18 @@ mojaloop-bulk:
           name: wait-for-postgres
           repository: bowerswilkins/awaitpostgres
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
         mysql:
           name: wait-for-mysql
           repository: mysql
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
         mongodb:
           name: wait-for-mongodb
           repository: bitnami/mongodb
           tag: latest
-          pullPolicy: Always
+          pullPolicy: IfNotPresent
           command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
 
       service:
@@ -5978,7 +6703,7 @@ mojaloop-bulk:
       ## Specify a imagePullPolicy
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
       ##
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -6228,122 +6953,253 @@ mojaloop-bulk:
 
 ml-testing-toolkit:
   enabled: true
+
   ml-testing-toolkit-backend:
-    extraEnvironments: {
-      "hub-k8s-local-environment.json": &ttkInputValues {
+    extraEnvironments:
+      hub-k8s-local-environment.json: &ttkInputValues {
         "inputValues": {
-          "fromIdType": "MSISDN",
-          "fromIdValue": "44123456789",
-          "fromFirstName": "Firstname-Test",
-          "fromLastName": "Lastname-Test",
-          "fromDOB": "1984-01-01",
-          "note": "test",
-          "currency": "USD",
-          "amount": "100",
-          "homeTransactionId": "123ABC",
-          "fromFspId": "testingtoolkitdfsp",
-          "accept": "application/vnd.interoperability.parties+json;version=1.0",
-          "contentType": "application/vnd.interoperability.parties+json;version=1.0",
-          "toIdValue": "27713803912",
-          "toIdType": "MSISDN",
-          "toFspId": "payeefsp",
-          "acceptQuotes": "application/vnd.interoperability.quotes+json;version=1.0",
-          "contentTypeQuotes": "application/vnd.interoperability.quotes+json;version=1.0",
-          "acceptTransfers": "application/vnd.interoperability.transfers+json;version=1.0",
-          "contentTransfers": "application/vnd.interoperability.transfers+json;version=1.0",
-          "hub_operator": "NOT_APPLICABLE",
-          "payerfsp": "testingtoolkitdfsp",
-          "accountId": "6",
-          "payeefsp": "payeefsp",
-          "receiverMSISDN": "27713803912",
-          "ilpPacket": "AYIDBQAAAAAAACcQJGcucGF5ZWVmc3AubXNpc2RuLnt7cmVjZWl2ZXJtc2lzZG59fYIC1GV5SjBjbUZ1YzJGamRHbHZia2xrSWpvaVptVXhNREU0Wm1NdE1EaGxZeTAwWWpJM0xUbGpZalF0TnpjMk9URTFNR00zT1dKaklpd2ljWFZ2ZEdWSlpDSTZJbVpsTVRBeE9HWmpMVEE0WldNdE5HSXlOeTA1WTJJMExUYzNOamt4TlRCak56bGlZeUlzSW5CaGVXVmxJanA3SW5CaGNuUjVTV1JKYm1adklqcDdJbkJoY25SNVNXUlVlWEJsSWpvaVRWTkpVMFJPSWl3aWNHRnlkSGxKWkdWdWRHbG1hV1Z5SWpvaWUzdHlaV05sYVhabGNrMVRTVk5FVG4xOUlpd2labk53U1dRaU9pSndZWGxsWldaemNDSjlmU3dpY0dGNVpYSWlPbnNpY0dGeWRIbEpaRWx1Wm04aU9uc2ljR0Z5ZEhsSlpGUjVjR1VpT2lKTlUwbFRSRTRpTENKd1lYSjBlVWxrWlc1MGFXWnBaWElpT2lJeU56Y3hNemd3TXprd05TSXNJbVp6Y0Vsa0lqb2ljR0Y1WlhKbWMzQWlmU3dpY0dWeWMyOXVZV3hKYm1adklqcDdJbU52YlhCc1pYaE9ZVzFsSWpwN0ltWnBjbk4wVG1GdFpTSTZJazFoZEhNaUxDSnNZWE4wVG1GdFpTSTZJa2hoWjIxaGJpSjlMQ0prWVhSbFQyWkNhWEowYUNJNklqRTVPRE10TVRBdE1qVWlmWDBzSW1GdGIzVnVkQ0k2ZXlKaGJXOTFiblFpT2lJeE1EQWlMQ0pqZFhKeVpXNWplU0k2SWxWVFJDSjlMQ0owY21GdWMyRmpkR2x2YmxSNWNHVWlPbnNpYzJObGJtRnlhVzhpT2lKVVVrRk9VMFpGVWlJc0ltbHVhWFJwWVhSdmNpSTZJbEJCV1VWU0lpd2lhVzVwZEdsaGRHOXlWSGx3WlNJNklrTlBUbE5WVFVWU0luMTkA",
-          "condition": "n2cwS3w4ekGlvNYoXg2uBAqssu3FCoXjADE2mziU5jU",
-          "validFulfillment": "UNlJ98hZTY_dsw0cAqw4i_UN3v4utt7CZFB4yfLbVFA",
-          "validCondition": "GRzLaTP7DJ9t4P-a_BA0WA9wzzlsugf00-Tn6kESAfM",
-          "invalidFulfillment": "_3cco-YN5OGpRKVWV3n6x6uNpBTH9tYUdOYmHA-----",
-          "fspiopSignature": "{\"signature\":\"iU4GBXSfY8twZMj1zXX1CTe3LDO8Zvgui53icrriBxCUF_wltQmnjgWLWI4ZUEueVeOeTbDPBZazpBWYvBYpl5WJSUoXi14nVlangcsmu2vYkQUPmHtjOW-yb2ng6_aPfwd7oHLWrWzcsjTF-S4dW7GZRPHEbY_qCOhEwmmMOnE1FWF1OLvP0dM0r4y7FlnrZNhmuVIFhk_pMbEC44rtQmMFv4pm4EVGqmIm3eyXz0GkX8q_O1kGBoyIeV_P6RRcZ0nL6YUVMhPFSLJo6CIhL2zPm54Qdl2nVzDFWn_shVyV0Cl5vpcMJxJ--O_Zcbmpv6lxqDdygTC782Ob3CNMvg\\\",\\\"protectedHeader\\\":\\\"eyJhbGciOiJSUzI1NiIsIkZTUElPUC1VUkkiOiIvdHJhbnNmZXJzIiwiRlNQSU9QLUhUVFAtTWV0aG9kIjoiUE9TVCIsIkZTUElPUC1Tb3VyY2UiOiJPTUwiLCJGU1BJT1AtRGVzdGluYXRpb24iOiJNVE5Nb2JpbGVNb25leSIsIkRhdGUiOiIifQ\"}",
-          "HUB_OPERATOR_BEARER_TOKEN": "NOT_APPLICABLE",
           "BASE_CENTRAL_LEDGER_ADMIN": "",
-          "HOST_ML_API_ADAPTER": "http://$release_name-ml-api-adapter-service",
-          "HOST_CENTRAL_LEDGER": "http://$release_name-centralledger-service",
-          "HOST_QUOTING_SERVICE": "http://$release_name-quoting-service",
-          "HOST_ACCOUNT_LOOKUP_SERVICE": "http://$release_name-account-lookup-service",
-          "HOST_ACCOUNT_LOOKUP_ADMIN": "http://$release_name-account-lookup-service-admin",
-          "HOST_ACCOUNT_LOOKUP_SERVICE_ADMIN": "http://$release_name-account-lookup-service-admin",
-          "HOST_SIMULATOR": "http://$release_name-simulator",
-          "HOST_CENTRAL_SETTLEMENT": "http://$release_name-centralsettlement/v1",
-          "HOST_TRANSACTION_REQUESTS_SERVICE": "http://$release_name-transaction-requests-service",
-          "HOST_BULK_ADAPTER": "http://$release_name-bulk-api-adapter",
-          "HOST_LEGACY_SIMULATOR": "http://$release_name-simulator",
           "CALLBACK_ENDPOINT_BASE_URL": "http://$release_name-ml-testing-toolkit-backend:5000",
-          "PAYERFSP_SDK_TESTAPI_URL": "http://$release_name-sim-payerfsp-scheme-adapter:4002",
-          "PAYEEFSP_SDK_TESTAPI_URL": "http://$release_name-sim-payeefsp-scheme-adapter:4002",
-          "TESTFSP1_SDK_TESTAPI_URL": "http://$release_name-sim-testfsp1-scheme-adapter:4002",
-          "TESTFSP2_SDK_TESTAPI_URL": "http://$release_name-sim-testfsp2-scheme-adapter:4002",
-          "PAYERFSP_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-payerfsp-scheme-adapter:4002",
-          "PAYEEFSP_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-payeefsp-scheme-adapter:4002",
-          "TESTFSP1_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-testfsp1-scheme-adapter:4002",
-          "TESTFSP2_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-testfsp2-scheme-adapter:4002",
-          "PAYERFSP_BACKEND_TESTAPI_URL": "http://$release_name-sim-payerfsp-backend:3003",
-          "PAYEEFSP_BACKEND_TESTAPI_URL": "http://$release_name-sim-payeefsp-backend:3003",
-          "TESTFSP1_BACKEND_TESTAPI_URL": "http://$release_name-sim-testfsp1-backend:3003",
-          "TESTFSP2_BACKEND_TESTAPI_URL": "http://$release_name-sim-testfsp2-backend:3003",
-          "payerIdType": "MSISDN",
-          "payerIdentifier": "17039811907",
-          "payerfspEmail": "some.email@gmail.com",
-          "payeeIdType": "MSISDN",
-          "payeeIdentifier": "17039811907",
-          "payeefspEmail": "some.email@gmail.com",
-          "testfsp1IdType": "MSISDN",
-          "testfsp1Identifier": "17039811907",
-          "testfsp1Email": "some.email@gmail.com",
-          "testfsp2IdType": "MSISDN",
-          "testfsp2Identifier": "17039811907",
-          "testfsp2Email": "some.email@gmail.com",
-          "hubEmail": "some.email@gmail.com",
-          "HOST_BULK_ADAPTER": "http://$release_name-bulk-api-adapter-service",
-          "HOST_LEGACY_SIMULATOR": "http://$release_name-simulator",
-          "validCondition2": "kPLCKM62VY2jbekuw3apCTBg5zk_mVs9DD8-XpljQms",
-          "validIlpPacket2": "AYIC9AAAAAAAABdwHWcucGF5ZWVmc3AubXNpc2RuLjIyNTU2OTk5MTI1ggLKZXlKMGNtRnVjMkZqZEdsdmJrbGtJam9pWmpRMFltUmtOV010WXpreE1DMDBZVGt3TFRoa05qa3RaR0ppWVRaaVl6aGxZVFpqSWl3aWNYVnZkR1ZKWkNJNklqVTBaRFZtTURsaUxXRTBOMlF0TkRCa05pMWhZVEEzTFdFNVkyWXpZbUl5TkRsaFpDSXNJbkJoZVdWbElqcDdJbkJoY25SNVNXUkpibVp2SWpwN0luQmhjblI1U1dSVWVYQmxJam9pVFZOSlUwUk9JaXdpY0dGeWRIbEpaR1Z1ZEdsbWFXVnlJam9pTWpJMU5UWTVPVGt4TWpVaUxDSm1jM0JKWkNJNkluQmhlV1ZsWm5Od0luMTlMQ0p3WVhsbGNpSTZleUp3WVhKMGVVbGtTVzVtYnlJNmV5SndZWEowZVVsa1ZIbHdaU0k2SWsxVFNWTkVUaUlzSW5CaGNuUjVTV1JsYm5ScFptbGxjaUk2SWpJeU5UQTNNREE0TVRneElpd2labk53U1dRaU9pSndZWGxsY21aemNDSjlMQ0p3WlhKemIyNWhiRWx1Wm04aU9uc2lZMjl0Y0d4bGVFNWhiV1VpT25zaVptbHljM1JPWVcxbElqb2lUV0YwY3lJc0lteGhjM1JPWVcxbElqb2lTR0ZuYldGdUluMHNJbVJoZEdWUFprSnBjblJvSWpvaU1UazRNeTB4TUMweU5TSjlmU3dpWVcxdmRXNTBJanA3SW1GdGIzVnVkQ0k2SWpZd0lpd2lZM1Z5Y21WdVkza2lPaUpWVTBRaWZTd2lkSEpoYm5OaFkzUnBiMjVVZVhCbElqcDdJbk5qWlc1aGNtbHZJam9pVkZKQlRsTkdSVklpTENKcGJtbDBhV0YwYjNJaU9pSlFRVmxGVWlJc0ltbHVhWFJwWVhSdmNsUjVjR1VpT2lKRFQwNVRWVTFGVWlKOWZRAA",
-          "currency2": "USD",
-          "PAYERFSP_CALLBACK_URL": "http://$release_name-sim-payerfsp-scheme-adapter:4000",
-          "PAYEEFSP_CALLBACK_URL": "http://$release_name-sim-payeefsp-scheme-adapter:4000",
-          "TESTFSP1_CALLBACK_URL": "http://$release_name-sim-testfsp1-scheme-adapter:4000",
-          "TESTFSP2_CALLBACK_URL": "http://$release_name-sim-testfsp2-scheme-adapter:4000",
-          "acceptParticipants": "application/vnd.interoperability.participants+json;version=1.0",
-          "contentTypeParticipants": "application/vnd.interoperability.participants+json;version=1.0",
-          "toIdValueDelete": "27713803913",
-          "batchToIdValue1": "27713803066",
-          "batchToIdValue2": "27713803067",
-          "invalidToIdType": "ACCOUNT_ID",
-          "invalidToIdValue": "27713803099",
-          "ENABLE_WS_ASSERTIONS": true,
-          "WS_ASSERTION_TIMEOUT": 5000,
-          "SIMPAYER_MSISDN": "17039811907",
-          "SIMPAYEE_MSISDN": "17039811907",
-          "SIMPAYER_CURRENCY": "USD",
-          "SIMPAYER_NAME": "payerfsp",
-          "SIMPAYEE_NAME": "payeefsp",
-          "SIMPAYEE_CURRENCY": "USD",
-          "testfsp1MSISDN": "17039811907",
-          "TEST_NOTIFICATIONS": true,
-          "testfsp2MSISDN": "17039811907",
+          "ENABLE_JWS_SIGNING": true,
           "ENABLE_JWS_VALIDATION": false,
           "ENABLE_PROTECTED_HEADERS_VALIDATION": true,
-          "ENABLE_JWS_SIGNING": true,
+          "ENABLE_WS_ASSERTIONS": true,
+          "HOST_ACCOUNT_LOOKUP_ADMIN": "http://$release_name-account-lookup-service-admin",
+          "HOST_ACCOUNT_LOOKUP_SERVICE": "http://$release_name-account-lookup-service",
+          "HOST_ACCOUNT_LOOKUP_SERVICE_ADMIN": "http://$release_name-account-lookup-service-admin",
+          "HOST_BULK_ADAPTER": "http://$release_name-bulk-api-adapter-service",
+          "HOST_CENTRAL_LEDGER": "http://$release_name-centralledger-service",
+          "HOST_CENTRAL_SETTLEMENT": "http://$release_name-centralsettlement-service/v2",
+          "HOST_LEGACY_SIMULATOR": "http://$release_name-simulator",
+          "HOST_ML_API_ADAPTER": "http://$release_name-ml-api-adapter-service",
+          "HOST_QUOTING_SERVICE": "http://$release_name-quoting-service",
+          "HOST_SIMULATOR": "http://$release_name-simulator",
+          "HOST_TRANSACTION_REQUESTS_SERVICE": "http://$release_name-transaction-requests-service",
+          "HUB_OPERATOR_BEARER_TOKEN": "NOT_APPLICABLE",
+          "PAYEEFSP_BACKEND_TESTAPI_URL": "http://$release_name-sim-payeefsp-backend:3003",
+          "PAYEEFSP_CALLBACK_URL": "http://$release_name-sim-payeefsp-scheme-adapter:4000",
+          "PAYEEFSP_SDK_TESTAPI_URL": "http://$release_name-sim-payeefsp-scheme-adapter:4002",
+          "PAYEEFSP_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-payeefsp-scheme-adapter:4002",
+          "PAYERFSP_BACKEND_TESTAPI_URL": "http://$release_name-sim-payerfsp-backend:3003",
+          "PAYERFSP_CALLBACK_URL": "http://$release_name-sim-payerfsp-scheme-adapter:4000",
+          "PAYERFSP_SDK_TESTAPI_URL": "http://$release_name-sim-payerfsp-scheme-adapter:4002",
+          "PAYERFSP_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-payerfsp-scheme-adapter:4002",
+          "SIMPAYEE_CURRENCY": "USD",
+          "SIMPAYEE_JWS_PUB_KEY": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzLtduponsAlAk+3+PQdE\nsgjxRs5qhkrPa0z25NbHvgQYan4bH5GY+nEUX65YN65nusHtCG9gBeU0C56EgZQw\nIpkHDTh166qQGPwdJf5oMlMJn79DSd1I2bghbsNx0a1P6ElH16AyEwvgYtdtMOBW\nNgf7z5/tYgv7bGgmsp3qGlf0nnaux/frJhJ0Hxpd6eUCafwdlrNwc9R6iCKMSxGj\nvVTHgx0D7zSZ/+4PXq6gObyIZoC0uOsKKzlY3USx9khAh+96qfFoNKyfGHltpEPJ\nLmOLh3BtzDuna2KwtNdVNGcjPdCle3b9mNIdhR5aZ/bP6Zm+t9JuRC6ZwU/6WEy3\nFwIDAQAB\n-----END PUBLIC KEY-----\n",
+          "SIMPAYEE_MSISDN": "17039811902",
+          "SIMPAYEE_NAME": "payeefsp",
+          "SIMPAYER_CURRENCY": "USD",
+          "SIMPAYER_MSISDN": "17039811901",
+          "SIMPAYER_NAME": "payerfsp",
+          "TESTFSP1_BACKEND_TESTAPI_URL": "http://$release_name-sim-testfsp1-backend:3003",
+          "TESTFSP1_CALLBACK_URL": "http://$release_name-sim-testfsp1-scheme-adapter:4000",
+          "TESTFSP1_SDK_TESTAPI_URL": "http://$release_name-sim-testfsp1-scheme-adapter:4002",
+          "TESTFSP1_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-testfsp1-scheme-adapter:4002",
+          "TESTFSP2_BACKEND_TESTAPI_URL": "http://$release_name-sim-testfsp2-backend:3003",
+          "TESTFSP2_CALLBACK_URL": "http://$release_name-sim-testfsp2-scheme-adapter:4000",
+          "TESTFSP2_SDK_TESTAPI_URL": "http://$release_name-sim-testfsp2-scheme-adapter:4002",
+          "TESTFSP2_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-testfsp2-scheme-adapter:4002",
+          "TEST_NOTIFICATIONS": true,
           "TTKFSP_JWS_KEY": "-----BEGIN PRIVATE KEY-----\n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\nDktFAP1w3ruycnE/t+/H8rDVJGPTHc8=\n-----END PRIVATE KEY-----\n",
-          "SIMPAYEE_JWS_PUB_CERT": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzLtduponsAlAk+3+PQdE\nsgjxRs5qhkrPa0z25NbHvgQYan4bH5GY+nEUX65YN65nusHtCG9gBeU0C56EgZQw\nIpkHDTh166qQGPwdJf5oMlMJn79DSd1I2bghbsNx0a1P6ElH16AyEwvgYtdtMOBW\nNgf7z5/tYgv7bGgmsp3qGlf0nnaux/frJhJ0Hxpd6eUCafwdlrNwc9R6iCKMSxGj\nvVTHgx0D7zSZ/+4PXq6gObyIZoC0uOsKKzlY3USx9khAh+96qfFoNKyfGHltpEPJ\nLmOLh3BtzDuna2KwtNdVNGcjPdCle3b9mNIdhR5aZ/bP6Zm+t9JuRC6ZwU/6WEy3\nFwIDAQAB\n-----END PUBLIC KEY-----\n"
+          "WS_ASSERTION_TIMEOUT": 5000,
+          "accept": "application/vnd.interoperability.parties+json;version=1.0",
+          "acceptParticipants": "application/vnd.interoperability.participants+json;version=1.0",
+          "acceptQuotes": "application/vnd.interoperability.quotes+json;version=1.0",
+          "acceptTransfers": "application/vnd.interoperability.transfers+json;version=1.0",
+          "accountId": "6",
+          "amount": "100",
+          "batchToIdValue1": "27713803066",
+          "batchToIdValue2": "27713803067",
+          "condition": "n2cwS3w4ekGlvNYoXg2uBAqssu3FCoXjADE2mziU5jU",
+          "contentTransfers": "application/vnd.interoperability.transfers+json;version=1.0",
+          "contentType": "application/vnd.interoperability.parties+json;version=1.0",
+          "contentTypeParticipants": "application/vnd.interoperability.participants+json;version=1.0",
+          "contentTypeQuotes": "application/vnd.interoperability.quotes+json;version=1.0",
+          "currency": "USD",
+          "currency2": "USD",
+          "fromDOB": "1984-01-01",
+          "fromFirstName": "Firstname-Test",
+          "fromFspId": "testingtoolkitdfsp",
+          "fromIdType": "MSISDN",
+          "fromIdValue": "44123456789",
+          "fromLastName": "Lastname-Test",
+          "fspiopSignature": "{\"signature\":\"iU4GBXSfY8twZMj1zXX1CTe3LDO8Zvgui53icrriBxCUF_wltQmnjgWLWI4ZUEueVeOeTbDPBZazpBWYvBYpl5WJSUoXi14nVlangcsmu2vYkQUPmHtjOW-yb2ng6_aPfwd7oHLWrWzcsjTF-S4dW7GZRPHEbY_qCOhEwmmMOnE1FWF1OLvP0dM0r4y7FlnrZNhmuVIFhk_pMbEC44rtQmMFv4pm4EVGqmIm3eyXz0GkX8q_O1kGBoyIeV_P6RRcZ0nL6YUVMhPFSLJo6CIhL2zPm54Qdl2nVzDFWn_shVyV0Cl5vpcMJxJ--O_Zcbmpv6lxqDdygTC782Ob3CNMvg\\\",\\\"protectedHeader\\\":\\\"eyJhbGciOiJSUzI1NiIsIkZTUElPUC1VUkkiOiIvdHJhbnNmZXJzIiwiRlNQSU9QLUhUVFAtTWV0aG9kIjoiUE9TVCIsIkZTUElPUC1Tb3VyY2UiOiJPTUwiLCJGU1BJT1AtRGVzdGluYXRpb24iOiJNVE5Nb2JpbGVNb25leSIsIkRhdGUiOiIifQ\"}",
+          "homeTransactionId": "123ABC",
+          "hubEmail": "some.email@gmail.com",
+          "hub_operator": "NOT_APPLICABLE",
+          "ilpPacket": "AYIDBQAAAAAAACcQJGcucGF5ZWVmc3AubXNpc2RuLnt7cmVjZWl2ZXJtc2lzZG59fYIC1GV5SjBjbUZ1YzJGamRHbHZia2xrSWpvaVptVXhNREU0Wm1NdE1EaGxZeTAwWWpJM0xUbGpZalF0TnpjMk9URTFNR00zT1dKaklpd2ljWFZ2ZEdWSlpDSTZJbVpsTVRBeE9HWmpMVEE0WldNdE5HSXlOeTA1WTJJMExUYzNOamt4TlRCak56bGlZeUlzSW5CaGVXVmxJanA3SW5CaGNuUjVTV1JKYm1adklqcDdJbkJoY25SNVNXUlVlWEJsSWpvaVRWTkpVMFJPSWl3aWNHRnlkSGxKWkdWdWRHbG1hV1Z5SWpvaWUzdHlaV05sYVhabGNrMVRTVk5FVG4xOUlpd2labk53U1dRaU9pSndZWGxsWldaemNDSjlmU3dpY0dGNVpYSWlPbnNpY0dGeWRIbEpaRWx1Wm04aU9uc2ljR0Z5ZEhsSlpGUjVjR1VpT2lKTlUwbFRSRTRpTENKd1lYSjBlVWxrWlc1MGFXWnBaWElpT2lJeU56Y3hNemd3TXprd05TSXNJbVp6Y0Vsa0lqb2ljR0Y1WlhKbWMzQWlmU3dpY0dWeWMyOXVZV3hKYm1adklqcDdJbU52YlhCc1pYaE9ZVzFsSWpwN0ltWnBjbk4wVG1GdFpTSTZJazFoZEhNaUxDSnNZWE4wVG1GdFpTSTZJa2hoWjIxaGJpSjlMQ0prWVhSbFQyWkNhWEowYUNJNklqRTVPRE10TVRBdE1qVWlmWDBzSW1GdGIzVnVkQ0k2ZXlKaGJXOTFiblFpT2lJeE1EQWlMQ0pqZFhKeVpXNWplU0k2SWxWVFJDSjlMQ0owY21GdWMyRmpkR2x2YmxSNWNHVWlPbnNpYzJObGJtRnlhVzhpT2lKVVVrRk9VMFpGVWlJc0ltbHVhWFJwWVhSdmNpSTZJbEJCV1VWU0lpd2lhVzVwZEdsaGRHOXlWSGx3WlNJNklrTlBUbE5WVFVWU0luMTkA",
+          "invalidFulfillment": "_3cco-YN5OGpRKVWV3n6x6uNpBTH9tYUdOYmHA-----",
+          "invalidToIdType": "ACCOUNT_ID",
+          "invalidToIdValue": "27713803099",
+          "note": "test",
+          "payeeIdType": "MSISDN",
+          "payeeIdentifier": "17039811902",
+          "payeefsp": "payeefsp",
+          "payeefspEmail": "some.email@gmail.com",
+          "payerIdType": "MSISDN",
+          "payerIdentifier": "17039811901",
+          "payerfsp": "testingtoolkitdfsp",
+          "payerfspEmail": "some.email@gmail.com",
+          "receiverMSISDN": "27713803912",
+          "testfsp1Email": "some.email@gmail.com",
+          "testfsp1IdType": "MSISDN",
+          "testfsp1Identifier": "17039811903",
+          "testfsp1MSISDN": "17039811903",
+          "testfsp2Email": "some.email@gmail.com",
+          "testfsp2IdType": "MSISDN",
+          "testfsp2Identifier": "17039811904",
+          "testfsp2MSISDN": "17039811904",
+          "toFspId": "payeefsp",
+          "toIdType": "MSISDN",
+          "toIdValue": "27713803912",
+          "toIdValueDelete": "27713803913",
+          "validCondition": "GRzLaTP7DJ9t4P-a_BA0WA9wzzlsugf00-Tn6kESAfM",
+          "validCondition2": "kPLCKM62VY2jbekuw3apCTBg5zk_mVs9DD8-XpljQms",
+          "validFulfillment": "UNlJ98hZTY_dsw0cAqw4i_UN3v4utt7CZFB4yfLbVFA",
+          "validIlpPacket2": "AYIC9AAAAAAAABdwHWcucGF5ZWVmc3AubXNpc2RuLjIyNTU2OTk5MTI1ggLKZXlKMGNtRnVjMkZqZEdsdmJrbGtJam9pWmpRMFltUmtOV010WXpreE1DMDBZVGt3TFRoa05qa3RaR0ppWVRaaVl6aGxZVFpqSWl3aWNYVnZkR1ZKWkNJNklqVTBaRFZtTURsaUxXRTBOMlF0TkRCa05pMWhZVEEzTFdFNVkyWXpZbUl5TkRsaFpDSXNJbkJoZVdWbElqcDdJbkJoY25SNVNXUkpibVp2SWpwN0luQmhjblI1U1dSVWVYQmxJam9pVFZOSlUwUk9JaXdpY0dGeWRIbEpaR1Z1ZEdsbWFXVnlJam9pTWpJMU5UWTVPVGt4TWpVaUxDSm1jM0JKWkNJNkluQmhlV1ZsWm5Od0luMTlMQ0p3WVhsbGNpSTZleUp3WVhKMGVVbGtTVzVtYnlJNmV5SndZWEowZVVsa1ZIbHdaU0k2SWsxVFNWTkVUaUlzSW5CaGNuUjVTV1JsYm5ScFptbGxjaUk2SWpJeU5UQTNNREE0TVRneElpd2labk53U1dRaU9pSndZWGxsY21aemNDSjlMQ0p3WlhKemIyNWhiRWx1Wm04aU9uc2lZMjl0Y0d4bGVFNWhiV1VpT25zaVptbHljM1JPWVcxbElqb2lUV0YwY3lJc0lteGhjM1JPWVcxbElqb2lTR0ZuYldGdUluMHNJbVJoZEdWUFprSnBjblJvSWpvaU1UazRNeTB4TUMweU5TSjlmU3dpWVcxdmRXNTBJanA3SW1GdGIzVnVkQ0k2SWpZd0lpd2lZM1Z5Y21WdVkza2lPaUpWVTBRaWZTd2lkSEpoYm5OaFkzUnBiMjVVZVhCbElqcDdJbk5qWlc1aGNtbHZJam9pVkZKQlRsTkdSVklpTENKcGJtbDBhV0YwYjNJaU9pSlFRVmxGVWlJc0ltbHVhWFJwWVhSdmNsUjVjR1VpT2lKRFQwNVRWVTFGVWlKOWZRAA",
+          "NORESPONSE_SIMPAYEE_NAME": "noresponsepayeefsp",
+          "SIM1_NAME": "testfsp1",
+          "SIM2_NAME": "testfsp2",
+          "SIM1_MSISDN": "17039811903",
+          "SIM2_MSISDN": "17039811904",
+          "SIM1_JWS_KEY": "-----BEGIN PRIVATE KEY-----\n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\nDgoQeSng2kt5Z6mkoDIQTs7nEflb4w==\n-----END PRIVATE KEY-----\n",
+          "SIM2_JWS_KEY": "-----BEGIN PRIVATE KEY-----\n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\nTv4G862WYeqD1fdyZaKQ3b9fAQEq1g==\n-----END PRIVATE KEY-----\n",
+          "SIMPAYEE_JWS_PRIVATE_KEY": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDMu126miewCUCT\n7f49B0SyCPFGzmqGSs9rTPbk1se+BBhqfhsfkZj6cRRfrlg3rme6we0Ib2AF5TQL\nnoSBlDAimQcNOHXrqpAY/B0l/mgyUwmfv0NJ3UjZuCFuw3HRrU/oSUfXoDITC+Bi\n120w4FY2B/vPn+1iC/tsaCayneoaV/Sedq7H9+smEnQfGl3p5QJp/B2Ws3Bz1HqI\nIoxLEaO9VMeDHQPvNJn/7g9erqA5vIhmgLS46worOVjdRLH2SECH73qp8Wg0rJ8Y\neW2kQ8kuY4uHcG3MO6drYrC011U0ZyM90KV7dv2Y0h2FHlpn9s/pmb630m5ELpnB\nT/pYTLcXAgMBAAECggEADqk6Qz3SgBeMMYEWYZ4ZdsW6Ktpm+Xqg/kDy4JywOB9z\nSikBXeeKH3Z6ltwq2BicDV020Wb8Zt+s3vTOmLhDzC544/hPmtKfjWfR2eHX6gaq\nm+8ml+20pQFmb4Kn2MlC/Xzwm/SOXBvPyUmTua95rQExsK12DT0+F4YhLfhYsTh2\nHfkEzdFW4rrd+9ddKG1ZANS4ZaiMyzhtvUWeEBypBtVf+kBk+51t9pLCdjuynb8I\nWylSDhikT3/YQ/3g/Sz3SMp1u4x0GQe9FWYrnPzzp5LnM5fm49v8JWVHUvd0TOi0\ndQV+LYlgSD38YPpi4iKQSh0Zf0EBfbA83GsX2ArJ7QKBgQDmvcA6PqPo0OV/7RKY\nJuziA3TpucL8iVM1i7/Lv6+VkX88uDvEjwLoNAiYcgIm/CMK7WAwA+Dzn4r38EHB\nBKF4KRhP0qQS0KLXsd0tdsmAB0In7+cbKL4ttqNUP98xZAkTLJq9PXqTKN0qtyw4\nSfIsVMjDGoeSdWHObZYbGKICfQKBgQDjJLwolDrVX29V4zVmxQYH5iN+5kwKXHXj\nsuHBrW02Oj/GQFh3Xj6JQi3mzTWYhHwhA4pdaQtNYqTaz9Ic/O1VNPic2ovtg+cd\n7sh86qdQ4QZYhN3RT4oX///u6+UK90llh9hEBo3GuZ4X47tuByNtD4SFAlULrkSm\nfW4XaC3gIwKBgGil6HfCDx65F00UnVlKVicPQEf8ivVz5rwjPIJQ1nZ0PYuxVtIH\ntl7PspJJKra5pb7/957vM2fqlOFsIrZCvmS75p3VP7qUyzYeIdzLwgmBwTxRrrP/\nn3kmGx9LtJM29nKuySNIrb3uS5hi6PhCeUYn0cHC13fSKuCvjOOPIXMVAoGBAJg+\nCPdR0tUs8Byq+yH0sIQe1m+5wAG50zJYtUPxD6AnDpO8kQ8A1f19o/JsXJ3rPp+K\nFfVh8LdfhIs8e+H+DLztkizftqXtoLzJTQuc46QsDurJszsVisNnTI1BAvWEpWct\n0+BUXDZ0NuhgNUIb+rygh/v2gjYgCddlfqKlqwntAoGBAM5Kpp5R0G0ioAuqGqfZ\nsHEdLqJMSepgc6c7RC+3G/svtS2IqCfyNfVMM3qV5MY3J7KnAVjGOw2oJbXcPLXa\nuutsVVmPx2d/x2LZdc8dYYcdOQZvrUhmALhAPXM4SRujakxh+Uxi1VOiW+fZL8aW\nuu1pxuWD0gTJxFkp6u4YIAhw\n-----END PRIVATE KEY-----\n",
+          "SIMPAYER_JWS_PRIVATE_KEY": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCg9eU66hg4ZAE6\njM4U8ylXQwUz9cdmzS3JyW+1bbgv77peMKSU/wFsi4QRwmbrYze9baFnGCKnS75E\nvCchib5vJxp3MDWzi/TGxmzgWdJRzkyCiI5C6dCgVL71MjsFgN3TN63wEf5sEU2I\neoJ8yXJM0pUG9f9NO7p/IGliDmt6C7EA7D9kQWigufmX0ZTVNKI07fKwC/AEKLp7\nkx99pvsCq8m184EEL15Q/NhA7R/5zKoHvmJa6Jd7tM0i0xn8IKOkNVFu3YIafAEC\nQWQwRbanFEeRc3tH3bEoYM8c74r+W+YxCG7nUf16XCk132XVffbHVl+wFgo18YB/\nsAJmcbePAgMBAAECggEAGQGKnsf+gkg7DqMQYx3Rxt5BISzmURjAK9CxG6ETk9Lt\nA7QP5ZvmVzwnhPDMN3Z/Et1EzXTo8U+pnBkVBTdWkAMlr+2b8ixklzr9cC9UJuRj\na4YWf9u+TyJLVmF63OSD0cwdKCZLffOENZc+zW8oZDn08BNomdGVLCnXZWXzGY8X\nKaJTJr29jEgkKOqFXdAHrsmj7TBtqSLZKx2IHdCmi05+5JCxVLPgnDiCicZ9zEii\nyWw57Q1migFIcw6ZQP4RyjgH1o70B+zo3OL7IQEirE17GUgK16XD8xi8hWCYTj5n\nxOz9yfVfPuYom/9Xbm5kYJZKE2HOZ3Lg8pUnWncuNQKBgQDbaOoACQPhVxQK1qYR\nRbW0I5Rn0EDxzsFPEpu3eXHoIYGXi8u/ew9AzFmGu+tKYJV5V4BCXo5x2ddE+B8B\ndXhyHLGfeV8tWKYKBpatolVxxKDL/9fnxoGIAO9cc91ieOm5JxmKscCVP1UnOXHZ\nuomSfAbGQwYDtMd2bJKkE1z0qwKBgQC7zacuv1PMaDFksHuNNRG+aZ74pJ77msht\nvJoKyaQcktD0xmIXhFfJvK4cclzG7s5jxCsu2ejimgmfVzgXlLEMrJFvSdFkD2SS\ngGqoxq5c9g8ssvt7xwr7aJ+VYYWTWRzJrOUny+99UbwHedu0EHL1BYILwy67Lium\nsgUeeCEgrQKBgGv+7f7qcRB/jgvvr3oc990dDjUzGmRrQlcrb54Vlu2NYH45fyZW\n6iEY9JAO+zd25tv9J9KDPFXpxb3a61gKfCie2wcF9MUbN08EAzKgDrKa+BKxcZJR\n8PwCic7V8QhBP7m09yt/Zq2PqNhPvCxRVtnVVnhMES/N0cgGlP9R0JVVAoGAHU2/\nkmnEN5bibiWjgasQM7fjWETHkdbbA1R0bM59zv+Rnz/9OlIqKI5KVKH7nAbTKXoI\niuzxi7ohWj2PwQ4wehvLLaRFCenk9X8YJXGq71Jtl7ntx6iNLCFtFS/8WbuD5GwX\n7ZfCrLk+L6RyBayzY0wSuKch+Y8AvKf2aISyFpkCgYEAjSfEjz9Cn+27HdiMoBwa\n+fyyoosci/6OBxj/WTKvV6KUYLBfFoAYpb9rqrbvnfyyc0UiAYQeMJAOWQ1kkzY4\nzXs63iPQi2UeGPJZ7RsT+31DSaG9YiQdrInsUrlm8hi1C7Pg/NNt6Y1G0WhWYrvF\niNK0yCENMhSoOTtbT9tmGi0=\n-----END PRIVATE KEY-----\n",
+          "TESTFSP1_JWS_PUB_KEY": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2R3IuEDpqDtsS96emI0v\ndCJpeb/lnCxR2Nw5x6Z3GjC9PRFCJ2gsS2Zq70NaUQ5yWrrrZ9DZ8PjgCXqftUKG\n42uFsibLFpN09IjQuZCDuAkCdEjMgm+xies47ajRzl6evOc0ClkQBZVGybl9RAr6\nNRTFOYkYjJ0xS0MNkfRkDiOEu5BA/XKb5oLbyVMjGyvLgyS1g41x4fA+Ccb5PENa\nh9dqkFJ3j218Rs+bGytrVqrrCCjV1FiI+Y9YjKuTRRo7U/jcGHLfEc7YRcP2U9os\nxQxFvhHxR7W0e74fAU8B8YIJzwjaQvrEh9SJRc2IZsh6EdBAXXmbk4sHKyhoX0by\nUQIDAQAB\n-----END PUBLIC KEY-----\n",
+          "TESTFSP2_JWS_PUB_KEY": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv7k0Mqy0jSXFpHD9/a+Y\nl5djXq6HdyC+BsSA/sRKczEBKQyW8mEJVILAKkOibWzK7e+SJjQPbFjgqiUZvRI5\n+ggHkSJXEV28Bi2sF58A15sQjwaSkE2vBwLAL5GftSmao0QSozSfQ+RFw2N+loRG\nYedXZpRMsYFr1uA1qavcBjoj7JqPpID7UaTgXwwHWbV+j2uhQfotqRvOQ5KTmx5H\nJa+VjPu+xAC7mmcL+dxmeBpbJJD5Li8B8ggJXGJUk+En6XSIgZkQ6vKvC9HyasE6\nWZLXU+JJoCp2wkCPNTRxzPE2PGnlI0a4ZP2/y/2yacc4HQGBhEMc+SVT/VSZaMS+\nAQIDAQAB\n-----END PUBLIC KEY-----",
+          "payerfspSettlementAccountId": "",
+          "payerfspSettlementAccountBalanceBeforeFundsIn": "",
+          "payerfspSettlementAccountBalanceAfterFundsIn": "",
+          "fundsInPrepareTransferId": "",
+          "fundsInPrepareAmount": ""
         }
       }
-    }
+      # hub-k8s-local-environment.json: &ttkInputValues {
+      #   "inputValues": {
+      #     "fromIdType": "MSISDN",
+      #     "fromIdValue": "44123456789",
+      #     "fromFirstName": "Firstname-Test",
+      #     "fromLastName": "Lastname-Test",
+      #     "fromDOB": "1984-01-01",
+      #     "note": "test",
+      #     "currency": "USD",
+      #     "amount": "100",
+      #     "homeTransactionId": "123ABC",
+      #     "fromFspId": "testingtoolkitdfsp",
+      #     "accept": "application/vnd.interoperability.parties+json;version=1.0",
+      #     "contentType": "application/vnd.interoperability.parties+json;version=1.0",
+      #     "toIdValue": "27713803912",
+      #     "toIdType": "MSISDN",
+      #     "toFspId": "payeefsp",
+      #     "acceptQuotes": "application/vnd.interoperability.quotes+json;version=1.0",
+      #     "contentTypeQuotes": "application/vnd.interoperability.quotes+json;version=1.0",
+      #     "acceptTransfers": "application/vnd.interoperability.transfers+json;version=1.0",
+      #     "contentTransfers": "application/vnd.interoperability.transfers+json;version=1.0",
+      #     "hub_operator": "NOT_APPLICABLE",
+      #     "payerfsp": "testingtoolkitdfsp",
+      #     "accountId": "6",
+      #     "payeefsp": "payeefsp",
+      #     "receiverMSISDN": "27713803912",
+      #     "ilpPacket": "AYIDBQAAAAAAACcQJGcucGF5ZWVmc3AubXNpc2RuLnt7cmVjZWl2ZXJtc2lzZG59fYIC1GV5SjBjbUZ1YzJGamRHbHZia2xrSWpvaVptVXhNREU0Wm1NdE1EaGxZeTAwWWpJM0xUbGpZalF0TnpjMk9URTFNR00zT1dKaklpd2ljWFZ2ZEdWSlpDSTZJbVpsTVRBeE9HWmpMVEE0WldNdE5HSXlOeTA1WTJJMExUYzNOamt4TlRCak56bGlZeUlzSW5CaGVXVmxJanA3SW5CaGNuUjVTV1JKYm1adklqcDdJbkJoY25SNVNXUlVlWEJsSWpvaVRWTkpVMFJPSWl3aWNHRnlkSGxKWkdWdWRHbG1hV1Z5SWpvaWUzdHlaV05sYVhabGNrMVRTVk5FVG4xOUlpd2labk53U1dRaU9pSndZWGxsWldaemNDSjlmU3dpY0dGNVpYSWlPbnNpY0dGeWRIbEpaRWx1Wm04aU9uc2ljR0Z5ZEhsSlpGUjVjR1VpT2lKTlUwbFRSRTRpTENKd1lYSjBlVWxrWlc1MGFXWnBaWElpT2lJeU56Y3hNemd3TXprd05TSXNJbVp6Y0Vsa0lqb2ljR0Y1WlhKbWMzQWlmU3dpY0dWeWMyOXVZV3hKYm1adklqcDdJbU52YlhCc1pYaE9ZVzFsSWpwN0ltWnBjbk4wVG1GdFpTSTZJazFoZEhNaUxDSnNZWE4wVG1GdFpTSTZJa2hoWjIxaGJpSjlMQ0prWVhSbFQyWkNhWEowYUNJNklqRTVPRE10TVRBdE1qVWlmWDBzSW1GdGIzVnVkQ0k2ZXlKaGJXOTFiblFpT2lJeE1EQWlMQ0pqZFhKeVpXNWplU0k2SWxWVFJDSjlMQ0owY21GdWMyRmpkR2x2YmxSNWNHVWlPbnNpYzJObGJtRnlhVzhpT2lKVVVrRk9VMFpGVWlJc0ltbHVhWFJwWVhSdmNpSTZJbEJCV1VWU0lpd2lhVzVwZEdsaGRHOXlWSGx3WlNJNklrTlBUbE5WVFVWU0luMTkA",
+      #     "condition": "n2cwS3w4ekGlvNYoXg2uBAqssu3FCoXjADE2mziU5jU",
+      #     "validFulfillment": "UNlJ98hZTY_dsw0cAqw4i_UN3v4utt7CZFB4yfLbVFA",
+      #     "validCondition": "GRzLaTP7DJ9t4P-a_BA0WA9wzzlsugf00-Tn6kESAfM",
+      #     "invalidFulfillment": "_3cco-YN5OGpRKVWV3n6x6uNpBTH9tYUdOYmHA-----",
+      #     "fspiopSignature": "{\"signature\":\"iU4GBXSfY8twZMj1zXX1CTe3LDO8Zvgui53icrriBxCUF_wltQmnjgWLWI4ZUEueVeOeTbDPBZazpBWYvBYpl5WJSUoXi14nVlangcsmu2vYkQUPmHtjOW-yb2ng6_aPfwd7oHLWrWzcsjTF-S4dW7GZRPHEbY_qCOhEwmmMOnE1FWF1OLvP0dM0r4y7FlnrZNhmuVIFhk_pMbEC44rtQmMFv4pm4EVGqmIm3eyXz0GkX8q_O1kGBoyIeV_P6RRcZ0nL6YUVMhPFSLJo6CIhL2zPm54Qdl2nVzDFWn_shVyV0Cl5vpcMJxJ--O_Zcbmpv6lxqDdygTC782Ob3CNMvg\\\",\\\"protectedHeader\\\":\\\"eyJhbGciOiJSUzI1NiIsIkZTUElPUC1VUkkiOiIvdHJhbnNmZXJzIiwiRlNQSU9QLUhUVFAtTWV0aG9kIjoiUE9TVCIsIkZTUElPUC1Tb3VyY2UiOiJPTUwiLCJGU1BJT1AtRGVzdGluYXRpb24iOiJNVE5Nb2JpbGVNb25leSIsIkRhdGUiOiIifQ\"}",
+      #     "HUB_OPERATOR_BEARER_TOKEN": "NOT_APPLICABLE",
+      #     "BASE_CENTRAL_LEDGER_ADMIN": "",
+      #     "HOST_ML_API_ADAPTER": "http://$release_name-ml-api-adapter-service",
+      #     "HOST_CENTRAL_LEDGER": "http://$release_name-centralledger-service",
+      #     "HOST_QUOTING_SERVICE": "http://$release_name-quoting-service",
+      #     "HOST_ACCOUNT_LOOKUP_SERVICE": "http://$release_name-account-lookup-service",
+      #     "HOST_ACCOUNT_LOOKUP_ADMIN": "http://$release_name-account-lookup-service-admin",
+      #     "HOST_ACCOUNT_LOOKUP_SERVICE_ADMIN": "http://$release_name-account-lookup-service-admin",
+      #     "HOST_SIMULATOR": "http://$release_name-simulator",
+      #     "HOST_CENTRAL_SETTLEMENT": "http://$release_name-centralsettlement/v1",
+      #     "HOST_TRANSACTION_REQUESTS_SERVICE": "http://$release_name-transaction-requests-service",
+      #     "HOST_BULK_ADAPTER": "http://$release_name-bulk-api-adapter",
+      #     "HOST_LEGACY_SIMULATOR": "http://$release_name-simulator",
+      #     "CALLBACK_ENDPOINT_BASE_URL": "http://$release_name-ml-testing-toolkit-backend:5000",
+      #     "PAYERFSP_SDK_TESTAPI_URL": "http://$release_name-sim-payerfsp-scheme-adapter:4002",
+      #     "PAYEEFSP_SDK_TESTAPI_URL": "http://$release_name-sim-payeefsp-scheme-adapter:4002",
+      #     "TESTFSP1_SDK_TESTAPI_URL": "http://$release_name-sim-testfsp1-scheme-adapter:4002",
+      #     "TESTFSP2_SDK_TESTAPI_URL": "http://$release_name-sim-testfsp2-scheme-adapter:4002",
+      #     "PAYERFSP_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-payerfsp-scheme-adapter:4002",
+      #     "PAYEEFSP_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-payeefsp-scheme-adapter:4002",
+      #     "TESTFSP1_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-testfsp1-scheme-adapter:4002",
+      #     "TESTFSP2_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-testfsp2-scheme-adapter:4002",
+      #     "PAYERFSP_BACKEND_TESTAPI_URL": "http://$release_name-sim-payerfsp-backend:3003",
+      #     "PAYEEFSP_BACKEND_TESTAPI_URL": "http://$release_name-sim-payeefsp-backend:3003",
+      #     "TESTFSP1_BACKEND_TESTAPI_URL": "http://$release_name-sim-testfsp1-backend:3003",
+      #     "TESTFSP2_BACKEND_TESTAPI_URL": "http://$release_name-sim-testfsp2-backend:3003",
+      #     "payerIdType": "MSISDN",
+      #     "payerIdentifier": "17039811907",
+      #     "payerfspEmail": "some.email@gmail.com",
+      #     "payeeIdType": "MSISDN",
+      #     "payeeIdentifier": "17039811907",
+      #     "payeefspEmail": "some.email@gmail.com",
+      #     "testfsp1IdType": "MSISDN",
+      #     "testfsp1Identifier": "17039811907",
+      #     "testfsp1Email": "some.email@gmail.com",
+      #     "testfsp2IdType": "MSISDN",
+      #     "testfsp2Identifier": "17039811907",
+      #     "testfsp2Email": "some.email@gmail.com",
+      #     "hubEmail": "some.email@gmail.com",
+      #     "HOST_BULK_ADAPTER": "http://$release_name-bulk-api-adapter-service",
+      #     "HOST_LEGACY_SIMULATOR": "http://$release_name-simulator",
+      #     "validCondition2": "kPLCKM62VY2jbekuw3apCTBg5zk_mVs9DD8-XpljQms",
+      #     "validIlpPacket2": "AYIC9AAAAAAAABdwHWcucGF5ZWVmc3AubXNpc2RuLjIyNTU2OTk5MTI1ggLKZXlKMGNtRnVjMkZqZEdsdmJrbGtJam9pWmpRMFltUmtOV010WXpreE1DMDBZVGt3TFRoa05qa3RaR0ppWVRaaVl6aGxZVFpqSWl3aWNYVnZkR1ZKWkNJNklqVTBaRFZtTURsaUxXRTBOMlF0TkRCa05pMWhZVEEzTFdFNVkyWXpZbUl5TkRsaFpDSXNJbkJoZVdWbElqcDdJbkJoY25SNVNXUkpibVp2SWpwN0luQmhjblI1U1dSVWVYQmxJam9pVFZOSlUwUk9JaXdpY0dGeWRIbEpaR1Z1ZEdsbWFXVnlJam9pTWpJMU5UWTVPVGt4TWpVaUxDSm1jM0JKWkNJNkluQmhlV1ZsWm5Od0luMTlMQ0p3WVhsbGNpSTZleUp3WVhKMGVVbGtTVzVtYnlJNmV5SndZWEowZVVsa1ZIbHdaU0k2SWsxVFNWTkVUaUlzSW5CaGNuUjVTV1JsYm5ScFptbGxjaUk2SWpJeU5UQTNNREE0TVRneElpd2labk53U1dRaU9pSndZWGxsY21aemNDSjlMQ0p3WlhKemIyNWhiRWx1Wm04aU9uc2lZMjl0Y0d4bGVFNWhiV1VpT25zaVptbHljM1JPWVcxbElqb2lUV0YwY3lJc0lteGhjM1JPWVcxbElqb2lTR0ZuYldGdUluMHNJbVJoZEdWUFprSnBjblJvSWpvaU1UazRNeTB4TUMweU5TSjlmU3dpWVcxdmRXNTBJanA3SW1GdGIzVnVkQ0k2SWpZd0lpd2lZM1Z5Y21WdVkza2lPaUpWVTBRaWZTd2lkSEpoYm5OaFkzUnBiMjVVZVhCbElqcDdJbk5qWlc1aGNtbHZJam9pVkZKQlRsTkdSVklpTENKcGJtbDBhV0YwYjNJaU9pSlFRVmxGVWlJc0ltbHVhWFJwWVhSdmNsUjVjR1VpT2lKRFQwNVRWVTFGVWlKOWZRAA",
+      #     "currency2": "USD",
+      #     "PAYERFSP_CALLBACK_URL": "http://$release_name-sim-payerfsp-scheme-adapter:4000",
+      #     "PAYEEFSP_CALLBACK_URL": "http://$release_name-sim-payeefsp-scheme-adapter:4000",
+      #     "TESTFSP1_CALLBACK_URL": "http://$release_name-sim-testfsp1-scheme-adapter:4000",
+      #     "TESTFSP2_CALLBACK_URL": "http://$release_name-sim-testfsp2-scheme-adapter:4000",
+      #     "acceptParticipants": "application/vnd.interoperability.participants+json;version=1.0",
+      #     "contentTypeParticipants": "application/vnd.interoperability.participants+json;version=1.0",
+      #     "toIdValueDelete": "27713803913",
+      #     "batchToIdValue1": "27713803066",
+      #     "batchToIdValue2": "27713803067",
+      #     "invalidToIdType": "ACCOUNT_ID",
+      #     "invalidToIdValue": "27713803099",
+      #     "ENABLE_WS_ASSERTIONS": true,
+      #     "WS_ASSERTION_TIMEOUT": 5000,
+      #     "SIMPAYER_MSISDN": "17039811907",
+      #     "SIMPAYEE_MSISDN": "17039811907",
+      #     "SIMPAYER_CURRENCY": "USD",
+      #     "SIMPAYER_NAME": "payerfsp",
+      #     "SIMPAYEE_NAME": "payeefsp",
+      #     "SIMPAYEE_CURRENCY": "USD",
+      #     "testfsp1MSISDN": "17039811907",
+      #     "TEST_NOTIFICATIONS": true,
+      #     "testfsp2MSISDN": "17039811907",
+      #     "ENABLE_JWS_VALIDATION": false,
+      #     "ENABLE_PROTECTED_HEADERS_VALIDATION": true,
+      #     "ENABLE_JWS_SIGNING": true,
+      #     "TTKFSP_JWS_KEY": "-----BEGIN PRIVATE KEY-----\n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\nDktFAP1w3ruycnE/t+/H8rDVJGPTHc8=\n-----END PRIVATE KEY-----\n",
+      #     "SIMPAYEE_JWS_PUB_CERT": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzLtduponsAlAk+3+PQdE\nsgjxRs5qhkrPa0z25NbHvgQYan4bH5GY+nEUX65YN65nusHtCG9gBeU0C56EgZQw\nIpkHDTh166qQGPwdJf5oMlMJn79DSd1I2bghbsNx0a1P6ElH16AyEwvgYtdtMOBW\nNgf7z5/tYgv7bGgmsp3qGlf0nnaux/frJhJ0Hxpd6eUCafwdlrNwc9R6iCKMSxGj\nvVTHgx0D7zSZ/+4PXq6gObyIZoC0uOsKKzlY3USx9khAh+96qfFoNKyfGHltpEPJ\nLmOLh3BtzDuna2KwtNdVNGcjPdCle3b9mNIdhR5aZ/bP6Zm+t9JuRC6ZwU/6WEy3\nFwIDAQAB\n-----END PUBLIC KEY-----\n"
+      #   }
+      # }
+
+  ml-testing-toolkit-frontend:
+    # ingress:
+    #   enabled: true
+    #   hosts:
+    #     testing-toolkit.local
+    #       port: 6060
+    #       paths: ['/']
+    config: {}
+      # API_BASE_URL: http://testing-toolkit.local
 
 ml-ttk-posthook-setup:
   postInstallHook:
     enabled: false
     weight: -5
   config:
-    testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/master.zip
-    testCasesPathInZip: testing-toolkit-test-cases-master/collections/hub/provisioning
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/v12.0.0.zip
+    testCasesPathInZip: testing-toolkit-test-cases-12.0.0/collections/hub/provisioning
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
 
   testCaseEnvironmentFile:  *ttkInputValues
@@ -6353,8 +7209,9 @@ ml-ttk-posthook-tests:
     enabled: false
     weight: -4
   config:
-    testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/master.zip
-    testCasesPathInZip: testing-toolkit-test-cases-master/collections/hub/sequence
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/v12.0.0.zip
+    testCasesPathInZip: testing-toolkit-test-cases-12.0.0/collections/hub/golden_path
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
@@ -6385,3 +7242,101 @@ ml-ttk-posthook-tests:
 
   testCaseEnvironmentFile:  *ttkInputValues
 
+ml-ttk-cronjob-tests:
+  scheduling:
+    enabled: false
+    #### cronSchedule format as follows:
+    ## ┌───────────── minute (0 - 59)
+    ## │ ┌───────────── hour (0 - 23)
+    ## │ │ ┌───────────── day of the month (1 - 31)
+    ## │ │ │ ┌───────────── month (1 - 12)
+    ## │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday;
+    ## │ │ │ │ │                                   7 is also Sunday on some systems)
+    ## │ │ │ │ │
+    ## │ │ │ │ │
+    ## * * * * *
+    cronSchedule: '0 8 * * *'
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/v12.0.0.zip
+    testCasesPathInZip: testing-toolkit-test-cases-12.0.0/collections/hub/golden_path
+    # awsS3BucketName: aws-s3-bucket-name
+    # awsS3FilePath: ttk-tests/reports
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: GP Tests
+    environmentName: Development
+
+  # configCreds:
+  #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
+  #   AWS_SECRET_ACCESS_KEY: 'some_aws_secret_key'
+  #   AWS_REGION: 'us-west-2'
+  #   SLACK_WEBHOOK_URL: 'slack_inbound_webhook'
+
+  ## Optionally specify the config file defaults for TTK CLI
+  ## You should specify at least mode here
+  # configFileDefaults: {
+  #   "mode": "outbound",
+  #   "reportFormat": "html",
+  #   "baseURL": "",
+  #   "reportTarget": "",
+  #   "reportAutoFilenameEnable": true,
+  #   "slackWebhookUrl": "",
+  #   "slackPassedImage": "",
+  #   "slackFailedImage": ""
+  # }
+  configFileDefaults: {
+    "mode": "outbound"
+  }
+
+  testCaseEnvironmentFile:  *ttkInputValues
+
+ml-ttk-test-setup:
+  tests:
+    enabled: true
+    weight: -5
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/v12.0.0.zip
+    testCasesPathInZip: testing-toolkit-test-cases-12.0.0/collections/hub/provisioning
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+
+  testCaseEnvironmentFile:  *ttkInputValues
+
+ml-ttk-test-validation:
+  tests:
+    enabled: true
+    weight: -4
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/v12.0.0.zip
+    testCasesPathInZip: testing-toolkit-test-cases-12.0.0/collections/hub/golden_path
+    ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
+    # awsS3BucketName: aws-s3-bucket-name
+    # awsS3FilePath: ttk-tests/reports
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: GP Tests
+    environmentName: Development
+
+  # configCreds:
+  #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
+  #   AWS_SECRET_ACCESS_KEY: 'some_aws_secret_key'
+  #   AWS_REGION: 'us-west-2'
+  #   SLACK_WEBHOOK_URL: 'slack_inbound_webhook'
+
+  ## Optionally specify the config file defaults for TTK CLI
+  ## You should specify at least mode here
+  # configFileDefaults: {
+  #   "mode": "outbound",
+  #   "reportFormat": "html",
+  #   "baseURL": "",
+  #   "reportTarget": "",
+  #   "reportAutoFilenameEnable": true,
+  #   "slackWebhookUrl": "",
+  #   "slackPassedImage": "",
+  #   "slackFailedImage": ""
+  # }
+  configFileDefaults: {
+    "mode": "outbound"
+  }
+
+  testCaseEnvironmentFile:  *ttkInputValues
