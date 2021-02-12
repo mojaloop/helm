@@ -45,7 +45,7 @@ echo "\n"
 
 for chart in "${charts[@]}"
 do
-    echo "Linting $chart - Starting"
+    echo "---=== Linting $chart ===---"
     helm lint $chart
 done
 

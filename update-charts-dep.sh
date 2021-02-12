@@ -39,9 +39,6 @@ declare -a charts=(
     mojaloop
 )
 
-echo "Update repos..."
-helm repo update
-
 echo "Updating all Charts..."
 for chart in "${charts[@]}"
 do
