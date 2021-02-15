@@ -25,7 +25,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.0.0
+            tag: v13.0.1
             pullPolicy: IfNotPresent
             command: '["node", "src/api/index.js"]'
           service:
@@ -212,7 +212,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.0.0
+            tag: v13.0.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
           service:
@@ -410,7 +410,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.0.0
+            tag: v13.0.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--admin"]'
           service:
@@ -605,7 +605,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.0.0
+            tag: v13.0.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--position"]'
           service:
@@ -800,7 +800,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.0.0
+            tag: v13.0.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--get"]'
           service:
@@ -995,7 +995,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.0.0
+            tag: v13.0.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
           service:
@@ -1190,7 +1190,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.0.0
+            tag: v13.0.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
           service:
@@ -1824,7 +1824,7 @@ central:
         api:
           image:
             repository: mojaloop/central-settlement
-            tag: v12.0.1
+            tag: v12.0.3
             pullPolicy: IfNotPresent
             command: '["node", "src/api/index.js"]'
           service:
@@ -2101,7 +2101,7 @@ central:
         api:
           image:
             repository: mojaloop/central-settlement
-            tag: v12.0.1
+            tag: v12.0.3
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "h", "--settlementwindow"]'
           service:
@@ -2377,13 +2377,15 @@ central:
         #  memory: 128Mi
 
     centralsettlement-handler-transfersettlement:
+      ## Enable this handler if you wish to support Continuous Gross Settlement (CGS) and rule processing. 
+      ## Note: Ensure that you have configured the appropriated settlementModels (refer to the associated tagged release on https://github.com/mojaloop/postman for an example). See below more information on how to configure rule processing for Interchange Fees.
       enabled: false
       replicaCount: 1
       containers:
         api:
           image:
             repository: mojaloop/central-settlement
-            tag: v12.0.1
+            tag: v12.0.3
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "h", "--transfersettlement"]'
           service:
@@ -2590,60 +2592,91 @@ central:
           include_cause_extension: false
           truncate_extensions: true
 
-        rules: {}
+        rules:
           ## The rules object defines rules files represented as key-value pairs. These rules will be executed per commited transfer.   
           ## Expected key-value format for the rules object:
           ##  nameOfFile.js: fileContents 
           ## See below example of interchange fee rule.
 
-          # interchangeFeeCalculation.js: |
-          #   /* eslint-disable no-undef */
+          ## Default Empty Script - This is required as the rule engine requires a rule-file to function properly. 
+          ## Note: Uncomment this and comment-out the interchangeFeeCalculation.js below is you wish to enable CGS processing but do not want Interchange Fee processing.
+          # defaultEmptyScript.js: |
           #   // ********************************************************
-          #   // Name: Interchange fee calculation
+          #   // Name: Default Empty Rule
           #   // Type: notification
           #   // Action: commit
           #   // Status: success
           #   // Start: 2020-06-01T00:00:00.000Z
           #   // End: 2100-12-31T23:59:59.999Z
-          #   // Description: This script calculates the interchange fees between DFSPs where the account type is "Wallet"
+          #   // Description: This is empty rules script
           #   // ********************************************************
-
           #   // ## Globals:
           #   // payload: The contents of the message from the Kafka topic.
           #   // transfer: The transfer object.
-
           #   // # Functions:
           #   // ## Data retrieval functions:
           #   // getTransfer(transferId): Retrieves a mojaloop transfer from the central-ledger API.
-
           #   // ## Helper functions:
           #   // getExtensionValue(list, key): Gets a value from an extension list
           #   // log(message): allows the script to log to standard out for debugging purposes
-
           #   // Math functions:
           #   // multiply(number1, number2, decimalPlaces): Uses ml-number to handle multiplication of money values
-
           #   // Ledger functions:
           #   // addLedgerEntry: Adds a debit and credit ledger entry to the specified account to the specified DFSPs
+          #   log('Running - DEFAULT EMPTY RULES SCRIPT')
 
-          #   log(JSON.stringify(transfer))
-          #   const payerFspId = transfer.payer.partyIdInfo.fspId
-          #   const payeeFspId = transfer.payee.partyIdInfo.fspId
+          ## Interchange Fee Calculation Script - Ensure that a settlementModel (refer to the associated tagged release on https://github.com/mojaloop/postman for an example) is created for the ledgerAccounType "INTERCHANGE_FEE".
+          ## Note: Uncomment this is you wish to enable CGS processing but also want Interchange Fee processing.
+          interchangeFeeCalculation.js: |
+            /* eslint-disable no-undef */
+            // ********************************************************
+            // Name: Interchange fee calculation
+            // Type: notification
+            // Action: commit
+            // Status: success
+            // Start: 2020-06-01T00:00:00.000Z
+            // End: 2100-12-31T23:59:59.999Z
+            // Description: This script calculates the interchange fees between DFSPs where the account type is "Wallet"
+            // ********************************************************
 
-          #   if ((payeeFspId !== payerFspId) &&
-          #     (getExtensionValue(transfer.payee.partyIdInfo.extensionList.extension, 'accountType') === 'Wallet' &&
-          #       getExtensionValue(transfer.payer.partyIdInfo.extensionList.extension, 'accountType') === 'Wallet') &&
-          #     (transfer.transactionType.scenario === 'TRANSFER' &&
-          #       transfer.transactionType.initiator === 'PAYER' &&
-          #       transfer.transactionType.initiatorType === 'CONSUMER')) {
-          #     log(`Adding an interchange fee for Wallet to Wallet from ${payerFspId} to ${payeeFspId}`)
-          #     addLedgerEntry(payload.id, 'INTERCHANGE_FEE', // Ledger account type Id
-          #       'INTERCHANGE_FEE', // Ledger entry type Id
-          #       multiply(transfer.amount.amount, 0.006, 2),
-          #       transfer.amount.currency,
-          #       payerFspId,
-          #       payeeFspId)
-          #   }
+            // ## Globals:
+            // payload: The contents of the message from the Kafka topic.
+            // transfer: The transfer object.
+
+            // # Functions:
+            // ## Data retrieval functions:
+            // getTransfer(transferId): Retrieves a mojaloop transfer from the central-ledger API.
+
+            // ## Helper functions:
+            // getExtensionValue(list, key): Gets a value from an extension list
+            // log(message): allows the script to log to standard out for debugging purposes
+
+            // Math functions:
+            // multiply(number1, number2, decimalPlaces): Uses ml-number to handle multiplication of money values
+
+            // Ledger functions:
+            // addLedgerEntry: Adds a debit and credit ledger entry to the specified account to the specified DFSPs
+
+            log('Running - interchangeFeeCalculation')
+
+            log(JSON.stringify(transfer))
+            const payerFspId = transfer.payer.partyIdInfo.fspId
+            const payeeFspId = transfer.payee.partyIdInfo.fspId
+
+            if ((payeeFspId !== payerFspId) &&
+              (getExtensionValue(transfer.payee.partyIdInfo.extensionList.extension, 'accountType') === 'Wallet' &&
+                getExtensionValue(transfer.payer.partyIdInfo.extensionList.extension, 'accountType') === 'Wallet') &&
+              (transfer.transactionType.scenario === 'TRANSFER' &&
+                transfer.transactionType.initiator === 'PAYER' &&
+                transfer.transactionType.initiatorType === 'CONSUMER')) {
+              log(`Adding an interchange fee for Wallet to Wallet from ${payerFspId} to ${payeeFspId}`)
+              addLedgerEntry(payload.id, 'INTERCHANGE_FEE', // Ledger account type Id
+                'INTERCHANGE_FEE', // Ledger entry type Id
+                multiply(transfer.amount.amount, 0.006, 2),
+                transfer.amount.currency,
+                payerFspId,
+                payeeFspId)
+            }
 
       init:
         enabled: true
@@ -3546,7 +3579,7 @@ account-lookup-service:
       api:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.2.0
+          tag: v11.2.1
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--api"]'
         service:
@@ -3557,7 +3590,7 @@ account-lookup-service:
       admin:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.2.0
+          tag: v11.2.1
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--admin"]'
         service:
@@ -3755,7 +3788,7 @@ account-lookup-service:
       api:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.2.0
+          tag: v11.2.1
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--api"]'
         service:
@@ -3766,7 +3799,7 @@ account-lookup-service:
       admin:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.2.0
+          tag: v11.2.1
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--admin"]'
         service:
@@ -6009,7 +6042,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.0.0
+            tag: v13.0.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkprepare"]'
           service:
@@ -6181,7 +6214,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.0.0
+            tag: v13.0.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkfulfil"]'
           service:
@@ -6350,7 +6383,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.0.0
+            tag: v13.0.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkprocessing"]'
           service:
@@ -6519,7 +6552,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.0.0
+            tag: v13.0.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkget"]'
           service:
@@ -7147,7 +7180,9 @@ ml-ttk-posthook-tests:
 ml-ttk-cronjob-tests:
   scheduling:
     enabled: false
+    ## Note: First Cronjob may fail as the Hub setup & Sim onboarding may not be completed. These must be run either via Post-hooks or via running `Helm test`.
     #### cronSchedule format as follows:
+    ## Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#example
     ## ┌───────────── minute (0 - 59)
     ## │ ┌───────────── hour (0 - 23)
     ## │ │ ┌───────────── day of the month (1 - 31)
