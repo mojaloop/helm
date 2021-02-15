@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ include "ml-testing-toolkit-backend.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/version: {{ .Chart.Version }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   annotations:
@@ -16,8 +16,8 @@ metadata:
     {{- end }}
 spec:
   rules:
-    {{- range $hostname, $service := .Values.ingress.hosts }}
-    - host: {{ $hostname }}
+    {{- range $hostType, $service := .Values.ingress.hosts }}
+    - host: {{ index $service "host" }}
       http:
         paths:
           {{- range $path := (index $service "paths") }}
