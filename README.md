@@ -121,6 +121,32 @@ e.g. `helm --namespace mojaloop upgrade dev ./centralenduserregistry`
 
 ## Testing Deployments
 
+### Validation
+
+_Note: This is currently only supported by Helm v3._
+
+1. Ensure Tests are enabled
+
+Ensure the following properties are set in your values file:
+
+- ml-ttk-test-setup.tests.enabled=true
+- ml-ttk-test-validation.tests.enabled=true
+
+Or alternatively add `--set` for each of the above parameters on the install command:
+
+`helm install ... --set ml-ttk-test-setup.tests.enabled=true --set ml-ttk-test-validation.tests.enabled=true`
+
+2. Run Tests
+
+Run tests:
+`helm test <RELEASE_NAME>`
+
+Run tests with logs:
+
+`helm test <RELEASE_NAME> --logs`
+
+### Ingress
+
 1. Add the following to your hosts file and ensure you have installed Ingress Controller on your Kubernetes Cluster:
 
 `<ip-of-k8s-node-ingress>	 ml-api-adapter.local central-ledger.local account-lookup-service.local quoting-service.local central-settlement.local moja-simulator.local`
