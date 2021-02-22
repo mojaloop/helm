@@ -5,7 +5,7 @@ Charts to enable Thirdparty APIs
 
 > Note:  
 > At the moment, these components are not bundled with the Mojaloop helm chart
-> but instead are published to be isntalled alongside the existing Mojalooop  
+> but instead are published to be installed alongside the existing Mojalooop  
 > helm charts
 
 ## Installing this chart helm repo
