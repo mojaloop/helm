@@ -2,16 +2,16 @@
 
 To configure a Rollover Policy for the Logstash index execute the following steps:
 
-1. Create a [Policy](#1111-create) with the desired Rollover configurations: [policy-rollover-logstash.json](./policy-rollover-logstash.json)
-2. Create a [Template](#1121-create) to associate the Policy Settings to the Logstash index
+1. [Create a Policy](#1111-create) with the desired Rollover configurations: [policy-rollover-logstash.json](policy-rollover-logstash.json)
+2. [Create a Template](#1121-create) to associate the Policy Settings to the Logstash index
 
 ## 1. Pre-requisites
 
 ### 1.1 Elasticsearch
 
-Ensure that you have created the `mojatemplate` based on the following config: [template](./config/template-mojaloop.json).
-
 #### 1.1.1 Logstash Index Rollover Policy
+
+Configure the `logstash_rollover_policy` based on the following config: [policy-rollover-logstash.json](policy-rollover-logstash.json).
 
 ##### 1.1.1.1 Create
 ```curl
@@ -31,6 +31,8 @@ curl -X GET "http://elasticsearch:9200/_ilm/policy/logstash_rollover_policy?"
 ```
 
 #### 1.1.2 Logstash Index Template
+
+Ensure that you have created the `logstash_template` based on the following config: [template-logstash.json](template-logstash.json).
 
 ##### 1.1.2.1 Create
 ```curl
