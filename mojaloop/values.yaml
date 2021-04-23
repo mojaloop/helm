@@ -2663,8 +2663,11 @@ central:
             log(JSON.stringify(transfer))
             const payerFspId = transfer.payer.partyIdInfo.fspId
             const payeeFspId = transfer.payee.partyIdInfo.fspId
-
             if ((payeeFspId !== payerFspId) &&
+              (transfer.payee.partyIdInfo.extensionList &&
+                transfer.payer.partyIdInfo.extensionList &&
+                transfer.payee.partyIdInfo.extensionList.extension &&
+                transfer.payer.partyIdInfo.extensionList.extension) &&
               (getExtensionValue(transfer.payee.partyIdInfo.extensionList.extension, 'accountType') === 'Wallet' &&
                 getExtensionValue(transfer.payer.partyIdInfo.extensionList.extension, 'accountType') === 'Wallet') &&
               (transfer.transactionType.scenario === 'TRANSFER' &&
