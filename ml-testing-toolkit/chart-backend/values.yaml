@@ -32,7 +32,7 @@ dependencies:
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit
-  tag: v12.0.2
+  tag: v12.2.1
   commandPersistence: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; else if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; fi; npm run start;"]'
   command: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; npm run start;"]'
 
@@ -125,6 +125,8 @@ config:
     "CLIENT_MUTUAL_TLS_ENABLED": false,
     "ADVANCED_FEATURES_ENABLED": true,
     "CALLBACK_TIMEOUT": 10000,
+    "DEFAULT_REQUEST_TIMEOUT": 3000,
+    "SCRIPT_TIMEOUT": 5000,
     "LOG_SERVER_UI_URL": "http://log-server-url.demo",
     "UI_CONFIGURATION": {
       "MOBILE_SIMULATOR": {
@@ -195,6 +197,12 @@ config:
       "HUB_USERNAME": "hub",
       "HUB_PASSWORD": "hub"
     },
+    "HTTP_CLIENT": {
+      "KEEP_ALIVE": true,
+      "MAX_SOCKETS": 50,
+      "UNUSED_AGENTS_EXPIRY_MS": 1800000,
+      "UNUSED_AGENTS_CHECK_TIMER_MS": 300000
+    },    
     "API_DEFINITIONS": [
       {
         "type": "fspiop",
