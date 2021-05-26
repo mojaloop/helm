@@ -779,96 +779,6 @@ centralsettlement-handler-grosssettlement:
       include_cause_extension: false
       truncate_extensions: true
 
-    rules:
-      ## The rules object defines rules files represented as key-value pairs. These rules will be executed per commited transfer.   
-      ## Expected key-value format for the rules object:
-      ##  nameOfFile.js: fileContents 
-      ## See below example of interchange fee rule.
-
-      ## Default Empty Script - This is required as the rule engine requires a rule-file to function properly. 
-      ## Note: Uncomment this and comment-out the interchangeFeeCalculation.js below is you wish to enable CGS processing but do not want Interchange Fee processing.
-      # defaultEmptyScript.js: |
-      #   // ********************************************************
-      #   // Name: Default Empty Rule
-      #   // Type: notification
-      #   // Action: commit
-      #   // Status: success
-      #   // Start: 2020-06-01T00:00:00.000Z
-      #   // End: 2100-12-31T23:59:59.999Z
-      #   // Description: This is empty rules script
-      #   // ********************************************************
-      #   // ## Globals:
-      #   // payload: The contents of the message from the Kafka topic.
-      #   // transfer: The transfer object.
-      #   // # Functions:
-      #   // ## Data retrieval functions:
-      #   // getTransfer(transferId): Retrieves a mojaloop transfer from the central-ledger API.
-      #   // ## Helper functions:
-      #   // getExtensionValue(list, key): Gets a value from an extension list
-      #   // log(message): allows the script to log to standard out for debugging purposes
-      #   // Math functions:
-      #   // multiply(number1, number2, decimalPlaces): Uses ml-number to handle multiplication of money values
-      #   // Ledger functions:
-      #   // addLedgerEntry: Adds a debit and credit ledger entry to the specified account to the specified DFSPs
-      #   log('Running - DEFAULT EMPTY RULES SCRIPT')
-
-      ## Interchange Fee Calculation Script - Ensure that a settlementModel (refer to the associated tagged release on https://github.com/mojaloop/postman for an example) is created for the ledgerAccounType "INTERCHANGE_FEE".
-      ## Note: Uncomment this is you wish to enable CGS processing but also want Interchange Fee processing.
-      interchangeFeeCalculation.js: |
-        /* eslint-disable no-undef */
-        // ********************************************************
-        // Name: Interchange fee calculation
-        // Type: notification
-        // Action: commit
-        // Status: success
-        // Start: 2020-06-01T00:00:00.000Z
-        // End: 2100-12-31T23:59:59.999Z
-        // Description: This script calculates the interchange fees between DFSPs where the account type is "Wallet"
-        // ********************************************************
-
-        // ## Globals:
-        // payload: The contents of the message from the Kafka topic.
-        // transfer: The transfer object.
-
-        // # Functions:
-        // ## Data retrieval functions:
-        // getTransfer(transferId): Retrieves a mojaloop transfer from the central-ledger API.
-
-        // ## Helper functions:
-        // getExtensionValue(list, key): Gets a value from an extension list
-        // log(message): allows the script to log to standard out for debugging purposes
-
-        // Math functions:
-        // multiply(number1, number2, decimalPlaces): Uses ml-number to handle multiplication of money values
-
-        // Ledger functions:
-        // addLedgerEntry: Adds a debit and credit ledger entry to the specified account to the specified DFSPs
-
-        log('Running - interchangeFeeCalculation')
-
-        log(JSON.stringify(transfer))
-        const payerFspId = transfer.payer.partyIdInfo.fspId
-        const payeeFspId = transfer.payee.partyIdInfo.fspId
-
-        if ((payeeFspId !== payerFspId) &&
-          (transfer.payee.partyIdInfo.extensionList &&                      // WORKAROUND for issue #2149 
-            transfer.payer.partyIdInfo.extensionList &&                     // WORKAROUND for issue #2149 
-            transfer.payee.partyIdInfo.extensionList.extension &&           // WORKAROUND for issue #2149 
-            transfer.payer.partyIdInfo.extensionList.extension) &&          // WORKAROUND for issue #2149         
-          (getExtensionValue(transfer.payee.partyIdInfo.extensionList.extension, 'accountType') === 'Wallet' &&
-            getExtensionValue(transfer.payer.partyIdInfo.extensionList.extension, 'accountType') === 'Wallet') &&
-          (transfer.transactionType.scenario === 'TRANSFER' &&
-            transfer.transactionType.initiator === 'PAYER' &&
-            transfer.transactionType.initiatorType === 'CONSUMER')) {
-          log(`Adding an interchange fee for Wallet to Wallet from ${payerFspId} to ${payeeFspId}`)
-          addLedgerEntry(payload.id, 'INTERCHANGE_FEE', // Ledger account type Id
-            'INTERCHANGE_FEE', // Ledger entry type Id
-            multiply(transfer.amount.amount, 0.006, 2),
-            transfer.amount.currency,
-            payerFspId,
-            payeeFspId)
-        }
-
   init:
     enabled: true
     mysql:
@@ -911,7 +821,7 @@ centralsettlement-handler-grosssettlement:
       api: /
     # Used to create an Ingress record.
     hosts:
-      api: central-settlement-rules.local
+      api: central-settlement-grosssettlement.local
     annotations: {}
       ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
       # nginx.ingress.kubernetes.io/rewrite-target: '/'
@@ -1032,7 +942,7 @@ centralsettlement-handler-rules:
       timeout: 5000
       prefix: moja_
       defaultLabels:
-        serviceName: central-settlement-handler-grosssettlement
+        serviceName: central-settlement-handler-rules
 
   config:
     ## Kafka Configuration
@@ -1284,7 +1194,7 @@ centralsettlement-handler-rules:
       api: /
     # Used to create an Ingress record.
     hosts:
-      api: central-settlement-grosssettlement.local
+      api: central-settlement-rules.local
     annotations: {}
       ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
       # nginx.ingress.kubernetes.io/rewrite-target: '/'
