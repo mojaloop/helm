@@ -11,9 +11,9 @@ containers:
   api:
     image:
       repository: mojaloop/central-settlement
-      tag: v12.0.3
+      tag: v13.1.1
       pullPolicy: IfNotPresent
-      command: '["node", "src/handlers/index.js", "h", "--transfersettlement"]'
+      command: '["node", "src/handlers/index.js", "h", "--grossSettlement"]'
     service:
       type: ClusterIP
       ports:
@@ -133,7 +133,7 @@ config:
               consumeTimeout: 1000
             rdkafkaConf:
               socket_keepalive_enable: true
-      settlementwindow:
+      deferredsettlement:
         close:
           config:
             options:
@@ -168,7 +168,7 @@ config:
             topicConf:
               request_required_acks: 'all'
               partitioner: 'murmur2_random'
-      settlementwindow:
+      deferredsettlement:
         close:
           config:
             options:
@@ -205,7 +205,7 @@ config:
     api:
       disabled: false
     settings:
-      scripts_folder: 'scripts/transferSettlementTemp'
+      scripts_folder: 'scripts/grosssettlementTemp'
   # Settlement Window aggregation Configuration
   window_aggregation:
     retry_count: 3
@@ -317,7 +317,7 @@ ingress:
     api: /
   # Used to create an Ingress record.
   hosts:
-    api: central-settlement-transfersettlement.local
+    api: central-settlement-grosssettlement.local
   annotations: {}
     ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
     # nginx.ingress.kubernetes.io/rewrite-target: '/'
