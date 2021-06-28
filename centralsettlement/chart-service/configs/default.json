@@ -39,7 +39,12 @@
       "DISABLED": {{ .Values.config.handlers.api.disabled }}
     },
     "SETTINGS": {
-      "SCRIPTS_FOLDER": "{{ .Values.config.handlers.settings.scripts_folder }}"
+      "RULES": {
+        "SCRIPTS_FOLDER": "{{ .Values.config.handlers.settings.scripts_folder }}",
+        "SCRIPT_TIMEOUT": 100,
+        "CONSUMER_COMMIT": true,
+        "FROM_SWITCH": true
+    }
     }
   },
   "API_DOC_ENDPOINTS_ENABLED": true,
@@ -51,24 +56,25 @@
       }
     },
     "CONSUMER": {
-      "SETTLEMENTWINDOW": {
+      "DEFERREDSETTLEMENT": {
         "CLOSE": {
           "config": {
             "options": {
-              "mode": {{ .Values.config.kafka.consumer.settlementwindow.close.config.options.mode }},
-              "batchSize": {{ .Values.config.kafka.consumer.settlementwindow.close.config.options.batchSize }},
-              "pollFrequency": {{ .Values.config.kafka.consumer.settlementwindow.close.config.options.pollFrequency }},
-              "recursiveTimeout": {{ .Values.config.kafka.consumer.settlementwindow.close.config.options.recursiveTimeout }},
-              "messageCharset": "{{ .Values.config.kafka.consumer.settlementwindow.close.config.options.messageCharset }}",
-              "messageAsJSON": {{ .Values.config.kafka.consumer.settlementwindow.close.config.options.messageAsJSON }},
-              "sync": {{ .Values.config.kafka.consumer.settlementwindow.close.config.options.sync }},
-              "consumeTimeout": {{ .Values.config.kafka.consumer.settlementwindow.close.config.options.consumeTimeout }}
+              "mode": {{ .Values.config.kafka.consumer.deferredsettlement.close.config.options.mode }},
+              "batchSize": {{ .Values.config.kafka.consumer.deferredsettlement.close.config.options.batchSize }},
+              "pollFrequency": {{ .Values.config.kafka.consumer.deferredsettlement.close.config.options.pollFrequency }},
+              "recursiveTimeout": {{ .Values.config.kafka.consumer.deferredsettlement.close.config.options.recursiveTimeout }},
+              "messageCharset": "{{ .Values.config.kafka.consumer.deferredsettlement.close.config.options.messageCharset }}",
+              "messageAsJSON": {{ .Values.config.kafka.consumer.deferredsettlement.close.config.options.messageAsJSON }},
+              "sync": {{ .Values.config.kafka.consumer.deferredsettlement.close.config.options.sync }},
+              "consumeTimeout": {{ .Values.config.kafka.consumer.deferredsettlement.close.config.options.consumeTimeout }}
             },
             "rdkafkaConf": {
-              "client.id": "cs-con-setlementwindow-close",
-              "group.id": "cs-group-setlementwindow-close",
+              "client.id": "cs-con-deferredsettlement-close",
+              "group.id": "cs-group-deferredsettlement-close",
               "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
-              "socket.keepalive.enable": {{ .Values.config.kafka.consumer.settlementwindow.close.config.rdkafkaConf.socket_keepalive_enable }}
+              "socket.keepalive.enable": {{ .Values.config.kafka.consumer.deferredsettlement.close.config.rdkafkaConf.socket_keepalive_enable }},
+              "allow.auto.create.topics": true
             },
             "topicConf": {
               "auto.offset.reset": "earliest"
@@ -90,10 +96,11 @@
               "consumeTimeout": {{ .Values.config.kafka.consumer.notification.event.config.options.consumeTimeout }}
             },
             "rdkafkaConf": {
-              "client.id": "cs-con-transferfulfil-process",
-              "group.id": "cs-group-transferfulfil-process",
+              "client.id": "cs-con-{{ template "centralsettlement-service.name" . }}-notification-event",
+              "group.id": "cs-group-{{ template "centralsettlement-service.name" . }}-notification-event",
               "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
-              "socket.keepalive.enable": {{ .Values.config.kafka.consumer.notification.event.config.rdkafkaConf.socket_keepalive_enable }}
+              "socket.keepalive.enable": {{ .Values.config.kafka.consumer.notification.event.config.rdkafkaConf.socket_keepalive_enable }},
+              "allow.auto.create.topics": true
             },
             "topicConf": {
               "auto.offset.reset": "earliest"
@@ -111,7 +118,7 @@
             },
             "rdkafkaConf": {
               "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
-              "client.id": "cs-prod-notification-event",
+              "client.id": "cs-prod-{{ template "centralsettlement-service.name" . }}-notification-event",
               "event_cb": {{ .Values.config.kafka.producer.notification.event.config.rdkafkaConf.event_cb }},
               "compression.codec": "{{ .Values.config.kafka.producer.notification.event.config.rdkafkaConf.compression_codec }}",
               "retry.backoff.ms": {{ .Values.config.kafka.producer.notification.event.config.rdkafkaConf.retry_backoff_ms }},
@@ -132,23 +139,23 @@
           }
         }
       },
-      "SETTLEMENTWINDOW": {
+      "DEFERREDSETTLEMENT": {
         "CLOSE": {
           "config": {
             "options": {
-              "messageCharset": "{{ .Values.config.kafka.producer.settlementwindow.close.config.options.messageCharset }}"
+              "messageCharset": "{{ .Values.config.kafka.producer.deferredsettlement.close.config.options.messageCharset }}"
             },
             "rdkafkaConf": {
               "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
-              "client.id": "cs-prod-setlementwindow-close",
-              "event_cb": {{ .Values.config.kafka.producer.settlementwindow.close.config.rdkafkaConf.event_cb }},
-              "dr_cb": {{ .Values.config.kafka.producer.settlementwindow.close.config.rdkafkaConf.dr_cb }},
-              "socket.keepalive.enable": {{ .Values.config.kafka.producer.settlementwindow.close.config.rdkafkaConf.socket_keepalive_enable }},
+              "client.id": "cs-prod-deferredsettlement-close",
+              "event_cb": {{ .Values.config.kafka.producer.deferredsettlement.close.config.rdkafkaConf.event_cb }},
+              "dr_cb": {{ .Values.config.kafka.producer.deferredsettlement.close.config.rdkafkaConf.dr_cb }},
+              "socket.keepalive.enable": {{ .Values.config.kafka.producer.deferredsettlement.close.config.rdkafkaConf.socket_keepalive_enable }},
               "queue.buffering.max.messages": 10000000
             },
             "topicConf": {
-              "request.required.acks": "{{ .Values.config.kafka.producer.settlementwindow.close.config.topicConf.request_required_acks }}",
-              "partitioner": "{{ .Values.config.kafka.producer.settlementwindow.close.config.topicConf.partitioner }}"
+              "request.required.acks": "{{ .Values.config.kafka.producer.deferredsettlement.close.config.topicConf.request_required_acks }}",
+              "partitioner": "{{ .Values.config.kafka.producer.deferredsettlement.close.config.topicConf.partitioner }}"
             }
           }
         }
