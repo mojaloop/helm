@@ -4,12 +4,12 @@ kind: ConfigMap
 metadata:
   name: {{ include "mojaloop-simulator.prefix" . }}jws-public-keys
   labels:
-    app.kubernetes.io/name: {{ include "mojaloop-simulator.prefix" . }}jws-public-keys
+    app.kubernetes.io/name: sim-jws-public-keys
     {{- include "mojaloop-simulator.common-labels" $ | nindent 4 }}
 data:
   {{- range $name, $customConfig := .Values.simulators }}
   {{- $config := merge $customConfig $.Values.defaults }}
-  {{- if and ($config.config.schemeAdapter.env.VALIDATE_INBOUND_JWS) (not $config.config.schemeAdapter.secrets.jws.pubKeyConfigMapName) }}
+  {{- if and (eq ($config.config.schemeAdapter.env.VALIDATE_INBOUND_JWS|toString|lower) "true") (not $config.config.schemeAdapter.secrets.jws.pubKeyConfigMapName) }}
   {{- if (not $config.config.schemeAdapter.secrets.jws.publicKey) }}
     {{- fail (printf "INBOUND_JWS enabled and jws public key not specified for '%s'. You need to specify %s.schemeAdapter.secrets.jws.publicKey or %s.schemeAdapter.secrets.jws.pubKeyConfigMapName." $name $name $name) }}
   {{- end }}
