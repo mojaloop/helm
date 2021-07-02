@@ -1,0 +1,20 @@
+{{- if index .Values "image-watcher" "ingress" "enabled" -}}
+apiVersion: {{ template "apiVersion.Ingress" . }}
+kind: Ingress
+metadata:
+  name: image-watcher-ingress
+  labels:
+    {{- include "ml-operator.labels" . | nindent 4 }}
+{{- with index .Values "image-watcher" "ingress" "annotations" }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  rules:
+    - http:
+        paths:
+          - path: {{ index .Values "image-watcher" "ingress" "path" }}
+            backend:
+              serviceName: image-watcher
+              servicePort: {{ index .Values "image-watcher" "ingress" "port" }}
+{{- end }}
