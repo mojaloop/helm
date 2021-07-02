@@ -78,7 +78,6 @@ spec:
         {{- if .Values.redis.enabled }}
         - name: redis
           image: {{.Values.redis.image }}}}
-          # command: [ "tail", "-f", "/dev/null" ]
           {{- end }}
           env:
           {{- range $envItem := .Values.redis.env }}
@@ -91,8 +90,10 @@ spec:
           configMap:
             name: ml-operator-config
             items:
-            - key: production.json
-              path: production.json
+              {{- range $k, $v := .Values.ml-operator.config }}
+              - key: {{ $k }}
+                path: {{ $k }}
+              {{- end }}
         - name: image-watcher-config-volume
           configMap:
             name: image-watcher-config

@@ -17,6 +17,24 @@ ml-operator:
     #
     # SLACK_WEBHOOK_URL env is set on the template, since we need to load
     # in the value from a secret, and don't want to expose it in our values.yaml 
+  
+  config:
+    production.json: {
+       "SERVICES": [
+          "account-lookup-service",
+          "auth-service",
+          "central-ledger",
+          "nginx-ingress-nginx-controller",
+          "quoting-service",
+          "transaction-requests-service"
+        ],
+        "UPGRADE_STRATEGY": "BUGFIX",
+        "CHECK_FOR_UPDATE_CRON": "0 * * * *",
+        "SLACK_WEBHOOK_URL": "__PRIVATE__",
+        "IMAGE_WATCHER_CLIENT_URL": "http://localhost:4006",
+        "SHOULD_USE_DEFAULT_K8S": false,
+        "NOTIFY_KUBECTL_PATCH_INSTRUCTIONS": true
+      }
 
 image-watcher:
   enabled: true
@@ -45,6 +63,33 @@ image-watcher:
       nginx.ingress.kubernetes.io/use-regex: "true"
     path: /image-watcher(/|$)(.*)
     port: 4006
+
+  config:
+    production.json: {
+      "PORT": 4006,
+      "HOST": "0.0.0.0",
+      "REDIS": {
+        "PORT": 6379,
+        "HOST": "localhost",
+        "TIMEOUT": 100
+      },
+      "INSPECT": {
+        "DEPTH": 4,
+        "SHOW_HIDDEN": false,
+        "COLOR": true
+      },
+      "IMAGES": [
+        "mojaloop/account-lookup-service",
+        "mojaloop/central-ledger",
+        "mojaloop/ml-api-adapter",
+        "mojaloop/auth-service",
+        "mojaloop/transaction-requests-service",
+        "mojaloop/quoting-service",
+        "mojaloop/thirdparty-api-adapter"
+      ],
+      "SCRAPE_TIME_MS": 30000
+    }
+
 
 redis:
   enabled: true
