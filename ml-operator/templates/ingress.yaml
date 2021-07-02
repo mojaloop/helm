@@ -1,0 +1,19 @@
+{{- if index .Values "image-watcher" "ingress" "enabled" }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: image-watcher
+  labels:
+    app: ml-operator
+    app.kubernetes.io/name: ml-operator
+    {{- include "ml-operator.labels" . | nindent 4 }}
+  annotations: {{ index .Values "image-watcher" "ingress" "annotations" }}
+spec:
+  rules:
+    - http:
+        paths:
+          - path: { index .Values "image-watcher" "ingress" "path" }}
+            backend:
+              serviceName: image-watcher
+              servicePort: {{ index .Values "image-watcher" "ingress" "port" }}
+{{- end }}

@@ -103,55 +103,36 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ml-operator-config
+  name: "ml-operator-config"
   labels:
     {{- include "ml-operator.labels" . | nindent 4 }}
-data:
+  data:
   production.json: {{ (.Files.Get "configs/ml-operator.json") | quote }}
 ---
-# ---
-# apiVersion: v1
-# kind: ConfigMap
-# metadata:
-#   name: image-watcher-config
-#   labels:
-#     app: ml-operator
-#     app.kubernetes.io/name: ml-operator
-#     {{- include "ml-operator.labels" . | nindent 4 }}
-# data:
-#   production.json: {{ (.Files.Get "configs/image-watcher.json") | quote }}
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: image-watcher
-#   labels:
-#     app: ml-operator
-#     app.kubernetes.io/name: ml-operator
-#     {{- include "ml-operator.labels" . | nindent 4 }}
-# spec:
-#   ports:
-#   - port: {{ index .Values "image-watcher" "service" "port"}}
-#   selector:
-#     app: image-watcher
-#   clusterIP: None
-# ---
-# {{- if index .Values "image-watcher" "ingress" "enabled" }}
-# apiVersion: extensions/v1beta1
-# kind: Ingress
-# metadata:
-#   name: image-watcher
-#   labels:
-#     app: ml-operator
-#     app.kubernetes.io/name: ml-operator
-#     {{- include "ml-operator.labels" . | nindent 4 }}
-#   annotations: {{ index .Values "image-watcher" "ingress" "annotations" }}
-# spec:
-#   rules:
-#     - http:
-#         paths:
-#           - path: 
-#             backend: {{ index .Values "image-watcher" "ingress" "path" }}
-#               serviceName: image-watcher
-#               servicePort: {{ index .Values "image-watcher" "ingress" "port" }}
-{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: image-watcher-config
+  labels:
+    app: ml-operator
+    app.kubernetes.io/name: ml-operator
+    {{- include "ml-operator.labels" . | nindent 4 }}
+data:
+  production.json: {{ (.Files.Get "configs/image-watcher.json") | quote }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-watcher
+  labels:
+    app: ml-operator
+    app.kubernetes.io/name: ml-operator
+    {{- include "ml-operator.labels" . | nindent 4 }}
+spec:
+  ports:
+  - port: {{ index .Values "image-watcher" "service" "port"}}
+  selector:
+    app: image-watcher
+  clusterIP: None
+---
