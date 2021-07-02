@@ -34,9 +34,9 @@ spec:
       {{- end }}
       serviceAccountName: mojaloop-operator
       containers:
-        {{- if .Values.ml-operator.enabled }}
+        {{- if index .Values "ml-operator" "enabled" }}
         - name: ml-operator
-          image: {{.Values.ml-operator.image }}}}
+          image: {{ index .Values "ml-operator" "image"  }}}}
           # command: [ "tail", "-f", "/dev/null" ]
           volumeMounts:
             - name: ml-operator-config-volume
@@ -47,38 +47,37 @@ spec:
                 secretKeyRef:
                   name: ml-operator-secrets
                   key: SLACK_WEBHOOK_URL
-          {{- range $envItem := .Values.ml-operator.env }}
+          {{- range $envItem := index .Values "ml-operator" "env" }}
             - name: {{ $envItem.name }}
               value: {{ $envItem.value }}
           {{- end }}
         {{- end }}
-        {{- if .Values.image-watcher.enabled }}
+        {{- if .index .Values "image-watcher" "enabled"  }}
         - name: image-watcher
-          image: {{.Values.image-watcher.image }}}}
+          image: {{ index .Values "image-watcher" "image"  }}
           # command: [ "tail", "-f", "/dev/null" ]
           volumeMounts:
             - name: image-watcher-config-volume
               mountPath: /opt/image-watcher/config
-          {{- if .Values.image-watcher.livenessProbe.enabled }}
+          {{- if index .Values "image-watcher" "livenessProbe" "enabled" }}
           livenessProbe:
             initialDelaySeconds: 30
-            httpGet: {{ .Values.image-watcher.livenessProbe.httpGet }}
+            httpGet: {{ index .Values "image-watcher" "livenessProbe" "httpGet" }}
           {{- end }}
-          {{- if .Values.image-watcher.readinessProbe.enabled }}
+          {{- if index .Values "image-watcher" "readinessProbe" "enabled" }}
           readinessProbe:
             initialDelaySeconds: 30
-            httpGet: {{ .Values.image-watcher.readinessProbe.httpGet }}
+            httpGet: {{ index .Values "image-watcher" "readinessProbe" "httpGet" }}
           {{- end }}
           env:
-          {{- range $envItem := .Values.image-watcher.env }}
+          {{- range $envItem := .Values "image-watcher" "env" }}
             - name: {{ $envItem.name }}
               value: {{ $envItem.value }}
           {{- end }}
         {{- end }}
         {{- if .Values.redis.enabled }}
         - name: redis
-          image: {{.Values.redis.image }}}}
-          {{- end }}
+          image: {{.Values.redis.image }}
           env:
           {{- range $envItem := .Values.redis.env }}
             - name: {{ $envItem.name }}
@@ -90,7 +89,7 @@ spec:
           configMap:
             name: ml-operator-config
             items:
-              {{- range $k, $v := .Values.ml-operator.config }}
+              {{- range $k, $v := index .Values "ml-operator" "config" }}
               - key: {{ $k }}
                 path: {{ $k }}
               {{- end }}
@@ -98,7 +97,7 @@ spec:
           configMap:
             name: image-watcher-config
             items:
-              {{- range $k, $v := .Values.image-watcher.config }}
+              {{- range $k, $v := index .Values "image-watcher" "config" }}
               - key: {{ $k }}
                 path: {{ $k }}
               {{- end }}
@@ -135,12 +134,12 @@ metadata:
     {{- include "ml-operator.labels" . | nindent 4 }}
 spec:
   ports:
-  - port: {{ .Values.image-watcher.service.port }}
+  - port: {{ index .Values "image-watcher" "service" "port"}}
   selector:
     app: image-watcher
   clusterIP: None
 ---
-{{- if .Values.image-watcher.ingress.enabled }}
+{{- if index .Values "image-watcher" "ingress" "enabled" }}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -149,13 +148,13 @@ metadata:
     app: ml-operator
     app.kubernetes.io/name: ml-operator
     {{- include "ml-operator.labels" . | nindent 4 }}
-  annotations: {{ .Values.image-watcher.ingress.annotations }}
+  annotations: {{ index .Values "image-watcher" "ingress" "annotations" }}
 spec:
   rules:
     - http:
         paths:
           - path: 
-            backend: {{ .Values.image-watcher.service.path }}
+            backend: {{ index .Values "image-watcher" "ingress" "path" }}
               serviceName: image-watcher
-              servicePort: {{ .Values.image-watcher.ingress.port }}
+              servicePort: {{ index .Values "image-watcher" "ingress" "port" }}
 {{- end }}
