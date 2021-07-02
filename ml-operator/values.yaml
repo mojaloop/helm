@@ -1,0 +1,42 @@
+
+ml-operator:
+  enabled: true
+  image: mojaloop/ml-operator:v0.1.6
+  env:
+    NODE_ENV:
+      name: NODE_ENV
+      value: production
+    LOG_LEVEL:
+      name: LOG_LEVEL
+      value: debug
+    # SLACK_WEBHOOK_URL env is set on the template, since we need to load
+    # in the value from a secret, and don't want to expose it in our values.yaml 
+
+image-watcher:
+  enabled: true
+  image: mojaloop/image-watcher:v0.1.3
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+      port: 4006
+  readinessProbe:
+    enabled: true
+    httpGet:
+       path: /health
+      port: 4006
+  env:
+    NODE_ENV:
+      name: NODE_ENV
+      value: production
+    ## Env example
+    # env:
+    #   envItem1:
+    #     name: hello
+    #     value: world
+    #
+  service:
+    externalPort: 4006
+
+  ingress:
+    enabled: true

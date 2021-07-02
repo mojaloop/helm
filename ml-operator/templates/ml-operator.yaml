@@ -34,41 +34,47 @@ spec:
       {{- end }}
       serviceAccountName: mojaloop-operator
       containers:
+        {{- if .Values.ml-operator.enabled }}
         - name: ml-operator
-          image: mojaloop/ml-operator:v0.1.6
+          image: {{.Values.ml-operator.image }}}}
           # command: [ "tail", "-f", "/dev/null" ]
           volumeMounts:
             - name: ml-operator-config-volume
               mountPath: /opt/ml-operator/config
           env:
-            - name: NODE_ENV
-              value: production
-            - name: LOG_LEVEL
-              value: debug
             - name: SLACK_WEBHOOK_URL
               valueFrom:
                 secretKeyRef:
                   name: ml-operator-secrets
                   key: SLACK_WEBHOOK_URL
+          {{- range $envItem := .Values.ml-operator.env }}
+            - name: {{ $envItem.name }}
+              value: {{ $envItem.value }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.image-watcher.enabled }}
         - name: image-watcher
-          image: mojaloop/image-watcher:v0.1.3
+          image: {{.Values.image-watcher.image }}}}
           # command: [ "tail", "-f", "/dev/null" ]
           volumeMounts:
             - name: image-watcher-config-volume
               mountPath: /opt/image-watcher/config
+          {{- if .Values.image-watcher.livenessProbe.enabled }}
           livenessProbe:
             initialDelaySeconds: 30
-            httpGet:
-              path: /health
-              port: 4006
+            httpGet: {{ .Values.image-watcher.livenessProbe.httpGet }}
+          {{- end }}
+          {{- if .Values.image-watcher.readinessProbe.enabled }}
           readinessProbe:
             initialDelaySeconds: 30
-            httpGet:
-              path: /health
-              port: 4006
+            httpGet: {{ .Values.image-watcher.readinessProbe.httpGet }}
+          {{- end }}
           env:
-            - name: NODE_ENV
-              value: production
+          {{- range $envItem := .Values.image-watcher.env }}
+            - name: {{ $envItem.name }}
+              value: {{ $envItem.value }}
+          {{- end }}
+        {{- end }}
       volumes:
         - name: ml-operator-config-volume
           configMap:
@@ -82,7 +88,6 @@ spec:
             items:
             - key: production.json
               path: production.json
-
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -116,11 +121,12 @@ metadata:
     {{- include "ml-operator.labels" . | nindent 4 }}
 spec:
   ports:
-  - port: 4006
+  - port: {{ .Values.image-watcher.service.externalPort }}
   selector:
     app: image-watcher
   clusterIP: None
 ---
+{{- if .Values.image-watcher.ingress.enabled }}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -139,4 +145,5 @@ spec:
           - path: /image-watcher(/|$)(.*)
             backend:
               serviceName: image-watcher
-              servicePort: 4006
+              servicePort: {{ .Values.image-watcher.service.externalPort }}
+{{- end }}
