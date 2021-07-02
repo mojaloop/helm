@@ -12,7 +12,7 @@ See [mojaloop/ml-operator](https://github.com/mojaloop/ml-operator) for more inf
 
 # create and edit the .env file:
 cd ml-operator
-mv .env.example .env
+cp .env.example .env
 vim .env
 # fill in the SLACK_WEBHOOK_URL appropriately
 
@@ -31,3 +31,11 @@ helm upgrade --install ml-operator ./
 - `redis` - a redis instance that helps image-watcher to cache its results. It's non mission critical as it's state can be recreated by `image-watcher` after it talks to Docker Hub
 
 You can of course bring your own redis if you'd like, by simply setting `values.redis.enabled=false`, and updating `./configs/image-watcher.json` to point to your own fantastic redis instance.
+
+
+## Other handy snippets:
+
+```bash
+# render the templates to `/tmp/template`
+helm template . --debug > /tmp/template
+```

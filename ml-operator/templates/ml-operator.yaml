@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "ml-operator.labels" . | nindent 6 }}
+        {{- include "ml-operator.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -60,12 +60,16 @@ spec:
           {{- if index .Values "image-watcher" "livenessProbe" "enabled" }}
           livenessProbe:
             initialDelaySeconds: 30
-            httpGet: {{ index .Values "image-watcher" "livenessProbe" "httpGet" }}
+            httpGet: 
+              path: {{ index .Values "image-watcher" "livenessProbe" "httpGet" "path"}}
+              port: {{ index .Values "image-watcher" "livenessProbe" "httpGet" "port"}}
           {{- end }}
           {{- if index .Values "image-watcher" "readinessProbe" "enabled" }}
           readinessProbe:
             initialDelaySeconds: 30
-            httpGet: {{ index .Values "image-watcher" "readinessProbe" "httpGet" }}
+            httpGet:
+              path: {{ index .Values "image-watcher" "readinessProbe" "httpGet" "path"}}
+              port: {{ index .Values "image-watcher" "readinessProbe" "httpGet" "port"}}
           {{- end }}
           env:
           {{- range $envItem := index .Values "image-watcher" "env" }}
@@ -106,20 +110,21 @@ metadata:
   name: "ml-operator-config"
   labels:
     {{- include "ml-operator.labels" . | nindent 4 }}
-  data:
-  production.json: {{ (.Files.Get "configs/ml-operator.json") | quote }}
----
+data:
+  {{- range $k, $v := index .Values "ml-operator" "config" }}
+    {{ $k }}: {{ ($v | toPrettyJson | squote ) }}
+  {{- end }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: image-watcher-config
   labels:
-    app: ml-operator
-    app.kubernetes.io/name: ml-operator
     {{- include "ml-operator.labels" . | nindent 4 }}
 data:
-  production.json: {{ (.Files.Get "configs/image-watcher.json") | quote }}
+  {{- range $k, $v := index .Values "image-watcher" "config" }}
+    {{ $k }}: {{ ($v | toPrettyJson | squote ) }}
+  {{- end }}
 ---
 apiVersion: v1
 kind: Service
