@@ -98,8 +98,10 @@ spec:
           configMap:
             name: image-watcher-config
             items:
-            - key: production.json
-              path: production.json
+              {{- range $k, $v := .Values.image-watcher.config }}
+              - key: {{ $k }}
+                path: {{ $k }}
+              {{- end }}
 ---
 apiVersion: v1
 kind: ConfigMap
