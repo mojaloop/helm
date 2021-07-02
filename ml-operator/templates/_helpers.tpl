@@ -5,11 +5,17 @@ Create chart name and version as used by the chart label.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
+{{- define "ml-operator.name" -}}
+{{- default .Chart.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{/*
 Common labels
 */}}
 {{- define "ml-operator.labels" -}}
 helm.sh/chart: {{ include "ml-operator.chart" . }}
+app: ml-operator
+app.kubernetes.io/name: {{ include "ml-operator.name" . }}
 {{ include "ml-operator.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}

@@ -1,10 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ml-operator
+  name: {{ include "ml-operator.name" . }}
   labels:
-    app: ml-operator
-    app.kubernetes.io/name: ml-operator
     {{- include "ml-operator.labels" . | nindent 4 }}
 spec:
   replicas: 1
@@ -52,7 +50,7 @@ spec:
               value: {{ $envItem.value }}
           {{- end }}
         {{- end }}
-        {{- if .index .Values "image-watcher" "enabled"  }}
+        {{- if index .Values "image-watcher" "enabled"  }}
         - name: image-watcher
           image: {{ index .Values "image-watcher" "image"  }}
           # command: [ "tail", "-f", "/dev/null" ]
@@ -70,7 +68,7 @@ spec:
             httpGet: {{ index .Values "image-watcher" "readinessProbe" "httpGet" }}
           {{- end }}
           env:
-          {{- range $envItem := .Values "image-watcher" "env" }}
+          {{- range $envItem := index .Values "image-watcher" "env" }}
             - name: {{ $envItem.name }}
               value: {{ $envItem.value }}
           {{- end }}
@@ -107,54 +105,53 @@ kind: ConfigMap
 metadata:
   name: ml-operator-config
   labels:
-    app: ml-operator
-    app.kubernetes.io/name: ml-operator
     {{- include "ml-operator.labels" . | nindent 4 }}
 data:
   production.json: {{ (.Files.Get "configs/ml-operator.json") | quote }}
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: image-watcher-config
-  labels:
-    app: ml-operator
-    app.kubernetes.io/name: ml-operator
-    {{- include "ml-operator.labels" . | nindent 4 }}
-data:
-  production.json: {{ (.Files.Get "configs/image-watcher.json") | quote }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: image-watcher
-  labels:
-    app: ml-operator
-    app.kubernetes.io/name: ml-operator
-    {{- include "ml-operator.labels" . | nindent 4 }}
-spec:
-  ports:
-  - port: {{ index .Values "image-watcher" "service" "port"}}
-  selector:
-    app: image-watcher
-  clusterIP: None
----
-{{- if index .Values "image-watcher" "ingress" "enabled" }}
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: image-watcher
-  labels:
-    app: ml-operator
-    app.kubernetes.io/name: ml-operator
-    {{- include "ml-operator.labels" . | nindent 4 }}
-  annotations: {{ index .Values "image-watcher" "ingress" "annotations" }}
-spec:
-  rules:
-    - http:
-        paths:
-          - path: 
-            backend: {{ index .Values "image-watcher" "ingress" "path" }}
-              serviceName: image-watcher
-              servicePort: {{ index .Values "image-watcher" "ingress" "port" }}
+# ---
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: image-watcher-config
+#   labels:
+#     app: ml-operator
+#     app.kubernetes.io/name: ml-operator
+#     {{- include "ml-operator.labels" . | nindent 4 }}
+# data:
+#   production.json: {{ (.Files.Get "configs/image-watcher.json") | quote }}
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: image-watcher
+#   labels:
+#     app: ml-operator
+#     app.kubernetes.io/name: ml-operator
+#     {{- include "ml-operator.labels" . | nindent 4 }}
+# spec:
+#   ports:
+#   - port: {{ index .Values "image-watcher" "service" "port"}}
+#   selector:
+#     app: image-watcher
+#   clusterIP: None
+# ---
+# {{- if index .Values "image-watcher" "ingress" "enabled" }}
+# apiVersion: extensions/v1beta1
+# kind: Ingress
+# metadata:
+#   name: image-watcher
+#   labels:
+#     app: ml-operator
+#     app.kubernetes.io/name: ml-operator
+#     {{- include "ml-operator.labels" . | nindent 4 }}
+#   annotations: {{ index .Values "image-watcher" "ingress" "annotations" }}
+# spec:
+#   rules:
+#     - http:
+#         paths:
+#           - path: 
+#             backend: {{ index .Values "image-watcher" "ingress" "path" }}
+#               serviceName: image-watcher
+#               servicePort: {{ index .Values "image-watcher" "ingress" "port" }}
 {{- end }}
