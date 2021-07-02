@@ -75,6 +75,17 @@ spec:
               value: {{ $envItem.value }}
           {{- end }}
         {{- end }}
+        {{- if .Values.redis.enabled }}
+        - name: redis
+          image: {{.Values.redis.image }}}}
+          # command: [ "tail", "-f", "/dev/null" ]
+          {{- end }}
+          env:
+          {{- range $envItem := .Values.redis.env }}
+            - name: {{ $envItem.name }}
+              value: {{ $envItem.value }}
+          {{- end }}
+        {{- end }}
       volumes:
         - name: ml-operator-config-volume
           configMap:
@@ -121,7 +132,7 @@ metadata:
     {{- include "ml-operator.labels" . | nindent 4 }}
 spec:
   ports:
-  - port: {{ .Values.image-watcher.service.externalPort }}
+  - port: {{ .Values.image-watcher.service.port }}
   selector:
     app: image-watcher
   clusterIP: None

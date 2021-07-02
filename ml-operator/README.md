@@ -22,3 +22,12 @@ kubectl create secret generic ml-operator-secrets --from-env-file=.env
 # install ml-operator
 helm upgrade --install ml-operator ./
 ```
+
+
+## Pod Components
+
+- `ml-operator` - the actual operator that does all of the heavy lifting
+- `image-watcher` - a simple service which repeatedly pings at docker hub or some other docker registry and looks for image updates that may be available. We use this service as an abstraction layer to prevent us from getting rate limited by Docker Hub
+- `redis` - a redis instance that helps image-watcher to cache its results. It's non mission critical as it's state can be recreated by `image-watcher` after it talks to Docker Hub
+
+You can of course bring your own redis if you'd like, by simply setting `values.redis.enabled=false`, and updating `./configs/image-watcher.json` to point to your own fantastic redis instance.
