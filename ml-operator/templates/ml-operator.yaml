@@ -136,3 +136,20 @@ spec:
     app: image-watcher
   clusterIP: None
 ---
+{{- if index .Values "image-watcher" "ingress" "enabled" }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: image-watcher-ingress
+  labels:
+    {{- include "ml-operator.labels" . | nindent 4 }}
+  annotations: {{ index .Values "image-watcher" "ingress" "annotations" }}
+spec:
+  rules:
+    - http:
+        paths:
+          - path: { index .Values "image-watcher" "ingress" "path" }}
+            backend:
+              serviceName: image-watcher
+              servicePort: {{ index .Values "image-watcher" "ingress" "port" }}
+{{- end }}
