@@ -7,7 +7,7 @@ containers:
   api:
     image:
       repository: mojaloop/account-lookup-service
-      tag: v11.1.2
+      tag: v11.5.3
       pullPolicy: IfNotPresent
       command: '["node", "src/index.js", "server", "--api"]'
     service:
@@ -18,7 +18,7 @@ containers:
   admin:
     image:
       repository: mojaloop/account-lookup-service
-      tag: v11.1.2
+      tag: v11.5.3
       pullPolicy: IfNotPresent
       command: '["node", "src/index.js", "server", "--admin"]'
     service:
@@ -60,8 +60,8 @@ sidecar:
   enabled: true
   image:
     repository: mojaloop/event-sidecar
-    tag: v9.5.1
-    pullPolicy: Always
+    tag: v11.0.1
+    pullPolicy: IfNotPresent
     command: '["npm", "run", "start"]'
   service:
     internalPort: 4003
@@ -99,6 +99,10 @@ config:
   ## Central-Ledger config
   central_services_host: '$release_name-centralledger-service'
   central_services_port: 80
+
+  # Log config
+  log_level: info
+  log_transport: file
 
   error_handling:
     include_cause_extension: false
@@ -154,9 +158,19 @@ config:
       # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
       # -----END RSA PRIVATE KEY-----
 
-  # Log config
-  log_level: info
-  log_transport: file
+  ## Tracing Configuration
+  event_trace_vendor: mojaloop
+  event_log_filter: 'audit:*, log:warn, log:error'
+  # If set to true, only the metadata object from the event will be printed.
+  event_log_metadata_only: false
+  # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+  # Any combination of: `log,audit,trace`
+  event_async_override: 'log,trace'
+  event_trace_state_enabled: true
+  event_traceid_per_vendor: false
+
+  # Thirdparty API Config
+  featureEnableExtendedPartyIdType: false
 
 init:
   enabled: true
@@ -165,7 +179,7 @@ init:
     name: wait-for-mysql
     repository: mysql
     tag: latest
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password $db_database -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
   migration:
     enabled: true

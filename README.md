@@ -16,6 +16,7 @@ Refer to Helm v3 docs for more information: https://docs.helm.sh/
  helm repo add stable https://charts.helm.sh/stable
  helm repo add incubator https://charts.helm.sh/incubator
  helm repo add kiwigrid https://kiwigrid.github.io
+ helm repo add kokuwa https://kokuwaio.github.io/helm-charts
  helm repo add elastic https://helm.elastic.co
  helm repo add bitnami https://charts.bitnami.com/bitnami
  helm repo add codecentric https://codecentric.github.io/helm-charts
@@ -121,6 +122,32 @@ e.g. `helm --namespace mojaloop install dev ./mojaloop`
 e.g. `helm --namespace mojaloop upgrade dev ./centralenduserregistry`
 
 ## Testing Deployments
+
+### Validation
+
+_Note: This is currently only supported by Helm v3._
+
+1. Ensure Tests are enabled
+
+Ensure the following properties are set in your values file:
+
+- ml-ttk-test-setup.tests.enabled=true
+- ml-ttk-test-validation.tests.enabled=true
+
+Or alternatively add `--set` for each of the above parameters on the install command:
+
+`helm install ... --set ml-ttk-test-setup.tests.enabled=true --set ml-ttk-test-validation.tests.enabled=true`
+
+2. Run Tests
+
+Run tests:
+`helm test <RELEASE_NAME>`
+
+Run tests with logs:
+
+`helm test <RELEASE_NAME> --logs`
+
+### Ingress
 
 1. Add the following to your hosts file and ensure you have installed Ingress Controller on your Kubernetes Cluster:
 

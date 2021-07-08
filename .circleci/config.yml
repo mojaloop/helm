@@ -8,7 +8,7 @@ version: 2.1
 ##
 orbs:
   slack: circleci/slack@3.4.2
-  pr-tools: mojaloop/pr-tools@0.1.8
+  pr-tools: mojaloop/pr-tools@0.1.10
 
 ##
 # defaults
@@ -39,13 +39,11 @@ defaults_license_scanner: &defaults_license_scanner
 defaults_Environment: &defaults_environment
   name: Set default environment
   command: |
-    echo "Initialising helm for local use only"
-    helm init --client-only --skip-refresh
-
     echo "Adding repos necessary for publishing process"
     helm repo add stable https://charts.helm.sh/stable
     helm repo add incubator https://charts.helm.sh/incubator
     helm repo add kiwigrid https://kiwigrid.github.io
+    helm repo add kokuwa https://kokuwaio.github.io/helm-charts
     helm repo add elastic https://helm.elastic.co
     helm repo add codecentric https://codecentric.github.io/helm-charts
     helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -59,7 +57,7 @@ executors:
   default-docker-helm:
     working_directory: /home/circleci/project
     docker:
-      - image: alpine/helm:2.13.1
+      - image: alpine/helm:3.5.0
 
   default-machine:
     machine:
@@ -195,16 +193,17 @@ workflows:
     jobs:
       - pr-tools/pr-title-check:
           context: org-global
+          filters:
+            tags:
+              ignore: /.*/
+            branches:
+              ignore:
+                - master
       - setup:
           context: org-global
           filters:
             tags:
               only: /.*/
-            branches:
-              ignore:
-                - /feature.*/
-                - /bugfix.*/
-                - gh-pages
       - test:
           context: org-global
           requires:
@@ -212,11 +211,6 @@ workflows:
           filters:
             tags:
               only: /.*/
-            branches:
-              ignore:
-                - /feature.*/
-                - /bugfix.*/
-                - gh-pages
       - audit-licenses:
           context: org-global
           requires:
@@ -224,11 +218,6 @@ workflows:
           filters:
             tags:
               only: /.*/
-            branches:
-              ignore:
-                - /feature.*/
-                - /bugfix.*/
-                - gh-pages
       - build:
           context: org-global
           requires:
@@ -237,11 +226,6 @@ workflows:
           filters:
             tags:
               only: /.*/
-            branches:
-              ignore:
-                - /feature.*/
-                - /bugfix.*/
-                - gh-pages
       - deploy:
           context: org-global
           requires:

@@ -4,18 +4,35 @@
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit
-  tag: v11.7.0
+  tag: v12.4.2
 ## Optionally specify an array of imagePullSecrets.
 ## Secrets must be manually created in the namespace.
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
 ##
 #  imagePullSecrets:
 #    - name: myregistrykey
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 scheduling:
   enabled: false
+  ## Note: First Cronjob may fail as the Hub setup & Sim onboarding may not be completed. These must be run either via Post-hooks or via running `Helm test`.
+  #### cronSchedule format as follows:
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#example
+  ## ┌───────────── minute (0 - 59)
+  ## │ ┌───────────── hour (0 - 23)
+  ## │ │ ┌───────────── day of the month (1 - 31)
+  ## │ │ │ ┌───────────── month (1 - 12)
+  ## │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday;
+  ## │ │ │ │ │                                   7 is also Sunday on some systems)
+  ## │ │ │ │ │
+  ## │ │ │ │ │
+  ## * * * * *
   cronSchedule: '0 8 * * *'
+
+tests:
+  enabled: false
+  weight: -5
+  deletePolicy: before-hook-creation
 
 postInstallHook:
   enabled: false
@@ -23,18 +40,24 @@ postInstallHook:
   deletePolicy: before-hook-creation
 
 config:
-  testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/master.zip
-  testCasesPathInZip: testing-toolkit-test-cases-master/collections/hub/sequence
+  ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+  testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/v<TAG_VERSION>.zip
+  ## Choose one of the following test-case paths for Provisioning or Golden Path test-cases:
+  # testCasesPathInZip: testing-toolkit-test-cases-12.0.0/collections/hub/provisioning
+  testCasesPathInZip: testing-toolkit-test-cases-<TAG_VERSION>/collections/hub/golden_path
+  ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
   # awsS3BucketName: 's3_bucket_name'
   # awsS3FilePath: ttk-tests/reports
-  ttkBackendURL: http://dev-testing-toolkit-adminapi.mojaloop.live
+  ttkBackendURL: http://testing-toolkit-adminapi.local
   testSuiteName: GP Tests
   environmentName: Development
 
 configCreds:
+  ## Define AWS Config
   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
   AWS_SECRET_ACCESS_KEY: 'some_aws_secret_key'
   AWS_REGION: 'us-west-2'
+  ## Define Slack Webhook URL for announcements
   # SLACK_WEBHOOK_URL: 'slack_inbound_webhook'
 
 ## Optionally specify the config file defaults for TTK CLI
@@ -50,12 +73,19 @@ configCreds:
 #   "slackFailedImage": ""
 # }
 configFileDefaults: {
-  "mode": "outbound"
+  "mode": "outbound",
+  "logLevel": "2"
 }
 
-testCaseEnvironmentFile:  {
-  "inputValues": {}
-}
+testCaseEnvironmentFile:
+  ## inputValues are Key-value pairs in the following format: <filename.json>: { <JSON> }
+  #  inputValues:
+  #    hub-k8s-local-environment.json: {
+  #      "inputValues": {
+  #        "BASE_CENTRAL_LEDGER_ADMIN": "",
+  #       }
+  #     }
+  inputValues: {}
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

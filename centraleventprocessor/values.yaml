@@ -10,8 +10,8 @@ global:
 replicaCount: 1
 image:
   repository: mojaloop/central-event-processor
-  tag: v10.5.0
-  pullPolicy: Always
+  tag: v11.0.2
+  pullPolicy: IfNotPresent
 
 ## Pod scheduling preferences.
 ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -31,7 +31,7 @@ init:
     name: wait-for-kafka
     repository: solsson/kafka
     tag: latest
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
     env: {}
     ## Env example
@@ -44,7 +44,7 @@ init:
     name: wait-for-mongodb
     repository: bitnami/mongodb
     tag: latest
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     command: "mongo mongodb://$mongo_host:$mongo_port --eval \"db.adminCommand('ping')\""
 
 service:
@@ -131,7 +131,7 @@ config:
   central_ledger_admin_host: '$release_name-centralledger-service'
   central_ledger_admin_port: 80
   hub_participant:
-    name: hub
+    name: Hub
   log_level: info
   log_transport: file
 
@@ -486,7 +486,7 @@ mongodb:
     ## Specify a imagePullPolicy
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
     ##
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
     ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/

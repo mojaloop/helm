@@ -13,7 +13,7 @@ bulk-api-adapter:
     replicaCount: 1
     image:
       repository: mojaloop/bulk-api-adapter
-      tag: v11.0.2
+      tag: v11.1.4
       command: '["node", "src/api/index.js"]'
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
@@ -21,15 +21,15 @@ bulk-api-adapter:
       ##
       #  imagePullSecrets:
       #    - name: myregistrykey
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
 
     init:
       enabled: true
-      image:
+      kafka:
         name: wait-for-kafka
         repository: solsson/kafka
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
         env: {}
         ## Env example
@@ -42,7 +42,7 @@ bulk-api-adapter:
         name: wait-for-mongodb
         repository: bitnami/mongodb
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
 
     readinessProbe:
@@ -132,7 +132,7 @@ bulk-api-adapter:
     replicaCount: 1
     image:
       repository: mojaloop/bulk-api-adapter
-      tag: v11.0.2
+      tag: v11.1.4
       command: '["node", "src/handlers/index.js", "handler", "--notification"]'
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
@@ -140,15 +140,15 @@ bulk-api-adapter:
       ##
       #  imagePullSecrets:
       #    - name: myregistrykey
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
 
     init:
       enabled: true
-      image:
+      kafka:
         name: wait-for-kafka
         repository: solsson/kafka
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
         env: {}
         ## Env example
@@ -161,7 +161,7 @@ bulk-api-adapter:
         name: wait-for-mongodb
         repository: bitnami/mongodb
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
 
     readinessProbe:
@@ -255,8 +255,8 @@ bulk-centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v11.3.1
-          pullPolicy: Always
+          tag: v13.12.1
+          pullPolicy: IfNotPresent
           command: '["node", "src/handlers/index.js", "handler", "--bulkprepare"]'
         service:
           ports:
@@ -340,7 +340,7 @@ bulk-centralledger:
         name: wait-for-kafka
         repository: solsson/kafka
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
         env: {}
         ## Env example
@@ -353,18 +353,18 @@ bulk-centralledger:
         name: wait-for-postgres
         repository: bowerswilkins/awaitpostgres
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
       mysql:
         name: wait-for-mysql
         repository: mysql
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
       mongodb:
         name: wait-for-mongodb
         repository: bitnami/mongodb
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
 
     service:
@@ -428,8 +428,8 @@ bulk-centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v11.3.1
-          pullPolicy: Always
+          tag: v13.12.1
+          pullPolicy: IfNotPresent
           command: '["node", "src/handlers/index.js", "handler", "--bulkfulfil"]'
         service:
           ports:
@@ -510,7 +510,7 @@ bulk-centralledger:
         name: wait-for-kafka
         repository: solsson/kafka
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
         env: {}
         ## Env example
@@ -523,18 +523,18 @@ bulk-centralledger:
         name: wait-for-postgres
         repository: bowerswilkins/awaitpostgres
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
       mysql:
         name: wait-for-mysql
         repository: mysql
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
       mongodb:
         name: wait-for-mongodb
         repository: bitnami/mongodb
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
 
     service:
@@ -598,8 +598,8 @@ bulk-centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v11.3.1
-          pullPolicy: Always
+          tag: v13.12.1
+          pullPolicy: IfNotPresent
           command: '["node", "src/handlers/index.js", "handler", "--bulkprocessing"]'
         service:
           ports:
@@ -680,7 +680,7 @@ bulk-centralledger:
         name: wait-for-kafka
         repository: solsson/kafka
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
         env: {}
         ## Env example
@@ -693,18 +693,18 @@ bulk-centralledger:
         name: wait-for-postgres
         repository: bowerswilkins/awaitpostgres
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
       mysql:
         name: wait-for-mysql
         repository: mysql
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
       mongodb:
         name: wait-for-mongodb
         repository: bitnami/mongodb
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
 
     service:
@@ -757,6 +757,7 @@ bulk-centralledger:
       # requests:
     #  cpu: 100m
     #  memory: 128Mi
+  
   cl-handler-bulk-transfer-get:
     enabled: true
     # Default values for centralledger-handler-bulk-transfer-get.
@@ -767,8 +768,8 @@ bulk-centralledger:
       api:
         image:
           repository: mojaloop/central-ledger
-          tag: v11.3.1
-          pullPolicy: Always
+          tag: v13.12.1
+          pullPolicy: IfNotPresent
           command: '["node", "src/handlers/index.js", "handler", "--bulkget"]'
         service:
           ports:
@@ -849,7 +850,7 @@ bulk-centralledger:
         name: wait-for-kafka
         repository: solsson/kafka
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
         env: {}
         ## Env example
@@ -862,18 +863,18 @@ bulk-centralledger:
         name: wait-for-postgres
         repository: bowerswilkins/awaitpostgres
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
       mysql:
         name: wait-for-mysql
         repository: mysql
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
       mongodb:
         name: wait-for-mongodb
         repository: bitnami/mongodb
         tag: latest
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
         command: "mongo $mongouri --eval \"db.adminCommand('ping')\""
 
     service:
@@ -927,7 +928,6 @@ bulk-centralledger:
     #  cpu: 100m
     #  memory: 128Mi
 
-  
 
 # Declare variables to be passed into your templates.
 mongodb:
@@ -954,7 +954,7 @@ mongodb:
     ## Specify a imagePullPolicy
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
     ##
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
     ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/

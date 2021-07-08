@@ -49,11 +49,6 @@
         "API": {
             "DISABLED": false
         },
-        "CRON": {
-            "DISABLED": true,
-            "TIMEXP": "*/10 * * * * *",
-            "TIMEZONE": "UTC"
-        },
         "TIMEOUT": {
             "DISABLED": true,
             "TIMEXP": "*/15 * * * * *",
@@ -79,8 +74,8 @@
     },
     "PARTICIPANT_INITIAL_POSITION": 0,
     "HUB_PARTICIPANT": {
-        "ID": 1,
-        "NAME": "Hub",
+        "ID": {{ .Values.config.hub_participant.id }},
+        "NAME": "{{ .Values.config.hub_participant.name }}",
         "ACCOUNTS": [
             "HUB_RECONCILIATION",
             "HUB_MULTILATERAL_SETTLEMENT",
@@ -120,7 +115,8 @@
                             "client.id": "cl-con-bulk-get",
                             "group.id": "cl-group-bulk-get",
                             "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
-                            "socket.keepalive.enable": true
+                            "socket.keepalive.enable": true,
+                            "allow.auto.create.topics": true
                         },
                         "topicConf": {
                             "auto.offset.reset": "earliest"
