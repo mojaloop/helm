@@ -1,0 +1,84 @@
+{{- if .Values.oracle_consent.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oracle-consent
+  labels:
+    app: oracle-consent
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1 # exeed the replicas by 1 pod
+  selector:
+    matchLabels:
+      app: oracle-consent
+  template:
+    metadata:
+      labels:
+        app: oracle-consent
+    spec:
+      containers:
+        - name: oracle-consent
+          image: mojaloop/als-consent-oracle:v0.0.3
+          # command: [ "tail", "-f", "/dev/null" ]
+          livenessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              path: /health
+              port: 3000
+          readinessProbe:
+            initialDelaySeconds: 30
+            httpGet:
+              path: /health
+              port: 3000
+          volumeMounts:
+            - name: oracle-consent-config-volume
+              mountPath: /opt/oracle-consent/config/development_db.json
+              subPath: development_db.json
+          env:
+            - name: NODE_ENV
+              value: development
+      volumes:
+        - name: oracle-consent-config-volume
+          configMap:
+            name: oracle-consent-config
+            items:
+            - key: development_db.json
+              path: development_db.json
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oracle-consent-config
+data:
+  development_db.json: {{ (.Files.Get "configs/consent-oracle-development_db.json") | quote }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oracle-consent
+spec:
+  ports:
+  - port: 3000
+  selector:
+    app: oracle-consent
+  clusterIP: None
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: oracle-consent
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /oracle-consent(/|$)(.*)
+            backend:
+              serviceName: oracle-consent
+              servicePort: 3000
+{{- end -}}
