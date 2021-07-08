@@ -11,6 +11,16 @@ metadata:
 {{- end }}
 spec:
   rules:
+    # Host based ingress
+    - host: {{index .Values "image-watcher" "ingress" "host"}}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: image-watcher
+              servicePort: {{ index .Values "image-watcher" "ingress" "port" }}
+
+    # Path based ingress
     - http:
         paths:
           - path: {{ index .Values "image-watcher" "ingress" "path" }}
