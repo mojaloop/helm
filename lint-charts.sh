@@ -12,34 +12,41 @@ LOCAL_HELM_MOJALOOP_REPO_URI=${HELM_MOJALOOP_REPO_URI:-'https://docs.mojaloop.io
 
 trap 'echo "Command failed...exiting. Please fix me!"' ERR
 
-declare -a charts=(
-    eventstreamprocessor
-    simulator
-    monitoring/promfana
-    monitoring/efk
-    account-lookup-service
-    als-oracle-pathfinder
-    centralkms
-    forensicloggingsidecar
-    centralledger
-    centralenduserregistry
-    centralsettlement
-    emailnotifier
-    centraleventprocessor
-    central
-    ml-api-adapter
-    quoting-service
-    finance-portal
-    finance-portal-settlement-management
-    transaction-requests-service
-    bulk-centralledger/
-    bulk-api-adapter/
-    mojaloop-bulk/
-    mojaloop
-    kube-system/ntpd/
-    mojaloop-simulator
-    ml-testing-toolkit
-)
+
+if [ "$1" ]; then
+    declare -a charts=("$1")
+else
+    declare -a charts=(
+        eventstreamprocessor
+        simulator
+        monitoring/promfana
+        monitoring/efk
+        account-lookup-service
+        als-oracle-pathfinder
+        centralkms
+        forensicloggingsidecar
+        centralledger
+        centralenduserregistry
+        centralsettlement
+        emailnotifier
+        centraleventprocessor
+        central
+        ml-api-adapter
+        quoting-service
+        finance-portal
+        finance-portal-settlement-management
+        transaction-requests-service
+        bulk-centralledger/
+        bulk-api-adapter/
+        mojaloop-bulk/
+        mojaloop-simulator
+        ml-testing-toolkit
+        ml-testing-toolkit-cli
+        mojaloop
+        kube-system/ntpd/
+        ml-operator
+    )
+fi
 
 echo "\n"
 
