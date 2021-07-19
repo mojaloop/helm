@@ -23,7 +23,7 @@ kubectl create secret generic ml-operator-secrets --from-env-file=.env
 helm upgrade --install ml-operator ./
 
 # install ml-operator from the published mojaloop charts, overriding the secret name
-helm upgrade --install {release-name} mojaloop/ml-operator --set secret_name=ml-operator-secrets
+helm upgrade --install {release-name} mojaloop/ml-operator --set secret-name=ml-operator-secrets
 ```
 
 ## Pod Components
