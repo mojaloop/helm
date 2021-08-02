@@ -3,11 +3,10 @@
 [![Git Releases](https://img.shields.io/github/release/mojaloop/helm.svg?style=flat)](https://github.com/mojaloop/helm/releases)
 [![CircleCI](https://circleci.com/gh/mojaloop/helm.svg?style=svg)](https://circleci.com/gh/mojaloop/helm)
 
-Mojaloop published Helm Repo: http://mojaloop.io/helm/repo/
-
-Mojaloop deployment documentation: https://docs.mojaloop.io/documentation/deployment-guide
-
-Refer to Helm v3 docs for more information: https://docs.helm.sh/
+## Quick Links
+- [http://mojaloop.io/helm/repo/](http://mojaloop.io/helm/repo/index.yaml) Mojaloop Published Helm Repo
+- [Documentation - Deploying Mojaloop](https://docs.mojaloop.io/documentation/deployment-guide)
+- [Helm v3 Docs](https://docs.helm.sh/)
 
 ## Pre-requisites
 
@@ -191,26 +190,17 @@ e.g. `helm --namespace mojaloop del dev`
 
 ## Helper scripts
 
-### Lint Helm Charts
-1.) Lint charts
+```bash
+# lint all parent charts and ensure they conform to Helm's standards
+./lint-charts.sh
 
-This will Lint all parent charts to ensure they conform to Helm standards
 
-`lint-charts.sh`
+# Update all charts, and their respective dependencies (requirements).
+./update-charts-dep.sh
 
-### Update Helm Charts for Local usage
-1.) Update charts
-
-Update all charts, and their respective dependencies (requirements).
-
-`update-charts-dep.sh`
-
-### Package Helm Charts into Local repo
-1.) Package charts
-
-Package all charts, and created an index.yaml in ./repo directory
-
-`sh package.sh`
+# Package all charts, and created an index.yaml in ./repo directory
+./package.sh
+```
 
 ## Monitoring Mojaloop
 
