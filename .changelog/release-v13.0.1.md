@@ -16,9 +16,9 @@ Date | Revision | Description
    * Bump to Account-Lookup-Service
      * Updated Account-Lookup-Service from 11.5.3 to 11.7.0
    * Bump to Testing-Toolkit Charts
-     * Updated Testing-Toolkit-Backend from 12.4.2 to 13.2.1
-     * Updated Testing-Toolkit-UI from 12.4.2 to 13.2.1
-     * Updated Testing-Toolkit-CLI from 12.4.2 to 13.2.1
+     * Updated Testing-Toolkit-Backend from 12.4.2 to 13.2.2
+     * Updated Testing-Toolkit-UI from 12.4.2 to 13.2.2
+     * Updated Testing-Toolkit-CLI from 12.4.2 to 13.2.2
 
 2. Testing-Toolkit
    * Provisioned new APIs (https://github.com/mojaloop/project/issues/2336)
@@ -68,8 +68,8 @@ Date | Revision | Description
 17. simulator: **v11.1.2**
 18. mojaloop-simulator: **v11.4.3**
 19. sdk-scheme-adapter: **v11.17.1**
-20. ml-testing-toolkit: v12.4.2 -> **v13.2.1**
-21. ml-testing-toolkit-ui: v12.2.3 -> **v13.2.1**
+20. ml-testing-toolkit: v12.4.2 -> **v13.2.2**
+21. ml-testing-toolkit-ui: v12.2.3 -> **v13.2.2**
 
 ## 5. Application release notes
 
@@ -92,8 +92,8 @@ Date | Revision | Description
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v11.1.2
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v11.4.3
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.17.1
-20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v13.2.1
-21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.2.1
+20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v13.2.2
+21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.2.2
 
 ## 6. Operational Chart versions
 
