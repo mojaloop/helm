@@ -4,47 +4,111 @@ global: {}
 
 ml-testing-toolkit-backend:
   enabled: true
+  # ingress:
+  #   enabled: true
+  #   hosts:
+  #     specApi:
+  #       host: testing-toolkit-specapi.localdomain
+  #       port: 5000
+  #       paths: ['/']
+  #     adminApi:
+  #       host: testing-toolkit.localdomain
+  #       port: 5050
+  #       paths: ['/api/', '/socket.io/']
   config:
     system_config.json:
       HOSTING_ENABLED: false
       OAUTH:
         AUTH_ENABLED: false
-      CONNECTION_MANAGER_AUTH_ENABLED: false
+      CONNECTION_MANAGER:
+        AUTH_ENABLED: false
+      KEYCLOAK:
+        ENABLED: false
+      # # For Hosted Mode
+      # HOSTING_ENABLED: true
+      # OAUTH:
+      #   AUTH_ENABLED: true
+      # CONNECTION_MANAGER:
+      #   AUTH_ENABLED: true
+      # KEYCLOAK:
+      #   ENABLED: true
   dependencies:
     keycloak:
       enabled: false
+      # # For Hosted Mode
+      # enabled: true
       embeddedCertificate: -----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDda1T6cyWogfG/xlUb3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHIc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7oCweP68CPbIrTWjR9gyjmSHfYhwIDAQAB\n-----END PUBLIC KEY-----
     mongodb:
       enabled: false
+      # # For Hosted Mode
+      # enabled: true
     connectionManagerBackend:
       enabled: false
+      # # For Hosted Mode
+      # enabled: true
 
 ml-testing-toolkit-frontend:
   enabled: true
+  # ingress:
+  #   enabled: true
+  #   # Used to create an Ingress record.
+  #   hosts:
+  #     ui:
+  #       host: testing-toolkit.localdomain
+  #       port: 6060
+  #       paths: ['/']
   config:
     AUTH_ENABLED: "FALSE" ## "TRUE" or "FALSE"
+    # API_BASE_URL: http://ttk-bankend-url
+    # # For Hosted Mode
+    # AUTH_ENABLED: "TRUE"
 
 connection-manager-backend:
   enabled: false
+  # # For Hosted Mode
+  # enabled: true
   config:
     AUTH_ENABLED: "DISABLED" ## TRUE or DISABLED
+    # # For Hosted Mode
+    # AUTH_ENABLED: "TRUE"
   dependencies:
     mysql:
       enabled: true
     keycloak:
       enabled: false
+      # # For Hosted Mode
+      # enabled: true
       embeddedCertificate: -----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDda1T6cyWogfG/xlUb3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHIc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7oCweP68CPbIrTWjR9gyjmSHfYhwIDAQAB\n-----END PUBLIC KEY-----
-  
+  # ingress:
+  #   enabled: true
+  #   hosts:
+  #     connection-manager.localdomain:
+  #       port: 5061
+  #       paths: ['/api/']
+
 connection-manager-frontend:
   enabled: false
+  # # For Hosted Mode
+  # enabled: true
   config:
     AUTH_ENABLED: "FALSE" ## TRUE or FALSE
+    # # For Hosted Mode
+    # API_BASE_URL: http://connection-manager.localdomain
+    # AUTH_ENABLED: "TRUE"
+  # ingress:
+  #   enabled: true
+  #   hosts:
+  #     connection-manager.localdomain:
+  #       port: 5060
+  #       paths: ['/']
 
 mysql:
   ## repo and documentation https://github.com/helm/charts/tree/master/stable/percona-xtradb-cluster
 
   ## disable when connection-manager-backend is disabled
   enabled: false
+  # # For Hosted Mode
+  # enabled: true
   image:
     repository: "percona/percona-xtradb-cluster"
     tag: "5.7.19"
@@ -109,6 +173,8 @@ mongodb:
   ## repo and documentation https://github.com/bitnami/charts/tree/master/bitnami/mysql
 
   enabled: false
+  # # For Hosted Mode
+  # enabled: true
 
   nameOverride: ttk-mongodb
 
@@ -188,6 +254,8 @@ keycloak:
   ## check the documentation in the repo for additional details
 
   enabled: false
+  # # For Hosted Mode
+  # enabled: true
   image:
     repository: quay.io/keycloak/keycloak
     tag: "11.0.2"
