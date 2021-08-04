@@ -1824,7 +1824,7 @@ central:
         api:
           image:
             repository: mojaloop/central-settlement
-            tag: v13.4.0
+            tag: v13.4.1
             pullPolicy: IfNotPresent
             command: '["node", "src/api/index.js"]'
           service:
@@ -1872,35 +1872,34 @@ central:
       ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
       tolerations: []
 
-      ## UNCOMMENT AFTER THE EVENT SDK AND METRICS ARE IMPLEMENTED
       sidecar:
-        enabled: false
-      #   image:
-      #     repository: mojaloop/event-sidecar
-      #     tag: v11.0.1
-      #     pullPolicy: IfNotPresent
-      #     command: '["npm", "run", "start"]'
-      #   service:
-      #     internalPort: 4001
-      #   readinessProbe:
-      #     enabled: true
-      #     httpGet:
-      #       path: /health
-      #     initialDelaySeconds: 120
-      #     periodSeconds: 15
-      #   livenessProbe:
-      #     enabled: true
-      #     httpGet:
-      #       path: /health
-      #     initialDelaySeconds: 90
-      #     periodSeconds: 15
-      #   config:
-      #     event_log_grpc_host: localhost
-      #     event_log_grpc_port: 50051
-      #     event_log_filter: 'audit:*, log:info, log:warn, log:error'
-      #     event_log_metadata_only: true
-      #     log_level: info
-      #     log_filter: 'error, warn, info'
+        enabled: true
+        image:
+          repository: mojaloop/event-sidecar
+          tag: v11.0.1
+          pullPolicy: IfNotPresent
+          command: '["npm", "run", "start"]'
+        service:
+          internalPort: 4001
+        readinessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 120
+          periodSeconds: 15
+        livenessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 90
+          periodSeconds: 15
+        config:
+          event_log_grpc_host: localhost
+          event_log_grpc_port: 50051
+          event_log_filter: 'audit:*, log:info, log:warn, log:error'
+          event_log_metadata_only: true
+          log_level: info
+          log_filter: 'error, warn, info'
 
       ## metric configuration for prometheus instrumentation
       metrics:
@@ -2024,9 +2023,23 @@ central:
         hub_participant:
           id: 1
           name: Hub
+
+        ## Log config
         log_level: info
         log_transport: file
 
+        ## Tracing Configuration
+        event_trace_vendor: mojaloop
+        event_log_filter: 'audit:*, log:warn, log:error'
+        # If set to true, only the metadata object from the event will be printed.
+        event_log_metadata_only: false
+        # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+        # Any combination of: `log,audit,trace`
+        event_async_override: 'log,trace'
+        event_trace_state_enabled: true
+        event_traceid_per_vendor: false
+
+        ## Error Handling
         error_handling:
           include_cause_extension: false
           truncate_extensions: true
@@ -2101,7 +2114,7 @@ central:
         api:
           image:
             repository: mojaloop/central-settlement
-            tag: v13.4.0
+            tag: v13.4.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "h", "--deferredSettlement"]'
           service:
@@ -2149,35 +2162,34 @@ central:
       ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
       tolerations: []
 
-      ## UNCOMMENT AFTER THE EVENT SDK AND METRICS ARE IMPLEMENTED
       sidecar:
-        enabled: false
-      #   image:
-      #     repository: mojaloop/event-sidecar
-      #     tag: v11.0.1
-      #     pullPolicy: IfNotPresent
-      #     command: '["npm", "run", "start"]'
-      #   service:
-      #     internalPort: 4001
-      #   readinessProbe:
-      #     enabled: true
-      #     httpGet:
-      #       path: /health
-      #     initialDelaySeconds: 120
-      #     periodSeconds: 15
-      #   livenessProbe:
-      #     enabled: true
-      #     httpGet:
-      #       path: /health
-      #     initialDelaySeconds: 90
-      #     periodSeconds: 15
-      #   config:
-      #     event_log_grpc_host: localhost
-      #     event_log_grpc_port: 50051
-      #     event_log_filter: 'audit:*, log:info, log:warn, log:error'
-      #     event_log_metadata_only: true
-      #     log_level: info
-      #     log_filter: 'error, warn, info'
+        enabled: true
+        image:
+          repository: mojaloop/event-sidecar
+          tag: v11.0.1
+          pullPolicy: IfNotPresent
+          command: '["npm", "run", "start"]'
+        service:
+          internalPort: 4001
+        readinessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 120
+          periodSeconds: 15
+        livenessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 90
+          periodSeconds: 15
+        config:
+          event_log_grpc_host: localhost
+          event_log_grpc_port: 50051
+          event_log_filter: 'audit:*, log:info, log:warn, log:error'
+          event_log_metadata_only: true
+          log_level: info
+          log_filter: 'error, warn, info'
 
       ## metric configuration for prometheus instrumentation
       metrics:
@@ -2301,9 +2313,23 @@ central:
         hub_participant:
           id: 1
           name: Hub
+
+        ## Log config
         log_level: info
         log_transport: file
 
+        ## Tracing Configuration
+        event_trace_vendor: mojaloop
+        event_log_filter: 'audit:*, log:warn, log:error'
+        # If set to true, only the metadata object from the event will be printed.
+        event_log_metadata_only: false
+        # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+        # Any combination of: `log,audit,trace`
+        event_async_override: 'log,trace'
+        event_trace_state_enabled: true
+        event_traceid_per_vendor: false
+
+        ## Error Handling
         error_handling:
           include_cause_extension: false
           truncate_extensions: true
@@ -2385,7 +2411,7 @@ central:
         api:
           image:
             repository: mojaloop/central-settlement
-            tag: v13.4.0
+            tag: v13.4.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "h", "--grossSettlement"]'
           service:
@@ -2433,35 +2459,34 @@ central:
       ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
       tolerations: []
 
-      ## UNCOMMENT AFTER THE EVENT SDK AND METRICS ARE IMPLEMENTED
       sidecar:
-        enabled: false
-      #   image:
-      #     repository: mojaloop/event-sidecar
-      #     tag: v11.0.1
-      #     pullPolicy: IfNotPresent
-      #     command: '["npm", "run", "start"]'
-      #   service:
-      #     internalPort: 4001
-      #   readinessProbe:
-      #     enabled: true
-      #     httpGet:
-      #       path: /health
-      #     initialDelaySeconds: 120
-      #     periodSeconds: 15
-      #   livenessProbe:
-      #     enabled: true
-      #     httpGet:
-      #       path: /health
-      #     initialDelaySeconds: 90
-      #     periodSeconds: 15
-      #   config:
-      #     event_log_grpc_host: localhost
-      #     event_log_grpc_port: 50051
-      #     event_log_filter: 'audit:*, log:info, log:warn, log:error'
-      #     event_log_metadata_only: true
-      #     log_level: info
-      #     log_filter: 'error, warn, info'
+        enabled: true
+        image:
+          repository: mojaloop/event-sidecar
+          tag: v11.0.1
+          pullPolicy: IfNotPresent
+          command: '["npm", "run", "start"]'
+        service:
+          internalPort: 4001
+        readinessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 120
+          periodSeconds: 15
+        livenessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 90
+          periodSeconds: 15
+        config:
+          event_log_grpc_host: localhost
+          event_log_grpc_port: 50051
+          event_log_filter: 'audit:*, log:info, log:warn, log:error'
+          event_log_metadata_only: true
+          log_level: info
+          log_filter: 'error, warn, info'
 
       ## metric configuration for prometheus instrumentation
       metrics:
@@ -2585,9 +2610,23 @@ central:
         hub_participant:
           id: 1
           name: Hub
+
+        ## Log config
         log_level: info
         log_transport: file
 
+        ## Tracing Configuration
+        event_trace_vendor: mojaloop
+        event_log_filter: 'audit:*, log:warn, log:error'
+        # If set to true, only the metadata object from the event will be printed.
+        event_log_metadata_only: false
+        # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+        # Any combination of: `log,audit,trace`
+        event_async_override: 'log,trace'
+        event_trace_state_enabled: true
+        event_traceid_per_vendor: false
+
+        ## Error Handling
         error_handling:
           include_cause_extension: false
           truncate_extensions: true
@@ -2669,7 +2708,7 @@ central:
         api:
           image:
             repository: mojaloop/central-settlement
-            tag: v13.4.0
+            tag: v13.4.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "h", "--rules"]'
           service:
@@ -2717,35 +2756,34 @@ central:
       ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
       tolerations: []
 
-      ## UNCOMMENT AFTER THE EVENT SDK AND METRICS ARE IMPLEMENTED
       sidecar:
-        enabled: false
-      #   image:
-      #     repository: mojaloop/event-sidecar
-      #     tag: v11.0.1
-      #     pullPolicy: IfNotPresent
-      #     command: '["npm", "run", "start"]'
-      #   service:
-      #     internalPort: 4001
-      #   readinessProbe:
-      #     enabled: true
-      #     httpGet:
-      #       path: /health
-      #     initialDelaySeconds: 120
-      #     periodSeconds: 15
-      #   livenessProbe:
-      #     enabled: true
-      #     httpGet:
-      #       path: /health
-      #     initialDelaySeconds: 90
-      #     periodSeconds: 15
-      #   config:
-      #     event_log_grpc_host: localhost
-      #     event_log_grpc_port: 50051
-      #     event_log_filter: 'audit:*, log:info, log:warn, log:error'
-      #     event_log_metadata_only: true
-      #     log_level: info
-      #     log_filter: 'error, warn, info'
+        enabled: true
+        image:
+          repository: mojaloop/event-sidecar
+          tag: v11.0.1
+          pullPolicy: IfNotPresent
+          command: '["npm", "run", "start"]'
+        service:
+          internalPort: 4001
+        readinessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 120
+          periodSeconds: 15
+        livenessProbe:
+          enabled: true
+          httpGet:
+            path: /health
+          initialDelaySeconds: 90
+          periodSeconds: 15
+        config:
+          event_log_grpc_host: localhost
+          event_log_grpc_port: 50051
+          event_log_filter: 'audit:*, log:info, log:warn, log:error'
+          event_log_metadata_only: true
+          log_level: info
+          log_filter: 'error, warn, info'
 
       ## metric configuration for prometheus instrumentation
       metrics:
@@ -2869,9 +2907,23 @@ central:
         hub_participant:
           id: 1
           name: Hub
+
+        ## Log config
         log_level: info
         log_transport: file
 
+        ## Tracing Configuration
+        event_trace_vendor: mojaloop
+        event_log_filter: 'audit:*, log:warn, log:error'
+        # If set to true, only the metadata object from the event will be printed.
+        event_log_metadata_only: false
+        # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+        # Any combination of: `log,audit,trace`
+        event_async_override: 'log,trace'
+        event_trace_state_enabled: true
+        event_traceid_per_vendor: false
+
+        ## Error Handling
         error_handling:
           include_cause_extension: false
           truncate_extensions: true
