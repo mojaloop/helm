@@ -46,6 +46,7 @@ Date | Revision | Description
      * Change UI to insert normalized lower case request headers [#2310](https://github.com/mojaloop/project/issues/2310)
      * Add input values not working [#2329](https://github.com/mojaloop/project/issues/2329)
      * Callback timeout in settings [#2330](https://github.com/mojaloop/project/issues/2330)
+     * Login is not working in the hosted mode [#2359](https://github.com/mojaloop/project/issues/2359)
 
 ## 4. Application versions
 
