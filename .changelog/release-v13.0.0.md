@@ -165,6 +165,6 @@ Mojaloop-simulators:
 
 - Contributing organizations: BMGF, CrossLake, ModusBox , Sybrin
 - Crosslake: @lewisdaly
-- ModusBox: @elnyry-sam-k , @mdebarros, @vgenev , @vijayg10, @shashi165, @kleyow, @partiallyordered
+- ModusBox: @elnyry-sam-k, @mdebarros, @vgenev, @vijayg10, @shashi165, @kleyow, @partiallyordered
 - Sybrin: @JohannWNel
 _Note: companies in alphabetical order_

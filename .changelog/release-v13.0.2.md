@@ -9,50 +9,21 @@ Date | Revision | Description
 
 ### 1. Maintenance updates
 
-1. feat(#2343): helm v13.0.1 release:
-   * Patch bump to Mojaloop Helm Charts
-   * Patch Bump to Central-Settlements
-     * Updated Central-Settlements from 13.2.0 to 13.4.1
-   * Bump to Account-Lookup-Service
-     * Updated Account-Lookup-Service from 11.5.3 to 11.7.0
-   * Bump to Testing-Toolkit Charts
-     * Updated Testing-Toolkit-Backend from 12.4.2 to 13.2.2
-     * Updated Testing-Toolkit-UI from 12.4.2 to 13.2.2
-     * Updated Testing-Toolkit-CLI from 12.4.2 to 13.2.2
-
-2. Testing-Toolkit
-   * Provisioned new APIs (https://github.com/mojaloop/project/issues/2336)
-     * Central Admin API v1.0
-     * Central Settlements API v2.0
-     * SDK Outbound Scheme Adapter API v1.0
-   * Refined callback rules
-   * Added Test-case definition generation functionality (https://github.com/mojaloop/project/issues/2237)
-   * Improvements in mobile simulator page with settlement related additions to support Deferred Multilateral Net Settlement (DMLNS) and Continuous Gross Settlement (CGS)demos
+N/A.
 
 ### 2. New Features
 
-1. Modify switch behaviour on receipt of a GET /parties message to avoid problems with duplicates (https://github.com/mojaloop/design-authority-project/issues/79)
+N/A.
 
 ### 3. Bug Fixes
 
-1. TTK Tests is using hard-coded USD currency [#2066](https://github.com/mojaloop/project/issues/2066)
-2. Default CGS model settles also Deferred Net transfers [#2325](https://github.com/mojaloop/project/issues/2325)
-3. ALS Admin Service DELETE API not working as expected [#2342](https://github.com/mojaloop/project/issues/2342)
-4. Tests coverage not provided for scenarios when Deferred Multilateral Net Settlement (DMLNS) and Continuous Gross Settlement (CGS) models are used on the same Switch [#2314](https://github.com/mojaloop/project/issues/2314)
-5. Central-Settlement-service is failing GP tests when enabling event-sdk sidecar [#2368](https://github.com/mojaloop/project/issues/2368)
-6. Testing-Toolkit
-     * Test execution stops with error 'max call stack' when http outbound errors like socket hangup [#2312](https://github.com/mojaloop/project/issues/2312)
-     * Proper progress updates [#2331](https://github.com/mojaloop/project/issues/2331)
-     * Change UI to insert normalized lower case request headers [#2310](https://github.com/mojaloop/project/issues/2310)
-     * Add input values not working [#2329](https://github.com/mojaloop/project/issues/2329)
-     * Callback timeout in settings [#2330](https://github.com/mojaloop/project/issues/2330)
-     * Login is not working in the hosted mode [#2359](https://github.com/mojaloop/project/issues/2359)
+1. **#2358:** firstname, middlename and lastname regex not supporting myanmar script unicode strings ([#423](https://github.com/mojaloop/account-lookup-service/issues/423)) ([049ce8a](https://github.com/mojaloop/account-lookup-service/commit/049ce8ab296d9eb44825c9cd0f7e7b3bd69d279c)), closes [#2358](https://github.com/mojaloop/project/issues/2358)
 
 ## 4. Application versions
 
 1. ml-api-adapter: **v11.1.6**
 2. central-ledger:  **v13.12.1**
-3. account-lookup-service: v11.5.3 -> **v11.7.0**
+3. account-lookup-service: v11.7.0 -> **v11.7.2**
 4. quoting-service: **v12.0.6**
 5. central-settlement: v13.2.0 -> **13.4.1**
 6. central-event-processor: **v11.0.2**
@@ -76,7 +47,7 @@ Date | Revision | Description
 
 1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v11.1.6
 2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.12.1
-3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v11.7.0
+3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v11.7.2
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v12.0.6
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v11.0.2
@@ -130,11 +101,10 @@ N/A
 
 1. [#2119 - Idempotency for duplicate quote request](https://github.com/mojaloop/project/issues/2119)
 2. [#2322 - Helm install failing with with "medium to large" release names](https://github.com/mojaloop/project/issues/2322)
-3. [#2358 - Firstname, Middlename and Lastname regex not supporting myanmar script unicode strings #2358](https://github.com/mojaloop/project/issues/2358)
 
 ## 10. Contributors
 
 - Contributing organizations: BMGF, ModusBox 
-- ModusBox: @elnyry-sam-k, @mdebarros, @vgenev, @vijayg10, @shashi165, @kleyow, @bushjames
+- ModusBox: @elnyry-sam-k, @mdebarros, @vijayg10
 
 _Note: companies in alphabetical order_
