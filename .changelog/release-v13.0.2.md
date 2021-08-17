@@ -13,7 +13,7 @@ Date | Revision | Description
 2. Bump to Quoting-Service Helm Chart
    * Updated Quoting-Service from 12.0.6 to 12.0.7
 3. Bump to Account-Lookup-Service Helm Charts
-   * Updated Account-Lookup-Service from 11.7.0 to 11.7.3
+   * Updated Account-Lookup-Service from 11.7.0 to 11.7.4
 
 ### 2. New Features
 
@@ -29,7 +29,7 @@ N/A.
 
 1. ml-api-adapter: **v11.1.6**
 2. central-ledger:  **v13.12.1**
-3. account-lookup-service: v11.7.0 -> **v11.7.3**
+3. account-lookup-service: v11.7.0 -> **v11.7.4**
 4. quoting-service: v12.0.6 -> **12.0.7**
 5. central-settlement: v13.2.0 -> **13.4.1**
 6. central-event-processor: **v11.0.2**
@@ -53,7 +53,7 @@ N/A.
 
 1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v11.1.6
 2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.12.1
-3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v11.7.3
+3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v11.7.4
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v12.0.7
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v11.0.2
