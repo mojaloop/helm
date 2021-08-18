@@ -23,7 +23,7 @@ N/A.
 
 1. **#2358:** firstname, middlename and lastname regex not supporting myanmar script unicode strings ([account-lookup-service/pull#423](https://github.com/mojaloop/account-lookup-service/pull/423), [quoting-service/pull#278](https://github.com/mojaloop/quoting-service/pull/278)) closes [issue/#2358](https://github.com/mojaloop/project/issues/2358))
 2. **#2373:** Mojaloop Oracle Simulator is not correctly filtering results when SubId request param is provided ([simulator/pull#230](https://github.com/mojaloop/simulator/pull/230) closes [mojaloop/#2373](https://github.com/mojaloop/project/issues/2373))
-3. **#2374:** ALS is sending out multiple requests to participants for both Oracle records that match non-subId and subId result set ([account-lookup-service/pull#424](https://github.com/mojaloop/account-lookup-service/pull/424) closes [mojaloop/#2374](https://github.com/mojaloop/project/issues/2374))
+3. **#2374:** ALS is sending out multiple requests to participants for both Oracle records that match non-subId and subId result set ([account-lookup-service/pull#424](https://github.com/mojaloop/account-lookup-service/pull/424), [account-lookup-service/pull#425](https://github.com/mojaloop/account-lookup-service/pull/425) closes [mojaloop/#2374](https://github.com/mojaloop/project/issues/2374))
 
 ## 4. Application versions
 
