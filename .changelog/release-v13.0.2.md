@@ -14,6 +14,7 @@ Date | Revision | Description
    * Updated Quoting-Service from 12.0.6 to 12.0.7
 3. Bump to Account-Lookup-Service Helm Charts
    * Updated Account-Lookup-Service from 11.7.0 to 11.7.4
+4. Included Mojaloop-Simulator helm chart changes to fix [mojaloop/2405](https://github.com/mojaloop/project/issues/2405)
 
 ### 2. New Features
 
@@ -24,6 +25,7 @@ N/A.
 1. **#2358:** firstname, middlename and lastname regex not supporting myanmar script unicode strings ([account-lookup-service/pull#423](https://github.com/mojaloop/account-lookup-service/pull/423), [account-lookup-service/pull#425](https://github.com/mojaloop/account-lookup-service/pull/425), [quoting-service/pull#278](https://github.com/mojaloop/quoting-service/pull/278)) closes [issue/#2358](https://github.com/mojaloop/project/issues/2358))
 2. **#2373:** Mojaloop Oracle Simulator is not correctly filtering results when SubId request param is provided ([simulator/pull#230](https://github.com/mojaloop/simulator/pull/230) closes [mojaloop/#2373](https://github.com/mojaloop/project/issues/2373))
 3. **#2374:** ALS is sending out multiple requests to participants for both Oracle records that match non-subId and subId result set ([account-lookup-service/pull#424](https://github.com/mojaloop/account-lookup-service/pull/424) closes [mojaloop/#2374](https://github.com/mojaloop/project/issues/2374))
+4. **2405:** ([helm/commit/7feed6fb120e4fafa2d5cbc8cd9643736750af4b](https://github.com/mojaloop/helm/commit/7feed6fb120e4fafa2d5cbc8cd9643736750af4b) closes [mojaloop/2405](https://github.com/mojaloop/project/issues/2405))
 
 ## 4. Application versions
 
