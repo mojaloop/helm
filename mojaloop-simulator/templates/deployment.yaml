@@ -87,19 +87,22 @@ spec:
         - name: tls-secrets
           mountPath: "/secrets/"
         env:
-        {{- if (not $config.config.schemeAdapter.env.CACHE_HOST) }} # We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
+        {{- if (not $config.config.schemeAdapter.env.CACHE_HOST) }}
+        ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
         - name: CACHE_HOST
           value: {{ printf "%s-cache" $fullName }}
         {{- end}}
-        {{- if (not $config.config.schemeAdapter.env.BACKEND_ENDPOINT) }} # We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
+        {{- if (not $config.config.schemeAdapter.env.BACKEND_ENDPOINT) }}
+        ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
         - name: BACKEND_ENDPOINT
           value: {{ printf "%s-backend:3000" $fullName }}
         {{- end}}
-        {{- if (not $config.config.schemeAdapter.env.DFSP_ID) }} # We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
+        {{- if (not $config.config.schemeAdapter.env.DFSP_ID) }}
+        ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
         - name: DFSP_ID
           value: {{ $name | quote }}
         {{- end}}
-        ## Map environment values
+        ## Map environment values from values.yaml
         {{- range $k, $v := $config.config.schemeAdapter.env }}
         - name: {{ $k }}
           value: {{ $v | quote | replace "$release_name" $releaseName }}
@@ -172,18 +175,22 @@ spec:
             scheme: HTTP
         {{- end }}
         env:
-        {{- if (not $config.config.backend.env.OUTBOUND_ENDPOINT) }} # We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
+        {{- if (not $config.config.backend.env.OUTBOUND_ENDPOINT) }}
+        ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
         - name: OUTBOUND_ENDPOINT
           value: "http://{{ $fullName }}-scheme-adapter:{{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}"
         {{- end }}
-        {{- if (not $config.config.schemeAdapter.env.SCHEME_NAME) }} # We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
+        {{- if (not $config.config.schemeAdapter.env.SCHEME_NAME) }}
+        ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
         - name: SCHEME_NAME
           value: {{ $fullName | quote }}
         {{- end }}
-        {{- if (not $config.config.backend.env.DFSP_ID) }} # We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
+        {{- if (not $config.config.backend.env.DFSP_ID) }}
+        ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
         - name: DFSP_ID
           value: {{ $name | quote }}
         {{- end }}
+        ## Map environment values from values.yaml
         {{- range $k, $v := $config.config.backend.env }}
         - name: {{ $k }}
           value: {{ $v | quote }}
