@@ -18,14 +18,18 @@ Date | Revision | Description
 
 ### 2. New Features
 
-N/A.
+1. **#2264:** add more robust header validation for inbound server ([sdk-scheme-adapter/pull/278](https://github.com/mojaloop/sdk-scheme-adapter/pull/278) closes [mojaloop/2264](https://github.com/mojaloop/project/issues/2264))
+2. feat: added ilp packet to transfer object ([sdk-scheme-adapter/pull/280](https://github.com/mojaloop/sdk-scheme-adapter/pull/280))
 
 ### 3. Bug Fixes
 
-1. **#2358:** firstname, middlename and lastname regex not supporting myanmar script unicode strings ([account-lookup-service/pull#423](https://github.com/mojaloop/account-lookup-service/pull/423), [account-lookup-service/pull#425](https://github.com/mojaloop/account-lookup-service/pull/425), [quoting-service/pull#278](https://github.com/mojaloop/quoting-service/pull/278)) closes [issue/#2358](https://github.com/mojaloop/project/issues/2358))
-2. **#2373:** Mojaloop Oracle Simulator is not correctly filtering results when SubId request param is provided ([simulator/pull#230](https://github.com/mojaloop/simulator/pull/230) closes [mojaloop/#2373](https://github.com/mojaloop/project/issues/2373))
-3. **#2374:** ALS is sending out multiple requests to participants for both Oracle records that match non-subId and subId result set ([account-lookup-service/pull#424](https://github.com/mojaloop/account-lookup-service/pull/424) closes [mojaloop/#2374](https://github.com/mojaloop/project/issues/2374))
-4. **2405:** ([helm/commit/7feed6fb120e4fafa2d5cbc8cd9643736750af4b](https://github.com/mojaloop/helm/commit/7feed6fb120e4fafa2d5cbc8cd9643736750af4b) closes [mojaloop/2405](https://github.com/mojaloop/project/issues/2405))
+1. Several bug-fixes to SDK-Scheme-Adapter for TLS configs, and Extension-lists ([sdk-scheme-adapter/pull/279](https://github.com/mojaloop/sdk-scheme-adapter/pull/279))
+2. **#2358:** firstname, middlename and lastname regex not supporting myanmar script unicode strings ([sdk-scheme-adapter/pull/281](https://github.com/mojaloop/sdk-scheme-adapter/pull/281), [account-lookup-service/pull/423](https://github.com/mojaloop/account-lookup-service/pull/423), [account-lookup-service/pull/425](https://github.com/mojaloop/account-lookup-service/pull/425), [quoting-service/pull/278](https://github.com/mojaloop/quoting-service/pull/278)) closes [mojaloop/2358](https://github.com/mojaloop/project/issues/2358))
+3. **#2373:** Mojaloop Oracle Simulator is not correctly filtering results when SubId request param is provided ([simulator/pull/230](https://github.com/mojaloop/simulator/pull/230) closes [mojaloop/2373](https://github.com/mojaloop/project/issues/2373))
+4. **#2374:** ALS is sending out multiple requests to participants for both Oracle records that match non-subId and subId result set ([account-lookup-service/pull/424](https://github.com/mojaloop/account-lookup-service/pull/424) closes [mojaloop/#2374](https://github.com/mojaloop/project/issues/2374))
+5. **2405:** Helm release v13.0.x upgrades fail after several iterations ([helm/commit/7feed6fb120e4fafa2d5cbc8cd9643736750af4b](https://github.com/mojaloop/helm/commit/7feed6fb120e4fafa2d5cbc8cd9643736750af4b) closes [mojaloop/2405](https://github.com/mojaloop/project/issues/2405))
+6. **2433:** sdk-scheme-adapter v11.18.6 release failing on startup ([sdk-scheme-adapter/pull/282](https://github.com/mojaloop/sdk-scheme-adapter/pull/282) closes [mojaloop/2433](https://github.com/mojaloop/project/issues/2433))
+7. **2436:** SDK-Scheme-Adapter Inbound API responds incorrectly for 'Unknown URI' Error scenario ([sdk-scheme-adapter/pull/283](https://github.com/mojaloop/sdk-scheme-adapter/pull/283) closes [mojaloop/2436](https://github.com/mojaloop/project/issues/2436))
 
 ## 4. Application versions
 
@@ -47,7 +51,7 @@ N/A.
 16. event-stream-processor: **v11.0.0-snapshot**
 17. simulator: **v11.1.3**
 18. mojaloop-simulator: **v11.4.3**
-19. sdk-scheme-adapter: **v11.17.1**
+19. sdk-scheme-adapter: v11.17.1 -> **v11.18.7**
 20. ml-testing-toolkit: v12.4.2 -> **v13.2.2**
 21. ml-testing-toolkit-ui: v12.2.3 -> **v13.2.2**
 
@@ -71,7 +75,7 @@ N/A.
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v11.0.0-snapshot
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v11.1.3
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v11.4.3
-19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.17.1
+19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.18.7
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v13.2.2
 21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.2.2
 
