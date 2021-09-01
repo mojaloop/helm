@@ -5,13 +5,15 @@
 
 Date | Revision | Description
 ---------|----------|---------
- 2021-08-11  | 0 | Initial release - https://github.com/mojaloop/helm/pull/446
+ 2021-08-11  | 0 | Initial Draft
+ 2021-08-27  | 1 | Included fixes: [mojaloop/2358](https://github.com/mojaloop/project/issues/2358), [mojaloop/#2374](https://github.com/mojaloop/project/issues/2374), [mojaloop/2405](https://github.com/mojaloop/project/issues/2405), [mojaloop/2433](https://github.com/mojaloop/project/issues/2433)
+ 2021-09-01  | 2 | Included fixes: [mojaloop/2439](https://github.com/mojaloop/project/issues/2439))
 
 ### 1. Maintenance updates
 
 1. Patch bump to Mojaloop Helm Charts
 2. Bump to Quoting-Service Helm Chart
-   * Updated Quoting-Service from 12.0.6 to 12.0.7
+   * Updated Quoting-Service from 12.0.6 to 12.0.9
 3. Bump to Account-Lookup-Service Helm Charts
    * Updated Account-Lookup-Service from 11.7.0 to 11.7.4
 4. Included Mojaloop-Simulator helm chart changes to fix [mojaloop/2405](https://github.com/mojaloop/project/issues/2405)
@@ -30,13 +32,14 @@ Date | Revision | Description
 5. **2405:** Helm release v13.0.x upgrades fail after several iterations ([helm/commit/7feed6fb120e4fafa2d5cbc8cd9643736750af4b](https://github.com/mojaloop/helm/commit/7feed6fb120e4fafa2d5cbc8cd9643736750af4b) closes [mojaloop/2405](https://github.com/mojaloop/project/issues/2405))
 6. **2433:** sdk-scheme-adapter v11.18.6 release failing on startup ([sdk-scheme-adapter/pull/282](https://github.com/mojaloop/sdk-scheme-adapter/pull/282) closes [mojaloop/2433](https://github.com/mojaloop/project/issues/2433))
 7. **2436:** SDK-Scheme-Adapter Inbound API responds incorrectly for 'Unknown URI' Error scenario ([sdk-scheme-adapter/pull/283](https://github.com/mojaloop/sdk-scheme-adapter/pull/283) closes [mojaloop/2436](https://github.com/mojaloop/project/issues/2436))
+8. **2439:** quoting-service model.validateQuoteRequest doesn't perform correct validation when simpleRoutingMode is TRUE ([quoting-service/pull/280](https://github.com/mojaloop/quoting-service/pull/280) closes [mojaloop/2439](https://github.com/mojaloop/project/issues/2439))
 
 ## 4. Application versions
 
 1. ml-api-adapter: **v11.1.6**
 2. central-ledger:  **v13.12.1**
 3. account-lookup-service: v11.7.0 -> **v11.7.4**
-4. quoting-service: v12.0.6 -> **12.0.7**
+4. quoting-service: v12.0.6 -> **12.0.9**
 5. central-settlement: v13.2.0 -> **13.4.1**
 6. central-event-processor: **v11.0.2**
 7. bulk-api-adapter: **v11.1.4**
@@ -60,7 +63,7 @@ Date | Revision | Description
 1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v11.1.6
 2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.12.1
 3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v11.7.4
-4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v12.0.7
+4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v12.0.9
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v11.0.2
 7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v11.1.4
