@@ -116,10 +116,12 @@ N/A
 
 1. [#2119 - Idempotency for duplicate quote request](https://github.com/mojaloop/project/issues/2119)
 2. [#2322 - Helm install failing with with "medium to large" release names](https://github.com/mojaloop/project/issues/2322)
+3. [#2352 - Mojaloop Helm support for Kubernetes 1.22](https://github.com/mojaloop/project/issues/2352)
+4. [#2448 - Nginx Ingress Controller v1.0.0 is incompatible with Mojaloop Helm v13.0.x releases](https://github.com/mojaloop/project/issues/2448)
 
 ## 10. Contributors
 
-- Contributing organizations: BMGF, ModusBox 
+- Contributing organizations: BMGF, ModusBox
 - ModusBox: @elnyry-sam-k, @mdebarros, @vijayg10
 
 _Note: companies in alphabetical order_

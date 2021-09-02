@@ -159,7 +159,8 @@ Mojaloop-simulators:
 3. Tests coverage not provided for scenarios when Deferred Multilateral Net Settlement (DMLNS) and Continuous Gross Settlement (CGS) models are used on the same Switch.
 4. [#2325 - Default CGS model settles also Deferred Net transfers](https://github.com/mojaloop/project/issues/2325)
 5. [#2342 - ALS Admin Service DELETE API not working as expected](https://github.com/mojaloop/project/issues/2342)
-
+6. [#2352 - Mojaloop Helm support for Kubernetes 1.22](https://github.com/mojaloop/project/issues/2352)
+7. [#2448 - Nginx Ingress Controller v1.0.0 is incompatible with Mojaloop Helm v13.0.x releases](https://github.com/mojaloop/project/issues/2448)
 
 ## 10. Contributors
 
