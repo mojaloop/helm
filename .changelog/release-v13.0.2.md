@@ -17,6 +17,7 @@ Date | Revision | Description
 3. Bump to Account-Lookup-Service Helm Charts
    * Updated Account-Lookup-Service from 11.7.0 to 11.7.4
 4. Included Mojaloop-Simulator helm chart changes to fix [mojaloop/2405](https://github.com/mojaloop/project/issues/2405)
+5. Added missing Kafka Consumer configs for `allow.auto.create.topics` - This may have caused some handlers to fail on startup as they cannot find the specific topic depending on their startup order
 
 ### 2. New Features
 
