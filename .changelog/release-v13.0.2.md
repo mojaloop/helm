@@ -23,6 +23,9 @@ Date | Revision | Description
 
 1. **#2264:** add more robust header validation for inbound server ([sdk-scheme-adapter/pull/278](https://github.com/mojaloop/sdk-scheme-adapter/pull/278) closes [mojaloop/2264](https://github.com/mojaloop/project/issues/2264))
 2. feat: added ilp packet to transfer object ([sdk-scheme-adapter/pull/280](https://github.com/mojaloop/sdk-scheme-adapter/pull/280))
+3. Added a demo friendly test runner in TTK ([ml-testing-toolkit-ui/pull/115](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/115))
+4. TTK hosted mode: Optional JWS & mTLS ([ml-testing-toolkit-ui/pull/116](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/116) and [ml-testing-toolkit/pull/184](https://github.com/mojaloop/ml-testing-toolkit/pull/184) closes [mojaloop/project/issues/2376](https://github.com/mojaloop/project/issues/2376))
+5. Provisioned payment manager api in TTK ([ml-testing-toolkit/pull/182](https://github.com/mojaloop/ml-testing-toolkit/pull/182))
 
 ### 3. Bug Fixes
 
@@ -34,6 +37,10 @@ Date | Revision | Description
 6. **2433:** sdk-scheme-adapter v11.18.6 release failing on startup ([sdk-scheme-adapter/pull/282](https://github.com/mojaloop/sdk-scheme-adapter/pull/282) closes [mojaloop/2433](https://github.com/mojaloop/project/issues/2433))
 7. **2436:** SDK-Scheme-Adapter Inbound API responds incorrectly for 'Unknown URI' Error scenario ([sdk-scheme-adapter/pull/283](https://github.com/mojaloop/sdk-scheme-adapter/pull/283) closes [mojaloop/2436](https://github.com/mojaloop/project/issues/2436))
 8. **2439:** quoting-service model.validateQuoteRequest doesn't perform correct validation when simpleRoutingMode is TRUE ([quoting-service/pull/280](https://github.com/mojaloop/quoting-service/pull/280) closes [mojaloop/2439](https://github.com/mojaloop/project/issues/2439))
+9. **2445:** TTKs Iteration Runner on Moja1 & Moja2 fails with "Terminated" regardless on the number of Iterations configured. ([ml-testing-toolkit/pull/184](https://github.com/mojaloop/ml-testing-toolkit/pull/184) closes [mojaloop/2445](https://github.com/mojaloop/project/issues/2445))
+10. **2400:** TTK demo test runner option to "import from GitHub" causing browser crash ([ml-testing-toolkit-ui/pull/117](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/117) closes [mojaloop/2400](https://github.com/mojaloop/project/issues/2400))
+
+
 
 ## 4. Application versions
 
@@ -56,8 +63,8 @@ Date | Revision | Description
 17. simulator: **v11.1.3**
 18. mojaloop-simulator: **v11.4.3**
 19. sdk-scheme-adapter: v11.17.1 -> **v11.18.7**
-20. ml-testing-toolkit: v12.4.2 -> **v13.2.2**
-21. ml-testing-toolkit-ui: v12.2.3 -> **v13.2.2**
+20. ml-testing-toolkit: v13.2.2 -> **v13.4.0**
+21. ml-testing-toolkit-ui: v13.2.2 -> **v13.4.0**
 
 ## 5. Application release notes
 
@@ -80,8 +87,8 @@ Date | Revision | Description
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v11.1.3
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v11.4.3
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.18.7
-20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v13.2.2
-21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.2.2
+20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v13.4.0
+21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.4.0
 
 ## 6. Operational Chart versions
 
