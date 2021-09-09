@@ -26,11 +26,12 @@ Date | Revision | Description
 3. Added a demo friendly test runner in TTK ([ml-testing-toolkit-ui/pull/115](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/115))
 4. TTK hosted mode: Optional JWS & mTLS ([ml-testing-toolkit-ui/pull/116](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/116) and [ml-testing-toolkit/pull/184](https://github.com/mojaloop/ml-testing-toolkit/pull/184) closes [mojaloop/project/issues/2376](https://github.com/mojaloop/project/issues/2376))
 5. Provisioned payment manager api in TTK ([ml-testing-toolkit/pull/182](https://github.com/mojaloop/ml-testing-toolkit/pull/182))
+6. feat: improved ttk inbound scripts ([ml-testing-toolkit/pull/187](https://github.com/mojaloop/ml-testing-toolkit/pull/187))
 
 ### 3. Bug Fixes
 
 1. Several bug-fixes to SDK-Scheme-Adapter for TLS configs, and Extension-lists ([sdk-scheme-adapter/pull/279](https://github.com/mojaloop/sdk-scheme-adapter/pull/279))
-2. **#2358:** firstname, middlename and lastname regex not supporting myanmar script unicode strings ([sdk-scheme-adapter/pull/281](https://github.com/mojaloop/sdk-scheme-adapter/pull/281), [account-lookup-service/pull/423](https://github.com/mojaloop/account-lookup-service/pull/423), [account-lookup-service/pull/425](https://github.com/mojaloop/account-lookup-service/pull/425), [quoting-service/pull/278](https://github.com/mojaloop/quoting-service/pull/278)) closes [mojaloop/2358](https://github.com/mojaloop/project/issues/2358))
+2. **#2358:** firstname, middlename and lastname regex not supporting myanmar script unicode strings ([ml-testing-toolkit/pull/186](https://github.com/mojaloop/ml-testing-toolkit/pull/186), [sdk-scheme-adapter/pull/281](https://github.com/mojaloop/sdk-scheme-adapter/pull/281), [account-lookup-service/pull/423](https://github.com/mojaloop/account-lookup-service/pull/423), [account-lookup-service/pull/425](https://github.com/mojaloop/account-lookup-service/pull/425), [quoting-service/pull/278](https://github.com/mojaloop/quoting-service/pull/278)) closes [mojaloop/2358](https://github.com/mojaloop/project/issues/2358))
 3. **#2373:** Mojaloop Oracle Simulator is not correctly filtering results when SubId request param is provided ([simulator/pull/230](https://github.com/mojaloop/simulator/pull/230) closes [mojaloop/2373](https://github.com/mojaloop/project/issues/2373))
 4. **#2374:** ALS is sending out multiple requests to participants for both Oracle records that match non-subId and subId result set ([account-lookup-service/pull/424](https://github.com/mojaloop/account-lookup-service/pull/424) closes [mojaloop/#2374](https://github.com/mojaloop/project/issues/2374))
 5. **2405:** Helm release v13.0.x upgrades fail after several iterations ([helm/commit/7feed6fb120e4fafa2d5cbc8cd9643736750af4b](https://github.com/mojaloop/helm/commit/7feed6fb120e4fafa2d5cbc8cd9643736750af4b) closes [mojaloop/2405](https://github.com/mojaloop/project/issues/2405))
@@ -39,8 +40,6 @@ Date | Revision | Description
 8. **2439:** quoting-service model.validateQuoteRequest doesn't perform correct validation when simpleRoutingMode is TRUE ([quoting-service/pull/280](https://github.com/mojaloop/quoting-service/pull/280) closes [mojaloop/2439](https://github.com/mojaloop/project/issues/2439))
 9. **2445:** TTKs Iteration Runner on Moja1 & Moja2 fails with "Terminated" regardless on the number of Iterations configured. ([ml-testing-toolkit/pull/184](https://github.com/mojaloop/ml-testing-toolkit/pull/184) closes [mojaloop/2445](https://github.com/mojaloop/project/issues/2445))
 10. **2400:** TTK demo test runner option to "import from GitHub" causing browser crash ([ml-testing-toolkit-ui/pull/117](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/117) closes [mojaloop/2400](https://github.com/mojaloop/project/issues/2400))
-
-
 
 ## 4. Application versions
 
@@ -63,8 +62,8 @@ Date | Revision | Description
 17. simulator: **v11.1.3**
 18. mojaloop-simulator: **v11.4.3**
 19. sdk-scheme-adapter: v11.17.1 -> **v11.18.7**
-20. ml-testing-toolkit: v13.2.2 -> **v13.4.0**
-21. ml-testing-toolkit-ui: v13.2.2 -> **v13.4.0**
+20. ml-testing-toolkit: v13.2.2 -> **v13.5.1**
+21. ml-testing-toolkit-ui: v13.2.2 -> **v13.5.0**
 
 ## 5. Application release notes
 
@@ -87,8 +86,8 @@ Date | Revision | Description
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v11.1.3
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v11.4.3
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.18.7
-20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v13.4.0
-21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.4.0
+20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v13.5.1
+21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.5.0
 
 ## 6. Operational Chart versions
 
