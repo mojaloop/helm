@@ -18,6 +18,7 @@ Date | Revision | Description
    * Updated Account-Lookup-Service from 11.7.0 to 11.7.7
 4. Included Mojaloop-Simulator helm chart changes to fix [mojaloop/2405](https://github.com/mojaloop/project/issues/2405)
 5. Added missing Kafka Consumer configs for `allow.auto.create.topics` - This may have caused some handlers to fail on startup as they cannot find the specific topic depending on their startup order
+6. Updated MySQL configs to use UTF8 as the default character-set to support unicode-character [mojaloop/2471](https://github.com/mojaloop/project/issues/2471)
 
 ### 2. New Features
 
