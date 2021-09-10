@@ -15,7 +15,7 @@ Date | Revision | Description
 2. Bump to Quoting-Service Helm Chart
    * Updated Quoting-Service from 12.0.6 to 12.0.10
 3. Bump to Account-Lookup-Service Helm Charts
-   * Updated Account-Lookup-Service from 11.7.0 to 11.7.5
+   * Updated Account-Lookup-Service from 11.7.0 to 11.7.7
 4. Included Mojaloop-Simulator helm chart changes to fix [mojaloop/2405](https://github.com/mojaloop/project/issues/2405)
 5. Added missing Kafka Consumer configs for `allow.auto.create.topics` - This may have caused some handlers to fail on startup as they cannot find the specific topic depending on their startup order
 
@@ -40,12 +40,13 @@ Date | Revision | Description
 8. **2439:** quoting-service model.validateQuoteRequest doesn't perform correct validation when simpleRoutingMode is TRUE ([quoting-service/pull/280](https://github.com/mojaloop/quoting-service/pull/280) closes [mojaloop/2439](https://github.com/mojaloop/project/issues/2439))
 9. **2445:** TTKs Iteration Runner on Moja1 & Moja2 fails with "Terminated" regardless on the number of Iterations configured. ([ml-testing-toolkit/pull/184](https://github.com/mojaloop/ml-testing-toolkit/pull/184) closes [mojaloop/2445](https://github.com/mojaloop/project/issues/2445))
 10. **2400:** TTK demo test runner option to "import from GitHub" causing browser crash ([ml-testing-toolkit-ui/pull/117](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/117) closes [mojaloop/2400](https://github.com/mojaloop/project/issues/2400))
+11. **2470:** Central-services-shared streamingProtocol encode/decode functionality working incorrectly ([central-services-shared/pull/313](https://github.com/mojaloop/central-services-shared/pull/313), [mojaloop/account-lookup-service/pull/428](https://github.com/mojaloop/account-lookup-service/pull/428) closes [mojaloop/2470](https://github.com/mojaloop/project/issues/2470))
 
 ## 4. Application versions
 
 1. ml-api-adapter: **v11.1.6**
 2. central-ledger:  **v13.12.1**
-3. account-lookup-service: v11.7.0 -> **v11.7.5**
+3. account-lookup-service: v11.7.0 -> **v11.7.7**
 4. quoting-service: v12.0.6 -> **12.0.10**
 5. central-settlement: v13.2.0 -> **13.4.1**
 6. central-event-processor: **v11.0.2**
@@ -69,7 +70,7 @@ Date | Revision | Description
 
 1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v11.1.6
 2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.12.1
-3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v11.7.5
+3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v11.7.7
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v12.0.10
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v11.0.2
