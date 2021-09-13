@@ -28,6 +28,7 @@ Date | Revision | Description
 4. TTK hosted mode: Optional JWS & mTLS ([ml-testing-toolkit-ui/pull/116](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/116) and [ml-testing-toolkit/pull/184](https://github.com/mojaloop/ml-testing-toolkit/pull/184) closes [mojaloop/project/issues/2376](https://github.com/mojaloop/project/issues/2376))
 5. Provisioned payment manager api in TTK ([ml-testing-toolkit/pull/182](https://github.com/mojaloop/ml-testing-toolkit/pull/182))
 6. feat: improved ttk inbound scripts ([ml-testing-toolkit/pull/187](https://github.com/mojaloop/ml-testing-toolkit/pull/187))
+7. Updated Golden-Path Tests to cater for updated regex for Accented & other Unicode Characters ((mojaloop/1452)[https://github.com/mojaloop/project/issues/1452])
 
 ### 3. Bug Fixes
 
@@ -42,6 +43,7 @@ Date | Revision | Description
 9. **2445:** TTKs Iteration Runner on Moja1 & Moja2 fails with "Terminated" regardless on the number of Iterations configured. ([ml-testing-toolkit/pull/184](https://github.com/mojaloop/ml-testing-toolkit/pull/184) closes [mojaloop/2445](https://github.com/mojaloop/project/issues/2445))
 10. **2400:** TTK demo test runner option to "import from GitHub" causing browser crash ([ml-testing-toolkit-ui/pull/117](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/117) closes [mojaloop/2400](https://github.com/mojaloop/project/issues/2400))
 11. **2470:** Central-services-shared streamingProtocol encode/decode functionality working incorrectly ([central-services-shared/pull/313](https://github.com/mojaloop/central-services-shared/pull/313), [mojaloop/account-lookup-service/pull/428](https://github.com/mojaloop/account-lookup-service/pull/428) closes [mojaloop/2470](https://github.com/mojaloop/project/issues/2470))
+12. **2474:** TTK test-cases that contain Unicode characters from Github incorrectly parsed #2474 ([ml-testing-toolkit/pull/###](https://github.com/mojaloop/ml-testing-toolkit/pull/###) closes [mojaloop/2474](https://github.com/mojaloop/project/issues/2474))
 
 ## 4. Application versions
 
