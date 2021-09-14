@@ -43,7 +43,7 @@ Date | Revision | Description
 9. **2445:** TTKs Iteration Runner on Moja1 & Moja2 fails with "Terminated" regardless on the number of Iterations configured. ([ml-testing-toolkit/pull/184](https://github.com/mojaloop/ml-testing-toolkit/pull/184) closes [mojaloop/2445](https://github.com/mojaloop/project/issues/2445))
 10. **2400:** TTK demo test runner option to "import from GitHub" causing browser crash ([ml-testing-toolkit-ui/pull/117](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/117) closes [mojaloop/2400](https://github.com/mojaloop/project/issues/2400))
 11. **2470:** Central-services-shared streamingProtocol encode/decode functionality working incorrectly ([central-services-shared/pull/313](https://github.com/mojaloop/central-services-shared/pull/313), [mojaloop/account-lookup-service/pull/428](https://github.com/mojaloop/account-lookup-service/pull/428) closes [mojaloop/2470](https://github.com/mojaloop/project/issues/2470))
-12. **2474:** TTK test-cases that contain Unicode characters from Github imports are incorrectly parsed ([ml-testing-toolkit/pull/###](https://github.com/mojaloop/ml-testing-toolkit/pull/###) closes [mojaloop/2474](https://github.com/mojaloop/project/issues/2474))
+12. **2474:** TTK test-cases that contain Unicode characters from Github imports are incorrectly parsed ([ml-testing-toolkit-ui/pull/120](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/120), [ml-testing-toolkit-ui/commit/9d2ad7c37db761672ac8c88831305e48855f8a45](https://github.com/mojaloop/ml-testing-toolkit-ui/commit/9d2ad7c37db761672ac8c88831305e48855f8a45) closes [mojaloop/2474](https://github.com/mojaloop/project/issues/2474))
 
 ## 4. Application versions
 
@@ -67,7 +67,7 @@ Date | Revision | Description
 18. mojaloop-simulator: **v11.4.3**
 19. sdk-scheme-adapter: v11.17.1 -> **v11.18.7**
 20. ml-testing-toolkit: v13.2.2 -> **v13.5.1**
-21. ml-testing-toolkit-ui: v13.2.2 -> **v13.5.0**
+21. ml-testing-toolkit-ui: v13.2.2 -> **v13.5.2**
 
 ## 5. Application release notes
 
@@ -91,7 +91,7 @@ Date | Revision | Description
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v11.4.3
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.18.7
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v13.5.1
-21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.5.0
+21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.5.2
 
 ## 6. Operational Chart versions
 
