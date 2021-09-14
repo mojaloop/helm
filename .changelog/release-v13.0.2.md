@@ -56,7 +56,7 @@ Date | Revision | Description
 7. bulk-api-adapter: **v11.1.4**
 8. email-notifier: **v11.0.2**
 9. als-oracle-pathfinder: **v11.0.0**
-10. transaction-requests-service: v11.1.5 -> **v11.1.6**
+10. transaction-requests-service: v11.1.5 -> **v11.1.7**
 11. finance-portal-ui: **v10.4.3**
 12. finance-portal-backend-service: **v15.0.2**
 13. settlement-management: **v11.0.0**
@@ -80,7 +80,7 @@ Date | Revision | Description
 7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v11.1.4
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v11.0.2
 9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v11.0.0
-10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v11.1.6
+10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v11.1.7
 11. finance-portal-ui - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
 12. finance-portal-backend-service - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
 13. settlement-management - https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0
