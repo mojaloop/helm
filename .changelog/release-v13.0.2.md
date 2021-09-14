@@ -33,7 +33,7 @@ Date | Revision | Description
 ### 3. Bug Fixes
 
 1. Several bug-fixes to SDK-Scheme-Adapter for TLS configs, and Extension-lists ([sdk-scheme-adapter/pull/279](https://github.com/mojaloop/sdk-scheme-adapter/pull/279))
-2. **#2358:** firstname, middlename and lastname regex not supporting myanmar script unicode strings ([ml-testing-toolkit/pull/186](https://github.com/mojaloop/ml-testing-toolkit/pull/186), [sdk-scheme-adapter/pull/281](https://github.com/mojaloop/sdk-scheme-adapter/pull/281), [account-lookup-service/pull/423](https://github.com/mojaloop/account-lookup-service/pull/423), [account-lookup-service/pull/425](https://github.com/mojaloop/account-lookup-service/pull/425), [quoting-service/pull/278](https://github.com/mojaloop/quoting-service/pull/278)) closes [mojaloop/2358](https://github.com/mojaloop/project/issues/2358))
+2. **#2358:** firstname, middlename and lastname regex not supporting myanmar script unicode strings ([ml-testing-toolkit/pull/186](https://github.com/mojaloop/ml-testing-toolkit/pull/186), [sdk-scheme-adapter/pull/281](https://github.com/mojaloop/sdk-scheme-adapter/pull/281), [account-lookup-service/pull/423](https://github.com/mojaloop/account-lookup-service/pull/423), [account-lookup-service/pull/425](https://github.com/mojaloop/account-lookup-service/pull/425), [quoting-service/pull/278](https://github.com/mojaloop/quoting-service/pull/278), [transaction-requests-service/pull/77](https://github.com/mojaloop/transaction-requests-service/pull/77) closes [mojaloop/2358](https://github.com/mojaloop/project/issues/2358))
 3. **#2373:** Mojaloop Oracle Simulator is not correctly filtering results when SubId request param is provided ([simulator/pull/230](https://github.com/mojaloop/simulator/pull/230) closes [mojaloop/2373](https://github.com/mojaloop/project/issues/2373))
 4. **#2374:** ALS is sending out multiple requests to participants for both Oracle records that match non-subId and subId result set ([account-lookup-service/pull/424](https://github.com/mojaloop/account-lookup-service/pull/424) closes [mojaloop/#2374](https://github.com/mojaloop/project/issues/2374))
 5. **2405:** Helm release v13.0.x upgrades fail after several iterations ([helm/commit/7feed6fb120e4fafa2d5cbc8cd9643736750af4b](https://github.com/mojaloop/helm/commit/7feed6fb120e4fafa2d5cbc8cd9643736750af4b) closes [mojaloop/2405](https://github.com/mojaloop/project/issues/2405))
@@ -56,7 +56,7 @@ Date | Revision | Description
 7. bulk-api-adapter: **v11.1.4**
 8. email-notifier: **v11.0.2**
 9. als-oracle-pathfinder: **v11.0.0**
-10. transaction-requests-service: **v11.1.5**
+10. transaction-requests-service: v11.1.5 -> **v11.1.6**
 11. finance-portal-ui: **v10.4.3**
 12. finance-portal-backend-service: **v15.0.2**
 13. settlement-management: **v11.0.0**
@@ -80,7 +80,7 @@ Date | Revision | Description
 7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v11.1.4
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v11.0.2
 9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v11.0.0
-10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v11.1.5
+10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v11.1.6
 11. finance-portal-ui - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
 12. finance-portal-backend-service - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
 13. settlement-management - https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0
