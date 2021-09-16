@@ -31,7 +31,7 @@ Date | Revision | Description
 6. feat: improved ttk inbound scripts ([ml-testing-toolkit/pull/187](https://github.com/mojaloop/ml-testing-toolkit/pull/187))
 7. Updated Golden-Path Tests to cater for updated regex for Accented & other Unicode Characters ([testing-toolkit-test-cases/pull/49](https://github.com/mojaloop/testing-toolkit-test-cases/pull/49), [testing-toolkit-test-cases/pull/48](https://github.com/mojaloop/testing-toolkit-test-cases/pull/48) closes [mojaloop/1452](https://github.com/mojaloop/project/issues/1452))
 8. Central-ledger migration scripts should configure the Quote Party table to utf8 character set ([central-ledger/pull/862](https://github.com/mojaloop/central-ledger/pull/862) closes [mojaloop/2480](https://github.com/mojaloop/project/issues/2480))
-9. Support for parameterize FspIds in Testing-toolkit Provisioning & Golden-Path Collections ([testing-toolkit-test-cases/pull/50](https://github.com/mojaloop/testing-toolkit-test-cases/pull/50) closes [mojaloop/2477](https://github.com/mojaloop/project/issues/2477))
+9. Support for parameterized FspIds in TTK's Provisioning & Golden-Path Collections ([testing-toolkit-test-cases/pull/50](https://github.com/mojaloop/testing-toolkit-test-cases/pull/50) closes [mojaloop/2477](https://github.com/mojaloop/project/issues/2477))
 
 ### 3. Bug Fixes
 
