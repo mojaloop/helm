@@ -23,6 +23,13 @@ spec:
         app.kubernetes.io/version: {{ .Chart.Version }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+      ## Currently not supported
+      # {{- if .Values.metrics.enabled }}
+      #   prometheus.io/port: "{{ .Values.containers.admin.service.ports.api.port }}"
+      #   prometheus.io/scrape: "true"
+      # {{- end }}
     spec:
       {{- if .Values.init.enabled }}
       initContainers:

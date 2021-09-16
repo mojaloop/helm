@@ -1,3 +1,6 @@
+{{- $checksumConfigRules := include (print $.Template.BasePath "/config-rules.yaml") . | sha256sum -}}
+{{- $checksumConfigJWSPublicKeys := include (print $.Template.BasePath "/config-jws-public-keys.yaml") . | sha256sum -}}
+{{- $checksumConfigSecrets := include (print $.Template.BasePath "/secret.yaml") . | sha256sum -}}
 {{- $prefix := include "mojaloop-simulator.prefix" . -}}
 {{- $releaseName := .Release.Name -}}
 {{- range $name, $customConfig := .Values.simulators }}
@@ -24,6 +27,10 @@ spec:
       labels:
         app.kubernetes.io/name: sim-{{ $name }}-scheme-adapter
         {{- include "mojaloop-simulator.common-labels" $ | nindent 8 }}
+      annotations:
+        checksum/config-rules: {{ $checksumConfigRules }}
+        checksum/config-jws-public-keys: {{ $checksumConfigJWSPublicKeys }}
+        checksum/secrets: {{ $checksumConfigSecrets }}
     spec:
       volumes:
       {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
@@ -154,6 +161,8 @@ spec:
       labels:
         app.kubernetes.io/name: sim-{{ $name }}-backend
         {{- include "mojaloop-simulator.common-labels" $ | nindent 8 }}
+      annotations:
+        checksum/config-rules: {{ $checksumConfigRules }}
     spec:
       initContainers:
 {{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.backend.initContainers "dict" (merge $config.config.backend.env $initContainerEnv)) | indent 6 }}
