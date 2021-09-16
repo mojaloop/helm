@@ -5,9 +5,7 @@
 
 Date | Revision | Description
 ---------|----------|---------
- 2021-08-11  | 0 | Initial Draft
- 2021-08-27  | 1 | Included fixes: [mojaloop/2358](https://github.com/mojaloop/project/issues/2358), [mojaloop/#2374](https://github.com/mojaloop/project/issues/2374), [mojaloop/2405](https://github.com/mojaloop/project/issues/2405), [mojaloop/2433](https://github.com/mojaloop/project/issues/2433)
- 2021-09-01  | 2 | Included fixes: [mojaloop/2439](https://github.com/mojaloop/project/issues/2439))
+ 2021-09-14  | 0 | Initial Draft
 
 ### 1. Maintenance updates
 
@@ -19,6 +17,8 @@ Date | Revision | Description
 4. Included Mojaloop-Simulator helm chart changes to fix [mojaloop/2405](https://github.com/mojaloop/project/issues/2405)
 5. Added missing Kafka Consumer configs for `allow.auto.create.topics` - This may have caused some handlers to fail on startup as they cannot find the specific topic depending on their startup order
 6. Updated MySQL configs to use UTF8 as the default character-set to support unicode-character [mojaloop/2471](https://github.com/mojaloop/project/issues/2471)
+7. Added waitForCache initContainers on the Mojaloop-Simulator's SDK-Scheme-Adapter deployment, this fixes an issue when upgrading from previous versions where the cache pod is restarted after the actual Adapter is upgraded, thereby losing connectivity to Redis - the result being that all WS subscriptions from the Test-API will be lost thereby causing GP tests to fail
+8. Updated Testing-Toolkit Backend statefulset to include `checksum/config` annotation containing the checksum for configMaps to ensure that pods are restarted on config changes [mojaloop/2476](https://github.com/mojaloop/project/issues/2476)
 
 ### 2. New Features
 
@@ -28,7 +28,8 @@ Date | Revision | Description
 4. TTK hosted mode: Optional JWS & mTLS ([ml-testing-toolkit-ui/pull/116](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/116) and [ml-testing-toolkit/pull/184](https://github.com/mojaloop/ml-testing-toolkit/pull/184) closes [mojaloop/project/issues/2376](https://github.com/mojaloop/project/issues/2376))
 5. Provisioned payment manager api in TTK ([ml-testing-toolkit/pull/182](https://github.com/mojaloop/ml-testing-toolkit/pull/182))
 6. feat: improved ttk inbound scripts ([ml-testing-toolkit/pull/187](https://github.com/mojaloop/ml-testing-toolkit/pull/187))
-7. Updated Golden-Path Tests to cater for updated regex for Accented & other Unicode Characters ((mojaloop/1452)[https://github.com/mojaloop/project/issues/1452])
+7. Updated Golden-Path Tests to cater for updated regex for Accented & other Unicode Characters ([testing-toolkit-test-cases/pull/49](https://github.com/mojaloop/testing-toolkit-test-cases/pull/49), [testing-toolkit-test-cases/pull/48](https://github.com/mojaloop/testing-toolkit-test-cases/pull/48) closes [mojaloop/1452](https://github.com/mojaloop/project/issues/1452))
+8. Central-ledger migration scripts should configure the Quote Party table to utf8 character set ([central-ledger/pull/862](https://github.com/mojaloop/central-ledger/pull/862) closes [mojaloop/2480](https://github.com/mojaloop/project/issues/2480))
 
 ### 3. Bug Fixes
 
@@ -44,11 +45,12 @@ Date | Revision | Description
 10. **2400:** TTK demo test runner option to "import from GitHub" causing browser crash ([ml-testing-toolkit-ui/pull/117](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/117) closes [mojaloop/2400](https://github.com/mojaloop/project/issues/2400))
 11. **2470:** Central-services-shared streamingProtocol encode/decode functionality working incorrectly ([central-services-shared/pull/313](https://github.com/mojaloop/central-services-shared/pull/313), [mojaloop/account-lookup-service/pull/428](https://github.com/mojaloop/account-lookup-service/pull/428) closes [mojaloop/2470](https://github.com/mojaloop/project/issues/2470))
 12. **2474:** TTK test-cases that contain Unicode characters from Github imports are incorrectly parsed ([ml-testing-toolkit-ui/pull/120](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/120), [ml-testing-toolkit-ui/commit/9d2ad7c37db761672ac8c88831305e48855f8a45](https://github.com/mojaloop/ml-testing-toolkit-ui/commit/9d2ad7c37db761672ac8c88831305e48855f8a45) closes [mojaloop/2474](https://github.com/mojaloop/project/issues/2474))
+13. SDK-Scheme-Adapter does not publish WS notifications when Cache is restarted ([sdk-scheme-adapter/pull/285](https://github.com/mojaloop/sdk-scheme-adapter/pull/285) closes [mojaloop/2478](https://github.com/mojaloop/project/issues/2478))
 
 ## 4. Application versions
 
 1. ml-api-adapter: **v11.1.6**
-2. central-ledger:  **v13.12.1**
+2. central-ledger:  13.12.1 -> **v13.14.0**
 3. account-lookup-service: v11.7.0 -> **v11.7.7**
 4. quoting-service: v12.0.6 -> **12.0.10**
 5. central-settlement: v13.2.0 -> **13.4.1**
@@ -65,14 +67,14 @@ Date | Revision | Description
 16. event-stream-processor: **v11.0.0-snapshot**
 17. simulator: **v11.1.3**
 18. mojaloop-simulator: **v11.4.3**
-19. sdk-scheme-adapter: v11.17.1 -> **v11.18.7**
+19. sdk-scheme-adapter: v11.17.1 -> **v11.18.8**
 20. ml-testing-toolkit: v13.2.2 -> **v13.5.1**
 21. ml-testing-toolkit-ui: v13.2.2 -> **v13.5.2**
 
 ## 5. Application release notes
 
 1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v11.1.6
-2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.12.1
+2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.14.0
 3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v11.7.7
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v12.0.10
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
@@ -89,7 +91,7 @@ Date | Revision | Description
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v11.0.0-snapshot
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v11.1.3
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v11.4.3
-19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.18.7
+19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.18.8
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v13.5.1
 21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.5.2
 
@@ -102,7 +104,30 @@ Date | Revision | Description
 
 N/A
 
-## 8. Testing notes
+## 8. Upgrade notes
+
+1. This release is fully compatible with prior v13.0.x releases, for Golden Path tests to fully pass you must ensure that your Central-Ledger Database has been correctly configured to support a UTF8 character-sets. Refer to the [mojaloop/2471](https://github.com/mojaloop/project/issues/2471#issuecomment-917089800) for more information. This is due to the Golden-Path Tests enhancements to cater for updated regex for Accented & other Unicode Characters ((mojaloop/1452)[https://github.com/mojaloop/project/issues/1452]).
+2. If upgrades fail due to a similar error reported by one of the Mojaloop-Simulators' SDK-Scheme-Adapter components as follows:
+
+```log
+Error: UPGRADE FAILED: cannot patch "moja1-sim-payeefsp-scheme-adapter" with kind Deployment: The order in patch list:
+[map[name:IN_SERVER_KEY_PATH value:./secrets/inbound-key.pem] map[name:IN_SERVER_KEY_PATH value:/secrets/inbound-key.pem] map[name:OUT_CA_CERT_PATH value:/secrets/outbound-cacert.pem] map[name:OUT_CA_CERT_PATH value:./secrets/outbound-cacert.pem] map[name:OUT_CLIENT_CERT_PATH value:/secrets/outbound-cert.pem] map[name:OUT_CLIENT_CERT_PATH value:./secrets/outbound-cert.pem] map[name:OUT_CLIENT_KEY_PATH value:./secrets/outbound-key.pem] map[name:OUT_CLIENT_KEY_PATH value:/secrets/outbound-key.pem] map[name:OAUTH_CLIENT_KEY value:] map[name:OAUTH_CLIENT_SECRET value:] map[name:OAUTH_TOKEN_ENDPOINT value:]]
+ doesn't match $setElementOrder list:
+```
+
+In the above example, one can modify the `Deployment: moja1-sim-payeefsp-scheme-adapter` descriptor by removing any duplicate environment variables (e.g. `IN_SERVER_KEY_PATH`, `OUT_CA_CERT_PATH`, etc), and then retrying the upgrade. This issue is related to [mojaloop/2405](https://github.com/mojaloop/project/issues/2405). This is a list of the environment variables that are most likely to be duplicated depending on your current installed configuration:
+
+* IN_CA_CERT_PATH
+* IN_SERVER_CERT_PATH
+* IN_SERVER_KEY_PATH
+* OUT_CA_CERT_PATH
+* OUT_CLIENT_CERT_PATH
+* OUT_CLIENT_KEY_PATH
+* JWS_SIGNING_KEY_PATH
+
+It was possible to have these configured by both the `mojaloop/values.yaml` and the `Helm Deployment.yaml template` itself - thus causing the duplicates. These are now solely configured the `mojaloop/values.yaml` as part of this release going forward.
+
+## 9. Testing notes
 
 1. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
 
@@ -123,16 +148,16 @@ N/A
 	- Nginx Ingress Controllers: 0.43.0
 	- Testing Toolkit Test Cases: [v13.0.1](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v13.0.1)
 
-## 9. Known Issues
+## 10. Known Issues
 
 1. [#2119 - Idempotency for duplicate quote request](https://github.com/mojaloop/project/issues/2119)
 2. [#2322 - Helm install failing with with "medium to large" release names](https://github.com/mojaloop/project/issues/2322)
 3. [#2352 - Mojaloop Helm support for Kubernetes 1.22](https://github.com/mojaloop/project/issues/2352)
 4. [#2448 - Nginx Ingress Controller v1.0.0 is incompatible with Mojaloop Helm v13.0.x releases](https://github.com/mojaloop/project/issues/2448)
 
-## 10. Contributors
+## 11. Contributors
 
-- Contributing organizations: BMGF, ModusBox
-- ModusBox: @elnyry-sam-k, @mdebarros, @vijayg10
+- Contributing organizations: BMGF, ModusBox, CrossLake
+- ModusBox: @elnyry-sam-k, @mdebarros, @vijayg10, @kleyow, @lewisdaly
 
 _Note: companies in alphabetical order_
