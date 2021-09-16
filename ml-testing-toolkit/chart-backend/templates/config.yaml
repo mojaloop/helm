@@ -1,5 +1,6 @@
 {{- $RELEASE_NAME := .Release.Name -}}
 {{- $MONGODB := (.Values.dependencies.mongodb) -}}
+{{- $PARAMETERS := .Values.parameters -}}
 {{- $CONNECTION_MANAGER := (.Values.dependencies.connectionManagerBackend) -}}
 {{- $API_AUTHENTICATION := index .Values.dependencies (ternary "keycloak" "adminApiAuthentication" .Values.dependencies.keycloak.enabled) -}}
 apiVersion: v1
@@ -29,5 +30,9 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   {{- range $k, $v := .Values.extraEnvironments }}
-    {{ $k }}: {{ ($v | toPrettyJson | squote | replace "$release_name" $RELEASE_NAME)  }}
+    {{- $environmentFileContent := ($v | toPrettyJson | squote | replace "$release_name" $RELEASE_NAME) -}}
+    {{- range $paramName, $paramValue := $PARAMETERS }}
+      {{- $environmentFileContent = ($environmentFileContent | replace (printf "$param_%s" $paramName) $paramValue) -}}
+    {{- end }}
+    {{ $k }}: {{ ($environmentFileContent)  }}
   {{- end }}
