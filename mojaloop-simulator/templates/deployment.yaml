@@ -4,6 +4,8 @@
 {{- $fullName := printf "%s%s" $prefix $name }}
 {{- $config := merge $customConfig $.Values.defaults }}
 {{- $initContainerEnv := dict "SIM_NAME" $name "SIM_SCHEME_ADAPTER_SERVICE_NAME" (printf "sim-%s-scheme-adapter" $name) "SIM_BACKEND_SERVICE_NAME" (printf "sim-%s-backend" $name) "SIM_CACHE_SERVICE_NAME" (printf "sim-%s-cache" $name) -}}
+{{- $cacheHost := default (printf "%s-cache" $fullName) $config.config.schemeAdapter.env.CACHE_HOST -}}
+{{- $cachePort := default "6379" $config.config.schemeAdapter.env.CACHE_PORT -}}
 apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
 kind: Deployment
 metadata:
@@ -48,6 +50,15 @@ spec:
           secretName: {{ $fullName }}-tls-creds
           {{- end }}
       initContainers:
+      {{- if $config.config.initContainers.waitForCache.enabled }}
+      - name: wait-for-cache
+        image: "{{ $config.config.cache.image.repository }}:{{ $config.config.cache.image.tag }}"
+        imagePullPolicy: {{ $config.config.cache.image.pullPolicy }}
+        command:
+          - sh
+          - "-c"
+          - {{ printf "until redis-cli -h %s -p %v ping; do echo waiting for Redis; sleep 2; done;" $cacheHost $cachePort }}
+      {{- end }}
 {{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.schemeAdapter.initContainers "dict" (merge $config.config.schemeAdapter.env $initContainerEnv)) | indent 6 }}
       containers:
       - name: scheme-adapter
