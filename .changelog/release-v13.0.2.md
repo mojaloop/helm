@@ -19,7 +19,7 @@ Date | Revision | Description
 6. Updated MySQL configs to use UTF8 as the default character-set to support unicode-character [mojaloop/2471](https://github.com/mojaloop/project/issues/2471)
 7. Added waitForCache initContainers on the Mojaloop-Simulator's SDK-Scheme-Adapter deployment, this fixes an issue when upgrading from previous versions where the cache pod is restarted after the actual Adapter is upgraded, thereby losing connectivity to Redis - the result being that all WS subscriptions from the Test-API will be lost thereby causing GP tests to fail
 8. Updated Testing-Toolkit Backend statefulset to include `checksum/config` annotation containing the checksum for configMaps to ensure that pods are restarted on config changes [mojaloop/2476](https://github.com/mojaloop/project/issues/2476)
-9. Updated all supported charts to include `checksum/*` annotations for configMaps and secrets - this should ensure that pods should gracefully restart if their respective config/secrets are modified
+9. Updated all supported charts to include `checksum/*` annotations for configMaps and secrets - this should ensure that pods will gracefully restart if their respective config/secrets are modified
 
 ### 2. New Features
 
