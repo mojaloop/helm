@@ -32,7 +32,7 @@ dependencies:
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit
-  tag: v13.2.2
+  tag: v13.5.1
   commandPersistence: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; else if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; fi; npm run start;"]'
   command: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; npm run start;"]'
 
@@ -170,18 +170,18 @@ config:
       "MTA_ROLE": "Application/MTA",
       "PTA_ROLE": "Application/PTA",
       "EVERYONE_ROLE": "Internal/everyone",
-      "P12_PASS_PHRASE": "SOME_S3C4R3_P@SS",
       "OAUTH2_TOKEN_ISS": "http://$auth_host:$auth_port$auth_token_iss_path",
       "OAUTH2_ISSUER": "http://$auth_host:$auth_port$auth_issuer_path",
-      "JWT_COOKIE_NAME": "TTK-API_ACCESS_TOKEN",
       "EMBEDDED_CERTIFICATE": "$auth_embedded_certificate"
     },
     "KEYCLOAK": {
       "ENABLED": false,
       "API_URL": "http://$auth_host:$auth_port",
       "REALM": "testingtoolkit",
-      "USERNAME": "hub",
-      "PASSWORD": "hub"
+      "ADMIN_REALM": "master",
+      "ADMIN_USERNAME": "admin",
+      "ADMIN_PASSWORD": "admin",
+      "ADMIN_CLIENT_ID": "admin-cli"
     },
     "SERVER_LOGS": {
       "ENABLED": false,
@@ -193,6 +193,7 @@ config:
       }
     },
     "CONNECTION_MANAGER": {
+      "ENABLED": false,
       "API_URL": "http://$connection_manager_host:$connection_manager_port",
       "AUTH_ENABLED": false,
       "HUB_USERNAME": "hub",
@@ -252,11 +253,17 @@ config:
         "type": "mojaloop_sdk_outbound_scheme_adapter",
         "version": "1.0",
         "folderPath": "mojaloop_sdk_outbound_scheme_adapter_1.0"
+      },
+      {
+        "type": "payment_manager",
+        "version": "1.4",
+        "folderPath": "payment_manager_1.4"
       }
     ]
   }
 
 extraEnvironments: {}
+parameters: {}
 
 service:
   type: ClusterIP

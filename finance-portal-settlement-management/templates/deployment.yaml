@@ -19,6 +19,9 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "finance-portal-settlement-management.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
     spec:
     {{- if .Values.affinity }}
       affinity:

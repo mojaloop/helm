@@ -1,3 +1,5 @@
+{{- $PARAMETERS := .Values.parameters -}}
+{{- $RELEASE_NAME := .Release.Name -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -23,5 +25,8 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
-  cli-testcase-environment.json: |
-    {{ .Values.testCaseEnvironmentFile | toJson | replace "$release_name" .Release.Name }}
+  {{- $environmentFileContent := (.Values.testCaseEnvironmentFile | toPrettyJson | squote | replace "$release_name" $RELEASE_NAME) -}}
+  {{- range $paramName, $paramValue := $PARAMETERS }}
+    {{- $environmentFileContent = ($environmentFileContent | replace (printf "$param_%s" $paramName) $paramValue) -}}
+  {{- end }}
+  cli-testcase-environment.json: {{ ($environmentFileContent)  }}
