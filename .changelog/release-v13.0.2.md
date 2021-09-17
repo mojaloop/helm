@@ -168,7 +168,7 @@ N/A
 3. This release has been tested against the following:
 	- Kubernetes: v1.20.6
 	- Nginx Ingress Controllers: 0.43.0
-	- Testing Toolkit Test Cases: [v13.0.1](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v13.0.1)
+	- Testing Toolkit Test Cases: [v13.0.2](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v13.0.2)
 
 ## 10. Known Issues
 
