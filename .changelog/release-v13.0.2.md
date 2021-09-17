@@ -110,7 +110,7 @@ N/A
 
 1. This release is fully compatible with prior v13.0.x releases, for Golden Path tests to fully pass you must ensure that your Central-Ledger Database has been correctly configured to support a UTF8 character-sets. Refer to the [mojaloop/2471](https://github.com/mojaloop/project/issues/2471#issuecomment-917089800) for more information. This is due to the Golden-Path Tests enhancements to cater for updated regex for Accented & other Unicode Characters ((mojaloop/1452)[https://github.com/mojaloop/project/issues/1452]). The [Central-ledger v13.14.0](https://github.com/mojaloop/central-ledger/releases/tag/v13.14.0) migration scripts will modify the Quote Party table to the utf8 character set ([mojaloop/2480](https://github.com/mojaloop/project/issues/2480)). If you disable the migration scripts, ensure that you make this configuration change manually prior to upgrade.
 
-2. If you have customized the TTK configuration for `ml-testing-toolkit.extraEnvironments.hub-k8s-default-environment.json` in the `mojaloop/values.yaml`, note the following new inputValues have been added as part of [mojaloop/1452](https://github.com/mojaloop/project/issues/1452). Ensure you add these before running the Provisioning and Golden-Path collections when running [testing-toolkit-test-cases/releases/tag/v13.0.2](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v13.0.2) versions:
+2. If you have customized the TTK's configuration for `ml-testing-toolkit.extraEnvironments.hub-k8s-default-environment.json` in the `mojaloop/values.yaml`, note the following new inputValues have been added as part of [mojaloop/1452](https://github.com/mojaloop/project/issues/1452). Ensure you add these before running the Provisioning and Golden-Path collections when running [testing-toolkit-test-cases/releases/tag/v13.0.2](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v13.0.2) versions:
 
 		```json
 		"toAccentIdType": "MSISDN",
@@ -147,7 +147,7 @@ N/A
 		* OUT_CLIENT_KEY_PATH
 		* JWS_SIGNING_KEY_PATH
 
-		It was possible to have these configured by both the `mojaloop/values.yaml` and the `Helm Deployment.yaml template` itself - thus causing the duplicates. These are now solely configured the `mojaloop/values.yaml` as part of this release going forward.
+		It was possible to have these configured by both the `mojaloop/values.yaml` and the `Helm Deployment.yaml template` itself in v13.0.1 and earlier releases - thus causing the duplicates. These are now solely configured the `mojaloop/values.yaml` as part of this release going forward.
 
 ## 9. Testing notes
 
