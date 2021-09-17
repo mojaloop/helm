@@ -111,6 +111,36 @@ N/A
 
 1. This release is fully compatible with prior v13.0.x releases, for Golden Path tests to fully pass you must ensure that your Central-Ledger Database has been correctly configured to support a UTF8 character-sets. Refer to the [mojaloop/2471](https://github.com/mojaloop/project/issues/2471#issuecomment-917089800) for more information. This is due to the Golden-Path Tests enhancements to cater for updated regex for Accented & other Unicode Characters ((mojaloop/1452)[https://github.com/mojaloop/project/issues/1452]). The [Central-ledger v13.14.0](https://github.com/mojaloop/central-ledger/releases/tag/v13.14.0) migration scripts will modify the Quote Party table to the utf8 character set ([mojaloop/2480](https://github.com/mojaloop/project/issues/2480)). If you disable the migration scripts, ensure that you make this configuration change manually prior to upgrade.
 
+		WARNING: The Migration script 500601_party-2480.js will convert the PARTY table's character-set to utf8mb4 with utf8mb4_unicode_ci collation. This cannot be undone automatically (i.e. through a rollback), but can be done manually if required.
+
+		The migration script will print out the current character-set and collation as per the following example when upgrading from v13.0.1:
+
+		```bash
+		❯ kubectl -n moja get po| grep centralledger-service
+		moja1-centralledger-service-645dfc6674-fzpfr                      1/1     Running     0          8m49s
+		❯ kubectl -n moja logs moja-centralledger-service-645dfc6674-fzpfr -c run-migration
+
+		> @mojaloop/central-ledger@13.14.0 migrate /opt/central-ledger
+		> run-s migrate:latest seed:run
+
+
+		> @mojaloop/central-ledger@13.14.0 migrate:latest /opt/central-ledger
+		> knex $npm_package_config_knex migrate:latest
+
+		Working directory changed to /opt/central-ledger/config
+		WARNING: Migration script 500601_party-2480.js is converting PARTY table to use the following character set utf8mb4 with utf8mb4_unicode_ci collation
+		WARNING: Migration script 500601_party-2480.js - take note of the current configuration if you wish to revert= [{"character_set_name":"latin1","collation_name":"latin1_swedish_ci"}]
+		Batch 2 run: 1 migrations
+
+		> @mojaloop/central-ledger@13.14.0 seed:run /opt/central-ledger
+		> knex seed:run $npm_package_config_knex
+
+		Working directory changed to /opt/central-ledger/config
+		Ran 23 seed files
+		```
+
+		However it is recommended that you check the PARTY table's character-set and collation before doing the upgrade.
+
 2. If you have customized the TTK's configuration for `ml-testing-toolkit.extraEnvironments.hub-k8s-default-environment.json` in the `mojaloop/values.yaml`, note the following new inputValues have been added as part of [mojaloop/1452](https://github.com/mojaloop/project/issues/1452). Ensure you add these before running the Provisioning and Golden-Path collections when running [testing-toolkit-test-cases/releases/tag/v13.0.2](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v13.0.2) versions:
 
 		```json
