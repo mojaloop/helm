@@ -9,7 +9,7 @@ account-lookup-service:
     api:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v11.7.2
+        tag: v11.7.7
         pullPolicy: IfNotPresent
         command: '["node", "src/index.js", "server", "--api"]'
       service:
@@ -20,7 +20,7 @@ account-lookup-service:
     admin:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v11.7.2
+        tag: v11.7.7
         pullPolicy: IfNotPresent
         command: '["node", "src/index.js", "server", "--admin"]'
       service:
@@ -168,7 +168,7 @@ account-lookup-service-admin:
     api:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v11.7.2
+        tag: v11.7.7
         pullPolicy: IfNotPresent
         command: '["node", "src/index.js", "server", "--api"]'
       service:
@@ -179,7 +179,7 @@ account-lookup-service-admin:
     admin:
       image:
         repository: mojaloop/account-lookup-service
-        tag: v11.7.2
+        tag: v11.7.7
         pullPolicy: IfNotPresent
         command: '["node", "src/index.js", "server", "--admin"]'
       service:
@@ -639,7 +639,16 @@ mysql:
   #   thread_cache_size=999
   configFiles:
     node.cnf: |+
+      [client]
+      default-character-set=utf8mb4
+
+      [mysql]
+      default-character-set=utf8mb4
+
       [mysqld]
+      collation-server = utf8mb4_unicode_ci
+      init-connect='SET NAMES utf8mb4'
+      character-set-server = utf8mb4
       datadir=/var/lib/mysql
       default_storage_engine=InnoDB
       binlog_format=ROW

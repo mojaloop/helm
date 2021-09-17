@@ -19,6 +19,10 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "finance-portal.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/config-auth-init: {{ include (print $.Template.BasePath "/configmap-auth-init.yaml") . | sha256sum }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
     spec:
       initContainers:
         {{- if .Values.backend.init.enabled }}

@@ -23,6 +23,8 @@ spec:
   serviceName: {{ template "ml-testing-toolkit-backend.fullname" . }}
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
       labels:
         app.kubernetes.io/name: {{ include "ml-testing-toolkit-backend.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}

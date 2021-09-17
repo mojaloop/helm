@@ -1,9 +1,14 @@
+{{- $checksumConfigRules := include (print $.Template.BasePath "/config-rules.yaml") . | sha256sum -}}
+{{- $checksumConfigJWSPublicKeys := include (print $.Template.BasePath "/config-jws-public-keys.yaml") . | sha256sum -}}
+{{- $checksumConfigSecrets := include (print $.Template.BasePath "/secret.yaml") . | sha256sum -}}
 {{- $prefix := include "mojaloop-simulator.prefix" . -}}
 {{- $releaseName := .Release.Name -}}
 {{- range $name, $customConfig := .Values.simulators }}
 {{- $fullName := printf "%s%s" $prefix $name }}
 {{- $config := merge $customConfig $.Values.defaults }}
 {{- $initContainerEnv := dict "SIM_NAME" $name "SIM_SCHEME_ADAPTER_SERVICE_NAME" (printf "sim-%s-scheme-adapter" $name) "SIM_BACKEND_SERVICE_NAME" (printf "sim-%s-backend" $name) "SIM_CACHE_SERVICE_NAME" (printf "sim-%s-cache" $name) -}}
+{{- $cacheHost := default (printf "%s-cache" $fullName) $config.config.schemeAdapter.env.CACHE_HOST -}}
+{{- $cachePort := default "6379" $config.config.schemeAdapter.env.CACHE_PORT -}}
 apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
 kind: Deployment
 metadata:
@@ -22,6 +27,10 @@ spec:
       labels:
         app.kubernetes.io/name: sim-{{ $name }}-scheme-adapter
         {{- include "mojaloop-simulator.common-labels" $ | nindent 8 }}
+      annotations:
+        checksum/config-rules: {{ $checksumConfigRules }}
+        checksum/config-jws-public-keys: {{ $checksumConfigJWSPublicKeys }}
+        checksum/secrets: {{ $checksumConfigSecrets }}
     spec:
       volumes:
       {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
@@ -48,6 +57,15 @@ spec:
           secretName: {{ $fullName }}-tls-creds
           {{- end }}
       initContainers:
+      {{- if $config.config.initContainers.waitForCache.enabled }}
+      - name: wait-for-cache
+        image: "{{ $config.config.cache.image.repository }}:{{ $config.config.cache.image.tag }}"
+        imagePullPolicy: {{ $config.config.cache.image.pullPolicy }}
+        command:
+          - sh
+          - "-c"
+          - {{ printf "until redis-cli -h %s -p %v ping; do echo waiting for Redis; sleep 2; done;" $cacheHost $cachePort }}
+      {{- end }}
 {{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.schemeAdapter.initContainers "dict" (merge $config.config.schemeAdapter.env $initContainerEnv)) | indent 6 }}
       containers:
       - name: scheme-adapter
@@ -87,26 +105,22 @@ spec:
         - name: tls-secrets
           mountPath: "/secrets/"
         env:
+        {{- if (not $config.config.schemeAdapter.env.CACHE_HOST) }}
+        ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
         - name: CACHE_HOST
           value: {{ printf "%s-cache" $fullName }}
+        {{- end}}
+        {{- if (not $config.config.schemeAdapter.env.BACKEND_ENDPOINT) }}
+        ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
         - name: BACKEND_ENDPOINT
           value: {{ printf "%s-backend:3000" $fullName }}
+        {{- end}}
+        {{- if (not $config.config.schemeAdapter.env.DFSP_ID) }}
+        ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
         - name: DFSP_ID
           value: {{ $name | quote }}
-        - name: IN_CA_CERT_PATH
-          value: "/secrets/inbound-cacert.pem"
-        - name: IN_SERVER_CERT_PATH
-          value: "/secrets/inbound-cert.pem"
-        - name: IN_SERVER_KEY_PATH
-          value: "/secrets/inbound-key.pem"
-        - name: OUT_CA_CERT_PATH
-          value: "/secrets/outbound-cacert.pem"
-        - name: OUT_CLIENT_CERT_PATH
-          value: "/secrets/outbound-cert.pem"
-        - name: OUT_CLIENT_KEY_PATH
-          value: "/secrets/outbound-key.pem"
-        - name: JWS_SIGNING_KEY_PATH
-          value: "/jwsSigningKey/private.key"
+        {{- end}}
+        ## Map environment values from values.yaml
         {{- range $k, $v := $config.config.schemeAdapter.env }}
         - name: {{ $k }}
           value: {{ $v | quote | replace "$release_name" $releaseName }}
@@ -147,6 +161,8 @@ spec:
       labels:
         app.kubernetes.io/name: sim-{{ $name }}-backend
         {{- include "mojaloop-simulator.common-labels" $ | nindent 8 }}
+      annotations:
+        checksum/config-rules: {{ $checksumConfigRules }}
     spec:
       initContainers:
 {{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.backend.initContainers "dict" (merge $config.config.backend.env $initContainerEnv)) | indent 6 }}
@@ -179,12 +195,22 @@ spec:
             scheme: HTTP
         {{- end }}
         env:
+        {{- if (not $config.config.backend.env.OUTBOUND_ENDPOINT) }}
+        ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
         - name: OUTBOUND_ENDPOINT
           value: "http://{{ $fullName }}-scheme-adapter:{{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}"
+        {{- end }}
+        {{- if (not $config.config.schemeAdapter.env.SCHEME_NAME) }}
+        ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
         - name: SCHEME_NAME
           value: {{ $fullName | quote }}
+        {{- end }}
+        {{- if (not $config.config.backend.env.DFSP_ID) }}
+        ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
         - name: DFSP_ID
           value: {{ $name | quote }}
+        {{- end }}
+        ## Map environment values from values.yaml
         {{- range $k, $v := $config.config.backend.env }}
         - name: {{ $k }}
           value: {{ $v | quote }}
