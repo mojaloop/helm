@@ -113,7 +113,7 @@ N/A
 
 		WARNING: The Migration script 500601_party-2480.js will convert the PARTY table's character-set to utf8mb4 with utf8mb4_unicode_ci collation. This cannot be undone automatically (i.e. through a rollback), but can be done manually if required.
 
-		The migration script will print out the current character-set and collation as per the following example when upgrading from v13.0.1:
+		The migration script will print out the current character-set and collation as per the following example:
 
 		```bash
 		❯ kubectl -n moja get po| grep centralledger-service
