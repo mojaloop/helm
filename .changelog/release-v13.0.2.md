@@ -111,6 +111,36 @@ N/A
 
 1. This release is fully compatible with prior v13.0.x releases, for Golden Path tests to fully pass you must ensure that your Central-Ledger Database has been correctly configured to support a UTF8 character-sets. Refer to the [mojaloop/2471](https://github.com/mojaloop/project/issues/2471#issuecomment-917089800) for more information. This is due to the Golden-Path Tests enhancements to cater for updated regex for Accented & other Unicode Characters ((mojaloop/1452)[https://github.com/mojaloop/project/issues/1452]). The [Central-ledger v13.14.0](https://github.com/mojaloop/central-ledger/releases/tag/v13.14.0) migration scripts will modify the Quote Party table to the utf8 character set ([mojaloop/2480](https://github.com/mojaloop/project/issues/2480)). If you disable the migration scripts, ensure that you make this configuration change manually prior to upgrade.
 
+		WARNING: The Migration script 500601_party-2480.js will convert the PARTY table's character-set to utf8mb4 with utf8mb4_unicode_ci collation. This cannot be undone automatically (i.e. through a rollback), but can be done manually if required.
+
+		The migration script will print out the current character-set and collation as per the following example:
+
+		```bash
+		❯ kubectl -n moja get po| grep centralledger-service
+		moja-centralledger-service-645dfc6674-fzpfr                      1/1     Running     0          8m49s
+		❯ kubectl -n moja logs moja-centralledger-service-645dfc6674-fzpfr -c run-migration
+
+		> @mojaloop/central-ledger@13.14.0 migrate /opt/central-ledger
+		> run-s migrate:latest seed:run
+
+
+		> @mojaloop/central-ledger@13.14.0 migrate:latest /opt/central-ledger
+		> knex $npm_package_config_knex migrate:latest
+
+		Working directory changed to /opt/central-ledger/config
+		WARNING: Migration script 500601_party-2480.js is converting PARTY table to use the following character set utf8mb4 with utf8mb4_unicode_ci collation
+		WARNING: Migration script 500601_party-2480.js - take note of the current configuration if you wish to revert= [{"character_set_name":"latin1","collation_name":"latin1_swedish_ci"}]
+		Batch 2 run: 1 migrations
+
+		> @mojaloop/central-ledger@13.14.0 seed:run /opt/central-ledger
+		> knex seed:run $npm_package_config_knex
+
+		Working directory changed to /opt/central-ledger/config
+		Ran 23 seed files
+		```
+
+		However it is recommended that you check the PARTY table's character-set and collation before doing the upgrade.
+
 2. If you have customized the TTK's configuration for `ml-testing-toolkit.extraEnvironments.hub-k8s-default-environment.json` in the `mojaloop/values.yaml`, note the following new inputValues have been added as part of [mojaloop/1452](https://github.com/mojaloop/project/issues/1452). Ensure you add these before running the Provisioning and Golden-Path collections when running [testing-toolkit-test-cases/releases/tag/v13.0.2](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v13.0.2) versions:
 
 		```json
@@ -133,12 +163,12 @@ N/A
 3. If upgrades fail due to a similar error reported by one of the Mojaloop-Simulators' SDK-Scheme-Adapter components as follows:
 
 		```log
-		Error: UPGRADE FAILED: cannot patch "moja1-sim-payeefsp-scheme-adapter" with kind Deployment: The order in patch list:
+		Error: UPGRADE FAILED: cannot patch "moja-sim-payeefsp-scheme-adapter" with kind Deployment: The order in patch list:
 		[map[name:IN_SERVER_KEY_PATH value:./secrets/inbound-key.pem] map[name:IN_SERVER_KEY_PATH value:/secrets/inbound-key.pem] map[name:OUT_CA_CERT_PATH value:/secrets/outbound-cacert.pem] map[name:OUT_CA_CERT_PATH value:./secrets/outbound-cacert.pem] map[name:OUT_CLIENT_CERT_PATH value:/secrets/outbound-cert.pem] map[name:OUT_CLIENT_CERT_PATH value:./secrets/outbound-cert.pem] map[name:OUT_CLIENT_KEY_PATH value:./secrets/outbound-key.pem] map[name:OUT_CLIENT_KEY_PATH value:/secrets/outbound-key.pem] map[name:OAUTH_CLIENT_KEY value:] map[name:OAUTH_CLIENT_SECRET value:] map[name:OAUTH_TOKEN_ENDPOINT value:]]
 		doesn't match $setElementOrder list
 		```
 
-		In the above example, one can modify the `Deployment: moja1-sim-payeefsp-scheme-adapter` descriptor by removing any duplicate environment variables (e.g. `IN_SERVER_KEY_PATH`, `OUT_CA_CERT_PATH`, etc), and then retrying the upgrade. This issue is related to [mojaloop/2405](https://github.com/mojaloop/project/issues/2405). This is a list of the environment variables that are most likely to be duplicated depending on your current installed configuration:
+		In the above example, one can modify the `Deployment: moja-sim-payeefsp-scheme-adapter` descriptor by removing any duplicate environment variables (e.g. `IN_SERVER_KEY_PATH`, `OUT_CA_CERT_PATH`, etc), and then retrying the upgrade. This issue is related to [mojaloop/2405](https://github.com/mojaloop/project/issues/2405). This is a list of the environment variables that are most likely to be duplicated depending on your current installed configuration:
 
 		* IN_CA_CERT_PATH
 		* IN_SERVER_CERT_PATH
