@@ -5,7 +5,7 @@
 
 Date | Revision | Description
 ---------|----------|---------
- 2021-09-14  | 0 | Initial Draft
+ 2021-09-17 | 0 | Initial release
 
 ### 1. Maintenance updates
 
@@ -19,7 +19,7 @@ Date | Revision | Description
 6. Updated MySQL configs to use UTF8 as the default character-set to support unicode-character [mojaloop/2471](https://github.com/mojaloop/project/issues/2471)
 7. Added waitForCache initContainers on the Mojaloop-Simulator's SDK-Scheme-Adapter deployment, this fixes an issue when upgrading from previous versions where the cache pod is restarted after the actual Adapter is upgraded, thereby losing connectivity to Redis - the result being that all WS subscriptions from the Test-API will be lost thereby causing GP tests to fail
 8. Updated Testing-Toolkit Backend statefulset to include `checksum/config` annotation containing the checksum for configMaps to ensure that pods are restarted on config changes [mojaloop/2476](https://github.com/mojaloop/project/issues/2476)
-9. Updated all supported charts to include `checksum/*` annotations for configMaps and secrets - this should ensure that pods will gracefully restart if their respective config/secrets are modified
+9. Updated supported charts to include `checksum/*` annotations for configMaps and secrets - this should ensure that pods will gracefully restart if their respective config/secrets are modified
 
 ### 2. New Features
 
@@ -109,25 +109,45 @@ N/A
 ## 8. Upgrade notes
 
 1. This release is fully compatible with prior v13.0.x releases, for Golden Path tests to fully pass you must ensure that your Central-Ledger Database has been correctly configured to support a UTF8 character-sets. Refer to the [mojaloop/2471](https://github.com/mojaloop/project/issues/2471#issuecomment-917089800) for more information. This is due to the Golden-Path Tests enhancements to cater for updated regex for Accented & other Unicode Characters ((mojaloop/1452)[https://github.com/mojaloop/project/issues/1452]). The [Central-ledger v13.14.0](https://github.com/mojaloop/central-ledger/releases/tag/v13.14.0) migration scripts will modify the Quote Party table to the utf8 character set ([mojaloop/2480](https://github.com/mojaloop/project/issues/2480)). If you disable the migration scripts, ensure that you make this configuration change manually prior to upgrade.
-2. If upgrades fail due to a similar error reported by one of the Mojaloop-Simulators' SDK-Scheme-Adapter components as follows:
 
-```log
-Error: UPGRADE FAILED: cannot patch "moja1-sim-payeefsp-scheme-adapter" with kind Deployment: The order in patch list:
-[map[name:IN_SERVER_KEY_PATH value:./secrets/inbound-key.pem] map[name:IN_SERVER_KEY_PATH value:/secrets/inbound-key.pem] map[name:OUT_CA_CERT_PATH value:/secrets/outbound-cacert.pem] map[name:OUT_CA_CERT_PATH value:./secrets/outbound-cacert.pem] map[name:OUT_CLIENT_CERT_PATH value:/secrets/outbound-cert.pem] map[name:OUT_CLIENT_CERT_PATH value:./secrets/outbound-cert.pem] map[name:OUT_CLIENT_KEY_PATH value:./secrets/outbound-key.pem] map[name:OUT_CLIENT_KEY_PATH value:/secrets/outbound-key.pem] map[name:OAUTH_CLIENT_KEY value:] map[name:OAUTH_CLIENT_SECRET value:] map[name:OAUTH_TOKEN_ENDPOINT value:]]
- doesn't match $setElementOrder list:
-```
+2. If you have customized the TTK configuration for `ml-testing-toolkit.extraEnvironments.hub-k8s-default-environment.json` in the `mojaloop/values.yaml`, note the following new inputValues have been added as part of [mojaloop/1452](https://github.com/mojaloop/project/issues/1452). Ensure you add these before running the Provisioning and Golden-Path collections when running [testing-toolkit-test-cases/releases/tag/v13.0.2](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v13.0.2) versions:
 
-In the above example, one can modify the `Deployment: moja1-sim-payeefsp-scheme-adapter` descriptor by removing any duplicate environment variables (e.g. `IN_SERVER_KEY_PATH`, `OUT_CA_CERT_PATH`, etc), and then retrying the upgrade. This issue is related to [mojaloop/2405](https://github.com/mojaloop/project/issues/2405). This is a list of the environment variables that are most likely to be duplicated depending on your current installed configuration:
+		```json
+		"toAccentIdType": "MSISDN",
+		"toAccentIdValue": "97039819999",
+		"toAccentIdDOB": "2000-01-01",
+		"toAccentIdFirstName": "Seán",
+		"toAccentIdMiddleName": "François",
+		"toAccentIdLastName": "Nuñez",
+		"toAccentIdFspId": "payeefsp",
+		"toBurmeseIdType": "MSISDN",
+		"toBurmeseIdValue": "2224448888",
+		"toBurmeseIdDOB": "1990-01-01",
+		"toBurmeseIdFirstName": "ကောင်းထက်စံ",
+		"toBurmeseIdMiddleName": "အောင်",
+		"toBurmeseIdLastName": "ဒေါ်သန္တာထွန်",
+		"toBurmeseIdFspId": "payeefsp",
+		```
 
-* IN_CA_CERT_PATH
-* IN_SERVER_CERT_PATH
-* IN_SERVER_KEY_PATH
-* OUT_CA_CERT_PATH
-* OUT_CLIENT_CERT_PATH
-* OUT_CLIENT_KEY_PATH
-* JWS_SIGNING_KEY_PATH
+3. If upgrades fail due to a similar error reported by one of the Mojaloop-Simulators' SDK-Scheme-Adapter components as follows:
 
-It was possible to have these configured by both the `mojaloop/values.yaml` and the `Helm Deployment.yaml template` itself - thus causing the duplicates. These are now solely configured the `mojaloop/values.yaml` as part of this release going forward.
+		```log
+		Error: UPGRADE FAILED: cannot patch "moja1-sim-payeefsp-scheme-adapter" with kind Deployment: The order in patch list:
+		[map[name:IN_SERVER_KEY_PATH value:./secrets/inbound-key.pem] map[name:IN_SERVER_KEY_PATH value:/secrets/inbound-key.pem] map[name:OUT_CA_CERT_PATH value:/secrets/outbound-cacert.pem] map[name:OUT_CA_CERT_PATH value:./secrets/outbound-cacert.pem] map[name:OUT_CLIENT_CERT_PATH value:/secrets/outbound-cert.pem] map[name:OUT_CLIENT_CERT_PATH value:./secrets/outbound-cert.pem] map[name:OUT_CLIENT_KEY_PATH value:./secrets/outbound-key.pem] map[name:OUT_CLIENT_KEY_PATH value:/secrets/outbound-key.pem] map[name:OAUTH_CLIENT_KEY value:] map[name:OAUTH_CLIENT_SECRET value:] map[name:OAUTH_TOKEN_ENDPOINT value:]]
+		doesn't match $setElementOrder list
+		```
+
+		In the above example, one can modify the `Deployment: moja1-sim-payeefsp-scheme-adapter` descriptor by removing any duplicate environment variables (e.g. `IN_SERVER_KEY_PATH`, `OUT_CA_CERT_PATH`, etc), and then retrying the upgrade. This issue is related to [mojaloop/2405](https://github.com/mojaloop/project/issues/2405). This is a list of the environment variables that are most likely to be duplicated depending on your current installed configuration:
+
+		* IN_CA_CERT_PATH
+		* IN_SERVER_CERT_PATH
+		* IN_SERVER_KEY_PATH
+		* OUT_CA_CERT_PATH
+		* OUT_CLIENT_CERT_PATH
+		* OUT_CLIENT_KEY_PATH
+		* JWS_SIGNING_KEY_PATH
+
+		It was possible to have these configured by both the `mojaloop/values.yaml` and the `Helm Deployment.yaml template` itself - thus causing the duplicates. These are now solely configured the `mojaloop/values.yaml` as part of this release going forward.
 
 ## 9. Testing notes
 
