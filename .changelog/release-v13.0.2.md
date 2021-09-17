@@ -117,7 +117,7 @@ N/A
 
 		```bash
 		❯ kubectl -n moja get po| grep centralledger-service
-		moja1-centralledger-service-645dfc6674-fzpfr                      1/1     Running     0          8m49s
+		moja-centralledger-service-645dfc6674-fzpfr                      1/1     Running     0          8m49s
 		❯ kubectl -n moja logs moja-centralledger-service-645dfc6674-fzpfr -c run-migration
 
 		> @mojaloop/central-ledger@13.14.0 migrate /opt/central-ledger
@@ -163,12 +163,12 @@ N/A
 3. If upgrades fail due to a similar error reported by one of the Mojaloop-Simulators' SDK-Scheme-Adapter components as follows:
 
 		```log
-		Error: UPGRADE FAILED: cannot patch "moja1-sim-payeefsp-scheme-adapter" with kind Deployment: The order in patch list:
+		Error: UPGRADE FAILED: cannot patch "moja-sim-payeefsp-scheme-adapter" with kind Deployment: The order in patch list:
 		[map[name:IN_SERVER_KEY_PATH value:./secrets/inbound-key.pem] map[name:IN_SERVER_KEY_PATH value:/secrets/inbound-key.pem] map[name:OUT_CA_CERT_PATH value:/secrets/outbound-cacert.pem] map[name:OUT_CA_CERT_PATH value:./secrets/outbound-cacert.pem] map[name:OUT_CLIENT_CERT_PATH value:/secrets/outbound-cert.pem] map[name:OUT_CLIENT_CERT_PATH value:./secrets/outbound-cert.pem] map[name:OUT_CLIENT_KEY_PATH value:./secrets/outbound-key.pem] map[name:OUT_CLIENT_KEY_PATH value:/secrets/outbound-key.pem] map[name:OAUTH_CLIENT_KEY value:] map[name:OAUTH_CLIENT_SECRET value:] map[name:OAUTH_TOKEN_ENDPOINT value:]]
 		doesn't match $setElementOrder list
 		```
 
-		In the above example, one can modify the `Deployment: moja1-sim-payeefsp-scheme-adapter` descriptor by removing any duplicate environment variables (e.g. `IN_SERVER_KEY_PATH`, `OUT_CA_CERT_PATH`, etc), and then retrying the upgrade. This issue is related to [mojaloop/2405](https://github.com/mojaloop/project/issues/2405). This is a list of the environment variables that are most likely to be duplicated depending on your current installed configuration:
+		In the above example, one can modify the `Deployment: moja-sim-payeefsp-scheme-adapter` descriptor by removing any duplicate environment variables (e.g. `IN_SERVER_KEY_PATH`, `OUT_CA_CERT_PATH`, etc), and then retrying the upgrade. This issue is related to [mojaloop/2405](https://github.com/mojaloop/project/issues/2405). This is a list of the environment variables that are most likely to be duplicated depending on your current installed configuration:
 
 		* IN_CA_CERT_PATH
 		* IN_SERVER_CERT_PATH
