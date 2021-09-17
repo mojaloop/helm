@@ -179,7 +179,7 @@ N/A
 
 ## 11. Contributors
 
-- Contributing organizations: BMGF, ModusBox, CrossLake
+- Contributing organizations: BMGF, CrossLake, ModusBox
 - ModusBox: @elnyry-sam-k, @mdebarros, @vijayg10, @kleyow, @lewisdaly
 
 _Note: companies in alphabetical order_
