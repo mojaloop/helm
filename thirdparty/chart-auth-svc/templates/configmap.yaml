@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "ml-operator-config"
+  labels:
+    {{- include "ml-operator.labels" . | nindent 4 }}
+data:
+  {{- range $k, $v := index .Values "ml-operator" "config" }}
+    {{ $k }}: {{ ($v | toPrettyJson | squote ) }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: image-watcher-config
+  labels:
+    {{- include "ml-operator.labels" . | nindent 4 }}
+data:
+  {{- range $k, $v := index .Values "image-watcher" "config" }}
+    {{ $k }}: {{ ($v | toPrettyJson | squote ) }}
+  {{- end }}

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-watcher
+  labels:
+    app: ml-operator
+    app.kubernetes.io/name: ml-operator
+    {{- include "ml-operator.labels" . | nindent 4 }}
+spec:
+  ports:
+  - port: {{ index .Values "image-watcher" "service" "port"}}
+  selector:
+    app: image-watcher
+  clusterIP: None
