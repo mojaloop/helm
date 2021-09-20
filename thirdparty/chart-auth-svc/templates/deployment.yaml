@@ -1,3 +1,4 @@
+{{- if .Values.enabled -}}
 apiVersion: {{ template "apiVersion.Deployment" . }}
 kind: Deployment
 metadata:
@@ -5,7 +6,7 @@ metadata:
   labels:
     {{- include "auth-svc.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -31,8 +32,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-        - name: auth-svc
-          image: {{ index .Values "auth-svc" "image"  }}
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command: {{ .Values.image.command }}
 
           # command: [ "tail", "-f", "/dev/null" ]
@@ -57,7 +58,7 @@ spec:
               mountPath: /opt/auth-service/config/production.json
               subPath: production.json
           env:
-          {{- range $envItem := index .Values "auth-svc" "env" }}
+          {{- range $envItem := .Values.env }}
             - name: {{ $envItem.name }}
               value: {{ $envItem.value }}
           {{- end }}
@@ -66,7 +67,8 @@ spec:
           configMap:
             name: auth-svc-config
             items:
-              {{- range $k, $v := index .Values "auth-svc" "config" }}
+              {{- range $k, $v := index .Values.config }}
               - key: {{ $k }}
                 path: {{ $k }}
               {{- end }}
+{{- end -}}

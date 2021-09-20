@@ -1,0 +1,141 @@
+NAME: auth-svc
+LAST DEPLOYED: Mon Sep 20 13:49:21 2021
+NAMESPACE: thirdparty
+STATUS: pending-install
+REVISION: 1
+TEST SUITE: None
+USER-SUPPLIED VALUES:
+{}
+
+COMPUTED VALUES:
+affinity: {}
+config:
+  production.json:
+    hello: true
+enabled: true
+env:
+- name: NODE_ENV
+  value: production
+- name: LOG_LEVEL
+  value: debug
+image:
+  command:
+  - tail
+  - -f
+  - /dev/null
+  pullPolicy: IfNotPresent
+  repository: mojaloop/auth-service
+  tag: v11.8.2
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 8m
+  enabled: true
+  hosts:
+    adminApi:
+      host: testing-toolkit.local
+      paths:
+      - /api/
+      - /socket.io/
+      port: 5050
+    specApi:
+      host: testing-toolkit-specapi.local
+      paths:
+      - /
+      port: 5000
+  tls: []
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 4004
+  initialDelaySeconds: 30
+nodeSelector: {}
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 4004
+  initialDelaySeconds: 30
+replicaCount: 3
+service:
+  ports:
+    adminApi:
+      externalPort: 5050
+      internalPort: 5050
+      name: admin-api
+    specApi:
+      externalPort: 5000
+      internalPort: 5000
+      name: spec-api
+  type: ClusterIP
+tolerations: []
+
+HOOKS:
+MANIFEST:
+---
+# Source: auth-svc/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "auth-svc-config"
+  labels:
+    helm.sh/chart: auth-svc-0.1.0
+    app.kubernetes.io/name: auth-svc
+    app.kubernetes.io/name: auth-svc
+    app.kubernetes.io/instance: auth-svc
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+    production.json: '{
+  "hello": true
+}'
+---
+# Source: auth-svc/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-svc
+  labels:
+    helm.sh/chart: auth-svc-0.1.0
+    app.kubernetes.io/name: auth-svc
+    app.kubernetes.io/name: auth-svc
+    app.kubernetes.io/instance: auth-svc
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: auth-svc
+      app.kubernetes.io/instance: auth-svc
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: auth-svc
+        app.kubernetes.io/instance: auth-svc
+    spec:
+      containers:
+        - name: auth-svc
+          image: "mojaloop/auth-service:v11.8.2"
+          command: [tail -f /dev/null]
+
+          # command: [ "tail", "-f", "/dev/null" ]
+          volumeMounts:
+            - name: auth-svc-config-volume
+              mountPath: /opt/auth-service/config/production.json
+              subPath: production.json
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: LOG_LEVEL
+              value: debug
+      volumes:
+        - name: auth-svc-config-volume
+          configMap:
+            name: auth-svc-config
+            items:
+              - key: production.json
+                path: production.json
+
