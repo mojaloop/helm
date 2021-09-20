@@ -1,22 +1,22 @@
 apiVersion: {{ template "apiVersion.Deployment" . }}
 kind: Deployment
 metadata:
-  name: {{ include "ml-operator.name" . }}
+  name: {{ include "auth-svc.name" . }}
   labels:
-    {{- include "ml-operator.labels" . | nindent 4 }}
+    {{- include "auth-svc.labels" . | nindent 4 }}
 spec:
   replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1 # exeed the replicas by 1 pod
+      maxSurge: 1
   selector:
     matchLabels:
-      {{- include "ml-operator.selectorLabels" . | nindent 6 }}
+      {{- include "auth-svc.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "ml-operator.selectorLabels" . | nindent 8 }}
+        {{- include "auth-svc.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -30,76 +30,43 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: mojaloop-operator
       containers:
-        {{- if index .Values "ml-operator" "enabled" }}
-        - name: ml-operator
-          image: {{ index .Values "ml-operator" "image"  }}
+        - name: auth-svc
+          image: {{ index .Values "auth-svc" "image"  }}
+          command: {{ .Values.image.command }}
+
           # command: [ "tail", "-f", "/dev/null" ]
-          volumeMounts:
-            - name: ml-operator-config-volume
-              mountPath: /opt/ml-operator/config
-          env:
-            - name: SLACK_WEBHOOK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: {{ index .Values "ml-operator" "secret-name" }}
-                  key: SLACK_WEBHOOK_URL
-          {{- range $envItem := index .Values "ml-operator" "env" }}
-            - name: {{ $envItem.name }}
-              value: {{ $envItem.value }}
-          {{- end }}
-        {{- end }}
-        {{- if index .Values "image-watcher" "enabled"  }}
-        - name: image-watcher
-          image: {{ index .Values "image-watcher" "image"  }}
-          # command: [ "tail", "-f", "/dev/null" ]
-          volumeMounts:
-            - name: image-watcher-config-volume
-              mountPath: /opt/image-watcher/config
-          {{- if index .Values "image-watcher" "livenessProbe" "enabled" }}
-          livenessProbe:
-            initialDelaySeconds: 30
-            httpGet: 
-              path: {{ index .Values "image-watcher" "livenessProbe" "httpGet" "path"}}
-              port: {{ index .Values "image-watcher" "livenessProbe" "httpGet" "port"}}
-          {{- end }}
-          {{- if index .Values "image-watcher" "readinessProbe" "enabled" }}
+          {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
-            initialDelaySeconds: 30
             httpGet:
-              path: {{ index .Values "image-watcher" "readinessProbe" "httpGet" "path"}}
-              port: {{ index .Values "image-watcher" "readinessProbe" "httpGet" "port"}}
+              path: {{ .Values.readinessProbe.httpGet.path }}
+              port: {{ .Values.service.ports.internalPort }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
           {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.httpGet.path }}
+              port: {{ .Values.service.ports.internalPort }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          {{- end }}
+          volumeMounts:
+            - name: auth-svc-config-volume
+              mountPath: /opt/auth-service/config/production.json
+              subPath: production.json
           env:
-          {{- range $envItem := index .Values "image-watcher" "env" }}
+          {{- range $envItem := index .Values "auth-svc" "env" }}
             - name: {{ $envItem.name }}
               value: {{ $envItem.value }}
           {{- end }}
-        {{- end }}
-        {{- if .Values.redis.enabled }}
-        - name: redis
-          image: {{.Values.redis.image }}
-          env:
-          {{- range $envItem := .Values.redis.env }}
-            - name: {{ $envItem.name }}
-              value: {{ $envItem.value }}
-          {{- end }}
-        {{- end }}
       volumes:
-        - name: ml-operator-config-volume
+        - name: auth-svc-config-volume
           configMap:
-            name: ml-operator-config
+            name: auth-svc-config
             items:
-              {{- range $k, $v := index .Values "ml-operator" "config" }}
-              - key: {{ $k }}
-                path: {{ $k }}
-              {{- end }}
-        - name: image-watcher-config-volume
-          configMap:
-            name: image-watcher-config
-            items:
-              {{- range $k, $v := index .Values "image-watcher" "config" }}
+              {{- range $k, $v := index .Values "auth-svc" "config" }}
               - key: {{ $k }}
                 path: {{ $k }}
               {{- end }}

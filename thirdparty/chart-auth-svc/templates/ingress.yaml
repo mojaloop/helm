@@ -1,30 +1,31 @@
-{{- if index .Values "image-watcher" "ingress" "enabled" -}}
+{{- if index .Values "ingress" "enabled" -}}
 apiVersion: {{ template "apiVersion.Ingress" . }}
 kind: Ingress
 metadata:
   name: {{ include "ml-operator.name" . }}-ingress
   labels:
     {{- include "ml-operator.labels" . | nindent 4 }}
-{{- with index .Values "image-watcher" "ingress" "annotations" }}
+{{- with index .Values "ingress" "annotations" }}
   annotations:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
   rules:
     # Host based ingress
-    - host: {{index .Values "image-watcher" "ingress" "host"}}
+    - host: {{index .Values "ingress" "host"}}
       http:
         paths:
           - path: /
             backend:
-              serviceName: image-watcher
-              servicePort: {{ index .Values "image-watcher" "ingress" "port" }}
+              serviceName: auth-svc
+
+              servicePort: {{ index .Values "ingress" "port" }}
 
     # Path based ingress
     - http:
         paths:
-          - path: {{ index .Values "image-watcher" "ingress" "path" }}
+          - path: {{ index .Values "ingress" "path" }}
             backend:
-              serviceName: image-watcher
-              servicePort: {{ index .Values "image-watcher" "ingress" "port" }}
+              serviceName: auth-svc
+              servicePort: {{ index .Values "auth-svc" "ingress" "port" }}
 {{- end }}

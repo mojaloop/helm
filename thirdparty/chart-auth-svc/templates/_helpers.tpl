@@ -1,21 +1,21 @@
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "ml-operator.chart" -}}
+{{- define "auth-svc.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{- define "ml-operator.name" -}}
+{{- define "auth-svc.name" -}}
 {{- default .Chart.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
-{{- define "ml-operator.labels" -}}
-helm.sh/chart: {{ include "ml-operator.chart" . }}
-app.kubernetes.io/name: {{ include "ml-operator.name" . }}
-{{ include "ml-operator.selectorLabels" . }}
+{{- define "auth-svc.labels" -}}
+helm.sh/chart: {{ include "auth-svc.chart" . }}
+app.kubernetes.io/name: {{ include "auth-svc.name" . }}
+{{ include "auth-svc.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -25,8 +25,8 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "ml-operator.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "ml-operator.name" . }}
+{{- define "auth-svc.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "auth-svc.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
