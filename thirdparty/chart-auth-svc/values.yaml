@@ -4,7 +4,8 @@ image:
   repository: mojaloop/auth-service
   tag: v11.8.2
   # TODO: change me!
-  command: [ "tail", "-f", "/dev/null" ]
+  # command: ["/bin/sh", "-c", "--" ]
+  command: '[ "tail", "-f", "/dev/null" ]'
   pullPolicy: IfNotPresent
 
 
@@ -19,7 +20,6 @@ nodeSelector: {}
 ## Set toleration for scheduler
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
-
 
 livenessProbe:
   initialDelaySeconds: 30
@@ -48,27 +48,17 @@ config:
 service:
   type: ClusterIP
   ports:
-    specApi:
-      name: "spec-api"
-      externalPort: 5000
-      internalPort: 5000
-    adminApi:
-      name: "admin-api"
-      externalPort: 5050
-      internalPort: 5050
+    name: api
+    externalPort: 4004
+    internalPort: 4004
 
 ingress:
-  enabled: true
+  enabled: false
   # Used to create an Ingress record.
   hosts:
-    specApi:
-      host: testing-toolkit-specapi.local
-      port: 5000
-      paths: ['/']
-    adminApi:
-      host: testing-toolkit.local
-      port: 5050
-      paths: ['/api/', '/socket.io/']
+    host: auth-service.local
+    port: 4004
+    paths: ['/']
 
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: 8m
@@ -80,7 +70,3 @@ ingress:
     ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
     # kubernetes.io/tls-acme: "true"
   tls: []
-    # Secrets must be manually created in the namespace.
-    # - secretName: chart-example-tls
-    #   hosts:
-    #     - chart-example.local
