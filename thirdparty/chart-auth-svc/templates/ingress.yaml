@@ -1,0 +1,30 @@
+{{- if index .Values "ingress" "enabled" -}}
+apiVersion: {{ template "apiVersion.Ingress" . }}
+kind: Ingress
+metadata:
+  name: {{ include "auth-svc.name" . }}-ingress
+  labels:
+    {{- include "auth-svc.labels" . | nindent 4 }}
+{{- with index .Values "ingress" "annotations" }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  rules:
+    {{- range $hostType, $service := .Values.ingress.hosts }}
+      - host: {{ index $service "host" }}
+        http:
+          paths:
+            {{- range $path := (index $service "paths") }}
+            - path: {{ $path }}
+              backend:
+                serviceName: {{ index $service "name" }}
+                servicePort: {{ index $service "port" }}
+            {{- end -}}
+      {{- end -}}
+    {{- if .Values.ingress.tls }}
+    tls:
+      {{ toYaml .Values.ingress.tls | indent 4 }}
+    {{- end -}}
+
+{{- end }}

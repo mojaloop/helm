@@ -4,10 +4,9 @@ image:
   repository: mojaloop/auth-service
   tag: v11.8.2
   # TODO: change me!
-  # command: ["/bin/sh", "-c", "--" ]
   command: '[ "tail", "-f", "/dev/null" ]'
+  # command: '[ "npm", "run", "start" ]'
   pullPolicy: IfNotPresent
-
 
 ## Pod scheduling preferences.
 ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -53,12 +52,13 @@ service:
     internalPort: 4004
 
 ingress:
-  enabled: false
+  enabled: true
   # Used to create an Ingress record.
   hosts:
-    host: auth-service.local
-    port: 4004
-    paths: ['/']
+    - host: auth-service.local
+      port: 4004
+      name: auth-svc
+      paths: ['/']
 
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: 8m
