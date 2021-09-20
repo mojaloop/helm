@@ -39,9 +39,82 @@ env:
     value: debug
 
 config:
-  # TODO: copy this in!
   production.json: {
-    "hello": true, 
+    "PORT": 4004,
+    "HOST": "0.0.0.0",
+    "PARTICIPANT_ID": "centralauth",
+    "REDIS": {
+      "PORT": 6379,
+      "HOST": "auth-svc-redis-svc",
+      "TIMEOUT": 100
+    },
+    "INSPECT": {
+      "DEPTH": 4,
+      "SHOW_HIDDEN": false,
+      "COLOR": true
+    },
+    "SHARED": {
+      "PEER_ENDPOINT": "thirdparty-api-adapter:3008",
+      "ALS_ENDPOINT": "mojaloop-account-lookup-service",
+      "QUOTES_ENDPOINT": "0.0.0.0:3002",
+      "TRANSFERS_ENDPOINT": "0.0.0.0:3000",
+      "BULK_TRANSFERS_ENDPOINT": "",
+      "JWS_SIGN": false,
+      "JWS_SIGNING_KEY": "./secrets/jwsSigningKey.key",
+      "WSO2_AUTH": {
+        "staticToken": "0706c62f-c022-3c42-8d14-8b5df128876d",
+        "tokenEndpoint": "",
+        "clientKey": "test-client-key",
+        "clientSecret": "test-client-secret",
+        "refreshSeconds": 3600
+      },
+      "TLS": {
+        "mutualTLS": {
+          "enabled": false
+        },
+        "creds": {
+          "ca": "./secrets/client.crt",
+          "cert": "./secrets/client.crt",
+          "key": "./secrets/client.crt"
+        }
+      }
+    },
+    "DATABASE": {
+      "client": "mysql",
+      "version": "5.5",
+      "connection": {
+        "host": "mysql-auth-svc",
+        "port": 3306,
+        "user": "auth-svc",
+        "password": "password",
+        "database": "auth-svc",
+        "timezone": "UTC"
+      },
+      "pool": {
+        "min": 10,
+        "max": 10,
+        "acquireTimeoutMillis": 30000,
+        "createTimeoutMillis": 30000,
+        "destroyTimeoutMillis": 5000,
+        "idleTimeoutMillis": 30000,
+        "reapIntervalMillis": 1000,
+        "createRetryIntervalMillis": 200
+      },
+      "migrations": {
+        "tableName": "auth-svc",
+        "loadExtensions": [
+          ".ts"
+        ]
+      },
+      "seeds": {
+        "loadExtensions": [
+          ".ts"
+        ]
+      }
+    },
+    "DEMO_SKIP_VALIDATION_FOR_CREDENTIAL_IDS": [
+      "Jfo5k6w4np09IUtYNHnxMM696jJHqvccUdBmd0xP6XEWwH0xLei1PUzDJCM19SZ3A2Ex0fNLw0nc2hrIlFnAtw=="
+    ]
   }
 
 service:
