@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name:  {{ include "auth-svc.name" . }}
+  labels:
+    app: auth-svc
+    {{- include "auth-svc.labels" . | nindent 4 }}
+spec:
+  ports:
+    {{- with .Values.service.ports }}
+    - port: {{ .externalPort }}
+      targetPort: {{ .internalPort }}
+      name: {{ .name }}
+    {{- end }}
+  selector:
+    {{- include "auth-svc.selectorLabels" . | nindent 6 }}
+  clusterIP: None

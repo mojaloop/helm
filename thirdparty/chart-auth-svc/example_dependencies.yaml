@@ -1,0 +1,110 @@
+##
+# mysql-auth-svc
+##
+
+# PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-auth-svc-pv-claim
+spec:
+  storageClassName: awsgp2
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+## Expose MySQL for Auth-Svc
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-auth-svc
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql-auth-svc
+  clusterIP: None
+---
+## Simple MySQL for Auth-Svc
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-auth-svc
+spec:
+  selector:
+    matchLabels:
+      app: mysql-auth-svc
+  serviceName: mysql-auth-svc-svc
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mysql-auth-svc
+    spec:
+      containers:
+      - image: mysql:5.7
+        name: mysql-auth-svc
+        # command: [ '/bin/sh' ]
+        # args: ['-c', 'tail -f /dev/null']
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: password
+        - name: MYSQL_USER
+          value: auth-svc
+        - name: MYSQL_PASSWORD
+          value: password
+        - name: MYSQL_DATABASE
+          value: auth-svc
+        - name: NODE_ENV
+          value: development
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-auth-svc-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-auth-svc-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-auth-svc-pv-claim
+---
+
+##
+# Auth-Svc Redis
+##
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-svc-redis
+  labels:
+    app: auth-svc-redis
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: auth-svc-redis
+  template:
+    metadata:
+      labels:
+        app: auth-svc-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:5.0.4-alpine
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-svc-redis-svc
+spec:
+  ports:
+    - port: 6379
+  selector:
+    app: auth-svc-redis
+  clusterIP: None
