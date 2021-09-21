@@ -17,7 +17,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "auth-svc.selectorLabels" . | nindent 8 }}
+        {{- include "auth-svc.labels" . | nindent 8 }}
     spec:
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -65,8 +65,6 @@ spec:
           configMap:
             name: auth-svc-config
             items:
-              {{- range $k, $v := index .Values.config }}
-              - key: {{ $k }}
-                path: {{ $k }}
-              {{- end }}
+              - key: production.json
+                path: production.json
 {{- end -}}
