@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "consent-oracle-config"
+  labels:
+    {{- include "consent-oracle.labels" . | nindent 4 }}
+data:
+  {{- range $k, $v := index .Values.config }}
+    {{ $k }}: {{ ($v | toPrettyJson | squote ) }}
+  {{- end }}
