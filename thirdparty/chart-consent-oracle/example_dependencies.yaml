@@ -1,0 +1,71 @@
+##
+# mysql-consent-oracle
+##
+
+# PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-consent-oracle-pv-claim
+spec:
+  storageClassName: awsgp2
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+## Expose MySQL for consent-oracle
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-consent-oracle
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql-consent-oracle
+  clusterIP: None
+---
+## Simple MySQL for consent-oracle
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-consent-oracle
+spec:
+  selector:
+    matchLabels:
+      app: mysql-consent-oracle
+  serviceName: mysql-consent-oracle-svc
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mysql-consent-oracle
+    spec:
+      containers:
+      - image: mysql:5.7
+        name: mysql-consent-oracle
+        # command: [ '/bin/sh' ]
+        # args: ['-c', 'tail -f /dev/null']
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: password
+        - name: MYSQL_USER
+          value: consent-oracle
+        - name: MYSQL_PASSWORD
+          value: password
+        - name: MYSQL_DATABASE
+          value: consent-oracle
+        - name: NODE_ENV
+          value: development
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-consent-oracle-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-consent-oracle-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-consent-oracle-pv-claim
