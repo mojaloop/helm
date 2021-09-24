@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "tp-api-svc-config"
+  labels:
+    {{- include "tp-api-svc.labels" . | nindent 4 }}
+data:
+  {{- range $k, $v := index .Values.config }}
+    {{ $k }}: {{ ($v | toPrettyJson | squote ) }}
+  {{- end }}
