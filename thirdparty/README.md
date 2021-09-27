@@ -87,7 +87,9 @@ in your master `values.yaml`:
 
 ```yaml
 ...
-
+thirdparty:
+  enabled: true
+  ...
 
 ```
 
