@@ -2,12 +2,6 @@
 
 Helm charts for Mojaloop Thirdparty API
 
-## Sub-Charts
-- [chart-auth-svc](./chart-auth-svc) - Central Auth-Svc
-- [chart-consent-oracle](./chart-consent-oracle) - CONSENT IdType oracle for the ALS
-- [chart-tp-api-svc](./chart-tp-api-svc) - Thirdparty Api Service
-
-
 ![](./overview.svg)
 
 ## Overview
@@ -15,6 +9,10 @@ Helm charts for Mojaloop Thirdparty API
 The Thirdparty API is an overlay services API that adds support for 3rd Party Payment
 Initiators to a Mojaloop Switch.
 
+### Sub-Charts
+- [chart-auth-svc](./chart-auth-svc) - Central Auth-Svc
+- [chart-consent-oracle](./chart-consent-oracle) - CONSENT IdType oracle for the ALS
+- [chart-tp-api-svc](./chart-tp-api-svc) - Thirdparty Api Service
 
 ## Components
 
