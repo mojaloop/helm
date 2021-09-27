@@ -1,6 +1,6 @@
 # Thirdparty API Service
 
-The Thirdparty API Service is a service that handles Mojaloop Thirdparty API.
+The Thirdparty API Service is a service that implements the [Mojaloop Thirdparty API]((https://github.com/mojaloop/mojaloop-specification/tree/master/thirdparty-api)).
 
 It is stateless, and routes requests between DFSPs, PISPs and Auth-Svc components.
 
@@ -15,7 +15,7 @@ The [Mojaloop 3P API Specification](https://github.com/mojaloop/mojaloop-specifi
 participants based on their role on a switch.
 
 For 3P-API v1.0, we implemented the Services lookup using a dedicated instance of the Mojaloop
-testing toolkit (../ml-testing-toolkit) which provides a simple mock for the `/services` resource.
+testing toolkit [`ml-testing-toolkit](../ml-testing-toolkit) which provides a simple mock for the `/services` resource.
 
-Future implementations may implement this endpoint with more features, such as the ability for 
+Future implementations will implement this endpoint with more features, such as the ability for 
 hub operators to add and remove services to this list, or additional service `Type`s.
