@@ -45,6 +45,7 @@ else
         mojaloop
         kube-system/ntpd/
         ml-operator
+        thirdparty
     )
 fi
 

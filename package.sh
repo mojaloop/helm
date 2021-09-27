@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ex
+set -e
 
 LOCAL_HELM_MOJALOOP_REPO_URI=${HELM_MOJALOOP_REPO_URI:-'https://docs.mojaloop.io/helm/repo'}
 
@@ -47,6 +47,7 @@ else
         mojaloop
         kube-system/ntpd/
         ml-operator
+        thirdparty
     )
 fi
 
