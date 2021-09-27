@@ -52,7 +52,30 @@ For the `mojaloop/mojaloop` helm chart, enable the following in your `values.yam
 ```yaml
 
 
+
 ```
+
+And run the following from the `/thirdparty` directory
+
+```bash
+# install the example dependencies for the thirdparty charts
+
+# skip these steps if you want to deploy them yourself
+cd chart-auth-svc
+kubectl apply -f ./example_dependencies.yaml
+cd ../chart-consent-oracle
+kubectl apply -f ./example_dependencies.yaml
+
+
+# install the participant-list-svc
+cd ../chart-tp-api-svc
+# note - we have to use a short name to get around
+# naming issues in the existing charts
+helm upgrade --install plist-svc mojaloop/ml-testing-toolkit --values ./participant-list-svc.yaml
+
+
+```
+
 
 ## Validating and testing the 3P-API
 
