@@ -44,10 +44,10 @@ else
         mojaloop-simulator
         ml-testing-toolkit
         ml-testing-toolkit-cli
+        thirdparty
         mojaloop
         kube-system/ntpd/
         ml-operator
-        thirdparty
     )
 fi
 
