@@ -2,9 +2,7 @@ enabled: true
 replicaCount: 1
 image:
   repository: mojaloop/auth-service
-  tag: v11.8.2
-  # TODO: change me!
-  # command: '[ "tail", "-f", "/dev/null" ]'
+  tag: v11.10.1
   command: '[ "npm", "run", "start" ]'
   pullPolicy: IfNotPresent
 
@@ -31,7 +29,7 @@ readinessProbe:
     path: /health
     port: 4004
 
-# Add exta environment variables here
+# Add extra environment variables here
 env:
   - name: NODE_ENV
     value: production
@@ -55,11 +53,8 @@ config:
       "COLOR": true
     },
     "SHARED": {
-      "PEER_ENDPOINT": "thirdparty-api-adapter:3008",
-      "ALS_ENDPOINT": "mojaloop-account-lookup-service",
-      "QUOTES_ENDPOINT": "0.0.0.0:3002",
-      "TRANSFERS_ENDPOINT": "0.0.0.0:3000",
-      "BULK_TRANSFERS_ENDPOINT": "",
+      "PEER_ENDPOINT": "$release_name-tp-api-svc",
+      "ALS_ENDPOINT": "$release_name-account-lookup-service",
       "JWS_SIGN": false,
       "JWS_SIGNING_KEY": "./secrets/jwsSigningKey.key",
       "WSO2_AUTH": {

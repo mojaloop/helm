@@ -1,14 +1,27 @@
-apiVersion: v1
-description: WIP - thirdparty api services for Mojaloop
+apiVersion: v2
 name: thirdparty
-version: 0.1.0
+version: 1.0.0
+description: Third Party API Support for Mojaloop
 appVersion: "1.0.0"
 home: http://mojaloop.io
 icon: http://mojaloop.io/images/logo.png
 sources:
   - https://github.com/mojaloop/mojaloop
   - https://github.com/mojaloop/helm
-  - https://github.com/mojaloop/pisp
+  - https://github.com/mojaloop/pisp-project
+dependencies:
+  - name: auth-svc
+    version: 1.0.0
+    repository: "file://./chart-auth-svc"
+    condition: auth-svc.enabled
+  - name: consent-oracle
+    version: 0.1.0
+    repository: "file://./chart-consent-oracle"
+    condition: consent-oracle.enabled
+  - name: tp-api-svc
+    version: 1.0.0
+    repository: "file://./chart-tp-api-svc"
+    condition: tp-api-svc.enabled
 maintainers:
   - name: Lewis Daly
     email: lewisd@crosslaketech.com

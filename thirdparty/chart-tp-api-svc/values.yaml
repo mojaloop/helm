@@ -1,8 +1,8 @@
 enabled: true
 replicaCount: 1
 image:
-  repository: mojaloop/als-consent-oracle
-  tag: v0.0.8
+  repository: mojaloop/thirdparty-api-svc
+  tag: v11.21.0
   command: '[ "npm", "run", "start" ]'
   pullPolicy: IfNotPresent
 
@@ -19,66 +19,83 @@ nodeSelector: {}
 tolerations: []
 
 livenessProbe:
-  enabled: true
   initialDelaySeconds: 30
   httpGet:
     path: /health
-    port: 3000
-
+    port: 3008
 readinessProbe:
-  enabled: true
   initialDelaySeconds: 30
   httpGet:
     path: /health
-    port: 3000
+    port: 3008
 
 # Add exta environment variables here
-env: {}
-  # e.g.
+env:
+  - name: NODE_ENV 
+    value: production
+  # e.g. to change the Log Level:
   # - name: LOG_LEVEL
   #   value: debug
 
 config:
-  default.json: {
-    "PORT": 3000,
-    "HOST": "0.0.0.0",
-    "INSPECT": {
-      "DEPTH": 4,
-      "SHOW_HIDDEN": false,
-      "COLOR": true
-    },
-    "DATABASE": {
-      "DIALECT": "mysql",
-      "HOST": "mysql-consent-oracle",
-      "PORT": 3306,
-      "USER": "consent-oracle",
-      "PASSWORD": "password",
-      "DATABASE": "consent-oracle",
-      "POOL_MIN_SIZE": 10,
-      "POOL_MAX_SIZE": 10,
-      "ACQUIRE_TIMEOUT_MILLIS": 30000,
-      "CREATE_TIMEOUT_MILLIS": 30000,
-      "DESTROY_TIMEOUT_MILLIS": 5000,
-      "IDLE_TIMEOUT_MILLIS": 30000,
-      "REAP_INTERVAL_MILLIS": 1000,
-      "CREATE_RETRY_INTERVAL_MILLIS": 200
+  production.json: {
+  "PORT": 3008,
+  "HOST": "0.0.0.0",
+  "INSPECT": {
+    "DEPTH": 4,
+    "SHOW_HIDDEN": false,
+    "COLOR": true
+  },
+  "ENDPOINT_CACHE_CONFIG": {
+    "expiresIn": 180000,
+    "generateTimeout": 30000
+  },
+  # Location of central ledger to lookup endpoints for
+  "ENDPOINT_SERVICE_URL": "http://$release_name-centralledger-service",
+  # Static list of participantIds that support account linking
+  "PARTICIPANT_LIST_LOCAL": [
+    "dfspa",
+    "dfspb"
+  ],
+  "ERROR_HANDLING": {
+    "includeCauseExtension": true,
+    "truncateExtensions": true
+  },
+  "INSTRUMENTATION": {
+    "METRICS": {
+      "DISABLED": false,
+      "labels": {
+        "eventId": "*"
+      },
+      "config": {
+        "timeout": 5000,
+        "prefix": "moja_3p_api",
+        "defaultLabels": {
+          "serviceName": "thirdparty-api-svc"
+        }
+      }
     }
+  },
+  "MOCK_CALLBACK": {
+    "transactionRequestId": "abc-12345",
+    "pispId": "pisp"
   }
+}
 
 service:
   type: ClusterIP
   ports:
     name: api
-    externalPort: 3000
-    internalPort: 3000
+    externalPort: 3008
+    internalPort: 3008
 
 ingress:
   enabled: true
   # Used to create an Ingress record.
   hosts:
-    - host: consent-oracle.local
-      port: 3000
-      name: consent-oracle
+    - host: tp-api-svc.local
+      port: 3008
+      name: tp-api-svc
       paths: ['/']
 
   annotations:
