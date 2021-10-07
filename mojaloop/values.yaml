@@ -5009,6 +5009,360 @@ transaction-requests-service:
   #  cpu: 100m
   #  memory: 128Mi
 
+thirdparty:
+  enabled: false
+  auth-svc:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: mojaloop/auth-service
+      tag: v11.10.1
+      command: '[ "npm", "run", "start" ]'
+      pullPolicy: IfNotPresent
+
+    ## Pod scheduling preferences.
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity: {}
+
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
+    ## Set toleration for scheduler
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations: []
+
+    livenessProbe:
+      initialDelaySeconds: 30
+      httpGet:
+        path: /health
+        port: 4004
+    readinessProbe:
+      initialDelaySeconds: 30
+      httpGet:
+        path: /health
+        port: 4004
+
+    # Add extra environment variables here
+    env:
+      - name: NODE_ENV
+        value: production
+      # e.g. to change the Log Level:
+      # - name: LOG_LEVEL
+      #   value: debug
+
+    config:
+      production.json: {
+        "PORT": 4004,
+        "HOST": "0.0.0.0",
+        "PARTICIPANT_ID": "centralauth",
+        "REDIS": {
+          "PORT": 6379,
+          "HOST": "auth-svc-redis-svc",
+          "TIMEOUT": 100
+        },
+        "INSPECT": {
+          "DEPTH": 4,
+          "SHOW_HIDDEN": false,
+          "COLOR": true
+        },
+        "SHARED": {
+          "PEER_ENDPOINT": "$release_name-tp-api-svc",
+          "ALS_ENDPOINT": "$release_name-account-lookup-service",
+          "JWS_SIGN": false,
+          "JWS_SIGNING_KEY": "./secrets/jwsSigningKey.key",
+          "WSO2_AUTH": {
+            "staticToken": "0706c62f-c022-3c42-8d14-8b5df128876d",
+            "tokenEndpoint": "",
+            "clientKey": "test-client-key",
+            "clientSecret": "test-client-secret",
+            "refreshSeconds": 3600
+          },
+          "TLS": {
+            "mutualTLS": {
+              "enabled": false
+            },
+            "creds": {
+              "ca": "./secrets/client.crt",
+              "cert": "./secrets/client.crt",
+              "key": "./secrets/client.crt"
+            }
+          }
+        },
+        "DATABASE": {
+          "client": "mysql",
+          "version": "5.5",
+          "connection": {
+            "host": "mysql-auth-svc",
+            "port": 3306,
+            "user": "auth-svc",
+            "password": "password",
+            "database": "auth-svc",
+            "timezone": "UTC"
+          },
+          "pool": {
+            "min": 10,
+            "max": 10,
+            "acquireTimeoutMillis": 30000,
+            "createTimeoutMillis": 30000,
+            "destroyTimeoutMillis": 5000,
+            "idleTimeoutMillis": 30000,
+            "reapIntervalMillis": 1000,
+            "createRetryIntervalMillis": 200
+          },
+          "migrations": {
+            "tableName": "auth-svc",
+            "loadExtensions": [
+              ".ts"
+            ]
+          },
+          "seeds": {
+            "loadExtensions": [
+              ".ts"
+            ]
+          }
+        },
+        "DEMO_SKIP_VALIDATION_FOR_CREDENTIAL_IDS": [
+          "Jfo5k6w4np09IUtYNHnxMM696jJHqvccUdBmd0xP6XEWwH0xLei1PUzDJCM19SZ3A2Ex0fNLw0nc2hrIlFnAtw=="
+        ]
+      }
+
+    service:
+      type: ClusterIP
+      ports:
+        name: api
+        externalPort: 4004
+        internalPort: 4004
+
+    ingress:
+      enabled: true
+      # Used to create an Ingress record.
+      hosts:
+        - host: auth-service.local
+          port: 4004
+          name: auth-svc
+          paths: ['/']
+
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: 8m
+        ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+        # nginx.ingress.kubernetes.io/rewrite-target: '/'
+        # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+        ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+        # kubernetes.io/ingress.class: nginx
+        ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
+        # kubernetes.io/tls-acme: "true"
+      tls: []
+
+  consent-oracle:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: mojaloop/als-consent-oracle
+      tag: v0.0.8
+      command: '[ "npm", "run", "start" ]'
+      pullPolicy: IfNotPresent
+
+    ## Pod scheduling preferences.
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity: {}
+
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
+    ## Set toleration for scheduler
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations: []
+
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 30
+      httpGet:
+        path: /health
+        port: 3000
+
+    readinessProbe:
+      enabled: true
+      initialDelaySeconds: 30
+      httpGet:
+        path: /health
+        port: 3000
+
+    # Add exta environment variables here
+    env: {}
+      # e.g.
+      # - name: LOG_LEVEL
+      #   value: debug
+
+    config:
+      default.json: {
+        "PORT": 3000,
+        "HOST": "0.0.0.0",
+        "INSPECT": {
+          "DEPTH": 4,
+          "SHOW_HIDDEN": false,
+          "COLOR": true
+        },
+        "DATABASE": {
+          "DIALECT": "mysql",
+          "HOST": "mysql-consent-oracle",
+          "PORT": 3306,
+          "USER": "consent-oracle",
+          "PASSWORD": "password",
+          "DATABASE": "consent-oracle",
+          "POOL_MIN_SIZE": 10,
+          "POOL_MAX_SIZE": 10,
+          "ACQUIRE_TIMEOUT_MILLIS": 30000,
+          "CREATE_TIMEOUT_MILLIS": 30000,
+          "DESTROY_TIMEOUT_MILLIS": 5000,
+          "IDLE_TIMEOUT_MILLIS": 30000,
+          "REAP_INTERVAL_MILLIS": 1000,
+          "CREATE_RETRY_INTERVAL_MILLIS": 200
+        }
+      }
+
+    service:
+      type: ClusterIP
+      ports:
+        name: api
+        externalPort: 3000
+        internalPort: 3000
+
+    ingress:
+      enabled: true
+      # Used to create an Ingress record.
+      hosts:
+        - host: consent-oracle.local
+          port: 3000
+          name: consent-oracle
+          paths: ['/']
+
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: 8m
+        ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+        # nginx.ingress.kubernetes.io/rewrite-target: '/'
+        # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+        ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+        # kubernetes.io/ingress.class: nginx
+        ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
+        # kubernetes.io/tls-acme: "true"
+      tls: []
+
+  tp-api-svc:
+    enabled: true
+    replicaCount: 1
+    image:
+      repository: mojaloop/thirdparty-api-svc
+      tag: v11.21.0
+      command: '[ "npm", "run", "start" ]'
+      pullPolicy: IfNotPresent
+
+    ## Pod scheduling preferences.
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity: {}
+
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
+    ## Set toleration for scheduler
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations: []
+
+    livenessProbe:
+      initialDelaySeconds: 30
+      httpGet:
+        path: /health
+        port: 3008
+    readinessProbe:
+      initialDelaySeconds: 30
+      httpGet:
+        path: /health
+        port: 3008
+
+    # Add exta environment variables here
+    env:
+      - name: NODE_ENV 
+        value: production
+      # e.g. to change the Log Level:
+      # - name: LOG_LEVEL
+      #   value: debug
+
+    config:
+      production.json: {
+      "PORT": 3008,
+      "HOST": "0.0.0.0",
+      "INSPECT": {
+        "DEPTH": 4,
+        "SHOW_HIDDEN": false,
+        "COLOR": true
+      },
+      "ENDPOINT_CACHE_CONFIG": {
+        "expiresIn": 180000,
+        "generateTimeout": 30000
+      },
+      # Location of central ledger to lookup endpoints for
+      "ENDPOINT_SERVICE_URL": "http://$release_name-centralledger-service",
+      # Static list of participantIds that support account linking
+      "PARTICIPANT_LIST_LOCAL": [
+        "dfspa",
+        "dfspb"
+      ],
+      "ERROR_HANDLING": {
+        "includeCauseExtension": true,
+        "truncateExtensions": true
+      },
+      "INSTRUMENTATION": {
+        "METRICS": {
+          "DISABLED": false,
+          "labels": {
+            "eventId": "*"
+          },
+          "config": {
+            "timeout": 5000,
+            "prefix": "moja_3p_api",
+            "defaultLabels": {
+              "serviceName": "thirdparty-api-svc"
+            }
+          }
+        }
+      },
+      "MOCK_CALLBACK": {
+        "transactionRequestId": "abc-12345",
+        "pispId": "pisp"
+      }
+    }
+
+    service:
+      type: ClusterIP
+      ports:
+        name: api
+        externalPort: 3008
+        internalPort: 3008
+
+    ingress:
+      enabled: true
+      # Used to create an Ingress record.
+      hosts:
+        - host: tp-api-svc.local
+          port: 3008
+          name: tp-api-svc
+          paths: ['/']
+
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: 8m
+        ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+        # nginx.ingress.kubernetes.io/rewrite-target: '/'
+        # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+        ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+        # kubernetes.io/ingress.class: nginx
+        ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
+        # kubernetes.io/tls-acme: "true"
+      tls: []
+
+
+
 simulator:
   enabled: true
   # Default values for simulators.

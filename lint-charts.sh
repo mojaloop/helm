@@ -6,7 +6,7 @@
 
 echo "Linting all Charts..."
 
-set -ex
+set -e
 
 LOCAL_HELM_MOJALOOP_REPO_URI=${HELM_MOJALOOP_REPO_URI:-'https://docs.mojaloop.io/helm/repo'}
 
@@ -45,6 +45,9 @@ else
         mojaloop
         kube-system/ntpd/
         ml-operator
+        thirdparty/chart-auth-svc
+        thirdparty/chart-consent-oracle
+        thirdparty/chart-tp-api-svc
     )
 fi
 
