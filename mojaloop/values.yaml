@@ -5017,8 +5017,6 @@ thirdparty:
     image:
       repository: mojaloop/auth-service
       tag: v11.10.1
-      # use for debugging
-      # command: '[ "tail", "-f", "/dev/null" ]'
       command: '[ "npm", "run", "start" ]'
       pullPolicy: IfNotPresent
 
@@ -5045,7 +5043,7 @@ thirdparty:
         path: /health
         port: 4004
 
-    # Add exta environment variables here
+    # Add exta environment variables here  b
     env:
       - name: NODE_ENV
         value: production
@@ -5069,11 +5067,8 @@ thirdparty:
           "COLOR": true
         },
         "SHARED": {
-          "PEER_ENDPOINT": "thirdparty-api-adapter:3008",
-          "ALS_ENDPOINT": "mojaloop-account-lookup-service",
-          "QUOTES_ENDPOINT": "0.0.0.0:3002",
-          "TRANSFERS_ENDPOINT": "0.0.0.0:3000",
-          "BULK_TRANSFERS_ENDPOINT": "",
+          "PEER_ENDPOINT": "$release_name-tp-api-svc",
+          "ALS_ENDPOINT": "$release_name-account-lookup-service",
           "JWS_SIGN": false,
           "JWS_SIGNING_KEY": "./secrets/jwsSigningKey.key",
           "WSO2_AUTH": {
@@ -5164,8 +5159,7 @@ thirdparty:
     replicaCount: 1
     image:
       repository: mojaloop/als-consent-oracle
-      tag: v0.0.7
-      # command: '[ "tail", "-f", "/dev/null" ]'
+      tag: v0.0.8
       command: '[ "npm", "run", "start" ]'
       pullPolicy: IfNotPresent
 
@@ -5256,13 +5250,11 @@ thirdparty:
       tls: []
 
   tp-api-svc:
-    enabled: false
+    enabled: true
     replicaCount: 1
     image:
       repository: mojaloop/thirdparty-api-svc
-      tag: v11.20.1
-      # use for debugging
-      # command: '[ "tail", "-f", "/dev/null" ]'
+      tag: v11.21.0
       command: '[ "npm", "run", "start" ]'
       pullPolicy: IfNotPresent
 
@@ -5311,9 +5303,12 @@ thirdparty:
         "generateTimeout": 30000
       },
       # Location of central ledger to lookup endpoints for
-      "ENDPOINT_SERVICE_URL": "http://mojaloop-centralledger-service:80",
-      # Location of service that implements `GET /SERVICES/{TYPE}` call
-      "PARTICIPANT_LIST_SERVICE_URL": "http://tp-svc.sandbox.mojaloop.io",
+      "ENDPOINT_SERVICE_URL": "http://$release_name-centralledger-service",
+      # Static list of participantIds that support account linking
+      "PARTICIPANT_LIST_LOCAL": [
+        "dfspa",
+        "dfspb"
+      ],
       "ERROR_HANDLING": {
         "includeCauseExtension": true,
         "truncateExtensions": true
@@ -5328,20 +5323,10 @@ thirdparty:
             "timeout": 5000,
             "prefix": "moja_3p_api",
             "defaultLabels": {
-              "serviceName": "thirdparty-api-adapter"
+              "serviceName": "thirdparty-api-svc"
             }
           }
         }
-      },
-      "KAFKA": {
-        "TOPIC_TEMPLATES": {
-          "GENERAL_TOPIC_TEMPLATE": {
-            "TEMPLATE": "topic-{{functionality}}-{{action}}",
-            "REGEX": "topic-(.*)-(.*)"
-          }
-        },
-        "CONSUMER": [
-        ]
       },
       "MOCK_CALLBACK": {
         "transactionRequestId": "abc-12345",
@@ -5375,6 +5360,7 @@ thirdparty:
         ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
         # kubernetes.io/tls-acme: "true"
       tls: []
+
 
 
 simulator:
