@@ -18,4 +18,4 @@ For 3P-API v1.0, we implemented the Services lookup inside of the Thirdparty API
 `PARTICIPANT_LIST_LOCAL` that responds with a `PUT /services/{ServiceType}` containing a list of static ids.
 
 Future implementations will implement this endpoint with more features, such as the ability for 
-hub operators to add and remove services to this list, or additional service `Type`s. 
+hub operators to add and remove services to this list, or additional service `Type`s.
