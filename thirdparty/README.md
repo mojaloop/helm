@@ -70,14 +70,6 @@ kubectl apply -f ./example_dependencies.yaml
 cd ../chart-consent-oracle
 kubectl apply -f ./example_dependencies.yaml
 
-
-# install the participant-list-svc
-cd ../chart-tp-api-svc
-# note - we have to use a short name to get around
-# naming issues in the existing charts
-helm upgrade --install plist-svc mojaloop/ml-testing-toolkit --values ./participant-list-svc.yaml
-
-
 # install as a standalone chart, alongside Mojaloop
 helm upgrade --install thirdparty mojaloop/thirdparty --values ./values.yaml
 ```
