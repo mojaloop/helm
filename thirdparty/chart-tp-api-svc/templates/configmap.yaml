@@ -1,3 +1,4 @@
+{{- $RELEASE_NAME := .Release.Name -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,5 +7,5 @@ metadata:
     {{- include "tp-api-svc.labels" . | nindent 4 }}
 data:
   {{- range $k, $v := index .Values.config }}
-    {{ $k }}: {{ ($v | toPrettyJson | squote ) }}
+    {{ $k }}: {{ ($v | toPrettyJson | squote | replace "$release_name" $RELEASE_NAME) }}
   {{- end }}
