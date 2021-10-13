@@ -42,7 +42,7 @@ With multiple dictionaries (see the `merge` sprig documentation for more info):
 {{- $ctx := . }}
 {{- range $_, $container := $ctx.containers -}}
 {{/*
-Because we need to quote the env vars, we'll print them manually, then print every _other_ key on
+Because we need to quote the env vars, we will print them manually, then print every _other_ key on
 the init container afterward.
 */}}
 - env:
