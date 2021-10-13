@@ -344,18 +344,56 @@ spec:
       {{- end }}
 {{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.thirdpartysdk.initContainers "dict" (merge $config.config.thirdpartysdk.env $initContainerEnv)) | indent 6 }}
       containers:
-      - name: thirdparty-sdk
+      # Inbound container
+      - name: inbound
         image: "{{ $config.config.thirdpartysdk.image.repository }}:{{ $config.config.thirdpartysdk.image.tag }}"
         imagePullPolicy: {{ $config.config.thirdpartysdk.image.pullPolicy }}
+        # TODO: make configurable
+        command: [ "npm", "run", "start:inbound" ]
         ports:
           - name: inboundapi
             containerPort: {{ $config.config.thirdpartysdk.env.INBOUND_LISTEN_PORT }}
             protocol: TCP
-          - name: outboundapi
+        {{- if $config.config.thirdpartysdk.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: {{ $config.config.thirdpartysdk.env.INBOUND_LISTEN_PORT }}
+            scheme: HTTP
+        {{- end }}
+        {{- if $config.config.thirdpartysdk.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: {{ $config.config.thirdpartysdk.env.INBOUND_LISTEN_PORT }}
+            scheme: HTTP
+        {{- end }}
+        volumeMounts:
+        - name: jws-public-keys
+          mountPath: {{ $config.config.thirdpartysdk.env.JWS_VERIFICATION_KEYS_DIRECTORY }}
+        - name: tls-secrets
+          mountPath: "/secrets/"
+        - name: {{ $fullName }}-thirdparty-sdk-config-volume
+          mountPath: /opt/thirdparty-sdk/config/production.json
+          subPath: production.json
+        env:
+        ## Map environment values from values.yaml
+        {{- range $k, $v := $config.config.thirdpartysdk.env }}
+        - name: {{ $k }}
+          value: {{ $v | quote | replace "$release_name" $releaseName }}
+        {{- end }}
+        resources:
+{{ toYaml $config.config.thirdpartysdk.resources | indent 10 }}
+
+      # Outbound Container
+      - name: thirdparty-sdk
+        image: "{{ $config.config.thirdpartysdk.image.repository }}:{{ $config.config.thirdpartysdk.image.tag }}"
+        imagePullPolicy: {{ $config.config.thirdpartysdk.image.pullPolicy }}
+        # TODO: make configurable
+        command: [ "npm", "run", "start:outbound" ]
+        ports:
+          - name: inboundapi
             containerPort: {{ $config.config.thirdpartysdk.env.OUTBOUND_LISTEN_PORT }}
-            protocol: TCP
-          - name: testapi
-            containerPort: {{ $config.config.thirdpartysdk.env.TEST_LISTEN_PORT }}
             protocol: TCP
         {{- if $config.config.thirdpartysdk.readinessProbe.enabled }}
         readinessProbe:
