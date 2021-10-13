@@ -351,20 +351,20 @@ spec:
         # TODO: make configurable
         command: [ "npm", "run", "start:inbound" ]
         ports:
-          - name: inboundapi
+          - name: inbound
             containerPort: {{ $config.config.thirdpartysdk.env.INBOUND_LISTEN_PORT }}
             protocol: TCP
         {{- if $config.config.thirdpartysdk.readinessProbe.enabled }}
         readinessProbe:
           httpGet:
-            path: /
+            path: /health
             port: {{ $config.config.thirdpartysdk.env.INBOUND_LISTEN_PORT }}
             scheme: HTTP
         {{- end }}
         {{- if $config.config.thirdpartysdk.livenessProbe.enabled }}
         livenessProbe:
           httpGet:
-            path: /
+            path: /health
             port: {{ $config.config.thirdpartysdk.env.INBOUND_LISTEN_PORT }}
             scheme: HTTP
         {{- end }}
@@ -393,20 +393,20 @@ spec:
         # TODO: make configurable
         command: [ "npm", "run", "start:outbound" ]
         ports:
-          - name: inboundapi
+          - name: outbound
             containerPort: {{ $config.config.thirdpartysdk.env.OUTBOUND_LISTEN_PORT }}
             protocol: TCP
         {{- if $config.config.thirdpartysdk.readinessProbe.enabled }}
         readinessProbe:
           httpGet:
-            path: /
+            path: /health
             port: {{ $config.config.thirdpartysdk.env.OUTBOUND_LISTEN_PORT }}
             scheme: HTTP
         {{- end }}
         {{- if $config.config.thirdpartysdk.livenessProbe.enabled }}
         livenessProbe:
           httpGet:
-            path: /
+            path: /health
             port: {{ $config.config.thirdpartysdk.env.OUTBOUND_LISTEN_PORT }}
             scheme: HTTP
         {{- end }}
