@@ -326,11 +326,17 @@ spec:
         checksum/secrets: {{ $checksumConfigSecrets }}
     spec:
       volumes:
+        - name: {{ $fullName }}-thirdparty-sdk-config-volume
+          configMap:
+            name: {{ $fullName }}-thirdparty-sdk-config
+            items:
+              - key: production.json
+                path: production.json
       initContainers:
-      {{- if $config.config.thirdpartysdk.initContainers.waitForCache.enabled }}
+      {{- if $config.config.initContainers.waitForCache.enabled }}
       - name: wait-for-cache
-        image: "{{ $config.config.thirdpartysdk.cache.image.repository }}:{{ $config.config.thirdpartysdk.cache.image.tag }}"
-        imagePullPolicy: {{ $config.config.thirdpartysdk.cache.image.pullPolicy }}
+        image: "{{ $config.config.cache.image.repository }}:{{ $config.config.cache.image.tag }}"
+        imagePullPolicy: {{ $config.config.cache.image.pullPolicy }}
         command:
           - sh
           - "-c"
@@ -370,22 +376,10 @@ spec:
           mountPath: {{ $config.config.thirdpartysdk.env.JWS_VERIFICATION_KEYS_DIRECTORY }}
         - name: tls-secrets
           mountPath: "/secrets/"
+        - name: {{ $fullName }}-thirdparty-sdk-config-volume
+          mountPath: /opt/thirdparty-sdk/config/production.json
+          subPath: production.json
         env:
-        {{- if (not $config.config.thirdpartysdk.env.CACHE_HOST) }}
-        ## We only define this if it is not defined in config.thirdpartysdk.env, otherwise we may have duplicate env values!
-        - name: CACHE_HOST
-          value: {{ printf "%s-cache" $fullName }}
-        {{- end}}
-        {{- if (not $config.config.thirdpartysdk.env.BACKEND_ENDPOINT) }}
-        ## We only define this if it is not defined in config.thirdpartysdk.env, otherwise we may have duplicate env values!
-        - name: BACKEND_ENDPOINT
-          value: {{ printf "%s-backend:3000" $fullName }}
-        {{- end}}
-        {{- if (not $config.config.thirdpartysdk.env.DFSP_ID) }}
-        ## We only define this if it is not defined in config.thirdpartysdk.env, otherwise we may have duplicate env values!
-        - name: DFSP_ID
-          value: {{ $name | quote }}
-        {{- end}}
         ## Map environment values from values.yaml
         {{- range $k, $v := $config.config.thirdpartysdk.env }}
         - name: {{ $k }}
