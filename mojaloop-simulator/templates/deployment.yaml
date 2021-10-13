@@ -301,4 +301,112 @@ spec:
     {{- end }}
 ---
 {{- end }}
+{{- if $config.config.thirdpartysdk.enabled }}
+apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-thirdparty-sdk
+  labels:
+    app.kubernetes.io/name: sim-{{ $name }}-thirdparty-sdk
+    {{- include "mojaloop-simulator.common-labels" $ | nindent 4 }}
+spec:
+  replicas: {{ $config.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sim-{{ $name }}-thirdparty-sdk
+      app.kubernetes.io/instance: {{ $releaseName }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sim-{{ $name }}-thirdparty-sdk
+        {{- include "mojaloop-simulator.common-labels" $ | nindent 8 }}
+      annotations:
+        checksum/config-rules: {{ $checksumConfigRules }}
+        checksum/config-jws-public-keys: {{ $checksumConfigJWSPublicKeys }}
+        checksum/secrets: {{ $checksumConfigSecrets }}
+    spec:
+      volumes:
+      initContainers:
+      {{- if $config.config.thirdpartysdk.initContainers.waitForCache.enabled }}
+      - name: wait-for-cache
+        image: "{{ $config.config.thirdpartysdk.cache.image.repository }}:{{ $config.config.thirdpartysdk.cache.image.tag }}"
+        imagePullPolicy: {{ $config.config.thirdpartysdk.cache.image.pullPolicy }}
+        command:
+          - sh
+          - "-c"
+          - {{ printf "until redis-cli -h %s -p %v ping; do echo waiting for Redis; sleep 2; done;" $cacheHost $cachePort }}
+      {{- end }}
+{{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.thirdpartysdk.initContainers "dict" (merge $config.config.thirdpartysdk.env $initContainerEnv)) | indent 6 }}
+      containers:
+      - name: thirdparty-sdk
+        image: "{{ $config.config.thirdpartysdk.image.repository }}:{{ $config.config.thirdpartysdk.image.tag }}"
+        imagePullPolicy: {{ $config.config.thirdpartysdk.image.pullPolicy }}
+        ports:
+          - name: inboundapi
+            containerPort: {{ $config.config.thirdpartysdk.env.INBOUND_LISTEN_PORT }}
+            protocol: TCP
+          - name: outboundapi
+            containerPort: {{ $config.config.thirdpartysdk.env.OUTBOUND_LISTEN_PORT }}
+            protocol: TCP
+          - name: testapi
+            containerPort: {{ $config.config.thirdpartysdk.env.TEST_LISTEN_PORT }}
+            protocol: TCP
+        {{- if $config.config.thirdpartysdk.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: {{ $config.config.thirdpartysdk.env.OUTBOUND_LISTEN_PORT }}
+            scheme: HTTP
+        {{- end }}
+        {{- if $config.config.thirdpartysdk.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: {{ $config.config.thirdpartysdk.env.OUTBOUND_LISTEN_PORT }}
+            scheme: HTTP
+        {{- end }}
+        volumeMounts:
+        - name: jws-public-keys
+          mountPath: {{ $config.config.thirdpartysdk.env.JWS_VERIFICATION_KEYS_DIRECTORY }}
+        - name: tls-secrets
+          mountPath: "/secrets/"
+        env:
+        {{- if (not $config.config.thirdpartysdk.env.CACHE_HOST) }}
+        ## We only define this if it is not defined in config.thirdpartysdk.env, otherwise we may have duplicate env values!
+        - name: CACHE_HOST
+          value: {{ printf "%s-cache" $fullName }}
+        {{- end}}
+        {{- if (not $config.config.thirdpartysdk.env.BACKEND_ENDPOINT) }}
+        ## We only define this if it is not defined in config.thirdpartysdk.env, otherwise we may have duplicate env values!
+        - name: BACKEND_ENDPOINT
+          value: {{ printf "%s-backend:3000" $fullName }}
+        {{- end}}
+        {{- if (not $config.config.thirdpartysdk.env.DFSP_ID) }}
+        ## We only define this if it is not defined in config.thirdpartysdk.env, otherwise we may have duplicate env values!
+        - name: DFSP_ID
+          value: {{ $name | quote }}
+        {{- end}}
+        ## Map environment values from values.yaml
+        {{- range $k, $v := $config.config.thirdpartysdk.env }}
+        - name: {{ $k }}
+          value: {{ $v | quote | replace "$release_name" $releaseName }}
+        {{- end }}
+        resources:
+{{ toYaml $config.config.thirdpartysdk.resources | indent 10 }}
+      imagePullSecrets:
+        - name: {{ $config.config.imagePullSecretName }}
+    {{- with $config.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with $config.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with $config.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+---
+{{- end }}
 {{ end }}
