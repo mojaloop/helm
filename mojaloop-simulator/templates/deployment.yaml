@@ -369,14 +369,15 @@ spec:
             scheme: HTTP
         {{- end }}
         volumeMounts:
-        - name: jws-public-keys
-          mountPath: {{ $config.config.thirdpartysdk.env.JWS_VERIFICATION_KEYS_DIRECTORY }}
-        - name: tls-secrets
-          mountPath: "/secrets/"
         - name: {{ $fullName }}-thirdparty-sdk-config-volume
-          mountPath: /opt/thirdparty-sdk/config/production.json
+          mountPath: /opt/thirdparty-scheme-adapter/config/production.json
           subPath: production.json
         env:
+        {{- if (not $config.config.thirdpartysdk.env.REDIS_HOST) }}
+        ## We only define this if it is not defined in config.thirdpartysdk.env, otherwise we may have duplicate env values!
+        - name: REDIS_HOST
+          value: {{ printf "%s-cache" $fullName }}
+        {{- end}}
         ## Map environment values from values.yaml
         {{- range $k, $v := $config.config.thirdpartysdk.env }}
         - name: {{ $k }}
@@ -386,7 +387,7 @@ spec:
 {{ toYaml $config.config.thirdpartysdk.resources | indent 10 }}
 
       # Outbound Container
-      - name: thirdparty-sdk
+      - name: outbound
         image: "{{ $config.config.thirdpartysdk.image.repository }}:{{ $config.config.thirdpartysdk.image.tag }}"
         imagePullPolicy: {{ $config.config.thirdpartysdk.image.pullPolicy }}
         # TODO: make configurable
@@ -410,14 +411,16 @@ spec:
             scheme: HTTP
         {{- end }}
         volumeMounts:
-        - name: jws-public-keys
-          mountPath: {{ $config.config.thirdpartysdk.env.JWS_VERIFICATION_KEYS_DIRECTORY }}
-        - name: tls-secrets
-          mountPath: "/secrets/"
         - name: {{ $fullName }}-thirdparty-sdk-config-volume
-          mountPath: /opt/thirdparty-sdk/config/production.json
+        # TODO: change back!
+          mountPath: /opt/thirdparty-scheme-adapter/config/production.json
           subPath: production.json
         env:
+        {{- if (not $config.config.schemeAdapter.env.REDIS_HOST) }}
+        ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
+        - name: REDIS_HOST
+          value: {{ printf "%s-cache" $fullName }}
+        {{- end}}
         ## Map environment values from values.yaml
         {{- range $k, $v := $config.config.thirdpartysdk.env }}
         - name: {{ $k }}
