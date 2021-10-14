@@ -349,7 +349,7 @@ spec:
         image: "{{ $config.config.thirdpartysdk.image.repository }}:{{ $config.config.thirdpartysdk.image.tag }}"
         imagePullPolicy: {{ $config.config.thirdpartysdk.image.pullPolicy }}
         # TODO: make configurable
-        command: [ "npm", "run", "start:inbound" ]
+        command: {{ $config.config.thirdpartysdk.image.inboundCommand }}
         ports:
           - name: inbound
             containerPort: {{ $config.config.thirdpartysdk.env.INBOUND_LISTEN_PORT }}
@@ -390,8 +390,7 @@ spec:
       - name: outbound
         image: "{{ $config.config.thirdpartysdk.image.repository }}:{{ $config.config.thirdpartysdk.image.tag }}"
         imagePullPolicy: {{ $config.config.thirdpartysdk.image.pullPolicy }}
-        # TODO: make configurable
-        command: [ "npm", "run", "start:outbound" ]
+        command: {{ $config.config.thirdpartysdk.image.outboundCommand }}
         ports:
           - name: outbound
             containerPort: {{ $config.config.thirdpartysdk.env.OUTBOUND_LISTEN_PORT }}
