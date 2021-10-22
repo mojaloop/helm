@@ -5,7 +5,7 @@
 
 Date | Revision | Description
 ---------|----------|---------
- 2021-10-01 | 0 | Initial release
+ 2021-10-01 | 0 | Initial draft
 
 ### 1. Maintenance updates
 
