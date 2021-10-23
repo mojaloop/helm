@@ -1,0 +1,19 @@
+{{- $RELEASE_NAME := .Release.Name -}}
+{{- range $name, $customConfig := .Values.simulators }}
+{{- $config := merge $customConfig $.Values.defaults }}
+{{- $fullName := printf "%s%s" (include "mojaloop-simulator.prefix" $) $name -}}
+{{- if $config.config.thirdpartysdk.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullName }}-thirdparty-sdk-config
+  labels:
+    app.kubernetes.io/name: sim-{{ $fullName }}-thirdparty-sdk-config
+    {{- include "mojaloop-simulator.common-labels" $ | nindent 4 }}
+data:
+  {{- range $k, $v := $config.config.thirdpartysdk.config }}
+    {{ $k }}: {{ ($v | toPrettyJson | squote | replace "$release_name" $RELEASE_NAME) | replace "$full_name" $fullName | replace "$name" $name }}
+  {{- end }}
+---
+{{- end }}
+{{- end }}
