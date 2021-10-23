@@ -6134,7 +6134,7 @@ mojaloop-simulator:
       backend:
         image:
           repository: mojaloop/mojaloop-simulator
-          tag: v11.4.3
+          tag: v11.6.1
           pullPolicy: IfNotPresent
         <<: *defaultProbes
 
@@ -6212,6 +6212,162 @@ mojaloop-simulator:
           SIMULATOR_API_LISTEN_PORT: 3000
           REPORT_API_LISTEN_PORT: 3002
           TEST_API_LISTEN_PORT: 3003
+
+      thirdpartysdk:
+        secrets:
+          tls:
+            # In order to enable TLS with your supplied credentials, you will need to:
+            # 1. set all three of the `cert`, `key`, `cacert` fields appropriately for each of
+            # `inbound` and `outbound` as per your preference.
+            # 2. optionally specify `schemeAdapter.env.INBOUND_MUTUAL_TLS_ENABLED: true`
+            # 3. optionally specify `schemeAdapter.env.OUTBOUND_MUTUAL_TLS_ENABLED: true`
+            # It probably makes sense to set your CA cert in defaults. Note that the default is that
+            # the CA, cert and key will be generated for you by this chart. To use this functionality
+            # you only need specify the config documented in steps (2, 3, 4) a few lines up.
+            #
+            # inbound:
+            #   key: |
+            #     -----BEGIN CERTIFICATE-----
+            #     ...
+            #     -----END CERTIFICATE-----
+            #   cacert: |
+            #     -----BEGIN CERTIFICATE-----
+            #     ...
+            #     -----END CERTIFICATE-----
+            #   cert: |
+            #     -----BEGIN RSA PRIVATE KEY-----
+            #     ...
+            #     -----END RSA PRIVATE KEY-----
+            #
+            # To set the same values for each of inbound and outbound, specify the values for
+            # inbound as above, then the values for outbound using yaml anchors:
+            #
+            # inbound: &inbound
+            #   key: |
+            #     ..
+            #   cacert: |
+            #     ..
+            #   cert: |
+            #     ..
+            # outbound: *inbound
+            inbound: &inbound
+            outbound: *inbound
+          jws:
+            # Use the privKeySecretName field if you would like to supply a JWS private key external
+            # to this chart.
+            # For example, if you create a private key called `sim-payerfsp-jws-signing-key` external
+            # to this chart, you would supply `privKeySecretName: sim-payerfsp-jws-signing-key` here.
+            # These fields will take precedence over `privateKey` and `publicKey` below.
+            # This field is best supplied per-simulator, however it's here for documentation
+            # purposes.
+            privKeySecretName: {}
+            # TODO: update `privKeySecretName` above to contain both a name and a key in the secret.
+            #       Add documentation on usage.
+            # privKeySecret: {}
+            #   name:
+            #   key:
+            #
+            # The `publicKeyConfigMapName` field allows you to supply a ConfigMap containing JWS public
+            # keys external to this release, and have this release reference that ConfigMap to
+            # populate JWS public keys. The format of this ConfigMap must be as described for
+            # `sharedJWSPubKeys`, a map with one key per FSP/simulator corresponding to the
+            # FSPIOP-Source header that will be supplied by that FSP/simulator.
+            publicKeyConfigMapName: {}
+            # Supply per-simulator private and public keys here:
+            privateKey: ''
+            publicKey: ''
+        image:
+          repository: mojaloop/thirdparty-sdk
+          tag: v11.55.1
+          pullPolicy: IfNotPresent
+          inboundCommand: '[ "npm", "run", "start:inbound" ]'
+          outboundCommand: '[ "npm", "run", "start:outbound" ]'
+        <<: *defaultProbes
+
+        # These will be supplied directly to the init containers array in the deployment for the
+        # scheme adapter. They should look exactly as you'd declare them inside the deployment.
+        # Example: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#init-containers-in-use
+        # This init container will have the same environment variables as the main scheme adapter
+        # container, as specified in .env below.
+        # All init containers will have the same preset environment variables as the backend init
+        # container as specified above.
+        initContainers: []
+
+        scale:
+          enabled: false
+          spec:
+            minReplicas: 1
+            maxReplicas: 10
+            metrics:
+            - type: Resource
+              resource:
+                name: cpu
+                target:
+                  type: Utilization
+                  averageUtilization: 80
+        config: {
+          production.json: {
+            "INBOUND": {
+              "PORT": 4005,
+              "HOST": "0.0.0.0",
+              "PISP_TRANSACTION_MODE": true
+            },
+            "OUTBOUND": {
+              "PORT": 4006,
+              "HOST": "0.0.0.0"
+            },
+            "REQUEST_PROCESSING_TIMEOUT_SECONDS": 30,
+            "WSO2_AUTH": {
+              "staticToken": "0706c62f-c022-3c42-8d14-8b5df128876d",
+              "tokenEndpoint": "",
+              "clientKey": "test-client-key",
+              "clientSecret": "test-client-secret",
+              "refreshSeconds": 3600
+            },
+            "REDIS": {
+              "PORT": 6379,
+              # covered by REDIS_HOST env var in deployment.yaml
+              # "HOST"
+              "TIMEOUT": 100
+            },
+            "INSPECT": {
+              "DEPTH": 4,
+              "SHOW_HIDDEN": false,
+              "COLOR": true
+            },
+            "SHARED": {
+              "AUTH_SERVICE_PARTICIPANT_ID": 'centralauth',
+              "PEER_ENDPOINT": "mojaloop-switch",
+              "DFSP_ID": "$name",
+              "DFSP_BACKEND_URI": "$full_name-backend:3000",
+              "DFSP_BACKEND_HTTP_SCHEME": "http",
+              "DFSP_BACKEND_VERIFY_AUTHORIZATION_PATH": "verify-authorization",
+              "DFSP_BACKEND_VERIFY_CONSENT_PATH": "verify-consent",
+              "SDK_OUTGOING_URI": "$full_name-scheme-adapter:4001",
+              "SDK_OUTGOING_HTTP_SCHEME": "http",
+              "SDK_OUTGOING_PARTIES_INFORMATION_PATH": "parties/{Type}/{ID}/{SubId}",
+              "JWS_SIGN": false,
+              "JWS_SIGNING_KEY": "./secrets/jwsSigningKey.key",
+              "TLS": {
+                "mutualTLS": {
+                  "enabled": false
+                },
+                "creds": {
+                  "ca": "./secrets/dfsp_a_client.crt",
+                  "cert": "./secrets/dfsp_a_client.crt",
+                  "key": "./secrets/dfsp_a_client.crt"
+                }
+              }
+            }
+          }
+        }
+        env:
+          NODE_ENV: production
+          INBOUND_LISTEN_PORT: 4005
+          OUTBOUND_LISTEN_PORT: 4006
+          # Path to JWS signing key (private key of THIS DFSP)
+          JWS_SIGNING_KEY_PATH: "/jwsSigningKey/private.key" # do not change this unless you know what you are doing - this will break the chart
+          JWS_VERIFICATION_KEYS_DIRECTORY: "/jwsVerificationKeys"
 
     ingress:
       enabled: true

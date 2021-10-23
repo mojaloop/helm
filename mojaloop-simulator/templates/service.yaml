@@ -75,4 +75,30 @@ spec:
       app.kubernetes.io/instance: {{ $.Release.Name }}
 {{- end }}
 ---
+{{- if $config.config.thirdpartysdk.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}-thirdparty-sdk
+  labels:
+    app.kubernetes.io/name: sim-{{ $name }}-thirdparty-sdk
+    {{- include "mojaloop-simulator.common-labels" $ | nindent 4 }}
+spec:
+   type: ClusterIP
+   ports:
+     - port: {{ $config.config.thirdpartysdk.env.INBOUND_LISTEN_PORT }}
+       protocol: TCP
+       name: inbound
+       targetPort: inbound
+     - port: {{ $config.config.thirdpartysdk.env.OUTBOUND_LISTEN_PORT }}
+       protocol: TCP
+       name: outbound
+       targetPort: outbound
+   selector:
+      app.kubernetes.io/name: sim-{{ $name }}-thirdparty-sdk
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+{{- end }}
+
+# TODO: thirdparty service!
+---
 {{ end }}
