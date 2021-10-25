@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name:  {{ include "tp-api-svc.name" . }}
+  labels:
+    app: tp-api-svc
+    {{- include "tp-api-svc.labels" . | nindent 4 }}
+spec:
+  ports:
+    {{- with .Values.service.ports }}
+    - port: {{ .externalPort }}
+      targetPort: {{ .internalPort }}
+      name: {{ .name }}
+    {{- end }}
+  selector:
+    {{- include "tp-api-svc.selectorLabels" . | nindent 6 }}
+  clusterIP: None

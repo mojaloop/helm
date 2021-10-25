@@ -1,0 +1,37 @@
+{{- $apiVersion := include "mojaloop-simulator.apiVersion.Ingress" . -}}
+{{- range $name, $customConfig := .Values.simulators }}
+{{- $config := merge $customConfig $.Values.defaults }}
+{{- $fullName := printf "%s%s" (include "mojaloop-simulator.prefix" $) $name -}}
+{{- if $config.config.thirdpartysdk.enabled }}
+apiVersion: {{ $apiVersion }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-thirdparty-sdk-ingress
+  labels:
+    app.kubernetes.io/name: sim-{{ $fullName }}-thirdparty-sdk-ingress
+    {{- include "mojaloop-simulator.common-labels" $ | nindent 4 }}
+{{- with $config.ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  rules:
+  {{- if $config.ingress.enabled -}}
+    {{ $hosts := default (list nil) $config.ingress.hosts }}
+    {{- range $host := $hosts }}
+      - host: {{ $host }}
+        http:
+          paths:
+          - path: /sim/{{ $name }}/thirdpartysdk/outbound{{ $.Values.ingress.ingressPathRewriteRegex }}
+            backend:
+              serviceName: {{ $fullName }}-thirdparty-sdk
+              servicePort: outbound
+          - path: /sim/{{ $name }}/thirdpartysdk/inbound{{ $.Values.ingress.ingressPathRewriteRegex }}
+            backend:
+              serviceName: {{ $fullName }}-thirdparty-sdk
+              servicePort: inboundapi
+    {{- end }}
+  {{- end }}
+---
+{{- end }}
+{{- end }}
