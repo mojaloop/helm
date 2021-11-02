@@ -22,7 +22,8 @@ Date | Revision | Description
 1. **mojaloop/2522:** cl-migration scripts should configure quoting tables to utf8 follow-up ([central-ledger/issues/#865](https://github.com/mojaloop/central-ledger/issues/865)), closes [mojaloop/#2522](https://github.com/mojaloop/central-ledger/issues/2522)
 2. **mojaloop/2525:** transfers are not being assigned to a settlementWindow on transfers version=1.1 ([central-ledger/issues/#866](https://github.com/mojaloop/central-ledger/issues/866)), closes [mojaloop/#2525](https://github.com/mojaloop/project/issues/2525)
 3. **mojaloop/2527:** transfers PUT callback on version=1.1 is not assigning destination headers correctly ([ml-api-adapter/issues/#866](https://github.com/mojaloop/ml-api-adapter/issues/486)), closes [mojaloop/#2527](https://github.com/mojaloop/project/issues/2527)
-4. Testing Toolkit:
+4. als-oracle-pathfinder fix: init and startup issues #61 ([als-oracle-pathfinder/pull/#61](https://github.com/mojaloop/als-oracle-pathfinder/pull/61))
+5. Testing Toolkit:
    1. TBD
 
 ## 4. Application versions
@@ -35,7 +36,7 @@ Date | Revision | Description
 6. central-event-processor: **v11.0.2**
 7. bulk-api-adapter: **v11.1.4**
 8. email-notifier: **v11.0.2**
-9. als-oracle-pathfinder: **v11.0.0**
+9. als-oracle-pathfinder: v11.0.0 -> **v11.0.4**
 10. transaction-requests-service: **v11.1.7**
 11. finance-portal-ui: **v10.4.3**
 12. finance-portal-backend-service: **v15.0.2**
@@ -59,7 +60,7 @@ Date | Revision | Description
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v11.0.2
 7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v11.1.4
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v11.0.2
-9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v11.0.0
+9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v11.0.4
 10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v11.1.7
 11. finance-portal-ui - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
 12. finance-portal-backend-service - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
