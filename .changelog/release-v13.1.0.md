@@ -28,16 +28,16 @@ Date | Revision | Description
 
 ## 4. Application versions
 
-1. ml-api-adapter: v11.1.6 -> **v11.2.0**
+1. ml-api-adapter: v11.1.6 -> **v12.0.0**
 2. central-ledger: v13.14.0 -> **v13.14.3**
-3. account-lookup-service: v11.7.7 -> **v11.8.0**
-4. quoting-service: **12.0.10**
+3. account-lookup-service: v11.7.7 -> **v12.0.0**
+4. quoting-service: **13.0.0**
 5. central-settlement: **13.4.1**
 6. central-event-processor: **v11.0.2**
 7. bulk-api-adapter: **v11.1.4**
 8. email-notifier: **v11.0.2**
 9. als-oracle-pathfinder: v11.0.0 -> **v11.0.4**
-10. transaction-requests-service: **v11.1.7**
+10. transaction-requests-service: **v12.0.1**
 11. finance-portal-ui: **v10.4.3**
 12. finance-portal-backend-service: **v15.0.2**
 13. settlement-management: **v11.0.0**
@@ -52,16 +52,16 @@ Date | Revision | Description
 
 ## 5. Application release notes
 
-1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v11.2.0
+1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v12.0.0
 2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.14.3
-3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v11.8.0
-4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v12.0.10
+3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v12.0.0
+4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v13.0.0
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v11.0.2
 7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v11.1.4
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v11.0.2
 9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v11.0.4
-10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v11.1.7
+10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v12.0.1
 11. finance-portal-ui - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
 12. finance-portal-backend-service - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
 13. settlement-management - https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0
