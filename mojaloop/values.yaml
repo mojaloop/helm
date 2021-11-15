@@ -25,7 +25,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.14.3
+            tag: v13.14.5
             pullPolicy: IfNotPresent
             command: '["node", "src/api/index.js"]'
           service:
@@ -212,7 +212,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.14.3
+            tag: v13.14.5
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
           service:
@@ -410,7 +410,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.14.3
+            tag: v13.14.5
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--admin"]'
           service:
@@ -605,7 +605,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.14.3
+            tag: v13.14.5
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--position"]'
           service:
@@ -800,7 +800,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.14.3
+            tag: v13.14.5
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--get"]'
           service:
@@ -995,7 +995,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.14.3
+            tag: v13.14.5
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
           service:
@@ -1190,7 +1190,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.14.3
+            tag: v13.14.5
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
           service:
@@ -3495,7 +3495,7 @@ ml-api-adapter:
     replicaCount: 1
     image:
       repository: mojaloop/ml-api-adapter
-      tag: v11.2.0
+      tag: v12.0.0
       command: '["node", "src/api/index.js"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -3567,6 +3567,17 @@ ml-api-adapter:
       max_callback_time_lag_dilation_milliseconds: 100
       max_fulfil_timeout_duration_seconds: 240
 
+      protocol_versions: {
+        "CONTENT": "1.0",
+        "ACCEPT": {
+          "VALIDATELIST": [
+            "1",
+            "1.0",
+            "1.1"
+          ]
+        }
+      }
+      
       ## Log Configuration
       log_level: info
       log_filter: 'error, warn, info'
@@ -3632,7 +3643,7 @@ ml-api-adapter:
     replicaCount: 1
     image:
       repository: mojaloop/ml-api-adapter
-      tag: v11.2.0
+      tag: v12.0.0
       command: '["node", "src/handlers/index.js", "handler", "--notification"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -3690,6 +3701,17 @@ ml-api-adapter:
           rejectUnauthorized: true
       max_callback_time_lag_dilation_milliseconds: 100
       max_fulfil_timeout_duration_seconds: 240
+
+      protocol_versions: {
+        "CONTENT": "1.0",
+        "ACCEPT": {
+          "VALIDATELIST": [
+            "1",
+            "1.0",
+            "1.1"
+          ]
+        }
+      }
 
       ## Endpoint Cache Configuration
       endpoint_cache_expiresInMs: 180000
@@ -3929,7 +3951,7 @@ account-lookup-service:
       api:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.8.0
+          tag: v12.0.0
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--api"]'
         service:
@@ -3940,7 +3962,7 @@ account-lookup-service:
       admin:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.8.0
+          tag: v12.0.0
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--admin"]'
         service:
@@ -3995,6 +4017,18 @@ account-lookup-service:
       ## Central-Ledger config
       central_services_host: '$release_name-centralledger-service'
       central_services_port: 80
+
+      protocol_versions: {
+        "CONTENT": "1.0",
+        "ACCEPT": {
+          "VALIDATELIST": [
+            "1",
+            "1.0",
+            "1.1"
+          ]
+        }
+      }
+
       # Log config
       log_level: 'info'
       log_transport: 'file'
@@ -4141,7 +4175,7 @@ account-lookup-service:
       api:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.8.0
+          tag: v12.0.0
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--api"]'
         service:
@@ -4152,7 +4186,7 @@ account-lookup-service:
       admin:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v11.8.0
+          tag: v12.0.0
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--admin"]'
         service:
@@ -4207,6 +4241,17 @@ account-lookup-service:
       ## Central-Ledger config
       central_services_host: '$release_name-centralledger-service'
       central_services_port: 80
+
+      protocol_versions: {
+        "CONTENT": "1.0",
+        "ACCEPT": {
+          "VALIDATELIST": [
+            "1",
+            "1.0",
+            "1.1"
+          ]
+        }
+      }
 
       end_point_cache:
         expiresIn: 180000
@@ -4694,8 +4739,11 @@ quoting-service:
   # Declare variables to be passed into your templates.
   replicaCount: 1
   image:
-    repository: mojaloop/quoting-service
-    tag: v12.0.10
+    # mdebarros/quoting-service:v13.0.1-snapshot.1
+    repository: mdebarros/quoting-service
+    tag: v13.0.1-snapshot.1
+    # repository: mojaloop/quoting-service
+    # tag: v13.0.0
     pullPolicy: IfNotPresent
 
   readinessProbe:
@@ -4713,6 +4761,18 @@ quoting-service:
     periodSeconds: 15
 
   config:
+
+    protocol_versions: {
+      "CONTENT": "1.0",
+      "ACCEPT": {
+        "VALIDATELIST": [
+          "1",
+          "1.0",
+          "1.1"
+        ]
+      }
+    }
+
     ## DB Configuration
     # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
     db_type: 'mysql'
@@ -4885,7 +4945,7 @@ transaction-requests-service:
   replicaCount: 1
   image:
     repository: mojaloop/transaction-requests-service
-    tag: v11.1.7
+    tag: v12.0.1
     pullPolicy: IfNotPresent
     command: '["node", "src/index.js", "api"]'
 
@@ -4935,6 +4995,18 @@ transaction-requests-service:
   config:
     central_services_host: '$release_name-centralledger-service'
     central_services_port: 80
+
+    protocol_versions: {
+      "CONTENT": "1.0",
+      "ACCEPT": {
+        "VALIDATELIST": [
+          "1",
+          "1.0",
+          "1.1"
+        ]
+      }
+    }
+
     log_level: info
     log_transport: file
 
@@ -6134,7 +6206,7 @@ mojaloop-simulator:
       backend:
         image:
           repository: mojaloop/mojaloop-simulator
-          tag: v11.6.1
+          tag: v11.6.2
           pullPolicy: IfNotPresent
         <<: *defaultProbes
 
@@ -6916,7 +6988,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.14.3
+            tag: v13.14.5
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkprepare"]'
           service:
@@ -7088,7 +7160,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.14.3
+            tag: v13.14.5
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkfulfil"]'
           service:
@@ -7257,7 +7329,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.14.3
+            tag: v13.14.5
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkprocessing"]'
           service:
@@ -7426,7 +7498,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.14.3
+            tag: v13.14.5
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkget"]'
           service:
