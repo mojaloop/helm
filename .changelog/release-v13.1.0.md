@@ -16,6 +16,12 @@ Date | Revision | Description
 1. **mojaloop/#2505:** als-subid-error-callback-endpoint-not-implemented ([account-lookup-service/issues/#429](https://github.com/mojaloop/account-lookup-service/issues/429)), closes [mojaloop/#2505](https://github.com/mojaloop/account-lookup-service/issues/2505) [mojaloop/#2505](https://github.com/mojaloop/account-lookup-service/issues/2505)
 2. **mojaloop/#2450:** feat(thirdparty): add tp-api-svc and round out thirdparty sub-chart ([helm/pull/#454](https://github.com/mojaloop/helm/pull/454), closes [mojaloop/#2450](https://github.com/mojaloop/project/issues/2450))
 3. **mojaloop/#2532:** feat(thirdparty): add thirdparty support to mojaloop-simulator chart ([helm/pull/#456](https://github.com/mojaloop/helm/pull/456), closes [mojaloop/#2532](https://github.com/mojaloop/project/issues/2532))
+4. Testing Toolkit:
+   1. Moved object store init config to system config ([ml-testing-toolkit/pull/189](https://github.com/mojaloop/ml-testing-toolkit/pull/189))
+   2. Added labels functionality to test cases ([ml-testing-toolkit/pull/193](https://github.com/mojaloop/ml-testing-toolkit/pull/193), [ml-testing-toolkit-ui/pull/122](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/122), [ml-testing-toolkit-ui/pull/123](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/123) and [ml-testing-toolkit-ui/pull/124](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/124)), closes [mojaloop/#2161](https://github.com/mojaloop/project/issues/2161)
+   3. Added thirdparty-sdk outbound API ([ml-testing-toolkit/pull/195](https://github.com/mojaloop/ml-testing-toolkit/pull/195)), closes [mojaloop/#2533](https://github.com/mojaloop/project/issues/2533)
+   4. New feature: Test cases definition report with grouping ([ml-testing-toolkit/pull/196](https://github.com/mojaloop/ml-testing-toolkit/pull/196)), closes [mojaloop/#2348](https://github.com/mojaloop/project/issues/2348)
+
 
 ### 3. Bug Fixes
 
@@ -24,7 +30,9 @@ Date | Revision | Description
 3. **mojaloop/2527:** transfers PUT callback on version=1.1 is not assigning destination headers correctly ([ml-api-adapter/issues/#866](https://github.com/mojaloop/ml-api-adapter/issues/486)), closes [mojaloop/#2527](https://github.com/mojaloop/project/issues/2527)
 4. als-oracle-pathfinder fix: init and startup issues #61 ([als-oracle-pathfinder/pull/#61](https://github.com/mojaloop/als-oracle-pathfinder/pull/61))
 5. Testing Toolkit:
-   1. TBD
+   1. Fixed TLS connectivity in hosted mode ([ml-testing-toolkit/pull/192](https://github.com/mojaloop/ml-testing-toolkit/pull/192)), closes [mojaloop/#1790](https://github.com/mojaloop/project/issues/1790)
+   2. Fixed fxapi callback map ([ml-testing-toolkit/pull/194](https://github.com/mojaloop/ml-testing-toolkit/pull/194))
+   3. Fixed stop button not working intermittently ([ml-testing-toolkit-ui/pull/121](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/121)), closes [mojaloop/#2332](https://github.com/mojaloop/project/issues/2332)
 
 ## 4. Application versions
 
@@ -47,8 +55,8 @@ Date | Revision | Description
 17. simulator: **v11.1.3**
 18. mojaloop-simulator: **v11.6.1**
 19. sdk-scheme-adapter: **v11.18.8**
-20. ml-testing-toolkit: v13.5.1 -> **v13.?**
-21. ml-testing-toolkit-ui: v13.5.2 -> **v13.?**
+20. ml-testing-toolkit: v13.5.1 -> **v14.0.2**
+21. ml-testing-toolkit-ui: v13.5.2 -> **v13.5.5**
 
 ## 5. Application release notes
 
@@ -72,8 +80,8 @@ Date | Revision | Description
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v11.6.1
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.18.8
 20. thirdparty-sdk-adapter - https://github.com/mojaloop/thirdparty-sdk/releases/tag/v11.55.1
-21. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v13.?
-22. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.?
+21. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v14.0.2
+22. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.5.5
 
 ## 6. Operational Chart versions
 
@@ -82,7 +90,7 @@ Date | Revision | Description
 
 ## 7. Breaking changes
 
-N/A
+1. Testing Toolkit - Moved TLS related configuration parameters from user config to system config ([ml-testing-toolkit/releases/v14.0.0](https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v14.0.0))
 
 ## 8. Upgrade notes
 

@@ -32,7 +32,7 @@ dependencies:
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit
-  tag: v13.5.1
+  tag: v14.0.2
   commandPersistence: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; else if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; fi; npm run start;"]'
   command: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; npm run start;"]'
 
@@ -81,17 +81,17 @@ config:
         {
           "method": "put",
           "path": "/parties/{Type}/{ID}",
-          "endpoint": "http://moja-account-lookup-service.demo"
+          "endpoint": "http://$release_name-account-lookup-service"
         },
         {
           "method": "put",
           "path": "/quotes/{ID}",
-          "endpoint": "http://moja-quoting-service.demo"
+          "endpoint": "http://$release_name-quoting-service"
         },
         {
           "method": "put",
           "path": "/transfers/{ID}",
-          "endpoint": "http://moja-ml-api-adapter-service.demo"
+          "endpoint": "http://$release_name-ml-api-adapter-service"
         }
       ]
     },
@@ -120,8 +120,6 @@ config:
     "VALIDATE_INBOUND_PUT_PARTIES_JWS": false,
     "JWS_SIGN": false,
     "JWS_SIGN_PUT_PARTIES": false,
-    "INBOUND_MUTUAL_TLS_ENABLED": false,
-    "OUTBOUND_MUTUAL_TLS_ENABLED": false,
     "CLIENT_MUTUAL_TLS_ENABLED": false,
     "ADVANCED_FEATURES_ENABLED": true,
     "CALLBACK_TIMEOUT": 20000,
@@ -148,11 +146,30 @@ config:
       "TEST_CASES_REPO_HUB_GP_PATH": "collections/hub/golden_path",
       "TEST_CASES_REPO_HUB_PROVISIONING_PATH": "collections/hub/provisioning"
     },
-    "DEFAULT_ENVIRONMENT_FILE_NAME": "hub-k8s-environment.json"
+    "DEFAULT_ENVIRONMENT_FILE_NAME": "hub-k8s-environment.json",
+    "LABELS": [
+      {
+        "name": "p2p",
+        "description": "Tests related to p2p transfer",
+        "color": "red"
+      },
+      {
+        "name": "settlements",
+        "description": "Tests related to settlements",
+        "color": "green"
+      },
+      {
+        "name": "quotes",
+        "description": "Tests related to quoting service",
+        "color": "blue"
+      }
+    ]
   }
   system_config.json: {
     "API_PORT": 5000,
     "HOSTING_ENABLED": false,
+    "INBOUND_MUTUAL_TLS_ENABLED": false,
+    "OUTBOUND_MUTUAL_TLS_ENABLED": false,
     "CONFIG_VERSIONS": {
       "response": 1,
       "callback": 1,
@@ -258,6 +275,11 @@ config:
         "type": "payment_manager",
         "version": "1.4",
         "folderPath": "payment_manager_1.4"
+      },
+      {
+        "type": "thirdparty_sdk_outbound",
+        "version": "0.1",
+        "folderPath": "thirdparty_sdk_outbound_0.1"
       }
     ]
   }
