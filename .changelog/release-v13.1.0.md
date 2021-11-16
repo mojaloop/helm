@@ -115,11 +115,12 @@ Take note that existing rules may not work without modifying the path to add a `
 
 1. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
 
-2. The [testing-toolkit-test-cases](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v13.0.3)' Golden Path collections expects:
-	-  the Quoting service operating mode to be set [quoting-service.config.simple_routing_mode_enabled](https://github.com/mojaloop/helm/blob/v13.0.0/mojaloop/values.yaml#L4664)=true. If this is incorrectly configured, it will result in several failures in the quoting-service tests (7 expected failures). If this is disabled, ensure that you update the corresponding test-case environment variable parameter [SIMPLE_ROUTING_MODE_ENABLED](https://github.com/mojaloop/helm/blob/v13.0.0/mojaloop/values.yaml#L7420) to match.
-	- the [on-us transfers](https://github.com/mojaloop/helm/blob/v13.0.0/mojaloop/values.yaml#L321) configuration to be disabled. The test-case environment variable parameter ([ON_US_TRANSFERS_ENABLED](https://github.com/mojaloop/helm/blob/v13.0.0/mojaloop/values.yaml#L7423), the same name used on postman collections) must similarly match this value.
+2. The [testing-toolkit-test-cases](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v13.1.0)' Golden Path collections expects:
+	-  the Quoting service operating mode to be set [quoting-service.config.simple_routing_mode_enabled](https://github.com/mojaloop/helm/blob/v13.1.0/mojaloop/values.yaml#L4664)=true. If this is incorrectly configured, it will result in several failures in the quoting-service tests (7 expected failures). If this is disabled, ensure that you update the corresponding test-case environment variable parameter [SIMPLE_ROUTING_MODE_ENABLED](https://github.com/mojaloop/helm/blob/v13.1.0/mojaloop/values.yaml#L7420) to match.
+	- the [on-us transfers](https://github.com/mojaloop/helm/blob/v13.1.0/mojaloop/values.yaml#L321) configuration to be disabled. The test-case environment variable parameter ([ON_US_TRANSFERS_ENABLED](https://github.com/mojaloop/helm/blob/v13.1.0/mojaloop/values.yaml#L7423), the same name used on postman collections) must similarly match this value.
 
-3. Simulators 
+3. Simulators
+	- We recommend using Testing Toolkit instead of Postman which is better suited for the async nature of the Mojaloop API specification (see above)
 	- [Mojaloop-Simulator](https://github.com/mojaloop/mojaloop-simulator) is enabled by default (six instances used).
 	- Ensure that correct Postman Scripts are used if you wish to test against the Mojaloop-Simulators:
     	- Setup Mojaloop Hub: [MojaloopHub_Setup](https://github.com/mojaloop/postman/blob/v12.0.0/MojaloopHub_Setup.postman_collection.json)
@@ -127,10 +128,10 @@ Take note that existing rules may not work without modifying the path to add a `
     	- Golden path tests: [Golden_Path_Mojaloop](https://github.com/mojaloop/postman/blob/v12.0.0/Golden_Path_Mojaloop.postman_collection.json)
 	- Legacy Simulators are still required and deployed by default; disabling this will cause issues since there is Account Lookup directory mocking functionality in this service.
 
-3. This release has been tested against the following:
+4. This release has been tested against the following:
 	- Kubernetes: v1.20.6
 	- Nginx Ingress Controllers: 0.43.0
-	- Testing Toolkit Test Cases: [v13.0.2](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v13.0.2)
+	- Testing Toolkit Test Cases: [v13.1.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v13.1.0)
 
 ## 10. Known Issues
 
@@ -144,6 +145,6 @@ Take note that existing rules may not work without modifying the path to add a `
 ## 11. Contributors
 
 - Contributing organizations: BMGF, CrossLake, ModusBox
-- ModusBox: @elnyry-sam-k, @mdebarros, @vijayg10, @kleyow, @lewisdaly
+- ModusBox: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @lewisdaly
 
 _Note: companies in alphabetical order_
