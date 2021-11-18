@@ -12,7 +12,7 @@ bulk-api-adapter-service:
   replicaCount: 1
   image:
     repository: mojaloop/bulk-api-adapter
-    tag: v11.1.4
+    tag: v12.0.1
     command: '["node", "src/api/index.js"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -82,6 +82,17 @@ bulk-api-adapter-service:
     log_level: 'info'
     log_transport: file
 
+    protocol_versions: {
+      "CONTENT": "1.0",
+      "ACCEPT": {
+        "VALIDATELIST": [
+          "1",
+          "1.0",
+          "1.1"
+        ]
+      }
+    }
+
     ## MongoDB Configuration for Object Store
     objstore_uri: 'mongodb://$mongodbUsername:$mongodbPassword@$release_name-centralledger-obj:27017/$mongodbDatabase'
 
@@ -131,7 +142,7 @@ bulk-api-adapter-handler-notification:
   replicaCount: 1
   image:
     repository: mojaloop/bulk-api-adapter
-    tag: v11.1.4
+    tag: v12.0.1
     command: '["node", "src/handlers/index.js", "handler", "--notification"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -200,6 +211,17 @@ bulk-api-adapter-handler-notification:
         rejectUnauthorized: true
     log_level: 'info'
     log_transport: file
+
+    protocol_versions: {
+      "CONTENT": "1.0",
+      "ACCEPT": {
+        "VALIDATELIST": [
+          "1",
+          "1.0",
+          "1.1"
+        ]
+      }
+    }
 
     ## MongoDB Configuration for Object Store
     objstore_uri: 'mongodb://$release_name-centralledger-obj:27017/mlos'

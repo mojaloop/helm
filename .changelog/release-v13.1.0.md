@@ -51,7 +51,7 @@ Date | Revision | Description
 4. quoting-service: 12.0.10 -> **13.0.1**
 5. central-settlement: **13.4.1**
 6. central-event-processor: **v11.0.2**
-7. bulk-api-adapter: **v11.1.4**
+7. bulk-api-adapter: 11.1.4 -> **v12.0.1**
 8. email-notifier: **v11.0.2**
 9. als-oracle-pathfinder: v11.0.0 -> **v11.0.4**
 10. transaction-requests-service: **v12.0.1**
@@ -76,7 +76,7 @@ Date | Revision | Description
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v11.0.2
 7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v11.1.4
-8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v11.0.2
+8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.1
 9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v11.0.4
 10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v12.0.1
 11. finance-portal-ui - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
