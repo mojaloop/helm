@@ -36,9 +36,11 @@ Date | Revision | Description
 8. **mojaloop/#2537:** FSPIOP API version negotiation not handled - Transaction-request-service ([transaction-requests-service/pull/#80](https://github.com/mojaloop/transaction-requests-service/pull/80), closes [mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2537))
 9. **mojaloop/#2538:** FSPIOP API version negotiation not handled - Bulk-api-adapter ([bulk-api-adapter/pull/#67](https://github.com/mojaloop/bulk-api-adapter/pull/67), closes[mojaloop/#2538](https://github.com/mojaloop/project/issues/2538))
 10. **mojaloop/#2557:** In error notification to Payer FSP, header for source having wrong value ([ml-api-adapter/pull/#488](https://github.com/mojaloop/ml-api-adapter/pull/488), [central-ledger/pull/#869](https://github.com/mojaloop/central-ledger/pull/869), [central-services-shared/pull/#316](https://github.com/mojaloop/central-services-shared/pull/316), closes [mojaloop/#2557](https://github.com/mojaloop/project/issues/2557))
-11. **mojaloop/#2574:** SDK-Scheme-Adapter is not returning Party Sub-Id ([mojaloop-simulator/pull/#120](https://github.com/mojaloop/mojaloop-simulator/pull/120), closes[mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2574))
-12. als-oracle-pathfinder fix: init and startup issues ([als-oracle-pathfinder/pull/#61](https://github.com/mojaloop/als-oracle-pathfinder/pull/61))
-13. Testing Toolkit:
+11. **mojaloop/#2574:** SDK-Scheme-Adapter is not returning Party Sub-Id ([mojaloop-simulator/pull/#120](https://github.com/mojaloop/mojaloop-simulator/pull/120), closes[mojaloop/#2574](https://github.com/mojaloop/project/issues/2574))
+12. **mojaloop/#2584:** bulk-api-adapter is unable to process requests with individualTransfers[].extensionLists ([bulk-api-adapter/pull/69](https://github.com/mojaloop/bulk-api-adapter/pull/2584), closes[mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2584))
+13. **mojaloop/#2585:** bulk-api-adapter fails when extensionLists are not send in the POST /bulkTransfer requests ([bulk-api-adapter/pull/69](https://github.com/mojaloop/bulk-api-adapter/pull/69), [object-store-lib/pull/35](https://github.com/mojaloop/object-store-lib/pull/35), closes[mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2585))
+14. als-oracle-pathfinder fix: init and startup issues ([als-oracle-pathfinder/pull/#61](https://github.com/mojaloop/als-oracle-pathfinder/pull/61))
+15. Testing Toolkit:
     1. Fixed TLS connectivity in hosted mode ([ml-testing-toolkit/pull/192](https://github.com/mojaloop/ml-testing-toolkit/pull/192)), closes [mojaloop/#1790](https://github.com/mojaloop/project/issues/1790)
     2. Fixed fxapi callback map ([ml-testing-toolkit/pull/194](https://github.com/mojaloop/ml-testing-toolkit/pull/194))
     3. Fixed stop button not working intermittently ([ml-testing-toolkit-ui/pull/121](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/121)), closes [mojaloop/#2332](https://github.com/mojaloop/project/issues/2332)
@@ -51,7 +53,7 @@ Date | Revision | Description
 4. quoting-service: 12.0.10 -> **13.0.1**
 5. central-settlement: **13.4.1**
 6. central-event-processor: **v11.0.2**
-7. bulk-api-adapter: 11.1.4 -> **v12.0.1**
+7. bulk-api-adapter: 11.1.4 -> **v12.0.2**
 8. email-notifier: **v11.0.2**
 9. als-oracle-pathfinder: v11.0.0 -> **v11.0.4**
 10. transaction-requests-service: **v12.0.1**
@@ -63,7 +65,7 @@ Date | Revision | Description
 16. event-stream-processor: **v11.0.0-snapshot**
 17. simulator: **v11.1.3**
 18. mojaloop-simulator: **v11.6.1**
-19. sdk-scheme-adapter: **v11.18.8**
+19. sdk-scheme-adapter: v11.18.8 -> **v11.18.9**
 20. ml-testing-toolkit: v13.5.1 -> **v14.0.2**
 21. ml-testing-toolkit-ui: v13.5.2 -> **v13.5.5**
 
@@ -76,7 +78,7 @@ Date | Revision | Description
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v11.0.2
 7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v11.1.4
-8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.1
+8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.2
 9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v11.0.4
 10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v12.0.1
 11. finance-portal-ui - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
@@ -87,7 +89,7 @@ Date | Revision | Description
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v11.0.0-snapshot
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v11.1.3
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v11.6.1
-19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.18.8
+19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.18.9
 20. thirdparty-sdk-adapter - https://github.com/mojaloop/thirdparty-sdk/releases/tag/v11.55.1
 21. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v14.0.2
 22. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.5.5
