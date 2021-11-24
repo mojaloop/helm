@@ -23,6 +23,7 @@ Date | Revision | Description
    2. Added labels functionality to test cases ([ml-testing-toolkit/pull/193](https://github.com/mojaloop/ml-testing-toolkit/pull/193), [ml-testing-toolkit-ui/pull/122](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/122), [ml-testing-toolkit-ui/pull/123](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/123) and [ml-testing-toolkit-ui/pull/124](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/124)), closes [mojaloop/#2161](https://github.com/mojaloop/project/issues/2161)
    3. Added thirdparty-sdk outbound API ([ml-testing-toolkit/pull/195](https://github.com/mojaloop/ml-testing-toolkit/pull/195)), closes [mojaloop/#2533](https://github.com/mojaloop/project/issues/2533)
    4. New feature: Test cases definition report with grouping ([ml-testing-toolkit/pull/196](https://github.com/mojaloop/ml-testing-toolkit/pull/196)), closes [mojaloop/#2348](https://github.com/mojaloop/project/issues/2348)
+7. Added Timeout Configuration to the centralledger-handler-timeout chart, and associated values files
 
 ### 3. Bug Fixes
 
