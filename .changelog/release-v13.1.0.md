@@ -104,6 +104,8 @@ Date | Revision | Description
 
 1. Testing Toolkit - Moved TLS related configuration parameters from user config to system config ([ml-testing-toolkit/releases/v14.0.0](https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v14.0.0))
 
+2. Helm test jobs name `ml-ttk-test-validation` (and its associated configuration tag in the values.yaml) have been shortened to `ml-ttk-test-val-gp` and made more meaningful with the introduction of the Bulk-API-Adapter tests (`ml-ttk-test-val-bulk`).
+
 ## 8. Upgrade notes
 
 1. Updates to Testing Toolkit environment file
