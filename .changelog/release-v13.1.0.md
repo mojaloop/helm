@@ -24,6 +24,7 @@ Date | Revision | Description
    3. Added thirdparty-sdk outbound API ([ml-testing-toolkit/pull/195](https://github.com/mojaloop/ml-testing-toolkit/pull/195)), closes [mojaloop/#2533](https://github.com/mojaloop/project/issues/2533)
    4. New feature: Test cases definition report with grouping ([ml-testing-toolkit/pull/196](https://github.com/mojaloop/ml-testing-toolkit/pull/196)), closes [mojaloop/#2348](https://github.com/mojaloop/project/issues/2348)
 7. Added Timeout Configuration to the centralledger-handler-timeout chart, and associated values files
+8. **mojaloop/#2589:** Added resource versions configuration parameter for all outbound requests from sdk-scheme-adapter ([sdk-scheme-adapter/pull/288](https://github.com/mojaloop/sdk-scheme-adapter/pull/288), closes [mojaloop/#2589](https://github.com/mojaloop/project/issues/2589))
 
 ### 3. Bug Fixes
 
@@ -66,7 +67,7 @@ Date | Revision | Description
 16. event-stream-processor: **v11.0.0-snapshot**
 17. simulator: **v11.1.3**
 18. mojaloop-simulator: **v11.6.1**
-19. sdk-scheme-adapter: v11.18.8 -> **v11.18.9**
+19. sdk-scheme-adapter: v11.18.8 -> **v11.18.11**
 20. ml-testing-toolkit: v13.5.1 -> **v14.0.2**
 21. ml-testing-toolkit-ui: v13.5.2 -> **v13.5.5**
 
@@ -90,7 +91,7 @@ Date | Revision | Description
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v11.0.0-snapshot
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v11.1.3
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v11.6.1
-19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.18.9
+19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.18.11
 20. thirdparty-sdk-adapter - https://github.com/mojaloop/thirdparty-sdk/releases/tag/v11.55.1
 21. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v14.0.2
 22. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.5.5
