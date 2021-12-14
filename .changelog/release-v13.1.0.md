@@ -124,7 +124,7 @@ Take note that existing rules may not work without modifying the path to add a `
   - acceptTransfers
   - acceptTransactionRequests
   - acceptAuthorizations
-  - acceptBulkTransfer
+  - acceptBulkTransfers
   - contentTypeTransfers
   - contentTypeParties
   - contentTypeParticipants
