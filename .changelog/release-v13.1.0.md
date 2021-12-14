@@ -124,12 +124,14 @@ Take note that existing rules may not work without modifying the path to add a `
   - acceptTransfers
   - acceptTransactionRequests
   - acceptAuthorizations
+  - acceptBulkTransfer
   - contentTypeTransfers
   - contentTypeParties
   - contentTypeParticipants
   - contentTypeQuotes
   - contentTypeTransactionRequests
   - contentTypeAuthorizations
+  - contentBulkTransfers
   - SIM3_NAME
   - SIM4_NAME
   - SIM3_MSISDN
