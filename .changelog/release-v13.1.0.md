@@ -117,6 +117,34 @@ Date | Revision | Description
 
 Take note that existing rules may not work without modifying the path to add a `$` prefix. See the following link for more information: https://github.com/mojaloop/mojaloop-simulator/pull/120#discussion_r747311386.
 
+3. The following new environment variables are added to the testing toolkit default values
+  - acceptParties
+  - acceptParticipants
+  - acceptQuotes
+  - acceptTransfers
+  - acceptTransactionRequests
+  - acceptAuthorizations
+  - acceptBulkTransfer
+  - contentTypeTransfers
+  - contentTypeParties
+  - contentTypeParticipants
+  - contentTypeQuotes
+  - contentTypeTransactionRequests
+  - contentTypeAuthorizations
+  - contentBulkTransfers
+  - SIM3_NAME
+  - SIM4_NAME
+  - SIM3_MSISDN
+  - SIM4_MSISDN
+  - TESTFSP3_BACKEND_TESTAPI_URL
+  - TESTFSP3_CALLBACK_URL
+  - TESTFSP3_SDK_TESTAPI_URL
+  - TESTFSP3_SDK_TESTAPI_WS_URL
+  - TESTFSP4_BACKEND_TESTAPI_URL
+  - TESTFSP4_CALLBACK_URL
+  - TESTFSP4_SDK_TESTAPI_URL
+  - TESTFSP4_SDK_TESTAPI_WS_URL
+
 ## 9. Testing notes
 
 1. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
