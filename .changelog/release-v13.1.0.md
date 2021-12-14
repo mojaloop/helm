@@ -32,11 +32,11 @@ Date | Revision | Description
 2. **mojaloop/#2525:** transfers are not being assigned to a settlementWindow on transfers version=1.1 ([central-ledger/issues/#866](https://github.com/mojaloop/central-ledger/issues/866)), closes [mojaloop/#2525](https://github.com/mojaloop/project/issues/2525)
 3. **mojaloop/#2527:** transfers PUT callback on version=1.1 is not assigning destination headers correctly ([ml-api-adapter/issues/#866](https://github.com/mojaloop/ml-api-adapter/issues/486)), closes [mojaloop/#2527](https://github.com/mojaloop/project/issues/2527)
 4. **mojaloop/#2549:** sdk-scheme-adapter support for test currencies XXX, XTS revoked with use of api-snippets ([api-snippets/pull/#115](https://github.com/mojaloop/api-snippets/pull/115), [sdk-scheme-adapter/pull/287](https://github.com/mojaloop/sdk-scheme-adapter/pull/287), closes [mojaloop/#2527](https://github.com/mojaloop/project/issues/2549))
-5. **mojaloop/#2534:** FSPIOP API version negotiation not handled - Account-lookup-service ([account-lookup-service/pull/#430](https://github.com/mojaloop/account-lookup-service/pull/430), closes[mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2534))
+5. **mojaloop/#2534:** FSPIOP API version negotiation not handled - Account-lookup-service ([account-lookup-service/pull/#430](https://github.com/mojaloop/account-lookup-service/pull/430), [account-lookup-service/pull/#432](https://github.com/mojaloop/account-lookup-service/pull/432), closes[mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2534))
 6. **mojaloop/#2535:** FSPIOP API version negotiation not handled - Quoting-Service ([quoting-service/pull/#289](https://github.com/mojaloop/quoting-service/pull/289), [quoting-service/pull/290](https://github.com/mojaloop/quoting-service/pull/290), closes [mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2535))
-7. **mojaloop/#2536:** FSPIOP API version negotiation not handled - Transfers-service ([ml-api-adapter/pull/#487](https://github.com/mojaloop/ml-api-adapter/pull/487), closes [mojaloop/#2536](https://github.com/mojaloop/project/issues/2536))
+7. **mojaloop/#2536:** FSPIOP API version negotiation not handled - Transfers-service ([ml-api-adapter/pull/#487](https://github.com/mojaloop/ml-api-adapter/pull/487), [ml-api-adapter/pull/#490](https://github.com/mojaloop/ml-api-adapter/pull/490), closes [mojaloop/#2536](https://github.com/mojaloop/project/issues/2536))
 8. **mojaloop/#2537:** FSPIOP API version negotiation not handled - Transaction-request-service ([transaction-requests-service/pull/#80](https://github.com/mojaloop/transaction-requests-service/pull/80), closes [mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2537))
-9. **mojaloop/#2538:** FSPIOP API version negotiation not handled - Bulk-api-adapter ([bulk-api-adapter/pull/#67](https://github.com/mojaloop/bulk-api-adapter/pull/67), closes[mojaloop/#2538](https://github.com/mojaloop/project/issues/2538))
+9. **mojaloop/#2538:** FSPIOP API version negotiation not handled - Bulk-api-adapter ([bulk-api-adapter/pull/#67](https://github.com/mojaloop/bulk-api-adapter/pull/67), [bulk-api-adapter/pull/#70](https://github.com/mojaloop/bulk-api-adapter/pull/70), closes[mojaloop/#2538](https://github.com/mojaloop/project/issues/2538))
 10. **mojaloop/#2557:** In error notification to Payer FSP, header for source having wrong value ([ml-api-adapter/pull/#488](https://github.com/mojaloop/ml-api-adapter/pull/488), [central-ledger/pull/#869](https://github.com/mojaloop/central-ledger/pull/869), [central-services-shared/pull/#316](https://github.com/mojaloop/central-services-shared/pull/316), closes [mojaloop/#2557](https://github.com/mojaloop/project/issues/2557))
 11. **mojaloop/#2574:** SDK-Scheme-Adapter is not returning Party Sub-Id ([mojaloop-simulator/pull/#120](https://github.com/mojaloop/mojaloop-simulator/pull/120), closes[mojaloop/#2574](https://github.com/mojaloop/project/issues/2574))
 12. **mojaloop/#2584:** bulk-api-adapter is unable to process requests with individualTransfers[].extensionLists ([bulk-api-adapter/pull/69](https://github.com/mojaloop/bulk-api-adapter/pull/2584), closes[mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2584))
@@ -49,13 +49,13 @@ Date | Revision | Description
 
 ## 4. Application versions
 
-1. ml-api-adapter: v11.1.6 -> **v12.0.0**
+1. ml-api-adapter: v11.1.6 -> **v12.1.0**
 2. central-ledger: v13.14.0 -> **v13.14.3**
-3. account-lookup-service: v11.7.7 -> **v12.0.0**
+3. account-lookup-service: v11.7.7 -> **v12.1.0**
 4. quoting-service: 12.0.10 -> **13.0.1**
 5. central-settlement: **13.4.1**
 6. central-event-processor: **v11.0.2**
-7. bulk-api-adapter: 11.1.4 -> **v12.0.2**
+7. bulk-api-adapter: 11.1.4 -> **v12.1.0**
 8. email-notifier: **v11.0.2**
 9. als-oracle-pathfinder: v11.0.0 -> **v11.0.4**
 10. transaction-requests-service: **v12.0.1**
@@ -73,13 +73,13 @@ Date | Revision | Description
 
 ## 5. Application release notes
 
-1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v12.0.0
+1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v12.1.0
 2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.14.3
-3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v12.0.0
+3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v12.1.0
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v13.0.1
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v11.0.2
-7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v11.1.4
+7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v12.1.0
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.2
 9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v11.0.4
 10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v12.0.1
