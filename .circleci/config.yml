@@ -18,13 +18,13 @@ orbs:
 defaults_Dependencies: &defaults_Dependencies
   name: Install default dependencies
   command: |
-    apk --no-cache add git
-    apk --no-cache add bash
-    apk --no-cache add ca-certificates
-    apk --no-cache add curl
-    apk --no-cache add openssh-client
-    apk add --no-cache -t python2
-    apk add --no-cache -t build-dependencies make gcc g++ libtool autoconf automake
+    apk --no-cache add --update git
+    apk --no-cache add --update openssh-client
+    apk --no-cache add --update bash
+    apk --no-cache add --update ca-certificates
+    apk --no-cache add --update curl
+    apk add --no-cache --update -t python2
+    apk add --no-cache --update -t build-dependencies make gcc g++ libtool autoconf automake
 
 defaults_license_scanner: &defaults_license_scanner
   name: Install and set up license-scanner
@@ -57,7 +57,7 @@ executors:
   default-docker-helm:
     working_directory: /home/circleci/project
     docker:
-      - image: alpine/helm:3.5.0
+      - image: alpine/helm:3.7.2
 
   default-machine:
     machine:
@@ -72,6 +72,8 @@ jobs:
   setup:
     executor: default-docker-helm
     steps:
+      - run:
+          <<: *defaults_Dependencies
       - checkout
       - run:
           name: Placeholder for setup
@@ -80,9 +82,9 @@ jobs:
   test:
     executor: default-docker-helm
     steps:
-      - checkout
       - run:
           <<: *defaults_Dependencies
+      - checkout
       - run:
           <<: *defaults_environment
       - run:
@@ -134,9 +136,9 @@ jobs:
   build:
     executor: default-docker-helm
     steps:
-      - checkout
       - run:
           <<: *defaults_Dependencies
+      - checkout
       - run:
           <<: *defaults_environment
       - run:
@@ -147,9 +149,9 @@ jobs:
   deploy:
     executor: default-docker-helm
     steps:
-      - checkout
       - run:
           <<: *defaults_Dependencies
+      - checkout
       - run:
           <<: *defaults_environment
       - run:

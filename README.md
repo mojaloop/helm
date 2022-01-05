@@ -70,6 +70,14 @@ Refer to the following default chart config file for values: http://mojaloop.io/
 
 e.g. `helm --namespace moja install dev mojaloop/mojaloop`
 
+5. Deploy Mojaloop with Bulk-API-Adapter
+
+*Warning: This will deploy all core Mojaloop charts.* and the Bulk-API-Adapter
+
+- `helm --namespace <namespace> install <release_name> mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true `
+
+e.g. `helm --namespace moja install dev mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true `
+
 ### Deploying development versions
 
 1. To deploy the latest development version, use the `--devel` flag:
@@ -126,18 +134,27 @@ e.g. `helm --namespace mojaloop upgrade dev ./centralenduserregistry`
 
 _Note: This is currently only supported by Helm v3._
 
+Mojaloop Helm deployments currently include the following tests:
+
+| Helm Test | Test Cases | Enabled by default? | Notes |
+|---------|----------|----------|----------|
+| ml-ttk-test-setup.tests | [hub/provisioning](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/provisioning) | Yes | Required as a pre-requisite for all tests. |
+| ml-ttk-test-val-gp | [hub/golden_path](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/golden_path)  | Yes | Previously named `ml-ttk-test-validation` prior to v13.1.0 release. |
+| ml-ttk-test-val-bulk | [hub/other_tests/bulk_transfers](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/other_tests/bulk_transfers) | No | `mojaloop-bulk.enabled=true` must be set to deploy the Bulk-API-Adapter components. |
+
 1. Ensure Tests are enabled
 
 Ensure the following properties are set in your values file:
 
 - ml-ttk-test-setup.tests.enabled=true
-- ml-ttk-test-validation.tests.enabled=true
+- ml-ttk-test-val-gp.tests.enabled=true
+- ml-ttk-test-val-bulk.tests.enabled=true (_Note: only applicable if `mojaloop-bulk.enabled=true` is set_)
 
 Or alternatively add `--set` for each of the above parameters on the install command:
 
-`helm install ... --set ml-ttk-test-setup.tests.enabled=true --set ml-ttk-test-validation.tests.enabled=true`
+`helm install ... --set ml-ttk-test-setup.tests.enabled=true --set ml-ttk-test-val-gp.tests.enabled=true --set ml-ttk-test-val-bulk=true --set ml-ttk-test-val-bulk.tests.enabled=true`
 
-2. Run Tests
+1. Run Tests
 
 Run tests:
 `helm test <RELEASE_NAME>`

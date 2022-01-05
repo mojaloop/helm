@@ -8,7 +8,7 @@ global: {}
 replicaCount: 1
 image:
   repository: mojaloop/quoting-service
-  tag: v12.0.10
+  tag: v13.0.1
   pullPolicy: IfNotPresent
 
 readinessProbe:
@@ -67,6 +67,19 @@ sidecar:
     log_filter: 'error, warn, info'
 
 config:
+
+  protocol_versions: {
+    "CONTENT": "1.0",
+    "ACCEPT": {
+      "DEFAULT": "1",
+      "VALIDATELIST": [
+        "1",
+        "1.0",
+        "1.1"
+      ]
+    }
+  }
+
   ## DB Configuration
   # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
   db_type: 'mysql'
@@ -126,8 +139,6 @@ config:
   error_handling:
     include_cause_extension: false
     truncate_extensions: true
-  resource_versions: 'transfers=1.1,participants=1.1,quotes=1.0'
-
 
 rules: []
 
