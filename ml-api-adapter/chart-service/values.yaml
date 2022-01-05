@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   repository: mojaloop/ml-api-adapter
-  tag: v11.1.6
+  tag: v12.1.0
   command: '["node", "src/api/index.js"]'
 ## Optionally specify an array of imagePullSecrets.
 ## Secrets must be manually created in the namespace.
@@ -107,6 +107,18 @@ config:
   max_callback_time_lag_dilation_milliseconds: 100
   max_fulfil_timeout_duration_seconds: 240
 
+  protocol_versions: {
+    "CONTENT": "1.1",
+    "ACCEPT": {
+      "DEFAULT": "1",
+      "VALIDATELIST": [
+        "1",
+        "1.0",
+        "1.1"
+      ]
+    }
+  }
+
   ## Log Configuration
   log_level: info
   log_filter: 'error, warn, info'
@@ -130,7 +142,6 @@ config:
   error_handling:
     include_cause_extension: false
     truncate_extensions: true
-  resource_versions: 'transfers=1.1,participants=1.1,quotes=1.0'
 
 service:
   type: ClusterIP
