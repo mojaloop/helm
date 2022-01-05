@@ -109,15 +109,11 @@ Date | Revision | Description
 
 ## 8. Upgrade notes
 
-1. Updates to Testing Toolkit environment file
-
-{{PLACEHOLDER}}
-
-2. Mojaloop-Simulator Rules path requires a `$` prefix (Known Issue)
+1. Mojaloop-Simulator Rules path requires a `$` prefix (Known Issue)
 
 Take note that existing rules may not work without modifying the path to add a `$` prefix. See the following link for more information: https://github.com/mojaloop/mojaloop-simulator/pull/120#discussion_r747311386.
 
-3. The following new environment variables are added to the testing toolkit default values
+2. The following new environment variables are added to the Testing Toolkit default values:
   - acceptParties
   - acceptParticipants
   - acceptQuotes
