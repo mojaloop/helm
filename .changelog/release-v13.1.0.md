@@ -14,7 +14,7 @@ Date | Revision | Description
 ### 2. New Features
 
 1. **mojaloop/#2314:** Add CGS default settlement test cases in testing toolkit test collection ([testing-toolkit-test-cases/pull/#54](https://github.com/mojaloop/testing-toolkit-test-cases/pull/54), (testing-toolkit-test-cases/pull/#57)[https://github.com/mojaloop/testing-toolkit-test-cases/pull/57], [mojaloop/helm/pull/#458](https://github.com/mojaloop/helm/pull/458), closes [mojaloop/#2314](https://github.com/mojaloop/project/issues/2314))
-2. **mojaloop/#2505:** als-subid-error-callback-endpoint-not-implemented ([account-lookup-service/issues/#429](https://github.com/mojaloop/account-lookup-service/issues/429)), closes [mojaloop/#2505](https://github.com/mojaloop/mojaloop/issues/2505) [mojaloop/#2505](https://github.com/mojaloop/mojaloop/issues/2505))
+2. **mojaloop/#2505:** als-subid-error-callback-endpoint-not-implemented ([account-lookup-service/issues/#429](https://github.com/mojaloop/account-lookup-service/issues/429)), closes [mojaloop/#2505](https://github.com/mojaloop/mojaloop/issues/2505))
 3. **mojaloop/#2450:** feat(thirdparty): add tp-api-svc and round out thirdparty sub-chart ([helm/pull/#454](https://github.com/mojaloop/helm/pull/454), closes [mojaloop/#2450](https://github.com/mojaloop/project/issues/2450))
 4. **mojaloop/#2532:** feat(thirdparty): add thirdparty support to mojaloop-simulator chart ([helm/pull/#456](https://github.com/mojaloop/helm/pull/456), closes [mojaloop/#2532](https://github.com/mojaloop/project/issues/2532))
 5. **mojaloop/#2556:** Implement patch notification for failure scenarios (following v1.1 update) ([xxxx](xxxx), closes [mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2556)) **BLOCKER PENDING***
