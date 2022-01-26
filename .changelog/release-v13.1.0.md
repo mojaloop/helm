@@ -141,6 +141,10 @@ Take note that existing rules may not work without modifying the path to add a `
   - TESTFSP4_SDK_TESTAPI_URL
   - TESTFSP4_SDK_TESTAPI_WS_URL
 
+3. Bulk API Helm Tests
+
+Refer to the [Testing Deployments](https://github.com/mojaloop/helm#testing-deployments) section in the main README for detailed information on how to enable bulk-api-adapter tests.
+
 ## 9. Testing notes
 
 1. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
@@ -170,8 +174,7 @@ Take note that existing rules may not work without modifying the path to add a `
 3. [#2352 - Mojaloop Helm support for Kubernetes 1.22](https://github.com/mojaloop/project/issues/2352)
 4. [#2448 - Nginx Ingress Controller v1.0.0 is incompatible with Mojaloop Helm v13.0.x releases](https://github.com/mojaloop/project/issues/2448)
 5. [#2317 - Mojaloop Helm deployments are not compatible when deployed to ARM-arch based hosts](https://github.com/mojaloop/project/issues/2317)
-6. [Mojaloop-Simulator Rules path requires a `$` prefix](https://github.com/mojaloop/mojaloop-simulator/pull/120#discussion_r747311386)
-7. [#2654 - Unstable GP tests for 13.1.0 Release Candidate](https://github.com/mojaloop/project/issues/2654) **BLOCKER PENDING***
+6. [#2654 - Unstable GP tests for 13.1.0 Release Candidate](https://github.com/mojaloop/project/issues/2654) **BLOCKER PENDING***
 
 ## 11. Contributors
 
