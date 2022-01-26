@@ -143,7 +143,7 @@ Take note that existing rules may not work without modifying the path to add a `
 
 3. Bulk API Helm Tests
 
-Refer to the [Testing Deployments](../helm#testing-deployments) section in the main README for detailed information on how to enable bulk-api-adapter tests.
+Refer to the [Testing Deployments](../README.md#testing-deployments) section in the main README for detailed information on how to enable bulk-api-adapter tests.
 
 ## 9. Testing notes
 
