@@ -17,7 +17,7 @@ Date | Revision | Description
 2. **mojaloop/#2505:** als-subid-error-callback-endpoint-not-implemented ([account-lookup-service/issues/#429](https://github.com/mojaloop/account-lookup-service/issues/429)), closes [mojaloop/#2505](https://github.com/mojaloop/mojaloop/issues/2505))
 3. **mojaloop/#2450:** feat(thirdparty): add tp-api-svc and round out thirdparty sub-chart ([helm/pull/#454](https://github.com/mojaloop/helm/pull/454), closes [mojaloop/#2450](https://github.com/mojaloop/project/issues/2450))
 4. **mojaloop/#2532:** feat(thirdparty): add thirdparty support to mojaloop-simulator chart ([helm/pull/#456](https://github.com/mojaloop/helm/pull/456), closes [mojaloop/#2532](https://github.com/mojaloop/project/issues/2532))
-5. **mojaloop/#2556:** Implement patch notification for failure scenarios (following v1.1 update) ([xxxx](xxxx), closes [mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2556)) **BLOCKER PENDING***
+5. **mojaloop/#2556:** Implement patch notification for failure scenarios (following v1.1 update) ([central-services-shared/pull/321](https://github.com/mojaloop/central-services-shared/pull/321), [central-ledger/pull/874](https://github.com/mojaloop/central-ledger/pull/874), [ml-api-adapter/pull/492](https://github.com/mojaloop/ml-api-adapter/pull/492), closes [mojaloop/#2556](https://github.com/mojaloop/project/issues/2556))
 6. Testing Toolkit:
    1. Moved object store init config to system config ([ml-testing-toolkit/pull/189](https://github.com/mojaloop/ml-testing-toolkit/pull/189))
    2. Added labels functionality to test cases ([ml-testing-toolkit/pull/193](https://github.com/mojaloop/ml-testing-toolkit/pull/193), [ml-testing-toolkit-ui/pull/122](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/122), [ml-testing-toolkit-ui/pull/123](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/123) and [ml-testing-toolkit-ui/pull/124](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/124)), closes [mojaloop/#2161](https://github.com/mojaloop/project/issues/2161)
@@ -32,25 +32,26 @@ Date | Revision | Description
 2. **mojaloop/#2525:** transfers are not being assigned to a settlementWindow on transfers version=1.1 ([central-ledger/issues/#866](https://github.com/mojaloop/central-ledger/issues/866)), closes [mojaloop/#2525](https://github.com/mojaloop/project/issues/2525)
 3. **mojaloop/#2527:** transfers PUT callback on version=1.1 is not assigning destination headers correctly ([ml-api-adapter/issues/#866](https://github.com/mojaloop/ml-api-adapter/issues/486)), closes [mojaloop/#2527](https://github.com/mojaloop/project/issues/2527)
 4. **mojaloop/#2549:** sdk-scheme-adapter support for test currencies XXX, XTS revoked with use of api-snippets ([api-snippets/pull/#115](https://github.com/mojaloop/api-snippets/pull/115), [sdk-scheme-adapter/pull/287](https://github.com/mojaloop/sdk-scheme-adapter/pull/287), closes [mojaloop/#2527](https://github.com/mojaloop/project/issues/2549))
-5. **mojaloop/#2534:** FSPIOP API version negotiation not handled - Account-lookup-service ([account-lookup-service/pull/#430](https://github.com/mojaloop/account-lookup-service/pull/430), [account-lookup-service/pull/#432](https://github.com/mojaloop/account-lookup-service/pull/432), closes[mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2534))
-6. **mojaloop/#2535:** FSPIOP API version negotiation not handled - Quoting-Service ([quoting-service/pull/#289](https://github.com/mojaloop/quoting-service/pull/289), [quoting-service/pull/290](https://github.com/mojaloop/quoting-service/pull/290), closes [mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2535))
+5. **mojaloop/#2534:** FSPIOP API version negotiation not handled - Account-lookup-service ([account-lookup-service/pull/#430](https://github.com/mojaloop/account-lookup-service/pull/430), [account-lookup-service/pull/#432](https://github.com/mojaloop/account-lookup-service/pull/432), closes[mojaloop/#2534](https://github.com/mojaloop/project/issues/2534))
+6. **mojaloop/#2535:** FSPIOP API version negotiation not handled - Quoting-Service ([quoting-service/pull/#289](https://github.com/mojaloop/quoting-service/pull/289), [quoting-service/pull/290](https://github.com/mojaloop/quoting-service/pull/290), closes [mojaloop/#2535](https://github.com/mojaloop/project/issues/2535))
 7. **mojaloop/#2536:** FSPIOP API version negotiation not handled - Transfers-service ([ml-api-adapter/pull/#487](https://github.com/mojaloop/ml-api-adapter/pull/487), [ml-api-adapter/pull/#490](https://github.com/mojaloop/ml-api-adapter/pull/490), closes [mojaloop/#2536](https://github.com/mojaloop/project/issues/2536))
-8. **mojaloop/#2537:** FSPIOP API version negotiation not handled - Transaction-request-service ([transaction-requests-service/pull/#80](https://github.com/mojaloop/transaction-requests-service/pull/80), closes [mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2537))
+8. **mojaloop/#2537:** FSPIOP API version negotiation not handled - Transaction-request-service ([transaction-requests-service/pull/#80](https://github.com/mojaloop/transaction-requests-service/pull/80), closes [mojaloop/#2537](https://github.com/mojaloop/project/issues/2537))
 9. **mojaloop/#2538:** FSPIOP API version negotiation not handled - Bulk-api-adapter ([bulk-api-adapter/pull/#67](https://github.com/mojaloop/bulk-api-adapter/pull/67), [bulk-api-adapter/pull/#70](https://github.com/mojaloop/bulk-api-adapter/pull/70), closes[mojaloop/#2538](https://github.com/mojaloop/project/issues/2538))
 10. **mojaloop/#2557:** In error notification to Payer FSP, header for source having wrong value ([ml-api-adapter/pull/#488](https://github.com/mojaloop/ml-api-adapter/pull/488), [central-ledger/pull/#869](https://github.com/mojaloop/central-ledger/pull/869), [central-services-shared/pull/#316](https://github.com/mojaloop/central-services-shared/pull/316), closes [mojaloop/#2557](https://github.com/mojaloop/project/issues/2557))
-11. **mojaloop/#2574:** SDK-Scheme-Adapter is not returning Party Sub-Id ([mojaloop-simulator/pull/#120](https://github.com/mojaloop/mojaloop-simulator/pull/120), closes[mojaloop/#2574](https://github.com/mojaloop/project/issues/2574))
-12. **mojaloop/#2584:** bulk-api-adapter is unable to process requests with individualTransfers[].extensionLists ([bulk-api-adapter/pull/69](https://github.com/mojaloop/bulk-api-adapter/pull/2584), closes[mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2584))
-13. **mojaloop/#2585:** bulk-api-adapter fails when extensionLists are not send in the POST /bulkTransfer requests ([bulk-api-adapter/pull/69](https://github.com/mojaloop/bulk-api-adapter/pull/69), [object-store-lib/pull/35](https://github.com/mojaloop/object-store-lib/pull/35), closes[mojaloop/#xxxx](https://github.com/mojaloop/project/issues/2585))
-14. als-oracle-pathfinder fix: init and startup issues ([als-oracle-pathfinder/pull/#61](https://github.com/mojaloop/als-oracle-pathfinder/pull/61))
-15. Testing Toolkit:
+11. **mojaloop/#2574:** SDK-Scheme-Adapter is not returning Party Sub-Id ([mojaloop-simulator/pull/#120](https://github.com/mojaloop/mojaloop-simulator/pull/120), closes [mojaloop/#2574](https://github.com/mojaloop/project/issues/2574))
+12. **mojaloop/#2584:** bulk-api-adapter is unable to process requests with individualTransfers[].extensionLists ([bulk-api-adapter/pull/69](https://github.com/mojaloop/bulk-api-adapter/pull/2584), closes[mojaloop/#2584](https://github.com/mojaloop/project/issues/2584))
+13. **mojaloop/#2585:** bulk-api-adapter fails when extensionLists are not send in the POST /bulkTransfer requests ([bulk-api-adapter/pull/69](https://github.com/mojaloop/bulk-api-adapter/pull/69), [object-store-lib/pull/35](https://github.com/mojaloop/object-store-lib/pull/35), closes[mojaloop/#2585](https://github.com/mojaloop/project/issues/2585))
+14. **mojaloop/#2697:** Central-Ledger Fulfil Handler does not correctly invalidate requests with an incorrect/non-existent FSP-ID in the FSPIOP-Destination header ([central-ledger/pull/874](https://github.com/mojaloop/central-ledger/pull/874), closes[mojaloop/#2697](https://github.com/mojaloop/project/issues/2697))
+15. als-oracle-pathfinder fix: init and startup issues ([als-oracle-pathfinder/pull/#61](https://github.com/mojaloop/als-oracle-pathfinder/pull/61))
+16. Testing Toolkit:
     1. Fixed TLS connectivity in hosted mode ([ml-testing-toolkit/pull/192](https://github.com/mojaloop/ml-testing-toolkit/pull/192)), closes [mojaloop/#1790](https://github.com/mojaloop/project/issues/1790)
     2. Fixed fxapi callback map ([ml-testing-toolkit/pull/194](https://github.com/mojaloop/ml-testing-toolkit/pull/194))
     3. Fixed stop button not working intermittently ([ml-testing-toolkit-ui/pull/121](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/121)), closes [mojaloop/#2332](https://github.com/mojaloop/project/issues/2332)
 
 ## 4. Application versions
 
-1. ml-api-adapter: v11.1.6 -> **v12.1.0**
-2. central-ledger: v13.14.0 -> **v13.14.3**
+1. ml-api-adapter: v11.1.6 -> **v12.3.0**
+2. central-ledger: v13.14.0 -> **v13.15.4**
 3. account-lookup-service: v11.7.7 -> **v12.1.0**
 4. quoting-service: 12.0.10 -> **13.0.1**
 5. central-settlement: **13.4.1**
@@ -68,13 +69,13 @@ Date | Revision | Description
 17. simulator: **v11.1.3**
 18. mojaloop-simulator: **v11.6.1**
 19. sdk-scheme-adapter: v11.18.8 -> **v11.18.11**
-20. ml-testing-toolkit: v13.5.1 -> **v14.0.2**
+20. ml-testing-toolkit: v13.5.1 -> **v14.0.4**
 21. ml-testing-toolkit-ui: v13.5.2 -> **v13.5.5**
 
 ## 5. Application release notes
 
-1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v12.1.0
-2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.14.3
+1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v12.3.0
+2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.15.4
 3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v12.1.0
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v13.0.1
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
@@ -93,7 +94,7 @@ Date | Revision | Description
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v11.6.1
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.18.11
 20. thirdparty-sdk-adapter - https://github.com/mojaloop/thirdparty-sdk/releases/tag/v11.55.1
-21. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v14.0.2
+21. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v14.0.4
 22. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.5.5
 
 ## 6. Operational Chart versions
