@@ -16,7 +16,7 @@ Initiators to a Mojaloop Switch.
 
 ## Components
 
-### Third Party API Service:
+### Third Party API Service
 
 The core of the 3P-API is handled by the Third Party API Service (tp-api-svc), which 
 implements the Third Party API as defined in the [Mojaloop 3P API Specification](https://github.com/mojaloop/mojaloop-specification/tree/master/thirdparty-api).
