@@ -50,8 +50,8 @@ Date | Revision | Description
 
 ## 4. Application versions
 
-1. ml-api-adapter: v11.1.6 -> **v12.3.0**
-2. central-ledger: v13.14.0 -> **v13.15.4**
+1. ml-api-adapter: v11.1.6 -> **v13.0.0**
+2. central-ledger: v13.14.0 -> **v13.16.0**
 3. account-lookup-service: v11.7.7 -> **v12.1.0**
 4. quoting-service: 12.0.10 -> **13.0.1**
 5. central-settlement: **13.4.1**
@@ -74,8 +74,8 @@ Date | Revision | Description
 
 ## 5. Application release notes
 
-1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v12.3.0
-2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.15.4
+1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v13.0.0
+2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.16.0
 3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v12.1.0
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v13.0.1
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
