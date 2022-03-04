@@ -116,19 +116,47 @@ Take note that existing rules may not work without modifying the path to add a `
 
 2. The following new environment variables are added to the Testing Toolkit default values:
   - acceptParties
+  - acceptPartiesOld
+  - acceptPartiesNotSupported
   - acceptParticipants
+  - acceptParticipantsOld
+  - acceptParticipantsNotSupported
   - acceptQuotes
+  - acceptQuotesOld
+  - acceptQuotesNotSupported
   - acceptTransfers
+  - acceptTransfersOld
+  - acceptTransfersNotSupported
   - acceptTransactionRequests
+  - acceptTransactionRequestsOld
+  - acceptTransactionRequestsNotSupported
   - acceptAuthorizations
+  - acceptAuthorizationsOld
+  - acceptAuthorizationsNotSupported
   - acceptBulkTransfers
+  - acceptBulkTransfersOld
+  - acceptBulkTransfersNotSupported
   - contentTypeTransfers
+  - contentTypeTransfersOld
+  - contentTypeTransfersNotSupported
   - contentTypeParties
+  - contentTypePartiesOld
+  - contentTypePartiesNotSupported
   - contentTypeParticipants
+  - contentTypeParticipantsOld
+  - contentTypeParticipantsNotSupported
   - contentTypeQuotes
+  - contentTypeQuotesOld
+  - contentTypeQuotesNotSupported
   - contentTypeTransactionRequests
+  - contentTypeTransactionRequestsOld
+  - contentTypeTransactionRequestsNotSupported
   - contentTypeAuthorizations
+  - contentTypeAuthorizationsOld
+  - contentTypeAuthorizationsNotSupported
   - contentBulkTransfers
+  - contentBulkTransfersOld
+  - contentBulkTransfersNotSupported
   - SIM3_NAME
   - SIM4_NAME
   - SIM3_MSISDN
