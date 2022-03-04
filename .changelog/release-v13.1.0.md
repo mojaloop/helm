@@ -108,36 +108,6 @@ Date | Revision | Description
 
 2. Helm test jobs name `ml-ttk-test-validation` (and its associated configuration tag in the values.yaml) have been shortened to `ml-ttk-test-val-gp` and made more meaningful with the introduction of the Bulk-API-Adapter tests (`ml-ttk-test-val-bulk`). Ensure you update your Helm values config to match this change (i.e. rename `ml-ttk-test-validation` to `ml-ttk-test-val-gp`).
 
-3. The following services now support configurable Content-Type and Accept Header validations and set header version when generating messages from the Switch:
-
-   1. ml-api-adapter [v13.0.0](https://github.com/mojaloop/ml-api-adapter/releases/tag/v13.0.0)
-   2. account-lookup-service - [v13.0.0](https://github.com/mojaloop/account-lookup-service/releases/tag/v13.0.0)
-   3. quoting-service - [v14.0.0](https://github.com/mojaloop/quoting-service/releases/tag/v14.0.0)
-   4. bulk-api-adapter - [v13.0.0](https://github.com/mojaloop/bulk-api-adapter/releases/tag/v13.0.0)
-   5. transaction-requests-service - [v13.0.0](https://github.com/mojaloop/transaction-requests-service/releases/tag/v13.0.0)
-
-    This can be set by the `PROTOCOL_VERSIONS` configuration as follows in the `default.json` or via environmental variables:
-
-    ```JSON
-     "PROTOCOL_VERSIONS": {
-       "CONTENT": {
-         "DEFAULT": "1.1", <-- used to set the header CONTENT version when generating messages from the *SWITCH*
-         "VALIDATELIST": [ <-- used to validate incoming FSPIOP API requests/callbacks version within the CONTENT-TYPE headers
-           "1.1",
-           "1.0"
-         ]
-       },
-       "ACCEPT": {
-         "DEFAULT": "1", <-- used to set the header ACCEPT-TYPE version when generating messages from the *SWITCH*
-         "VALIDATELIST": [ <-- used to validate incoming FSPIOP API requests/callbacks version within the ACCEPT headers
-           "1",
-           "1.0",
-           "1.1"
-         ]
-       }
-     },
-    ```
-
 ## 8. Upgrade notes
 
 1. Mojaloop-Simulator Rules path requires a `$` prefix (Known Issue)
@@ -175,6 +145,38 @@ Take note that existing rules may not work without modifying the path to add a `
 3. Bulk API Helm Tests
 
 Refer to the [Testing Deployments](../README.md#testing-deployments) section in the main README for detailed information on how to enable bulk-api-adapter tests.
+
+4. The following services now support configurable Content-Type and Accept Header validations and set header version when generating messages from the Switch:
+
+   1. ml-api-adapter [v13.0.0](https://github.com/mojaloop/ml-api-adapter/releases/tag/v13.0.0)
+   2. account-lookup-service - [v13.0.0](https://github.com/mojaloop/account-lookup-service/releases/tag/v13.0.0)
+   3. quoting-service - [v14.0.0](https://github.com/mojaloop/quoting-service/releases/tag/v14.0.0)
+   4. bulk-api-adapter - [v13.0.0](https://github.com/mojaloop/bulk-api-adapter/releases/tag/v13.0.0)
+   5. transaction-requests-service - [v13.0.0](https://github.com/mojaloop/transaction-requests-service/releases/tag/v13.0.0)
+
+    This can be set by the `PROTOCOL_VERSIONS` configuration as follows in the `default.json` or via environmental variables:
+
+    ```JSON
+     "PROTOCOL_VERSIONS": {
+       "CONTENT": {
+         "DEFAULT": "1.1", <-- used to set the header CONTENT version when generating messages from the *SWITCH*
+         "VALIDATELIST": [ <-- used to validate incoming FSPIOP API requests/callbacks version within the CONTENT-TYPE headers
+           "1.1",
+           "1.0"
+         ]
+       },
+       "ACCEPT": {
+         "DEFAULT": "1", <-- used to set the header ACCEPT-TYPE version when generating messages from the *SWITCH*
+         "VALIDATELIST": [ <-- used to validate incoming FSPIOP API requests/callbacks version within the ACCEPT headers
+           "1",
+           "1.0",
+           "1.1"
+         ]
+       }
+     },
+    ```
+
+    Note the above configuration is optional, as it will default to what is shown above if not overridden by a set configuration.
 
 ## 9. Testing notes
 
