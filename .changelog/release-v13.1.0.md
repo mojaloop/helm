@@ -25,6 +25,7 @@ Date | Revision | Description
    4. New feature: Test cases definition report with grouping ([ml-testing-toolkit/pull/196](https://github.com/mojaloop/ml-testing-toolkit/pull/196)), closes [mojaloop/#2348](https://github.com/mojaloop/project/issues/2348)
 7. Added Timeout Configuration to the centralledger-handler-timeout chart, and associated values files
 8. **mojaloop/#2589:** Added resource versions configuration parameter for all outbound requests from sdk-scheme-adapter ([sdk-scheme-adapter/pull/288](https://github.com/mojaloop/sdk-scheme-adapter/pull/288), closes [mojaloop/#2589](https://github.com/mojaloop/project/issues/2589))
+9. **mojaloop/#2704:** Core-services support for non-breaking backward API compatibility for PROTOCOL_VERSION configs ([central-services-shared/pull/325](https://github.com/mojaloop/central-services-shared/pull/325), [ml-api-adapter/pull/496](https://github.com/mojaloop/ml-api-adapter/pull/496), [quoting-service/pull/295](https://github.com/mojaloop/quoting-service/pull/295), [account-lookup-service/pull/436](https://github.com/mojaloop/account-lookup-service/pull/436), [account-lookup-service/pull/438](https://github.com/mojaloop/account-lookup-service/pull/438), [quoting-service/pull/297](https://github.com/mojaloop/quoting-service/pull/297), [bulk-api-adapter/pull/74](https://github.com/mojaloop/bulk-api-adapter/pull/74), [bulk-api-adapter/pull/77](https://github.com/mojaloop/bulk-api-adapter/pull/77), [transaction-requests-service/pull/85](https://github.com/mojaloop/transaction-requests-service/pull/85), [central-ledger/pull/884](https://github.com/mojaloop/central-ledger/pull/884), [testing-toolkit-test-cases/pull/66](https://github.com/mojaloop/testing-toolkit-test-cases/pull/66), closes [mojaloop/#2704](https://github.com/mojaloop/project/issues/2704))
 
 ### 3. Bug Fixes
 
@@ -50,16 +51,16 @@ Date | Revision | Description
 
 ## 4. Application versions
 
-1. ml-api-adapter: v11.1.6 -> **v12.3.0**
-2. central-ledger: v13.14.0 -> **v13.15.4**
-3. account-lookup-service: v11.7.7 -> **v12.1.0**
-4. quoting-service: 12.0.10 -> **13.0.1**
+1. ml-api-adapter: v11.1.6 -> **v13.0.0**
+2. central-ledger: v13.14.0 -> **v13.16.0**
+3. account-lookup-service: v11.7.7 -> **v13.0.0**
+4. quoting-service: 12.0.10 -> **14.0.0**
 5. central-settlement: **13.4.1**
 6. central-event-processor: **v11.0.2**
-7. bulk-api-adapter: 11.1.4 -> **v12.1.0**
+7. bulk-api-adapter: 11.1.4 -> **v13.0.1**
 8. email-notifier: **v11.0.2**
 9. als-oracle-pathfinder: v11.0.0 -> **v11.0.4**
-10. transaction-requests-service: **v12.0.1**
+10. transaction-requests-service: **v13.0.0**
 11. finance-portal-ui: **v10.4.3**
 12. finance-portal-backend-service: **v15.0.2**
 13. settlement-management: **v11.0.0**
@@ -74,16 +75,16 @@ Date | Revision | Description
 
 ## 5. Application release notes
 
-1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v12.3.0
-2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.15.4
-3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v12.1.0
-4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v13.0.1
+1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v13.0.0
+2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.16.0
+3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v13.0.0
+4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v14.0.0
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v11.0.2
-7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v12.1.0
+7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v13.0.1
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.2
 9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v11.0.4
-10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v12.0.1
+10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v13.0.0
 11. finance-portal-ui - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
 12. finance-portal-backend-service - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
 13. settlement-management - https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0
@@ -116,19 +117,47 @@ Take note that existing rules may not work without modifying the path to add a `
 
 2. The following new environment variables are added to the Testing Toolkit default values:
   - acceptParties
+  - acceptPartiesOld
+  - acceptPartiesNotSupported
   - acceptParticipants
+  - acceptParticipantsOld
+  - acceptParticipantsNotSupported
   - acceptQuotes
+  - acceptQuotesOld
+  - acceptQuotesNotSupported
   - acceptTransfers
+  - acceptTransfersOld
+  - acceptTransfersNotSupported
   - acceptTransactionRequests
+  - acceptTransactionRequestsOld
+  - acceptTransactionRequestsNotSupported
   - acceptAuthorizations
+  - acceptAuthorizationsOld
+  - acceptAuthorizationsNotSupported
   - acceptBulkTransfers
+  - acceptBulkTransfersOld
+  - acceptBulkTransfersNotSupported
   - contentTypeTransfers
+  - contentTypeTransfersOld
+  - contentTypeTransfersNotSupported
   - contentTypeParties
+  - contentTypePartiesOld
+  - contentTypePartiesNotSupported
   - contentTypeParticipants
+  - contentTypeParticipantsOld
+  - contentTypeParticipantsNotSupported
   - contentTypeQuotes
+  - contentTypeQuotesOld
+  - contentTypeQuotesNotSupported
   - contentTypeTransactionRequests
+  - contentTypeTransactionRequestsOld
+  - contentTypeTransactionRequestsNotSupported
   - contentTypeAuthorizations
+  - contentTypeAuthorizationsOld
+  - contentTypeAuthorizationsNotSupported
   - contentBulkTransfers
+  - contentBulkTransfersOld
+  - contentBulkTransfersNotSupported
   - SIM3_NAME
   - SIM4_NAME
   - SIM3_MSISDN
@@ -145,6 +174,38 @@ Take note that existing rules may not work without modifying the path to add a `
 3. Bulk API Helm Tests
 
 Refer to the [Testing Deployments](../README.md#testing-deployments) section in the main README for detailed information on how to enable bulk-api-adapter tests.
+
+4. The following services now support configurable Content-Type and Accept Header validations and set header version when generating messages from the Switch:
+
+   1. ml-api-adapter [v13.0.0](https://github.com/mojaloop/ml-api-adapter/releases/tag/v13.0.0)
+   2. account-lookup-service - [v13.0.0](https://github.com/mojaloop/account-lookup-service/releases/tag/v13.0.0)
+   3. quoting-service - [v14.0.0](https://github.com/mojaloop/quoting-service/releases/tag/v14.0.0)
+   4. bulk-api-adapter - [v13.0.0](https://github.com/mojaloop/bulk-api-adapter/releases/tag/v13.0.0)
+   5. transaction-requests-service - [v13.0.0](https://github.com/mojaloop/transaction-requests-service/releases/tag/v13.0.0)
+
+    This can be set by the `PROTOCOL_VERSIONS` configuration as follows in the `default.json` or via environmental variables:
+
+    ```JSON
+     "PROTOCOL_VERSIONS": {
+       "CONTENT": {
+         "DEFAULT": "1.1", <-- used to set the header CONTENT version when generating messages from the *SWITCH*
+         "VALIDATELIST": [ <-- used to validate incoming FSPIOP API requests/callbacks version within the CONTENT-TYPE headers
+           "1.1",
+           "1.0"
+         ]
+       },
+       "ACCEPT": {
+         "DEFAULT": "1", <-- used to set the header ACCEPT-TYPE version when generating messages from the *SWITCH*
+         "VALIDATELIST": [ <-- used to validate incoming FSPIOP API requests/callbacks version within the ACCEPT headers
+           "1",
+           "1.0",
+           "1.1"
+         ]
+       }
+     },
+    ```
+
+    Note the above configuration is optional, as it will default to what is shown above if not overridden by a set configuration.
 
 ## 9. Testing notes
 

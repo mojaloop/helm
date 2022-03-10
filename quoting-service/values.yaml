@@ -8,7 +8,7 @@ global: {}
 replicaCount: 1
 image:
   repository: mojaloop/quoting-service
-  tag: v13.0.1
+  tag: v14.0.0
   pullPolicy: IfNotPresent
 
 readinessProbe:
@@ -68,8 +68,17 @@ sidecar:
 
 config:
 
+  # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+  # and for generating requests/callbacks from the Switch itself (DEFAULT value)
   protocol_versions: {
-    "CONTENT": "1.0",
+    "CONTENT": {
+      "DEFAULT": "1.1",
+      "VALIDATELIST": [
+        "1",
+        "1.0",
+        "1.1"
+      ]
+    },
     "ACCEPT": {
       "DEFAULT": "1",
       "VALIDATELIST": [
