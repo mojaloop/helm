@@ -154,7 +154,7 @@ Or alternatively add `--set` for each of the above parameters on the install com
 
 `helm install ... --set ml-ttk-test-setup.tests.enabled=true --set ml-ttk-test-val-gp.tests.enabled=true --set ml-ttk-test-val-bulk=true --set ml-ttk-test-val-bulk.tests.enabled=true`
 
-1. Run Tests
+2. Run Tests
 
 Run tests:
 `helm test <RELEASE_NAME>`
