@@ -38,6 +38,7 @@ declare -a charts=(
     ml-testing-toolkit
     thirdparty/chart-auth-svc
     thirdparty/chart-consent-oracle
+    thirdparty/chart-tp-api-svc
     thirdparty
     mojaloop
 )
