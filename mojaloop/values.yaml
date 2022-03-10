@@ -25,7 +25,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.15.4
+            tag: v13.16.0
             pullPolicy: IfNotPresent
             command: '["node", "src/api/index.js"]'
           service:
@@ -212,7 +212,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.15.4
+            tag: v13.16.0
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
           service:
@@ -409,7 +409,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.15.4
+            tag: v13.16.0
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--admin"]'
           service:
@@ -603,7 +603,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.15.4
+            tag: v13.16.0
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--position"]'
           service:
@@ -797,7 +797,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.15.4
+            tag: v13.16.0
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--get"]'
           service:
@@ -991,7 +991,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.15.4
+            tag: v13.16.0
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
           service:
@@ -1185,7 +1185,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.15.4
+            tag: v13.16.0
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
           service:
@@ -3494,7 +3494,7 @@ ml-api-adapter:
     replicaCount: 1
     image:
       repository: mojaloop/ml-api-adapter
-      tag: v12.3.0
+      tag: v13.0.0
       command: '["node", "src/api/index.js"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -3566,12 +3566,22 @@ ml-api-adapter:
       max_callback_time_lag_dilation_milliseconds: 100
       max_fulfil_timeout_duration_seconds: 240
 
+      # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+      # and for generating requests/callbacks from the Switch itself (DEFAULT value)
       protocol_versions: {
-        "CONTENT": "1.1",
+        "CONTENT": {
+          "DEFAULT": "1.1",
+          "VALIDATELIST": [
+            "1",
+            "1.0",
+            "1.1"
+          ]
+        },
         "ACCEPT": {
           "DEFAULT": "1",
           "VALIDATELIST": [
             "1",
+            "1.0",
             "1.1"
           ]
         }
@@ -3641,7 +3651,7 @@ ml-api-adapter:
     replicaCount: 1
     image:
       repository: mojaloop/ml-api-adapter
-      tag: v12.3.0
+      tag: v13.0.0
       command: '["node", "src/handlers/index.js", "handler", "--notification"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -3700,12 +3710,22 @@ ml-api-adapter:
       max_callback_time_lag_dilation_milliseconds: 100
       max_fulfil_timeout_duration_seconds: 240
 
+      # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+      # and for generating requests/callbacks from the Switch itself (DEFAULT value)
       protocol_versions: {
-        "CONTENT": "1.1",
+        "CONTENT": {
+          "DEFAULT": "1.1",
+          "VALIDATELIST": [
+            "1",
+            "1.0",
+            "1.1"
+          ]
+        },
         "ACCEPT": {
           "DEFAULT": "1",
           "VALIDATELIST": [
             "1",
+            "1.0",
             "1.1"
           ]
         }
@@ -3948,7 +3968,7 @@ account-lookup-service:
       api:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v12.1.0
+          tag: v13.0.0
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--api"]'
         service:
@@ -3959,7 +3979,7 @@ account-lookup-service:
       admin:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v12.1.0
+          tag: v13.0.0
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--admin"]'
         service:
@@ -4015,12 +4035,22 @@ account-lookup-service:
       central_services_host: '$release_name-centralledger-service'
       central_services_port: 80
 
+      # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+      # and for generating requests/callbacks from the Switch itself (DEFAULT value)
       protocol_versions: {
-        "CONTENT": "1.1",
+        "CONTENT": {
+          "DEFAULT": "1.1",
+          "VALIDATELIST": [
+            "1",
+            "1.0",
+            "1.1"
+          ]
+        },
         "ACCEPT": {
           "DEFAULT": "1",
           "VALIDATELIST": [
             "1",
+            "1.0",
             "1.1"
           ]
         }
@@ -4172,7 +4202,7 @@ account-lookup-service:
       api:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v12.1.0
+          tag: v13.0.0
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--api"]'
         service:
@@ -4183,7 +4213,7 @@ account-lookup-service:
       admin:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v12.1.0
+          tag: v13.0.0
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--admin"]'
         service:
@@ -4239,12 +4269,22 @@ account-lookup-service:
       central_services_host: '$release_name-centralledger-service'
       central_services_port: 80
 
+      # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+      # and for generating requests/callbacks from the Switch itself (DEFAULT value)
       protocol_versions: {
-        "CONTENT": "1.1",
+        "CONTENT": {
+          "DEFAULT": "1.1",
+          "VALIDATELIST": [
+            "1",
+            "1.0",
+            "1.1"
+          ]
+        },
         "ACCEPT": {
           "DEFAULT": "1",
           "VALIDATELIST": [
             "1",
+            "1.0",
             "1.1"
           ]
         }
@@ -4737,7 +4777,7 @@ quoting-service:
   replicaCount: 1
   image:
     repository: mojaloop/quoting-service
-    tag: v13.0.1
+    tag: v14.0.0
     pullPolicy: IfNotPresent
 
   readinessProbe:
@@ -4756,12 +4796,22 @@ quoting-service:
 
   config:
 
+    # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+    # and for generating requests/callbacks from the Switch itself (DEFAULT value)
     protocol_versions: {
-      "CONTENT": "1.1",
+      "CONTENT": {
+        "DEFAULT": "1.1",
+        "VALIDATELIST": [
+          "1",
+          "1.0",
+          "1.1"
+        ]
+      },
       "ACCEPT": {
         "DEFAULT": "1",
         "VALIDATELIST": [
           "1",
+          "1.0",
           "1.1"
         ]
       }
@@ -4937,7 +4987,7 @@ transaction-requests-service:
   replicaCount: 1
   image:
     repository: mojaloop/transaction-requests-service
-    tag: v12.0.1
+    tag: v13.0.0
     pullPolicy: IfNotPresent
     command: '["node", "src/index.js", "api"]'
 
@@ -4988,12 +5038,22 @@ transaction-requests-service:
     central_services_host: '$release_name-centralledger-service'
     central_services_port: 80
 
+    # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+    # and for generating requests/callbacks from the Switch itself (DEFAULT value)
     protocol_versions: {
-      "CONTENT": "1.1",
+      "CONTENT": {
+        "DEFAULT": "1.1",
+        "VALIDATELIST": [
+          "1",
+          "1.0",
+          "1.1"
+        ]
+      },
       "ACCEPT": {
         "DEFAULT": "1",
         "VALIDATELIST": [
           "1",
+          "1.0",
           "1.1"
         ]
       }
@@ -6748,7 +6808,7 @@ mojaloop-bulk:
       replicaCount: 1
       image:
         repository: mojaloop/bulk-api-adapter
-        tag: v12.1.0
+        tag: v13.0.1
         command: '["node", "src/api/index.js"]'
         ## Optionally specify an array of imagePullSecrets.
         ## Secrets must be manually created in the namespace.
@@ -6814,12 +6874,22 @@ mojaloop-bulk:
             rejectUnauthorized: true
         log_level: 'info'
 
+        # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+        # and for generating requests/callbacks from the Switch itself (DEFAULT value)
         protocol_versions: {
-          "CONTENT": "1.1",
+          "CONTENT": {
+            "DEFAULT": "1.1",
+            "VALIDATELIST": [
+              "1",
+              "1.0",
+              "1.1"
+            ]
+          },
           "ACCEPT": {
             "DEFAULT": "1",
             "VALIDATELIST": [
               "1",
+              "1.0",
               "1.1"
             ]
           }
@@ -6873,7 +6943,7 @@ mojaloop-bulk:
       replicaCount: 1
       image:
         repository: mojaloop/bulk-api-adapter
-        tag: v12.1.0
+        tag: v13.0.1
         command: '["node", "src/handlers/index.js", "handler", "--notification"]'
         ## Optionally specify an array of imagePullSecrets.
         ## Secrets must be manually created in the namespace.
@@ -6939,12 +7009,22 @@ mojaloop-bulk:
             rejectUnauthorized: true
         log_level: 'info'
 
+        # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+        # and for generating requests/callbacks from the Switch itself (DEFAULT value)
         protocol_versions: {
-          "CONTENT": "1.1",
+          "CONTENT": {
+            "DEFAULT": "1.1",
+            "VALIDATELIST": [
+              "1",
+              "1.0",
+              "1.1"
+            ]
+          },
           "ACCEPT": {
             "DEFAULT": "1",
             "VALIDATELIST": [
               "1",
+              "1.0",
               "1.1"
             ]
           }
@@ -7002,7 +7082,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.15.4
+            tag: v13.16.0
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkprepare"]'
           service:
@@ -7174,7 +7254,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.15.4
+            tag: v13.16.0
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkfulfil"]'
           service:
@@ -7343,7 +7423,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.15.4
+            tag: v13.16.0
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkprocessing"]'
           service:
@@ -7512,7 +7592,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v13.15.4
+            tag: v13.16.0
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkget"]'
           service:
@@ -8028,12 +8108,26 @@ ml-testing-toolkit:
           "WS_ASSERTION_TIMEOUT": 5000,
           "accept": "application/vnd.interoperability.parties+json;version=1.1",
           "acceptParties": "application/vnd.interoperability.parties+json;version=1.1",
+          "acceptPartiesOld": "application/vnd.interoperability.parties+json;version=1.0",
+          "acceptPartiesNotSupported": "application/vnd.interoperability.parties+json;version=2.0",
           "acceptParticipants": "application/vnd.interoperability.participants+json;version=1.1",
+          "acceptParticipantsOld": "application/vnd.interoperability.participants+json;version=1.0",
+          "acceptParticipantsNotSupported": "application/vnd.interoperability.participants+json;version=2.0",
           "acceptQuotes": "application/vnd.interoperability.quotes+json;version=1.1",
+          "acceptQuotesOld": "application/vnd.interoperability.quotes+json;version=1.0",
+          "acceptQuotesNotSupported": "application/vnd.interoperability.quotes+json;version=2.0",
           "acceptTransfers": "application/vnd.interoperability.transfers+json;version=1.1",
+          "acceptTransfersOld": "application/vnd.interoperability.transfers+json;version=1.0",
+          "acceptTransfersNotSupported": "application/vnd.interoperability.transfers+json;version=2.0",
           "acceptTransactionRequests": "application/vnd.interoperability.transactionRequests+json;version=1.1",
+          "acceptTransactionRequestsOld": "application/vnd.interoperability.transactionRequests+json;version=1.0",
+          "acceptTransactionRequestsNotSupported": "application/vnd.interoperability.transactionRequests+json;version=2.0",
           "acceptAuthorizations": "application/vnd.interoperability.authorizations+json;version=1.1",
+          "acceptAuthorizationsOld": "application/vnd.interoperability.authorizations+json;version=1.0",
+          "acceptAuthorizationsNotSupported": "application/vnd.interoperability.authorizations+json;version=2.0",
           "acceptBulkTransfers": "application/vnd.interoperability.bulkTransfers+json;version=1.1",
+          "acceptBulkTransfersOld": "application/vnd.interoperability.bulkTransfers+json;version=1.0",
+          "acceptBulkTransfersNotSupported": "application/vnd.interoperability.bulkTransfers+json;version=2.0",
           "accountId": "6",
           "amount": "100",
           "batchToIdValue1": "27713803066",
@@ -8041,12 +8135,26 @@ ml-testing-toolkit:
           "condition": "n2cwS3w4ekGlvNYoXg2uBAqssu3FCoXjADE2mziU5jU",
           "contentType": "application/vnd.interoperability.parties+json;version=1.1",
           "contentTypeTransfers": "application/vnd.interoperability.transfers+json;version=1.1",
+          "contentTypeTransfersOld": "application/vnd.interoperability.transfers+json;version=1.0",
+          "contentTypeTransfersNotSupported": "application/vnd.interoperability.transfers+json;version=2.0",
           "contentTypeParties": "application/vnd.interoperability.parties+json;version=1.1",
+          "contentTypePartiesOld": "application/vnd.interoperability.parties+json;version=1.0",
+          "contentTypePartiesNotSupported": "application/vnd.interoperability.parties+json;version=2.0",
           "contentTypeParticipants": "application/vnd.interoperability.participants+json;version=1.1",
+          "contentTypeParticipantsOld": "application/vnd.interoperability.participants+json;version=1.0",
+          "contentTypeParticipantsNotSupported": "application/vnd.interoperability.participants+json;version=2.0",
           "contentTypeQuotes": "application/vnd.interoperability.quotes+json;version=1.1",
+          "contentTypeQuotesOld": "application/vnd.interoperability.quotes+json;version=1.0",
+          "contentTypeQuotesNotSupported": "application/vnd.interoperability.quotes+json;version=2.0",
           "contentTypeTransactionRequests": "application/vnd.interoperability.transactionRequests+json;version=1.1",
+          "contentTypeTransactionRequestsOld": "application/vnd.interoperability.transactionRequests+json;version=1.0",
+          "contentTypeTransactionRequestsNotSupported": "application/vnd.interoperability.transactionRequests+json;version=2.0",
           "contentTypeAuthorizations": "application/vnd.interoperability.authorizations+json;version=1.1",
+          "contentTypeAuthorizationsOld": "application/vnd.interoperability.authorizations+json;version=1.0",
+          "contentTypeAuthorizationsNotSupported": "application/vnd.interoperability.authorizations+json;version=2.0",
           "contentBulkTransfers": "application/vnd.interoperability.bulkTransfers+json;version=1.1",
+          "contentBulkTransfersOld": "application/vnd.interoperability.bulkTransfers+json;version=1.0",
+          "contentBulkTransfersNotSupported": "application/vnd.interoperability.bulkTransfers+json;version=2.0",
           "currency": "USD",
           "currency2": "TZS",
           "fromDOB": "1984-01-01",

@@ -12,7 +12,7 @@ bulk-api-adapter-service:
   replicaCount: 1
   image:
     repository: mojaloop/bulk-api-adapter
-    tag: v12.1.0
+    tag: v13.0.1
     command: '["node", "src/api/index.js"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -82,8 +82,17 @@ bulk-api-adapter-service:
     log_level: 'info'
     log_transport: file
 
+    # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+    # and for generating requests/callbacks from the Switch itself (DEFAULT value)
     protocol_versions: {
-      "CONTENT": "1.1",
+      "CONTENT": {
+        "DEFAULT": "1.1",
+        "VALIDATELIST": [
+          "1",
+          "1.0",
+          "1.1"
+        ]
+      },
       "ACCEPT": {
         "DEFAULT": "1",
         "VALIDATELIST": [
@@ -143,7 +152,7 @@ bulk-api-adapter-handler-notification:
   replicaCount: 1
   image:
     repository: mojaloop/bulk-api-adapter
-    tag: v12.1.0
+    tag: v13.0.1
     command: '["node", "src/handlers/index.js", "handler", "--notification"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -213,8 +222,17 @@ bulk-api-adapter-handler-notification:
     log_level: 'info'
     log_transport: file
 
+    # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+    # and for generating requests/callbacks from the Switch itself (DEFAULT value)
     protocol_versions: {
-      "CONTENT": "1.1",
+      "CONTENT": {
+        "DEFAULT": "1.1",
+        "VALIDATELIST": [
+          "1",
+          "1.0",
+          "1.1"
+        ]
+      },
       "ACCEPT": {
         "DEFAULT": "1",
         "VALIDATELIST": [

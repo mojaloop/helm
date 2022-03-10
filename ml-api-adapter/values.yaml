@@ -13,7 +13,7 @@ ml-api-adapter-service:
   replicaCount: 1
   image:
     repository: mojaloop/ml-api-adapter
-    tag: v12.3.0
+    tag: v13.0.0
     command: '["node", "src/api/index.js"]'
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -101,6 +101,27 @@ ml-api-adapter-service:
     max_callback_time_lag_dilation_milliseconds: 100
     max_fulfil_timeout_duration_seconds: 240
 
+    # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+    # and for generating requests/callbacks from the Switch itself (DEFAULT value)
+    protocol_versions: {
+      "CONTENT": {
+        "DEFAULT": "1.1",
+        "VALIDATELIST": [
+          "1",
+          "1.0",
+          "1.1"
+        ]
+      },
+      "ACCEPT": {
+        "DEFAULT": "1",
+        "VALIDATELIST": [
+          "1",
+          "1.0",
+          "1.1"
+        ]
+      }
+    }
+
     ## Log Configuration
     log_level: info
     log_filter: 'error, warn, info'
@@ -171,7 +192,7 @@ ml-api-adapter-handler-notification:
   replicaCount: 1
   image:
     repository: mojaloop/ml-api-adapter
-    tag: v12.3.0
+    tag: v13.0.0
     command: '["node", "src/handlers/index.js", "handler", "--notification"]'
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -247,6 +268,27 @@ ml-api-adapter-handler-notification:
         rejectUnauthorized: true
     max_callback_time_lag_dilation_milliseconds: 100
     max_fulfil_timeout_duration_seconds: 240
+
+    # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+    # and for generating requests/callbacks from the Switch itself (DEFAULT value)
+    protocol_versions: {
+      "CONTENT": {
+        "DEFAULT": "1.1",
+        "VALIDATELIST": [
+          "1",
+          "1.0",
+          "1.1"
+        ]
+      },
+      "ACCEPT": {
+        "DEFAULT": "1",
+        "VALIDATELIST": [
+          "1",
+          "1.0",
+          "1.1"
+        ]
+      }
+    }
 
     ## Endpoint Cache Configuration
     endpoint_cache_expiresInMs: 180000
