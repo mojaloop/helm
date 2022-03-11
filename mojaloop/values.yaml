@@ -5140,7 +5140,7 @@ thirdparty:
     replicaCount: 1
     image:
       repository: mojaloop/auth-service
-      tag: v11.10.1
+      tag: v11.11.1
       command: '[ "npm", "run", "start" ]'
       pullPolicy: IfNotPresent
 
@@ -5191,7 +5191,7 @@ thirdparty:
           "COLOR": true
         },
         "SHARED": {
-          "PEER_ENDPOINT": "$release_name-tp-api-svc",
+          "THIRDPARTY_REQUESTS_ENDPOINT": "tp-api-svc:3008",
           "ALS_ENDPOINT": "$release_name-account-lookup-service",
           "JWS_SIGN": false,
           "JWS_SIGNING_KEY": "./secrets/jwsSigningKey.key",
@@ -5247,7 +5247,7 @@ thirdparty:
           }
         },
         "DEMO_SKIP_VALIDATION_FOR_CREDENTIAL_IDS": [
-          "Jfo5k6w4np09IUtYNHnxMM696jJHqvccUdBmd0xP6XEWwH0xLei1PUzDJCM19SZ3A2Ex0fNLw0nc2hrIlFnAtw=="
+          "HskU2gw4np09IUtYNHnxMM696jJHqvccUdBmd0xP6XEWwH0xLei1PUzDJCM19SZ3A2Ex0fNLw0nc2hrIlFnAtw"
         ]
       }
 
@@ -5314,7 +5314,7 @@ thirdparty:
         port: 3000
 
     # Add exta environment variables here
-    env: {}
+    env: []
       # e.g.
       # - name: LOG_LEVEL
       #   value: debug
@@ -5406,15 +5406,13 @@ thirdparty:
         port: 3008
 
     # Add exta environment variables here
-    env:
-      - name: NODE_ENV 
-        value: production
+    env: []
       # e.g. to change the Log Level:
       # - name: LOG_LEVEL
       #   value: debug
 
     config:
-      production.json: {
+      default.json: {
       "PORT": 3008,
       "HOST": "0.0.0.0",
       "INSPECT": {
@@ -6461,7 +6459,10 @@ mojaloop-simulator:
             },
             "SHARED": {
               "AUTH_SERVICE_PARTICIPANT_ID": 'centralauth',
-              "PEER_ENDPOINT": "mojaloop-switch",
+              "THIRDPARTY_REQUESTS_ENDPOINT": "tp-api-svc:3008",
+              "ALS_ENDPOINT": "$release_name-quoting-service",
+              "QUOTES_ENDPOINT": "$release_name-quoting-service",
+              "TRANSFERS_ENDPOINT": "$release_name-ml-api-adapter-service",
               "DFSP_ID": "$name",
               "DFSP_BACKEND_URI": "$full_name-backend:3000",
               "DFSP_BACKEND_HTTP_SCHEME": "http",
@@ -8254,7 +8255,32 @@ ml-testing-toolkit:
           "payeefspMSISDN": "17039811907",
           "payerfspMSISDN": "17891239876",
           "settlementtestNonExistingMSISDN": "22244803917",
-          "NET_DEBIT_CAP": "50000"
+          "NET_DEBIT_CAP": "50000",
+          "HOST_ORACLE_CONSENT": "http://consent-oracle:3000",
+          "DFSPA_NAME": "dfspa",
+          "DFSPA_CB_FSPIOP": "http://$release_name-sim-tp-dfspa-scheme-adapter:4000",
+          "DFSPA_CB_THIRDPARTY": "http://$release_name-sim-tp-dfspa-thirdparty-sdk:4005",
+          "DFSPB_NAME": "dfspb",
+          "DFSPB_CB_FSPIOP": "http://$release_name-sim-tp-dfspb-scheme-adapter:4000",
+          "DFSPB_CB_THIRDPARTY": "http://$release_name-sim-tp-dfspb-thirdparty-sdk:4005",
+          "PISP_NAME": "pisp",
+          "PISP_CB_FSPIOP": "http://$release_name-sim-tp-pisp-scheme-adapter:4000",
+          "PISP_CB_THIRDPARTY": "http://$release_name-sim-tp-pisp-thirdparty-sdk:4005",
+          "CENTRALAUTH_NAME": "centralauth",
+          "CENTRALAUTH_CB_FSPIOP": "http://auth-svc:4004",
+          "PISP_THIRDPARTY_SDK_OUTBOUND_URL": "http://$release_name-sim-tp-pisp-thirdparty-sdk:4006",
+          "PISP_BACKEND_TESTAPI_URL": "http://$release_name-sim-tp-pisp-backend:3003",
+          "PISP_CALLBACK_URL": "http://$release_name-sim-tp-pisp-scheme-adapter:4000",
+          "PISP_SDK_TESTAPI_URL": "http://$release_name-sim-tp-pisp-scheme-adapter:4002",
+          "PISP_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-tp-pisp-scheme-adapter:4002",
+          "DFSPA_BACKEND_TESTAPI_URL": "http://$release_name-sim-tp-dfspa-backend:3003",
+          "DFSPA_CALLBACK_URL": "http://$release_name-sim-tp-dfspa-scheme-adapter:4000",
+          "DFSPA_SDK_TESTAPI_URL": "http://$release_name-sim-tp-dfspa-scheme-adapter:4002",
+          "DFSPA_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-tp-dfspa-scheme-adapter:4002",
+          "DFSPB_BACKEND_TESTAPI_URL": "http://$release_name-sim-tp-dfspb-backend:3003",
+          "DFSPB_CALLBACK_URL": "http://$release_name-sim-tp-dfspb-scheme-adapter:4000",
+          "DFSPB_SDK_TESTAPI_URL": "http://$release_name-sim-tp-dfspb-scheme-adapter:4002",
+          "DFSPB_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-tp-dfspb-scheme-adapter:4002"
         }
       }
 
@@ -8436,6 +8462,86 @@ ml-ttk-test-val-bulk:
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     testSuiteName: Bulk Tests
+    environmentName: Development
+
+  # configCreds:
+  #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
+  #   AWS_SECRET_ACCESS_KEY: 'some_aws_secret_key'
+  #   AWS_REGION: 'us-west-2'
+  #   SLACK_WEBHOOK_URL: 'slack_inbound_webhook'
+
+  ## Optionally specify the config file defaults for TTK CLI
+  ## You should specify at least mode here
+  # configFileDefaults: {
+  #   "mode": "outbound",
+  #   "reportFormat": "html",
+  #   "baseURL": "",
+  #   "reportTarget": "",
+  #   "reportAutoFilenameEnable": true,
+  #   "slackWebhookUrl": "",
+  #   "slackPassedImage": "",
+  #   "slackFailedImage": "",
+  #   "logLevel": "2"
+  # }
+  parameters:
+    <<: *simNames
+  testCaseEnvironmentFile:  *ttkInputValues
+
+ml-ttk-test-setup-tp:
+  tests:
+    enabled: false
+    weight: -3
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: *ttkGitUrl
+    # testCasesPathInZip: *ttkGitPathGP
+    # testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/refs/heads/release/v13.1.0.zip
+    testCasesPathInZip: testing-toolkit-test-cases-13.1.0/collections/hub/provisioning_thirdparty
+    ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
+    # awsS3BucketName: aws-s3-bucket-name
+    # awsS3FilePath: ttk-tests/reports
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: Thirdparty Provisioning Collection
+    environmentName: Development
+
+  # configCreds:
+  #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
+  #   AWS_SECRET_ACCESS_KEY: 'some_aws_secret_key'
+  #   AWS_REGION: 'us-west-2'
+  #   SLACK_WEBHOOK_URL: 'slack_inbound_webhook'
+
+  ## Optionally specify the config file defaults for TTK CLI
+  ## You should specify at least mode here
+  # configFileDefaults: {
+  #   "mode": "outbound",
+  #   "reportFormat": "html",
+  #   "baseURL": "",
+  #   "reportTarget": "",
+  #   "reportAutoFilenameEnable": true,
+  #   "slackWebhookUrl": "",
+  #   "slackPassedImage": "",
+  #   "slackFailedImage": "",
+  #   "logLevel": "2"
+  # }
+  parameters:
+    <<: *simNames
+  testCaseEnvironmentFile:  *ttkInputValues
+
+ml-ttk-test-val-tp:
+  tests:
+    enabled: false
+    weight: -2
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: *ttkGitUrl
+    # testCasesPathInZip: *ttkGitPathGP
+    # testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/refs/heads/release/v13.1.0.zip
+    testCasesPathInZip: testing-toolkit-test-cases-13.1.0/collections/hub/thirdparty
+    ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
+    # awsS3BucketName: aws-s3-bucket-name
+    # awsS3FilePath: ttk-tests/reports
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: Thirdparty Tests
     environmentName: Development
 
   # configCreds:

@@ -44,6 +44,9 @@ else
         mojaloop-simulator
         ml-testing-toolkit
         ml-testing-toolkit-cli
+        thirdparty/chart-auth-svc
+        thirdparty/chart-consent-oracle
+        thirdparty/chart-tp-api-svc
         thirdparty
         mojaloop
         kube-system/ntpd/

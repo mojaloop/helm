@@ -26,7 +26,7 @@ Prefix is truncated to 10 characters long.
 {{- if kindIs "invalid" .Values.prefix -}}
 {{- printf "%s-sim-" .Release.Name -}}
 {{- else -}}
-{{- .Values.prefix | trunc 10 | trimAll " " -}}
+{{- tpl .Values.prefix $ | trimAll " " -}}
 {{- end -}}
 {{- end -}}
 

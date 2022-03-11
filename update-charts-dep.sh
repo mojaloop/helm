@@ -36,6 +36,9 @@ declare -a charts=(
     mojaloop-bulk
     mojaloop-simulator
     ml-testing-toolkit
+    thirdparty/chart-auth-svc
+    thirdparty/chart-consent-oracle
+    thirdparty/chart-tp-api-svc
     thirdparty
     mojaloop
 )
