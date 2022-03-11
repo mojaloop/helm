@@ -31,6 +31,10 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      initContainers:
+        {{- if .Values.initContainers }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -53,8 +57,8 @@ spec:
           {{- end }}
           volumeMounts:
             - name: consent-oracle-config-volume
-              mountPath: /opt/als-consent-oracle/config/production.json
-              subPath: production.json
+              mountPath: /opt/als-consent-oracle/config/default.json
+              subPath: default.json
           env:
           {{- range $envItem := .Values.env }}
             - name: {{ $envItem.name }}

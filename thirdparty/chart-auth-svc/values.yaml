@@ -2,7 +2,7 @@ enabled: true
 replicaCount: 1
 image:
   repository: mojaloop/auth-service
-  tag: v11.10.1
+  tag: v11.11.1
   command: '[ "npm", "run", "start" ]'
   pullPolicy: IfNotPresent
 
@@ -17,6 +17,35 @@ nodeSelector: {}
 ## Set toleration for scheduler
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
+
+## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+## e.g:
+## initContainers:
+##  - name: your-image-name
+##    image: your-image
+##    imagePullPolicy: Always
+##    command: ['sh', '-c', 'echo "hello world"']
+##    env:
+##      - name: debug
+##        value: trace
+##
+# initContainers: []
+initContainers:
+  - name: run-migration
+    image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+    imagePullPolicy: IfNotPresent
+    command:
+      - sh
+      - -c
+      - npm run migrate
+    env:
+      - name: NODE_ENV
+        value: production
+    volumeMounts:
+      - name: auth-svc-config-volume
+        mountPath: /opt/auth-service/config/production.json
+        subPath: production.json
 
 livenessProbe:
   initialDelaySeconds: 30
@@ -53,7 +82,7 @@ config:
       "COLOR": true
     },
     "SHARED": {
-      "PEER_ENDPOINT": "$release_name-tp-api-svc",
+      "THIRDPARTY_REQUESTS_ENDPOINT": "tp-api-svc:3008",
       "ALS_ENDPOINT": "$release_name-account-lookup-service",
       "JWS_SIGN": false,
       "JWS_SIGNING_KEY": "./secrets/jwsSigningKey.key",

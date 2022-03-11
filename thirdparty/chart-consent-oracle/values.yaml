@@ -18,6 +18,32 @@ nodeSelector: {}
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
 
+## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+## e.g:
+## initContainers:
+##  - name: your-image-name
+##    image: your-image
+##    imagePullPolicy: Always
+##    command: ['sh', '-c', 'echo "hello world"']
+##    env:
+##      - name: debug
+##        value: trace
+##
+# initContainers: []
+initContainers:
+  - name: run-migration
+    image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+    imagePullPolicy: IfNotPresent
+    command:
+      - sh
+      - -c
+      - npm run migrate
+    volumeMounts:
+      - name: consent-oracle-config-volume
+        mountPath: /opt/als-consent-oracle/config/default.json
+        subPath: default.json
+
 livenessProbe:
   enabled: true
   initialDelaySeconds: 30

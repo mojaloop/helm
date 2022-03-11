@@ -9,7 +9,8 @@ Date | Revision | Description
 
 ### 1. Maintenance updates
 
-1. change endpoint types to line up with enums ([#863](https://github.com/mojaloop/central-ledger/issues/863))
+1. Change endpoint types to line up with enums ([#863](https://github.com/mojaloop/central-ledger/issues/863))
+2. Added Helm Tests for Thirdparty Provisioning and Verification Collections ([#2650](https://github.com/mojaloop/project/issues/2650))
 
 ### 2. New Features
 
@@ -72,6 +73,10 @@ Date | Revision | Description
 19. sdk-scheme-adapter: v11.18.8 -> **v11.18.11**
 20. ml-testing-toolkit: v13.5.1 -> **v14.0.4**
 21. ml-testing-toolkit-ui: v13.5.2 -> **v13.5.5**
+22. auth-service: v11.11.1
+23. als-consent-service: v0.0.8
+24. thirdparty-api-svc: v11.21.0
+25. thirdparty-sdk: v11.55.1
 
 ## 5. Application release notes
 
@@ -94,9 +99,12 @@ Date | Revision | Description
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v11.1.3
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v11.6.1
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.18.11
-20. thirdparty-sdk-adapter - https://github.com/mojaloop/thirdparty-sdk/releases/tag/v11.55.1
-21. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v14.0.4
-22. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.5.5
+20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v14.0.4
+21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.5.5
+22. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v11.11.1
+23. als-consent-service - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.0.8
+24. thirdparty-api-svc - https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v11.21.0
+25. thirdparty-sdk-adapter - https://github.com/mojaloop/thirdparty-sdk/releases/tag/v11.55.1
 
 ## 6. Operational Chart versions
 
@@ -170,6 +178,31 @@ Take note that existing rules may not work without modifying the path to add a `
   - TESTFSP4_CALLBACK_URL
   - TESTFSP4_SDK_TESTAPI_URL
   - TESTFSP4_SDK_TESTAPI_WS_URL
+  - HOST_ORACLE_CONSENT
+  - DFSPA_NAME
+  - DFSPA_CB_FSPIOP
+  - DFSPA_CB_THIRDPARTY
+  - DFSPB_NAME
+  - DFSPB_CB_FSPIOP
+  - DFSPB_CB_THIRDPARTY
+  - PISP_NAME
+  - PISP_CB_FSPIOP
+  - PISP_CB_THIRDPARTY
+  - CENTRALAUTH_NAME
+  - CENTRALAUTH_CB_FSPIOP
+  - PISP_THIRDPARTY_SDK_OUTBOUND_URL
+  - PISP_BACKEND_TESTAPI_URL
+  - PISP_CALLBACK_URL
+  - PISP_SDK_TESTAPI_URL
+  - PISP_SDK_TESTAPI_WS_URL
+  - DFSPA_BACKEND_TESTAPI_URL
+  - DFSPA_CALLBACK_URL
+  - DFSPA_SDK_TESTAPI_URL
+  - DFSPA_SDK_TESTAPI_WS_URL
+  - DFSPB_BACKEND_TESTAPI_URL
+  - DFSPB_CALLBACK_URL
+  - DFSPB_SDK_TESTAPI_URL
+  - DFSPB_SDK_TESTAPI_WS_URL
 
 3. Bulk API Helm Tests
 
@@ -207,6 +240,10 @@ Refer to the [Testing Deployments](../README.md#testing-deployments) section in 
 
     Note the above configuration is optional, as it will default to what is shown above if not overridden by a set configuration.
 
+5. Thirdparty deployment
+
+Refer to [thirdparty/README.md](../thirdparty/README.md#deploying-the-3p-api) for more information on what pre-requisites are required to enable Thirdparty components and how to  manually deploy backend dependencies.
+
 ## 9. Testing notes
 
 1. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
@@ -229,6 +266,10 @@ Refer to the [Testing Deployments](../README.md#testing-deployments) section in 
 	- Nginx Ingress Controllers: 0.43.0
 	- Testing Toolkit Test Cases: [v13.1.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v13.1.0)
 
+5. Thirdparty Testing Toolkit Test Collections are not repeatable. Please refer to the following issue for more information [#2717 - Thirdparty TTK Test-Collection is not repeatable](https://github.com/mojaloop/project/issues/2717). It is possible to manually cleanup persistent data to re-run the test if required.
+
+6. Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](../thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
+
 ## 10. Known Issues
 
 1. [#2119 - Idempotency for duplicate quote request](https://github.com/mojaloop/project/issues/2119)
@@ -236,7 +277,8 @@ Refer to the [Testing Deployments](../README.md#testing-deployments) section in 
 3. [#2352 - Mojaloop Helm support for Kubernetes 1.22](https://github.com/mojaloop/project/issues/2352)
 4. [#2448 - Nginx Ingress Controller v1.0.0 is incompatible with Mojaloop Helm v13.0.x releases](https://github.com/mojaloop/project/issues/2448)
 5. [#2317 - Mojaloop Helm deployments are not compatible when deployed to ARM-arch based hosts](https://github.com/mojaloop/project/issues/2317)
-6. [#2654 - Unstable GP tests for 13.1.0 Release Candidate](https://github.com/mojaloop/project/issues/2654) **BLOCKER PENDING***
+6. ~[#2654 - Unstable GP tests for 13.1.0 Release Candidate](https://github.com/mojaloop/project/issues/2654)~
+7. [#2717 - Thirdparty TTK Test-Collection is not repeatable](https://github.com/mojaloop/project/issues/2717)
 
 ## 11. Contributors
 

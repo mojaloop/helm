@@ -3,7 +3,7 @@ auth-svc:
   replicaCount: 1
   image:
     repository: mojaloop/auth-service
-    tag: v11.10.1
+    tag: v11.11.1
     command: '[ "npm", "run", "start" ]'
     pullPolicy: IfNotPresent
 
@@ -54,7 +54,7 @@ auth-svc:
         "COLOR": true
       },
       "SHARED": {
-        "PEER_ENDPOINT": "$release_name-tp-api-svc",
+        "THIRDPARTY_REQUESTS_ENDPOINT": "tp-api-svc:3008",
         "ALS_ENDPOINT": "$release_name-account-lookup-service",
         "JWS_SIGN": false,
         "JWS_SIGNING_KEY": "./secrets/jwsSigningKey.key",
@@ -269,15 +269,13 @@ tp-api-svc:
       port: 3008
 
   # Add exta environment variables here
-  env:
-    - name: NODE_ENV 
-      value: production
+  env: []
     # e.g. to change the Log Level:
     # - name: LOG_LEVEL
     #   value: debug
 
   config:
-    production.json: {
+    default.json: {
     "PORT": 3008,
     "HOST": "0.0.0.0",
     "INSPECT": {
@@ -347,3 +345,1386 @@ tp-api-svc:
       ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
       # kubernetes.io/tls-acme: "true"
     tls: []
+
+thirdparty-simulator:
+  enabled: true
+  prefix: "{{ $.Release.Name }}-sim-tp-"
+  # Default values for mojaloop-simulator.
+  # This is a YAML-formatted file.
+  # Declare variables to be passed into your templates.
+
+  # Usage:
+  # Add simulators to the simulators object. The following example will create two simulators,
+  # 'payerfsp' and 'payeefsp' that will be created with the default values available lower in this
+  # file.
+  #
+  # simulators:
+  #   payerfsp: {}
+  #   payeefsp: {}
+  #
+  # The default values can be overridden for all sims by modifying mojaloop-simulator.defaults in
+  # your parent chart. They can also be overriden per-simulator. The following example will result in
+  # a payerfsp without a cache and a payeefsp with a cache.
+  #
+  # simulators:
+  #   payerfsp:
+  #     config:
+  #       cache:
+  #         enabled: false
+  #   payeefsp: {}
+  #
+  # If you want to disable any of the default simulators, you can define the values to null in this file.
+  #
+  # simlators:
+  #   payerfsp: null
+  #   payeefsp: null
+  #
+
+  # TODO & notes:
+  # * do the port _numbers_ matter at all? Can we get rid of them?
+  # * for Mowali, how are JWS and TLS secrets being set up?
+  # * support arbitrary init containers + config (that might just be config that goes into defaults
+  #   or something?). Supply all config and volumes to the init containers.
+  # * create some test containers
+  # * parametrise imagePullSecretName (global? like https://github.com/bitnami/charts/tree/master/bitnami/redis#parameters)
+  # * generate JWS private/public keys, so the user does not need to supply keys at all.
+  # * generate public key from private, so the user only needs to supply private keys for each sim?
+  #   (_might_ be possible with a job or init container or similar).
+  # * support mTLS auto-cert generation
+  # * probably eliminate all config that shouldn't actually be changed by a user, e.g.
+  #   JWS_VERIFICATION_KEYS_DIRECTORY. That's a good configuration option to have for other contexts,
+  #   such as running the sim locally or in docker-compose but in this context it's _an
+  #   implementation detail_. The chart user should not have to worry about it, and we should not
+  #   have to test the effect of changing it.
+  #   Also
+  #   INBOUND_LISTEN_PORT
+  #   OUTBOUND_LISTEN_PORT
+  # * make ingress more generic- do not preconfigure annotations
+  # * think about labels a little more carefully- the app should probably always be "mojaloop-simulator"
+  # * add config map and hashes to the deployments so that a configmap change triggers a rolling
+  #   update
+  # * support JWS public keys for other entities. Add a note in the documentation that they must map
+  #   directly to the value that will be received in the FSPIOP-Source (check this is correct)
+  # * update labels to be compliant. E.g. app.kubernetes.io/name or whatever
+  # * rename ".Values.defaults.config" as it's pretty a useless name
+  # * support arbitrary sidecars?
+  # * use the redis subchart? https://github.com/bitnami/charts/tree/master/bitnami/redis
+  #   - this would mean a single instance of redis (probably good)
+  #   - might need to have the simulators use separate databases per simulator, or prefix all of
+  #     their keys with their own name, or something
+  # * allow the user to optionally specify the namespace, with the caveat that that namespace will
+  #   need to be created manually before the release is deployed. There may be a horrible hack (which
+  #   I have not tried) whereby all templates are moved to a different directory, say ./xtemplates,
+  #   then all are imported using {{ .Files.Glob }} and {{ .Files.Get }} then templated into a single
+  #   amazing template with {{ template }}. At the top of this template goes a namespace. The
+  #   consequence of this is that the namespace is created first, enabling this beautiful pattern.
+  #   Remember, with great power comes great responsibility. (In other words, we probably have a
+  #   responsibility to _not_ do this).
+  # * should redis be a statefulset? optionally? what does the bitnami chart do?
+  # * move labels into helpers
+  # * autogenerate ILP stuff?
+  # * defaults.resources looks like it's used nowhere- check this and remove it as appropriate
+  # * look for references to replicaCount in the charts/values. Is it set, or whatever?
+  # * scale Redis
+  # * changing JWS_SIGNING_KEY_PATH currently breaks the chart because it's nastily hard-coded. It
+  #   should be possible to use the Spring filepath functions to avoid this. Similarly, changing
+  #   RULES_FILE will have a similar effect. Alternatively, make these unconfigured by default. I.e.
+  #   comment them out, hard-code them and add a warning to the user in the config. (Is there a
+  #   scenario where the user should want to configure them? I don't think so..).
+  #   (https://masterminds.github.io/sprig/paths.html)
+  # * put sim inbound API on port 80
+  # * supply more documentation, especially a range of examples, and preferably documentation that is
+  #   executable
+  # * share configmaps, secrets with init containers
+  # * share an emptyDir volume between init containers and main containers
+  # * allow init containers to create secrets and put them on persistent volumes, or emptyDirs, then
+  #   allow main containers to access those
+  # * do not put environment variables in configmaps, instead put them straight into the deployments.
+  #   This makes the deployment much easier to manage.
+  # * Remember, labels are _for_ identifying stuff. So labels should probably be like "release"
+  #   (.Release.Name or similar) "chart" (.Chart.Name or similar) "simulator" (e.g. payerfsp,
+  #   payeefsp) "sim-component" (e.g. backend, scheme-adapter, cache)
+  # * can _probably_ remove port numbers from services to simplify chart (although perhaps not? try
+  #   to port-forward with a named port instead of a numbered port?)
+
+
+  simulators:
+    ## Every key added to this `simulators` object will be a simulator that takes on the default
+    ## config below. The default is deliberately left empty so nothing is deployed by default.
+    # payerfsp: {}
+    # payeefsp: {}
+    ## Default FSPs for Mojaloop Postman Scripts
+    dfspa:
+      ingress:
+        hosts:
+          - sim-dfspa.local
+      config:
+        thirdpartysdk:
+          enabled: true
+          config: {
+            production.json: {
+              "INBOUND": {
+                "PORT": 4005,
+                "HOST": "0.0.0.0",
+                "PISP_TRANSACTION_MODE": true
+              },
+              "OUTBOUND": {
+                "PORT": 4006,
+                "HOST": "0.0.0.0"
+              },
+              "REQUEST_PROCESSING_TIMEOUT_SECONDS": 30,
+              "WSO2_AUTH": {
+                "staticToken": "0706c62f-c022-3c42-8d14-8b5df128876d",
+                "tokenEndpoint": "",
+                "clientKey": "test-client-key",
+                "clientSecret": "test-client-secret",
+                "refreshSeconds": 3600
+              },
+              "REDIS": {
+                "PORT": 6379,
+                # covered by REDIS_HOST env var in deployment.yaml
+                # "HOST"
+                "TIMEOUT": 100
+              },
+              "INSPECT": {
+                "DEPTH": 4,
+                "SHOW_HIDDEN": false,
+                "COLOR": true
+              },
+              "SHARED": {
+                "AUTH_SERVICE_PARTICIPANT_ID": 'centralauth',
+                "THIRDPARTY_REQUESTS_ENDPOINT": "tp-api-svc:3008",
+                "SERVICES_ENDPOINT": "tp-api-svc:3008",
+                "ALS_ENDPOINT": "$release_name-account-lookup-service",
+                "QUOTES_ENDPOINT": "$release_name-quoting-service",
+                "TRANSFERS_ENDPOINT": "$release_name-ml-api-adapter-service",
+                "BULK_TRANSFERS_ENDPOINT": "",
+                "DFSP_ID": "$name",
+                "DFSP_BACKEND_URI": "$full_name-backend:3000",
+                "DFSP_BACKEND_HTTP_SCHEME": "http",
+                "DFSP_BACKEND_VERIFY_AUTHORIZATION_PATH": "verify-authorization",
+                "DFSP_BACKEND_VERIFY_CONSENT_PATH": "verify-consent",
+                "SDK_OUTGOING_URI": "$full_name-scheme-adapter:4001",
+                "SDK_OUTGOING_HTTP_SCHEME": "http",
+                "SDK_OUTGOING_PARTIES_INFORMATION_PATH": "parties/{Type}/{ID}/{SubId}",
+                "JWS_SIGN": false,
+                "JWS_SIGNING_KEY": "./secrets/jwsSigningKey.key",
+                "TLS": {
+                  "mutualTLS": {
+                    "enabled": false
+                  },
+                  "creds": {
+                    "ca": "./secrets/dfsp_a_client.crt",
+                    "cert": "./secrets/dfsp_a_client.crt",
+                    "key": "./secrets/dfsp_a_client.crt"
+                  }
+                },
+                "TEMP_OVERRIDE_QUOTES_PARTY_ID_TYPE": "MSISDN",
+                "TEST_SHOULD_OVERRIDE_CONSENT_ID": true,
+                "TEST_CONSENT_REQUEST_TO_CONSENT_MAP": {
+                  "76059a0a-684f-4002-a880-b01159afe119": "76059a0a-684f-4002-a880-b01159afe119",
+                  "6bf07f98-cfce-45ba-b048-7a86bac45d79": "be433b9e-9473-4b7d-bdd5-ac5b42463afb",
+                  "c51ec534-ee48-4575-b6a9-ead2955b8069": "46876aac-5db8-4353-bb3c-a6a905843ce7",
+                  "d51ec534-ee48-4575-b6a9-ead2955b8069": "23b07761-6b41-442a-b3d5-d876a6ea9ecc",
+                  "b5d6206c-4f06-497d-af15-ed866ea6958f": "2acf1dfa-ce45-486e-b19e-ae4ad9804a63"
+                },
+                "TEST_OVERRIDE_TRANSACTION_CHALLENGE": "OWZhYjAxZTcwYjU4YzRhMzRmOWQwNzBmZjllZDFiNjc2NWVhMzA1NGI1MWZjZThjZGFjNDEyZDBmNmM2MWFhMQ"
+              }
+            }
+          }
+        schemeAdapter:
+          secrets:
+            jws:
+              # The following is an example key and shouldn't be used in production
+              privateKey: |-
+                -----BEGIN PRIVATE KEY-----
+                MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCg9eU66hg4ZAE6
+                jM4U8ylXQwUz9cdmzS3JyW+1bbgv77peMKSU/wFsi4QRwmbrYze9baFnGCKnS75E
+                vCchib5vJxp3MDWzi/TGxmzgWdJRzkyCiI5C6dCgVL71MjsFgN3TN63wEf5sEU2I
+                eoJ8yXJM0pUG9f9NO7p/IGliDmt6C7EA7D9kQWigufmX0ZTVNKI07fKwC/AEKLp7
+                kx99pvsCq8m184EEL15Q/NhA7R/5zKoHvmJa6Jd7tM0i0xn8IKOkNVFu3YIafAEC
+                QWQwRbanFEeRc3tH3bEoYM8c74r+W+YxCG7nUf16XCk132XVffbHVl+wFgo18YB/
+                sAJmcbePAgMBAAECggEAGQGKnsf+gkg7DqMQYx3Rxt5BISzmURjAK9CxG6ETk9Lt
+                A7QP5ZvmVzwnhPDMN3Z/Et1EzXTo8U+pnBkVBTdWkAMlr+2b8ixklzr9cC9UJuRj
+                a4YWf9u+TyJLVmF63OSD0cwdKCZLffOENZc+zW8oZDn08BNomdGVLCnXZWXzGY8X
+                KaJTJr29jEgkKOqFXdAHrsmj7TBtqSLZKx2IHdCmi05+5JCxVLPgnDiCicZ9zEii
+                yWw57Q1migFIcw6ZQP4RyjgH1o70B+zo3OL7IQEirE17GUgK16XD8xi8hWCYTj5n
+                xOz9yfVfPuYom/9Xbm5kYJZKE2HOZ3Lg8pUnWncuNQKBgQDbaOoACQPhVxQK1qYR
+                RbW0I5Rn0EDxzsFPEpu3eXHoIYGXi8u/ew9AzFmGu+tKYJV5V4BCXo5x2ddE+B8B
+                dXhyHLGfeV8tWKYKBpatolVxxKDL/9fnxoGIAO9cc91ieOm5JxmKscCVP1UnOXHZ
+                uomSfAbGQwYDtMd2bJKkE1z0qwKBgQC7zacuv1PMaDFksHuNNRG+aZ74pJ77msht
+                vJoKyaQcktD0xmIXhFfJvK4cclzG7s5jxCsu2ejimgmfVzgXlLEMrJFvSdFkD2SS
+                gGqoxq5c9g8ssvt7xwr7aJ+VYYWTWRzJrOUny+99UbwHedu0EHL1BYILwy67Lium
+                sgUeeCEgrQKBgGv+7f7qcRB/jgvvr3oc990dDjUzGmRrQlcrb54Vlu2NYH45fyZW
+                6iEY9JAO+zd25tv9J9KDPFXpxb3a61gKfCie2wcF9MUbN08EAzKgDrKa+BKxcZJR
+                8PwCic7V8QhBP7m09yt/Zq2PqNhPvCxRVtnVVnhMES/N0cgGlP9R0JVVAoGAHU2/
+                kmnEN5bibiWjgasQM7fjWETHkdbbA1R0bM59zv+Rnz/9OlIqKI5KVKH7nAbTKXoI
+                iuzxi7ohWj2PwQ4wehvLLaRFCenk9X8YJXGq71Jtl7ntx6iNLCFtFS/8WbuD5GwX
+                7ZfCrLk+L6RyBayzY0wSuKch+Y8AvKf2aISyFpkCgYEAjSfEjz9Cn+27HdiMoBwa
+                +fyyoosci/6OBxj/WTKvV6KUYLBfFoAYpb9rqrbvnfyyc0UiAYQeMJAOWQ1kkzY4
+                zXs63iPQi2UeGPJZ7RsT+31DSaG9YiQdrInsUrlm8hi1C7Pg/NNt6Y1G0WhWYrvF
+                iNK0yCENMhSoOTtbT9tmGi0=
+                -----END PRIVATE KEY-----
+              publicKey: |-
+                -----BEGIN PUBLIC KEY-----
+                MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoPXlOuoYOGQBOozOFPMp
+                V0MFM/XHZs0tyclvtW24L++6XjCklP8BbIuEEcJm62M3vW2hZxgip0u+RLwnIYm+
+                bycadzA1s4v0xsZs4FnSUc5MgoiOQunQoFS+9TI7BYDd0zet8BH+bBFNiHqCfMly
+                TNKVBvX/TTu6fyBpYg5reguxAOw/ZEFooLn5l9GU1TSiNO3ysAvwBCi6e5Mffab7
+                AqvJtfOBBC9eUPzYQO0f+cyqB75iWuiXe7TNItMZ/CCjpDVRbt2CGnwBAkFkMEW2
+                pxRHkXN7R92xKGDPHO+K/lvmMQhu51H9elwpNd9l1X32x1ZfsBYKNfGAf7ACZnG3
+                jwIDAQAB
+                -----END PUBLIC KEY-----
+        backend:
+          rules: |-
+            [
+              {
+                "ruleId": 1,
+                "description": "Returns an Payee rejected transaction error (ML error 5105) from the simulator when transfer value is 5105 in any currency",
+                "conditions": {
+                  "all": [
+                    {
+                      "fact": "path",
+                      "operator": "equal",
+                      "value": "/transfers"
+                    },
+                    {
+                      "fact": "method",
+                      "operator": "equal",
+                      "value": "POST"
+                    },
+                    {
+                      "fact": "body",
+                      "operator": "equal",
+                      "value": "5105",
+                      "path": "$.amount"
+                    }
+                  ]
+                },
+                "event": {
+                  "type": "simulateError",
+                  "params": {
+                    "statusCode": 500,
+                    "body": {
+                      "statusCode": "5105",
+                      "message": "Payee rejected transaction"
+                    }
+                  }
+                }
+              },
+              {
+                "ruleId": 2,
+                "description": "makes the validation of authorization",
+                "conditions": {
+                  "all": [
+                    {
+                      "fact": "path",
+                      "operator": "equal",
+                      "value": "/verify-authorization"
+                    },
+                    {
+                      "fact": "method",
+                      "operator": "equal",
+                      "value": "POST"
+                    }
+                  ]
+                },
+                "event": {
+                  "type": "FIXED_CALLBACK",
+                  "params": {
+                    "statusCode": 200,
+                    "body": {
+                      "isValid": true
+                    }
+                  }
+                }
+              },
+              {
+                "ruleId": 3,
+                "description": "Returns list of user Accounts",
+                "conditions": {
+                  "all": [
+                    {
+                      "fact": "path",
+                      "operator": "equal",
+                      "value": "/accounts/username1234"
+                    },
+                    {
+                      "fact": "method",
+                      "operator": "equal",
+                      "value": "GET"
+                    }
+                  ]
+                },
+                "event": {
+                  "type": "FIXED_CALLBACK",
+                  "params": {
+                    "statusCode": 200,
+                    "body": {
+                      "accounts": [
+                        {
+                          "accountNickname": "dfspa.user.nickname1",
+                          "id": "dfspa.username.1234",
+                          "currency": "ZAR"
+                        },
+                        {
+                          "accountNickname": "dfspa.user.nickname2",
+                          "id": "dfspa.username.5678",
+                          "currency": "USD"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "ruleId": 4,
+                "description": "validate consentRequests - WEB",
+                "conditions": {
+                  "all": [
+                    {
+                      "fact": "path",
+                      "operator": "equal",
+                      "value": "/validateConsentRequests"
+                    },
+                    {
+                      "fact": "method",
+                      "operator": "equal",
+                      "value": "POST"
+                    },
+                    {
+                      "fact": "body",
+                      "operator": "equal",
+                      "value": "b51ec534-ee48-4575-b6a9-ead2955b8069",
+                      "path": "$.consentRequestId"
+                    }
+                  ]
+                },
+                "event": {
+                  "type": "FIXED_CALLBACK",
+                  "params": {
+                    "statusCode": 200,
+                    "body": {
+                      "isValid": true,
+                      "data": {
+                        "authChannels": [
+                          "WEB"
+                        ],
+                        "authUri": "http://localhost:6060/admin/dfsp/authorize?consentRequestId=b51ec534-ee48-4575-b6a9-ead2955b8069&callbackUri=http://localhost:42181/flutter-web-auth.html"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "ruleId": 5,
+                "description": "validate consentRequests - OTP",
+                "conditions": {
+                  "all": [
+                    {
+                      "fact": "path",
+                      "operator": "equal",
+                      "value": "/validateConsentRequests"
+                    },
+                    {
+                      "fact": "method",
+                      "operator": "equal",
+                      "value": "POST"
+                    },
+                    {
+                      "fact": "body",
+                      "operator": "equal",
+                      "value": "c51ec534-ee48-4575-b6a9-ead2955b8069",
+                      "path": "$.consentRequestId"
+                    }
+                  ]
+                },
+                "event": {
+                  "type": "FIXED_CALLBACK",
+                  "params": {
+                    "statusCode": 200,
+                    "body": {
+                      "isValid": true,
+                      "data": {
+                        "authChannels": ["OTP"]
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "ruleId": 6,
+                "description": "validate consentRequests - Error:7203",
+                "conditions": {
+                  "all": [
+                    {
+                      "fact": "path",
+                      "operator": "equal",
+                      "value": "/validateConsentRequests"
+                    },
+                    {
+                      "fact": "method",
+                      "operator": "equal",
+                      "value": "POST"
+                    },
+                    {
+                      "fact": "body",
+                      "operator": "equal",
+                      "value": "d51ec534-ee48-4575-b6a9-ead2955b8069",
+                      "path": "$.consentRequestId"
+                    }
+                  ]
+                },
+                "event": {
+                  "type": "FIXED_CALLBACK",
+                  "params": {
+                    "statusCode": 200,
+                    "body": {
+                      "isValid": false,
+                      "data": {},
+                      "errorInformation": {
+                        "errorCode": "7203",
+                        "errorDescription": "FSP does not support any requested authentication channels"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "ruleId": 7,
+                "description": "validate consentRequests - Error:7204",
+                "conditions": {
+                  "all": [
+                    {
+                      "fact": "path",
+                      "operator": "equal",
+                      "value": "/validateConsentRequests"
+                    },
+                    {
+                      "fact": "method",
+                      "operator": "equal",
+                      "value": "POST"
+                    },
+                    {
+                      "fact": "body",
+                      "operator": "equal",
+                      "value": "e51ec534-ee48-4575-b6a9-ead2955b8069",
+                      "path": "$.consentRequestId"
+                    }
+                  ]
+                },
+                "event": {
+                  "type": "FIXED_CALLBACK",
+                  "params": {
+                    "statusCode": 200,
+                    "body": {
+                      "isValid": false,
+                      "data": {},
+                      "errorInformation": {
+                        "errorCode": "7204",
+                        "errorDescription": "FSP does not support any requested scope actions"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "ruleId": 8,
+                "description": "validate consentRequests - Error:7209",
+                "conditions": {
+                  "all": [
+                    {
+                      "fact": "path",
+                      "operator": "equal",
+                      "value": "/validateConsentRequests"
+                    },
+                    {
+                      "fact": "method",
+                      "operator": "equal",
+                      "value": "POST"
+                    },
+                    {
+                      "fact": "body",
+                      "operator": "equal",
+                      "value": "f51ec534-ee48-4575-b6a9-ead2955b8069",
+                      "path": "$.consentRequestId"
+                    }
+                  ]
+                },
+                "event": {
+                  "type": "FIXED_CALLBACK",
+                  "params": {
+                    "statusCode": 200,
+                    "body": {
+                      "isValid": false,
+                      "data": {},
+                      "errorInformation": {
+                        "errorCode": "7209",
+                        "errorDescription": "FSP does not find scopes suitable"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "ruleId": 9,
+                "description": "validate consentRequests - Error:7210",
+                "conditions": {
+                  "all": [
+                    {
+                      "fact": "path",
+                      "operator": "equal",
+                      "value": "/validateConsentRequests"
+                    },
+                    {
+                      "fact": "method",
+                      "operator": "equal",
+                      "value": "POST"
+                    },
+                    {
+                      "fact": "body",
+                      "operator": "equal",
+                      "value": "f61ec534-ee48-4575-b6a9-ead2955b8069",
+                      "path": "$.consentRequestId"
+                    }
+                  ]
+                },
+                "event": {
+                  "type": "FIXED_CALLBACK",
+                  "params": {
+                    "statusCode": 200,
+                    "body": {
+                      "isValid": false,
+                      "data": {},
+                      "errorInformation": {
+                        "errorCode": "7210",
+                        "errorDescription": "FSP does not trust PISP callback URI"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "ruleId": 10,
+                "description": "validate consentRequests - Error:7211",
+                "conditions": {
+                  "all": [
+                    {
+                      "fact": "path",
+                      "operator": "equal",
+                      "value": "/validateConsentRequests"
+                    },
+                    {
+                      "fact": "method",
+                      "operator": "equal",
+                      "value": "POST"
+                    },
+                    {
+                      "fact": "body",
+                      "operator": "equal",
+                      "value": "f71ec534-ee48-4575-b6a9-ead2955b8069",
+                      "path": "$.consentRequestId"
+                    }
+                  ]
+                },
+                "event": {
+                  "type": "FIXED_CALLBACK",
+                  "params": {
+                    "statusCode": 200,
+                    "body": {
+                      "isValid": false,
+                      "data": {},
+                      "errorInformation": {
+                        "errorCode": "7211",
+                        "errorDescription": "FSP does not allow consent requests for specified username"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "ruleId": 11,
+                "description": "Returns list of user account for username user@example.com",
+                "conditions": {
+                  "all": [
+                    {
+                      "fact": "path",
+                      "operator": "equal",
+                      "value": "/accounts/user@example.com"
+                    },
+                    {
+                      "fact": "method",
+                      "operator": "equal",
+                      "value": "GET"
+                    }
+                  ]
+                },
+                "event": {
+                  "type": "FIXED_CALLBACK",
+                  "params": {
+                    "statusCode": 200,
+                    "body": {
+                      "accounts": [
+                        {
+                          "accountNickname": "Chequing Account",
+                          "id": "dfspa.username.1234",
+                          "currency": "TZS"
+                        },
+                        {
+                          "accountNickname": "Everyday Spending",
+                          "id": "dfspa.username.5678",
+                          "currency": "TZS"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "ruleId": 12,
+                "description": "verify received thirdparty transaction request",
+                "conditions": {
+                  "all": [
+                    {
+                      "fact": "path",
+                      "operator": "equal",
+                      "value": "/validate-thirdparty-transaction-request"
+                    },
+                    {
+                      "fact": "method",
+                      "operator": "equal",
+                      "value": "POST"
+                    },
+                    {
+                      "fact": "body",
+                      "operator": "equal",
+                      "value": "c2470148-1be2-4c0b-aece-aa8dcb92a6cc",
+                      "path": "$.transactionRequestId"
+                    }
+                  ]
+                },
+                "event": {
+                  "type": "FIXED_CALLBACK",
+                  "params": {
+                    "statusCode": 200,
+                    "body": {
+                      "isValid": true,
+                      "payerPartyIdInfo": {
+                        "partyIdType": "MSISDN",
+                        "partyIdentifier": "123456789",
+                        "fspId": "dfspa"
+                      },
+                      "consentId": "2acf1dfa-ce45-486e-b19e-ae4ad9804a63"
+                    }
+                  }
+                }
+              },
+              {
+                "ruleId": 13,
+                "description": "stores the final consent",
+                "conditions": {
+                  "all": [
+                    {
+                      "fact": "path",
+                      "operator": "equal",
+                      "value": "/store/consent"
+                    },
+                    {
+                      "fact": "method",
+                      "operator": "equal",
+                      "value": "POST"
+                    }
+                  ]
+                },
+                "event": {
+                  "type": "FIXED_CALLBACK",
+                  "params": {
+                    "statusCode": 200,
+                    "body": {
+                    }
+                  }
+                }
+              },
+              {
+                "ruleId": 14,
+                "description": "validate consentRequests - OTP",
+                "conditions": {
+                  "all": [
+                    {
+                      "fact": "path",
+                      "operator": "equal",
+                      "value": "/validateConsentRequests"
+                    },
+                    {
+                      "fact": "method",
+                      "operator": "equal",
+                      "value": "POST"
+                    },
+                    {
+                      "fact": "body",
+                      "operator": "equal",
+                      "value": "b5d6206c-4f06-497d-af15-ed866ea6958f",
+                      "path": "$.consentRequestId"
+                    }
+                  ]
+                },
+                "event": {
+                  "type": "FIXED_CALLBACK",
+                  "params": {
+                    "statusCode": 200,
+                    "body": {
+                      "isValid": true,
+                      "data": {
+                        "authChannels": [
+                          "OTP"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+    dfspb:
+      ingress:
+        hosts:
+          - sim-dfspb.local
+      config:
+        thirdpartysdk:
+          enabled: true
+        schemeAdapter:
+          secrets:
+            jws:
+              # The following is an example key and shouldn't be used in production
+              privateKey: |-
+                -----BEGIN PRIVATE KEY-----
+                MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDMu126miewCUCT
+                7f49B0SyCPFGzmqGSs9rTPbk1se+BBhqfhsfkZj6cRRfrlg3rme6we0Ib2AF5TQL
+                noSBlDAimQcNOHXrqpAY/B0l/mgyUwmfv0NJ3UjZuCFuw3HRrU/oSUfXoDITC+Bi
+                120w4FY2B/vPn+1iC/tsaCayneoaV/Sedq7H9+smEnQfGl3p5QJp/B2Ws3Bz1HqI
+                IoxLEaO9VMeDHQPvNJn/7g9erqA5vIhmgLS46worOVjdRLH2SECH73qp8Wg0rJ8Y
+                eW2kQ8kuY4uHcG3MO6drYrC011U0ZyM90KV7dv2Y0h2FHlpn9s/pmb630m5ELpnB
+                T/pYTLcXAgMBAAECggEADqk6Qz3SgBeMMYEWYZ4ZdsW6Ktpm+Xqg/kDy4JywOB9z
+                SikBXeeKH3Z6ltwq2BicDV020Wb8Zt+s3vTOmLhDzC544/hPmtKfjWfR2eHX6gaq
+                m+8ml+20pQFmb4Kn2MlC/Xzwm/SOXBvPyUmTua95rQExsK12DT0+F4YhLfhYsTh2
+                HfkEzdFW4rrd+9ddKG1ZANS4ZaiMyzhtvUWeEBypBtVf+kBk+51t9pLCdjuynb8I
+                WylSDhikT3/YQ/3g/Sz3SMp1u4x0GQe9FWYrnPzzp5LnM5fm49v8JWVHUvd0TOi0
+                dQV+LYlgSD38YPpi4iKQSh0Zf0EBfbA83GsX2ArJ7QKBgQDmvcA6PqPo0OV/7RKY
+                JuziA3TpucL8iVM1i7/Lv6+VkX88uDvEjwLoNAiYcgIm/CMK7WAwA+Dzn4r38EHB
+                BKF4KRhP0qQS0KLXsd0tdsmAB0In7+cbKL4ttqNUP98xZAkTLJq9PXqTKN0qtyw4
+                SfIsVMjDGoeSdWHObZYbGKICfQKBgQDjJLwolDrVX29V4zVmxQYH5iN+5kwKXHXj
+                suHBrW02Oj/GQFh3Xj6JQi3mzTWYhHwhA4pdaQtNYqTaz9Ic/O1VNPic2ovtg+cd
+                7sh86qdQ4QZYhN3RT4oX///u6+UK90llh9hEBo3GuZ4X47tuByNtD4SFAlULrkSm
+                fW4XaC3gIwKBgGil6HfCDx65F00UnVlKVicPQEf8ivVz5rwjPIJQ1nZ0PYuxVtIH
+                tl7PspJJKra5pb7/957vM2fqlOFsIrZCvmS75p3VP7qUyzYeIdzLwgmBwTxRrrP/
+                n3kmGx9LtJM29nKuySNIrb3uS5hi6PhCeUYn0cHC13fSKuCvjOOPIXMVAoGBAJg+
+                CPdR0tUs8Byq+yH0sIQe1m+5wAG50zJYtUPxD6AnDpO8kQ8A1f19o/JsXJ3rPp+K
+                FfVh8LdfhIs8e+H+DLztkizftqXtoLzJTQuc46QsDurJszsVisNnTI1BAvWEpWct
+                0+BUXDZ0NuhgNUIb+rygh/v2gjYgCddlfqKlqwntAoGBAM5Kpp5R0G0ioAuqGqfZ
+                sHEdLqJMSepgc6c7RC+3G/svtS2IqCfyNfVMM3qV5MY3J7KnAVjGOw2oJbXcPLXa
+                uutsVVmPx2d/x2LZdc8dYYcdOQZvrUhmALhAPXM4SRujakxh+Uxi1VOiW+fZL8aW
+                uu1pxuWD0gTJxFkp6u4YIAhw
+                -----END PRIVATE KEY-----
+              publicKey: |-
+                -----BEGIN PUBLIC KEY-----
+                MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzLtduponsAlAk+3+PQdE
+                sgjxRs5qhkrPa0z25NbHvgQYan4bH5GY+nEUX65YN65nusHtCG9gBeU0C56EgZQw
+                IpkHDTh166qQGPwdJf5oMlMJn79DSd1I2bghbsNx0a1P6ElH16AyEwvgYtdtMOBW
+                Ngf7z5/tYgv7bGgmsp3qGlf0nnaux/frJhJ0Hxpd6eUCafwdlrNwc9R6iCKMSxGj
+                vVTHgx0D7zSZ/+4PXq6gObyIZoC0uOsKKzlY3USx9khAh+96qfFoNKyfGHltpEPJ
+                LmOLh3BtzDuna2KwtNdVNGcjPdCle3b9mNIdhR5aZ/bP6Zm+t9JuRC6ZwU/6WEy3
+                FwIDAQAB
+                -----END PUBLIC KEY-----
+    pisp:
+      ingress:
+        hosts:
+          - sim-pisp.local
+      config:
+        thirdpartysdk:
+          enabled: true
+        schemeAdapter:
+          secrets:
+            jws:
+              # The following is an example key and shouldn't be used in production
+              privateKey: |-
+                -----BEGIN PRIVATE KEY-----
+                MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDZHci4QOmoO2xL
+                3p6YjS90Iml5v+WcLFHY3DnHpncaML09EUInaCxLZmrvQ1pRDnJauutn0Nnw+OAJ
+                ep+1Qobja4WyJssWk3T0iNC5kIO4CQJ0SMyCb7GJ6zjtqNHOXp685zQKWRAFlUbJ
+                uX1ECvo1FMU5iRiMnTFLQw2R9GQOI4S7kED9cpvmgtvJUyMbK8uDJLWDjXHh8D4J
+                xvk8Q1qH12qQUnePbXxGz5sbK2tWqusIKNXUWIj5j1iMq5NFGjtT+NwYct8RzthF
+                w/ZT2izFDEW+EfFHtbR7vh8BTwHxggnPCNpC+sSH1IlFzYhmyHoR0EBdeZuTiwcr
+                KGhfRvJRAgMBAAECggEAJ1r6QMfncsq+sSv71Iw3D1aThvGtZbc06NnWkWWPzkwK
+                aXDg7HK6ILrCZHdxfiLfwKmENU/KyZ7bQWycWYdjGwMo+2eDxaZZ+193ckOLVMcx
+                TjHJ/FTRuj3MlmvVCBLntDc2nC+Ts2dhKvy4A6b3vrpym6DJtedigZF4er3xiww4
+                a9XV7vr5xDEjf4kFWWGtEDuF+4YAEBbmD76cRyF5Hv8eoU0MELCelHqL1jL7W6/5
+                sTfbTxRIFO3wmJhW2ZRRyD9EN5lmP9dROxIE4H3tRBihUJVDBA0IXGiE2Z+NjOUJ
+                ycbZVT0LMa3XeYKdrhHRGFafWPSPIJCyQOIK33V6BwKBgQD/TjS9sXJ9hXu53bM1
+                8/X780kUp66GQF5V+QhMAVW/6BdQ1Fkhv6AuJZl+FujBRszSdl96thILy87qkP+n
+                dUDxXn5B2B7MQ1K7uwmKrYW087BfDPa+3R7wKJ4fndIhrqANGy1KCfwhe8GJEzpP
+                vlI4JeInrgMXyQgZgj+65zE22wKBgQDZtPu1MD8SJVvUYXgP1u0XqJWZDo5dndI1
+                KA7UlefbBqqtZ87EP7zxcTZHaRLuMBPEppH4+K4NsopnZh4rD+bV/NOJ/rI6PMZe
+                zIkjLYE+KTgvM7pvwDy+q08fDYnucS4xnHOjLzw8/l4ptJ1uigXkx8PSl94118+5
+                h4Ac4ZL1QwKBgQCk/3MggXT/4GvU9I4kuVVpjpLVkYU+aI1PPNH65QX5L9MZvxMX
+                t5ObH1uy3LVybAJlpnEQimjhTMeeWzWOkT32gF5SyY0l8AChKUECaiC2kKOU2nkB
+                Y0Diby26OzIZ6JSxw7WiWw+iyCuNHmsaLGNQvFML1+9RyO++JKpxbYcl7wKBgBbd
+                Vi5CYe1i9REKJ5TqSr5YW1XW3Ibig2hHy77x+4baXWSW6XVdCFgHPt8jHvTbIche
+                gig23fjcToLri7GUGvdQdVsh39AT//WG38RNDCzeIWN7uFHyS67uyQGG53yecG6P
+                cumplVcGlBcnO/2XC2VqwZtFjfXzs4JVw9PEsS2HAoGANdd6dNf7ETpBgAlesWgS
+                73JAElMGkQH42dqejEzMa5CXUCPLQdqHCgxaT4M25c6F8tUhb2qSvV+Cl+zVkqlA
+                CpocM6+FV4oYNLIJUtNJj+XLbDkV2XjXYzuzcGlDd9HAv6hzg0zHOhN6ETsxqIx7
+                dvV4dxN19eDirp9AVl6k3Ew=
+                -----END PRIVATE KEY-----
+              publicKey: |-
+                -----BEGIN PUBLIC KEY-----
+                MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2R3IuEDpqDtsS96emI0v
+                dCJpeb/lnCxR2Nw5x6Z3GjC9PRFCJ2gsS2Zq70NaUQ5yWrrrZ9DZ8PjgCXqftUKG
+                42uFsibLFpN09IjQuZCDuAkCdEjMgm+xies47ajRzl6evOc0ClkQBZVGybl9RAr6
+                NRTFOYkYjJ0xS0MNkfRkDiOEu5BA/XKb5oLbyVMjGyvLgyS1g41x4fA+Ccb5PENa
+                h9dqkFJ3j218Rs+bGytrVqrrCCjV1FiI+Y9YjKuTRRo7U/jcGHLfEc7YRcP2U9os
+                xQxFvhHxR7W0e74fAU8B8YIJzwjaQvrEh9SJRc2IZsh6EdBAXXmbk4sHKyhoX0by
+                UQIDAQAB
+                -----END PUBLIC KEY-----
+ 
+  defaultProbes: &defaultProbes
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 3
+      periodSeconds: 30
+      timeoutSeconds: 10
+      successThreshold: 1
+      failureThreshold: 3
+    readinessProbe:
+      enabled: true
+      initialDelaySeconds: 3
+      periodSeconds: 5
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 3
+
+  ingress:
+    # If you're using nginx ingress controller >= v0.22.0 set this to (/|$)(.*). Ensure that you set the `"nginx.ingress.kubernetes.io/rewrite-target": "/$2"`
+    # If you're using nginx ingress controller < v0.22.0 set this to an empty string or "/". Ensure that you set the `"nginx.ingress.kubernetes.io/rewrite-target": "/"`
+    # This affects the way your rewrite target will work.
+    # For more information see "Breaking changes" here:
+    # https://github.com/kubernetes/ingress-nginx/blob/master/Changelog.md#0220
+
+    ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+    # nginx.ingress.kubernetes.io/rewrite-target: '/'
+    # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+    ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+    # kubernetes.io/ingress.class: nginx
+    ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
+    # kubernetes.io/tls-acme: "true""
+
+    ## nginx ingress controller >= v0.22.0
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+    ingressPathRewriteRegex: (/|$)(.*)
+
+    ## nginx ingress controller < v0.22.0
+    # annotations:
+    #   nginx.ingress.kubernetes.io/rewrite-target: '/'
+    # ingressPathRewriteRegex: "/"
+
+  # If you enable JWS validation and intend to communicate via a switch you will almost certainly
+  # want to put your switch JWS public key in this array. The name of the property in this object
+  # will correspond directly to the name of the signing key (e.g., in the example below,
+  # `switch.pem`). Do not include the `.pem` extension, this will be added for you. The scheme
+  # adapter will use the FSPIOP-Source header content to identify the relevant signing key to use.
+  # The below example assumes your switch will use `FSPIOP-Source: switch`. If instead, for example,
+  # your switch is using `FSPIOP-Source: peter` you will need a property `peter` in the following
+  # object. Do not add the public keys of your simulators to this object. Instead, put them in
+  # `mojaloop-simulator.simulators.$yourSimName.config.schemeAdapter.secrets.jws.publicKey`.
+  sharedJWSPubKeys:
+    # switch: |-
+    #   -----BEGIN PUBLIC KEY-----
+    #   blah blah blah
+    #   -----END PUBLIC KEY-----
+
+  defaults: &defaults
+    # Changes to this object in the parent chart, for example 'mojaloop-simulator.defaults' will be
+    # applied to all simulators deployed by this child chart.
+    config:
+      # Config for init containers
+      initContainers:
+        waitForCache:
+          enabled: true
+
+      imagePullSecretName: dock-casa-secret
+
+      cache:
+
+        # These will be supplied directly to the init containers array in the deployment for the
+        # scheme adapter. They should look exactly as you'd declare them inside the deployment.
+        # Example: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#init-containers-in-use
+        # This init container will have the same environment variables as the main backend container,
+        # as specified in .env below.
+        # Additionally, the following preset environment variables will be set:
+        # SIM_NAME: the name of the simulator as specified in the `mojaloop-simulator` config
+        # SIM_SCHEME_ADAPTER_SERVICE_NAME: "sim-$SIM_NAME-scheme-adapter"
+        # SIM_BACKEND_SERVICE_NAME: "sim-$SIM_NAME-backend"
+        # SIM_CACHE_SERVICE_NAME: "sim-$SIM_NAME-cache"
+        initContainers: []
+        enabled: true
+        image:
+          repository: redis
+          tag: 5.0.4-alpine
+          pullPolicy: IfNotPresent
+        <<: *defaultProbes
+        livenessProbe:
+          enabled: true
+          timeoutSeconds: 5
+        readinessProbe:
+          enabled: true
+          timeoutSeconds: 5
+
+      schemeAdapter:
+        secrets:
+          jws:
+            # Use the privKeySecretName field if you would like to supply a JWS private key external
+            # to this chart.
+            # For example, if you create a private key called `sim-payerfsp-jws-signing-key` external
+            # to this chart, you would supply `privKeySecretName: sim-payerfsp-jws-signing-key` here.
+            # These fields will take precedence over `privateKey` and `publicKey` below.
+            # This field is best supplied per-simulator, however it's here for documentation
+            # purposes.
+            privKeySecretName: {}
+            # TODO: update `privKeySecretName` above to contain both a name and a key in the secret.
+            #       Add documentation on usage.
+            # privKeySecret: {}
+            #   name:
+            #   key:
+            #
+            # The `publicKeyConfigMapName` field allows you to supply a ConfigMap containing JWS public
+            # keys external to this release, and have this release reference that ConfigMap to
+            # populate JWS public keys. The format of this ConfigMap must be as described for
+            # `sharedJWSPubKeys`, a map with one key per FSP/simulator corresponding to the
+            # FSPIOP-Source header that will be supplied by that FSP/simulator.
+            publicKeyConfigMapName: {}
+            # Supply per-simulator private and public keys here:
+            privateKey: ''
+            publicKey: ''
+        image:
+          repository: mojaloop/sdk-scheme-adapter
+          tag: v11.18.11
+          pullPolicy: IfNotPresent
+        <<: *defaultProbes
+
+        # These will be supplied directly to the init containers array in the deployment for the
+        # scheme adapter. They should look exactly as you'd declare them inside the deployment.
+        # Example: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#init-containers-in-use
+        # This init container will have the same environment variables as the main scheme adapter
+        # container, as specified in .env below.
+        # All init containers will have the same preset environment variables as the backend init
+        # container as specified above.
+        initContainers: []
+
+        scale:
+          enabled: false
+          spec:
+            minReplicas: 1
+            maxReplicas: 10
+            metrics:
+            - type: Resource
+              resource:
+                name: cpu
+                target:
+                  type: Utilization
+                  averageUtilization: 80
+
+        env:
+          # Ports the scheme adapter listens on. Shouldn't really matter for a user of this chart.
+          # You probably shouldn't bother configuring them- it likely won't do you much good. But it
+          # won't do any harm, either.
+          INBOUND_LISTEN_PORT: 4000
+          OUTBOUND_LISTEN_PORT: 4001
+          TEST_LISTEN_PORT: 4002
+
+          # Enable mutual TLS authentication. Useful when not running in a secure
+          # environment, i.e. when you're running it locally against your own implementation.
+          INBOUND_MUTUAL_TLS_ENABLED: false
+          OUTBOUND_MUTUAL_TLS_ENABLED: false
+          TEST_MUTUAL_TLS_ENABLED: false
+
+          # Enable JWS verification and signing
+          VALIDATE_INBOUND_JWS: false
+          JWS_SIGN: true
+
+          # applicable only if VALIDATE_INBOUND_JWS is `true`
+          # allows disabling of validation on incoming PUT /parties/{idType}/{idValue} requests
+          VALIDATE_INBOUND_PUT_PARTIES_JWS: true
+
+          # applicable only if JWS_SIGN is `true`
+          # allows disabling of signing on outgoing PUT /parties/{idType}/{idValue} requests
+          JWS_SIGN_PUT_PARTIES: true
+
+          # The number of space characters by which to indent pretty-printed logs. If set to zero, log events
+          # will each be printed on a single line.
+          LOG_INDENT: "0"
+
+          # REDIS CACHE CONNECTION
+          # CACHE_HOST: "" # Default is parametrised, but it's possible to override this
+          CACHE_PORT: 6379
+
+          # Switch or DFSP system under test Mojaloop API endpoint
+          # The option 'PEER_ENDPOINT' has no effect if the remaining options 'ALS_ENDPOINT', 'QUOTES_ENDPOINT',
+          # 'BULK_QUOTES_ENDPOINT', 'TRANSFERS_ENDPOINT', 'BULK_TRANSFERS_ENDPOINT', 'TRANSACTION_REQUESTS_ENDPOINT' are specified.          # Do not include the protocol, i.e. http.
+          PEER_ENDPOINT: "mojaloop-switch"
+          # Common Account Lookup System (ALS)
+          ALS_ENDPOINT: $release_name-account-lookup-service
+          QUOTES_ENDPOINT: $release_name-quoting-service
+          TRANSFERS_ENDPOINT: $release_name-ml-api-adapter-service
+          BULK_TRANSFERS_ENDPOINT: $release_name-bulk-api-adapter-service
+          BULK_QUOTES_ENDPOINT: $release_name-bulk-quoting-service
+          TRANSACTION_REQUESTS_ENDPOINT: $release_name-transaction-requests-service
+
+          # This value specifies the endpoint the scheme adapter expects to communicate with the
+          # backend on. Do not include the protocol, i.e. http.
+          # You're very likely to break the functioning of this chart if you configure the following
+          # value. This config item has been copied from the service repo for consistency with that,
+          # so that if you come here and find this variable, with this comment, it's less confusing
+          # than if you come here and it's missing entirely.
+          # BACKEND_ENDPOINT: "localhost:3000"
+
+          # FSPID of this DFSP
+          # Commented by default- you're likely to break the chart if you configure this value.
+          # DFSP_ID: "mojaloop-sdk"
+
+          # Secret used for generation and verification of secure ILP
+          ILP_SECRET: "Quaixohyaesahju3thivuiChai5cahng"
+
+          # expiry period in seconds for quote and transfers issued by the SDK
+          EXPIRY_SECONDS: "60"
+
+          # if set to false the SDK will not automatically accept all returned quotes
+          # but will halt the transfer after a quote response is received. A further
+          # confirmation call will be required to complete the final transfer stage.
+          AUTO_ACCEPT_QUOTES: true
+
+          # if set to false the SDK will not automatically accept a resolved party
+          # but will halt the transer after a party lookup response is received. A further
+          # confirmation call will be required to progress the transfer to quotes state.
+          AUTO_ACCEPT_PARTY: true
+
+          # when set to true, when sending money via the outbound API, the SDK will use the value
+          # of FSPIOP-Source header from the received quote response as the payeeFsp value in the
+          # transfer prepare request body instead of the value received in the payee party lookup.
+          # This behaviour should be enabled when the SDK user DFSP is in a forex enabled switch
+          # ecosystem and expects quotes and transfers to be rerouted by the switch to forex
+          # entities i.e. forex providing DFSPs. Please see the SDK documentation and switch
+          # operator documentation for more information on forex use cases.
+          USE_QUOTE_SOURCE_FSP_AS_TRANSFER_PAYEE_FSP: false
+
+          # set to true to validate ILP, otherwise false to ignore ILP
+          CHECK_ILP: true
+
+          # set to true to enable test features such as request cacheing and retrieval endpoints
+          ENABLE_TEST_FEATURES: true
+
+          # set to true to mock WSO2 oauth2 token endpoint
+          ENABLE_OAUTH_TOKEN_ENDPOINT: false
+          OAUTH_TOKEN_ENDPOINT_CLIENT_KEY: "test-client-key"
+          OAUTH_TOKEN_ENDPOINT_CLIENT_SECRET: "test-client-secret"
+          OAUTH_TOKEN_ENDPOINT_LISTEN_PORT: "6000"
+
+          # WS02 Bearer Token specific to golden-fsp instance and environment
+          WS02_BEARER_TOKEN: "7718fa9b-be13-3fe7-87f0-a12cf1628168"
+
+          # OAuth2 data used to obtain WSO2 bearer token
+          OAUTH_TOKEN_ENDPOINT: ""
+          OAUTH_CLIENT_KEY: ""
+          OAUTH_CLIENT_SECRET: ""
+          OAUTH_REFRESH_SECONDS: "3600"
+
+          # Set to true to respect expirity timestamps
+          REJECT_EXPIRED_QUOTE_RESPONSES: false
+          REJECT_TRANSFERS_ON_EXPIRED_QUOTES: false
+          REJECT_EXPIRED_TRANSFER_FULFILS: false
+
+          # Timeout for GET/POST/DELETE - PUT flow processing
+          REQUEST_PROCESSING_TIMEOUT_SECONDS: "30"
+
+          # To allow transfer without a previous quote request, set this value to true.
+          # The incoming transfer request should consist of an ILP packet and a matching condition in this case.
+          # The fulfilment will be generated from the provided ILP packet, and must hash to the provided condition.
+          ALLOW_TRANSFER_WITHOUT_QUOTE: true
+          RESERVE_NOTIFICATION: false
+          RESOURCE_VERSIONS: transfers=1.1,quotes=1.1,participants=1.1,parties=1.1,transactionRequests=1.1
+
+
+      backend:
+        image:
+          repository: mojaloop/mojaloop-simulator
+          tag: v11.6.2
+          pullPolicy: IfNotPresent
+        <<: *defaultProbes
+
+        # These will be supplied directly to the init containers array in the deployment for the
+        # backend. They should look exactly as you'd declare them inside the deployment.
+        # Example: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#init-containers-in-use
+        initContainers: []
+
+        # Supply JSON rules here as a string
+        # Example:
+        # rules: |-
+        #   [
+        #     {
+        #       "ruleId": 1,
+        #       .. etc.
+        #     }
+        #   ]
+        rules: |-
+          [ ]
+
+        env:
+          ##### Section for simulator backend container #####
+          # This is the endpoint the backend expects to communicate with the scheme adapter on.
+          # Include the protocol, i.e. http.
+          # It's not configured by default in this chart as the default value is calculated in a
+          # template and configuring it is likely to break communication between the backend and the
+          # scheme adapter.
+          # OUTBOUND_ENDPOINT: "http://localhost:4001" # within the pod
+
+          # Enable mutual TLS authentication. Useful when the simulator is not running in a managed
+          # environment, i.e. when you're running it locally against your own implementation.
+          MUTUAL_TLS_ENABLED: false
+
+          # Enable server-only TLS; i.e. serve on HTTPS instead of HTTP.
+          HTTPS_ENABLED: false
+
+          # Location of certs and key required for TLS
+          CA_CERT_PATH: ./secrets/cacert.pem
+          SERVER_CERT_PATH: ./secrets/servercert.pem
+          SERVER_KEY_PATH: ./secrets/serverkey.pem
+
+          # The number of space characters by which to indent pretty-printed logs. If set to zero, log events
+          # will each be printed on a single line.
+          LOG_INDENT: "0"
+
+          # The name of the sqlite log file. This probably doesn't matter much to the user, except that
+          # setting :memory: will use an in-memory sqlite db, which will be faster and not consume disk
+          # space. However, it will also mean that the logs will be lost once the container is stopped.
+          SQLITE_LOG_FILE: ./log.sqlite
+
+          # The DFSPID of this simulator. The simulator will accept any requests routed to
+          # FSPIOP-Destination: $SCHEME_NAME. Other requests will be rejected.
+          # Not set in this chart as these are calculated in templates. Setting this values is likely
+          # to break expected functionality.
+          # SCHEME_NAME: golden
+          # DFSP_ID: golden
+
+          # The name of the sqlite model database. If you would like to start the simulator with preloaded
+          # state you can use a preexisting file. If running in a container, you can mount a sqlite file as a
+          # volume in the container to preserve state between runs.
+          # Use MODEL_DATABASE: :memory: for an ephemeral in-memory database
+          MODEL_DATABASE: ./model.sqlite
+
+          # The simulator can automatically add fees when generating quote responses. Use this
+          # variable to control the fee amounts added. e.g. for a transfer of 100 USD a FEE_MULTIPLIER of 0.1
+          # reuslts in fees of USD 10 being applied to the quote response
+          FEE_MULTIPLIER: "0.05"
+
+          # Specifies the location of a rules file for the simulator backend. Rules can be used to produce
+          # specific simulator behaviours in response to incoming requests that match certain conditions.
+          # e.g. a rule can be used to trigger NDC errors given transfers between certain limits.
+          RULES_FILE: ../rules/rules.json
+
+          # Ports for simulator, report, and test APIs
+          SIMULATOR_API_LISTEN_PORT: 3000
+          REPORT_API_LISTEN_PORT: 3002
+          TEST_API_LISTEN_PORT: 3003
+
+      thirdpartysdk:
+        secrets:
+          tls:
+            # In order to enable TLS with your supplied credentials, you will need to:
+            # 1. set all three of the `cert`, `key`, `cacert` fields appropriately for each of
+            # `inbound` and `outbound` as per your preference.
+            # 2. optionally specify `schemeAdapter.env.INBOUND_MUTUAL_TLS_ENABLED: true`
+            # 3. optionally specify `schemeAdapter.env.OUTBOUND_MUTUAL_TLS_ENABLED: true`
+            # It probably makes sense to set your CA cert in defaults. Note that the default is that
+            # the CA, cert and key will be generated for you by this chart. To use this functionality
+            # you only need specify the config documented in steps (2, 3, 4) a few lines up.
+            #
+            # inbound:
+            #   key: |
+            #     -----BEGIN CERTIFICATE-----
+            #     ...
+            #     -----END CERTIFICATE-----
+            #   cacert: |
+            #     -----BEGIN CERTIFICATE-----
+            #     ...
+            #     -----END CERTIFICATE-----
+            #   cert: |
+            #     -----BEGIN RSA PRIVATE KEY-----
+            #     ...
+            #     -----END RSA PRIVATE KEY-----
+            #
+            # To set the same values for each of inbound and outbound, specify the values for
+            # inbound as above, then the values for outbound using yaml anchors:
+            #
+            # inbound: &inbound
+            #   key: |
+            #     ..
+            #   cacert: |
+            #     ..
+            #   cert: |
+            #     ..
+            # outbound: *inbound
+            inbound: &inbound
+            outbound: *inbound
+          jws:
+            # Use the privKeySecretName field if you would like to supply a JWS private key external
+            # to this chart.
+            # For example, if you create a private key called `sim-payerfsp-jws-signing-key` external
+            # to this chart, you would supply `privKeySecretName: sim-payerfsp-jws-signing-key` here.
+            # These fields will take precedence over `privateKey` and `publicKey` below.
+            # This field is best supplied per-simulator, however it's here for documentation
+            # purposes.
+            privKeySecretName: {}
+            # TODO: update `privKeySecretName` above to contain both a name and a key in the secret.
+            #       Add documentation on usage.
+            # privKeySecret: {}
+            #   name:
+            #   key:
+            #
+            # The `publicKeyConfigMapName` field allows you to supply a ConfigMap containing JWS public
+            # keys external to this release, and have this release reference that ConfigMap to
+            # populate JWS public keys. The format of this ConfigMap must be as described for
+            # `sharedJWSPubKeys`, a map with one key per FSP/simulator corresponding to the
+            # FSPIOP-Source header that will be supplied by that FSP/simulator.
+            publicKeyConfigMapName: {}
+            # Supply per-simulator private and public keys here:
+            privateKey: ''
+            publicKey: ''
+        image:
+          repository: mojaloop/thirdparty-sdk
+          tag: v11.55.1
+          pullPolicy: IfNotPresent
+          inboundCommand: '[ "npm", "run", "start:inbound" ]'
+          outboundCommand: '[ "npm", "run", "start:outbound" ]'
+        <<: *defaultProbes
+
+        # These will be supplied directly to the init containers array in the deployment for the
+        # scheme adapter. They should look exactly as you'd declare them inside the deployment.
+        # Example: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#init-containers-in-use
+        # This init container will have the same environment variables as the main scheme adapter
+        # container, as specified in .env below.
+        # All init containers will have the same preset environment variables as the backend init
+        # container as specified above.
+        initContainers: []
+
+        scale:
+          enabled: false
+          spec:
+            minReplicas: 1
+            maxReplicas: 10
+            metrics:
+            - type: Resource
+              resource:
+                name: cpu
+                target:
+                  type: Utilization
+                  averageUtilization: 80
+        config: {
+          production.json: {
+            "INBOUND": {
+              "PORT": 4005,
+              "HOST": "0.0.0.0",
+              "PISP_TRANSACTION_MODE": true
+            },
+            "OUTBOUND": {
+              "PORT": 4006,
+              "HOST": "0.0.0.0"
+            },
+            "REQUEST_PROCESSING_TIMEOUT_SECONDS": 30,
+            "WSO2_AUTH": {
+              "staticToken": "0706c62f-c022-3c42-8d14-8b5df128876d",
+              "tokenEndpoint": "",
+              "clientKey": "test-client-key",
+              "clientSecret": "test-client-secret",
+              "refreshSeconds": 3600
+            },
+            "REDIS": {
+              "PORT": 6379,
+              # covered by REDIS_HOST env var in deployment.yaml
+              # "HOST"
+              "TIMEOUT": 100
+            },
+            "INSPECT": {
+              "DEPTH": 4,
+              "SHOW_HIDDEN": false,
+              "COLOR": true
+            },
+            "SHARED": {
+              "AUTH_SERVICE_PARTICIPANT_ID": 'centralauth',
+              "THIRDPARTY_REQUESTS_ENDPOINT": "tp-api-svc:3008",
+              "SERVICES_ENDPOINT": "tp-api-svc:3008",
+              "ALS_ENDPOINT": "$release_name-account-lookup-service",
+              "QUOTES_ENDPOINT": "$release_name-quoting-service",
+              "TRANSFERS_ENDPOINT": "$release_name-ml-api-adapter-service",
+              "BULK_TRANSFERS_ENDPOINT": "",
+              "DFSP_ID": "$name",
+              "DFSP_BACKEND_URI": "$full_name-backend:3000",
+              "DFSP_BACKEND_HTTP_SCHEME": "http",
+              "DFSP_BACKEND_VERIFY_AUTHORIZATION_PATH": "verify-authorization",
+              "DFSP_BACKEND_VERIFY_CONSENT_PATH": "verify-consent",
+              "SDK_OUTGOING_URI": "$full_name-scheme-adapter:4001",
+              "SDK_OUTGOING_HTTP_SCHEME": "http",
+              "SDK_OUTGOING_PARTIES_INFORMATION_PATH": "parties/{Type}/{ID}/{SubId}",
+              "JWS_SIGN": false,
+              "JWS_SIGNING_KEY": "./secrets/jwsSigningKey.key",
+              "TLS": {
+                "mutualTLS": {
+                  "enabled": false
+                },
+                "creds": {
+                  "ca": "./secrets/dfsp_a_client.crt",
+                  "cert": "./secrets/dfsp_a_client.crt",
+                  "key": "./secrets/dfsp_a_client.crt"
+                }
+              }
+            }
+          }
+        }
+        env:
+          NODE_ENV: production
+          INBOUND_LISTEN_PORT: 4005
+          OUTBOUND_LISTEN_PORT: 4006
+          # Path to JWS signing key (private key of THIS DFSP)
+          JWS_SIGNING_KEY_PATH: "/jwsSigningKey/private.key" # do not change this unless you know what you are doing - this will break the chart
+          JWS_VERIFICATION_KEYS_DIRECTORY: "/jwsVerificationKeys"
+
+    ingress:
+      enabled: true
+      path: /
+      hosts:
+        - mojaloop-simulators.local
+      tls: []
+      #  - secretName: chart-example-tls
+      #    hosts:
+      #      - chart-example.local
+
+    resources: {}
+      # We usually recommend not to specify default resources and to leave this as a conscious
+      # choice for the user. This also increases chances charts run on environments with little
+      # resources, such as Minikube. If you do want to specify resources, uncomment the following
+      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+      # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+      # requests:
+      #  cpu: 100m
+      #  memory: 128Mi
+
+    ## Pod scheduling preferences.
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity: {}
+
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
+    ## Set toleration for scheduler
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations: []

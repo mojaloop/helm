@@ -47,6 +47,8 @@ defaults_Environment: &defaults_environment
     helm repo add elastic https://helm.elastic.co
     helm repo add codecentric https://codecentric.github.io/helm-charts
     helm repo add bitnami https://charts.bitnami.com/bitnami
+    helm repo add mojaloop-charts https://docs.mojaloop.io/charts/repo
+    helm repo update
 
 ##
 # Executors
@@ -87,6 +89,10 @@ jobs:
       - checkout
       - run:
           <<: *defaults_environment
+      - run:
+          name: Update Helm Charts
+          command: |
+            bash update-charts-dep.sh
       - run:
           name: Linting Helm Charts
           command: |
@@ -133,18 +139,18 @@ jobs:
           path: /tmp/license-scanner/results
           prefix: licenses
 
-  build:
-    executor: default-docker-helm
-    steps:
-      - run:
-          <<: *defaults_Dependencies
-      - checkout
-      - run:
-          <<: *defaults_environment
-      - run:
-          name: Update Helm Charts
-          command: |
-            bash update-charts-dep.sh
+  # build:
+  #   executor: default-docker-helm
+  #   steps:
+  #     - run:
+  #         <<: *defaults_Dependencies
+  #     - checkout
+  #     - run:
+  #         <<: *defaults_environment
+  #     - run:
+  #         name: Update Helm Charts
+  #         command: |
+  #           bash update-charts-dep.sh
 
   deploy:
     executor: default-docker-helm
@@ -220,18 +226,18 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - build:
-          context: org-global
-          requires:
-            - test
-            - audit-licenses
-          filters:
-            tags:
-              only: /.*/
+      # - build:
+      #     context: org-global
+      #     requires:
+      #       - test
+      #       - audit-licenses
+      #     filters:
+      #       tags:
+      #         only: /.*/
       - deploy:
           context: org-global
           requires:
-            - build
+            - test
           filters:
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
