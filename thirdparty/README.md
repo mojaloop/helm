@@ -75,6 +75,17 @@ thirdparty:
 
 ```
 
+Or alternatively add `--set` for each of the above parameters on the install command:
+
+```bash
+helm install ... \
+  # enabled Thirdparty support on Account-lookup-services
+  --set account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true \
+  --set account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true \
+  # enabled Thirdparty components
+  --set thirdparty.enabled=true
+```
+
 ## Validating and testing the 3P-API
 
 After setting the required configuration flags to enable Thirdparty features and components, specific tests can be enabled to verify your installation...
@@ -88,13 +99,24 @@ Ensure the following properties are set in your values file:
 
 Or alternatively add `--set` for each of the above parameters on the install command:
 
-`helm install ... --set ml-ttk-test-setup-tk.tests.enabled=true --set ml-ttk-test-val-tk.tests.enabled=true`
+```bash
+helm install ... \
+  # enabled Thirdparty setup
+  --set ml-ttk-test-setup-tk.tests.enabled=true \
+  # enabled Thirdparty validation tests
+  --set ml-ttk-test-val-tk.tests.enabled=true
+```
 
 2. Run Tests
 
 Run tests:
+
 `helm test <RELEASE_NAME>`
 
 Run tests with logs:
 
 `helm test <RELEASE_NAME> --logs`
+
+3. Known issues
+
+- Thirdparty TTK Test-Collection is not repeatable - [#2717](https://github.com/mojaloop/project/issues/2717)
