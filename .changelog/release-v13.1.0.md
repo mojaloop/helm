@@ -44,8 +44,9 @@ Date | Revision | Description
 12. **mojaloop/#2584:** bulk-api-adapter is unable to process requests with individualTransfers[].extensionLists ([bulk-api-adapter/pull/69](https://github.com/mojaloop/bulk-api-adapter/pull/2584), closes[mojaloop/#2584](https://github.com/mojaloop/project/issues/2584))
 13. **mojaloop/#2585:** bulk-api-adapter fails when extensionLists are not send in the POST /bulkTransfer requests ([bulk-api-adapter/pull/69](https://github.com/mojaloop/bulk-api-adapter/pull/69), [object-store-lib/pull/35](https://github.com/mojaloop/object-store-lib/pull/35), closes[mojaloop/#2585](https://github.com/mojaloop/project/issues/2585))
 14. **mojaloop/#2697:** Central-Ledger Fulfil Handler does not correctly invalidate requests with an incorrect/non-existent FSP-ID in the FSPIOP-Destination header ([central-ledger/pull/874](https://github.com/mojaloop/central-ledger/pull/874), closes[mojaloop/#2697](https://github.com/mojaloop/project/issues/2697))
-15. als-oracle-pathfinder fix: init and startup issues ([als-oracle-pathfinder/pull/#61](https://github.com/mojaloop/als-oracle-pathfinder/pull/61))
-16. Testing Toolkit:
+15. **mojaloop/#2719:** POST Quotes fails when transactionId != transactionRequestId ([central-ledger/pull/887](https://github.com/mojaloop/central-ledger/pull/887), [testing-toolkit-test-cases/pull/68](https://github.com/mojaloop/testing-toolkit-test-cases/pull/68), closes [mojaloop/#2697](https://github.com/mojaloop/project/issues/2719))
+16. als-oracle-pathfinder fix: init and startup issues ([als-oracle-pathfinder/pull/#61](https://github.com/mojaloop/als-oracle-pathfinder/pull/61))
+17. Testing Toolkit:
     1. Fixed TLS connectivity in hosted mode ([ml-testing-toolkit/pull/192](https://github.com/mojaloop/ml-testing-toolkit/pull/192)), closes [mojaloop/#1790](https://github.com/mojaloop/project/issues/1790)
     2. Fixed fxapi callback map ([ml-testing-toolkit/pull/194](https://github.com/mojaloop/ml-testing-toolkit/pull/194))
     3. Fixed stop button not working intermittently ([ml-testing-toolkit-ui/pull/121](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/121)), closes [mojaloop/#2332](https://github.com/mojaloop/project/issues/2332)
@@ -53,7 +54,7 @@ Date | Revision | Description
 ## 4. Application versions
 
 1. ml-api-adapter: v11.1.6 -> **v13.0.0**
-2. central-ledger: v13.14.0 -> **v13.16.0**
+2. central-ledger: v13.14.0 -> **v13.16.1**
 3. account-lookup-service: v11.7.7 -> **v13.0.0**
 4. quoting-service: 12.0.10 -> **14.0.0**
 5. central-settlement: **13.4.1**
@@ -81,7 +82,7 @@ Date | Revision | Description
 ## 5. Application release notes
 
 1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v13.0.0
-2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.16.0
+2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v13.16.1
 3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v13.0.0
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v14.0.0
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
