@@ -284,7 +284,7 @@ Refer to [thirdparty/README.md](../thirdparty/README.md#deploying-the-3p-api) fo
 
 ## 11. Contributors
 
-- Contributing organizations: BMGF, CrossLake, ModusBox, Sybrin
-- ModusBox: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @lewisdaly, @donaldbartlett
+- Organizations: BMGF, CrossLake, ModusBox, Sybrin
+- Individuals: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @lewisdaly, @donaldbartlett
 
-_Note: companies in alphabetical order_
+_Note: companies are in alphabetical order, and _
