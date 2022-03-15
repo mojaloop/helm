@@ -287,4 +287,4 @@ Refer to [thirdparty/README.md](../thirdparty/README.md#deploying-the-3p-api) fo
 - Organizations: BMGF, CrossLake, ModusBox, Sybrin
 - Individuals: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @lewisdaly, @donaldbartlett
 
-_Note: companies are in alphabetical order, and _
+_Note: companies are in alphabetical order, individuals are in no particular order._
