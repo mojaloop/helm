@@ -54,8 +54,6 @@ Date | Revision | Description
     3. Fixed stop button not working intermittently ([ml-testing-toolkit-ui/pull/121](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/121)), closes [mojaloop/#2332](https://github.com/mojaloop/project/issues/2332)
     4. Fixed fulfilment override issue when set in a callback-rules ([ml-testing-toolkit/pull/202](https://github.com/mojaloop/ml-testing-toolkit/pull/202)), closes [mojaloop/#2696](https://github.com/mojaloop/project/issues/2696)
 
-
-
 ## 4. Application versions
 
 1. ml-api-adapter: v11.1.6 -> **v13.0.0**
