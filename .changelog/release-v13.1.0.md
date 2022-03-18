@@ -25,6 +25,7 @@ Date | Revision | Description
    2. Added labels functionality to test cases ([ml-testing-toolkit/pull/193](https://github.com/mojaloop/ml-testing-toolkit/pull/193), [ml-testing-toolkit-ui/pull/122](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/122), [ml-testing-toolkit-ui/pull/123](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/123) and [ml-testing-toolkit-ui/pull/124](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/124)), closes [mojaloop/#2161](https://github.com/mojaloop/project/issues/2161)
    3. Added thirdparty-sdk outbound API ([ml-testing-toolkit/pull/195](https://github.com/mojaloop/ml-testing-toolkit/pull/195)), closes [mojaloop/#2533](https://github.com/mojaloop/project/issues/2533)
    4. New feature: Test cases definition report with grouping ([ml-testing-toolkit/pull/196](https://github.com/mojaloop/ml-testing-toolkit/pull/196)), closes [mojaloop/#2348](https://github.com/mojaloop/project/issues/2348)
+   5. Callback rule updates to support patch notification test-scenarios ([ml-testing-toolkit/pull/200](https://github.com/mojaloop/ml-testing-toolkit/pull/200)), closes [mojaloop/#2556](https://github.com/mojaloop/project/issues/2556) and [mojaloop/#2676](https://github.com/mojaloop/project/issues/2676)
 7. Added Timeout Configuration to the centralledger-handler-timeout chart, and associated values files
 8. **mojaloop/#2589:** Added resource versions configuration parameter for all outbound requests from sdk-scheme-adapter ([sdk-scheme-adapter/pull/288](https://github.com/mojaloop/sdk-scheme-adapter/pull/288), closes [mojaloop/#2589](https://github.com/mojaloop/project/issues/2589))
 9. **mojaloop/#2704:** Core-services support for non-breaking backward API compatibility for PROTOCOL_VERSION configs ([central-services-shared/pull/325](https://github.com/mojaloop/central-services-shared/pull/325), [ml-api-adapter/pull/496](https://github.com/mojaloop/ml-api-adapter/pull/496), [quoting-service/pull/295](https://github.com/mojaloop/quoting-service/pull/295), [account-lookup-service/pull/436](https://github.com/mojaloop/account-lookup-service/pull/436), [account-lookup-service/pull/438](https://github.com/mojaloop/account-lookup-service/pull/438), [quoting-service/pull/297](https://github.com/mojaloop/quoting-service/pull/297), [bulk-api-adapter/pull/74](https://github.com/mojaloop/bulk-api-adapter/pull/74), [bulk-api-adapter/pull/77](https://github.com/mojaloop/bulk-api-adapter/pull/77), [transaction-requests-service/pull/85](https://github.com/mojaloop/transaction-requests-service/pull/85), [central-ledger/pull/884](https://github.com/mojaloop/central-ledger/pull/884), [testing-toolkit-test-cases/pull/66](https://github.com/mojaloop/testing-toolkit-test-cases/pull/66), closes [mojaloop/#2704](https://github.com/mojaloop/project/issues/2704))
@@ -51,6 +52,7 @@ Date | Revision | Description
     1. Fixed TLS connectivity in hosted mode ([ml-testing-toolkit/pull/192](https://github.com/mojaloop/ml-testing-toolkit/pull/192)), closes [mojaloop/#1790](https://github.com/mojaloop/project/issues/1790)
     2. Fixed fxapi callback map ([ml-testing-toolkit/pull/194](https://github.com/mojaloop/ml-testing-toolkit/pull/194))
     3. Fixed stop button not working intermittently ([ml-testing-toolkit-ui/pull/121](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/121)), closes [mojaloop/#2332](https://github.com/mojaloop/project/issues/2332)
+    4. Fixed fulfilment override issue when set in a callback-rules ([ml-testing-toolkit/pull/202](https://github.com/mojaloop/ml-testing-toolkit/pull/202)), closes [mojaloop/#2696](https://github.com/mojaloop/project/issues/2696)
 
 ## 4. Application versions
 
@@ -206,11 +208,7 @@ Take note that existing rules may not work without modifying the path to add a `
   - DFSPB_SDK_TESTAPI_URL
   - DFSPB_SDK_TESTAPI_WS_URL
 
-3. Bulk API Helm Tests
-
-Refer to the [Testing Deployments](../README.md#testing-deployments) section in the main README for detailed information on how to enable bulk-api-adapter tests.
-
-4. The following services now support configurable Content-Type and Accept Header validations and set header version when generating messages from the Switch:
+3. The following services now support configurable Content-Type and Accept Header validations and set header version when generating messages from the Switch:
 
    1. ml-api-adapter [v13.0.0](https://github.com/mojaloop/ml-api-adapter/releases/tag/v13.0.0)
    2. account-lookup-service - [v13.0.0](https://github.com/mojaloop/account-lookup-service/releases/tag/v13.0.0)
@@ -242,9 +240,9 @@ Refer to the [Testing Deployments](../README.md#testing-deployments) section in 
 
     Note the above configuration is optional, as it will default to what is shown above if not overridden by a set configuration.
 
-5. Thirdparty deployment
+4. Enabling Bulk and Thirdparty components
 
-Refer to [thirdparty/README.md](../thirdparty/README.md#deploying-the-3p-api) for more information on what pre-requisites are required to enable Thirdparty components and how to  manually deploy backend dependencies.
+Refer to the deployment section in the [helm/README.md](../README.md#deployment) for more information.
 
 ## 9. Testing notes
 
@@ -270,7 +268,13 @@ Refer to [thirdparty/README.md](../thirdparty/README.md#deploying-the-3p-api) fo
 
 5. Thirdparty Testing Toolkit Test Collections are not repeatable. Please refer to the following issue for more information [#2717 - Thirdparty TTK Test-Collection is not repeatable](https://github.com/mojaloop/project/issues/2717). It is possible to manually cleanup persistent data to re-run the test if required.
 
-6. Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](../thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
+6. Bulk API Helm Tests
+
+  Refer to the [Testing Deployments](../README.md#testing-deployments) section in the main README for detailed information on how to enable bulk-api-adapter tests.
+
+7. Thirdparty API Helm Tests
+
+  Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](../thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
 
 ## 10. Known Issues
 
@@ -284,7 +288,7 @@ Refer to [thirdparty/README.md](../thirdparty/README.md#deploying-the-3p-api) fo
 
 ## 11. Contributors
 
-- Contributing organizations: BMGF, CrossLake, ModusBox
-- ModusBox: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @lewisdaly
+- Organizations: BMGF, CrossLake, ModusBox, Sybrin
+- Individuals: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @lewisdaly, @donaldbartlett
 
-_Note: companies in alphabetical order_
+_Note: companies are in alphabetical order, individuals are in no particular order._

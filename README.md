@@ -78,6 +78,10 @@ e.g. `helm --namespace moja install dev mojaloop/mojaloop`
 
 e.g. `helm --namespace moja install dev mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true `
 
+6. Deploy Mojaloop with Thirdparty components
+
+Refer to [thirdparty/README.md](./thirdparty/README.md) for more information on what pre-requisites are required to enable Thirdparty components and how to  manually deploy backend dependencies.
+
 ### Deploying development versions
 
 1. To deploy the latest development version, use the `--devel` flag:
