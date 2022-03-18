@@ -208,11 +208,7 @@ Take note that existing rules may not work without modifying the path to add a `
   - DFSPB_SDK_TESTAPI_URL
   - DFSPB_SDK_TESTAPI_WS_URL
 
-3. Bulk API Helm Tests
-
-Refer to the [Testing Deployments](../README.md#testing-deployments) section in the main README for detailed information on how to enable bulk-api-adapter tests.
-
-4. The following services now support configurable Content-Type and Accept Header validations and set header version when generating messages from the Switch:
+3. The following services now support configurable Content-Type and Accept Header validations and set header version when generating messages from the Switch:
 
    1. ml-api-adapter [v13.0.0](https://github.com/mojaloop/ml-api-adapter/releases/tag/v13.0.0)
    2. account-lookup-service - [v13.0.0](https://github.com/mojaloop/account-lookup-service/releases/tag/v13.0.0)
@@ -244,9 +240,9 @@ Refer to the [Testing Deployments](../README.md#testing-deployments) section in 
 
     Note the above configuration is optional, as it will default to what is shown above if not overridden by a set configuration.
 
-5. Thirdparty deployment
+4. Enabling Bulk and Thirdparty components
 
-Refer to [thirdparty/README.md](../thirdparty/README.md#deploying-the-3p-api) for more information on what pre-requisites are required to enable Thirdparty components and how to  manually deploy backend dependencies.
+Refer to the deployment section in the [helm/README.md](../README.md#deployment) for more information.
 
 ## 9. Testing notes
 
@@ -272,7 +268,13 @@ Refer to [thirdparty/README.md](../thirdparty/README.md#deploying-the-3p-api) fo
 
 5. Thirdparty Testing Toolkit Test Collections are not repeatable. Please refer to the following issue for more information [#2717 - Thirdparty TTK Test-Collection is not repeatable](https://github.com/mojaloop/project/issues/2717). It is possible to manually cleanup persistent data to re-run the test if required.
 
-6. Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](../thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
+6. Bulk API Helm Tests
+
+  Refer to the [Testing Deployments](../README.md#testing-deployments) section in the main README for detailed information on how to enable bulk-api-adapter tests.
+
+7. Thirdparty API Helm Tests
+
+  Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](../thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
 
 ## 10. Known Issues
 
