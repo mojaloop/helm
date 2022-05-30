@@ -1,26 +1,80 @@
 ## Helm release notes
 1. For breaking changes, please review the section `#4` "Breaking Changes" below.
 
-### 1. New Features
+## 1. New Features
 
 1. Change the basis for the liquidity check ([mojaloop/design-authority-project/issues/90](https://github.com/mojaloop/design-authority-project/issues/90)). Pull requests are [mojaloop/central-ledger/pull/899](https://github.com/mojaloop/central-ledger/pull/899) & [mojaloop/central-ledger/pull/901](https://github.com/mojaloop/central-ledger/pull/901)
+2. **mojaloop/#2092:** upgrade nodeJS version for core services ([#902](https://github.com/mojaloop/central-ledger/issues/902)) ([defff30](https://github.com/mojaloop/central-ledger/commit/defff30b2bf29a74a4bb152e5fa4af00ae5b7463)), closes [mojaloop/#2092](https://github.com/mojaloop/project/issues/2092)
 
-## 2. Application versions
+## 2. Bug Fixes
+1. **mojaloop/#2719:** post quotes fails when transactionId does not equal transactionRequestId ([#887](https://github.com/mojaloop/central-ledger/issues/887)) ([b9944d1](https://github.com/mojaloop/central-ledger/commit/b9944d15c9486ffd62b968797fb79847a512a6c8)), closes [mojaloop/#2719](https://github.com/mojaloop/project/issues/2719)
+2. **mojaloop/#2704:** core-services support for non-breaking backward api compatibility ([#884](https://github.com/mojaloop/central-ledger/issues/884)) ([02cf7c2](https://github.com/mojaloop/central-ledger/commit/02cf7c25b4071bb44f62271d7e9bdbc8674a1ee7)), closes [mojaloop/#2704](https://github.com/mojaloop/project/issues/2704)
+3. **mojaloop/#2522:** cl-migration scripts should configure quoting tables to utf8 follow-up ([#865](https://github.com/mojaloop/central-ledger/issues/865)) ([dcc57b8](https://github.com/mojaloop/central-ledger/commit/dcc57b8f22bc66fa4e6ae35ce04cf095fce780c6)), closes [mojaloop/#2522](https://github.com/mojaloop/project/issues/2522)
+4. **mojaloop/#2480:** central-ledger migration scripts to configure quote party table utf8 support ([#862](https://github.com/mojaloop/central-ledger/issues/862)) ([bf4da0e](https://github.com/mojaloop/central-ledger/commit/bf4da0e7645edf2e701b36b9f78c32c8783136b8)), closes [mojaloop/#2480](https://github.com/mojaloop/project/issues/2480)
 
-1. central-ledger: v13.16.1 -> **v15.0.1**
+## 3. Application versions
 
+1. ml-api-adapter: **v13.0.0**
+2. central-ledger: v13.16.1 -> **v15.0.1**
+3. account-lookup-service: **v13.0.0**
+4. quoting-service: **14.0.0**
+5. central-settlement: **13.4.1**
+6. central-event-processor: **v11.0.2**
+7. bulk-api-adapter: **v13.0.1**
+8. email-notifier: **v11.0.2**
+9. als-oracle-pathfinder: **v11.0.4**
+10. transaction-requests-service: **v13.0.0**
+11. finance-portal-ui: **v10.4.3**
+12. finance-portal-backend-service: **v15.0.2**
+13. settlement-management: **v11.0.0**
+14. operator-settlement: **v11.0.0**
+15. event-sidecar: **v11.0.1**
+16. event-stream-processor: **v11.0.0-snapshot**
+17. simulator: **v11.1.3**
+18. mojaloop-simulator: **v11.6.1**
+19. sdk-scheme-adapter: **v11.18.11**
+20. ml-testing-toolkit: **v14.0.4**
+21. ml-testing-toolkit-ui: **v13.5.5**
+22. auth-service: **v11.11.1**
+23. als-consent-service: **v0.0.8**
+24. thirdparty-api-svc: **v11.21.0**
+25. thirdparty-sdk: **v11.55.1**
 
-## 3. Application release notes
+## 4. Application release notes
 
-1. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v15.0.1
+1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v13.0.0
+2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v15.0.1
+3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v13.0.0
+4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v14.0.0
+5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
+6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v11.0.2
+7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v13.0.1
+8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.2
+9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v11.0.4
+10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v13.0.0
+11. finance-portal-ui - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
+12. finance-portal-backend-service - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
+13. settlement-management - https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0
+14. operator-settlement - https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0
+15. event-sidecar - https://github.com/mojaloop/event-sidecar/releases/tag/v11.0.1
+16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v11.0.0-snapshot
+17. simulator - https://github.com/mojaloop/simulator/releases/tag/v11.1.3
+18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v11.6.1
+19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v11.18.11
+20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v14.0.4
+21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.5.5
+22. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v11.11.1
+23. als-consent-service - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.0.8
+24. thirdparty-api-svc - https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v11.21.0
+25. thirdparty-sdk-adapter - https://github.com/mojaloop/thirdparty-sdk/releases/tag/v11.55.1
 
-
-## 4. Breaking changes
+## 5. Breaking changes
 
 1. Central Ledger - Transfer will be successful only if the payer has sufficient liquidity in their settlement account balance over and above their NET-DEBIT-CAP (NDC) limit. This is the additional check that has been added in this PR, and will be applied to the lower value. Error messages have changed as a result. For NDC limit check from `PAYER_FSP_INSUFFICIENT_LIQUIDITY` to `PAYER_LIMIT_ERROR`. The error message `PAYER_FSP_INSUFFICIENT_LIQUIDITY` occurs when the payer has an insufficient settlement account balance. [mojaloop/central-ledger/pull/899](https://github.com/mojaloop/central-ledger/pull/899)
+2. **mojaloop/#2092:** Major version bump for node v16 LTS support, re-structuring of project directories to align to core Mojaloop repositories and docker image now uses `/opt/app` instead of `/opt/central-ledger` which will impact config mounts.
 
 
-## 5. Testing notes
+## 6. Testing notes
 
 1. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
 
