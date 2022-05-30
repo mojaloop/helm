@@ -1,9 +1,9 @@
 'use strict'
 
-const migrationsDirectory = '/opt/central-ledger/migrations'
-const seedsDirectory = '/opt/central-ledger/seeds'
+const migrationsDirectory = '/opt/app/migrations'
+const seedsDirectory = '/opt/app/seeds'
 
-const Config = require('/opt/central-ledger/src/lib/config')
+const Config = require('/opt/app/src/lib/config')
 
 module.exports = {
   client: 'mysql',
