@@ -4,20 +4,20 @@
 ## 1. New Features
 
 1. Change the basis for the liquidity check ([mojaloop/design-authority-project/issues/90](https://github.com/mojaloop/design-authority-project/issues/90)). Pull requests are [mojaloop/central-ledger/pull/899](https://github.com/mojaloop/central-ledger/pull/899) & [mojaloop/central-ledger/pull/901](https://github.com/mojaloop/central-ledger/pull/901)
-2. **mojaloop/#2092:** upgrade nodeJS version for core services ([#902](https://github.com/mojaloop/central-ledger/issues/902)) ([defff30](https://github.com/mojaloop/central-ledger/commit/defff30b2bf29a74a4bb152e5fa4af00ae5b7463)), closes [mojaloop/#2092](https://github.com/mojaloop/project/issues/2092)
+2. **mojaloop/#2092:** upgrade nodeJS version for core services ([ml-api-adapter/#501](https://github.com/mojaloop/ml-api-adapter/pull/501)) ([central-ledger/#902](https://github.com/mojaloop/central-ledger/issues/902)) ([account-lookup/#445](https://github.com/mojaloop/account-lookup-service/pull/445)) ([quoting-service/#302](https://github.com/mojaloop/quoting-service/pull/302)), closes [mojaloop/#2092](https://github.com/mojaloop/project/issues/2092)
 
 ## 2. Bug Fixes
-1. **mojaloop/#2719:** post quotes fails when transactionId does not equal transactionRequestId ([#887](https://github.com/mojaloop/central-ledger/issues/887)) ([b9944d1](https://github.com/mojaloop/central-ledger/commit/b9944d15c9486ffd62b968797fb79847a512a6c8)), closes [mojaloop/#2719](https://github.com/mojaloop/project/issues/2719)
+1. **mojaloop/#2719:** post quotes fails when transactionId does not equal transactionRequestId ([central-ledger/#887](https://github.com/mojaloop/central-ledger/issues/887)) ([central-ledger/b9944d1](https://github.com/mojaloop/central-ledger/commit/b9944d15c9486ffd62b968797fb79847a512a6c8)), closes [mojaloop/#2719](https://github.com/mojaloop/project/issues/2719)
 2. **mojaloop/#2704:** core-services support for non-breaking backward api compatibility ([#884](https://github.com/mojaloop/central-ledger/issues/884)) ([02cf7c2](https://github.com/mojaloop/central-ledger/commit/02cf7c25b4071bb44f62271d7e9bdbc8674a1ee7)), closes [mojaloop/#2704](https://github.com/mojaloop/project/issues/2704)
 3. **mojaloop/#2522:** cl-migration scripts should configure quoting tables to utf8 follow-up ([#865](https://github.com/mojaloop/central-ledger/issues/865)) ([dcc57b8](https://github.com/mojaloop/central-ledger/commit/dcc57b8f22bc66fa4e6ae35ce04cf095fce780c6)), closes [mojaloop/#2522](https://github.com/mojaloop/project/issues/2522)
 4. **mojaloop/#2480:** central-ledger migration scripts to configure quote party table utf8 support ([#862](https://github.com/mojaloop/central-ledger/issues/862)) ([bf4da0e](https://github.com/mojaloop/central-ledger/commit/bf4da0e7645edf2e701b36b9f78c32c8783136b8)), closes [mojaloop/#2480](https://github.com/mojaloop/project/issues/2480)
 
 ## 3. Application versions
 
-1. ml-api-adapter: **v13.0.0**
-2. central-ledger: v13.16.1 -> **v15.0.1**
-3. account-lookup-service: **v13.0.0**
-4. quoting-service: **14.0.0**
+1. ml-api-adapter: v13.0.0 -> **v14.0.0**
+2. central-ledger: v13.16.1 -> **v15.1.1**
+3. account-lookup-service: v13.0.0 -> **v14.0.0**
+4. quoting-service: v14.0.0 -> **15.0.2**
 5. central-settlement: **13.4.1**
 6. central-event-processor: **v11.0.2**
 7. bulk-api-adapter: **v13.0.1**
@@ -42,10 +42,10 @@
 
 ## 4. Application release notes
 
-1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v13.0.0
-2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v15.0.1
-3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v13.0.0
-4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v14.0.0
+1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v14.0.0
+2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v15.1.0
+3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v14.0.0
+4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v15.0.2
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v11.0.2
 7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v13.0.1
@@ -71,8 +71,7 @@
 ## 5. Breaking changes
 
 1. Central Ledger - Transfer will be successful only if the payer has sufficient liquidity in their settlement account balance over and above their NET-DEBIT-CAP (NDC) limit. This is the additional check that has been added in this PR, and will be applied to the lower value. Error messages have changed as a result. For NDC limit check from `PAYER_FSP_INSUFFICIENT_LIQUIDITY` to `PAYER_LIMIT_ERROR`. The error message `PAYER_FSP_INSUFFICIENT_LIQUIDITY` occurs when the payer has an insufficient settlement account balance. [mojaloop/central-ledger/pull/899](https://github.com/mojaloop/central-ledger/pull/899)
-2. **mojaloop/#2092:** Major version bump for node v16 LTS support, re-structuring of project directories to align to core Mojaloop repositories and docker image now uses `/opt/app` instead of `/opt/central-ledger` which will impact config mounts.
-
+2. **mojaloop/#2092:** Major version bump for node v16 LTS support, re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/opt/central-ledger`, `opt/account-lookup-service`, `opt/ml-api-adapter`, `/opt/quoting-service` which will impact config mounts.
 
 ## 6. Testing notes
 
