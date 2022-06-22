@@ -3212,276 +3212,66 @@ central:
       log_transport: file
 
     mongodb:
-    ## Global Docker image registry
-    ## Please, note that this will override the image registry for all the images, including dependencies, configured to use the global value
-    ##
-    # global:
-    #   imageRegistry:
       enabled: true
+      ## @param nameOverride String to partially override mongodb.fullname template (will maintain the release name)
+      ##
       nameOverride: cep-mongodb
-
-      image:
-        ## Bitnami MongoDB registry
+      ## @param architecture MongoDB(&reg;) architecture (`standalone` or `replicaset`)
+      ##
+      architecture: standalone
+      ## @param useStatefulSet Set to true to use a StatefulSet instead of a Deployment (only when `architecture=standalone`)
+      ##
+      useStatefulSet: false
+      ## MongoDB(&reg;) Authentication parameters
+      ##
+      auth:
+        ## @param auth.enabled Enable authentication
+        ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
         ##
-        registry: docker.io
-        ## Bitnami MongoDB image name
-        ##
-        repository: bitnami/mongodb
-        ## Bitnami MongoDB image tag
-        ## ref: https://hub.docker.com/r/bitnami/mongodb/tags/
-        ##
-        tag: 4.0.3
-
-        ## Specify a imagePullPolicy
-        ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-        ##
-        pullPolicy: IfNotPresent
-        ## Optionally specify an array of imagePullSecrets.
-        ## Secrets must be manually created in the namespace.
-        ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-        ##
-        # pullSecrets:
-        #   - myRegistrKeySecretName
-
-      ## Enable authentication
-      ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
-      #
-      usePassword: true
-      # existingSecret: name-of-existing-secret
-
-      ## MongoDB admin password
-      ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
-      ##
-      mongodbRootPassword: adminpass
-
-      ## MongoDB custom user and database
-      ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run
-      ##
-      mongodbUsername: mojaloop
-      mongodbPassword: password
-      mongodbDatabase: mojaloop
-
-
-      ## Whether enable/disable IPv6 on MongoDB
-      ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#enabling/disabling-ipv6
-      ##
-      mongodbEnableIPv6: true
-
-      ## MongoDB additional command line flags
-      ##
-      ## Can be used to specify command line flags, for example:
-      ##
-      ## mongodbExtraFlags:
-      ##  - "--wiredTigerCacheSizeGB=2"
-      mongodbExtraFlags: []
-
-      ## Pod Security Context
-      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-      ##
-      securityContext:
         enabled: true
-        fsGroup: 1001
-        runAsUser: 1001
-
-      ## Kubernetes Cluster Domain
-      clusterDomain: cluster.local
-
-      ## Kubernetes service type
-      service:
-        annotations: {}
-        type: ClusterIP
-        # clusterIP: None
-        port: 27017
-
-        ## Specify the nodePort value for the LoadBalancer and NodePort service types.
-        ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+        ## @param auth.rootUser MongoDB(&reg;) root user
         ##
-        # nodePort:
-
-      ## Setting up replication
-      ## ref: https://github.com/bitnami/bitnami-docker-mongodb#setting-up-a-replication
-      #
-      replicaSet:
-        ## Whether to create a MongoDB replica set for high availability or not
+        rootUser: root
+        ## @param auth.rootPassword MongoDB(&reg;) root password
+        ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
+        ##
+        rootPassword: adminpass
+        ## MongoDB(&reg;) custom users and databases
+        ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-users-and-databases-on-first-run
+        ## @param auth.usernames List of custom users to be created during the initialization
+        ## @param auth.passwords List of passwords for the custom users set at `auth.usernames`
+        ## @param auth.databases List of custom databases to be created during the initialization
+        ##
+        usernames:
+          - 'mojaloop'
+        passwords:
+          - 'password'
+        databases:
+          -  'mojaloop'
+        ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
+        ##
+        replicaSetKey: ""
+        ## @param auth.existingSecret Existing secret with MongoDB(&reg;) credentials (keys: `mongodb-passwords`, `mongodb-root-password`, `mongodb-metrics-password`, ` mongodb-replica-set-key`)
+        ## NOTE: When it's set the previous parameters are ignored.
+        ##
+        existingSecret: ""
+      tls:
+        ## @param tls.enabled Enable MongoDB(&reg;) TLS support between nodes in the cluster as well as between mongo clients and nodes
+        ##
         enabled: false
-        useHostnames: true
-
-        ## Name of the replica set
+        ## @param tls.autoGenerated Generate a custom CA and self-signed certificates
         ##
-        name: rs0
-
-        ## Key used for replica set authentication
+        autoGenerated: true
+        ## @param tls.existingSecret Existing secret with TLS certificates (keys: `mongodb-ca-cert`, `mongodb-ca-key`, `client-pem`)
+        ## NOTE: When it's set it will disable certificate creation
         ##
-        # key: key
-
-        ## Number of replicas per each node type
+        existingSecret: ""
+        ## Add Custom CA certificate
+        ## @param tls.caCert Custom CA certificated (base64 encoded)
+        ## @param tls.caKey CA certificate private key (base64 encoded)
         ##
-        replicas:
-          secondary: 1
-          arbiter: 1
-        ## Pod Disruption Budget
-        ## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
-        pdb:
-          minAvailable:
-            primary: 1
-            secondary: 1
-            arbiter: 1
-
-      # Annotations to be added to MongoDB pods
-      podAnnotations: {}
-
-      # Additional pod labels to apply
-      podLabels: {}
-
-      ## Configure resource requests and limits
-      ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-      ##
-      resources: {}
-      # limits:
-      #   cpu: 500m
-      #   memory: 512Mi
-      # requests:
-      #   cpu: 100m
-      #   memory: 256Mi
-
-      ## Node selector
-      ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-      nodeSelector: {}
-
-      ## Affinity
-      ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-      affinity: {}
-
-      ## Tolerations
-      ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-      tolerations: []
-
-      ## Enable persistence using Persistent Volume Claims
-      ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
-      ##
-      persistence:
-        enabled: false
-        ## A manually managed Persistent Volume and Claim
-        ## Requires persistence.enabled: true
-        ## If defined, PVC must be created manually before volume will be bound
-        # existingClaim:
-
-        ## mongodb data Persistent Volume Storage Class
-        ## If defined, storageClassName: <storageClass>
-        ## If set to "-", storageClassName: "", which disables dynamic provisioning
-        ## If undefined (the default) or set to null, no storageClassName spec is
-        ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-        ##   GKE, AWS & OpenStack)
-        ##
-        # storageClass: "-"
-        accessModes:
-          - ReadWriteOnce
-        size: 8Gi
-        annotations: {}
-
-      ## Configure extra options for liveness and readiness probes
-      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
-      livenessProbe:
-        enabled: true
-        initialDelaySeconds: 30
-        periodSeconds: 10
-        timeoutSeconds: 5
-        failureThreshold: 6
-        successThreshold: 1
-      readinessProbe:
-        enabled: true
-        initialDelaySeconds: 5
-        periodSeconds: 10
-        timeoutSeconds: 5
-        failureThreshold: 6
-        successThreshold: 1
-
-      # Entries for the MongoDB config file
-      configmap:
-      #  # Where and how to store data.
-      #  storage:
-      #    dbPath: /opt/bitnami/mongodb/data/db
-      #    journal:
-      #      enabled: true
-      #    #engine:
-      #    #wiredTiger:
-      #  # where to write logging data.
-      #  systemLog:
-      #    destination: file
-      #    logAppend: true
-      #    path: /opt/bitnami/mongodb/logs/mongodb.log
-      #  # network interfaces
-      #  net:
-      #    port: 27017
-      #    bindIp: 0.0.0.0
-      #    unixDomainSocket:
-      #      enabled: true
-      #      pathPrefix: /opt/bitnami/mongodb/tmp
-      #  # replica set options
-      #  #replication:
-      #  #  replSetName: replicaset
-      #  # process management options
-      #  processManagement:
-      #     fork: false
-      #     pidFilePath: /opt/bitnami/mongodb/tmp/mongodb.pid
-      #  # set parameter options
-      #  setParameter:
-      #     enableLocalhostAuthBypass: true
-      #  # security options
-      #  security:
-      #  authorization: enabled
-        #keyFile: /opt/bitnami/mongodb/conf/keyfile
-
-      ## Prometheus Exporter / Metrics
-      ##
-      metrics:
-        enabled: false
-
-        image:
-          registry: docker.io
-          repository: forekshub/percona-mongodb-exporter
-          tag: latest
-          pullPolicy: IfNotPresent
-          ## Optionally specify an array of imagePullSecrets.
-          ## Secrets must be manually created in the namespace.
-          ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-          ##
-          # pullSecrets:
-          #   - myRegistrKeySecretName
-
-        ## Metrics exporter resource requests and limits
-        ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-        ##
-        # resources: {}
-
-        ## Metrics exporter pod Annotation
-        podAnnotations:
-          prometheus.io/scrape: "true"
-          prometheus.io/port: "9216"
-
-        ## Prometheus Service Monitor
-        ## ref: https://github.com/coreos/prometheus-operator
-        ##      https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md
-        serviceMonitor:
-          ## If the operator is installed in your cluster, set to true to create a Service Monitor Entry
-          enabled: false
-          ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Service Monitors to work with
-          ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
-          additionalLabels: {}
-
-          ## Specify Metric Relabellings to add to the scrape endpoint
-          ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
-          # relabellings:
-
-          alerting:
-            ## Define individual alerting rules as required
-            ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#rulegroup
-            ##      https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
-            rules: {}
-
-            ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Prometheus Rules to work with
-            ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
-      additionalLabels: {}
+        caCert: ""
+        caKey: ""
 
 ml-api-adapter:
   enabled: true
@@ -7752,276 +7542,66 @@ mojaloop-bulk:
 
   # Declare variables to be passed into your templates.
   mongodb:
-    ## Global Docker image registry
-    ## Please, note that this will override the image registry for all the images, including dependencies, configured to use the global value
-    ##
-    # global:
-    #   imageRegistry:
     enabled: true
+    ## @param nameOverride String to partially override mongodb.fullname template (will maintain the release name)
+    ##
     nameOverride: centralledger-obj
-
-    image:
-      ## Bitnami MongoDB registry
+    ## @param architecture MongoDB(&reg;) architecture (`standalone` or `replicaset`)
+    ##
+    architecture: standalone
+    ## @param useStatefulSet Set to true to use a StatefulSet instead of a Deployment (only when `architecture=standalone`)
+    ##
+    useStatefulSet: false
+    ## MongoDB(&reg;) Authentication parameters
+    ##
+    auth:
+      ## @param auth.enabled Enable authentication
+      ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
       ##
-      registry: docker.io
-      ## Bitnami MongoDB image name
-      ##
-      repository: bitnami/mongodb
-      ## Bitnami MongoDB image tag
-      ## ref: https://hub.docker.com/r/bitnami/mongodb/tags/
-      ##
-      tag: 4.0.3
-
-      ## Specify a imagePullPolicy
-      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-      ##
-      pullPolicy: IfNotPresent
-      ## Optionally specify an array of imagePullSecrets.
-      ## Secrets must be manually created in the namespace.
-      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-      ##
-      # pullSecrets:
-      #   - myRegistrKeySecretName
-
-    ## Enable authentication
-    ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
-    #
-    usePassword: true
-    # existingSecret: name-of-existing-secret
-
-    ## MongoDB admin password
-    ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
-    ##
-    mongodbRootPassword: adminpass
-
-    ## MongoDB custom user and database
-    ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run
-    ##
-    mongodbUsername: mojaloop
-    mongodbPassword: password
-    mongodbDatabase: mlos
-
-
-    ## Whether enable/disable IPv6 on MongoDB
-    ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#enabling/disabling-ipv6
-    ##
-    mongodbEnableIPv6: true
-
-    ## MongoDB additional command line flags
-    ##
-    ## Can be used to specify command line flags, for example:
-    ##
-    ## mongodbExtraFlags:
-    ##  - "--wiredTigerCacheSizeGB=2"
-    mongodbExtraFlags: []
-
-    ## Pod Security Context
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-    ##
-    securityContext:
       enabled: true
-      fsGroup: 1001
-      runAsUser: 1001
-
-    ## Kubernetes Cluster Domain
-    clusterDomain: cluster.local
-
-    ## Kubernetes service type
-    service:
-      annotations: {}
-      type: ClusterIP
-      # clusterIP: None
-      port: 27017
-
-      ## Specify the nodePort value for the LoadBalancer and NodePort service types.
-      ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+      ## @param auth.rootUser MongoDB(&reg;) root user
       ##
-      # nodePort:
-
-    ## Setting up replication
-    ## ref: https://github.com/bitnami/bitnami-docker-mongodb#setting-up-a-replication
-    #
-    replicaSet:
-      ## Whether to create a MongoDB replica set for high availability or not
+      rootUser: root
+      ## @param auth.rootPassword MongoDB(&reg;) root password
+      ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
+      ##
+      rootPassword: adminpass
+      ## MongoDB(&reg;) custom users and databases
+      ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-users-and-databases-on-first-run
+      ## @param auth.usernames List of custom users to be created during the initialization
+      ## @param auth.passwords List of passwords for the custom users set at `auth.usernames`
+      ## @param auth.databases List of custom databases to be created during the initialization
+      ##
+      usernames:
+        - 'mojaloop'
+      passwords:
+        - 'password'
+      databases:
+        -  'mlos'
+      ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
+      ##
+      replicaSetKey: ""
+      ## @param auth.existingSecret Existing secret with MongoDB(&reg;) credentials (keys: `mongodb-passwords`, `mongodb-root-password`, `mongodb-metrics-password`, ` mongodb-replica-set-key`)
+      ## NOTE: When it's set the previous parameters are ignored.
+      ##
+      existingSecret: ""
+    tls:
+      ## @param tls.enabled Enable MongoDB(&reg;) TLS support between nodes in the cluster as well as between mongo clients and nodes
+      ##
       enabled: false
-      useHostnames: true
-
-      ## Name of the replica set
+      ## @param tls.autoGenerated Generate a custom CA and self-signed certificates
       ##
-      name: rs0
-
-      ## Key used for replica set authentication
+      autoGenerated: true
+      ## @param tls.existingSecret Existing secret with TLS certificates (keys: `mongodb-ca-cert`, `mongodb-ca-key`, `client-pem`)
+      ## NOTE: When it's set it will disable certificate creation
       ##
-      # key: key
-
-      ## Number of replicas per each node type
+      existingSecret: ""
+      ## Add Custom CA certificate
+      ## @param tls.caCert Custom CA certificated (base64 encoded)
+      ## @param tls.caKey CA certificate private key (base64 encoded)
       ##
-      replicas:
-        secondary: 1
-        arbiter: 1
-      ## Pod Disruption Budget
-      ## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
-      pdb:
-        minAvailable:
-          primary: 1
-          secondary: 1
-          arbiter: 1
-
-    # Annotations to be added to MongoDB pods
-    podAnnotations: {}
-
-    # Additional pod labels to apply
-    podLabels: {}
-
-    ## Configure resource requests and limits
-    ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-    ##
-    resources: {}
-    # limits:
-    #   cpu: 500m
-    #   memory: 512Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 256Mi
-
-    ## Node selector
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-    nodeSelector: {}
-
-    ## Affinity
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-    affinity: {}
-
-    ## Tolerations
-    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    tolerations: []
-
-    ## Enable persistence using Persistent Volume Claims
-    ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
-    ##
-    persistence:
-      enabled: false
-      ## A manually managed Persistent Volume and Claim
-      ## Requires persistence.enabled: true
-      ## If defined, PVC must be created manually before volume will be bound
-      # existingClaim:
-
-      ## mongodb data Persistent Volume Storage Class
-      ## If defined, storageClassName: <storageClass>
-      ## If set to "-", storageClassName: "", which disables dynamic provisioning
-      ## If undefined (the default) or set to null, no storageClassName spec is
-      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-      ##   GKE, AWS & OpenStack)
-      ##
-      # storageClass: "-"
-      accessModes:
-        - ReadWriteOnce
-      size: 8Gi
-      annotations: {}
-
-    ## Configure extra options for liveness and readiness probes
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
-    livenessProbe:
-      enabled: true
-      initialDelaySeconds: 30
-      periodSeconds: 10
-      timeoutSeconds: 5
-      failureThreshold: 6
-      successThreshold: 1
-    readinessProbe:
-      enabled: true
-      initialDelaySeconds: 5
-      periodSeconds: 10
-      timeoutSeconds: 5
-      failureThreshold: 6
-      successThreshold: 1
-
-    # Entries for the MongoDB config file
-    configmap:
-    #  # Where and how to store data.
-    #  storage:
-    #    dbPath: /opt/bitnami/mongodb/data/db
-    #    journal:
-    #      enabled: true
-    #    #engine:
-    #    #wiredTiger:
-    #  # where to write logging data.
-    #  systemLog:
-    #    destination: file
-    #    logAppend: true
-    #    path: /opt/bitnami/mongodb/logs/mongodb.log
-    #  # network interfaces
-    #  net:
-    #    port: 27017
-    #    bindIp: 0.0.0.0
-    #    unixDomainSocket:
-    #      enabled: true
-    #      pathPrefix: /opt/bitnami/mongodb/tmp
-    #  # replica set options
-    #  #replication:
-    #  #  replSetName: replicaset
-    #  # process management options
-    #  processManagement:
-    #     fork: false
-    #     pidFilePath: /opt/bitnami/mongodb/tmp/mongodb.pid
-    #  # set parameter options
-    #  setParameter:
-    #     enableLocalhostAuthBypass: true
-    #  # security options
-    #  security:
-    #  authorization: enabled
-    #keyFile: /opt/bitnami/mongodb/conf/keyfile
-
-    ## Prometheus Exporter / Metrics
-    ##
-    metrics:
-      enabled: false
-
-      image:
-        registry: docker.io
-        repository: forekshub/percona-mongodb-exporter
-        tag: latest
-        pullPolicy: IfNotPresent
-        ## Optionally specify an array of imagePullSecrets.
-        ## Secrets must be manually created in the namespace.
-        ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-        ##
-        # pullSecrets:
-        #   - myRegistrKeySecretName
-
-      ## Metrics exporter resource requests and limits
-      ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-      ##
-      # resources: {}
-
-      ## Metrics exporter pod Annotation
-      podAnnotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9216"
-
-      ## Prometheus Service Monitor
-      ## ref: https://github.com/coreos/prometheus-operator
-      ##      https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md
-      serviceMonitor:
-        ## If the operator is installed in your cluster, set to true to create a Service Monitor Entry
-        enabled: false
-        ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Service Monitors to work with
-        ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
-        additionalLabels: {}
-
-        ## Specify Metric Relabellings to add to the scrape endpoint
-        ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
-        # relabellings:
-
-        alerting:
-          ## Define individual alerting rules as required
-          ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#rulegroup
-          ##      https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
-          rules: {}
-
-          ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Prometheus Rules to work with
-          ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
-    additionalLabels: {}
+      caCert: ""
+      caKey: ""
 
 ml-testing-toolkit:
   enabled: true
