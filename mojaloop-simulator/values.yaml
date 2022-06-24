@@ -585,10 +585,11 @@ defaults: &defaults
           publicKey: ''
       image:
         repository: mojaloop/thirdparty-sdk
-        tag: v11.55.1
+        tag: v15.1.0
         pullPolicy: IfNotPresent
-        inboundCommand: '[ "npm", "run", "start:inbound" ]'
-        outboundCommand: '[ "npm", "run", "start:outbound" ]'
+        # inboundCommand: '[ "npm", "run", "start:inbound" ]' ## TODO: Remove
+        # outboundCommand: '[ "npm", "run", "start:outbound" ]' ## TODO: Remove
+        command: '[ "npm", "run", "start" ]'
       <<: *defaultProbes
 
       # These will be supplied directly to the init containers array in the deployment for the
@@ -612,62 +613,88 @@ defaults: &defaults
               target:
                 type: Utilization
                 averageUtilization: 80
+      
+      ## Config files
       config: {
         production.json: {
-          "INBOUND": {
-            "PORT": 4005,
-            "HOST": "0.0.0.0",
-            "PISP_TRANSACTION_MODE": true
+          "control": {
+            "mgmtAPIWsUrl": "127.0.0.1",
+            "mgmtAPIWsPort": 4010
           },
-          "OUTBOUND": {
-            "PORT": 4006,
-            "HOST": "0.0.0.0"
-          },
-          "REQUEST_PROCESSING_TIMEOUT_SECONDS": 30,
-          "WSO2_AUTH": {
-            "staticToken": "0706c62f-c022-3c42-8d14-8b5df128876d",
-            "tokenEndpoint": "",
-            "clientKey": "test-client-key",
-            "clientSecret": "test-client-secret",
-            "refreshSeconds": 3600
-          },
-          "REDIS": {
-            "PORT": 6379,
-            # covered by REDIS_HOST env var in deployment.yaml
-            # "HOST"
-            "TIMEOUT": 100
-          },
-          "INSPECT": {
-            "DEPTH": 4,
-            "SHOW_HIDDEN": false,
-            "COLOR": true
-          },
-          "SHARED": {
-            "AUTH_SERVICE_PARTICIPANT_ID": 'centralauth',
-            "THIRDPARTY_REQUESTS_ENDPOINT": "tp-api-svc:3008",
-            "DFSP_ID": "$name",
-            "DFSP_BACKEND_URI": "$full_name-backend:3000",
-            "DFSP_BACKEND_HTTP_SCHEME": "http",
-            "DFSP_BACKEND_VERIFY_AUTHORIZATION_PATH": "verify-authorization",
-            "DFSP_BACKEND_VERIFY_CONSENT_PATH": "verify-consent",
-            "SDK_OUTGOING_URI": "$full_name-scheme-adapter:4001",
-            "SDK_OUTGOING_HTTP_SCHEME": "http",
-            "SDK_OUTGOING_PARTIES_INFORMATION_PATH": "parties/{Type}/{ID}/{SubId}",
-            "JWS_SIGN": false,
-            "JWS_SIGNING_KEY": "./secrets/jwsSigningKey.key",
-            "TLS": {
+          "inbound": {
+            "port": 4005,
+            "host": "0.0.0.0",
+            "pispTransactionMode": true,
+            "tls": {
               "mutualTLS": {
                 "enabled": false
               },
               "creds": {
-                "ca": "./secrets/dfsp_a_client.crt",
-                "cert": "./secrets/dfsp_a_client.crt",
-                "key": "./secrets/dfsp_a_client.crt"
+                "ca": "./secrets/dfsp_or_3ppi_client_cacert.pem",
+                "cert": "./secrets/dfsp_or_3ppi_server_cert.pem",
+                "key": "./secrets/dfsp_or_3ppi_server_key.key"
               }
             }
-          }
+          },
+          "outbound": {
+            "port": 4006,
+            "host": "0.0.0.0",
+            "tls": {
+              "mutualTLS": {
+                "enabled": false
+              },
+              "creds": {
+                "ca": "./secrets/hub_server_cacert.pem",
+                "cert": "./secrets/dfsp_or_3ppi_client_cert.cer",
+                "key": "./secrets/dfsp_or_3ppi_client_key.key"
+              }
+            }
+          },
+          "requestProcessingTimeoutSeconds": 30,
+          "wso2": {
+            "auth": {
+              "staticToken": "test-static-token",
+              "tokenEndpoint": "",
+              "clientKey": "test-client-key",
+              "clientSecret": "test-client-secret",
+              "refreshSeconds": 3600
+            }
+          },
+          "redis": {
+            ## Host is managed by environment variables
+            "port": 6379,
+            "timeout": 100
+          },
+          "inspect": {
+            "depth": 4,
+            "showHidden": false,
+            "color": true
+          },
+          "shared": {
+            "authServiceParticipantId": "centralauth",
+            "thirdpartyRequestsEndpoint": "tp-api-svc:3008",
+            "alsEndpoint": "$release_name-account-lookup-service",
+            "quotesEndpoint": "$release_name-quoting-service",
+            "transfersEndpoint": "$release_name-ml-api-adapter-service",
+            "dfspId": "$name",
+            "dfspBackendUri": "$full_name-backend:3000",
+            "dfspBackendHttpScheme": "http",
+            "dfspBackendVerifyAuthorizationPath": "verify-authorization",
+            "dfspBackendVerifyConsentPath": "verify-consent",
+            "sdkRequestToPayTransferUri": "0.0.0.0:3000/requestToPayTransfer",
+            "sdkOutgoingUri": "$full_name-scheme-adapter:4001",
+            "sdkOutgoingHttpScheme": "http",
+            "sdkOutgoingPartiesInformationPath": "parties/{Type}/{ID}/{SubId}",
+            "sdkNotifyAboutTransferUri": "ml-testing-toolkit:5000/thirdpartyRequests/transactions/{ID}"
+          },
+          "pm4mlEnabled": false,
+          "validateInboundJws": false,
+          "jwsSign": false,
+          "jwsSigningKey": "/jwsSigningKey.key",
+          "jwsVerificationKeysDirectory": null
         }
       }
+
       env:
         NODE_ENV: production
         INBOUND_LISTEN_PORT: 4005
