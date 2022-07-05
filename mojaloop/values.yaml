@@ -25,7 +25,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v15.0.1
+            tag: v15.1.1
             pullPolicy: IfNotPresent
             command: '["node", "src/api/index.js"]'
           service:
@@ -212,7 +212,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v15.0.1
+            tag: v15.1.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
           service:
@@ -409,7 +409,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v15.0.1
+            tag: v15.1.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--admin"]'
           service:
@@ -603,7 +603,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v15.0.1
+            tag: v15.1.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--position"]'
           service:
@@ -797,7 +797,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v15.0.1
+            tag: v15.1.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--get"]'
           service:
@@ -991,7 +991,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v15.0.1
+            tag: v15.1.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
           service:
@@ -1185,7 +1185,7 @@ central:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v15.0.1
+            tag: v15.1.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
           service:
@@ -3212,276 +3212,66 @@ central:
       log_transport: file
 
     mongodb:
-    ## Global Docker image registry
-    ## Please, note that this will override the image registry for all the images, including dependencies, configured to use the global value
-    ##
-    # global:
-    #   imageRegistry:
       enabled: true
+      ## @param nameOverride String to partially override mongodb.fullname template (will maintain the release name)
+      ##
       nameOverride: cep-mongodb
-
-      image:
-        ## Bitnami MongoDB registry
+      ## @param architecture MongoDB(&reg;) architecture (`standalone` or `replicaset`)
+      ##
+      architecture: standalone
+      ## @param useStatefulSet Set to true to use a StatefulSet instead of a Deployment (only when `architecture=standalone`)
+      ##
+      useStatefulSet: false
+      ## MongoDB(&reg;) Authentication parameters
+      ##
+      auth:
+        ## @param auth.enabled Enable authentication
+        ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
         ##
-        registry: docker.io
-        ## Bitnami MongoDB image name
-        ##
-        repository: bitnami/mongodb
-        ## Bitnami MongoDB image tag
-        ## ref: https://hub.docker.com/r/bitnami/mongodb/tags/
-        ##
-        tag: 4.0.3
-
-        ## Specify a imagePullPolicy
-        ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-        ##
-        pullPolicy: IfNotPresent
-        ## Optionally specify an array of imagePullSecrets.
-        ## Secrets must be manually created in the namespace.
-        ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-        ##
-        # pullSecrets:
-        #   - myRegistrKeySecretName
-
-      ## Enable authentication
-      ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
-      #
-      usePassword: true
-      # existingSecret: name-of-existing-secret
-
-      ## MongoDB admin password
-      ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
-      ##
-      mongodbRootPassword: adminpass
-
-      ## MongoDB custom user and database
-      ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run
-      ##
-      mongodbUsername: mojaloop
-      mongodbPassword: password
-      mongodbDatabase: mojaloop
-
-
-      ## Whether enable/disable IPv6 on MongoDB
-      ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#enabling/disabling-ipv6
-      ##
-      mongodbEnableIPv6: true
-
-      ## MongoDB additional command line flags
-      ##
-      ## Can be used to specify command line flags, for example:
-      ##
-      ## mongodbExtraFlags:
-      ##  - "--wiredTigerCacheSizeGB=2"
-      mongodbExtraFlags: []
-
-      ## Pod Security Context
-      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-      ##
-      securityContext:
         enabled: true
-        fsGroup: 1001
-        runAsUser: 1001
-
-      ## Kubernetes Cluster Domain
-      clusterDomain: cluster.local
-
-      ## Kubernetes service type
-      service:
-        annotations: {}
-        type: ClusterIP
-        # clusterIP: None
-        port: 27017
-
-        ## Specify the nodePort value for the LoadBalancer and NodePort service types.
-        ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+        ## @param auth.rootUser MongoDB(&reg;) root user
         ##
-        # nodePort:
-
-      ## Setting up replication
-      ## ref: https://github.com/bitnami/bitnami-docker-mongodb#setting-up-a-replication
-      #
-      replicaSet:
-        ## Whether to create a MongoDB replica set for high availability or not
+        rootUser: root
+        ## @param auth.rootPassword MongoDB(&reg;) root password
+        ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
+        ##
+        rootPassword: adminpass
+        ## MongoDB(&reg;) custom users and databases
+        ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-users-and-databases-on-first-run
+        ## @param auth.usernames List of custom users to be created during the initialization
+        ## @param auth.passwords List of passwords for the custom users set at `auth.usernames`
+        ## @param auth.databases List of custom databases to be created during the initialization
+        ##
+        usernames:
+          - 'mojaloop'
+        passwords:
+          - 'password'
+        databases:
+          -  'mojaloop'
+        ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
+        ##
+        replicaSetKey: ""
+        ## @param auth.existingSecret Existing secret with MongoDB(&reg;) credentials (keys: `mongodb-passwords`, `mongodb-root-password`, `mongodb-metrics-password`, ` mongodb-replica-set-key`)
+        ## NOTE: When it's set the previous parameters are ignored.
+        ##
+        existingSecret: ""
+      tls:
+        ## @param tls.enabled Enable MongoDB(&reg;) TLS support between nodes in the cluster as well as between mongo clients and nodes
+        ##
         enabled: false
-        useHostnames: true
-
-        ## Name of the replica set
+        ## @param tls.autoGenerated Generate a custom CA and self-signed certificates
         ##
-        name: rs0
-
-        ## Key used for replica set authentication
+        autoGenerated: true
+        ## @param tls.existingSecret Existing secret with TLS certificates (keys: `mongodb-ca-cert`, `mongodb-ca-key`, `client-pem`)
+        ## NOTE: When it's set it will disable certificate creation
         ##
-        # key: key
-
-        ## Number of replicas per each node type
+        existingSecret: ""
+        ## Add Custom CA certificate
+        ## @param tls.caCert Custom CA certificated (base64 encoded)
+        ## @param tls.caKey CA certificate private key (base64 encoded)
         ##
-        replicas:
-          secondary: 1
-          arbiter: 1
-        ## Pod Disruption Budget
-        ## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
-        pdb:
-          minAvailable:
-            primary: 1
-            secondary: 1
-            arbiter: 1
-
-      # Annotations to be added to MongoDB pods
-      podAnnotations: {}
-
-      # Additional pod labels to apply
-      podLabels: {}
-
-      ## Configure resource requests and limits
-      ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-      ##
-      resources: {}
-      # limits:
-      #   cpu: 500m
-      #   memory: 512Mi
-      # requests:
-      #   cpu: 100m
-      #   memory: 256Mi
-
-      ## Node selector
-      ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-      nodeSelector: {}
-
-      ## Affinity
-      ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-      affinity: {}
-
-      ## Tolerations
-      ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-      tolerations: []
-
-      ## Enable persistence using Persistent Volume Claims
-      ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
-      ##
-      persistence:
-        enabled: false
-        ## A manually managed Persistent Volume and Claim
-        ## Requires persistence.enabled: true
-        ## If defined, PVC must be created manually before volume will be bound
-        # existingClaim:
-
-        ## mongodb data Persistent Volume Storage Class
-        ## If defined, storageClassName: <storageClass>
-        ## If set to "-", storageClassName: "", which disables dynamic provisioning
-        ## If undefined (the default) or set to null, no storageClassName spec is
-        ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-        ##   GKE, AWS & OpenStack)
-        ##
-        # storageClass: "-"
-        accessModes:
-          - ReadWriteOnce
-        size: 8Gi
-        annotations: {}
-
-      ## Configure extra options for liveness and readiness probes
-      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
-      livenessProbe:
-        enabled: true
-        initialDelaySeconds: 30
-        periodSeconds: 10
-        timeoutSeconds: 5
-        failureThreshold: 6
-        successThreshold: 1
-      readinessProbe:
-        enabled: true
-        initialDelaySeconds: 5
-        periodSeconds: 10
-        timeoutSeconds: 5
-        failureThreshold: 6
-        successThreshold: 1
-
-      # Entries for the MongoDB config file
-      configmap:
-      #  # Where and how to store data.
-      #  storage:
-      #    dbPath: /opt/bitnami/mongodb/data/db
-      #    journal:
-      #      enabled: true
-      #    #engine:
-      #    #wiredTiger:
-      #  # where to write logging data.
-      #  systemLog:
-      #    destination: file
-      #    logAppend: true
-      #    path: /opt/bitnami/mongodb/logs/mongodb.log
-      #  # network interfaces
-      #  net:
-      #    port: 27017
-      #    bindIp: 0.0.0.0
-      #    unixDomainSocket:
-      #      enabled: true
-      #      pathPrefix: /opt/bitnami/mongodb/tmp
-      #  # replica set options
-      #  #replication:
-      #  #  replSetName: replicaset
-      #  # process management options
-      #  processManagement:
-      #     fork: false
-      #     pidFilePath: /opt/bitnami/mongodb/tmp/mongodb.pid
-      #  # set parameter options
-      #  setParameter:
-      #     enableLocalhostAuthBypass: true
-      #  # security options
-      #  security:
-      #  authorization: enabled
-        #keyFile: /opt/bitnami/mongodb/conf/keyfile
-
-      ## Prometheus Exporter / Metrics
-      ##
-      metrics:
-        enabled: false
-
-        image:
-          registry: docker.io
-          repository: forekshub/percona-mongodb-exporter
-          tag: latest
-          pullPolicy: IfNotPresent
-          ## Optionally specify an array of imagePullSecrets.
-          ## Secrets must be manually created in the namespace.
-          ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-          ##
-          # pullSecrets:
-          #   - myRegistrKeySecretName
-
-        ## Metrics exporter resource requests and limits
-        ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-        ##
-        # resources: {}
-
-        ## Metrics exporter pod Annotation
-        podAnnotations:
-          prometheus.io/scrape: "true"
-          prometheus.io/port: "9216"
-
-        ## Prometheus Service Monitor
-        ## ref: https://github.com/coreos/prometheus-operator
-        ##      https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md
-        serviceMonitor:
-          ## If the operator is installed in your cluster, set to true to create a Service Monitor Entry
-          enabled: false
-          ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Service Monitors to work with
-          ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
-          additionalLabels: {}
-
-          ## Specify Metric Relabellings to add to the scrape endpoint
-          ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
-          # relabellings:
-
-          alerting:
-            ## Define individual alerting rules as required
-            ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#rulegroup
-            ##      https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
-            rules: {}
-
-            ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Prometheus Rules to work with
-            ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
-      additionalLabels: {}
+        caCert: ""
+        caKey: ""
 
 ml-api-adapter:
   enabled: true
@@ -3494,7 +3284,7 @@ ml-api-adapter:
     replicaCount: 1
     image:
       repository: mojaloop/ml-api-adapter
-      tag: v13.0.0
+      tag: v14.0.0
       command: '["node", "src/api/index.js"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -3651,7 +3441,7 @@ ml-api-adapter:
     replicaCount: 1
     image:
       repository: mojaloop/ml-api-adapter
-      tag: v13.0.0
+      tag: v14.0.0
       command: '["node", "src/handlers/index.js", "handler", "--notification"]'
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -3968,7 +3758,7 @@ account-lookup-service:
       api:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v13.0.0
+          tag: v14.0.0
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--api"]'
         service:
@@ -3979,7 +3769,7 @@ account-lookup-service:
       admin:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v13.0.0
+          tag: v14.0.0
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--admin"]'
         service:
@@ -4202,7 +3992,7 @@ account-lookup-service:
       api:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v13.0.0
+          tag: v14.0.0
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--api"]'
         service:
@@ -4213,7 +4003,7 @@ account-lookup-service:
       admin:
         image:
           repository: mojaloop/account-lookup-service
-          tag: v13.0.0
+          tag: v14.0.0
           pullPolicy: IfNotPresent
           command: '["node", "src/index.js", "server", "--admin"]'
         service:
@@ -4777,7 +4567,7 @@ quoting-service:
   replicaCount: 1
   image:
     repository: mojaloop/quoting-service
-    tag: v14.0.0
+    tag: v15.0.2
     pullPolicy: IfNotPresent
 
   readinessProbe:
@@ -5140,7 +4930,7 @@ thirdparty:
     replicaCount: 1
     image:
       repository: mojaloop/auth-service
-      tag: v11.11.1
+      tag: v13.0.2
       command: '[ "npm", "run", "start" ]'
       pullPolicy: IfNotPresent
 
@@ -5237,12 +5027,12 @@ thirdparty:
           "migrations": {
             "tableName": "auth-svc",
             "loadExtensions": [
-              ".ts"
+              ".js"
             ]
           },
           "seeds": {
             "loadExtensions": [
-              ".ts"
+              ".js"
             ]
           }
         },
@@ -5283,7 +5073,7 @@ thirdparty:
     replicaCount: 1
     image:
       repository: mojaloop/als-consent-oracle
-      tag: v0.0.8
+      tag: v0.2.0
       command: '[ "npm", "run", "start" ]'
       pullPolicy: IfNotPresent
 
@@ -5378,7 +5168,7 @@ thirdparty:
     replicaCount: 1
     image:
       repository: mojaloop/thirdparty-api-svc
-      tag: v11.21.0
+      tag: v13.0.2
       command: '[ "npm", "run", "start" ]'
       pullPolicy: IfNotPresent
 
@@ -5413,48 +5203,48 @@ thirdparty:
 
     config:
       default.json: {
-      "PORT": 3008,
-      "HOST": "0.0.0.0",
-      "INSPECT": {
-        "DEPTH": 4,
-        "SHOW_HIDDEN": false,
-        "COLOR": true
-      },
-      "ENDPOINT_CACHE_CONFIG": {
-        "expiresIn": 180000,
-        "generateTimeout": 30000
-      },
-      # Location of central ledger to lookup endpoints for
-      "ENDPOINT_SERVICE_URL": "http://$release_name-centralledger-service",
-      # Static list of participantIds that support account linking
-      "PARTICIPANT_LIST_LOCAL": [
-        "dfspa",
-        "dfspb"
-      ],
-      "ERROR_HANDLING": {
-        "includeCauseExtension": true,
-        "truncateExtensions": true
-      },
-      "INSTRUMENTATION": {
-        "METRICS": {
-          "DISABLED": false,
-          "labels": {
-            "eventId": "*"
-          },
-          "config": {
-            "timeout": 5000,
-            "prefix": "moja_3p_api",
-            "defaultLabels": {
-              "serviceName": "thirdparty-api-svc"
+        "PORT": 3008,
+        "HOST": "0.0.0.0",
+        "INSPECT": {
+          "DEPTH": 4,
+          "SHOW_HIDDEN": false,
+          "COLOR": true
+        },
+        "ENDPOINT_CACHE_CONFIG": {
+          "expiresIn": 180000,
+          "generateTimeout": 30000
+        },
+        # Location of central ledger to lookup endpoints for
+        "ENDPOINT_SERVICE_URL": "http://$release_name-centralledger-service",
+        # Static list of participantIds that support account linking
+        "PARTICIPANT_LIST_LOCAL": [
+          "dfspa",
+          "dfspb"
+        ],
+        "ERROR_HANDLING": {
+          "includeCauseExtension": true,
+          "truncateExtensions": true
+        },
+        "INSTRUMENTATION": {
+          "METRICS": {
+            "DISABLED": false,
+            "labels": {
+              "eventId": "*"
+            },
+            "config": {
+              "timeout": 5000,
+              "prefix": "moja_3p_api",
+              "defaultLabels": {
+                "serviceName": "thirdparty-api-svc"
+              }
             }
           }
+        },
+        "MOCK_CALLBACK": {
+          "transactionRequestId": "abc-12345",
+          "pispId": "pisp"
         }
-      },
-      "MOCK_CALLBACK": {
-        "transactionRequestId": "abc-12345",
-        "pispId": "pisp"
       }
-    }
 
     service:
       type: ClusterIP
@@ -6105,7 +5895,7 @@ mojaloop-simulator:
             publicKey: ''
         image:
           repository: mojaloop/sdk-scheme-adapter
-          tag: v11.18.11
+          tag: v15.0.0
           pullPolicy: IfNotPresent
         <<: *defaultProbes
 
@@ -6254,7 +6044,7 @@ mojaloop-simulator:
       backend:
         image:
           repository: mojaloop/mojaloop-simulator
-          tag: v11.6.2
+          tag: v12.1.1
           pullPolicy: IfNotPresent
         <<: *defaultProbes
 
@@ -6398,7 +6188,7 @@ mojaloop-simulator:
             publicKey: ''
         image:
           repository: mojaloop/thirdparty-sdk
-          tag: v11.55.1
+          tag: v15.1.0
           pullPolicy: IfNotPresent
           inboundCommand: '[ "npm", "run", "start:inbound" ]'
           outboundCommand: '[ "npm", "run", "start:outbound" ]'
@@ -6427,63 +6217,85 @@ mojaloop-simulator:
                   averageUtilization: 80
         config: {
           production.json: {
-            "INBOUND": {
-              "PORT": 4005,
-              "HOST": "0.0.0.0",
-              "PISP_TRANSACTION_MODE": true
+            "control": {
+              "mgmtAPIWsUrl": "127.0.0.1",
+              "mgmtAPIWsPort": 4010
             },
-            "OUTBOUND": {
-              "PORT": 4006,
-              "HOST": "0.0.0.0"
-            },
-            "REQUEST_PROCESSING_TIMEOUT_SECONDS": 30,
-            "WSO2_AUTH": {
-              "staticToken": "0706c62f-c022-3c42-8d14-8b5df128876d",
-              "tokenEndpoint": "",
-              "clientKey": "test-client-key",
-              "clientSecret": "test-client-secret",
-              "refreshSeconds": 3600
-            },
-            "REDIS": {
-              "PORT": 6379,
-              # covered by REDIS_HOST env var in deployment.yaml
-              # "HOST"
-              "TIMEOUT": 100
-            },
-            "INSPECT": {
-              "DEPTH": 4,
-              "SHOW_HIDDEN": false,
-              "COLOR": true
-            },
-            "SHARED": {
-              "AUTH_SERVICE_PARTICIPANT_ID": 'centralauth',
-              "THIRDPARTY_REQUESTS_ENDPOINT": "tp-api-svc:3008",
-              "ALS_ENDPOINT": "$release_name-quoting-service",
-              "QUOTES_ENDPOINT": "$release_name-quoting-service",
-              "TRANSFERS_ENDPOINT": "$release_name-ml-api-adapter-service",
-              "DFSP_ID": "$name",
-              "DFSP_BACKEND_URI": "$full_name-backend:3000",
-              "DFSP_BACKEND_HTTP_SCHEME": "http",
-              "DFSP_BACKEND_VERIFY_AUTHORIZATION_PATH": "verify-authorization",
-              "DFSP_BACKEND_VERIFY_CONSENT_PATH": "verify-consent",
-              "SDK_OUTGOING_URI": "$full_name-scheme-adapter:4001",
-              "SDK_OUTGOING_HTTP_SCHEME": "http",
-              "SDK_OUTGOING_PARTIES_INFORMATION_PATH": "parties/{Type}/{ID}/{SubId}",
-              "JWS_SIGN": false,
-              "JWS_SIGNING_KEY": "./secrets/jwsSigningKey.key",
-              "TLS": {
+            "inbound": {
+              "port": 4005,
+              "host": "0.0.0.0",
+              "pispTransactionMode": true,
+              "tls": {
                 "mutualTLS": {
                   "enabled": false
                 },
                 "creds": {
-                  "ca": "./secrets/dfsp_a_client.crt",
-                  "cert": "./secrets/dfsp_a_client.crt",
-                  "key": "./secrets/dfsp_a_client.crt"
+                  "ca": "./secrets/dfsp_or_3ppi_client_cacert.pem",
+                  "cert": "./secrets/dfsp_or_3ppi_server_cert.pem",
+                  "key": "./secrets/dfsp_or_3ppi_server_key.key"
                 }
               }
-            }
+            },
+            "outbound": {
+              "port": 4006,
+              "host": "0.0.0.0",
+              "tls": {
+                "mutualTLS": {
+                  "enabled": false
+                },
+                "creds": {
+                  "ca": "./secrets/hub_server_cacert.pem",
+                  "cert": "./secrets/dfsp_or_3ppi_client_cert.cer",
+                  "key": "./secrets/dfsp_or_3ppi_client_key.key"
+                }
+              }
+            },
+            "requestProcessingTimeoutSeconds": 30,
+            "wso2": {
+              "auth": {
+                "staticToken": "test-static-token",
+                "tokenEndpoint": "",
+                "clientKey": "test-client-key",
+                "clientSecret": "test-client-secret",
+                "refreshSeconds": 3600
+              }
+            },
+            "redis": {
+              ## Host is managed by environment variables
+              "port": 6379,
+              "timeout": 100
+            },
+            "inspect": {
+              "depth": 4,
+              "showHidden": false,
+              "color": true
+            },
+            "shared": {
+              "authServiceParticipantId": "centralauth",
+              "thirdpartyRequestsEndpoint": "tp-api-svc:3008",
+              "servicesEndpoint": "tp-api-svc:3008",
+              "alsEndpoint": "$release_name-account-lookup-service",
+              "quotesEndpoint": "$release_name-quoting-service",
+              "transfersEndpoint": "$release_name-ml-api-adapter-service",
+              "dfspId": "$name",
+              "dfspBackendUri": "$full_name-backend:3000",
+              "dfspBackendHttpScheme": "http",
+              "dfspBackendVerifyAuthorizationPath": "verify-authorization",
+              "dfspBackendVerifyConsentPath": "verify-consent",
+              "sdkRequestToPayTransferUri": "0.0.0.0:3000/requestToPayTransfer",
+              "sdkOutgoingUri": "$full_name-scheme-adapter:4001",
+              "sdkOutgoingHttpScheme": "http",
+              "sdkOutgoingPartiesInformationPath": "parties/{Type}/{ID}/{SubId}",
+              "sdkNotifyAboutTransferUri": "ml-testing-toolkit:5000/thirdpartyRequests/transactions/{ID}"
+            },
+            "pm4mlEnabled": false,
+            "validateInboundJws": false,
+            "jwsSign": false,
+            "jwsSigningKey": "/jwsSigningKey.key",
+            "jwsVerificationKeysDirectory": null
           }
         }
+
         env:
           NODE_ENV: production
           INBOUND_LISTEN_PORT: 4005
@@ -7081,7 +6893,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v15.0.1
+            tag: v15.1.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkprepare"]'
           service:
@@ -7253,7 +7065,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v15.0.1
+            tag: v15.1.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkfulfil"]'
           service:
@@ -7422,7 +7234,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v15.0.1
+            tag: v15.1.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkprocessing"]'
           service:
@@ -7591,7 +7403,7 @@ mojaloop-bulk:
         api:
           image:
             repository: mojaloop/central-ledger
-            tag: v15.0.1
+            tag: v15.1.1
             pullPolicy: IfNotPresent
             command: '["node", "src/handlers/index.js", "handler", "--bulkget"]'
           service:
@@ -7752,276 +7564,66 @@ mojaloop-bulk:
 
   # Declare variables to be passed into your templates.
   mongodb:
-    ## Global Docker image registry
-    ## Please, note that this will override the image registry for all the images, including dependencies, configured to use the global value
-    ##
-    # global:
-    #   imageRegistry:
     enabled: true
+    ## @param nameOverride String to partially override mongodb.fullname template (will maintain the release name)
+    ##
     nameOverride: centralledger-obj
-
-    image:
-      ## Bitnami MongoDB registry
+    ## @param architecture MongoDB(&reg;) architecture (`standalone` or `replicaset`)
+    ##
+    architecture: standalone
+    ## @param useStatefulSet Set to true to use a StatefulSet instead of a Deployment (only when `architecture=standalone`)
+    ##
+    useStatefulSet: false
+    ## MongoDB(&reg;) Authentication parameters
+    ##
+    auth:
+      ## @param auth.enabled Enable authentication
+      ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
       ##
-      registry: docker.io
-      ## Bitnami MongoDB image name
-      ##
-      repository: bitnami/mongodb
-      ## Bitnami MongoDB image tag
-      ## ref: https://hub.docker.com/r/bitnami/mongodb/tags/
-      ##
-      tag: 4.0.3
-
-      ## Specify a imagePullPolicy
-      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-      ##
-      pullPolicy: IfNotPresent
-      ## Optionally specify an array of imagePullSecrets.
-      ## Secrets must be manually created in the namespace.
-      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-      ##
-      # pullSecrets:
-      #   - myRegistrKeySecretName
-
-    ## Enable authentication
-    ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
-    #
-    usePassword: true
-    # existingSecret: name-of-existing-secret
-
-    ## MongoDB admin password
-    ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
-    ##
-    mongodbRootPassword: adminpass
-
-    ## MongoDB custom user and database
-    ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run
-    ##
-    mongodbUsername: mojaloop
-    mongodbPassword: password
-    mongodbDatabase: mlos
-
-
-    ## Whether enable/disable IPv6 on MongoDB
-    ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#enabling/disabling-ipv6
-    ##
-    mongodbEnableIPv6: true
-
-    ## MongoDB additional command line flags
-    ##
-    ## Can be used to specify command line flags, for example:
-    ##
-    ## mongodbExtraFlags:
-    ##  - "--wiredTigerCacheSizeGB=2"
-    mongodbExtraFlags: []
-
-    ## Pod Security Context
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-    ##
-    securityContext:
       enabled: true
-      fsGroup: 1001
-      runAsUser: 1001
-
-    ## Kubernetes Cluster Domain
-    clusterDomain: cluster.local
-
-    ## Kubernetes service type
-    service:
-      annotations: {}
-      type: ClusterIP
-      # clusterIP: None
-      port: 27017
-
-      ## Specify the nodePort value for the LoadBalancer and NodePort service types.
-      ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+      ## @param auth.rootUser MongoDB(&reg;) root user
       ##
-      # nodePort:
-
-    ## Setting up replication
-    ## ref: https://github.com/bitnami/bitnami-docker-mongodb#setting-up-a-replication
-    #
-    replicaSet:
-      ## Whether to create a MongoDB replica set for high availability or not
+      rootUser: root
+      ## @param auth.rootPassword MongoDB(&reg;) root password
+      ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
+      ##
+      rootPassword: adminpass
+      ## MongoDB(&reg;) custom users and databases
+      ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-users-and-databases-on-first-run
+      ## @param auth.usernames List of custom users to be created during the initialization
+      ## @param auth.passwords List of passwords for the custom users set at `auth.usernames`
+      ## @param auth.databases List of custom databases to be created during the initialization
+      ##
+      usernames:
+        - 'mojaloop'
+      passwords:
+        - 'password'
+      databases:
+        -  'mlos'
+      ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
+      ##
+      replicaSetKey: ""
+      ## @param auth.existingSecret Existing secret with MongoDB(&reg;) credentials (keys: `mongodb-passwords`, `mongodb-root-password`, `mongodb-metrics-password`, ` mongodb-replica-set-key`)
+      ## NOTE: When it's set the previous parameters are ignored.
+      ##
+      existingSecret: ""
+    tls:
+      ## @param tls.enabled Enable MongoDB(&reg;) TLS support between nodes in the cluster as well as between mongo clients and nodes
+      ##
       enabled: false
-      useHostnames: true
-
-      ## Name of the replica set
+      ## @param tls.autoGenerated Generate a custom CA and self-signed certificates
       ##
-      name: rs0
-
-      ## Key used for replica set authentication
+      autoGenerated: true
+      ## @param tls.existingSecret Existing secret with TLS certificates (keys: `mongodb-ca-cert`, `mongodb-ca-key`, `client-pem`)
+      ## NOTE: When it's set it will disable certificate creation
       ##
-      # key: key
-
-      ## Number of replicas per each node type
+      existingSecret: ""
+      ## Add Custom CA certificate
+      ## @param tls.caCert Custom CA certificated (base64 encoded)
+      ## @param tls.caKey CA certificate private key (base64 encoded)
       ##
-      replicas:
-        secondary: 1
-        arbiter: 1
-      ## Pod Disruption Budget
-      ## ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
-      pdb:
-        minAvailable:
-          primary: 1
-          secondary: 1
-          arbiter: 1
-
-    # Annotations to be added to MongoDB pods
-    podAnnotations: {}
-
-    # Additional pod labels to apply
-    podLabels: {}
-
-    ## Configure resource requests and limits
-    ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-    ##
-    resources: {}
-    # limits:
-    #   cpu: 500m
-    #   memory: 512Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 256Mi
-
-    ## Node selector
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-    nodeSelector: {}
-
-    ## Affinity
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-    affinity: {}
-
-    ## Tolerations
-    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    tolerations: []
-
-    ## Enable persistence using Persistent Volume Claims
-    ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
-    ##
-    persistence:
-      enabled: false
-      ## A manually managed Persistent Volume and Claim
-      ## Requires persistence.enabled: true
-      ## If defined, PVC must be created manually before volume will be bound
-      # existingClaim:
-
-      ## mongodb data Persistent Volume Storage Class
-      ## If defined, storageClassName: <storageClass>
-      ## If set to "-", storageClassName: "", which disables dynamic provisioning
-      ## If undefined (the default) or set to null, no storageClassName spec is
-      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-      ##   GKE, AWS & OpenStack)
-      ##
-      # storageClass: "-"
-      accessModes:
-        - ReadWriteOnce
-      size: 8Gi
-      annotations: {}
-
-    ## Configure extra options for liveness and readiness probes
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
-    livenessProbe:
-      enabled: true
-      initialDelaySeconds: 30
-      periodSeconds: 10
-      timeoutSeconds: 5
-      failureThreshold: 6
-      successThreshold: 1
-    readinessProbe:
-      enabled: true
-      initialDelaySeconds: 5
-      periodSeconds: 10
-      timeoutSeconds: 5
-      failureThreshold: 6
-      successThreshold: 1
-
-    # Entries for the MongoDB config file
-    configmap:
-    #  # Where and how to store data.
-    #  storage:
-    #    dbPath: /opt/bitnami/mongodb/data/db
-    #    journal:
-    #      enabled: true
-    #    #engine:
-    #    #wiredTiger:
-    #  # where to write logging data.
-    #  systemLog:
-    #    destination: file
-    #    logAppend: true
-    #    path: /opt/bitnami/mongodb/logs/mongodb.log
-    #  # network interfaces
-    #  net:
-    #    port: 27017
-    #    bindIp: 0.0.0.0
-    #    unixDomainSocket:
-    #      enabled: true
-    #      pathPrefix: /opt/bitnami/mongodb/tmp
-    #  # replica set options
-    #  #replication:
-    #  #  replSetName: replicaset
-    #  # process management options
-    #  processManagement:
-    #     fork: false
-    #     pidFilePath: /opt/bitnami/mongodb/tmp/mongodb.pid
-    #  # set parameter options
-    #  setParameter:
-    #     enableLocalhostAuthBypass: true
-    #  # security options
-    #  security:
-    #  authorization: enabled
-    #keyFile: /opt/bitnami/mongodb/conf/keyfile
-
-    ## Prometheus Exporter / Metrics
-    ##
-    metrics:
-      enabled: false
-
-      image:
-        registry: docker.io
-        repository: forekshub/percona-mongodb-exporter
-        tag: latest
-        pullPolicy: IfNotPresent
-        ## Optionally specify an array of imagePullSecrets.
-        ## Secrets must be manually created in the namespace.
-        ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-        ##
-        # pullSecrets:
-        #   - myRegistrKeySecretName
-
-      ## Metrics exporter resource requests and limits
-      ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-      ##
-      # resources: {}
-
-      ## Metrics exporter pod Annotation
-      podAnnotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9216"
-
-      ## Prometheus Service Monitor
-      ## ref: https://github.com/coreos/prometheus-operator
-      ##      https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md
-      serviceMonitor:
-        ## If the operator is installed in your cluster, set to true to create a Service Monitor Entry
-        enabled: false
-        ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Service Monitors to work with
-        ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
-        additionalLabels: {}
-
-        ## Specify Metric Relabellings to add to the scrape endpoint
-        ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#endpoint
-        # relabellings:
-
-        alerting:
-          ## Define individual alerting rules as required
-          ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#rulegroup
-          ##      https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
-          rules: {}
-
-          ## Used to pass Labels that are used by the Prometheus installed in your cluster to select Prometheus Rules to work with
-          ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
-    additionalLabels: {}
+      caCert: ""
+      caKey: ""
 
 ml-testing-toolkit:
   enabled: true
@@ -8297,8 +7899,12 @@ ml-ttk-posthook-setup:
     weight: -5
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
-    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v14.0.0.zip
-    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-14.0.0/collections/hub/provisioning
+    # testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v14.0.0.zip
+    # testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-14.0.0/collections/hub/provisioning
+    ## DELETE ME
+    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/refs/heads/release/v14.0.0-rc.zip
+    ## DELETE ME
+    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-release-v14.0.0-rc/collections/hub/provisioning
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
   parameters:
     <<: *simNames
@@ -8311,7 +7917,9 @@ ml-ttk-posthook-tests:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-14.0.0/collections/hub/golden_path
+    # testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-14.0.0/collections/hub/golden_path
+    ## DELETE ME
+    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-release-v14.0.0-rc/collections/hub/golden_path
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
@@ -8454,7 +8062,9 @@ ml-ttk-test-val-bulk:
     testCasesZipUrl: *ttkGitUrl
     # testCasesPathInZip: *ttkGitPathGP
     # testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/refs/heads/release/v14.0.0.zip
-    testCasesPathInZip: testing-toolkit-test-cases-14.0.0/collections/hub/other_tests/bulk_transfers
+    # testCasesPathInZip: testing-toolkit-test-cases-14.0.0/collections/hub/other_tests/bulk_transfers
+    ## DELETE ME
+    testCasesPathInZip: testing-toolkit-test-cases-release-v14.0.0-rc/collections/hub/other_tests/bulk_transfers
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -8494,7 +8104,9 @@ ml-ttk-test-setup-tp:
     testCasesZipUrl: *ttkGitUrl
     # testCasesPathInZip: *ttkGitPathGP
     # testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/refs/heads/release/v14.0.0.zip
-    testCasesPathInZip: testing-toolkit-test-cases-14.0.0/collections/hub/provisioning_thirdparty
+    # testCasesPathInZip: testing-toolkit-test-cases-14.0.0/collections/hub/provisioning_thirdparty
+    ## DELETE ME
+    testCasesPathInZip: testing-toolkit-test-cases-release-v14.0.0-rc/collections/hub/provisioning_thirdparty
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -8534,7 +8146,9 @@ ml-ttk-test-val-tp:
     testCasesZipUrl: *ttkGitUrl
     # testCasesPathInZip: *ttkGitPathGP
     # testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/refs/heads/release/v14.0.0.zip
-    testCasesPathInZip: testing-toolkit-test-cases-14.0.0/collections/hub/thirdparty
+    # testCasesPathInZip: testing-toolkit-test-cases-14.0.0/collections/hub/thirdparty
+    ## DELETE ME
+    testCasesPathInZip: testing-toolkit-test-cases-release-v14.0.0-rc/collections/hub/thirdparty
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
