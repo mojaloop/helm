@@ -44,11 +44,12 @@ sdk-scheme-adapter/issues/2478)
 14. **sdk-scheme-adapter:** correct party outbound response ([#317](https://github.com/mojaloop/sdk-scheme-adapter/issues/317)) ([752e8b4](https://github.com/mojaloop/sdk-scheme-adapter/commit/752e8b4d315a6e9c3b8ad4ff1b65761c41e3d721))
 15. **sdk-scheme-adapter:** reformat error information response ([#318](https://github.com/mojaloop/sdk-scheme-adapter/issues/318)) ([ed844b1](https://github.com/mojaloop/sdk-scheme-adapter/commit/ed844b1d2da6c58d3c61622c07c326bda3ca3b86))
 16. **mojaloop/#2574:** sdk-scheme-adapter is not returning party sub-id ([#120](https://github.com/mojaloop/mojaloop-simulator/issues/120)) ([b0e9504](https://github.com/mojaloop/mojaloop-simulator/commit/b0e950468ceeb129dc62f7ad8fdb84c86bf12749)), closes [mojaloop/#2574](https://github.com/mojaloop/mojaloop-simulator/issues/2574) [mojaloop/#2574](https://github.com/mojaloop/mojaloop-simulator/issues/2574) [mojaloop/#2575](https://github.com/mojaloop/mojaloop-simulator/issues/2575)
+17. **mojaloop/#2810:** timeout events are being produced for transfers with an internal-state of ABORTED_ERROR ([#907](https://github.com/mojaloop/central-ledger/issues/907)) ([e77de0a](https://github.com/mojaloop/central-ledger/commit/e77de0a8e7dd473d3afbb27df464d27ff5ce98a7)), closes [mojaloop/#2810](https://github.com/mojaloop/project/issues/2810)
 
 ## 3. Application versions
 
 1. ml-api-adapter: v13.0.0 -> **v14.0.0**
-2. central-ledger: v13.16.1 -> **v15.1.1**
+2. central-ledger: v13.16.1 -> **v15.1.2**
 3. account-lookup-service: v13.0.0 -> **v14.0.0**
 4. quoting-service: v14.0.0 -> **15.0.2**
 5. central-settlement: **13.4.1**
@@ -111,14 +112,18 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
 
 3. **Mongodb dependency charts:** have been upgraded due to Bitnami's [retention policy](https://github.com/bitnami/charts/issues/10539). This impacts the following components: `central-event-processor`, `ml-testing-toolkit` (only when enabled), `bulk-api-adapter`.
 
-4. **Thirdparty-api specification:** changes introduced in this release are breaking and will impact the following components:
+4. **Thirdparty-api specification:** upgrades from v0.1 to v1.0 introduced breaking changes in this release will impact the following Thirdparty components:
    - auth-svc
    - als-consent-service
    - thirdparty-api-svc
    - thirdparty-sdk
 
-5. **Thirdparty-sdk:** support for configuration management via [Payment Manager for Mojaloop](https://github.com/pm4ml).
+5. **Thirdparty-sdk:** support for configuration management via [Payment Manager for Mojaloop](https://github.com/pm4ml) introduced a breaking changes:
+   - Configuration changed to camel-case (take note of your configuration)
+   - Inbound/Outbound servers can NOT be run independently
 
+6. **Sdk-scheme-adapter:** features merged from mojaloop-connector:
+   - Outbound API response body has changed, now includes headers and payloads
 ## 6. Testing notes
 
 1. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
