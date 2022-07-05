@@ -1,7 +1,7 @@
 'use strict'
-const migrationsDirectory = '/opt/account-lookup-service/migrations'
-const seedsDirectory = '/opt/account-lookup-service/seeds'
-const Config = require('/opt/account-lookup-service/src/lib/config')
+const migrationsDirectory = '/opt/app/migrations'
+const seedsDirectory = '/opt/app/seeds'
+const Config = require('/opt/app/src/lib/config')
 module.exports = {
     client: 'mysql',
     version: '5.7',
