@@ -103,13 +103,15 @@ sdk-scheme-adapter/issues/2478)
 
 ## 5. Breaking changes
 
+_Note: Apart from `Thirdparty-api specification`, below changes are breaking for upgrades and implementations of a Mojaloop Switch but not for FSPs or other entities interacting with a Mojaloop Switch itself._
+
 1. **Central Ledger:** Transfer will be successful only if the payer has sufficient liquidity in their settlement account balance over and above their NET-DEBIT-CAP (NDC) limit. This is the additional check that has been added in this PR, and will be applied to the lower value. Error messages have changed as a result. For NDC limit check from `PAYER_FSP_INSUFFICIENT_LIQUIDITY` to `PAYER_LIMIT_ERROR`. The error message `PAYER_FSP_INSUFFICIENT_LIQUIDITY` occurs when the payer has an insufficient settlement account balance. [mojaloop/central-ledger/pull/899](https://github.com/mojaloop/central-ledger/pull/899)
 
 2. **mojaloop/#2092:** Major version bump for node v16 LTS support, re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/opt/central-ledger`, `opt/account-lookup-service`, `opt/ml-api-adapter`, `/opt/quoting-service` which will impact config mounts.
 
 3. **Mongodb dependency charts:** have been upgraded due to Bitnami's [retention policy](https://github.com/bitnami/charts/issues/10539). This impacts the following components: `central-event-processor`, `ml-testing-toolkit` (only when enabled), `bulk-api-adapter`.
 
-4. **Thirdparty-api specification v1.0:** changes introduced in this release are breaking and will impact the following components:
+4. **Thirdparty-api specification:** changes introduced in this release are breaking and will impact the following components:
    - auth-svc
    - als-consent-service
    - thirdparty-api-svc
