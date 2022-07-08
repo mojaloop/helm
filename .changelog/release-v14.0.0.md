@@ -66,7 +66,7 @@ sdk-scheme-adapter/issues/2478)
 16. event-stream-processor: **v11.0.0-snapshot**
 17. simulator: **v11.1.3**
 18. mojaloop-simulator: v11.6.1 -> **v12.1.1**
-19. sdk-scheme-adapter: v11.18.11 -> **v15.0.0**
+19. sdk-scheme-adapter: v11.18.11 -> **v17.0.2-snapshot.11**
 20. ml-testing-toolkit: **v14.0.4**
 21. ml-testing-toolkit-ui: **v13.5.5**
 22. auth-service: v11.11.1 -> **v13.0.2**
@@ -94,7 +94,7 @@ sdk-scheme-adapter/issues/2478)
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v11.0.0-snapshot
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v11.1.3
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v12.1.1
-19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v15.0.0
+19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v17.0.2-snapshot.11
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v14.0.4
 21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.5.5
 22. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v11.11.1
@@ -123,7 +123,8 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
    - Inbound/Outbound servers can NOT be run independently
 
 6. **Sdk-scheme-adapter:** features merged from mojaloop-connector:
-   - Outbound API response body has changed, now includes headers and payloads
+   - Outbound API response body has changed, now includes headers and payloads, refer to [mojaloop/sdk-scheme-adapter/v17.0.2-snapshot.11/src/OutboundServer/api.yaml](https://github.com/mojaloop/sdk-scheme-adapter/blob/v17.0.2-snapshot.11/src/OutboundServer/api.yaml) for updated interface specification.
+
 ## 6. Testing notes
 
 1. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
