@@ -5,25 +5,24 @@ For breaking changes, please review the section `#4` "Breaking Changes" below.
 ## 1. New Features
 
 1. Change the basis for the liquidity check ([mojaloop/design-authority-project/issues/90](https://github.com/mojaloop/design-authority-project/issues/90)). Pull requests are [mojaloop/central-ledger/pull/899](https://github.com/mojaloop/central-ledger/pull/899) & [mojaloop/central-ledger/pull/901](https://github.com/mojaloop/central-ledger/pull/901)
-2. **mojaloop/#2092:** upgrade nodeJS version for core services ([ml-api-adapter/#501](https://github.com/mojaloop/ml-api-adapter/pull/501)) ([central-ledger/#902](https://github.com/mojaloop/central-ledger/issues/902)) ([account-lookup/#445](https://github.com/mojaloop/account-lookup-service/pull/445)) ([quoting-service/#302](https://github.com/mojaloop/quoting-service/pull/302)) ([sdk-standard-components/#168](https://github.com/mojaloop/sdk-standard-components/pull/168) [auth-svc/#116](https://github.com/mojaloop/auth-service/issues/116) [als-consent/#13](https://github.com/mojaloop/als-consent-oracle/issues/13) [thirdparty-api-svc/#82](https://github.com/mojaloop/thirdparty-api-svc/issues/82) [thirdparty-sdk/#142](https://github.com/mojaloop/thirdparty-sdk/issues/142)), closes [mojaloop/#2092](https://github.com/mojaloop/project/issues/2092)
-3. **mojaloop/#2092:** upgrade nodeJS version for core services ([#168](https://github.com/mojaloop/sdk-standard-components/issues/168)) ([e0191bf](https://github.com/mojaloop/sdk-standard-components/commit/e0191bfa9942ccb3acb4335b41d65c2c903b770f)), closes [mojaloop/#2092](https://github.com/mojaloop/project/issues/2092)
-4. **sdk-scheme-adapter:** add extensionList to quote request/response ([#269](https://github.com/mojaloop/sdk-scheme-adapter/issues/269)) ([9cbed66](https://github.com/mojaloop/sdk-scheme-adapter/commit/9cbed66f0db4190f2f34cd7ba3d531a8bbb95d79))
-5. **sdk-scheme-adapter:** proper response schema for post /authorization sync response ([#270](https://github.com/mojaloop/sdk-scheme-adapter/issues/270)) ([6535c1d](https://github.com/mojaloop/sdk-scheme-adapter/commit/6535c1de145ff58db48bc5be61dae9b0133786d8))
-6. **mojaloop/#2264:** add more robust header validation for inbound server ([#278](https://github.com/mojaloop/sdk-scheme-adapter/issues/278)) ([9ea24d7](https://github.com/mojaloop/sdk-scheme-adapter/commit/9ea24d748ccd58fdfb30c77e98b021aa6a607b4f)), closes [#2264](https://github.com/mojaloop/sdk-scheme-adapter/issues/2264)
-7. **mojaloop/#2739:**  Reconcile mojaloop-connector with sdk-scheme adapter, closes [mojaloop/#2739](https://github.com/mojaloop/project/issues/2739)
+2. **mojaloop/#2092:** upgrade nodeJS version for core services ([ml-api-adapter/#501](https://github.com/mojaloop/ml-api-adapter/pull/501)) ([central-ledger/#902](https://github.com/mojaloop/central-ledger/issues/902)) ([account-lookup/#445](https://github.com/mojaloop/account-lookup-service/pull/445)) ([quoting-service/#302](https://github.com/mojaloop/quoting-service/pull/302)) ([sdk-scheme-adapter/pull/319](https://github.com/mojaloop/sdk-scheme-adapter/pull/319)) ([sdk-standard-components/#168](https://github.com/mojaloop/sdk-standard-components/pull/168)) ([auth-svc/#116](https://github.com/mojaloop/auth-service/issues/116)) ([als-consent/#13](https://github.com/mojaloop/als-consent-oracle/issues/13)) ([thirdparty-api-svc/#82](https://github.com/mojaloop/thirdparty-api-svc/issues/82)) ([thirdparty-sdk/#142](https://github.com/mojaloop/thirdparty-sdk/issues/142)) ([simulator/pull/243](https://github.com/mojaloop/simulator/pull/243)) ([mojaloop-simulator/pull/145](https://github.com/mojaloop/mojaloop-simulator/pull/145)) ([bulk-api-adapter/pull/82](https://github.com/mojaloop/bulk-api-adapter/pull/82)), closes [mojaloop/#2092](https://github.com/mojaloop/project/issues/2092)
+3. **sdk-scheme-adapter:** add extensionList to quote request/response ([#269](https://github.com/mojaloop/sdk-scheme-adapter/issues/269)) ([9cbed66](https://github.com/mojaloop/sdk-scheme-adapter/commit/9cbed66f0db4190f2f34cd7ba3d531a8bbb95d79))
+4. **sdk-scheme-adapter:** proper response schema for post /authorization sync response ([#270](https://github.com/mojaloop/sdk-scheme-adapter/issues/270)) ([6535c1d](https://github.com/mojaloop/sdk-scheme-adapter/commit/6535c1de145ff58db48bc5be61dae9b0133786d8))
+5. **mojaloop/#2264:** add more robust header validation for inbound server ([#278](https://github.com/mojaloop/sdk-scheme-adapter/issues/278)) ([9ea24d7](https://github.com/mojaloop/sdk-scheme-adapter/commit/9ea24d748ccd58fdfb30c77e98b021aa6a607b4f)), closes [#2264](https://github.com/mojaloop/sdk-scheme-adapter/issues/2264)
+6. **mojaloop/#2739:**  Reconcile mojaloop-connector with sdk-scheme adapter, closes [mojaloop/#2739](https://github.com/mojaloop/project/issues/2739)
    1. **sdk-scheme-adapter:** port control client and service from ml connector ([#308](https://github.com/mojaloop/sdk-scheme-adapter/issues/308)) ([e6c963c](https://github.com/mojaloop/sdk-scheme-adapter/commit/e6c963c5e5faa17f6a39e0b70f34c3e3717ba090))
    2. **sdk-scheme-adapter:** port use payee FSPID as GET /parties destination header if provided ([#301](https://github.com/mojaloop/sdk-scheme-adapter/issues/301)) ([3ad0ba5](https://github.com/mojaloop/sdk-scheme-adapter/commit/3ad0ba5f745b459ff6d9484c83ac3f384faf34b2))
    3. **sdk-scheme-adapter:** port over prom client metrics ([#312](https://github.com/mojaloop/sdk-scheme-adapter/issues/312)) ([8de66d5](https://github.com/mojaloop/sdk-scheme-adapter/commit/8de66d505b94cddb5e3b8e857ae491f85058d395))
    4. **sdk-scheme-adapter:** pull in live reconfiguration logic ([#313](https://github.com/mojaloop/sdk-scheme-adapter/issues/313)) ([ae5648a](https://github.com/mojaloop/sdk-scheme-adapter/commit/ae5648a500eaab80804db0298facc1e352482fb9))
-8. **sdk-scheme-adapter:** added outbound bulk api ([#320](https://github.com/mojaloop/sdk-scheme-adapter/issues/320)) ([e2e83e9](https://github.com/mojaloop/sdk-scheme-adapter/commit/e2e83e99048a755b49123e91faa3acc03dded029))
-9. **mbp/#286:** add simulator rule to trigger patch transferState=aborted notification ([#138](https://github.com/mojaloop/mojaloop-simulator/issues/138)) ([d4a407a](https://github.com/mojaloop/mojaloop-simulator/commit/d4a407aad73c4eef353fddf324db212d97f3b3f6)), closes [mbp/#286](https://github.com/mbp/mojaloop-simulator/issues/286)
-10. **mojaloop-simulator:** update simulator schema for latest thirdparty api ([#128](https://github.com/mojaloop/mojaloop-simulator/issues/128)) ([1a89bdf](https://github.com/mojaloop/mojaloop-simulator/commit/1a89bdfc6a1103c468f3bd7cfb3502627e71f983))
-11. **auth-service:** handle errors akin to core ml services and update verification response ([#99](https://github.com/mojaloop/auth-service/issues/99))
-12. **auth-service:** update for Thirdparty-api specification v1.0 ([#106](https://github.com/mojaloop/auth-service/issues/106))
-13. **thirdparty-api-svc:** update for Thirdparty-api specification v1.0 ([#65](https://github.com/mojaloop/thirdparty-api-svc/issues/65))
-14. **thirdparty-sdk:** update for Thirdparty-api specification v1.0 ([#135](https://github.com/mojaloop/thirdparty-sdk/issues/135))
-15. **mojaloop/#2758:** add Certificate management functionality in thirdparty sdk (from mojaloop connector) from [Payment Manager for Mojaloop](https://github.com/pm4ml) ([thirdparty-sdk/#146](https://github.com/mojaloop/thirdparty-sdk/issues/146) [thirdparty-sdk/##147](https://github.com/mojaloop/thirdparty-sdk/issues/147)), closes [#2758](https://github.com/mojaloop/project/issues/2758)
-16. **mojaloop/#2777:** add jws validation on inbound server and update reconfig for jws signing ([thirdparty-sdk/#151](https://github.com/mojaloop/thirdparty-sdk/issues/151)), closes [mojaloop/#2777](https://github.com/mojaloop/project/issues/2777)
+7. **sdk-scheme-adapter:** added outbound bulk api ([#320](https://github.com/mojaloop/sdk-scheme-adapter/issues/320)) ([e2e83e9](https://github.com/mojaloop/sdk-scheme-adapter/commit/e2e83e99048a755b49123e91faa3acc03dded029))
+8. **mbp/#286:** add simulator rule to trigger patch transferState=aborted notification ([#138](https://github.com/mojaloop/mojaloop-simulator/issues/138)) ([d4a407a](https://github.com/mojaloop/mojaloop-simulator/commit/d4a407aad73c4eef353fddf324db212d97f3b3f6)), closes [mbp/#286](https://github.com/mbp/mojaloop-simulator/issues/286)
+9. **mojaloop-simulator:** update simulator schema for latest thirdparty api ([#128](https://github.com/mojaloop/mojaloop-simulator/issues/128)) ([1a89bdf](https://github.com/mojaloop/mojaloop-simulator/commit/1a89bdfc6a1103c468f3bd7cfb3502627e71f983))
+10. **auth-service:** handle errors akin to core ml services and update verification response ([#99](https://github.com/mojaloop/auth-service/issues/99))
+11. **auth-service:** update for Thirdparty-api specification v1.0 ([#106](https://github.com/mojaloop/auth-service/issues/106))
+12. **thirdparty-api-svc:** update for Thirdparty-api specification v1.0 ([#65](https://github.com/mojaloop/thirdparty-api-svc/issues/65))
+13. **thirdparty-sdk:** update for Thirdparty-api specification v1.0 ([#135](https://github.com/mojaloop/thirdparty-sdk/issues/135))
+14. **mojaloop/#2758:** add Certificate management functionality in thirdparty sdk (from mojaloop connector) from [Payment Manager for Mojaloop](https://github.com/pm4ml) ([thirdparty-sdk/#146](https://github.com/mojaloop/thirdparty-sdk/issues/146) [thirdparty-sdk/##147](https://github.com/mojaloop/thirdparty-sdk/issues/147)), closes [#2758](https://github.com/mojaloop/project/issues/2758)
+15. **mojaloop/#2777:** add jws validation on inbound server and update reconfig for jws signing ([thirdparty-sdk/#151](https://github.com/mojaloop/thirdparty-sdk/issues/151)), closes [mojaloop/#2777](https://github.com/mojaloop/project/issues/2777)
 
 ## 2. Bug Fixes
 
@@ -45,6 +44,8 @@ sdk-scheme-adapter/issues/2478)
 15. **sdk-scheme-adapter:** reformat error information response ([#318](https://github.com/mojaloop/sdk-scheme-adapter/issues/318)) ([ed844b1](https://github.com/mojaloop/sdk-scheme-adapter/commit/ed844b1d2da6c58d3c61622c07c326bda3ca3b86))
 16. **mojaloop/#2574:** sdk-scheme-adapter is not returning party sub-id ([#120](https://github.com/mojaloop/mojaloop-simulator/issues/120)) ([b0e9504](https://github.com/mojaloop/mojaloop-simulator/commit/b0e950468ceeb129dc62f7ad8fdb84c86bf12749)), closes [mojaloop/#2574](https://github.com/mojaloop/mojaloop-simulator/issues/2574) [mojaloop/#2574](https://github.com/mojaloop/mojaloop-simulator/issues/2574) [mojaloop/#2575](https://github.com/mojaloop/mojaloop-simulator/issues/2575)
 17. **mojaloop/#2810:** timeout events are being produced for transfers with an internal-state of ABORTED_ERROR ([#907](https://github.com/mojaloop/central-ledger/issues/907)) ([e77de0a](https://github.com/mojaloop/central-ledger/commit/e77de0a8e7dd473d3afbb27df464d27ff5ce98a7)), closes [mojaloop/#2810](https://github.com/mojaloop/project/issues/2810)
+18. **mojaloop/#2811:** sdk-scheme-adapter sending incorrect transferState on a PUT transfers Callback ([#331](https://github.com/mojaloop/sdk-scheme-adapter/issues/331)) ([f7e450c](https://github.com/mojaloop/sdk-scheme-adapter/commit/f7e450cc2568f70f6c9abbb39d9c2186787c31b7)), closes [mojaloop/#2811](https://github.com/mojaloop/sdk-scheme-adapter/issues/2811)
+19. **mojaloop/#2816:** SDK-Scheme-Adapter is missing/incorrect bulkTransferState on a PUT /bulkTransfer/{id} Callback by the PayeeFSP ([#331](https://github.com/mojaloop/sdk-scheme-adapter/issues/331)) ([f7e450c](https://github.com/mojaloop/sdk-scheme-adapter/commit/f7e450cc2568f70f6c9abbb39d9c2186787c31b7)), closes [mojaloop/#2816](https://github.com/mojaloop/sdk-scheme-adapter/issues/2816)
 
 ## 3. Application versions
 
@@ -54,7 +55,7 @@ sdk-scheme-adapter/issues/2478)
 4. quoting-service: v14.0.0 -> **15.0.2**
 5. central-settlement: **13.4.1**
 6. central-event-processor: **v11.0.2**
-7. bulk-api-adapter: **v13.0.1**
+7. bulk-api-adapter: v13.0.1 -> **v14.0.0**
 8. email-notifier: **v11.0.2**
 9. als-oracle-pathfinder: **v11.0.4**
 10. transaction-requests-service: **v13.0.0**
@@ -65,8 +66,8 @@ sdk-scheme-adapter/issues/2478)
 15. event-sidecar: **v11.0.1**
 16. event-stream-processor: **v11.0.0-snapshot**
 17. simulator: **v11.1.3**
-18. mojaloop-simulator: v11.6.1 -> **v12.1.1**
-19. sdk-scheme-adapter: v11.18.11 -> **v17.0.2-snapshot.12**
+18. mojaloop-simulator: v12.1.1 -> **v13.0.0**
+19. sdk-scheme-adapter: v11.18.11 -> **v18.0.1**
 20. ml-testing-toolkit: **v14.0.4**
 21. ml-testing-toolkit-ui: **v13.5.5**
 22. auth-service: v11.11.1 -> **v13.0.2**
@@ -82,7 +83,7 @@ sdk-scheme-adapter/issues/2478)
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v15.0.2
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v13.4.1
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v11.0.2
-7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v13.0.1
+7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v14.0.0
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.2
 9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v11.0.4
 10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v13.0.0
@@ -93,8 +94,8 @@ sdk-scheme-adapter/issues/2478)
 15. event-sidecar - https://github.com/mojaloop/event-sidecar/releases/tag/v11.0.1
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v11.0.0-snapshot
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v11.1.3
-18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v12.1.1
-19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v17.0.2-snapshot.12
+18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v13.0.0
+19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v18.0.1
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v14.0.4
 21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.5.5
 22. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v11.11.1
@@ -108,7 +109,7 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
 
 1. **Central Ledger:** Transfer will be successful only if the payer has sufficient liquidity in their settlement account balance over and above their NET-DEBIT-CAP (NDC) limit. This is the additional check that has been added in this PR, and will be applied to the lower value. Error messages have changed as a result. For NDC limit check from `PAYER_FSP_INSUFFICIENT_LIQUIDITY` to `PAYER_LIMIT_ERROR`. The error message `PAYER_FSP_INSUFFICIENT_LIQUIDITY` occurs when the payer has an insufficient settlement account balance. [mojaloop/central-ledger/pull/899](https://github.com/mojaloop/central-ledger/pull/899)
 
-2. **mojaloop/#2092:** Major version bump for node v16 LTS support, re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/opt/central-ledger`, `opt/account-lookup-service`, `opt/ml-api-adapter`, `/opt/quoting-service` which will impact config mounts.
+2. **mojaloop/#2092:** Major version bump for node v16 LTS support, re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/opt/central-ledger`, `opt/account-lookup-service`, `opt/ml-api-adapter`, `/opt/quoting-service`, `/opt/bulk-api-adapter` which will impact config mounts.
 
 3. **Mongodb dependency charts:** have been upgraded due to Bitnami's [retention policy](https://github.com/bitnami/charts/issues/10539). This impacts the following components: `central-event-processor`, `ml-testing-toolkit` (only when enabled), `bulk-api-adapter`.
 
@@ -123,7 +124,9 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
    - Inbound/Outbound servers can NOT be run independently
 
 6. **Sdk-scheme-adapter:** features merged from mojaloop-connector:
-   - Outbound API response body has changed, now includes headers and payloads, refer to [mojaloop/sdk-scheme-adapter/v17.0.2-snapshot.12/src/OutboundServer/api.yaml](https://github.com/mojaloop/sdk-scheme-adapter/blob/v17.0.2-snapshot.12/src/OutboundServer/api.yaml) for updated interface specification.
+   - Outbound API response body has changed, now includes headers and payloads, refer to [mojaloop/sdk-scheme-adapter/v18.0.1/src/OutboundServer/api.yaml](https://github.com/mojaloop/sdk-scheme-adapter/blob/v18.0.1/src/OutboundServer/api.yaml) for updated interface specification.
+   - Re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/` (root).
+   - `/secrets` folder is no longer included in docker image by default aligning to best practices. Ensure you mount and configure your secrets appropriately.
 
 ## 6. Testing notes
 
@@ -159,7 +162,7 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
 
 8. Contributors
 
-- Organizations: BMGF, CrossLake, ModusBox, Sybrin
-- Individuals: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @lewisdaly, @donaldbartlett
+- Organizations: BMGF, CrossLake, ModusBox
+- Individuals: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @lewisdaly
 
 _Note: companies are in alphabetical order, individuals are in no particular order._
