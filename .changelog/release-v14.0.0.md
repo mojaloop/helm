@@ -5,7 +5,7 @@ For breaking changes, please review the section `#4` "Breaking Changes" below.
 ## 1. New Features
 
 1. Change the basis for the liquidity check ([mojaloop/design-authority-project/issues/90](https://github.com/mojaloop/design-authority-project/issues/90)). Pull requests are [mojaloop/central-ledger/pull/899](https://github.com/mojaloop/central-ledger/pull/899) & [mojaloop/central-ledger/pull/901](https://github.com/mojaloop/central-ledger/pull/901)
-2. **mojaloop/#2092:** upgrade nodeJS version for core services ([ml-api-adapter/#501](https://github.com/mojaloop/ml-api-adapter/pull/501)) ([central-ledger/#902](https://github.com/mojaloop/central-ledger/issues/902)) ([account-lookup/#445](https://github.com/mojaloop/account-lookup-service/pull/445)) ([quoting-service/#302](https://github.com/mojaloop/quoting-service/pull/302)) ([sdk-scheme-adapter/pull/319](https://github.com/mojaloop/sdk-scheme-adapter/pull/319)) ([sdk-standard-components/#168](https://github.com/mojaloop/sdk-standard-components/pull/168)) ([auth-svc/#116](https://github.com/mojaloop/auth-service/issues/116)) ([als-consent/#13](https://github.com/mojaloop/als-consent-oracle/issues/13)) ([thirdparty-api-svc/#82](https://github.com/mojaloop/thirdparty-api-svc/issues/82)) ([thirdparty-sdk/#142](https://github.com/mojaloop/thirdparty-sdk/issues/142)) ([simulator/pull/243](https://github.com/mojaloop/simulator/pull/243)) ([mojaloop-simulator/pull/145](https://github.com/mojaloop/mojaloop-simulator/pull/145)) ([bulk-api-adapter/pull/82](https://github.com/mojaloop/bulk-api-adapter/pull/82)) ([event-sdk/pull/67](https://github.com/mojaloop/event-sdk/pull/67)), closes [mojaloop/#2092](https://github.com/mojaloop/project/issues/2092)
+2. **mojaloop/#2092:** upgrade nodeJS version for core services ([ml-api-adapter/#501](https://github.com/mojaloop/ml-api-adapter/pull/501)) ([central-ledger/#902](https://github.com/mojaloop/central-ledger/issues/902)) ([account-lookup/#445](https://github.com/mojaloop/account-lookup-service/pull/445)) ([quoting-service/#302](https://github.com/mojaloop/quoting-service/pull/302)) ([sdk-scheme-adapter/pull/319](https://github.com/mojaloop/sdk-scheme-adapter/pull/319)) ([sdk-standard-components/#168](https://github.com/mojaloop/sdk-standard-components/pull/168)) ([auth-svc/#116](https://github.com/mojaloop/auth-service/issues/116)) ([als-consent/#13](https://github.com/mojaloop/als-consent-oracle/issues/13)) ([thirdparty-api-svc/#82](https://github.com/mojaloop/thirdparty-api-svc/issues/82)) ([thirdparty-sdk/#142](https://github.com/mojaloop/thirdparty-sdk/issues/142)) ([simulator/pull/243](https://github.com/mojaloop/simulator/pull/243)) ([mojaloop-simulator/pull/145](https://github.com/mojaloop/mojaloop-simulator/pull/145)) ([bulk-api-adapter/pull/82](https://github.com/mojaloop/bulk-api-adapter/pull/82)) ([event-sdk/pull/67](https://github.com/mojaloop/event-sdk/pull/67)) ([transaction-requests-service/pull/90](https://github.com/mojaloop/transaction-requests-service/pull/90)), closes [mojaloop/#2092](https://github.com/mojaloop/project/issues/2092)
 3. **sdk-scheme-adapter:** add extensionList to quote request/response ([#269](https://github.com/mojaloop/sdk-scheme-adapter/issues/269)) ([9cbed66](https://github.com/mojaloop/sdk-scheme-adapter/commit/9cbed66f0db4190f2f34cd7ba3d531a8bbb95d79))
 4. **sdk-scheme-adapter:** proper response schema for post /authorization sync response ([#270](https://github.com/mojaloop/sdk-scheme-adapter/issues/270)) ([6535c1d](https://github.com/mojaloop/sdk-scheme-adapter/commit/6535c1de145ff58db48bc5be61dae9b0133786d8))
 5. **mojaloop/#2264:** add more robust header validation for inbound server ([#278](https://github.com/mojaloop/sdk-scheme-adapter/issues/278)) ([9ea24d7](https://github.com/mojaloop/sdk-scheme-adapter/commit/9ea24d748ccd58fdfb30c77e98b021aa6a607b4f)), closes [#2264](https://github.com/mojaloop/sdk-scheme-adapter/issues/2264)
@@ -58,7 +58,7 @@ sdk-scheme-adapter/issues/2478)
 7. bulk-api-adapter: v13.0.1 -> **v14.0.0**
 8. email-notifier: **v11.0.2**
 9. als-oracle-pathfinder: **v11.0.4**
-10. transaction-requests-service: **v13.0.0**
+10. transaction-requests-service: v13.0.0 -> **v14.0.1**
 11. finance-portal-ui: **v10.4.3**
 12. finance-portal-backend-service: **v15.0.2**
 13. settlement-management: **v11.0.0**
@@ -86,7 +86,7 @@ sdk-scheme-adapter/issues/2478)
 7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v14.0.0
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.2
 9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v11.0.4
-10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v13.0.0
+10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.0.1
 11. finance-portal-ui - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
 12. finance-portal-backend-service - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
 13. settlement-management - https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0
@@ -109,7 +109,7 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
 
 1. **Central Ledger:** Transfer will be successful only if the payer has sufficient liquidity in their settlement account balance over and above their NET-DEBIT-CAP (NDC) limit. This is the additional check that has been added in this PR, and will be applied to the lower value. Error messages have changed as a result. For NDC limit check from `PAYER_FSP_INSUFFICIENT_LIQUIDITY` to `PAYER_LIMIT_ERROR`. The error message `PAYER_FSP_INSUFFICIENT_LIQUIDITY` occurs when the payer has an insufficient settlement account balance. [mojaloop/central-ledger/pull/899](https://github.com/mojaloop/central-ledger/pull/899)
 
-2. **mojaloop/#2092:** Major version bump for node v16 LTS support, re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/opt/central-ledger`, `opt/account-lookup-service`, `opt/ml-api-adapter`, `/opt/quoting-service`, `/opt/bulk-api-adapter` which will impact config mounts.
+2. **mojaloop/#2092:** Major version bump for node v16 LTS support, re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/opt/central-ledger`, `opt/account-lookup-service`, `opt/ml-api-adapter`, `/opt/quoting-service`, `/opt/bulk-api-adapter`, `/opt/transaction-requests-service` which will impact config mounts.
 
 3. **Mongodb dependency charts:** have been upgraded due to Bitnami's [retention policy](https://github.com/bitnami/charts/issues/10539). This impacts the following components: `central-event-processor`, `ml-testing-toolkit` (only when enabled), `bulk-api-adapter`.
 
