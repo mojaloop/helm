@@ -63,7 +63,7 @@ sdk-scheme-adapter/issues/2478)
 12. finance-portal-backend-service: **v15.0.2**
 13. settlement-management: **v11.0.0**
 14. operator-settlement: **v11.0.0**
-15. event-sidecar: **v12.0.0-snapshot.5**
+15. event-sidecar: **v12.0.0-snapshot.6**
 16. event-stream-processor: **v11.0.0-snapshot**
 17. simulator: **v11.1.3**
 18. mojaloop-simulator: v12.1.1 -> **v13.0.0**
@@ -91,7 +91,7 @@ sdk-scheme-adapter/issues/2478)
 12. finance-portal-backend-service - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
 13. settlement-management - https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0
 14. operator-settlement - https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0
-15. event-sidecar - https://github.com/mojaloop/event-sidecar/releases/tag/v12.0.0-snapshot.5
+15. event-sidecar - https://github.com/mojaloop/event-sidecar/releases/tag/v12.0.0-snapshot.6
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v11.0.0-snapshot
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v11.1.3
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v13.0.0
