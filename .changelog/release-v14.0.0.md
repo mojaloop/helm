@@ -65,7 +65,7 @@ sdk-scheme-adapter/issues/2478)
 14. operator-settlement: **v11.0.0**
 15. event-sidecar: **v12.0.0**
 16. event-stream-processor: **v11.0.0-snapshot**
-17. simulator: **v11.1.3**
+17. simulator: 12.0.0 -> **v12.0.0**
 18. mojaloop-simulator: v12.1.1 -> **v13.0.0**
 19. sdk-scheme-adapter: v11.18.11 -> **v18.0.1**
 20. ml-testing-toolkit: **v14.0.4**
@@ -93,7 +93,7 @@ sdk-scheme-adapter/issues/2478)
 14. operator-settlement - https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0
 15. event-sidecar - https://github.com/mojaloop/event-sidecar/releases/tag/v12.0.0
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v11.0.0-snapshot
-17. simulator - https://github.com/mojaloop/simulator/releases/tag/v11.1.3
+17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v13.0.0
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v18.0.1
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v14.0.4
