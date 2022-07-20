@@ -57,7 +57,7 @@ sdk-scheme-adapter/issues/2478)
 6. central-event-processor: **v11.0.2**
 7. bulk-api-adapter: v13.0.1 -> **v14.0.0**
 8. email-notifier: v11.0.2 -> **v12.0.0**
-9. als-oracle-pathfinder: v12.0.0 -> **v12.0.0**
+9. als-oracle-pathfinder: v11.0.4 -> **v12.0.0**
 10. transaction-requests-service: v13.0.0 -> **v14.0.1**
 11. finance-portal-ui: **v10.4.3**
 12. finance-portal-backend-service: **v15.0.2**
