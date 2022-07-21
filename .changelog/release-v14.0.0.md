@@ -160,7 +160,7 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
 
   Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](../thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
 
-8. Contributors
+## 7. Contributors
 
 - Organizations: BMGF, CrossLake, ModusBox
 - Individuals: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @lewisdaly
