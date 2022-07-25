@@ -368,9 +368,9 @@ als-oracle-pathfinder:
   replicaCount: 1
   image:
     repository: mojaloop/als-oracle-pathfinder
-    tag: v11.0.0
+    tag: v12.0.0
     pullPolicy: IfNotPresent
-    command: '["node", "/opt/als-oracle-pathfinder/src/index.js"]'
+    command: '["node", "/opt/app/src/index.js"]'
     imagePullSecrets: []
 
   readinessProbe:
@@ -511,13 +511,13 @@ als-oracle-pathfinder:
         # rejectUnauthorized should be true in production
         rejectUnauthorized: false
         # The following paths are all relative to this directory containing the values file
-        client_cert_path: '/opt/als-oracle-pathfinder/secrets/client_cert.pem'
-        client_key_path: '/opt/als-oracle-pathfinder/secrets/client_key.pem'
-        root_cert_path: '/opt/als-oracle-pathfinder/secrets/pathfinder_cert.pem'
+        client_cert_path: '/opt/app/secrets/client_cert.pem'
+        client_key_path: '/opt/app/secrets/client_key.pem'
+        root_cert_path: '/opt/app/secrets/pathfinder_cert.pem'
         # Intermediate cert is optional, but will likely be required for mutual auth if
         # rejectUnauthorized is true, as Neustar's certificate doesn't seem to have been signed by any
         # certs in the Mozilla bundle, which is used by Node as default.
-        intermediate_cert_path: '/opt/als-oracle-pathfinder/secrets/pathfinder_intermediate_cert.pem'
+        intermediate_cert_path: '/opt/app/secrets/pathfinder_intermediate_cert.pem'
 
   init:
     enabled: true
@@ -533,13 +533,13 @@ als-oracle-pathfinder:
         repository: mojaloop/als-oracle-pathfinder
         tag: latest
         pullPolicy: IfNotPresent
-        command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-central-ledger.sql;";
+        command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -e "SET @service_name='$service_name'; source /opt/app/init-central-ledger.sql;";
       accountLookup:
         name: init-account-lookup-mysql
         repository: mojaloop/als-oracle-pathfinder
         tag: latest
         pullPolicy: IfNotPresent
-        command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password $db_database -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-account-lookup.sql;";
+        command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password $db_database -e "SET @service_name='$service_name'; source /opt/app/init-account-lookup.sql;";
     populateMysql:
       name: populate-mysql-tables
       repository: mysql
