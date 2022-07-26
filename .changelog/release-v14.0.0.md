@@ -10,10 +10,10 @@ For breaking changes, please review the section `#4` "Breaking Changes" below.
 4. **sdk-scheme-adapter:** proper response schema for post /authorization sync response ([#270](https://github.com/mojaloop/sdk-scheme-adapter/issues/270)) ([6535c1d](https://github.com/mojaloop/sdk-scheme-adapter/commit/6535c1de145ff58db48bc5be61dae9b0133786d8))
 5. **mojaloop/#2264:** add more robust header validation for inbound server ([#278](https://github.com/mojaloop/sdk-scheme-adapter/issues/278)) ([9ea24d7](https://github.com/mojaloop/sdk-scheme-adapter/commit/9ea24d748ccd58fdfb30c77e98b021aa6a607b4f)), closes [#2264](https://github.com/mojaloop/sdk-scheme-adapter/issues/2264)
 6. **mojaloop/#2739:**  Reconcile mojaloop-connector with sdk-scheme adapter, closes [mojaloop/#2739](https://github.com/mojaloop/project/issues/2739)
-   1. **sdk-scheme-adapter:** port control client and service from ml connector ([#308](https://github.com/mojaloop/sdk-scheme-adapter/issues/308)) ([e6c963c](https://github.com/mojaloop/sdk-scheme-adapter/commit/e6c963c5e5faa17f6a39e0b70f34c3e3717ba090))
-   2. **sdk-scheme-adapter:** port use payee FSPID as GET /parties destination header if provided ([#301](https://github.com/mojaloop/sdk-scheme-adapter/issues/301)) ([3ad0ba5](https://github.com/mojaloop/sdk-scheme-adapter/commit/3ad0ba5f745b459ff6d9484c83ac3f384faf34b2))
-   3. **sdk-scheme-adapter:** port over prom client metrics ([#312](https://github.com/mojaloop/sdk-scheme-adapter/issues/312)) ([8de66d5](https://github.com/mojaloop/sdk-scheme-adapter/commit/8de66d505b94cddb5e3b8e857ae491f85058d395))
-   4. **sdk-scheme-adapter:** pull in live reconfiguration logic ([#313](https://github.com/mojaloop/sdk-scheme-adapter/issues/313)) ([ae5648a](https://github.com/mojaloop/sdk-scheme-adapter/commit/ae5648a500eaab80804db0298facc1e352482fb9))
+    1. **sdk-scheme-adapter:** port control client and service from ml connector ([#308](https://github.com/mojaloop/sdk-scheme-adapter/issues/308)) ([e6c963c](https://github.com/mojaloop/sdk-scheme-adapter/commit/e6c963c5e5faa17f6a39e0b70f34c3e3717ba090))
+    2. **sdk-scheme-adapter:** port use payee FSPID as GET /parties destination header if provided ([#301](https://github.com/mojaloop/sdk-scheme-adapter/issues/301)) ([3ad0ba5](https://github.com/mojaloop/sdk-scheme-adapter/commit/3ad0ba5f745b459ff6d9484c83ac3f384faf34b2))
+    3. **sdk-scheme-adapter:** port over prom client metrics ([#312](https://github.com/mojaloop/sdk-scheme-adapter/issues/312)) ([8de66d5](https://github.com/mojaloop/sdk-scheme-adapter/commit/8de66d505b94cddb5e3b8e857ae491f85058d395))
+    4. **sdk-scheme-adapter:** pull in live reconfiguration logic ([#313](https://github.com/mojaloop/sdk-scheme-adapter/issues/313)) ([ae5648a](https://github.com/mojaloop/sdk-scheme-adapter/commit/ae5648a500eaab80804db0298facc1e352482fb9))
 7. **sdk-scheme-adapter:** added outbound bulk api ([#320](https://github.com/mojaloop/sdk-scheme-adapter/issues/320)) ([e2e83e9](https://github.com/mojaloop/sdk-scheme-adapter/commit/e2e83e99048a755b49123e91faa3acc03dded029))
 8. **mbp/#286:** add simulator rule to trigger patch transferState=aborted notification ([#138](https://github.com/mojaloop/mojaloop-simulator/issues/138)) ([d4a407a](https://github.com/mojaloop/mojaloop-simulator/commit/d4a407aad73c4eef353fddf324db212d97f3b3f6)), closes [mbp/#286](https://github.com/mbp/mojaloop-simulator/issues/286)
 9. **mojaloop-simulator:** update simulator schema for latest thirdparty api ([#128](https://github.com/mojaloop/mojaloop-simulator/issues/128)) ([1a89bdf](https://github.com/mojaloop/mojaloop-simulator/commit/1a89bdfc6a1103c468f3bd7cfb3502627e71f983))
@@ -59,10 +59,10 @@ sdk-scheme-adapter/issues/2478)
 8. email-notifier: **v11.0.2**
 9. als-oracle-pathfinder: **v11.0.4**
 10. transaction-requests-service: v13.0.0 -> **v14.0.1**
-11. finance-portal-ui: **v10.4.3**
-12. finance-portal-backend-service: **v15.0.2**
-13. settlement-management: **v11.0.0**
-14. operator-settlement: **v11.0.0**
+11. finance-portal-ui: **v10.4.3** (DEPRECATED)
+12. finance-portal-backend-service: **v15.0.2** (DEPRECATED)
+13. settlement-management: **v11.0.0** (DEPRECATED)
+14. operator-settlement: **v11.0.0** (DEPRECATED)
 15. event-sidecar: **v12.0.0**
 16. event-stream-processor: v11.0.0-snapshot -> **v12.0.0-snapshot.7**
 17. simulator: 12.0.0 -> **v12.0.0**
@@ -87,10 +87,10 @@ sdk-scheme-adapter/issues/2478)
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.2
 9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v11.0.4
 10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.0.1
-11. finance-portal-ui - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
-12. finance-portal-backend-service - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
-13. settlement-management - https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0
-14. operator-settlement - https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0
+11. finance-portal-ui (DEPRECATED) - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
+12. finance-portal-backend-service (DEPRECATED) - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
+13. settlement-management (DEPRECATED) - https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0
+14. operator-settlement (DEPRECATED) - https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0
 15. event-sidecar - https://github.com/mojaloop/event-sidecar/releases/tag/v12.0.0
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.7
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
@@ -120,47 +120,70 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
    - thirdparty-sdk
 
 5. **Thirdparty-sdk:** support for configuration management via [Payment Manager for Mojaloop](https://github.com/pm4ml) introduced a breaking changes:
-   - Configuration changed to camel-case (take note of your configuration)
-   - Inbound/Outbound servers can NOT be run independently
+    - Configuration changed to camel-case (take note of your configuration)
+    - Inbound/Outbound servers can NOT be run independently
 
 6. **Sdk-scheme-adapter:** features merged from mojaloop-connector:
-   - Outbound API response body has changed, now includes headers and payloads, refer to [mojaloop/sdk-scheme-adapter/v18.0.1/src/OutboundServer/api.yaml](https://github.com/mojaloop/sdk-scheme-adapter/blob/v18.0.1/src/OutboundServer/api.yaml) for updated interface specification.
-   - Re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/` (root).
-   - `/secrets` folder is no longer included in docker image by default aligning to best practices. Ensure you mount and configure your secrets appropriately.
+    - Outbound API response body has changed, now includes headers and payloads, refer to [mojaloop/sdk-scheme-adapter/v18.0.1/src/OutboundServer/api.yaml](https://github.com/mojaloop/sdk-scheme-adapter/blob/v18.0.1/src/OutboundServer/api.yaml) for updated interface specification.
+    - Re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/` (root).
+    - `/secrets` folder is no longer included in docker image by default aligning to best practices. Ensure you mount and configure your secrets appropriately.
 
-## 6. Testing notes
+## 6. Deprecations
+
+The following components are being deprecated from the package Mojaloop Helm chart release:
+
+- [finance-portal](https://github.com/mojaloop/helm/tree/master/finance-portal) Helm Chart
+  - [finance-portal-ui](https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3)
+  - [finance-portal-backend-service](https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2)
+- [finance-portal-settlement-management](https://github.com/mojaloop/helm/tree/master/finance-portal-settlement-management) Helm Chart
+  - [settlement-management](https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0)
+  - [operator-settlement](https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0)
+
+> _Note these Helm Chart are still available for deployment in the [Mojaloop Helm Repo (http://mojaloop.io/helm/repo/)](http://mojaloop.io/helm/repo/index.yaml)._
+
+This is due to the underlying services being deprecated by the [Business Operation Framework (BOF)](https://github.com/mojaloop/business-operations-framework-docs).
+
+More information can be found here:
+
+- https://github.com/mojaloop/business-operations-framework-docs.
+
+[BOF Helm charts](https://github.com/mojaloop/charts/tree/master/mojaloop/bof) to deploy the [Business Operation Framework](https://github.com/mojaloop/business-operations-framework-docs) can be found here:
+
+- https://github.com/mojaloop/charts/tree/master/mojaloop/bof
+
+## 7. Testing notes
 
 1. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
 
 2. The [testing-toolkit-test-cases](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v14.0.0)' Golden Path collections expects:
-	-  the Quoting service operating mode to be set [quoting-service.config.simple_routing_mode_enabled](https://github.com/mojaloop/helm/blob/v13.1.0/mojaloop/values.yaml#L4664)=true. If this is incorrectly configured, it will result in several failures in the quoting-service tests (7 expected failures). If this is disabled, ensure that you update the corresponding test-case environment variable parameter [SIMPLE_ROUTING_MODE_ENABLED](https://github.com/mojaloop/helm/blob/v14.0.0/mojaloop/values.yaml#L7420) to match.
-	- the [on-us transfers](https://github.com/mojaloop/helm/blob/v14.0.0/mojaloop/values.yaml#L321) configuration to be disabled. The test-case environment variable parameter ([ON_US_TRANSFERS_ENABLED](https://github.com/mojaloop/helm/blob/v14.0.0/mojaloop/values.yaml#L7423), the same name used on postman collections) must similarly match this value.
+    - the Quoting service operating mode to be set [quoting-service.config.simple_routing_mode_enabled](https://github.com/mojaloop/helm/blob/v13.1.0/mojaloop/values.yaml#L4664)=true. If this is incorrectly configured, it will result in several failures in the quoting-service tests (7 expected failures). If this is disabled, ensure that you update the corresponding test-case environment variable parameter [SIMPLE_ROUTING_MODE_ENABLED](https://github.com/mojaloop/helm/blob/v14.0.0/mojaloop/values.yaml#L7420) to match.
+    - the [on-us transfers](https://github.com/mojaloop/helm/blob/v14.0.0/mojaloop/values.yaml#L321) configuration to be disabled. The test-case environment variable parameter ([ON_US_TRANSFERS_ENABLED](https://github.com/mojaloop/helm/blob/v14.0.0/mojaloop/values.yaml#L7423), the same name used on postman collections) must similarly match this value.
 
 3. Simulators
-	- We recommend using Testing Toolkit instead of Postman which is better suited for the async nature of the Mojaloop API specification (see above)
-	- [Mojaloop-Simulator](https://github.com/mojaloop/mojaloop-simulator) is enabled by default (six instances used).
-	- Ensure that correct Postman Scripts are used if you wish to test against the Mojaloop-Simulators:
-    	- Setup Mojaloop Hub: [MojaloopHub_Setup](https://github.com/mojaloop/postman/blob/v12.0.0/MojaloopHub_Setup.postman_collection.json)
-    	- Setup Mojaloop Simulators for testing : [MojaloopSims_Onboarding](https://github.com/mojaloop/postman/blob/v12.0.0/MojaloopSims_Onboarding.postman_collection.json)
-    	- Golden path tests: [Golden_Path_Mojaloop](https://github.com/mojaloop/postman/blob/v12.0.0/Golden_Path_Mojaloop.postman_collection.json)
-	- Legacy Simulators are still required and deployed by default; disabling this will cause issues since there is Account Lookup directory mocking functionality in this service.
+    - We recommend using Testing Toolkit instead of Postman which is better suited for the async nature of the Mojaloop API specification (see above)
+    - [Mojaloop-Simulator](https://github.com/mojaloop/mojaloop-simulator) is enabled by default (six instances used).
+    - Ensure that correct Postman Scripts are used if you wish to test against the Mojaloop-Simulators:
+        - Setup Mojaloop Hub: [MojaloopHub_Setup](https://github.com/mojaloop/postman/blob/v12.0.0/MojaloopHub_Setup.postman_collection.json)
+        - Setup Mojaloop Simulators for testing : [MojaloopSims_Onboarding](https://github.com/mojaloop/postman/blob/v12.0.0/MojaloopSims_Onboarding.postman_collection.json)
+        - Golden path tests: [Golden_Path_Mojaloop](https://github.com/mojaloop/postman/blob/v12.0.0/Golden_Path_Mojaloop.postman_collection.json)
+    - Legacy Simulators are still required and deployed by default; disabling this will cause issues since there is Account Lookup directory mocking functionality in this service.
 
 4. This release has been tested against the following:
-	- Kubernetes: v1.20.6
-	- Nginx Ingress Controllers: 0.43.0
-	- Testing Toolkit Test Cases: [v14.0.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v14.0.0)
+    - Kubernetes: v1.20.6
+    - Nginx Ingress Controllers: 0.43.0
+    - Testing Toolkit Test Cases: [v14.0.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v14.0.0)
 
 5. Thirdparty Testing Toolkit Test Collections are not repeatable. Please refer to the following issue for more information [#2717 - Thirdparty TTK Test-Collection is not repeatable](https://github.com/mojaloop/project/issues/2717). It is possible to manually cleanup persistent data to re-run the test if required.
 
 6. Bulk API Helm Tests
 
-  Refer to the [Testing Deployments](../README.md#testing-deployments) section in the main README for detailed information on how to enable bulk-api-adapter tests.
+    Refer to the [Testing Deployments](../README.md#testing-deployments) section in the main README for detailed information on how to enable bulk-api-adapter tests.
 
 7. Thirdparty API Helm Tests
 
   Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](../thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
 
-## 7. Contributors
+## 8. Contributors
 
 - Organizations: BMGF, CrossLake, ModusBox
 - Individuals: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @lewisdaly
