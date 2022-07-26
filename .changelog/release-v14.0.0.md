@@ -131,7 +131,7 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
 
 ## 6. Deprecations
 
-The following components are being deprecated from the package Mojaloop Helm chart release:
+The following components are being deprecated from the packaged Mojaloop Helm chart release:
 
 - [finance-portal](https://github.com/mojaloop/helm/tree/master/finance-portal) Helm Chart
   - [finance-portal-ui](https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3)
