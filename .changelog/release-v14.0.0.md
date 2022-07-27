@@ -23,6 +23,14 @@ For breaking changes, please review the section `#4` "Breaking Changes" below.
 13. **thirdparty-sdk:** update for Thirdparty-api specification v1.0 ([#135](https://github.com/mojaloop/thirdparty-sdk/issues/135))
 14. **mojaloop/#2758:** add Certificate management functionality in thirdparty sdk (from mojaloop connector) from [Payment Manager for Mojaloop](https://github.com/pm4ml) ([thirdparty-sdk/#146](https://github.com/mojaloop/thirdparty-sdk/issues/146) [thirdparty-sdk/##147](https://github.com/mojaloop/thirdparty-sdk/issues/147)), closes [#2758](https://github.com/mojaloop/project/issues/2758)
 15. **mojaloop/#2777:** add jws validation on inbound server and update reconfig for jws signing ([thirdparty-sdk/#151](https://github.com/mojaloop/thirdparty-sdk/issues/151)), closes [mojaloop/#2777](https://github.com/mojaloop/project/issues/2777)
+16. **Testing Toolkit:**:
+   - Major version bump for node v16 LTS support [ml-testing-toolkit/pull/215](https://github.com/mojaloop/ml-testing-toolkit/pull/215), closes [mojaloop/#2784](https://github.com/mojaloop/project/issues/2784) [mojaloop/#2785](https://github.com/mojaloop/project/issues/2785) [mojaloop/#2786](https://github.com/mojaloop/project/issues/2786)
+   - Port changed from `5000` to `4040`, closes [mojaloop/#2675](https://github.com/mojaloop/project/issues/2675)
+   - TTK CLI is migrated from `ml-testing-toolkit` to `ml-testing-toolkit-client-lib` (https://github.com/mojaloop/ml-testing-toolkit-client-lib)
+   - Callback assignments through UI, closes [mojaloop/#1809](https://github.com/mojaloop/project/issues/1809)
+   - Checkbox to disable some requests in test case editor easily, closes [mojaloop/#2335](https://github.com/mojaloop/project/issues/2335)
+   - Option for breaking a test case on error, closes [mojaloop/#2431](https://github.com/mojaloop/project/issues/2431)
+   - Added hostname and prefix to api definition listPath and hostname feature, closes [mojaloop/#2792](https://github.com/mojaloop/project/issues/2792). Refer this documentation https://github.com/mojaloop/ml-testing-toolkit/blob/master/documents/User-Guide-API-Provisioning.md#5-prefix-and-hostnames
 
 ## 2. Bug Fixes
 
@@ -46,6 +54,10 @@ sdk-scheme-adapter/issues/2478)
 17. **mojaloop/#2810:** timeout events are being produced for transfers with an internal-state of ABORTED_ERROR ([#907](https://github.com/mojaloop/central-ledger/issues/907)) ([e77de0a](https://github.com/mojaloop/central-ledger/commit/e77de0a8e7dd473d3afbb27df464d27ff5ce98a7)), closes [mojaloop/#2810](https://github.com/mojaloop/project/issues/2810)
 18. **mojaloop/#2811:** sdk-scheme-adapter sending incorrect transferState on a PUT transfers Callback ([#331](https://github.com/mojaloop/sdk-scheme-adapter/issues/331)) ([f7e450c](https://github.com/mojaloop/sdk-scheme-adapter/commit/f7e450cc2568f70f6c9abbb39d9c2186787c31b7)), closes [mojaloop/#2811](https://github.com/mojaloop/sdk-scheme-adapter/issues/2811)
 19. **mojaloop/#2816:** SDK-Scheme-Adapter is missing/incorrect bulkTransferState on a PUT /bulkTransfer/{id} Callback by the PayeeFSP ([#331](https://github.com/mojaloop/sdk-scheme-adapter/issues/331)) ([f7e450c](https://github.com/mojaloop/sdk-scheme-adapter/commit/f7e450cc2568f70f6c9abbb39d9c2186787c31b7)), closes [mojaloop/#2816](https://github.com/mojaloop/sdk-scheme-adapter/issues/2816)
+20. **Testing Toolkit:**:
+  - Added missing test currencies to FSPIOP apis provisioned in TTK [ml-testing-toolkit/pull/205](https://github.com/mojaloop/ml-testing-toolkit/pull/205)
+  - Unable to retain the renamed folder [ml-testing-toolkit-ui/pull/126](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/126), closes [mojaloop/#2656](https://github.com/mojaloop/project/issues/2656)
+  - TTK does not send callbacks after processing a Callback-Rule with a FIXED_CALLBACK [ml-testing-toolkit-ui/pull/126](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/126), closes [mojaloop/#2685](https://github.com/mojaloop/project/issues/2695)
 
 ## 3. Application versions
 
@@ -68,12 +80,13 @@ sdk-scheme-adapter/issues/2478)
 17. simulator: 12.0.0 -> **v12.0.0**
 18. mojaloop-simulator: v12.1.1 -> **v13.0.0**
 19. sdk-scheme-adapter: v11.18.11 -> **v18.0.1**
-20. ml-testing-toolkit: **v14.0.4**
-21. ml-testing-toolkit-ui: **v13.5.5**
-22. auth-service: v11.11.1 -> **v13.0.2**
-23. als-consent-service: v0.0.8 -> **v0.2.0**
-24. thirdparty-api-svc: v11.21.0 -> **v13.0.2**
-25. thirdparty-sdk: v11.55.1 -> **v15.1.0**
+20. ml-testing-toolkit: v14.0.4 -> **v15.0.0**
+21. ml-testing-toolkit-ui: v13.5.5 -> **v15.0.0**
+22. ml-testing-toolkit-client-lib: **v1.0.0**
+23. auth-service: v11.11.1 -> **v13.0.2**
+24. als-consent-service: v0.0.8 -> **v0.2.0**
+25. thirdparty-api-svc: v11.21.0 -> **v13.0.2**
+26. thirdparty-sdk: v11.55.1 -> **v15.1.0**
 
 ## 4. Application release notes
 
@@ -96,12 +109,13 @@ sdk-scheme-adapter/issues/2478)
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v13.0.0
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v18.0.1
-20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v14.0.4
-21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v13.5.5
-22. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v11.11.1
-23. als-consent-service - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.0.8
-24. thirdparty-api-svc - https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v11.21.0
-25. thirdparty-sdk-adapter - https://github.com/mojaloop/thirdparty-sdk/releases/tag/v11.55.1
+20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v15.0.0
+21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.0.0
+22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.0.0
+23. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v11.11.1
+24. als-consent-service - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.0.8
+25. thirdparty-api-svc - https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v11.21.0
+26. thirdparty-sdk-adapter - https://github.com/mojaloop/thirdparty-sdk/releases/tag/v11.55.1
 
 ## 5. Breaking changes
 
@@ -127,6 +141,11 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
    - Outbound API response body has changed, now includes headers and payloads, refer to [mojaloop/sdk-scheme-adapter/v18.0.1/src/OutboundServer/api.yaml](https://github.com/mojaloop/sdk-scheme-adapter/blob/v18.0.1/src/OutboundServer/api.yaml) for updated interface specification.
    - Re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/` (root).
    - `/secrets` folder is no longer included in docker image by default aligning to best practices. Ensure you mount and configure your secrets appropriately.
+
+7. **Testing Toolkit:**:
+   - Major version bump for node v16 LTS support, re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app`.
+   - Port changed from `5000` to `4040`, this may impact the callback endpoints used in the TTK environment files. And also if there are any overrides related to ports in the helm values files.
+   - TTK CLI is now removed from `ml-testing-toolkit`. Please use `ml-testing-toolkit-client-lib` (https://github.com/mojaloop/ml-testing-toolkit-client-lib) for TTK CLI.
 
 ## 6. Testing notes
 
