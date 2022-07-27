@@ -3099,7 +3099,7 @@ central:
     replicaCount: 1
     image:
       repository: mojaloop/central-event-processor
-      tag: v11.0.2
+      tag: v12.0.0
       pullPolicy: IfNotPresent
     init:
       enabled: true
@@ -3638,7 +3638,7 @@ emailnotifier:
 
   image:
     repository: mojaloop/email-notifier
-    tag: v11.0.2
+    tag: v12.0.0
     pullPolicy: IfNotPresent
 
   init:
@@ -4205,9 +4205,9 @@ account-lookup-service:
     replicaCount: 1
     image:
       repository: mojaloop/als-oracle-pathfinder
-      tag: v11.0.0
+      tag: v12.0.0
       pullPolicy: IfNotPresent
-      command: '["node", "/opt/als-oracle-pathfinder/src/index.js"]'
+      command: '["node", "/opt/app/src/index.js"]'
       imagePullSecrets: []
 
     readinessProbe:
@@ -4348,13 +4348,13 @@ account-lookup-service:
           # rejectUnauthorized should be true in production
           rejectUnauthorized: false
           # The following paths are all relative to this directory containing the values file
-          client_cert_path: '/opt/als-oracle-pathfinder/secrets/client_cert.pem'
-          client_key_path: '/opt/als-oracle-pathfinder/secrets/client_key.pem'
-          root_cert_path: '/opt/als-oracle-pathfinder/secrets/pathfinder_cert.pem'
+          client_cert_path: '/opt/app/secrets/client_cert.pem'
+          client_key_path: '/opt/app/secrets/client_key.pem'
+          root_cert_path: '/opt/app/secrets/pathfinder_cert.pem'
           # Intermediate cert is optional, but will likely be required for mutual auth if
           # rejectUnauthorized is true, as Neustar's certificate doesn't seem to have been signed by any
           # certs in the Mozilla bundle, which is used by Node as default.
-          intermediate_cert_path: '/opt/als-oracle-pathfinder/secrets/pathfinder_intermediate_cert.pem'
+          intermediate_cert_path: '/opt/app/secrets/pathfinder_intermediate_cert.pem'
 
     init:
       enabled: true
@@ -4369,16 +4369,16 @@ account-lookup-service:
           enabled: true
           name: init-central-ledger-mysql
           repository: mojaloop/als-oracle-pathfinder
-          tag: v11.0.2
+          tag: v12.0.0
           pullPolicy: IfNotPresent
-          command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-central-ledger.sql;";
+          command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -e "SET @service_name='$service_name'; source /opt/app/init-central-ledger.sql;";
         accountLookup:
           enabled: true
           name: init-account-lookup-mysql
           repository: mojaloop/als-oracle-pathfinder
-          tag: v11.0.2
+          tag: v12.0.0
           pullPolicy: IfNotPresent
-          command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password $db_database -e "SET @service_name='$service_name'; source /opt/als-oracle-pathfinder/init-account-lookup.sql;";
+          command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password $db_database -e "SET @service_name='$service_name'; source /opt/app/init-account-lookup.sql;";
       populateMysql:
         enabled: true
         name: populate-mysql-tables
@@ -6337,274 +6337,6 @@ mojaloop-simulator:
     ## Set toleration for scheduler
     ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations: []
-
-finance-portal:
-  enabled: false
-  service:
-    type: ClusterIP
-
-  imageCredentials:
-      enabled: false
-      name: pull-secrets
-
-  JWTKeys:
-    # These are example keys, please get valid keys for your deployment
-    # The name you assign to each variable will be used as the file name. Using the following examples, three key files will be created:
-    # - /opt/finance-portal-backend-service/secrets/first_key.key
-    # - /opt/finance-portal-backend-service/secrets/second_key.key
-    # - /opt/finance-portal-backend-service/secrets/third_key.key
-    first_key.key: |-
-      -----BEGIN RSA PUBLIC KEY-----
-      MIICXQIBAAKBgQCyQ80uaA1DKxjwuGgetuHiXoZxpQ/Twyj/9a5zeMCfZlAvreCs
-      8MhCm17OuQkYkiIpoEwn3DUDXAO03kUg9Hg5pd5ObnTZdWoBKWR1t/U2R4xU6v2w
-      KLn9KyK/cA/79wzaiMZS+H+j+pt9ZjgdpKOcn3XK8bOURIVEsSNu8+yZ/wIDAQAB
-      AoGAULdvj9wwaSH6DIFLL+EaHYA0ev/Ez1tWVLN/NqzN9z8B/tzJ1zS9UJ9+Sbcx
-      3azJiDSbVw8X9/nxebOM9JONXbcCMeJX5MqsBzrR89vTHo9ir91u7LDVBEo+bsrS
-      ufTQdT1etUOggwWssU4JLoQB7L7QoFhBTndAc6AwmB1t6pECQQDHBe01qgTQwF4H
-      zjnpBKPUlYX5Ma+6VDvSG/yFdJeA58TrF3oBBnET9ZTmy4mDLQaO88wsAx0kduaB
-      H8tuoCUvAkEA5UyIpG2djRCyCRkENJLn9qpCaSOwaO43D189KqGzW9nHihMNczha
-      akAIa3ULp8AoqPFKOFk+v2jGYwPHSatEMQJBAK9vr/wAFSKWj8y9oxqetnPsIh7a
-      B5duLRU3Ck/xyKMeqty44xkIPqFjd5BClsME66UTj0S0sfm0vdfQ2Rh5Ho0CQAaz
-      PM7pMRBdK4aeh4Ptwv9vLC+cTlxSkaNOWiAzx2TosS70rZDvVZ0DL/vL2MJXGBkP
-      q+aHnRDEw/9CrgEWExECQQCT7jFthoPs29A981euHfZ+bXMFEI48PFgw13cmyWnM
-      HijF+4E/XtD11WJkIuDCmHal/oRtcbIO/cCk15xbWZkD
-      -----END RSA PUBLIC KEY-----
-    second_key.key: |-
-      -----BEGIN RSA PUBLIC KEY-----
-      MIICXQIBAAKBgQCyQ80uaA1DKxjwuGgetuHiXoZxpQ/Twyj/9a5zeMCfZlAvreCs
-      8MhCm17OuQkYkiIpoEwn3DUDXAO03kUg9Hg5pd5ObnTZdWoBKWR1t/U2R4xU6v2w
-      KLn9KyK/cA/79wzaiMZS+H+j+pt9ZjgdpKOcn3XK8bOURIVEsSNu8+yZ/wIDAQAB
-      AoGAULdvj9wwaSH6DIFLL+EaHYA0ev/Ez1tWVLN/NqzN9z8B/tzJ1zS9UJ9+Sbcx
-      3azJiDSbVw8X9/nxebOM9JONXbcCMeJX5MqsBzrR89vTHo9ir91u7LDVBEo+bsrS
-      ufTQdT1etUOggwWssU4JLoQB7L7QoFhBTndAc6AwmB1t6pECQQDHBe01qgTQwF4H
-      zjnpBKPUlYX5Ma+6VDvSG/yFdJeA58TrF3oBBnET9ZTmy4mDLQaO88wsAx0kduaB
-      H8tuoCUvAkEA5UyIpG2djRCyCRkENJLn9qpCaSOwaO43D189KqGzW9nHihMNczha
-      akAIa3ULp8AoqPFKOFk+v2jGYwPHSatEMQJBAK9vr/wAFSKWj8y9oxqetnPsIh7a
-      B5duLRU3Ck/xyKMeqty44xkIPqFjd5BClsME66UTj0S0sfm0vdfQ2Rh5Ho0CQAaz
-      PM7pMRBdK4aeh4Ptwv9vLC+cTlxSkaNOWiAzx2TosS70rZDvVZ0DL/vL2MJXGBkP
-      q+aHnRDEw/9CrgEWExECQQCT7jFthoPs29A981euHfZ+bXMFEI48PFgw13cmyWnM
-      HijF+4E/XtD11WJkIuDCmHal/oRtcbIO/cCk15xbWZkD
-      -----END RSA PUBLIC KEY-----
-    third_key.key: |-
-      -----BEGIN RSA PUBLIC KEY-----
-      MIICXQIBAAKBgQCyQ80uaA1DKxjwuGgetuHiXoZxpQ/Twyj/9a5zeMCfZlAvreCs
-      8MhCm17OuQkYkiIpoEwn3DUDXAO03kUg9Hg5pd5ObnTZdWoBKWR1t/U2R4xU6v2w
-      KLn9KyK/cA/79wzaiMZS+H+j+pt9ZjgdpKOcn3XK8bOURIVEsSNu8+yZ/wIDAQAB
-      AoGAULdvj9wwaSH6DIFLL+EaHYA0ev/Ez1tWVLN/NqzN9z8B/tzJ1zS9UJ9+Sbcx
-      3azJiDSbVw8X9/nxebOM9JONXbcCMeJX5MqsBzrR89vTHo9ir91u7LDVBEo+bsrS
-      ufTQdT1etUOggwWssU4JLoQB7L7QoFhBTndAc6AwmB1t6pECQQDHBe01qgTQwF4H
-      zjnpBKPUlYX5Ma+6VDvSG/yFdJeA58TrF3oBBnET9ZTmy4mDLQaO88wsAx0kduaB
-      H8tuoCUvAkEA5UyIpG2djRCyCRkENJLn9qpCaSOwaO43D189KqGzW9nHihMNczha
-      akAIa3ULp8AoqPFKOFk+v2jGYwPHSatEMQJBAK9vr/wAFSKWj8y9oxqetnPsIh7a
-      B5duLRU3Ck/xyKMeqty44xkIPqFjd5BClsME66UTj0S0sfm0vdfQ2Rh5Ho0CQAaz
-      PM7pMRBdK4aeh4Ptwv9vLC+cTlxSkaNOWiAzx2TosS70rZDvVZ0DL/vL2MJXGBkP
-      q+aHnRDEw/9CrgEWExECQQCT7jFthoPs29A981euHfZ+bXMFEI48PFgw13cmyWnM
-      HijF+4E/XtD11WJkIuDCmHal/oRtcbIO/cCk15xbWZkD
-      -----END RSA PUBLIC KEY-----
-
-  config:
-    azureLogAnalytics:
-      authTokenEndpoint: 'https://login.microsoftonline.com'
-      clientId: 'ec3b168c-91db-4aa0-a7d3-ea9f6f999999'
-      clientSecret: 'secret'
-      grantType: 'client_credentials'
-      kafkaMessagePattern: "Producer.sendMessage::messageProtocol:'({.*?})'"
-      logApiEndpoint: 'https://api.loganalytics.io/v1/'
-      redirectUri: 'http://localhost:5000'
-      resource: 'https://api.loganalytics.io/'
-      searchQueryTemplate:
-        regex: "search '(.*)' | where LogEntry matches regex '.*Producer.sendMessage::messageProtocol:.*' | where LogEntry matches regex '.*transferId.*' | where LogEntry matches regex '.*fspiop-signature.*' | take 1 | project LogEntry"
-        template: "search '{{transferId}}' | where LogEntry matches regex '.*Producer.sendMessage::messageProtocol:.*' | where LogEntry matches regex '.*transferId.*' | where LogEntry matches regex '.*fspiop-signature.*' | take 1 | project LogEntry"
-      tenantId: 'ec3b168c-91db-4aa0-a7d3-ea9f6f999999'
-      workspaceId: 'e16d055b-7a9a-4e9b-bb4b-abcdef999999'
-    db_host: '$release_name-centralledger-mysql'
-    db_port: '3306'
-    db_user: 'central_ledger'
-    db_password: 'oyMxgZChuu'
-    db_database: 'central_ledger'
-    fxpEndpoint: '$release_name-fxp-server'
-    externalSettlementsEndpoint: '$release_name-external-settlement-server'
-    centralSettlementsEndpoint: '$release_name-centralsettlement/v1'
-    centralLedgerEndpoint: '$release_name-centralledger-service'
-    settlementManagementEndpoint: '$release_name-finance-portal-settlement-management'
-    settlementManagementPort: '5000'
-    isOauthEnabled: false
-    oauthServer: 'https://localhost'
-    oauthPort: 9443
-    oauthLoginPath: '/oauth2/token'
-    oauthTokenValidationPath: '/oauth2/introspect'
-    oauthUserInfo: '/oauth2/userinfo'
-    oauthTokenRevoke: '/oauth2/revoke'
-    oauthClientKey: 'testkey'
-    oauthClientSecret: 'testsecret'
-    # Do not set to true in production
-    corsReflectOrigin: 'false'
-    # Do not set to true in production
-    BypassAuth: 'true'
-    # Do not set to true in production
-    InsecureCookie: 'false'
-    is_populate:
-      name: $release_name-ispopulate
-      http:
-        endpoint: 'something'
-        timeout: 30000
-      authentication:
-        type: 'basic'
-        credentials:
-          username: 'admin'
-          password: 'admin'
-    jasperUser: 'user'
-    jasperPassword: 'password'
-    report1: "something"
-    report2: "something"
-
-  frontend:
-    service:
-      port: 80
-    image:
-      repository: mojaloop/finance-portal-ui
-      tag: v10.4.3
-      pullPolicy: IfNotPresent
-      port: 80
-    ingress:
-      enabled: true
-      externalPath: /(.*)
-      hosts:
-        api: finance-portal.local
-      annotations: {}
-        ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
-        # nginx.ingress.kubernetes.io/rewrite-target: '/'
-        # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
-        ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
-        # kubernetes.io/ingress.class: nginx
-        ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
-        # kubernetes.io/tls-acme: "true"
-
-  backend:
-    service:
-      port: 3000
-    image:
-      repository: mojaloop/finance-portal-backend-service
-      tag: v15.0.2
-      pullPolicy: IfNotPresent
-      port: 3000
-    init:
-      enabled: false
-      image:
-        repository: mojaloop/finance-portal-backend-service
-        tag: v15.0.2
-        pullPolicy: IfNotPresent
-    env: 'dev'
-    ingress:
-      enabled: true
-      externalPath: /admin-portal-backend/(.*)
-      hosts:
-        api: finance-portal.local
-      annotations: {}
-        ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
-        # nginx.ingress.kubernetes.io/rewrite-target: '/'
-        # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
-        ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
-        # kubernetes.io/ingress.class: nginx
-        ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
-        # kubernetes.io/tls-acme: "true"
-
-finance-portal-settlement-management:
-  enabled: false
-  # This is a YAML-formatted file.
-  # Declare variables to be passed into your templates.
-  # Default values shared by all containers
-  config:
-    db_protocol: 'mysql'
-    db_host: '$release_name-centralledger-mysql'
-    db_port: '3306'
-    db_user: 'central_ledger'
-    db_password: 'oyMxgZChuu'
-    db_database: 'central_ledger'
-
-  service:
-    type: ClusterIP
-
-  imageCredentials:
-    name: pull-secrets
-
-  # Default values for operator-settlement
-  operatorSettlement:
-    image:
-      repository: mojaloop/operator-settlement
-      tag: v11.0.0
-      pullPolicy: IfNotPresent
-
-    service:
-      port: 80
-
-    init:
-      enabled: true
-      image:
-        repository: mojaloop/operator-settlement
-        tag: v11.0.0
-        pullPolicy: IfNotPresent
-      command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database < /opt/operator-settlement/init.sql
-
-    ingress:
-      enabled: true
-      externalPath: /
-      hosts:
-        api: operator-settlement.local
-      annotations: {}
-        ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
-        # nginx.ingress.kubernetes.io/rewrite-target: '/'
-        # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
-        ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
-        # kubernetes.io/ingress.class: nginx
-        ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
-        # kubernetes.io/tls-acme: "true"
-      tls: []
-
-  # Default values for settlement-management
-  settlementManagement:
-    image:
-      repository: mojaloop/settlement-management
-      tag: v11.0.0
-      pullPolicy: IfNotPresent
-
-    service:
-      port: 5000
-
-    init:
-      enabled: true
-      image:
-        repository: mojaloop/settlement-management
-        tag: v11.0.0
-        pullPolicy: IfNotPresent
-      command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database < /opt/settlement-management/init.sql
-
-    config:
-      CENTRAL_LEDGER_SERVICE_NAME: '$release_name-centralledger-service'
-      CENTRAL_LEDGER_SERVICE_ADMIN_PORT: '80'
-      SETTLEMENTS_SERVICE_NAME: '$release_name-centralsettlement'
-      SETTLEMENTS_SERVICE_PORT: '80'
-      MIN_WINDOW_AGE_MS: '5000'
-      OPERATOR_SETTLEMENTS_SERVICE_NAME: '$release_name-finance-portal-settlement-management'
-      OPERATOR_SETTLEMENTS_SERVICE_PORT: '80'
-    ingress:
-      enabled: false
-      externalPath: /
-      hosts:
-        api: settlement-management.local
-      annotations: {}
-        ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
-        # nginx.ingress.kubernetes.io/rewrite-target: '/'
-        # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
-        ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
-        # kubernetes.io/ingress.class: nginx
-        ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
-        # kubernetes.io/tls-acme: "true"
-      tls: []
-      # Secrets must be manually created in the namespace.
-      # - secretName: chart-example-tls
-      #   hosts:
-      #     - chart-example.local
 
 mojaloop-bulk:
   enabled: false
