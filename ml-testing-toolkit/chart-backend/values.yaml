@@ -32,9 +32,9 @@ dependencies:
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit
-  tag: v14.0.4
-  commandPersistence: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; else if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; fi; npm run start;"]'
-  command: '["sh", "-c", "cd /opt/mojaloop-testing-toolkit; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; npm run start;"]'
+  tag: v15.0.0
+  commandPersistence: '["sh", "-c", "cd /opt/app; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; else if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; fi; npm run start;"]'
+  command: '["sh", "-c", "cd /opt/app; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; npm run start;"]'
 
   # command: '["npm", "run", "start"]'
 ## Optionally specify an array of imagePullSecrets.
@@ -166,7 +166,7 @@ config:
     ]
   }
   system_config.json: {
-    "API_PORT": 5000,
+    "API_PORT": 4040,
     "HOSTING_ENABLED": false,
     "INBOUND_MUTUAL_TLS_ENABLED": false,
     "OUTBOUND_MUTUAL_TLS_ENABLED": false,
@@ -269,7 +269,8 @@ config:
       {
         "type": "mojaloop_sdk_outbound_scheme_adapter",
         "version": "1.0",
-        "folderPath": "mojaloop_sdk_outbound_scheme_adapter_1.0"
+        "folderPath": "mojaloop_sdk_outbound_scheme_adapter_1.0",
+        "prefix": "sdk-out"
       },
       {
         "type": "payment_manager",
@@ -292,8 +293,8 @@ service:
   ports:
     specApi:
       name: "spec-api"
-      externalPort: 5000
-      internalPort: 5000
+      externalPort: 4040
+      internalPort: 4040
     adminApi:
       name: "admin-api"
       externalPort: 5050
@@ -305,7 +306,7 @@ ingress:
   hosts:
     specApi:
       host: testing-toolkit-specapi.local
-      port: 5000
+      port: 4040
       paths: ['/']
     adminApi:
       host: testing-toolkit.local

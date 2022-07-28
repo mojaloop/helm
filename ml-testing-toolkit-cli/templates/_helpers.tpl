@@ -92,10 +92,10 @@ containers:
       name: {{ template "ml-testing-toolkit-cli.fullname" . }}-aws-creds
   volumeMounts:
     - name: {{ $serviceFullName }}-volume-testcase-environment-file
-      mountPath: /opt/mojaloop-testing-toolkit/cli-testcase-environment.json
+      mountPath: /opt/app/cli-testcase-environment.json
       subPath: cli-testcase-environment.json
     - name: {{ $serviceFullName }}-volume-config-file-defaults
-      mountPath: /opt/mojaloop-testing-toolkit/cli-default-config.json
+      mountPath: /opt/app/cli-default-config.json
       subPath: cli-default-config.json
 {{- end }}
 
