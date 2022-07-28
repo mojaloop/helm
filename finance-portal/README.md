@@ -2,7 +2,7 @@
 
 ## DEPRECATION
 
-Note this Helm Chart is still available, but the underlying services are not being actively maintained, as they have been deprecated by the [Business Operation Framework](https://github.com/mojaloop/business-operations-framework-docs).
+Note this Helm Chart is still available, but the underlying services have been deprecated by the Micro-Services provided by the [Business Operation Framework (BOF)](https://github.com/mojaloop/business-operations-framework-docs) for Financial Management and Reporting.
 
 More information can be found here:
 
