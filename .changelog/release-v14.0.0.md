@@ -122,23 +122,23 @@ sdk-scheme-adapter/issues/2478)
 
 _Note: Apart from `Thirdparty-api specification`, below changes are breaking for upgrades and implementations of a Mojaloop Switch but not for FSPs or other entities interacting with a Mojaloop Switch itself._
 
-1. **Central Ledger:** Transfer will be successful only if the payer has sufficient liquidity in their settlement account balance over and above their NET-DEBIT-CAP (NDC) limit. This is the additional check that has been added in this PR, and will be applied to the lower value. Error messages have changed as a result. For NDC limit check from `PAYER_FSP_INSUFFICIENT_LIQUIDITY` to `PAYER_LIMIT_ERROR`. The error message `PAYER_FSP_INSUFFICIENT_LIQUIDITY` occurs when the payer has an insufficient settlement account balance. [mojaloop/central-ledger/pull/899](https://github.com/mojaloop/central-ledger/pull/899)
+1. **Central-Ledger:** Transfer will be successful only if the payer has sufficient liquidity in their settlement account balance over and above their NET-DEBIT-CAP (NDC) limit. This is the additional check that has been added in this PR, and will be applied to the lower value. Error messages have changed as a result. For NDC limit check from `PAYER_FSP_INSUFFICIENT_LIQUIDITY` to `PAYER_LIMIT_ERROR`. The error message `PAYER_FSP_INSUFFICIENT_LIQUIDITY` occurs when the payer has an insufficient settlement account balance. [mojaloop/central-ledger/pull/899](https://github.com/mojaloop/central-ledger/pull/899)
 
 2. **mojaloop/#2092:** Major version bump for node v16 LTS support, re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/opt/central-ledger`, `opt/account-lookup-service`, `opt/ml-api-adapter`, `/opt/quoting-service`, `/opt/bulk-api-adapter`, `/opt/transaction-requests-service`, `/opt/central-settlement`, `/opt/email-notifier`, `/opt/als-consent-oracle`, `/opt/event-stream-processor`, `/opt/central-event-processor` which will impact config mounts.
 
 3. **Mongodb dependency charts:** have been upgraded due to Bitnami's [retention policy](https://github.com/bitnami/charts/issues/10539). This impacts the following components: `central-event-processor`, `ml-testing-toolkit` (only when enabled), `bulk-api-adapter`.
 
-4. **Thirdparty-api specification:** upgrades from v0.1 to v1.0 introduced breaking changes in this release will impact the following Thirdparty components:
+4. **Thirdparty-API specification:** upgrades from v0.1 to v1.0 introduced breaking changes in this release will impact the following Thirdparty components:
    - auth-svc
    - als-consent-service
    - thirdparty-api-svc
    - thirdparty-sdk
 
-5. **Thirdparty-sdk:** support for configuration management via [Payment Manager for Mojaloop](https://github.com/pm4ml) introduced a breaking changes:
+5. **Thirdparty-SDK:** support for configuration management via [Payment Manager for Mojaloop](https://github.com/pm4ml) introduced a breaking changes:
     - Configuration changed to camel-case (take note of your configuration)
     - Inbound/Outbound servers can NOT be run independently
 
-6. **Sdk-scheme-adapter:** features merged from mojaloop-connector:
+6. **SDK-Scheme-Adapter:** features merged from mojaloop-connector:
     - Outbound API response body has changed, now includes headers and payloads, refer to [mojaloop/sdk-scheme-adapter/v18.0.2/src/OutboundServer/api.yaml](https://github.com/mojaloop/sdk-scheme-adapter/blob/v18.0.2/src/OutboundServer/api.yaml) for updated interface specification.
     - Re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/` (root).
     - `/secrets` folder is no longer included in docker image by default aligning to best practices. Ensure you mount and configure your secrets appropriately.
