@@ -201,7 +201,7 @@ More information can be found here:
 
 7. Thirdparty API Helm Tests
 
-  Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](../thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
+    Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](../thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
 
 ## 8. Contributors
 
