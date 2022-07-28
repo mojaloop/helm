@@ -56,9 +56,9 @@ sdk-scheme-adapter/issues/2478)
 18. **mojaloop/#2811:** sdk-scheme-adapter sending incorrect transferState on a PUT transfers Callback ([#331](https://github.com/mojaloop/sdk-scheme-adapter/issues/331)) ([f7e450c](https://github.com/mojaloop/sdk-scheme-adapter/commit/f7e450cc2568f70f6c9abbb39d9c2186787c31b7)), closes [mojaloop/#2811](https://github.com/mojaloop/sdk-scheme-adapter/issues/2811)
 19. **mojaloop/#2816:** SDK-Scheme-Adapter is missing/incorrect bulkTransferState on a PUT /bulkTransfer/{id} Callback by the PayeeFSP ([#331](https://github.com/mojaloop/sdk-scheme-adapter/issues/331)) ([f7e450c](https://github.com/mojaloop/sdk-scheme-adapter/commit/f7e450cc2568f70f6c9abbb39d9c2186787c31b7)), closes [mojaloop/#2816](https://github.com/mojaloop/sdk-scheme-adapter/issues/2816)
 20. **Testing Toolkit:**:
-    - Added missing test currencies to FSPIOP apis provisioned in TTK [ml-testing-toolkit/pull/205](https://github.com/mojaloop/ml-testing-toolkit/pull/205)
-    - Unable to retain the renamed folder [ml-testing-toolkit-ui/pull/126](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/126), closes [mojaloop/#2656](https://github.com/mojaloop/project/issues/2656)
-    - TTK does not send callbacks after processing a Callback-Rule with a FIXED_CALLBACK [ml-testing-toolkit-ui/pull/126](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/126), closes [mojaloop/#2685](https://github.com/mojaloop/project/issues/2695)
+    1. Added missing test currencies to FSPIOP apis provisioned in TTK [ml-testing-toolkit/pull/205](https://github.com/mojaloop/ml-testing-toolkit/pull/205)
+    2. Unable to retain the renamed folder [ml-testing-toolkit-ui/pull/126](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/126), closes [mojaloop/#2656](https://github.com/mojaloop/project/issues/2656)
+    3. TTK does not send callbacks after processing a Callback-Rule with a FIXED_CALLBACK [ml-testing-toolkit-ui/pull/126](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/126), closes [mojaloop/#2685](https://github.com/mojaloop/project/issues/2695)
 
 ## 3. Application versions
 
