@@ -80,7 +80,7 @@ sdk-scheme-adapter/issues/2478)
 16. event-stream-processor: v11.0.0-snapshot -> **v12.0.0-snapshot.7**
 17. simulator: 12.0.0 -> **v12.0.0**
 18. mojaloop-simulator: v12.1.1 -> **v13.0.0**
-19. sdk-scheme-adapter: v11.18.11 -> **v18.0.1**
+19. sdk-scheme-adapter: v11.18.11 -> **v18.0.2**
 20. ml-testing-toolkit: v14.0.4 -> **v15.0.0**
 21. ml-testing-toolkit-ui: v13.5.5 -> **v15.0.0**
 22. ml-testing-toolkit-client-lib: **v1.0.0**
@@ -109,7 +109,7 @@ sdk-scheme-adapter/issues/2478)
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.7
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v13.0.0
-19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v18.0.1
+19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v18.0.2
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v15.0.0
 21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.0.0
 22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.0.0
@@ -139,7 +139,7 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
     - Inbound/Outbound servers can NOT be run independently
 
 6. **Sdk-scheme-adapter:** features merged from mojaloop-connector:
-    - Outbound API response body has changed, now includes headers and payloads, refer to [mojaloop/sdk-scheme-adapter/v18.0.1/src/OutboundServer/api.yaml](https://github.com/mojaloop/sdk-scheme-adapter/blob/v18.0.1/src/OutboundServer/api.yaml) for updated interface specification.
+    - Outbound API response body has changed, now includes headers and payloads, refer to [mojaloop/sdk-scheme-adapter/v18.0.2/src/OutboundServer/api.yaml](https://github.com/mojaloop/sdk-scheme-adapter/blob/v18.0.2/src/OutboundServer/api.yaml) for updated interface specification.
     - Re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/` (root).
     - `/secrets` folder is no longer included in docker image by default aligning to best practices. Ensure you mount and configure your secrets appropriately.
 
