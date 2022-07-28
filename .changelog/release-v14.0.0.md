@@ -25,13 +25,13 @@ For breaking changes, please review the section `#4` "Breaking Changes" below.
 14. **mojaloop/#2758:** add Certificate management functionality in thirdparty sdk (from mojaloop connector) from [Payment Manager for Mojaloop](https://github.com/pm4ml) ([thirdparty-sdk/#146](https://github.com/mojaloop/thirdparty-sdk/issues/146) [thirdparty-sdk/##147](https://github.com/mojaloop/thirdparty-sdk/issues/147)), closes [#2758](https://github.com/mojaloop/project/issues/2758)
 15. **mojaloop/#2777:** add jws validation on inbound server and update reconfig for jws signing ([thirdparty-sdk/#151](https://github.com/mojaloop/thirdparty-sdk/issues/151)), closes [mojaloop/#2777](https://github.com/mojaloop/project/issues/2777)
 16. **Testing Toolkit:**:
-    - Major version bump for node v16 LTS support [ml-testing-toolkit/pull/215](https://github.com/mojaloop/ml-testing-toolkit/pull/215), closes [mojaloop/#2784](https://github.com/mojaloop/project/issues/2784) [mojaloop/#2785](https://github.com/mojaloop/project/issues/2785) [mojaloop/#2786](https://github.com/mojaloop/project/issues/2786)
-    - Port changed from `5000` to `4040`, closes [mojaloop/#2675](https://github.com/mojaloop/project/issues/2675)
-    - TTK CLI is migrated from `ml-testing-toolkit` to `ml-testing-toolkit-client-lib` (https://github.com/mojaloop/ml-testing-toolkit-client-lib)
-    - Callback assignments through UI, closes [mojaloop/#1809](https://github.com/mojaloop/project/issues/1809)
-    - Checkbox to disable some requests in test case editor easily, closes [mojaloop/#2335](https://github.com/mojaloop/project/issues/2335)
-    - Option for breaking a test case on error, closes [mojaloop/#2431](https://github.com/mojaloop/project/issues/2431)
-    - Added hostname and prefix to api definition listPath and hostname feature, closes [mojaloop/#2792](https://github.com/mojaloop/project/issues/2792). Refer this documentation https://github.com/mojaloop/ml-testing-toolkit/blob/master/documents/User-Guide-API-Provisioning.md#5-prefix-and-hostnames
+    1. Major version bump for node v16 LTS support [ml-testing-toolkit/pull/215](https://github.com/mojaloop/ml-testing-toolkit/pull/215), closes [mojaloop/#2784](https://github.com/mojaloop/project/issues/2784) [mojaloop/#2785](https://github.com/mojaloop/project/issues/2785) [mojaloop/#2786](https://github.com/mojaloop/project/issues/2786)
+    2. Port changed from `5000` to `4040`, closes [mojaloop/#2675](https://github.com/mojaloop/project/issues/2675)
+    3. TTK CLI is migrated from `ml-testing-toolkit` to [ml-testing-toolkit-client-lib](https://github.com/mojaloop/ml-testing-toolkit-client-lib)
+    4. Callback assignments through UI, closes [mojaloop/#1809](https://github.com/mojaloop/project/issues/1809)
+    5. Checkbox to disable some requests in test case editor easily, closes [mojaloop/#2335](https://github.com/mojaloop/project/issues/2335)
+    6. Option for breaking a test case on error, closes [mojaloop/#2431](https://github.com/mojaloop/project/issues/2431)
+    7. Added hostname and prefix to api definition listPath and hostname feature, closes [mojaloop/#2792](https://github.com/mojaloop/project/issues/2792). Refer this documentation [ml-testing-toolkit/User-Guide-API-Provisioning.md#5-prefix-and-hostnames](https://github.com/mojaloop/ml-testing-toolkit/blob/master/documents/User-Guide-API-Provisioning.md#5-prefix-and-hostnames)
 
 ## 2. Bug Fixes
 
