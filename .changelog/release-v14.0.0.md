@@ -243,6 +243,6 @@ More information can be found here:
 ## 8. Contributors
 
 - Organizations: BMGF, CrossLake, ModusBox
-- Individuals: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @lewisdaly, @tdaly61
+- Individuals: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @kirgene, @lewisdaly, @tdaly61
 
 _Note: companies are in alphabetical order, individuals are in no particular order._
