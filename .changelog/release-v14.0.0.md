@@ -128,6 +128,53 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
 
 3. **Mongodb dependency charts:** have been upgraded due to Bitnami's [retention policy](https://github.com/bitnami/charts/issues/10539). This impacts the following components: `central-event-processor`, `ml-testing-toolkit` (only when enabled), `bulk-api-adapter`.
 
+    >
+    > Please familiarize yourself with the [deployment-guide/upgrade-strategy-guide](https://docs.mojaloop.io/legacy/deployment-guide/upgrade-strategy-guide.html) documentation.
+    >
+    > To avoid this, please ensure that all backend-dependencies are deployed separately. Currently they are included in a default Mojaloop installation for convenience, and should not be used for any production-grade installation.
+    >
+    > In future versions of Mojaloop all backend-dependencies will be removed and a separate backend chart will be provided for convenience (Similarly, this chart should not be used for any production-grade installation).
+    >
+
+    Here is an example of braking of how this breaking change manifests itself ...
+
+    Installing `v13.1.1`:
+
+    ```bash
+    > helm -n moja install moja mojaloop/mojaloop --version 13.1.1
+    ```
+
+    Upgrading `v13.1.1` to `v14.0.0` will result in the following error:
+
+    ```bash
+    > helm -n moja upgrade moja mojaloop/mojaloop --devel  --version 14.0.0
+
+    history.go:56: [debug] getting history for release moja
+    upgrade.go:142: [debug] preparing upgrade for moja
+    coalesce.go:220: warning: cannot overwrite table with non table for mojaloop. thirdparty.consent-oracle.env (map[])
+    Error: UPGRADE FAILED: execution error at (mojaloop/charts/central/charts/ centraleventprocessor/charts/mongodb/templates/secrets.yaml:33:24): 
+    PASSWORDS ERROR: The secret "moja-cep-mongodb" does not contain the key  "mongodb-passwords"
+ 
+    helm.go:84: [debug] execution error at (mojaloop/charts/central/charts/ centraleventprocessor/charts/mongodb/templates/secrets.yaml:33:24): 
+    PASSWORDS ERROR: The secret "moja-cep-mongodb" does not contain the key  "mongodb-passwords"
+ 
+    UPGRADE FAILED
+    main.newUpgradeCmd.func2
+          helm.sh/helm/v3/cmd/helm/upgrade.go:200
+    github.com/spf13/cobra.(*Command).execute
+          github.com/spf13/cobra@v1.4.0/command.go:856
+    github.com/spf13/cobra.(*Command).ExecuteC
+          github.com/spf13/cobra@v1.4.0/command.go:974
+    github.com/spf13/cobra.(*Command).Execute
+          github.com/spf13/cobra@v1.4.0/command.go:902
+    main.main
+          helm.sh/helm/v3/cmd/helm/helm.go:83
+    runtime.main
+          runtime/proc.go:250
+    runtime.goexit
+          runtime/asm_amd64.s:1571
+    ```
+
 4. **Thirdparty-API specification:** upgrades from v0.1 to v1.0 introduced breaking changes in this release will impact the following Thirdparty components:
    - auth-svc
    - als-consent-service
