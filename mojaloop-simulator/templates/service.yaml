@@ -1,6 +1,7 @@
 {{- range $name, $customConfig := .Values.simulators }}
 {{- $config := merge $customConfig $.Values.defaults }}
 {{- $fullName := printf "%s%s" (include "mojaloop-simulator.prefix" $) $name -}}
+{{- $cachePort := default "6379" $config.config.schemeAdapter.env.CACHE_PORT -}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -66,7 +67,7 @@ metadata:
 spec:
    type: ClusterIP
    ports:
-     - port: {{ $config.config.schemeAdapter.env.CACHE_PORT }}
+     - port: {{ $cachePort }}
        protocol: TCP
        name: redis
        targetPort: redis

@@ -24,8 +24,8 @@ simulators: {}
 #       cache:
 #         enabled: false
 #   payeefsp: {}
-# 
-# 
+#
+#
 # You can also enable the thirdparty-sdk for each simulator you define in order to test
 # the Mojaloop Third Party Components:
 #
@@ -35,7 +35,7 @@ simulators: {}
 #       thirdpartysdk:
 #         enabled: true
 #
-# The above config will create 1 instance of a simulator, with a thirdparty-sdk 
+# The above config will create 1 instance of a simulator, with a thirdparty-sdk
 
 
 # TODO & notes:
@@ -274,7 +274,7 @@ defaults: &defaults
           publicKey: ''
       image:
         repository: mojaloop/sdk-scheme-adapter
-        tag: v15.0.0
+        tag: v18.0.2
         pullPolicy: IfNotPresent
       <<: *defaultProbes
 
@@ -327,19 +327,19 @@ defaults: &defaults
         JWS_SIGN_PUT_PARTIES: false
 
         # Path to JWS signing key (private key of THIS DFSP)
-        JWS_SIGNING_KEY_PATH: "/jwsSigningKey.key" # do not configure- will break the chart
-        JWS_VERIFICATION_KEYS_DIRECTORY: "/jwsVerificationKeys"
+        JWS_SIGNING_KEY_PATH: "/jwsSigningKey/private.key" # do not configure- will break the chart
+        JWS_VERIFICATION_KEYS_DIRECTORY: "/secrets/jwsVerificationKeys"
 
         # Location of certs and key required for TLS. It is possible to configure these- however,
         # at the time of writing, it's not supported by this chart and will likely cause breakage.
         # You should probably not do it unless you know what you're doing.
-        IN_CA_CERT_PATH: ./secrets/inbound-cacert.pem
-        IN_SERVER_CERT_PATH: ./secrets/inbound-cert.pem
-        IN_SERVER_KEY_PATH: ./secrets/inbound-key.pem
+        IN_CA_CERT_PATH: /secrets/inbound-cacert.pem
+        IN_SERVER_CERT_PATH: /secrets/inbound-cert.pem
+        IN_SERVER_KEY_PATH: /secrets/inbound-key.pem
 
-        OUT_CA_CERT_PATH: ./secrets/outbound-cacert.pem
-        OUT_CLIENT_CERT_PATH: ./secrets/outbound-cert.pem
-        OUT_CLIENT_KEY_PATH: ./secrets/outbound-key.pem
+        OUT_CA_CERT_PATH: /secrets/outbound-cacert.pem
+        OUT_CLIENT_CERT_PATH: /secrets/outbound-cert.pem
+        OUT_CLIENT_KEY_PATH: /secrets/outbound-key.pem
 
         # The number of space characters by which to indent pretty-printed logs. If set to zero, log events
         # will each be printed on a single line.
@@ -441,7 +441,7 @@ defaults: &defaults
     backend:
       image:
         repository: mojaloop/mojaloop-simulator
-        tag: v12.1.1
+        tag: v13.0.0
         pullPolicy: IfNotPresent
       <<: *defaultProbes
 
@@ -479,9 +479,9 @@ defaults: &defaults
         HTTPS_ENABLED: false
 
         # Location of certs and key required for TLS
-        CA_CERT_PATH: ./secrets/cacert.pem
-        SERVER_CERT_PATH: ./secrets/servercert.pem
-        SERVER_KEY_PATH: ./secrets/serverkey.pem
+        CA_CERT_PATH: /secrets/cacert.pem
+        SERVER_CERT_PATH: /secrets/servercert.pem
+        SERVER_KEY_PATH: /secrets/serverkey.pem
 
         # The number of space characters by which to indent pretty-printed logs. If set to zero, log events
         # will each be printed on a single line.
@@ -490,7 +490,7 @@ defaults: &defaults
         # The name of the sqlite log file. This probably doesn't matter much to the user, except that
         # setting :memory: will use an in-memory sqlite db, which will be faster and not consume disk
         # space. However, it will also mean that the logs will be lost once the container is stopped.
-        SQLITE_LOG_FILE: ./log.sqlite
+        SQLITE_LOG_FILE: ':memory:'
 
         # The DFSPID of this simulator. The simulator will accept any requests routed to
         # FSPIOP-Destination: $SCHEME_NAME. Other requests will be rejected.
@@ -503,7 +503,7 @@ defaults: &defaults
         # state you can use a preexisting file. If running in a container, you can mount a sqlite file as a
         # volume in the container to preserve state between runs.
         # Use MODEL_DATABASE: :memory: for an ephemeral in-memory database
-        MODEL_DATABASE: ./model.sqlite
+        MODEL_DATABASE: ':memory:'
 
         # The simulator can automatically add fees when generating quote responses. Use this
         # variable to control the fee amounts added. e.g. for a transfer of 100 USD a FEE_MULTIPLIER of 0.1
@@ -613,7 +613,7 @@ defaults: &defaults
               target:
                 type: Utilization
                 averageUtilization: 80
-      
+
       ## Config files
       config: {
         production.json: {
@@ -630,9 +630,9 @@ defaults: &defaults
                 "enabled": false
               },
               "creds": {
-                "ca": "./secrets/dfsp_or_3ppi_client_cacert.pem",
-                "cert": "./secrets/dfsp_or_3ppi_server_cert.pem",
-                "key": "./secrets/dfsp_or_3ppi_server_key.key"
+                "ca": "/secrets/dfsp_or_3ppi_client_cacert.pem",
+                "cert": "/secrets/dfsp_or_3ppi_server_cert.pem",
+                "key": "/secrets/dfsp_or_3ppi_server_key.key"
               }
             }
           },
@@ -644,9 +644,9 @@ defaults: &defaults
                 "enabled": false
               },
               "creds": {
-                "ca": "./secrets/hub_server_cacert.pem",
-                "cert": "./secrets/dfsp_or_3ppi_client_cert.cer",
-                "key": "./secrets/dfsp_or_3ppi_client_key.key"
+                "ca": "/secrets/hub_server_cacert.pem",
+                "cert": "/secrets/dfsp_or_3ppi_client_cert.cer",
+                "key": "/secrets/dfsp_or_3ppi_client_key.key"
               }
             }
           },
@@ -686,7 +686,7 @@ defaults: &defaults
             "sdkOutgoingUri": "$full_name-scheme-adapter:4001",
             "sdkOutgoingHttpScheme": "http",
             "sdkOutgoingPartiesInformationPath": "parties/{Type}/{ID}/{SubId}",
-            "sdkNotifyAboutTransferUri": "ml-testing-toolkit:5000/thirdpartyRequests/transactions/{ID}"
+            "sdkNotifyAboutTransferUri": "ml-testing-toolkit:4040/thirdpartyRequests/transactions/{ID}"
           },
           "pm4mlEnabled": false,
           "validateInboundJws": false,
