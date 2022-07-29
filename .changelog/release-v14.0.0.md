@@ -147,7 +147,7 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
     Upgrading `v13.1.1` to `v14.0.0` will result in the following error:
 
     ```bash
-    > helm -n moja upgrade moja mojaloop/mojaloop --debug --devel  --version 14.0.0
+    > helm -n moja upgrade moja mojaloop/mojaloop --debug --devel --version 14.0.0
 
     history.go:56: [debug] getting history for release moja
     upgrade.go:142: [debug] preparing upgrade for moja
