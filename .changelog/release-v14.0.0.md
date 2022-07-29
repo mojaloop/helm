@@ -136,7 +136,7 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
     > In future versions of Mojaloop all backend-dependencies will be removed and a separate backend chart will be provided for convenience (Similarly, this chart should not be used for any production-grade installation).
     >
 
-    Here is an example of how this breaking change manifests itself ...
+    Here is an example of how this breaking change manifests itself...
 
     Installing `v13.1.1`:
 
