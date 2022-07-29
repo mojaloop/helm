@@ -1,6 +1,6 @@
 # Helm Release Notes
 
-For breaking changes, please review the section `#4` "Breaking Changes" below.
+For breaking changes, please review the section `#5` "Breaking Changes" below.
 
 ## 1. New Features
 
