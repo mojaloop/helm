@@ -131,7 +131,7 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
     >
     > Please familiarize yourself with the [deployment-guide/upgrade-strategy-guide](https://docs.mojaloop.io/legacy/deployment-guide/upgrade-strategy-guide.html) documentation.
     >
-    > To avoid this, please ensure that all backend-dependencies are deployed separately. Currently they are included in a default Mojaloop installation for convenience, and should not be used for any production-grade installation.
+    > To avoid this, ensure that all backend-dependencies are deployed separately. Currently they are included in a default Mojaloop installation for convenience, and should not be used for any production-grade installation.
     >
     > In future versions of Mojaloop all backend-dependencies will be removed and a separate backend chart will be provided for convenience (Similarly, this chart should not be used for any production-grade installation).
     >
