@@ -133,7 +133,7 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
     >
     > To avoid this, ensure that all backend-dependencies are deployed separately. Currently they are included in a default Mojaloop installation for convenience, and should not be used for any production-grade installation.
     >
-    > In future versions of Mojaloop all backend-dependencies will be removed and a separate backend chart will be provided for convenience (Similarly, this chart should not be used for any production-grade installation).
+    > In future versions of Mojaloop all backend-dependencies will be removed and a separate backend chart will be provided as an example for convenience (Similarly, this chart should not be used for any production-grade installation).
     >
 
     Here is an example of how this breaking change manifests itself...
