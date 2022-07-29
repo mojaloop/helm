@@ -159,20 +159,7 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
     PASSWORDS ERROR: The secret "moja-cep-mongodb" does not contain the key  "mongodb-passwords"
  
     UPGRADE FAILED
-    main.newUpgradeCmd.func2
-          helm.sh/helm/v3/cmd/helm/upgrade.go:200
-    github.com/spf13/cobra.(*Command).execute
-          github.com/spf13/cobra@v1.4.0/command.go:856
-    github.com/spf13/cobra.(*Command).ExecuteC
-          github.com/spf13/cobra@v1.4.0/command.go:974
-    github.com/spf13/cobra.(*Command).Execute
-          github.com/spf13/cobra@v1.4.0/command.go:902
-    main.main
-          helm.sh/helm/v3/cmd/helm/helm.go:83
-    runtime.main
-          runtime/proc.go:250
-    runtime.goexit
-          runtime/asm_amd64.s:1571
+    ...
     ```
 
 4. **Thirdparty-API specification:** upgrades from v0.1 to v1.0 introduced breaking changes in this release will impact the following Thirdparty components:
