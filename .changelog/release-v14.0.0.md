@@ -128,6 +128,40 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
 
 3. **Mongodb dependency charts:** have been upgraded due to Bitnami's [retention policy](https://github.com/bitnami/charts/issues/10539). This impacts the following components: `central-event-processor`, `ml-testing-toolkit` (only when enabled), `bulk-api-adapter`.
 
+    >
+    > Please familiarize yourself with the [deployment-guide/upgrade-strategy-guide](https://docs.mojaloop.io/legacy/deployment-guide/upgrade-strategy-guide.html) documentation.
+    >
+    > To avoid this, ensure that all backend-dependencies are deployed separately. Currently they are included in a default Mojaloop installation for convenience, and should not be used for any production-grade installation.
+    >
+    > In future versions of Mojaloop all backend-dependencies will be removed and a separate backend chart will be provided as an example for convenience (Similarly, this chart should not be used for any production-grade installation).
+    >
+
+    Here is an example of how this breaking change manifests itself...
+
+    Installing `v13.1.1`:
+
+    ```bash
+    > helm -n moja install moja mojaloop/mojaloop --version 13.1.1
+    ```
+
+    Upgrading `v13.1.1` to `v14.0.0` will result in the following error:
+
+    ```bash
+    > helm -n moja upgrade moja mojaloop/mojaloop --debug --devel --version 14.0.0
+
+    history.go:56: [debug] getting history for release moja
+    upgrade.go:142: [debug] preparing upgrade for moja
+
+    Error: UPGRADE FAILED: execution error at (mojaloop/charts/central/charts/ centraleventprocessor/charts/mongodb/templates/secrets.yaml:33:24): 
+    PASSWORDS ERROR: The secret "moja-cep-mongodb" does not contain the key  "mongodb-passwords"
+ 
+    helm.go:84: [debug] execution error at (mojaloop/charts/central/charts/ centraleventprocessor/charts/mongodb/templates/secrets.yaml:33:24): 
+    PASSWORDS ERROR: The secret "moja-cep-mongodb" does not contain the key  "mongodb-passwords"
+ 
+    UPGRADE FAILED
+    ...
+    ```
+
 4. **Thirdparty-API specification:** upgrades from v0.1 to v1.0 introduced breaking changes in this release will impact the following Thirdparty components:
    - auth-svc
    - als-consent-service
@@ -138,12 +172,15 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
     - Configuration changed to camel-case (take note of your configuration)
     - Inbound/Outbound servers can NOT be run independently
 
-6. **SDK-Scheme-Adapter:** features merged from mojaloop-connector:
+6. **Thirdparty - auth-service, als-consent-service:** migration scripts are now compiled by Typescript instead of interpreted:
+   If you have a deployment of any previous versions of `auth-service` or `als-consent-oracle` running, you will need to create new databases and manually create migration scripts for any data that you require. This is due to the migration-scripts files being dependent on their javascript compiled variants.
+
+7. **SDK-Scheme-Adapter:** features merged from mojaloop-connector:
     - Outbound API response body has changed, now includes headers and payloads, refer to [mojaloop/sdk-scheme-adapter/v18.0.2/src/OutboundServer/api.yaml](https://github.com/mojaloop/sdk-scheme-adapter/blob/v18.0.2/src/OutboundServer/api.yaml) for updated interface specification.
     - Re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/` (root).
     - `/secrets` folder is no longer included in docker image by default aligning to best practices. Ensure you mount and configure your secrets appropriately.
 
-7. **Testing Toolkit:**:
+8. **Testing Toolkit:**:
    - Major version bump for node v16 LTS support, re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app`.
    - Port changed from `5000` to `4040`, this may impact the callback endpoints used in the TTK environment files. And also if there are any overrides related to ports in the helm values files.
    - TTK CLI is now removed from `ml-testing-toolkit`. Please use [ml-testing-toolkit-client-lib](https://github.com/mojaloop/ml-testing-toolkit-client-lib) for TTK CLI.
