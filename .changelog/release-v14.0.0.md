@@ -147,11 +147,11 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
     Upgrading `v13.1.1` to `v14.0.0` will result in the following error:
 
     ```bash
-    > helm -n moja upgrade moja mojaloop/mojaloop --devel  --version 14.0.0
+    > helm -n moja upgrade moja mojaloop/mojaloop --debug --devel  --version 14.0.0
 
     history.go:56: [debug] getting history for release moja
     upgrade.go:142: [debug] preparing upgrade for moja
-    coalesce.go:220: warning: cannot overwrite table with non table for mojaloop. thirdparty.consent-oracle.env (map[])
+
     Error: UPGRADE FAILED: execution error at (mojaloop/charts/central/charts/ centraleventprocessor/charts/mongodb/templates/secrets.yaml:33:24): 
     PASSWORDS ERROR: The secret "moja-cep-mongodb" does not contain the key  "mongodb-passwords"
  
