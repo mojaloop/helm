@@ -172,12 +172,15 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
     - Configuration changed to camel-case (take note of your configuration)
     - Inbound/Outbound servers can NOT be run independently
 
-6. **SDK-Scheme-Adapter:** features merged from mojaloop-connector:
+6. **Thirdparty auth-service & als-consent-service:** migration scripts are now compiled by typescript instead of interpreted:
+   If you have a deployment of any previous versions of `auth-service` or `als-consent-oracle` running, you will need to create new databases and manually create migration scripts for any data that you require. This is due to the migration-scripts files being dependent on their javascript compiled variants.
+
+7. **SDK-Scheme-Adapter:** features merged from mojaloop-connector:
     - Outbound API response body has changed, now includes headers and payloads, refer to [mojaloop/sdk-scheme-adapter/v18.0.2/src/OutboundServer/api.yaml](https://github.com/mojaloop/sdk-scheme-adapter/blob/v18.0.2/src/OutboundServer/api.yaml) for updated interface specification.
     - Re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app` instead of `/` (root).
     - `/secrets` folder is no longer included in docker image by default aligning to best practices. Ensure you mount and configure your secrets appropriately.
 
-7. **Testing Toolkit:**:
+8. **Testing Toolkit:**:
    - Major version bump for node v16 LTS support, re-structuring of project directories to align to core Mojaloop repositories with docker image now using `/opt/app`.
    - Port changed from `5000` to `4040`, this may impact the callback endpoints used in the TTK environment files. And also if there are any overrides related to ports in the helm values files.
    - TTK CLI is now removed from `ml-testing-toolkit`. Please use [ml-testing-toolkit-client-lib](https://github.com/mojaloop/ml-testing-toolkit-client-lib) for TTK CLI.
