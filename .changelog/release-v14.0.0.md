@@ -172,7 +172,7 @@ _Note: Apart from `Thirdparty-api specification`, below changes are breaking for
     - Configuration changed to camel-case (take note of your configuration)
     - Inbound/Outbound servers can NOT be run independently
 
-6. **Thirdparty auth-service & als-consent-service:** migration scripts are now compiled by Typescript instead of interpreted:
+6. **Thirdparty - auth-service, als-consent-service:** migration scripts are now compiled by Typescript instead of interpreted:
    If you have a deployment of any previous versions of `auth-service` or `als-consent-oracle` running, you will need to create new databases and manually create migration scripts for any data that you require. This is due to the migration-scripts files being dependent on their javascript compiled variants.
 
 7. **SDK-Scheme-Adapter:** features merged from mojaloop-connector:
