@@ -57,7 +57,7 @@ auth-svc:
         "THIRDPARTY_REQUESTS_ENDPOINT": "tp-api-svc:3008",
         "ALS_ENDPOINT": "$release_name-account-lookup-service",
         "JWS_SIGN": false,
-        "JWS_SIGNING_KEY": "./secrets/jwsSigningKey.key",
+        "JWS_SIGNING_KEY": "/secrets/jwsSigningKey.key",
         "WSO2_AUTH": {
           "staticToken": "0706c62f-c022-3c42-8d14-8b5df128876d",
           "tokenEndpoint": "",
@@ -70,9 +70,9 @@ auth-svc:
             "enabled": false
           },
           "creds": {
-            "ca": "./secrets/client.crt",
-            "cert": "./secrets/client.crt",
-            "key": "./secrets/client.crt"
+            "ca": "/secrets/client.crt",
+            "cert": "/secrets/client.crt",
+            "key": "/secrets/client.crt"
           }
         }
       },
@@ -476,9 +476,9 @@ thirdparty-simulator:
                     "enabled": false
                   },
                   "creds": {
-                    "ca": "./secrets/dfsp_or_3ppi_client_cacert.pem",
-                    "cert": "./secrets/dfsp_or_3ppi_server_cert.pem",
-                    "key": "./secrets/dfsp_or_3ppi_server_key.key"
+                    "ca": "/secrets/dfsp_or_3ppi_client_cacert.pem",
+                    "cert": "/secrets/dfsp_or_3ppi_server_cert.pem",
+                    "key": "/secrets/dfsp_or_3ppi_server_key.key"
                   }
                 }
               },
@@ -490,9 +490,9 @@ thirdparty-simulator:
                     "enabled": false
                   },
                   "creds": {
-                    "ca": "./secrets/hub_server_cacert.pem",
-                    "cert": "./secrets/dfsp_or_3ppi_client_cert.cer",
-                    "key": "./secrets/dfsp_or_3ppi_client_key.key"
+                    "ca": "/secrets/hub_server_cacert.pem",
+                    "cert": "/secrets/dfsp_or_3ppi_client_cert.cer",
+                    "key": "/secrets/dfsp_or_3ppi_client_key.key"
                   }
                 }
               },
@@ -532,7 +532,7 @@ thirdparty-simulator:
                 "sdkOutgoingUri": "$full_name-scheme-adapter:4001",
                 "sdkOutgoingHttpScheme": "http",
                 "sdkOutgoingPartiesInformationPath": "parties/{Type}/{ID}/{SubId}",
-                "sdkNotifyAboutTransferUri": "ml-testing-toolkit:5000/thirdpartyRequests/transactions/{ID}",
+                "sdkNotifyAboutTransferUri": "ml-testing-toolkit:4040/thirdpartyRequests/transactions/{ID}",
                 "tempOverrideQuotesPartyIdType": "MSISDN",
                 "testShouldOverrideConsentId": true,
                 "testConsentRequestToConsentMap": {
@@ -1204,7 +1204,7 @@ thirdparty-simulator:
                 xQxFvhHxR7W0e74fAU8B8YIJzwjaQvrEh9SJRc2IZsh6EdBAXXmbk4sHKyhoX0by
                 UQIDAQAB
                 -----END PUBLIC KEY-----
- 
+
   defaultProbes: &defaultProbes
     livenessProbe:
       enabled: true
@@ -1326,7 +1326,7 @@ thirdparty-simulator:
             publicKey: ''
         image:
           repository: mojaloop/sdk-scheme-adapter
-          tag: v15.0.0
+          tag: v18.0.2
           pullPolicy: IfNotPresent
         <<: *defaultProbes
 
@@ -1475,7 +1475,7 @@ thirdparty-simulator:
       backend:
         image:
           repository: mojaloop/mojaloop-simulator
-          tag: v12.1.1
+          tag: v13.0.0
           pullPolicy: IfNotPresent
         <<: *defaultProbes
 
@@ -1513,9 +1513,9 @@ thirdparty-simulator:
           HTTPS_ENABLED: false
 
           # Location of certs and key required for TLS
-          CA_CERT_PATH: ./secrets/cacert.pem
-          SERVER_CERT_PATH: ./secrets/servercert.pem
-          SERVER_KEY_PATH: ./secrets/serverkey.pem
+          CA_CERT_PATH: /secrets/cacert.pem
+          SERVER_CERT_PATH: /secrets/servercert.pem
+          SERVER_KEY_PATH: /secrets/serverkey.pem
 
           # The number of space characters by which to indent pretty-printed logs. If set to zero, log events
           # will each be printed on a single line.
@@ -1524,7 +1524,7 @@ thirdparty-simulator:
           # The name of the sqlite log file. This probably doesn't matter much to the user, except that
           # setting :memory: will use an in-memory sqlite db, which will be faster and not consume disk
           # space. However, it will also mean that the logs will be lost once the container is stopped.
-          SQLITE_LOG_FILE: ./log.sqlite
+          SQLITE_LOG_FILE: ':memory:'
 
           # The DFSPID of this simulator. The simulator will accept any requests routed to
           # FSPIOP-Destination: $SCHEME_NAME. Other requests will be rejected.
@@ -1537,7 +1537,7 @@ thirdparty-simulator:
           # state you can use a preexisting file. If running in a container, you can mount a sqlite file as a
           # volume in the container to preserve state between runs.
           # Use MODEL_DATABASE: :memory: for an ephemeral in-memory database
-          MODEL_DATABASE: ./model.sqlite
+          MODEL_DATABASE: ':memory:'
 
           # The simulator can automatically add fees when generating quote responses. Use this
           # variable to control the fee amounts added. e.g. for a transfer of 100 USD a FEE_MULTIPLIER of 0.1
@@ -1661,9 +1661,9 @@ thirdparty-simulator:
                   "enabled": false
                 },
                 "creds": {
-                  "ca": "./secrets/dfsp_or_3ppi_client_cacert.pem",
-                  "cert": "./secrets/dfsp_or_3ppi_server_cert.pem",
-                  "key": "./secrets/dfsp_or_3ppi_server_key.key"
+                  "ca": "/secrets/dfsp_or_3ppi_client_cacert.pem",
+                  "cert": "/secrets/dfsp_or_3ppi_server_cert.pem",
+                  "key": "/secrets/dfsp_or_3ppi_server_key.key"
                 }
               }
             },
@@ -1675,9 +1675,9 @@ thirdparty-simulator:
                   "enabled": false
                 },
                 "creds": {
-                  "ca": "./secrets/hub_server_cacert.pem",
-                  "cert": "./secrets/dfsp_or_3ppi_client_cert.cer",
-                  "key": "./secrets/dfsp_or_3ppi_client_key.key"
+                  "ca": "/secrets/hub_server_cacert.pem",
+                  "cert": "/secrets/dfsp_or_3ppi_client_cert.cer",
+                  "key": "/secrets/dfsp_or_3ppi_client_key.key"
                 }
               }
             },
@@ -1717,7 +1717,7 @@ thirdparty-simulator:
               "sdkOutgoingUri": "$full_name-scheme-adapter:4001",
               "sdkOutgoingHttpScheme": "http",
               "sdkOutgoingPartiesInformationPath": "parties/{Type}/{ID}/{SubId}",
-              "sdkNotifyAboutTransferUri": "ml-testing-toolkit:5000/thirdpartyRequests/transactions/{ID}"
+              "sdkNotifyAboutTransferUri": "ml-testing-toolkit:4040/thirdpartyRequests/transactions/{ID}"
             },
             "pm4mlEnabled": false,
             "validateInboundJws": false,

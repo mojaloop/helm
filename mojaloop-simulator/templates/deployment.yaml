@@ -9,6 +9,7 @@
 {{- $initContainerEnv := dict "SIM_NAME" $name "SIM_SCHEME_ADAPTER_SERVICE_NAME" (printf "sim-%s-scheme-adapter" $name) "SIM_BACKEND_SERVICE_NAME" (printf "sim-%s-backend" $name) "SIM_CACHE_SERVICE_NAME" (printf "sim-%s-cache" $name) -}}
 {{- $cacheHost := default (printf "%s-cache" $fullName) $config.config.schemeAdapter.env.CACHE_HOST -}}
 {{- $cachePort := default "6379" $config.config.schemeAdapter.env.CACHE_PORT -}}
+{{- $cacheURL := (printf "redis://%s:%s" $cacheHost ($cachePort | toString)) -}}
 apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
 kind: Deployment
 metadata:
@@ -64,7 +65,7 @@ spec:
         command:
           - sh
           - "-c"
-          - {{ printf "until redis-cli -h %s -p %v ping; do echo waiting for Redis; sleep 2; done;" $cacheHost $cachePort }}
+          - {{ printf "until redis-cli -u %s ping; do echo waiting for Redis; sleep 2; done;" $cacheURL }}
       {{- end }}
 {{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.schemeAdapter.initContainers "dict" (merge $config.config.schemeAdapter.env $initContainerEnv)) | indent 6 }}
       containers:
@@ -105,11 +106,9 @@ spec:
         - name: tls-secrets
           mountPath: "/secrets/"
         env:
-        {{- if (not $config.config.schemeAdapter.env.CACHE_HOST) }}
-        ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
-        - name: CACHE_HOST
-          value: {{ printf "%s-cache" $fullName }}
-        {{- end}}
+        ## This is defined by the config.schemeAdapter.env.CACHE_HOST and config.schemeAdapter.env.CACHE_PORT as "redis://%s:%s" with defaults if one or neither are defined.
+        - name: CACHE_URL
+          value: {{ $cacheURL | quote }}
         {{- if (not $config.config.schemeAdapter.env.BACKEND_ENDPOINT) }}
         ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
         - name: BACKEND_ENDPOINT
@@ -219,7 +218,7 @@ spec:
 {{ toYaml $config.config.backend.resources | indent 10 }}
         volumeMounts:
         - name: {{ $prefix }}rules
-          mountPath: /rules/
+          mountPath: /opt/app/rules/
       volumes:
       - name: {{ $prefix }}rules
         configMap:
@@ -340,93 +339,10 @@ spec:
         command:
           - sh
           - "-c"
-          - {{ printf "until redis-cli -h %s -p %v ping; do echo waiting for Redis; sleep 2; done;" $cacheHost $cachePort }}
+          - {{ printf "until redis-cli -u %s ping; do echo waiting for Redis; sleep 2; done;" $cacheURL }}
       {{- end }}
 {{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.thirdpartysdk.initContainers "dict" (merge $config.config.thirdpartysdk.env $initContainerEnv)) | indent 6 }}
       containers:
-      # Inbound container
-#       - name: inbound
-#         image: "{{ $config.config.thirdpartysdk.image.repository }}:{{ $config.config.thirdpartysdk.image.tag }}"
-#         imagePullPolicy: {{ $config.config.thirdpartysdk.image.pullPolicy }}
-#         # TODO: make configurable
-#         command: {{ $config.config.thirdpartysdk.image.inboundCommand }}
-#         ports:
-#           - name: inbound
-#             containerPort: {{ $config.config.thirdpartysdk.env.INBOUND_LISTEN_PORT }}
-#             protocol: TCP
-#         {{- if $config.config.thirdpartysdk.readinessProbe.enabled }}
-#         readinessProbe:
-#           httpGet:
-#             path: /health
-#             port: {{ $config.config.thirdpartysdk.env.INBOUND_LISTEN_PORT }}
-#             scheme: HTTP
-#         {{- end }}
-#         {{- if $config.config.thirdpartysdk.livenessProbe.enabled }}
-#         livenessProbe:
-#           httpGet:
-#             path: /health
-#             port: {{ $config.config.thirdpartysdk.env.INBOUND_LISTEN_PORT }}
-#             scheme: HTTP
-#         {{- end }}
-#         volumeMounts:
-#         - name: {{ $fullName }}-thirdparty-sdk-config-volume
-#           mountPath: /opt/app/dist/config/production.json
-#           subPath: production.json
-#         env:
-#         {{- if (not $config.config.thirdpartysdk.env.REDIS_HOST) }}
-#         ## We only define this if it is not defined in config.thirdpartysdk.env, otherwise we may have duplicate env values!
-#         - name: REDIS_HOST
-#           value: {{ printf "%s-cache" $fullName }}
-#         {{- end}}
-#         ## Map environment values from values.yaml
-#         {{- range $k, $v := $config.config.thirdpartysdk.env }}
-#         - name: {{ $k }}
-#           value: {{ $v | quote | replace "$release_name" $releaseName }}
-#         {{- end }}
-#         resources:
-# {{ toYaml $config.config.thirdpartysdk.resources | indent 10 }}
-
-#       # Outbound Container
-#       - name: outbound
-#         image: "{{ $config.config.thirdpartysdk.image.repository }}:{{ $config.config.thirdpartysdk.image.tag }}"
-#         imagePullPolicy: {{ $config.config.thirdpartysdk.image.pullPolicy }}
-#         command: {{ $config.config.thirdpartysdk.image.outboundCommand }}
-#         ports:
-#           - name: outbound
-#             containerPort: {{ $config.config.thirdpartysdk.env.OUTBOUND_LISTEN_PORT }}
-#             protocol: TCP
-#         {{- if $config.config.thirdpartysdk.readinessProbe.enabled }}
-#         readinessProbe:
-#           httpGet:
-#             path: /health
-#             port: {{ $config.config.thirdpartysdk.env.OUTBOUND_LISTEN_PORT }}
-#             scheme: HTTP
-#         {{- end }}
-#         {{- if $config.config.thirdpartysdk.livenessProbe.enabled }}
-#         livenessProbe:
-#           httpGet:
-#             path: /health
-#             port: {{ $config.config.thirdpartysdk.env.OUTBOUND_LISTEN_PORT }}
-#             scheme: HTTP
-#         {{- end }}
-#         volumeMounts:
-#         - name: {{ $fullName }}-thirdparty-sdk-config-volume
-#           mountPath: /opt/app/dist/config/production.json
-#           subPath: production.json
-#         env:
-#         {{- if (not $config.config.schemeAdapter.env.REDIS_HOST) }}
-#         ## We only define this if it is not defined in config.schemeAdapter.env, otherwise we may have duplicate env values!
-#         - name: REDIS_HOST
-#           value: {{ printf "%s-cache" $fullName }}
-#         {{- end}}
-#         ## Map environment values from values.yaml
-#         {{- range $k, $v := $config.config.thirdpartysdk.env }}
-#         - name: {{ $k }}
-#           value: {{ $v | quote | replace "$release_name" $releaseName }}
-#         {{- end }}
-#         resources:
-# {{ toYaml $config.config.thirdpartysdk.resources | indent 10 }}
-
       # Combined container
       - name: thirdpartysdk
         image: "{{ $config.config.thirdpartysdk.image.repository }}:{{ $config.config.thirdpartysdk.image.tag }}"

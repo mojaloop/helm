@@ -94,7 +94,7 @@ spec:
             initialDelaySeconds: {{ .Values.containers.api.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.containers.api.livenessProbe.periodSeconds }}
           {{- end }}
-          env: 
+          env:
             - name: LOG_LEVEL
               value: {{ .Values.config.log_level }}
             - name: CSL_LOG_TRANSPORT
@@ -121,9 +121,9 @@ spec:
               value: {{ .Values.config.event_traceid_per_vendor | quote }}
           volumeMounts:
           - name: {{ template "centralsettlement-service.fullname" . }}-cfg-vol
-            mountPath: /opt/central-settlement/config
+            mountPath: /opt/app/config
           - name: {{ template "centralsettlement-service.fullname" . }}-rules-vol
-            mountPath: "/opt/central-settlement/{{ .Values.config.handlers.settings.scripts_folder }}"
+            mountPath: "/opt/app/{{ .Values.config.handlers.settings.scripts_folder }}"
         {{- if .Values.sidecar.enabled }}
         - name: {{ template "centralsettlement-service.name" . }}-sidecar
           image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
@@ -153,7 +153,7 @@ spec:
           {{- end }}
           volumeMounts:
             - name: {{ template "centralsettlement-service.fullname" . }}-sidecar-vol
-              mountPath: /opt/event-sidecar/config
+              mountPath: /opt/app/config
           env:
             - name: LOG_LEVEL
               value: {{ .Values.sidecar.config.log_level | quote }}
