@@ -250,7 +250,7 @@ More information can be found here:
 7. [#2717 - Thirdparty TTK Test-Collection is not repeatable](https://github.com/mojaloop/project/issues/2717)
 8. [#2846 - QA: Mojaloop TTK GP Test Collections to reset available liquidity after each run](https://github.com/mojaloop/project/issues/2846)
 
-## 7. Contributors
+## 9. Contributors
 
 - Organizations: BMGF, CrossLake, ModusBox
 - Individuals: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @kirgene, @lewisdaly, @tdaly61
