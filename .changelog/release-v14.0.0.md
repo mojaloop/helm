@@ -240,7 +240,17 @@ More information can be found here:
 
     Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](../thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
 
-## 8. Contributors
+## 8. Known Issues
+
+1. [#2119 - Idempotency for duplicate quote request](https://github.com/mojaloop/project/issues/2119)
+2. [#2322 - Helm install failing with with "medium to large" release names](https://github.com/mojaloop/project/issues/2322)
+3. [#2352 - Mojaloop Helm support for Kubernetes 1.22](https://github.com/mojaloop/project/issues/2352)
+4. [#2448 - Nginx Ingress Controller v1.0.0 is incompatible with Mojaloop Helm v13.0.x releases](https://github.com/mojaloop/project/issues/2448)
+5. [#2317 - Mojaloop Helm deployments are not compatible when deployed to ARM-arch based hosts](https://github.com/mojaloop/project/issues/2317)
+7. [#2717 - Thirdparty TTK Test-Collection is not repeatable](https://github.com/mojaloop/project/issues/2717)
+8. [#2846 - QA: Mojaloop TTK GP Test Collections to reset available liquidity after each run](https://github.com/mojaloop/project/issues/2846)
+
+## 7. Contributors
 
 - Organizations: BMGF, CrossLake, ModusBox
 - Individuals: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @kirgene, @lewisdaly, @tdaly61
