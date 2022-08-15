@@ -19,7 +19,7 @@
 ## 3. Application versions
 
 1. ml-api-adapter: v13.0.0 -> **v14.0.0**
-2. central-ledger: v13.16.1 -> **v16.1.0**
+2. central-ledger: v13.16.1 -> **v16.2.0**
 3. account-lookup-service: v13.0.0 -> **v14.0.0**
 4. quoting-service: v14.0.0 -> **15.0.2**
 5. central-settlement: 13.4.1 -> **v14.0.0**
