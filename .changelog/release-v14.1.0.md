@@ -6,8 +6,9 @@
 ## 1. New Features
 
 1. **mojaloop/#2092:** add bulk error handling notification callbacks ([#911](https://github.com/mojaloop/central-ledger/issues/911)) ([9ac6e1a](https://github.com/mojaloop/central-ledger/commit/9ac6e1afe3a72cbad0c1b5fc2a7a559d6435ce63))
-2. TBD...
-3. **Testing Toolkit:**:
+2. **mojaloop/#2801:** add fulfil timestamp validation and more error handling ([#916](https://github.com/mojaloop/central-ledger/issues/916)) ([336a0a2](https://github.com/mojaloop/central-ledger/commit/336a0a27e908eedeb0dcf8b171ad8c0edfb4c3d8))
+3. TBD...
+4. **Testing Toolkit:**:
     1. TBD...
 
 ## 2. Bug Fixes
@@ -48,7 +49,7 @@
 ## 4. Application release notes
 
 1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v14.0.0
-2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v15.1.0
+2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v16.2.0
 3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v14.0.0
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v15.0.2
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v14.0.0
