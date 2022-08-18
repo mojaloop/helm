@@ -13,8 +13,9 @@
 
 ## 2. Bug Fixes
 
-1. **mojaloop/#XXXX:** Some bug-fix example ([central-ledger/#XXXX](https://github.com/mojaloop/central-ledger/issues/XXXX)) ([central-ledger/XXXXX](https://github.com/mojaloop/central-ledger/commit/XXXX)), closes [mojaloop/#XXXX](https://github.com/mojaloop/project/issues/XXXX)
-2. **Testing Toolkit:**:
+1. **mojaloop/#2863:** fix put callback http code ([bulk-api-adapter/#89](https://github.com/mojaloop/bulk-api-adapter/issues/89)) ([c6699ad](https://github.com/mojaloop/bulk-api-adapter/commit/c6699ad695e0a4627fd76d4288b9ef6e64cd2130)), closes [mojaloop/#2863](https://github.com/mojaloop/project/issues/2863)
+2. **mojaloop/#XXXX:** Some bug-fix example ([central-ledger/#XXXX](https://github.com/mojaloop/central-ledger/issues/XXXX)) ([central-ledger/XXXXX](https://github.com/mojaloop/central-ledger/commit/XXXX)), closes [mojaloop/#XXXX](https://github.com/mojaloop/project/issues/XXXX)
+3. **Testing Toolkit:**:
     1. TBD...
 
 ## 3. Application versions
