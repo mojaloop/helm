@@ -72,7 +72,7 @@ sdk-scheme-adapter/issues/2478)
 2. central-ledger: v13.16.1 -> **v15.1.2.1-snapshot.1**
 3. account-lookup-service: v13.0.0 -> **v14.0.0**
 4. quoting-service: v14.0.0 -> **15.0.2**
-5. central-settlement: 13.4.1 -> **v14.0.0**
+5. central-settlement: 13.4.1 -> **v14.0.0.1-snapshot.1**
 6. central-event-processor: v11.0.2 -> **v12.0.0**
 7. bulk-api-adapter: v13.0.1 -> **v14.0.0**
 8. email-notifier: v11.0.2 -> **v12.0.0**
@@ -101,7 +101,7 @@ sdk-scheme-adapter/issues/2478)
 2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v15.1.0
 3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v14.0.0
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v15.0.2
-5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v14.0.0
+5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v14.0.0.1-snapshot.1
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v12.0.0
 7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v14.0.0
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.0
