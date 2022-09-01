@@ -1,5 +1,10 @@
 # Helm Release Notes
 
+Date | Revision | Description
+---------|----------|---------
+ 2022-07-29 | 0 | Initial release
+ 2022-09-01 | 1 | Updates for init-containers [mojaloop/#2909](https://github.com/mojaloop/project/issues/2909)
+
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
 
