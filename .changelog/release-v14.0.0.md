@@ -1,6 +1,7 @@
 # Helm Release Notes
 
-For breaking changes, please review the section `#4` "Breaking Changes" below.
+- For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
+- For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
 
 ## 1. New Features
 
@@ -240,9 +241,22 @@ More information can be found here:
 
     Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](../thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
 
-## 8. Contributors
+## 8. Known Issues
+
+1. [#2119 - Idempotency for duplicate quote request](https://github.com/mojaloop/project/issues/2119)
+2. [#2322 - Helm install failing with with "medium to large" release names](https://github.com/mojaloop/project/issues/2322)
+3. [#2352 - Mojaloop Helm support for Kubernetes 1.22](https://github.com/mojaloop/project/issues/2352)
+4. [#2448 - Nginx Ingress Controller v1.0.0 is incompatible with Mojaloop Helm v13.0.x releases](https://github.com/mojaloop/project/issues/2448)
+5. [#2317 - Mojaloop Helm deployments are not compatible when deployed to ARM-arch based hosts](https://github.com/mojaloop/project/issues/2317)
+6. Testing Toolkit Test Case issues causing instability/intermitant failures on Test Case Results
+    1. [#2717 - Thirdparty TTK Test-Collection is not repeatable](https://github.com/mojaloop/project/issues/2717)
+    2. [#2734 - Failures in daily cron job running GP tests](https://github.com/mojaloop/project/issues/2734)
+    3. [#2845 - QA: Replace Legacy-Simulator as a NORESPONSE_SIMPAYEE in Testing-Toolkit Goden Path Test-Suite](https://github.com/mojaloop/project/issues/2845)
+    4. [#2846 - QA: Mojaloop TTK GP Test Collections to reset available liquidity after each run](https://github.com/mojaloop/project/issues/2846)
+
+## 9. Contributors
 
 - Organizations: BMGF, CrossLake, ModusBox
-- Individuals: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @lewisdaly, @tdaly61
+- Individuals: @elnyry-sam-k, @mdebarros, @vijayg10, @shashi165, @kleyow, @kirgene, @lewisdaly, @tdaly61
 
 _Note: companies are in alphabetical order, individuals are in no particular order._
