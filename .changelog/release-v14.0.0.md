@@ -4,6 +4,7 @@ Date | Revision | Description
 ---------|----------|---------
  2022-07-29 | 0 | Initial release
  2022-09-01 | 1 | Updates for init-containers [mojaloop/#2909](https://github.com/mojaloop/project/issues/2909)
+ 2022-09-08 | 2 | Updates for [mojaloop/#2734](https://github.com/mojaloop/project/issues/2734), [mojaloop/#2880](https://github.com/mojaloop/project/issues/2880)
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
