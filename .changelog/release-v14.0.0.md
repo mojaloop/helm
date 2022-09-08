@@ -69,7 +69,7 @@ sdk-scheme-adapter/issues/2478)
 ## 3. Application versions
 
 1. ml-api-adapter: v13.0.0 -> **v14.0.0**
-2. central-ledger: v13.16.1 -> **v15.1.2.1-snapshot.3**
+2. central-ledger: v13.16.1 -> **v15.1.2.1**
 3. account-lookup-service: v13.0.0 -> **v14.0.0**
 4. quoting-service: v14.0.0 -> **15.0.2**
 5. central-settlement: 13.4.1 -> **v14.0.0.1-snapshot.1**
