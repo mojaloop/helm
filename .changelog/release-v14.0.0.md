@@ -4,6 +4,7 @@ Date | Revision | Description
 ---------|----------|---------
  2022-07-29 | 0 | Initial release
  2022-09-01 | 1 | Updates for init-containers [mojaloop/#2909](https://github.com/mojaloop/project/issues/2909)
+ 2022-09-08 | 2 | Updates for [mojaloop/#2734](https://github.com/mojaloop/project/issues/2734), [mojaloop/#2880](https://github.com/mojaloop/project/issues/2880)
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
@@ -69,10 +70,10 @@ sdk-scheme-adapter/issues/2478)
 ## 3. Application versions
 
 1. ml-api-adapter: v13.0.0 -> **v14.0.0**
-2. central-ledger: v13.16.1 -> **v15.1.2**
+2. central-ledger: v13.16.1 -> **v15.1.2.1**
 3. account-lookup-service: v13.0.0 -> **v14.0.0**
 4. quoting-service: v14.0.0 -> **15.0.2**
-5. central-settlement: 13.4.1 -> **v14.0.0**
+5. central-settlement: 13.4.1 -> **v15.0.0**
 6. central-event-processor: v11.0.2 -> **v12.0.0**
 7. bulk-api-adapter: v13.0.1 -> **v14.0.0**
 8. email-notifier: v11.0.2 -> **v12.0.0**
@@ -85,7 +86,7 @@ sdk-scheme-adapter/issues/2478)
 15. event-sidecar: **v12.0.0**
 16. event-stream-processor: v11.0.0-snapshot -> **v12.0.0-snapshot.7**
 17. simulator: 12.0.0 -> **v12.0.0**
-18. mojaloop-simulator: v12.1.1 -> **v13.0.0**
+18. mojaloop-simulator: v12.1.1 -> **v13.0.1**
 19. sdk-scheme-adapter: v11.18.11 -> **v18.0.2**
 20. ml-testing-toolkit: v14.0.4 -> **v15.0.0**
 21. ml-testing-toolkit-ui: v13.5.5 -> **v15.0.0**
@@ -101,7 +102,7 @@ sdk-scheme-adapter/issues/2478)
 2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v15.1.0
 3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v14.0.0
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v15.0.2
-5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v14.0.0
+5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v15.0.0
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v12.0.0
 7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v14.0.0
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.0
@@ -114,7 +115,7 @@ sdk-scheme-adapter/issues/2478)
 15. event-sidecar - https://github.com/mojaloop/event-sidecar/releases/tag/v12.0.0
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.7
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
-18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v13.0.0
+18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v13.0.1
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v18.0.2
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v15.0.0
 21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.0.0
