@@ -120,10 +120,10 @@ sdk-scheme-adapter/issues/2478)
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v15.0.0
 21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.0.0
 22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.0.0
-23. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v11.11.1
-24. als-consent-service - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.0.8
-25. thirdparty-api-svc - https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v11.21.0
-26. thirdparty-sdk-adapter - https://github.com/mojaloop/thirdparty-sdk/releases/tag/v11.55.1
+23. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v13.0.2
+24. als-consent-service - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.0
+25. thirdparty-api-svc - https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v13.0.2
+26. thirdparty-sdk-adapter - https://github.com/mojaloop/thirdparty-sdk/releases/tag/v15.1.0
 
 ## 5. Breaking changes
 
