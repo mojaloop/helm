@@ -320,13 +320,13 @@ initContainers: |
 
 readinessProbe: |
   httpGet:
-    path: /health
+    path: /
     port: {{ .Values.env.OUTBOUND_LISTEN_PORT }}
   initialDelaySeconds: 15
   periodSeconds: 15
 livenessProbe: |
   httpGet:
-    path: /health
+    path: /
     port: {{ .Values.env.OUTBOUND_LISTEN_PORT }}
   initialDelaySeconds: 15
   periodSeconds: 15
@@ -437,33 +437,33 @@ ingress:
   ##
   # extraPaths: []
   extraPaths:
-  - path: /inbound/*
+  - path: /inbound/
     pathType: ImplementationSpecific
     backend:
       service:
-        name: inboundapi
+        name: '{{ include "common.names.fullname" . }}'
         port:
           name: inboundapi
-      # serviceName: inboundapi
+      # serviceName: '{{ include "common.names.fullname" . }}'
       # servicePort: inboundapi
-  - path: /outbound/*
+  - path: /outbound/
     pathType: ImplementationSpecific
     backend:
       service:
-        name: outboundapi
+        name: '{{ include "common.names.fullname" . }}'
         port:
           name: outboundapi
-      # serviceName: outboundapi
+      # serviceName: '{{ include "common.names.fullname" . }}'
       # servicePort: outboundapi
-  - path: /sdktest/*
+  - path: /sdktest/
     pathType: ImplementationSpecific
     backend:
       service:
-        name: testapi
+        name: '{{ include "common.names.fullname" . }}'
         port:
           name: testapi
       ## This is required for 
-      # serviceName: testapi
+      # serviceName: '{{ include "common.names.fullname" . }}'
       # servicePort: testapi
   ## @param ingress.extraTls TLS configuration for additional hostname(s) to be covered with this ingress record
   ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
