@@ -72,6 +72,10 @@ livenessProbe:
 
 ## $snake_case values are dynamic
 config:
+  ## We can specify the files and folders here those we want to override in the TTK `spec_files` directory.
+  ## For example, you can specify user_config.json, system_config.json ...etc
+  ## Files inside the folders can be defined with fill path of the files with slashes replaced by two underscores `__`.
+  ## For example, `rules_response__default.json`, `rules_callback__default.json`, `rules_validation__default.json` ...etc
   user_config.json: {
     "VERSION": 1,
     "CALLBACK_ENDPOINT": "http://localhost:4000",
@@ -284,68 +288,9 @@ config:
       }
     ]
   }
-  rules_response__default.json: []
-  rules_callback__default.json: [
-    {
-      "ruleId": 1,
-      "priority": 1,
-      "description": "GVK1",
-      "apiVersion": {
-        "minorVersion": 1,
-        "majorVersion": 1,
-        "type": "fspiop",
-        "asynchronous": true
-      },
-      "conditions": {
-        "all": [
-          {
-            "fact": "headers",
-            "operator": "equal",
-            "value": "testingtoolkitdfsp",
-            "path": "FSPIOP-Source"
-          },
-          {
-            "fact": "headers",
-            "operator": "equal",
-            "value": "ttkpayeefsp",
-            "path": "FSPIOP-Destination"
-          },
-          {
-            "fact": "body",
-            "operator": "numericEqual",
-            "value": "104",
-            "path": "amount.amount"
-          },
-          {
-            "fact": "operationPath",
-            "operator": "equal",
-            "value": "/transfers"
-          },
-          {
-            "fact": "method",
-            "operator": "equal",
-            "value": "post"
-          }
-        ]
-      },
-      "event": {
-        "method": "put",
-        "path": "/transfers/{ID}",
-        "params": {
-          "headers": {
-            "FSPIOP-Destination": "doesnotexistfsp"
-          },
-          "scripts": {
-            "scriptingEngine": "postman"
-          }
-        },
-        "type": "MOCK_CALLBACK"
-      },
-      "type": "callback",
-      "version": 1
-    }
-  ]
-  rules_validation__default.json: []
+  # rules_response__default.json: []
+  # rules_callback__default.json: []
+  # rules_validation__default.json: []
 
 extraEnvironments: {}
 parameters: {}
