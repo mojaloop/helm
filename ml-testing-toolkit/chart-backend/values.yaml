@@ -33,7 +33,7 @@ replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit
   tag: v15.0.0
-  commandPersistence: '["sh", "-c", "cd /opt/app; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; else if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; fi; npm run start;"]'
+  commandPersistence: '["sh", "-c", "cd /opt/default_config; for FILE in *; do newFileName=/opt/app/spec_files/${FILE//__/\\/}; mkdir -p ${newFileName%/*}; cp $FILE $newFileName; done; cd /opt/app; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_bkp; ln -s /opt/ttk-data/spec_files spec_files; fi; npm run start;"]'
   command: '["sh", "-c", "cd /opt/default_config; for FILE in *; do newFileName=/opt/app/spec_files/${FILE//__/\\/}; mkdir -p ${newFileName%/*}; cp $FILE $newFileName; done; cd /opt/app; npm run start;"]'
 
   # command: '["npm", "run", "start"]'
