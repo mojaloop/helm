@@ -31,7 +31,7 @@ spec:
       http:
         paths:
           {{- if .Values.ingress.extraPaths }}
-          {{- toYaml .Values.ingress.extraPaths | nindent 10 }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.ingress.extraPaths "context" $) | nindent 10 }}
           {{- end }}
           - path: {{ .Values.ingress.path }}
             {{- if eq "true" (include "common.ingress.supportsPathType" .) }}
