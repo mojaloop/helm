@@ -12,6 +12,7 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
+  ingressClassName: nginx
   rules:
   {{- range $name, $customConfig := .Values.simulators }}
   {{- $fullName := printf "%s%s" (include "mojaloop-simulator.prefix" $) $name -}}
@@ -23,21 +24,33 @@ spec:
         http:
           paths:
           - path: /sim/{{ $name }}/outbound{{ $.Values.ingress.ingressPathRewriteRegex }}
+            pathType: ImplementationSpecific
             backend:
-              serviceName: {{ $fullName }}-scheme-adapter
-              servicePort: outboundapi
+              service:
+                name: {{ $fullName }}-scheme-adapter
+                port:
+                  number: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
           - path: /sim/{{ $name }}/inbound{{ $.Values.ingress.ingressPathRewriteRegex }}
+            pathType: ImplementationSpecific
             backend:
-              serviceName: {{ $fullName }}-scheme-adapter
-              servicePort: inboundapi
+              service:
+                name: {{ $fullName }}-scheme-adapter
+                port:
+                  number: {{ $config.config.schemeAdapter.env.INBOUND_LISTEN_PORT }}
           - path: /sim/{{ $name }}/sdktest{{ $.Values.ingress.ingressPathRewriteRegex }}
+            pathType: ImplementationSpecific
             backend:
-              serviceName: {{ $fullName }}-scheme-adapter
-              servicePort: testapi
+              service:
+                name: {{ $fullName }}-scheme-adapter
+                port:
+                  number: 3003
           - path: /sim/{{ $name }}/test{{ $.Values.ingress.ingressPathRewriteRegex }}
+            pathType: ImplementationSpecific
             backend:
-              serviceName: {{ $fullName }}-backend
-              servicePort: testapi
+              service:
+                name: {{ $fullName }}-backend
+                port:
+                  number: 3003
 
     {{- end }}
   {{- end }}

@@ -24,9 +24,9 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{- define "transaction-requests-service.apiVersion.Ingress" -}}
-  {{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" -}}
-    {{- print "networking.k8s.io/v1beta1" -}}
+  {{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" -}}
+    {{- print "networking.k8s.io/v1" -}}
   {{- else -}}
-    {{- print "extensions/v1beta1" -}}
+    {{- print "networking.k8s.io/v1" -}}
   {{- end -}}
 {{- end -}}

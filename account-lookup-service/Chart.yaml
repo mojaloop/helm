@@ -1,5 +1,31 @@
-apiVersion: v1
+apiVersion: v2
 version: 13.0.0
 appVersion: "account-lookup-service: v14.0.0; als-oracle-pathfinder: v12.0.0"
 description: Account Lookup Service Helm Chart for Mojaloop
 name: account-lookup-service
+dependencies:
+  -   name: account-lookup-service
+      version: 13.0.0
+      repository: "file://./chart-service"
+      condition: account-lookup-service.enabled
+  -   name: account-lookup-service-admin
+      version: 13.0.0
+      repository: "file://./chart-admin"
+      condition: account-lookup-service-admin.enabled
+  -   name: als-oracle-pathfinder
+      version: 12.0.0
+      repository: "file://../als-oracle-pathfinder"
+      condition: als-oracle-pathfinder.enabled
+  -   name: percona-xtradb-cluster
+      version: 1.0.8
+      repository: https://charts.helm.sh/stable
+      alias: mysql
+      condition: mysql.enabled
+  -   name: common
+      repository: https://docs.mojaloop.io/charts/repo
+      version: 2.0.0
+      tags:
+        -   moja-common
+maintainers:
+  -   name: Tom Daly
+      email: tomd@crosslaketech
