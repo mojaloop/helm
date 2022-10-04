@@ -115,19 +115,21 @@ env:
   MULTIPLE_PARTIES_RESPONSE: false
   AUTO_ACCEPT_PARTY: true
   AUTO_ACCEPT_QUOTES: true
-  MGMT_API_WS_URL: 127.0.0.1
   LOG_INDENT: 0
   OAUTH_REFRESH_SECONDS: 3600
-  PM4ML_ENABLED: true
-  ### Override all endpoints with a single Service
-  # PEER_ENDPOINT: ''
-  ### Set each endpoint service individually
-  ALS_ENDPOINT: '{{ .Release }}-account-lookup-service'
-  QUOTES_ENDPOINT: '{{ .Release }}-quoting-service'
-  BULK_QUOTES_ENDPOINT: '{{ .Release }}-quoting-service'
-  TRANSACTION_REQUESTS_ENDPOINT: '{{ .Release }}-transaction-requests-service'
-  TRANSFERS_ENDPOINT: '{{ .Release }}-api-adapter-servic'
-  BULK_TRANSFERS_ENDPOINT: '{{ .Release }}-bulk-api-adapter-service'
+  PM4ML_ENABLED: false
+  ### These configs are only applicable if PM4ML_ENABLED=true
+  MGMT_API_WS_URL: localhost
+  MGMT_API_WS_PORT: 4005
+  ### Default Mojaloop Switch endpoints
+  PEER_ENDPOINT: 'overridden-below'
+  ### Set each Mojaloop Switch endpoint service individually
+  ALS_ENDPOINT: '{{ .Release.Name }}-account-lookup-service'
+  QUOTES_ENDPOINT: '{{ .Release.Name }}-quoting-service'
+  BULK_QUOTES_ENDPOINT: '{{ .Release.Name }}-quoting-service'
+  TRANSACTION_REQUESTS_ENDPOINT: '{{ .Release.Name }}-transaction-requests-service'
+  TRANSFERS_ENDPOINT: '{{ .Release.Name }}-api-adapter-servic'
+  BULK_TRANSFERS_ENDPOINT: '{{ .Release.Name }}-bulk-api-adapter-service'
   ### Backend Service
   BACKEND_ENDPOINT: 'does-not-exist'
   ## API-SVC kafka config
@@ -142,7 +144,7 @@ env:
   FSPIOP_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-domain-events
   FSPIOP_EVENT_PRODUCER_TOPIC: payer-topic-sdk-outbound-domain-events
   ## outbound-command-event-handler
-  LOG_LEVEL: info
+  # LOG_LEVEL: info
   API_SERVER_ENABLED: true
   API_SERVER_PORT: 8000
   REDIS_CONNECTION_URL: redis://{{ .Values.redis.host }}:{{ .Values.redis.port }}
@@ -278,7 +280,7 @@ diagnosticMode:
 # initContainers: []
 initContainers: |
   - name: wait-for-kafka
-    image: solsson/kafka
+    image: solsson/kafka:2.8.1
     imagePullPolicy: IfNotPresent
     command:
       - sh
@@ -296,6 +298,25 @@ initContainers: |
         value: {{ .Values.kafka.host | quote }}
       - name: KAFKA_PORT
         value: {{ .Values.kafka.port | quote }}
+  - name: wait-for-redis
+    image: redis:7.0.5
+    imagePullPolicy: IfNotPresent
+    command:
+      - sh
+      - -c
+      - until redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} ping; 
+        do
+          echo --------------------;
+          echo Waiting for Redis...;
+          sleep 2; 
+        done;
+        echo ====================; 
+        echo Redis ok!;
+    env:
+      - name: REDIS_HOST
+        value: {{ .Values.redis.host | quote }}
+      - name: REDIS_PORT
+        value: {{ .Values.redis.port | quote }}
 
 readinessProbe: |
   httpGet:
