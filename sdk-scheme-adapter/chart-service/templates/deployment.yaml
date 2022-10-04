@@ -24,7 +24,7 @@ spec:
       {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.metrics.enabled }}
-        prometheus.io/port: {{ include "common.tplvalues.render" (dict "value" .Values.metrics.config.port "context" $) }}
+        prometheus.io/port: {{ include "common.tplvalues.render" (dict "value" .Values.metrics.config.port "context" $) | quote }}
         prometheus.io/scrape: "true"
       {{- end }}
       labels: {{- include "common.labels.standard" . | nindent 8 }}
@@ -114,21 +114,13 @@ spec:
             - name: debug
               containerPort: {{ .Values.diagnosticMode.debug.internalPort }}
           {{- end }}
-          {{- if .Values.readinessProbe.enabled }}
+          {{- if .Values.readinessProbe }}
           readinessProbe:
-            httpGet:
-              path: {{ .Values.readinessProbe.httpGet.path }}
-              port: {{ .Values.service.internalPort }}
-            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe "context" $) | nindent 12 }}
           {{- end }}
-          {{- if .Values.livenessProbe.enabled }}
+          {{- if .Values.livenessProbe }}
           livenessProbe:
-            httpGet:
-              path: {{ .Values.livenessProbe.httpGet.path }}
-              port: {{ .Values.service.internalPort }}
-            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe "context" $) | nindent 12 }}
           {{- end }}
           env:
             {{- if not (hasKey .Values.env "BACKEND_ENDPOINT") }}
