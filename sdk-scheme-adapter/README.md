@@ -49,13 +49,19 @@ The following-backend dependency are required for each of the following services
 Ensure that you configure the appropriate configurations to match the above in the [SDK-Scheme-Adapter values.yaml](./values.yaml):
 
    ```yaml
-      kafka:
-         host: <KAFKA_INSTALL_NAME>
-         port: 9092
+   kafka:
+      host: <KAFKA_INSTALL_NAME>-kafka
+      port: 9092
 
-      redis:
-         host: <REDIS_INSTALL_NAME>
-         port: 6379
+   redis:
+      host: <REDIS_INSTALL_NAME>-redis-master
+      port: 6379
+   ```
+
+Or alternatively one can install the chart by adding the following `--set` parameters:
+
+   ```bash
+   helm <NAMESPACE> install sdk . --set global.kafka.host=<KAFKA_INSTALL_NAME>-kafka --set global.redis.host=<REDIS_INSTALL_NAME>-redis-master
    ```
 
 ### Validation

@@ -13,10 +13,7 @@
 ## @param global.imagePullSecrets Global Docker registry secret names as an array
 ## @param global.storageClass Global StorageClass for Persistent Volume(s)
 ##
-global: {}
-
-sdk-scheme-adapter-api-svc:
-  enabled: true
+global:
   kafka:
     host: kafka
     port: 9092
@@ -24,10 +21,27 @@ sdk-scheme-adapter-api-svc:
   redis:
     host: redis
     port: 6379
+
+sdk-scheme-adapter-api-svc:
+  enabled: true
+
+  ## Set this if you want to use the global override
+  kafka: {}
+  ## Set this to override this specifically
+  # kafka:
+  #   host: kafka
+  #   port: 9092
+
+  ## Set this if you want to use the global override
+  redis: {}
+  ## Set this to override this specifically
+  # redis:
+  #   host: redis
+  #   port: 6379
     
   env:
     ## API-SVC general config
-    CACHE_URL: redis://{{ .Values.redis.host }}:{{ .Values.redis.port }}
+    CACHE_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
     INBOUND_LISTEN_PORT: 4000
     OUTBOUND_LISTEN_PORT: 4001
     ENABLE_TEST_FEATURES: true
@@ -61,10 +75,10 @@ sdk-scheme-adapter-api-svc:
     ### Backend Service
     BACKEND_ENDPOINT: 'does-not-exist'
     ## API-SVC kafka config
-    BACKEND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    BACKEND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    FSPIOP_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    FSPIOP_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
+    BACKEND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    BACKEND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    FSPIOP_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    FSPIOP_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     BACKEND_EVENT_CONSUMER_GROUP_ID: payer-domain_events_consumer_api_svc_backend_group
     FSPIOP_EVENT_CONSUMER_GROUP_ID: payer-domain_events_consumer_api_svc_fspiop_group
     BACKEND_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-domain-events
@@ -75,18 +89,18 @@ sdk-scheme-adapter-api-svc:
     # LOG_LEVEL: info
     API_SERVER_ENABLED: true
     API_SERVER_PORT: 8000
-    REDIS_CONNECTION_URL: redis://{{ .Values.redis.host }}:{{ .Values.redis.port }}
-    COMMAND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    DOMAIN_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
+    REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
+    COMMAND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    DOMAIN_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     MAX_ITEMS_PER_BATCH: 1000
     COMMAND_EVENT_CONSUMER_GROUP_ID: payer-command_events_consumer_group
     COMMAND_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-command-events
     DOMAIN_EVENT_PRODUCER_TOPIC: payer-topic-sdk-outbound-domain-events
     ## outbound-domain-event-handler
     # LOG_LEVEL: info
-    # REDIS_CONNECTION_URL: redis://{{ .Values.redis.host }}:{{ .Values.redis.port }}
-    DOMAIN_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    COMMAND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
+    # REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
+    DOMAIN_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    COMMAND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     DOMAIN_EVENT_CONSUMER_GROUP_ID: payer-domain_events_consumer_group
     DOMAIN_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-domain-events
     COMMAND_EVENT_PRODUCER_TOPIC: payer-topic-sdk-outbound-command-events
@@ -223,9 +237,9 @@ sdk-scheme-adapter-api-svc:
           echo Kafka ok!;
       env:
         - name: KAFKA_HOST
-          value: {{ .Values.kafka.host | quote }}
+          value: {{ .Values.kafka.host | default .Values.global.kafka.host | quote }}
         - name: KAFKA_PORT
-          value: {{ .Values.kafka.port | quote }}
+          value: {{ .Values.kafka.port | default .Values.global.kafka.port | quote }}
     - name: wait-for-redis
       image: redis:7.0.5
       imagePullPolicy: IfNotPresent
@@ -242,9 +256,9 @@ sdk-scheme-adapter-api-svc:
           echo Redis ok!;
       env:
         - name: REDIS_HOST
-          value: {{ .Values.redis.host | quote }}
+          value: {{ .Values.redis.host | default .Values.global.redis.host | quote }}
         - name: REDIS_PORT
-          value: {{ .Values.redis.port | quote }}
+          value: {{ .Values.redis.port | default .Values.global.redis.port | quote }}
 
   readinessProbe: |
     httpGet:
@@ -317,7 +331,7 @@ sdk-scheme-adapter-api-svc:
   ingress:
     ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
     ##
-    enabled: false
+    enabled: true
     ## @param ingress.pathType Ingress path type
     ##
     pathType: ImplementationSpecific
@@ -453,17 +467,24 @@ sdk-scheme-adapter-api-svc:
 
 sdk-scheme-adapter-dom-evt-handler:
   enabled: true
-  kafka:
-    host: kafka
-    port: 9092
 
-  redis:
-    host: redis
-    port: 6379
-    
+  ## Set this if you want to use the global override
+  kafka: {}
+  ## Set this to override this specifically
+  # kafka:
+  #   host: kafka
+  #   port: 9092
+
+  ## Set this if you want to use the global override
+  redis: {}
+  ## Set this to override this specifically
+  # redis:
+  #   host: redis
+  #   port: 6379
+
   env:
     ## API-SVC general config
-    CACHE_URL: redis://{{ .Values.redis.host }}:{{ .Values.redis.port }}
+    CACHE_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
     INBOUND_LISTEN_PORT: 4000
     OUTBOUND_LISTEN_PORT: 4001
     ENABLE_TEST_FEATURES: true
@@ -497,10 +518,10 @@ sdk-scheme-adapter-dom-evt-handler:
     ### Backend Service
     BACKEND_ENDPOINT: 'does-not-exist'
     ## API-SVC kafka config
-    BACKEND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    BACKEND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    FSPIOP_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    FSPIOP_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
+    BACKEND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    BACKEND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    FSPIOP_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    FSPIOP_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     BACKEND_EVENT_CONSUMER_GROUP_ID: payer-domain_events_consumer_api_svc_backend_group
     FSPIOP_EVENT_CONSUMER_GROUP_ID: payer-domain_events_consumer_api_svc_fspiop_group
     BACKEND_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-domain-events
@@ -511,18 +532,18 @@ sdk-scheme-adapter-dom-evt-handler:
     # LOG_LEVEL: info
     API_SERVER_ENABLED: true
     API_SERVER_PORT: 8000
-    REDIS_CONNECTION_URL: redis://{{ .Values.redis.host }}:{{ .Values.redis.port }}
-    COMMAND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    DOMAIN_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
+    REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
+    COMMAND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    DOMAIN_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     MAX_ITEMS_PER_BATCH: 1000
     COMMAND_EVENT_CONSUMER_GROUP_ID: payer-command_events_consumer_group
     COMMAND_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-command-events
     DOMAIN_EVENT_PRODUCER_TOPIC: payer-topic-sdk-outbound-domain-events
     ## outbound-domain-event-handler
     # LOG_LEVEL: info
-    # REDIS_CONNECTION_URL: redis://{{ .Values.redis.host }}:{{ .Values.redis.port }}
-    DOMAIN_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    COMMAND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
+    # REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
+    DOMAIN_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    COMMAND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     DOMAIN_EVENT_CONSUMER_GROUP_ID: payer-domain_events_consumer_group
     DOMAIN_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-domain-events
     COMMAND_EVENT_PRODUCER_TOPIC: payer-topic-sdk-outbound-command-events
@@ -659,9 +680,9 @@ sdk-scheme-adapter-dom-evt-handler:
           echo Kafka ok!;
       env:
         - name: KAFKA_HOST
-          value: {{ .Values.kafka.host | quote }}
+          value: {{ .Values.kafka.host | default .Values.global.kafka.host | quote }}
         - name: KAFKA_PORT
-          value: {{ .Values.kafka.port | quote }}
+          value: {{ .Values.kafka.port | default .Values.global.kafka.port | quote }}
     - name: wait-for-redis
       image: redis:7.0.5
       imagePullPolicy: IfNotPresent
@@ -678,9 +699,9 @@ sdk-scheme-adapter-dom-evt-handler:
           echo Redis ok!;
       env:
         - name: REDIS_HOST
-          value: {{ .Values.redis.host | quote }}
+          value: {{ .Values.redis.host | default .Values.global.redis.host | quote }}
         - name: REDIS_PORT
-          value: {{ .Values.redis.port | quote }}
+          value: {{ .Values.redis.port | default .Values.global.redis.port | quote }}
 
   ## TODO: uncomment with correct port once health end-point is enabled
   readinessProbe: false
@@ -893,17 +914,24 @@ sdk-scheme-adapter-dom-evt-handler:
 
 sdk-scheme-adapter-cmd-evt-handler:
   enabled: true
-  kafka:
-    host: kafka
-    port: 9092
 
-  redis:
-    host: redis
-    port: 6379
-    
+  ## Set this if you want to use the global override
+  kafka: {}
+  ## Set this to override this specifically
+  # kafka:
+  #   host: kafka
+  #   port: 9092
+
+  ## Set this if you want to use the global override
+  redis: {}
+  ## Set this to override this specifically
+  # redis:
+  #   host: redis
+  #   port: 6379
+
   env:
     ## API-SVC general config
-    CACHE_URL: redis://{{ .Values.redis.host }}:{{ .Values.redis.port }}
+    CACHE_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
     INBOUND_LISTEN_PORT: 4000
     OUTBOUND_LISTEN_PORT: 4001
     ENABLE_TEST_FEATURES: true
@@ -937,10 +965,10 @@ sdk-scheme-adapter-cmd-evt-handler:
     ### Backend Service
     BACKEND_ENDPOINT: 'does-not-exist'
     ## API-SVC kafka config
-    BACKEND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    BACKEND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    FSPIOP_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    FSPIOP_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
+    BACKEND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    BACKEND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    FSPIOP_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    FSPIOP_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     BACKEND_EVENT_CONSUMER_GROUP_ID: payer-domain_events_consumer_api_svc_backend_group
     FSPIOP_EVENT_CONSUMER_GROUP_ID: payer-domain_events_consumer_api_svc_fspiop_group
     BACKEND_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-domain-events
@@ -951,18 +979,18 @@ sdk-scheme-adapter-cmd-evt-handler:
     # LOG_LEVEL: info
     API_SERVER_ENABLED: true
     API_SERVER_PORT: 8000
-    REDIS_CONNECTION_URL: redis://{{ .Values.redis.host }}:{{ .Values.redis.port }}
-    COMMAND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    DOMAIN_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
+    REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
+    COMMAND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    DOMAIN_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     MAX_ITEMS_PER_BATCH: 1000
     COMMAND_EVENT_CONSUMER_GROUP_ID: payer-command_events_consumer_group
     COMMAND_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-command-events
     DOMAIN_EVENT_PRODUCER_TOPIC: payer-topic-sdk-outbound-domain-events
     ## outbound-domain-event-handler
     # LOG_LEVEL: info
-    # REDIS_CONNECTION_URL: redis://{{ .Values.redis.host }}:{{ .Values.redis.port }}
-    DOMAIN_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
-    COMMAND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host }}:{{ .Values.kafka.port }}"
+    # REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
+    DOMAIN_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+    COMMAND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     DOMAIN_EVENT_CONSUMER_GROUP_ID: payer-domain_events_consumer_group
     DOMAIN_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-domain-events
     COMMAND_EVENT_PRODUCER_TOPIC: payer-topic-sdk-outbound-command-events
@@ -1099,9 +1127,9 @@ sdk-scheme-adapter-cmd-evt-handler:
           echo Kafka ok!;
       env:
         - name: KAFKA_HOST
-          value: {{ .Values.kafka.host | quote }}
+          value: {{ .Values.kafka.host | default .Values.global.kafka.host | quote }}
         - name: KAFKA_PORT
-          value: {{ .Values.kafka.port | quote }}
+          value: {{ .Values.kafka.port | default .Values.global.kafka.port | quote }}
     - name: wait-for-redis
       image: redis:7.0.5
       imagePullPolicy: IfNotPresent
@@ -1118,9 +1146,9 @@ sdk-scheme-adapter-cmd-evt-handler:
           echo Redis ok!;
       env:
         - name: REDIS_HOST
-          value: {{ .Values.redis.host | quote }}
+          value: {{ .Values.redis.host | default .Values.global.redis.host | quote }}
         - name: REDIS_PORT
-          value: {{ .Values.redis.port | quote }}
+          value: {{ .Values.redis.port | default .Values.global.redis.port | quote }}
 
   readinessProbe: |
     httpGet:
