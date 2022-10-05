@@ -25,9 +25,38 @@ It compromises of three distinct micro-services:
 The following-backend dependency are required for each of the following services.
 
 1. Redis - used as a persistent state store, and for correlating async-to-sync requests/responses using the pub-sub mechanisms.
+
+   An example for installing the [Bitnami Redis Helm Chart](https://github.com/bitnami/charts/tree/master/bitnami/redis) can be done as follows:
+
+   ```bash
+   helm repo add bitnami https://charts.bitnami.com/bitnami
+   helm -n <DESTINATION_NAMESPACE> install <KAFKA_INSTALL_NAME> bitnami/kafka --set persistence.enabled=false --set zookeeper.persistence.enabled=false
+   ```
+
+   _IMPORTANT: The above command includes config changes to deploy a single instance with disable persistence, etc which is not recommended for Production grade installations. Please refer to the [Bitnami Kafka values.yaml](https://github.com/bitnami/charts/blob/master/bitnami/kafka/values.yaml) for available configuration parameters._
+
 2. Kafka - used for pub-sub all Domain and Command events.
 
-<!-- TODO: provides instructions on how to deploy/configure -->
+   An example for installing the [Bitnami Kafka Helm Chart](https://github.com/bitnami/charts/tree/master/bitnami/redis) can be done as follows:
+
+   ```bash
+   helm repo add bitnami https://charts.bitnami.com/bitnami
+   helm -n <DESTINATION_NAMESPACE> install <REDIS_INSTALL_NAME> bitnami/redis --set architecture=standalone --set master.persistence.enabled=false
+   ```
+
+   _IMPORTANT: The above command includes config changes to deploy a single instance with disable persistence, etc which is not recommended for Production grade installations. Please refer to the [Bitnami Redis values.yaml](https://github.com/bitnami/charts/blob/master/bitnami/kafka/values.yaml) for available configuration parameters._
+
+Ensure that you configure the appropriate configurations to match the above in the [SDK-Scheme-Adapter values.yaml](./values.yaml):
+
+   ```yaml
+      kafka:
+         host: <KAFKA_INSTALL_NAME>
+         port: 9092
+
+      redis:
+         host: <REDIS_INSTALL_NAME>
+         port: 6379
+   ```
 
 ### Validation
 
