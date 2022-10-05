@@ -32,9 +32,9 @@ dependencies:
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit
-  tag: v15.0.0
-  commandPersistence: '["sh", "-c", "cd /opt/app; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_default; ln -s /opt/ttk-data/spec_files spec_files; else if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; fi; npm run start;"]'
-  command: '["sh", "-c", "cd /opt/app; if [ -f /opt/default_config/user_config.json ]; then cp /opt/default_config/user_config.json spec_files; fi; if [ -f /opt/default_config/system_config.json ]; then cp /opt/default_config/system_config.json spec_files; fi; npm run start;"]'
+  tag: v15.1.0
+  commandPersistence: '["sh", "-c", "cd /opt/default_config; for FILE in *; do newFileName=/opt/app/spec_files/${FILE//__/\\/}; mkdir -p ${newFileName%/*}; firstLine=$(head -n 1 $FILE | tr -d \\\"); regex=\"^(http|https|ftp)://\"; if [[ \"$firstLine\" =~ $regex ]]; then wget $firstLine -O $newFileName; else cp $FILE $newFileName; fi; done; cd /opt/app; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_bkp; ln -s /opt/ttk-data/spec_files spec_files; fi; npm run start;"]'
+  command: '["sh", "-c", "cd /opt/default_config; for FILE in *; do newFileName=/opt/app/spec_files/${FILE//__/\\/}; mkdir -p ${newFileName%/*}; firstLine=$(head -n 1 $FILE | tr -d \\\"); regex=\"^(http|https|ftp)://\"; if [[ \"$firstLine\" =~ $regex ]]; then wget $firstLine -O $newFileName; else cp $FILE $newFileName; fi; done; cd /opt/app; npm run start;"]'
 
   # command: '["npm", "run", "start"]'
 ## Optionally specify an array of imagePullSecrets.
@@ -72,6 +72,13 @@ livenessProbe:
 
 ## $snake_case values are dynamic
 config:
+  ## We can specify the files and folders here those we want to override in the TTK `spec_files` directory.
+  ## For example, you can specify user_config.json, system_config.json ...etc
+  ## Files inside the folders can be defined with full path of the files with slashes replaced by two underscores `__`.
+  ## For example, `rules_response__default.json`, `rules_callback__default.json`, `rules_validation__default.json` ...etc
+  ## We can pass the JSON content as the value for the parameters
+  ## Or we can pass a http/https URL for the JSON file as the value for the parameters. Then the file will be downloaded and replaced in the corresponding location.
+  ## Ex: rules_callback__default.json: "https://raw.githubusercontent.com/mojaloop/ml-testing-toolkit/master/spec_files/rules_callback/default.json"
   user_config.json: {
     "VERSION": 1,
     "CALLBACK_ENDPOINT": "http://localhost:4000",
@@ -284,6 +291,9 @@ config:
       }
     ]
   }
+  # rules_response__default.json: []
+  # rules_callback__default.json: []
+  # rules_validation__default.json: []
 
 extraEnvironments: {}
 parameters: {}
