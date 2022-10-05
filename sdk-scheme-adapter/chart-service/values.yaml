@@ -38,39 +38,147 @@ redis: {}
 
 env:
   ## API-SVC general config
-  CACHE_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
+  # Port number that the inbound (Mojaloop API) HTTP server will listen on
   INBOUND_LISTEN_PORT: 4000
+
+  # Port number that the outbound (simplified DFSP outbound API) HTTP server will listen on
   OUTBOUND_LISTEN_PORT: 4001
-  ENABLE_TEST_FEATURES: true
-  TEST_LISTEN_PORT: 4002
+
+  # Enable mutual TLS authentication. Useful when not running in a secure
+  # environment, i.e. when you're running it locally against your own implementation.
   INBOUND_MUTUAL_TLS_ENABLED: false
   OUTBOUND_MUTUAL_TLS_ENABLED: false
+
+  # Enable verification or incoming JWS signatures
+  # Note that signatures will be required on incoming messages
+  # and will be validated against a public key.
+  VALIDATE_INBOUND_JWS: false
+
+  # applicable only if VALIDATE_INBOUND_JWS is "true"
+  # allows disabling of validation on incoming PUT /parties/{idType}/{idValue} requests
+  VALIDATE_INBOUND_PUT_PARTIES_JWS: false
+
+  # Enable signing of outgoing requests
   JWS_SIGN: false
-  OAUTH_TOKEN_ENDPOINT: test
-  OAUTH_CLIENT_KEY: test
-  OAUTH_CLIENT_SECRET: test
-  WS_PORT: 4005
-  METRICS_SERVER_LISTEN_PORT: 4004
-  MULTIPLE_PARTIES_RESPONSE: false
-  AUTO_ACCEPT_PARTY: true
-  AUTO_ACCEPT_QUOTES: true
+
+  # applicable only if JWS_SIGN is "true"
+  # allows disabling of signing on outgoing PUT /parties/{idType}/{idValue} requests
+  JWS_SIGN_PUT_PARTIES: false
+
+  # Path to JWS signing key (private key of THIS DFSP)
+  JWS_SIGNING_KEY_PATH: secrets/jwsSigningKey.key
+  JWS_VERIFICATION_KEYS_DIRECTORY: secrets/jwsVerificationKeys
+
+  # Location of certs and key required for TLS
+  # IN_CA_CERT_PATH:./secrets/cacert.pem
+  # IN_SERVER_CERT_PATH:./secrets/servercert.pem
+  # IN_SERVER_KEY_PATH:./secrets/serverkey.pem
+
+  # OUT_CA_CERT_PATH:./secrets/cacert.pem
+  # OUT_CLIENT_CERT_PATH:./secrets/servercert.pem
+  # OUT_CLIENT_KEY_PATH:./secrets/serverkey.pem
+
+  # The number of space characters by which to indent pretty-printed logs. If set to zero, log events
+  # will each be printed on a single line.
   LOG_INDENT: 0
-  OAUTH_REFRESH_SECONDS: 3600
-  PM4ML_ENABLED: false
-  ### These configs are only applicable if PM4ML_ENABLED=true
-  MGMT_API_WS_URL: localhost
-  MGMT_API_WS_PORT: 4005
-  ### Default Mojaloop Switch endpoints
-  PEER_ENDPOINT: 'overridden-below'
+
+  # REDIS CACHE CONNECTION
+  CACHE_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
+  CACHE_SHOULD_EXPIRE: false
+  CACHE_EXPIRY_SECONDS: 3600
+
+  # SWITCH ENDPOINT
+  # The option 'PEER_ENDPOINT' has no effect if the remaining options 'ALS_ENDPOINT', 'QUOTES_ENDPOINT',
+  # 'BULK_QUOTES_ENDPOINT', 'TRANSFERS_ENDPOINT', 'BULK_TRANSFERS_ENDPOINT', 'TRANSACTION_REQUESTS_ENDPOINT' are specified.
+  PEER_ENDPOINT: localhost:4000
+
   ### Set each Mojaloop Switch endpoint service individually
   ALS_ENDPOINT: '{{ .Release.Name }}-account-lookup-service'
   QUOTES_ENDPOINT: '{{ .Release.Name }}-quoting-service'
   BULK_QUOTES_ENDPOINT: '{{ .Release.Name }}-quoting-service'
   TRANSACTION_REQUESTS_ENDPOINT: '{{ .Release.Name }}-transaction-requests-service'
-  TRANSFERS_ENDPOINT: '{{ .Release.Name }}-api-adapter-servic'
+  TRANSFERS_ENDPOINT: '{{ .Release.Name }}-api-adapter-service'
   BULK_TRANSFERS_ENDPOINT: '{{ .Release.Name }}-bulk-api-adapter-service'
-  ### Backend Service
-  BACKEND_ENDPOINT: 'does-not-exist'
+
+  # BACKEND ENDPOINT
+  BACKEND_ENDPOINT: localhost:4000
+
+  # FSPID of this DFSP
+  DFSP_ID: mojaloop-sdk
+
+  # Secret used for generation and verification of secure ILP
+  ILP_SECRET: Quaixohyaesahju3thivuiChai5cahng
+
+  # expiry period in seconds for quote and transfers issued by the SDK
+  EXPIRY_SECONDS: 60
+
+  # if set to false the SDK will not automatically accept all returned quotes
+  # but will halt the transfer after a quote response is received. A further
+  # confirmation call will be required to complete the final transfer stage.
+  AUTO_ACCEPT_QUOTES: false
+
+  # if set to false the SDK will not automatically accept a resolved party
+  # but will halt the transer after a party lookup response is received. A further
+  # cnofirmation call will be required to progress the transfer to quotes state.
+  AUTO_ACCEPT_PARTY: false
+
+  # when set to true, when sending money via the outbound API, the SDK will use the value
+  # of FSPIOP-Source header from the received quote response as the payeeFsp value in the
+  # transfer prepare request body instead of the value received in the payee party lookup.
+  # This behaviour should be enabled when the SDK user DFSP is in a forex enabled switch
+  # ecosystem and expects quotes and transfers to be rerouted by the switch to forex
+  # entities i.e. forex providing DFSPs. Please see the SDK documentation and switch
+  # operator documentation for more information on forex use cases.
+  USE_QUOTE_SOURCE_FSP_AS_TRANSFER_PAYEE_FSP: false
+
+  # set to true to validate ILP, otherwise false to ignore ILP
+  CHECK_ILP: true
+
+  # set to true to enable test features such as request cacheing and retrieval endpoints
+  ENABLE_TEST_FEATURES: false
+
+  # set to true to mock WSO2 oauth2 token endpoint
+  ENABLE_OAUTH_TOKEN_ENDPOINT: false
+  OAUTH_TOKEN_ENDPOINT_CLIENT_KEY: test-client-key
+  OAUTH_TOKEN_ENDPOINT_CLIENT_SECRET: test-client-secret
+  OAUTH_TOKEN_ENDPOINT_LISTEN_PORT: 6000
+
+  # WSO2 Bearer Token specific to golden-fsp instance and environment
+  WSO2_BEARER_TOKEN: 7718fa9b-be13-3fe7-87f0-a12cf1628168
+
+  # OAuth2 data used to obtain WSO2 bearer token
+  OAUTH_TOKEN_ENDPOINT:
+  OAUTH_CLIENT_KEY:
+  OAUTH_CLIENT_SECRET:
+  OAUTH_REFRESH_SECONDS: 3600
+
+  # Set to true to respect expirity timestamps
+  REJECT_EXPIRED_QUOTE_RESPONSES: false
+  REJECT_TRANSFERS_ON_EXPIRED_QUOTES: false
+  REJECT_EXPIRED_TRANSFER_FULFILS: false
+
+  # Timeout for GET/POST/DELETE - PUT flow processing
+  REQUEST_PROCESSING_TIMEOUT_SECONDS: 4
+
+  # To allow transfer without a previous quote request, set this value to true.
+  # The incoming transfer request should consists of an ILP packet and a matching condition in this case.
+  # The fulfilment will be generated from the provided ILP packet, and must hash to the provided condition.
+  ALLOW_TRANSFER_WITHOUT_QUOTE: false
+
+  # To enable request for notification on fulfiled transfer
+  RESERVE_NOTIFICATION: true
+  # resources API versions should be string in format: "resourceOneName=1.0,resourceTwoName=1.1"
+  RESOURCE_VERSIONS: transfers=1.1,participants=1.1
+
+  # Management API websocket connection settings.
+  # The Management API uses this for exchanging connector management messages.
+  MGMT_API_WS_URL: 127.0.0.1
+  MGMT_API_WS_PORT: 4005
+
+  # Set to true to enable the use of PM4ML-related services e.g MCM, Management API service
+  # when running the scheme-adapter as a mojaloop connector component within Payment Manager for Mojaloop.
+  PM4ML_ENABLED: false
+
   ## API-SVC kafka config
   BACKEND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
   BACKEND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
@@ -82,6 +190,7 @@ env:
   BACKEND_EVENT_PRODUCER_TOPIC: payer-topic-sdk-outbound-domain-events
   FSPIOP_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-domain-events
   FSPIOP_EVENT_PRODUCER_TOPIC: payer-topic-sdk-outbound-domain-events
+  
   ## outbound-command-event-handler
   # LOG_LEVEL: info
   API_SERVER_ENABLED: true
@@ -93,6 +202,7 @@ env:
   COMMAND_EVENT_CONSUMER_GROUP_ID: payer-command_events_consumer_group
   COMMAND_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-command-events
   DOMAIN_EVENT_PRODUCER_TOPIC: payer-topic-sdk-outbound-domain-events
+
   ## outbound-domain-event-handler
   # LOG_LEVEL: info
   # REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
@@ -183,7 +293,15 @@ image:
 replicaCount: 1
 command: 
   - yarn
+  ## Start ALL APIs and Handlers
   - start
+  ## Start only the SDK-Scheme-Adapter API Service
+  # - start:api-svc
+  ## Start only the Outbound Domain Event Handler
+  # - start:event-handler
+  ## Start only the Outbound Command Event Handler
+  # - start:command-handler
+
 
 ## Enable diagnostic mode in the deployment
 ##
