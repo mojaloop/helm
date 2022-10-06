@@ -13,6 +13,7 @@ find ./ -name "charts"| xargs rm -Rf
 find ./ -name "tmpcharts"| xargs rm -Rf
 
 declare -a charts=(
+    sdk-scheme-adapter
     eventstreamprocessor
     monitoring/promfana
     monitoring/efk
