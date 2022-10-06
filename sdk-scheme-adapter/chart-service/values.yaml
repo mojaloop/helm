@@ -21,6 +21,7 @@ global:
   redis:
     host: redis
     port: 6379
+    database: 0 # This is a number between 0 to 15
 
 ## Set this if you want to use the global override
 kafka: {}
@@ -35,6 +36,7 @@ redis: {}
 # redis:
 #   host: redis
 #   port: 6379
+#   database: 0 # This is a number between 0 to 15
 
 env:
   ## API-SVC general config
@@ -83,7 +85,7 @@ env:
   LOG_INDENT: 0
 
   # REDIS CACHE CONNECTION
-  CACHE_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
+  CACHE_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
   CACHE_SHOULD_EXPIRE: false
   CACHE_EXPIRY_SECONDS: 3600
 
@@ -184,33 +186,33 @@ env:
   BACKEND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
   FSPIOP_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
   FSPIOP_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
-  BACKEND_EVENT_CONSUMER_GROUP_ID: payer-domain_events_consumer_api_svc_backend_group
-  FSPIOP_EVENT_CONSUMER_GROUP_ID: payer-domain_events_consumer_api_svc_fspiop_group
-  BACKEND_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-domain-events
-  BACKEND_EVENT_PRODUCER_TOPIC: payer-topic-sdk-outbound-domain-events
-  FSPIOP_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-domain-events
-  FSPIOP_EVENT_PRODUCER_TOPIC: payer-topic-sdk-outbound-domain-events
+  BACKEND_EVENT_CONSUMER_GROUP_ID: '{{ include "common.names.name" . }}-domain_events_consumer_api_svc_backend_group'
+  FSPIOP_EVENT_CONSUMER_GROUP_ID: '{{ include "common.names.name" . }}-domain_events_consumer_api_svc_fspiop_group'
+  BACKEND_EVENT_CONSUMER_TOPICS: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
+  BACKEND_EVENT_PRODUCER_TOPIC: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
+  FSPIOP_EVENT_CONSUMER_TOPICS: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
+  FSPIOP_EVENT_PRODUCER_TOPIC: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
   
   ## outbound-command-event-handler
   # LOG_LEVEL: info
   API_SERVER_ENABLED: true
   API_SERVER_PORT: 8000
-  REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
+  REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
   COMMAND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
   DOMAIN_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
   MAX_ITEMS_PER_BATCH: 1000
-  COMMAND_EVENT_CONSUMER_GROUP_ID: payer-command_events_consumer_group
-  COMMAND_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-command-events
-  DOMAIN_EVENT_PRODUCER_TOPIC: payer-topic-sdk-outbound-domain-events
+  COMMAND_EVENT_CONSUMER_GROUP_ID: '{{ include "common.names.name" . }}-command_events_consumer_group'
+  COMMAND_EVENT_CONSUMER_TOPICS: '{{ include "common.names.name" . }}-topic-sdk-outbound-command-events'
+  DOMAIN_EVENT_PRODUCER_TOPIC: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
 
   ## outbound-domain-event-handler
   # LOG_LEVEL: info
-  # REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}
-  DOMAIN_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
-  COMMAND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
-  DOMAIN_EVENT_CONSUMER_GROUP_ID: payer-domain_events_consumer_group
-  DOMAIN_EVENT_CONSUMER_TOPICS: payer-topic-sdk-outbound-domain-events
-  COMMAND_EVENT_PRODUCER_TOPIC: payer-topic-sdk-outbound-command-events
+  # REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
+  DOMAIN_EVENT_CONSUMER_BROKER_LIST: '{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
+  COMMAND_EVENT_PRODUCER_BROKER_LIST: '{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
+  DOMAIN_EVENT_CONSUMER_GROUP_ID: '{{ include "common.names.name" . }}-domain_events_consumer_group'
+  DOMAIN_EVENT_CONSUMER_TOPICS: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
+  COMMAND_EVENT_PRODUCER_TOPIC: '{{ include "common.names.name" . }}-topic-sdk-outbound-command-events'
 
 podAffinityPreset: ""
 ## @param podAntiAffinityPreset Pod anti-affinity preset. Ignored if `main.affinity` is set. Allowed values: `soft` or `hard`
@@ -272,7 +274,7 @@ containerSecurityContext:
 image:
   registry: docker.io
   repository: mojaloop/sdk-scheme-adapter
-  tag: v20.0.0-bulk-snapshot.17
+  tag: v20.0.0-bulk-snapshot.19
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
