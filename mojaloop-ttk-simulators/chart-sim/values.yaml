@@ -1,1 +1,1056 @@
 # This is a YAML-formatted file.
+
+global:
+  kafka:
+    host: kafka
+    port: 9092
+
+  redis:
+    host: redis-master
+    port: 6379
+    database: 0 # This is a number between 0 to 15
+
+sdk-scheme-adapter:
+  enabled: true
+
+  sdk-scheme-adapter-api-svc:
+    enabled: true
+    ## Set this if you want to use the global override
+    kafka: {}
+    ## Set this to override this specifically
+    # kafka:
+    #   host: kafka
+    #   port: 9092
+
+    ## Set this if you want to use the global override
+    redis: {}
+    ## Set this to override this specifically
+    # redis:
+    #   host: redis
+    #   port: 6379
+    #   database: 0 # This is a number between 0 to 15
+      
+    env:
+      ## API-SVC general config
+      # Port number that the inbound (Mojaloop API) HTTP server will listen on
+      INBOUND_LISTEN_PORT: 4000
+
+      # Port number that the outbound (simplified DFSP outbound API) HTTP server will listen on
+      OUTBOUND_LISTEN_PORT: 4001
+
+      # Enable mutual TLS authentication. Useful when not running in a secure
+      # environment, i.e. when you're running it locally against your own implementation.
+      INBOUND_MUTUAL_TLS_ENABLED: false
+      OUTBOUND_MUTUAL_TLS_ENABLED: false
+
+      # Enable verification or incoming JWS signatures
+      # Note that signatures will be required on incoming messages
+      # and will be validated against a public key.
+      VALIDATE_INBOUND_JWS: false
+
+      # applicable only if VALIDATE_INBOUND_JWS is "true"
+      # allows disabling of validation on incoming PUT /parties/{idType}/{idValue} requests
+      VALIDATE_INBOUND_PUT_PARTIES_JWS: false
+
+      # Enable signing of outgoing requests
+      JWS_SIGN: false
+
+      # applicable only if JWS_SIGN is "true"
+      # allows disabling of signing on outgoing PUT /parties/{idType}/{idValue} requests
+      JWS_SIGN_PUT_PARTIES: false
+
+      # Path to JWS signing key (private key of THIS DFSP)
+      JWS_SIGNING_KEY_PATH: secrets/jwsSigningKey.key
+      JWS_VERIFICATION_KEYS_DIRECTORY: secrets/jwsVerificationKeys
+
+      # Location of certs and key required for TLS
+      # IN_CA_CERT_PATH:./secrets/cacert.pem
+      # IN_SERVER_CERT_PATH:./secrets/servercert.pem
+      # IN_SERVER_KEY_PATH:./secrets/serverkey.pem
+
+      # OUT_CA_CERT_PATH:./secrets/cacert.pem
+      # OUT_CLIENT_CERT_PATH:./secrets/servercert.pem
+      # OUT_CLIENT_KEY_PATH:./secrets/serverkey.pem
+
+      # The number of space characters by which to indent pretty-printed logs. If set to zero, log events
+      # will each be printed on a single line.
+      LOG_INDENT: 0
+
+      # REDIS CACHE CONNECTION
+      CACHE_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
+      CACHE_SHOULD_EXPIRE: false
+      CACHE_EXPIRY_SECONDS: 3600
+
+      # SWITCH ENDPOINT
+      # The option 'PEER_ENDPOINT' has no effect if the remaining options 'ALS_ENDPOINT', 'QUOTES_ENDPOINT',
+      # 'BULK_QUOTES_ENDPOINT', 'TRANSFERS_ENDPOINT', 'BULK_TRANSFERS_ENDPOINT', 'TRANSACTION_REQUESTS_ENDPOINT' are specified.
+      PEER_ENDPOINT: localhost:4000
+
+      ### Set each Mojaloop Switch endpoint service individually
+      ALS_ENDPOINT: '{{ .Release.Name }}-account-lookup-service'
+      QUOTES_ENDPOINT: '{{ .Release.Name }}-quoting-service'
+      BULK_QUOTES_ENDPOINT: '{{ .Release.Name }}-quoting-service'
+      TRANSACTION_REQUESTS_ENDPOINT: '{{ .Release.Name }}-transaction-requests-service'
+      TRANSFERS_ENDPOINT: '{{ .Release.Name }}-api-adapter-service'
+      BULK_TRANSFERS_ENDPOINT: '{{ .Release.Name }}-bulk-api-adapter-service'
+
+      # BACKEND ENDPOINT
+      BACKEND_ENDPOINT: localhost:4000
+
+      # FSPID of this DFSP
+      DFSP_ID: mojaloop-sdk
+
+      # Secret used for generation and verification of secure ILP
+      ILP_SECRET: Quaixohyaesahju3thivuiChai5cahng
+
+      # expiry period in seconds for quote and transfers issued by the SDK
+      EXPIRY_SECONDS: 60
+
+      # if set to false the SDK will not automatically accept all returned quotes
+      # but will halt the transfer after a quote response is received. A further
+      # confirmation call will be required to complete the final transfer stage.
+      AUTO_ACCEPT_QUOTES: false
+
+      # if set to false the SDK will not automatically accept a resolved party
+      # but will halt the transer after a party lookup response is received. A further
+      # cnofirmation call will be required to progress the transfer to quotes state.
+      AUTO_ACCEPT_PARTY: false
+
+      # when set to true, when sending money via the outbound API, the SDK will use the value
+      # of FSPIOP-Source header from the received quote response as the payeeFsp value in the
+      # transfer prepare request body instead of the value received in the payee party lookup.
+      # This behaviour should be enabled when the SDK user DFSP is in a forex enabled switch
+      # ecosystem and expects quotes and transfers to be rerouted by the switch to forex
+      # entities i.e. forex providing DFSPs. Please see the SDK documentation and switch
+      # operator documentation for more information on forex use cases.
+      USE_QUOTE_SOURCE_FSP_AS_TRANSFER_PAYEE_FSP: false
+
+      # set to true to validate ILP, otherwise false to ignore ILP
+      CHECK_ILP: true
+
+      # set to true to enable test features such as request cacheing and retrieval endpoints
+      ENABLE_TEST_FEATURES: false
+
+      # Set to true to respect expirity timestamps
+      REJECT_EXPIRED_QUOTE_RESPONSES: false
+      REJECT_TRANSFERS_ON_EXPIRED_QUOTES: false
+      REJECT_EXPIRED_TRANSFER_FULFILS: false
+
+      # Timeout for GET/POST/DELETE - PUT flow processing
+      REQUEST_PROCESSING_TIMEOUT_SECONDS: 4
+
+      # To allow transfer without a previous quote request, set this value to true.
+      # The incoming transfer request should consists of an ILP packet and a matching condition in this case.
+      # The fulfilment will be generated from the provided ILP packet, and must hash to the provided condition.
+      ALLOW_TRANSFER_WITHOUT_QUOTE: false
+
+      # To enable request for notification on fulfiled transfer
+      RESERVE_NOTIFICATION: true
+      # resources API versions should be string in format: "resourceOneName=1.0,resourceTwoName=1.1"
+      RESOURCE_VERSIONS: transfers=1.1,participants=1.1
+
+      ## API-SVC kafka config
+      # BACKEND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+      # BACKEND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+      # FSPIOP_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+      # FSPIOP_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+      # BACKEND_EVENT_CONSUMER_GROUP_ID: '{{ include "common.names.name" . }}-domain_events_consumer_api_svc_backend_group'
+      # FSPIOP_EVENT_CONSUMER_GROUP_ID: '{{ include "common.names.name" . }}-domain_events_consumer_api_svc_fspiop_group'
+      # BACKEND_EVENT_CONSUMER_TOPICS: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
+      # BACKEND_EVENT_PRODUCER_TOPIC: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
+      # FSPIOP_EVENT_CONSUMER_TOPICS: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
+      # FSPIOP_EVENT_PRODUCER_TOPIC: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
+
+    podAffinityPreset: ""
+    ## @param podAntiAffinityPreset Pod anti-affinity preset. Ignored if `main.affinity` is set. Allowed values: `soft` or `hard`
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    ##
+    podAntiAffinityPreset: soft
+    ## Node affinity preset
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    ##
+
+    nodeAffinityPreset:
+      ## @param nodeAffinityPreset.type Node affinity preset type. Ignored if `main.affinity` is set. Allowed values: `soft` or `hard`
+      ##
+      type: ""
+      ## @param nodeAffinityPreset.key Node label key to match. Ignored if `main.affinity` is set
+      ##
+      key: ""
+      ## @param nodeAffinityPreset.values Node label values to match. Ignored if `main.affinity` is set
+      ## E.g.
+      ## values:
+      ##   - e2e-az1
+      ##   - e2e-az2
+      ##
+      values: []
+    ## @param affinity Affinity for %%MAIN_CONTAINER_NAME%% pods assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    ## NOTE: `podAffinityPreset`, `main.podAntiAffinityPreset`, and `main.nodeAffinityPreset` will be ignored when it's set
+    ##
+
+    ## Pod scheduling preferences.
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity: {}
+
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
+    ## Set toleration for scheduler
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations: []
+
+    ## Configure Pods Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+    ## @param podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+    ## @param podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+    ##
+    podSecurityContext:
+      enabled: true
+      fsGroup: 1001
+    ## Configure Container Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+    ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+    ## @param containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+    ##
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 1001
+
+    ## Enable diagnostic mode in the deployment
+    ##
+    diagnosticMode:
+      ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+      ##
+      enabled: false
+      ## @param diagnosticMode.command Command to override all containers in the deployment
+      ##
+      command: 
+        - yarn
+        - start
+      ## @param diagnosticMode.args Args to override all containers in the deployment
+      ##
+      args:
+        - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      
+      ## @param diagnosticMode.debug config to override all debug information
+      ##
+      debug:
+        internalPort: 9229
+        port: 9229
+
+    service:
+      ## Not used by the SDK-Scheme-Adapter
+      # internalPort: 3000
+      ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+      ##
+      type: ClusterIP
+      ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+      ##
+      port: 80
+      ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+      ##
+      httpsPort: 443
+      ## Node ports to expose
+      ## @param service.nodePorts.http Node port for HTTP
+      ## @param service.nodePorts.https Node port for HTTPS
+      ## NOTE: choose port between <30000-32767>
+      ##
+      nodePorts:
+        http:
+        https:
+      ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      ## e.g.:
+      ## clusterIP: None
+      ##
+      clusterIP:
+      ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+      ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+      ##
+      loadBalancerIP:
+      ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+      ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+      ## e.g:
+      ## loadBalancerSourceRanges:
+      ##   - 10.10.10.0/24
+      ##
+      loadBalancerSourceRanges: []
+      ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+      ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+      ##
+      externalTrafficPolicy: Cluster
+      ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+      ##
+      annotations: {}
+
+    ingress:
+      ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
+      ##
+      enabled: true
+      ## @param ingress.pathType Ingress path type
+      ##
+      pathType: ImplementationSpecific
+      ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+      ##
+      apiVersion:
+      ## @param ingress.hostname Default host for the ingress record
+      ##
+      hostname: sdk-scheme-adapter.local
+      ## @param ingress.path Default path for the ingress record
+      ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+      ##
+      path: /
+      ## @param ingress.annotations Additional custom annotations for the ingress record
+      ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+      ##
+      annotations: {}
+      ## Example annotations for ingress class and rewrite-targets
+      ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+      # nginx.ingress.kubernetes.io/rewrite-target: '/'
+      # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+      ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+      # kubernetes.io/ingress.class: nginx
+      ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
+      # kubernetes.io/tls-acme: "true""
+
+      ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+      ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+      ## You can:
+      ##   - Use the `ingress.secrets` parameter to create this TLS secret
+      ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+      ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+      ##
+      tls: false
+      ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+      ##
+      certManager: false
+      ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+      ##
+      selfSigned: false
+      ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+      ## e.g:
+      ## extraHosts:
+      ##   - name: transfer-api-svc.local
+      ##     path: /
+      ##
+      ## @param ingress.extraPaths An array with additional arbitrary paths that may need to be added to the ingress under the main host
+      ## e.g:
+      ## extraPaths:
+      ## - path: /*
+      ##   backend:
+      ##     serviceName: ssl-redirect
+      ##     servicePort: use-annotation
+      ##
+      # extraPaths: []
+      extraPaths:
+      - path: /inbound/
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: '{{ include "common.names.fullname" . }}'
+            port:
+              name: inboundapi
+          # serviceName: '{{ include "common.names.fullname" . }}'
+          # servicePort: inboundapi
+      - path: /outbound/
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: '{{ include "common.names.fullname" . }}'
+            port:
+              name: outboundapi
+          # serviceName: '{{ include "common.names.fullname" . }}'
+          # servicePort: outboundapi
+      - path: /sdktest/
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: '{{ include "common.names.fullname" . }}'
+            port:
+              name: testapi
+          ## This is required for 
+          # serviceName: '{{ include "common.names.fullname" . }}'
+          # servicePort: testapi
+      ## @param ingress.extraTls TLS configuration for additional hostname(s) to be covered with this ingress record
+      ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+      ## e.g:
+      ## extraTls:
+      ## - hosts:
+      ##     - transfer-api-svc.local
+      ##   secretName: transfer-api-svc.local-tls
+      ##
+      extraTls: []
+      ## @param ingress.secrets Custom TLS certificates as secrets
+      ## NOTE: 'key' and 'certificate' are expected in PEM format
+      ## NOTE: 'name' should line up with a 'secretName' set further up
+      ## If it is not set and you're using cert-manager, this is unneeded, as it will create a secret for you with valid certificates
+      ## If it is not set and you're NOT using cert-manager either, self-signed certificates will be created valid for 365 days
+      ## It is also possible to create and manage the certificates outside of this helm chart
+      ## Please see README.md for more information
+      ## e.g:
+      ## secrets:
+      ##   - name: transfer-api-svc.local-tls
+      ##     key: |-
+      ##       -----BEGIN RSA PRIVATE KEY-----
+      ##       ...
+      ##       -----END RSA PRIVATE KEY-----
+      ##     certificate: |-
+      ##       -----BEGIN CERTIFICATE-----
+      ##       ...
+      ##       -----END CERTIFICATE-----
+      ##
+      secrets: []
+      className: "nginx"
+
+    ## RBAC configuration
+    ##
+    rbac:
+      ## @param rbac.create Specifies whether RBAC resources should be created
+      ##
+      create: false
+
+    ## ServiceAccount configuration
+    ##
+    serviceAccount:
+      ## @param serviceAccount.create Specifies whether a ServiceAccount should be created
+      ##
+      create: false
+      ## @param serviceAccount.name The name of the ServiceAccount to use.
+      ## If not set and create is true, a name is generated using the common.names.fullname template
+      ##
+      name: ""
+
+  sdk-scheme-adapter-dom-evt-handler:
+    enabled: true
+
+    ## Set this if you want to use the global override
+    kafka: {}
+    ## Set this to override this specifically
+    # kafka:
+    #   host: kafka
+    #   port: 9092
+
+    ## Set this if you want to use the global override
+    redis: {}
+    ## Set this to override this specifically
+    # redis:
+    #   host: redis
+    #   port: 6379
+    #   database: 0 # This is a number between 0 to 15
+
+    env:
+      ## outbound-domain-event-handler
+      # LOG_LEVEL: info
+      API_SERVER_ENABLED: true
+      API_SERVER_PORT: 8001
+      # REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
+      # DOMAIN_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+      # COMMAND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+      # DOMAIN_EVENT_CONSUMER_GROUP_ID: '{{ include "common.names.name" . }}-domain_events_consumer_group'
+      # DOMAIN_EVENT_CONSUMER_TOPICS: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
+      # COMMAND_EVENT_PRODUCER_TOPIC: '{{ include "common.names.name" . }}-topic-sdk-outbound-command-events'
+
+    podAffinityPreset: ""
+    ## @param podAntiAffinityPreset Pod anti-affinity preset. Ignored if `main.affinity` is set. Allowed values: `soft` or `hard`
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    ##
+    podAntiAffinityPreset: soft
+    ## Node affinity preset
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    ##
+
+    nodeAffinityPreset:
+      ## @param nodeAffinityPreset.type Node affinity preset type. Ignored if `main.affinity` is set. Allowed values: `soft` or `hard`
+      ##
+      type: ""
+      ## @param nodeAffinityPreset.key Node label key to match. Ignored if `main.affinity` is set
+      ##
+      key: ""
+      ## @param nodeAffinityPreset.values Node label values to match. Ignored if `main.affinity` is set
+      ## E.g.
+      ## values:
+      ##   - e2e-az1
+      ##   - e2e-az2
+      ##
+      values: []
+    ## @param affinity Affinity for %%MAIN_CONTAINER_NAME%% pods assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    ## NOTE: `podAffinityPreset`, `main.podAntiAffinityPreset`, and `main.nodeAffinityPreset` will be ignored when it's set
+    ##
+
+    ## Pod scheduling preferences.
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity: {}
+
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
+    ## Set toleration for scheduler
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations: []
+
+    ## Configure Pods Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+    ## @param podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+    ## @param podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+    ##
+    podSecurityContext:
+      enabled: true
+      fsGroup: 1001
+    ## Configure Container Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+    ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+    ## @param containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+    ##
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 1001
+
+    ## Enable diagnostic mode in the deployment
+    ##
+    diagnosticMode:
+      ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+      ##
+      enabled: false
+      ## @param diagnosticMode.command Command to override all containers in the deployment
+      ##
+      command: 
+        - yarn
+        - start
+      ## @param diagnosticMode.args Args to override all containers in the deployment
+      ##
+      args:
+        - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      
+      ## @param diagnosticMode.debug config to override all debug information
+      ##
+      debug:
+        internalPort: 9229
+        port: 9229
+
+    service:
+      ## Not used by the SDK-Scheme-Adapter
+      # internalPort: 3000
+      ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+      ##
+      type: ClusterIP
+      ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+      ##
+      port: 80
+      ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+      ##
+      httpsPort: 443
+      ## Node ports to expose
+      ## @param service.nodePorts.http Node port for HTTP
+      ## @param service.nodePorts.https Node port for HTTPS
+      ## NOTE: choose port between <30000-32767>
+      ##
+      nodePorts:
+        http:
+        https:
+      ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      ## e.g.:
+      ## clusterIP: None
+      ##
+      clusterIP:
+      ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+      ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+      ##
+      loadBalancerIP:
+      ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+      ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+      ## e.g:
+      ## loadBalancerSourceRanges:
+      ##   - 10.10.10.0/24
+      ##
+      loadBalancerSourceRanges: []
+      ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+      ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+      ##
+      externalTrafficPolicy: Cluster
+      ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+      ##
+      annotations: {}
+
+    ingress:
+      ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
+      ##
+      enabled: false
+      ## @param ingress.pathType Ingress path type
+      ##
+      pathType: ImplementationSpecific
+      ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+      ##
+      apiVersion:
+      ## @param ingress.hostname Default host for the ingress record
+      ##
+      hostname: sdk-scheme-adapter.local
+      ## @param ingress.path Default path for the ingress record
+      ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+      ##
+      path: /
+      ## @param ingress.annotations Additional custom annotations for the ingress record
+      ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+      ##
+      annotations: {}
+      ## Example annotations for ingress class and rewrite-targets
+      ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+      # nginx.ingress.kubernetes.io/rewrite-target: '/'
+      # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+      ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+      # kubernetes.io/ingress.class: nginx
+      ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
+      # kubernetes.io/tls-acme: "true""
+
+      ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+      ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+      ## You can:
+      ##   - Use the `ingress.secrets` parameter to create this TLS secret
+      ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+      ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+      ##
+      tls: false
+      ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+      ##
+      certManager: false
+      ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+      ##
+      selfSigned: false
+      ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+      ## e.g:
+      ## extraHosts:
+      ##   - name: transfer-api-svc.local
+      ##     path: /
+      ##
+      ## @param ingress.extraPaths An array with additional arbitrary paths that may need to be added to the ingress under the main host
+      ## e.g:
+      ## extraPaths:
+      ## - path: /*
+      ##   backend:
+      ##     serviceName: ssl-redirect
+      ##     servicePort: use-annotation
+      ##
+      # extraPaths: []
+      ## TODO: REMOVE
+      # extraPaths:
+      # - path: /inbound/
+      #   pathType: ImplementationSpecific
+      #   backend:
+      #     service:
+      #       name: '{{ include "common.names.fullname" . }}'
+      #       port:
+      #         name: inboundapi
+      #     # serviceName: '{{ include "common.names.fullname" . }}'
+      #     # servicePort: inboundapi
+      # - path: /outbound/
+      #   pathType: ImplementationSpecific
+      #   backend:
+      #     service:
+      #       name: '{{ include "common.names.fullname" . }}'
+      #       port:
+      #         name: outboundapi
+      #     # serviceName: '{{ include "common.names.fullname" . }}'
+      #     # servicePort: outboundapi
+      # - path: /sdktest/
+      #   pathType: ImplementationSpecific
+      #   backend:
+      #     service:
+      #       name: '{{ include "common.names.fullname" . }}'
+      #       port:
+      #         name: testapi
+          ## This is required for 
+          # serviceName: '{{ include "common.names.fullname" . }}'
+          # servicePort: testapi
+      ## @param ingress.extraTls TLS configuration for additional hostname(s) to be covered with this ingress record
+      ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+      ## e.g:
+      ## extraTls:
+      ## - hosts:
+      ##     - transfer-api-svc.local
+      ##   secretName: transfer-api-svc.local-tls
+      ##
+      extraTls: []
+      ## @param ingress.secrets Custom TLS certificates as secrets
+      ## NOTE: 'key' and 'certificate' are expected in PEM format
+      ## NOTE: 'name' should line up with a 'secretName' set further up
+      ## If it is not set and you're using cert-manager, this is unneeded, as it will create a secret for you with valid certificates
+      ## If it is not set and you're NOT using cert-manager either, self-signed certificates will be created valid for 365 days
+      ## It is also possible to create and manage the certificates outside of this helm chart
+      ## Please see README.md for more information
+      ## e.g:
+      ## secrets:
+      ##   - name: transfer-api-svc.local-tls
+      ##     key: |-
+      ##       -----BEGIN RSA PRIVATE KEY-----
+      ##       ...
+      ##       -----END RSA PRIVATE KEY-----
+      ##     certificate: |-
+      ##       -----BEGIN CERTIFICATE-----
+      ##       ...
+      ##       -----END CERTIFICATE-----
+      ##
+      secrets: []
+      className: "nginx"
+
+    ## RBAC configuration
+    ##
+    rbac:
+      ## @param rbac.create Specifies whether RBAC resources should be created
+      ##
+      create: false
+
+    ## ServiceAccount configuration
+    ##
+    serviceAccount:
+      ## @param serviceAccount.create Specifies whether a ServiceAccount should be created
+      ##
+      create: false
+      ## @param serviceAccount.name The name of the ServiceAccount to use.
+      ## If not set and create is true, a name is generated using the common.names.fullname template
+      ##
+      name: ""
+
+  sdk-scheme-adapter-cmd-evt-handler:
+    enabled: true
+
+    ## Set this if you want to use the global override
+    kafka: {}
+    ## Set this to override this specifically
+    # kafka:
+    #   host: kafka
+    #   port: 9092
+
+    ## Set this if you want to use the global override
+    redis: {}
+    ## Set this to override this specifically
+    # redis:
+    #   host: redis
+    #   port: 6379
+    #   database: 0 # This is a number between 0 to 15
+
+    env:
+      ## outbound-command-event-handler
+      # LOG_LEVEL: info
+      API_SERVER_ENABLED: true
+      API_SERVER_PORT: 8000
+      MAX_ITEMS_PER_BATCH: 1000
+      # REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
+      # COMMAND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+      # DOMAIN_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+      # COMMAND_EVENT_CONSUMER_GROUP_ID: '{{ include "common.names.name" . }}-command_events_consumer_group'
+      # COMMAND_EVENT_CONSUMER_TOPICS: '{{ include "common.names.name" . }}-topic-sdk-outbound-command-events'
+      # DOMAIN_EVENT_PRODUCER_TOPIC: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
+
+    podAffinityPreset: ""
+    ## @param podAntiAffinityPreset Pod anti-affinity preset. Ignored if `main.affinity` is set. Allowed values: `soft` or `hard`
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+    ##
+    podAntiAffinityPreset: soft
+    ## Node affinity preset
+    ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+    ##
+
+    nodeAffinityPreset:
+      ## @param nodeAffinityPreset.type Node affinity preset type. Ignored if `main.affinity` is set. Allowed values: `soft` or `hard`
+      ##
+      type: ""
+      ## @param nodeAffinityPreset.key Node label key to match. Ignored if `main.affinity` is set
+      ##
+      key: ""
+      ## @param nodeAffinityPreset.values Node label values to match. Ignored if `main.affinity` is set
+      ## E.g.
+      ## values:
+      ##   - e2e-az1
+      ##   - e2e-az2
+      ##
+      values: []
+    ## @param affinity Affinity for %%MAIN_CONTAINER_NAME%% pods assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    ## NOTE: `podAffinityPreset`, `main.podAntiAffinityPreset`, and `main.nodeAffinityPreset` will be ignored when it's set
+    ##
+
+    ## Pod scheduling preferences.
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity: {}
+
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
+    ## Set toleration for scheduler
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations: []
+
+    ## Configure Pods Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+    ## @param podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+    ## @param podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+    ##
+    podSecurityContext:
+      enabled: true
+      fsGroup: 1001
+    ## Configure Container Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+    ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+    ## @param containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+    ##
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 1001
+
+    ## Enable diagnostic mode in the deployment
+    ##
+    diagnosticMode:
+      ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+      ##
+      enabled: false
+      ## @param diagnosticMode.command Command to override all containers in the deployment
+      ##
+      command: 
+        - yarn
+        - start
+      ## @param diagnosticMode.args Args to override all containers in the deployment
+      ##
+      args:
+        - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      
+      ## @param diagnosticMode.debug config to override all debug information
+      ##
+      debug:
+        internalPort: 9229
+        port: 9229
+
+    service:
+      ## Not used by the SDK-Scheme-Adapter
+      internalPort: 8000
+      ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+      ##
+      type: ClusterIP
+      ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+      ##
+      port: 80
+      ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+      ##
+      httpsPort: 443
+      ## Node ports to expose
+      ## @param service.nodePorts.http Node port for HTTP
+      ## @param service.nodePorts.https Node port for HTTPS
+      ## NOTE: choose port between <30000-32767>
+      ##
+      nodePorts:
+        http:
+        https:
+      ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      ## e.g.:
+      ## clusterIP: None
+      ##
+      clusterIP:
+      ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+      ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+      ##
+      loadBalancerIP:
+      ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+      ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+      ## e.g:
+      ## loadBalancerSourceRanges:
+      ##   - 10.10.10.0/24
+      ##
+      loadBalancerSourceRanges: []
+      ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+      ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+      ##
+      externalTrafficPolicy: Cluster
+      ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+      ##
+      annotations: {}
+
+    ingress:
+      ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
+      ##
+      enabled: false
+      ## @param ingress.pathType Ingress path type
+      ##
+      pathType: ImplementationSpecific
+      ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+      ##
+      apiVersion:
+      ## @param ingress.hostname Default host for the ingress record
+      ##
+      hostname: sdk-scheme-adapter.local
+      ## @param ingress.path Default path for the ingress record
+      ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+      ##
+      path: /
+      ## @param ingress.annotations Additional custom annotations for the ingress record
+      ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+      ##
+      annotations: {}
+      ## Example annotations for ingress class and rewrite-targets
+      ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+      # nginx.ingress.kubernetes.io/rewrite-target: '/'
+      # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+      ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+      # kubernetes.io/ingress.class: nginx
+      ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
+      # kubernetes.io/tls-acme: "true""
+
+      ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+      ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+      ## You can:
+      ##   - Use the `ingress.secrets` parameter to create this TLS secret
+      ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+      ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+      ##
+      tls: false
+      ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+      ##
+      certManager: false
+      ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+      ##
+      selfSigned: false
+      ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+      ## e.g:
+      ## extraHosts:
+      ##   - name: transfer-api-svc.local
+      ##     path: /
+      ##
+      ## @param ingress.extraPaths An array with additional arbitrary paths that may need to be added to the ingress under the main host
+      ## e.g:
+      ## extraPaths:
+      ## - path: /*
+      ##   backend:
+      ##     serviceName: ssl-redirect
+      ##     servicePort: use-annotation
+      ##
+      # extraPaths: []
+      ## TODO: REMOVE
+      # extraPaths:
+      # - path: /inbound/
+      #   pathType: ImplementationSpecific
+      #   backend:
+      #     service:
+      #       name: '{{ include "common.names.fullname" . }}'
+      #       port:
+      #         name: inboundapi
+      #     # serviceName: '{{ include "common.names.fullname" . }}'
+      #     # servicePort: inboundapi
+      # - path: /outbound/
+      #   pathType: ImplementationSpecific
+      #   backend:
+      #     service:
+      #       name: '{{ include "common.names.fullname" . }}'
+      #       port:
+      #         name: outboundapi
+      #     # serviceName: '{{ include "common.names.fullname" . }}'
+      #     # servicePort: outboundapi
+      # - path: /sdktest/
+      #   pathType: ImplementationSpecific
+      #   backend:
+      #     service:
+      #       name: '{{ include "common.names.fullname" . }}'
+      #       port:
+      #         name: testapi
+          ## This is required for 
+          # serviceName: '{{ include "common.names.fullname" . }}'
+          # servicePort: testapi
+      ## @param ingress.extraTls TLS configuration for additional hostname(s) to be covered with this ingress record
+      ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+      ## e.g:
+      ## extraTls:
+      ## - hosts:
+      ##     - transfer-api-svc.local
+      ##   secretName: transfer-api-svc.local-tls
+      ##
+      extraTls: []
+      ## @param ingress.secrets Custom TLS certificates as secrets
+      ## NOTE: 'key' and 'certificate' are expected in PEM format
+      ## NOTE: 'name' should line up with a 'secretName' set further up
+      ## If it is not set and you're using cert-manager, this is unneeded, as it will create a secret for you with valid certificates
+      ## If it is not set and you're NOT using cert-manager either, self-signed certificates will be created valid for 365 days
+      ## It is also possible to create and manage the certificates outside of this helm chart
+      ## Please see README.md for more information
+      ## e.g:
+      ## secrets:
+      ##   - name: transfer-api-svc.local-tls
+      ##     key: |-
+      ##       -----BEGIN RSA PRIVATE KEY-----
+      ##       ...
+      ##       -----END RSA PRIVATE KEY-----
+      ##     certificate: |-
+      ##       -----BEGIN CERTIFICATE-----
+      ##       ...
+      ##       -----END CERTIFICATE-----
+      ##
+      secrets: []
+      className: "nginx"
+
+    ## RBAC configuration
+    ##
+    rbac:
+      ## @param rbac.create Specifies whether RBAC resources should be created
+      ##
+      create: false
+
+    ## ServiceAccount configuration
+    ##
+    serviceAccount:
+      ## @param serviceAccount.create Specifies whether a ServiceAccount should be created
+      ##
+      create: false
+      ## @param serviceAccount.name The name of the ServiceAccount to use.
+      ## If not set and create is true, a name is generated using the common.names.fullname template
+      ##
+      name: ""
+
+ml-testing-toolkit:
+  enabled: true
+
+  # ml-testing-toolkit-backend:
+  #   enabled: true
+  #   config:
+  #     user_config.json: {
+  #       "VERSION": 1,
+  #       "CALLBACK_ENDPOINT": "http://{{ $.Release.Name }}-scheme-adapter:4001",
+  #       "SEND_CALLBACK_ENABLE": true,
+  #       "DEFAULT_ENVIRONMENT_FILE_NAME": "ml-default-environment.json",
+  #       "FSPID": "{{ include 'common.names.name' . }}"
+  #     }
+  #     system_config.json: {
+  #       "API_DEFINITIONS": [
+  #         {
+  #           "type": "scheme_adapter_outbound",
+  #           "version": "1.0",
+  #           "folderPath": "mojaloop_sdk_outbound_scheme_adapter_1.0"
+  #         },
+  #         {
+  #           "type": "core_connector",
+  #           "version": "1.4",
+  #           "folderPath": "mojaloop_simulator_sim_1.4"
+  #         }
+  #       ]
+  #     }
+  #   ingress:
+  #     enabled: true
+  #     hosts:
+  #       specApi:
+  #         host: ml-testing-toolkit-specapi.local
+  #       adminApi:
+  #         host: ml-testing-toolkit.local
+  #   extraEnvironments:
+  #     ml-default-environment.json: {
+  #       "inputValues": {
+  #         "VAR1": "VALUE1"
+  #       }
+  #     }
+
+  # ml-testing-toolkit-frontend:
+  #   enabled: true
+  #   ingress:
+  #     enabled: true
+  #     hosts:
+  #       ui:
+  #         host: ml-testing-toolkit.local
+  #   config:
+  #     API_BASE_URL: http://ml-testing-toolkit.local
