@@ -195,8 +195,8 @@ env:
   
   ## outbound-command-event-handler
   # LOG_LEVEL: info
-  API_SERVER_ENABLED: true
-  API_SERVER_PORT: 8000
+  COMMAND_EVENT_API_SERVER_ENABLED: true
+  COMMAND_EVENT_API_SERVER_PORT: 8000
   REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
   COMMAND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
   DOMAIN_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
@@ -207,6 +207,8 @@ env:
 
   ## outbound-domain-event-handler
   # LOG_LEVEL: info
+  DOMAIN_EVENT_API_SERVER_ENABLED: true
+  DOMAIN_EVENT_API_SERVER_PORT: 8001
   # REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
   DOMAIN_EVENT_CONSUMER_BROKER_LIST: '{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
   COMMAND_EVENT_PRODUCER_BROKER_LIST: '{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
@@ -274,7 +276,7 @@ containerSecurityContext:
 image:
   registry: docker.io
   repository: mojaloop/sdk-scheme-adapter
-  tag: v20.0.0-bulk-snapshot.19
+  tag: v20.0.0-bulk-snapshot.20
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -399,7 +401,7 @@ metrics:
     port: "{{ .Values.env.METRICS_SERVER_LISTEN_PORT }}"
     prefix: moja_
     defaultLabels:
-      serviceName: ml-service
+      serviceName: sdk-scheme-adapter-api-svc
 
 service:
   ## Not used by the SDK-Scheme-Adapter

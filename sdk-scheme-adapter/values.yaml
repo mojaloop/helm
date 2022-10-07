@@ -256,7 +256,7 @@ sdk-scheme-adapter-api-svc:
   image:
     registry: docker.io
     repository: mojaloop/sdk-scheme-adapter
-    tag: v20.0.0-bulk-snapshot.19
+    tag: v20.0.0-bulk-snapshot.20
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -373,7 +373,7 @@ sdk-scheme-adapter-api-svc:
       port: "{{ .Values.env.METRICS_SERVER_LISTEN_PORT }}"
       prefix: moja_
       defaultLabels:
-        serviceName: ml-service
+        serviceName: sdk-scheme-adapter-api-svc
 
   service:
     ## Not used by the SDK-Scheme-Adapter
@@ -577,8 +577,8 @@ sdk-scheme-adapter-dom-evt-handler:
   env:
     ## outbound-domain-event-handler
     # LOG_LEVEL: info
-    API_SERVER_ENABLED: true
-    API_SERVER_PORT: 8001
+    DOMAIN_EVENT_API_SERVER_ENABLED: true
+    DOMAIN_EVENT_API_SERVER_PORT: 8001
     REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
     DOMAIN_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     COMMAND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
@@ -646,7 +646,7 @@ sdk-scheme-adapter-dom-evt-handler:
   image:
     registry: docker.io
     repository: mojaloop/sdk-scheme-adapter
-    tag: v20.0.0-bulk-snapshot.19
+    tag: v20.0.0-bulk-snapshot.20
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -744,26 +744,27 @@ sdk-scheme-adapter-dom-evt-handler:
   readinessProbe: |
     httpGet:
       path: /health
-      port: {{ .Values.env.API_SERVER_PORT }}
+      port: {{ .Values.env.DOMAIN_EVENT_API_SERVER_PORT }}
     initialDelaySeconds: 15
     periodSeconds: 15
   livenessProbe: |
     httpGet:
       path: /health
-      port: {{ .Values.env.API_SERVER_PORT }}
+      port: {{ .Values.env.DOMAIN_EVENT_API_SERVER_PORT }}
     initialDelaySeconds: 15
     periodSeconds: 15
 
   ## metric configuration for prometheus instrumentation
+  ## TODO: NOT SUPPORTED
   metrics:
     ## flag to enable/disable the metrics end-points
     enabled: false
     config:
       timeout: 5000
-      port: "{{ .Values.env.METRICS_SERVER_LISTEN_PORT }}"
+      port: "{{ .Values.env.DOMAIN_EVENT_API_SERVER_PORT }}"
       prefix: moja_
       defaultLabels:
-        serviceName: ml-service
+        serviceName: sdk-scheme-adapter-dom-evt-handler
 
   service:
     ## Not used by the SDK-Scheme-Adapter
@@ -968,8 +969,8 @@ sdk-scheme-adapter-cmd-evt-handler:
   env:
     ## outbound-command-event-handler
     # LOG_LEVEL: info
-    API_SERVER_ENABLED: true
-    API_SERVER_PORT: 8000
+    COMMAND_EVENT_API_SERVER_ENABLED: true
+    COMMAND_EVENT_API_SERVER_PORT: 8000
     REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
     COMMAND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     DOMAIN_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
@@ -1038,7 +1039,7 @@ sdk-scheme-adapter-cmd-evt-handler:
   image:
     registry: docker.io
     repository: mojaloop/sdk-scheme-adapter
-    tag: v20.0.0-bulk-snapshot.19
+    tag: v20.0.0-bulk-snapshot.20
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -1136,26 +1137,27 @@ sdk-scheme-adapter-cmd-evt-handler:
   readinessProbe: |
     httpGet:
       path: /health
-      port: {{ .Values.env.API_SERVER_PORT }}
+      port: {{ .Values.env.COMMAND_EVENT_API_SERVER_PORT }}
     initialDelaySeconds: 15
     periodSeconds: 15
   livenessProbe: |
     httpGet:
       path: /health
-      port: {{ .Values.env.API_SERVER_PORT }}
+      port: {{ .Values.env.COMMAND_EVENT_API_SERVER_PORT }}
     initialDelaySeconds: 15
     periodSeconds: 15
 
   ## metric configuration for prometheus instrumentation
+  ## TODO: NOT SUPPORTED
   metrics:
     ## flag to enable/disable the metrics end-points
     enabled: false
     config:
       timeout: 5000
-      port: "{{ .Values.env.API_SERVER_PORT }}"
+      port: "{{ .Values.env.COMMAND_EVENT_API_SERVER_PORT }}"
       prefix: moja_
       defaultLabels:
-        serviceName: ml-service
+        serviceName: sdk-scheme-adapter-cmd-evt-handler
 
   service:
     ## Not used by the SDK-Scheme-Adapter
