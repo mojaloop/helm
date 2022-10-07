@@ -274,8 +274,9 @@ defaults: &defaults
           publicKey: ''
       image:
         repository: mojaloop/sdk-scheme-adapter
-        tag: v18.0.2
+        tag: v20.0.0-bulk-snapshot.20
         pullPolicy: IfNotPresent
+        command: '[ "yarn", "start:api-svc" ]'
       <<: *defaultProbes
 
       # These will be supplied directly to the init containers array in the deployment for the
@@ -438,6 +439,10 @@ defaults: &defaults
         # The fulfilment will be generated from the provided ILP packet, and must hash to the provided condition.
         ALLOW_TRANSFER_WITHOUT_QUOTE: false
         RESOURCE_VERSIONS: transfers=1.1,quotes=1.0
+
+        ENABLE_FSPIOP_EVENT_HANDLER: false
+        ENABLE_BACKEND_EVENT_HANDLER: false
+
     backend:
       image:
         repository: mojaloop/mojaloop-simulator

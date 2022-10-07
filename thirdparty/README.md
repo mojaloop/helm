@@ -40,7 +40,7 @@ In addition to enabling the above charts, a few options must be configured to al
 For the `mojaloop/mojaloop` helm chart, enable the following in your `values.yaml`:
 
 ```yaml
-... 
+...
 account-lookup-service:
   account-lookup-service:
     config:
@@ -102,9 +102,9 @@ Or alternatively add `--set` for each of the above parameters on the install com
 ```bash
 helm install ... \
   # enabled Thirdparty setup
-  --set ml-ttk-test-setup-tk.tests.enabled=true \
+  --set ml-ttk-test-setup-tp.tests.enabled=true \
   # enabled Thirdparty validation tests
-  --set ml-ttk-test-val-tk.tests.enabled=true
+  --set ml-ttk-test-val-tp.tests.enabled=true
 ```
 
 2. Run Tests
