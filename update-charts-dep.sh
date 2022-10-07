@@ -13,7 +13,9 @@ find ./ -name "charts"| xargs rm -Rf
 find ./ -name "tmpcharts"| xargs rm -Rf
 
 declare -a charts=(
+    sdk-scheme-adapter/chart-service
     sdk-scheme-adapter
+    mojaloop-ttk-simulators
     eventstreamprocessor
     monitoring/promfana
     monitoring/efk
