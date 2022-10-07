@@ -15,6 +15,7 @@ find ./ -name "tmpcharts"| xargs rm -Rf
 declare -a charts=(
     chart-sim1
     chart-sim2
+    chart-sim3
 )
 
 echo "Updating all Charts..."
