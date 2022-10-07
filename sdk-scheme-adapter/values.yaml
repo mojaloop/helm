@@ -23,6 +23,9 @@ global:
     port: 6379
     database: 0 # This is a number between 0 to 15
 
+config:
+  simName: testSimFSP
+
 sdk-scheme-adapter-api-svc:
   enabled: true
 
@@ -109,7 +112,7 @@ sdk-scheme-adapter-api-svc:
     BACKEND_ENDPOINT: localhost:4000
 
     # FSPID of this DFSP
-    DFSP_ID: mojaloop-sdk
+    DFSP_ID: '{{ .Values.config.simName }}'
 
     # Secret used for generation and verification of secure ILP
     ILP_SECRET: Quaixohyaesahju3thivuiChai5cahng
@@ -189,12 +192,12 @@ sdk-scheme-adapter-api-svc:
     BACKEND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     FSPIOP_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     FSPIOP_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
-    BACKEND_EVENT_CONSUMER_GROUP_ID: '{{ include "common.names.name" . }}-domain_events_consumer_api_svc_backend_group'
-    FSPIOP_EVENT_CONSUMER_GROUP_ID: '{{ include "common.names.name" . }}-domain_events_consumer_api_svc_fspiop_group'
-    BACKEND_EVENT_CONSUMER_TOPICS: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
-    BACKEND_EVENT_PRODUCER_TOPIC: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
-    FSPIOP_EVENT_CONSUMER_TOPICS: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
-    FSPIOP_EVENT_PRODUCER_TOPIC: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
+    BACKEND_EVENT_CONSUMER_GROUP_ID: '{{ .Values.config.simName }}-sdk_api_backend_consumer_group'
+    FSPIOP_EVENT_CONSUMER_GROUP_ID: '{{ .Values.config.simName }}-sdk_api_fspiop_consumer_group'
+    BACKEND_EVENT_CONSUMER_TOPICS: '{{ .Values.config.simName }}-topic-sdk-outbound-domain-events'
+    BACKEND_EVENT_PRODUCER_TOPIC: '{{ .Values.config.simName }}-topic-sdk-outbound-domain-events'
+    FSPIOP_EVENT_CONSUMER_TOPICS: '{{ .Values.config.simName }}-topic-sdk-outbound-domain-events'
+    FSPIOP_EVENT_PRODUCER_TOPIC: '{{ .Values.config.simName }}-topic-sdk-outbound-domain-events'
 
   podAffinityPreset: ""
   ## @param podAntiAffinityPreset Pod anti-affinity preset. Ignored if `main.affinity` is set. Allowed values: `soft` or `hard`
@@ -582,9 +585,9 @@ sdk-scheme-adapter-dom-evt-handler:
     REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
     DOMAIN_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     COMMAND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
-    DOMAIN_EVENT_CONSUMER_GROUP_ID: '{{ include "common.names.name" . }}-domain_events_consumer_group'
-    DOMAIN_EVENT_CONSUMER_TOPICS: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
-    COMMAND_EVENT_PRODUCER_TOPIC: '{{ include "common.names.name" . }}-topic-sdk-outbound-command-events'
+    DOMAIN_EVENT_CONSUMER_GROUP_ID: '{{ .Values.config.simName }}-domain_events_consumer_group'
+    DOMAIN_EVENT_CONSUMER_TOPICS: '{{ .Values.config.simName }}-topic-sdk-outbound-domain-events'
+    COMMAND_EVENT_PRODUCER_TOPIC: '{{ .Values.config.simName }}-topic-sdk-outbound-command-events'
 
   podAffinityPreset: ""
   ## @param podAntiAffinityPreset Pod anti-affinity preset. Ignored if `main.affinity` is set. Allowed values: `soft` or `hard`
@@ -975,9 +978,9 @@ sdk-scheme-adapter-cmd-evt-handler:
     COMMAND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     DOMAIN_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
     MAX_ITEMS_PER_BATCH: 1000
-    COMMAND_EVENT_CONSUMER_GROUP_ID: '{{ include "common.names.name" . }}-command_events_consumer_group'
-    COMMAND_EVENT_CONSUMER_TOPICS: '{{ include "common.names.name" . }}-topic-sdk-outbound-command-events'
-    DOMAIN_EVENT_PRODUCER_TOPIC: '{{ include "common.names.name" . }}-topic-sdk-outbound-domain-events'
+    COMMAND_EVENT_CONSUMER_GROUP_ID: '{{ .Values.config.simName }}-command_events_consumer_group'
+    COMMAND_EVENT_CONSUMER_TOPICS: '{{ .Values.config.simName }}-topic-sdk-outbound-command-events'
+    DOMAIN_EVENT_PRODUCER_TOPIC: '{{ .Values.config.simName }}-topic-sdk-outbound-domain-events'
 
   podAffinityPreset: ""
   ## @param podAntiAffinityPreset Pod anti-affinity preset. Ignored if `main.affinity` is set. Allowed values: `soft` or `hard`
