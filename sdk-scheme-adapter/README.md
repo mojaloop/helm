@@ -61,7 +61,7 @@ Ensure that you configure the appropriate configurations to match the above in t
 Or alternatively one can install the chart by adding the following `--set` parameters:
 
    ```bash
-   helm <NAMESPACE> install sdk . --set global.kafka.host=<KAFKA_INSTALL_NAME>-kafka --set global.redis.host=<REDIS_INSTALL_NAME>-redis-master
+   helm <NAMESPACE> install <INSTALL_NAME> . --set global.kafka.host=<KAFKA_INSTALL_NAME>-kafka --set global.redis.host=<REDIS_INSTALL_NAME>-redis-master
    ```
 
 ### Validation
