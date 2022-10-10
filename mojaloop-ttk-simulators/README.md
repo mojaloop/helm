@@ -1,22 +1,16 @@
-# SDK-Scheme-Adapter Helm Chart
+# Mojaloop-TTK-Simulators Helm Chart
 
-Helm Chart for the [SDK-Scheme-Adapter](https://github.com/mojaloop/sdk-scheme-adapter) service.
+Helm Chart for deploying Simulators that are based on an [SDK-Scheme-Adapter](https://github.com/mojaloop/sdk-scheme-adapter) with a [Testing-Toolkit](https://github.com/mojaloop/ml-testing-toolkit) backend.
 
 ## Overview
 
-The [SDK-Scheme-Adapter](https://github.com/mojaloop/sdk-scheme-adapter) provides an interoperable connector (i.e. a Mojaloop-Connector) hosted by a DFSP (Digital Financial Service Provider) between the DFSP's Backend and the Mojaloop Switch, simplifying API interactions for synchronous request-response patterns.
-
-It compromises of three distinct micro-services:
-
-1. API-SVC - The standard SDK-Scheme-Adapter offering two APIs
-   1. Outbound - API used by the DFSP's Backend to make outgoing requests
-   2. Inbound - API used for receiving incoming requests from a Mojaloop Switch
-2. Outbound-Domain-Event-Handler - Handles and reacts to any Domain Events - Optional, required for Bulk-Transacts.
-3. Outbound-Command-Event-Handler - Process any Command Events - Optional, required for Bulk-Transactions.
+N/A
 
 ## Sub-Charts
 
-- [chart-service](./chart-service/) - Template Service to use for all SDK-Scheme-Adapter deployments
+- [chart-sim1](./chart-sim1) - Test FSP Sim1
+- [chart-sim2](./chart-sim2) - Test FSP Sim2
+- [chart-sim3](./chart-sim3) - Test FSP Sim3
 
 ## Deployment
 
@@ -49,13 +43,14 @@ The following-backend dependency are required for each of the following services
 Ensure that you configure the appropriate configurations to match the above in the [values.yaml](./values.yaml):
 
    ```yaml
-   kafka:
-      host: <KAFKA_INSTALL_NAME>-kafka
-      port: 9092
+   global:
+     kafka:
+       host: <KAFKA_INSTALL_NAME>-kafka
+       port: 9092
 
-   redis:
-      host: <REDIS_INSTALL_NAME>-redis-master
-      port: 6379
+     redis:
+       host: <REDIS_INSTALL_NAME>-redis-master
+       port: 6379
    ```
 
 Or alternatively one can install the chart by adding the following `--set` parameters:
@@ -66,4 +61,12 @@ Or alternatively one can install the chart by adding the following `--set` param
 
 ### Validation
 
-Not available at this time.
+- Open TTK UI for SIM1 on http://ttksim1.ttk1.test.mojaloop.live/admin/outbound_request
+- Open TTK UI for SIM2 for monitoring the inbound requests as receiver http://ttksim2.ttk1.test.mojaloop.live/admin/monitoring
+- Download the following test cases
+  https://github.com/mojaloop/sdk-scheme-adapter/blob/mvp/feat/%232809-local-end-to-end-func-tests/test/func/ttk-testcases/bulk-happy-path.json
+- Import the test cases in TTK SIM1
+- Edit the first test case `TC-BHP1. Happy Path`
+- Goto `Editor` tab on each request and deselect the checkbox `Override with Custom URL`
+- Run the test cases by clicking on the `Send` button at the top right corner
+- You should see all tests passed

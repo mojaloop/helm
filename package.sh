@@ -19,7 +19,14 @@ if [ "$1" ]; then
     declare -a charts=("$1")
 else
     declare -a charts=(
+        ml-testing-toolkit
+        ml-testing-toolkit-cli
+        sdk-scheme-adapter/chart-service
         sdk-scheme-adapter
+        mojaloop-ttk-simulators/chart-sim1
+        mojaloop-ttk-simulators/chart-sim2
+        mojaloop-ttk-simulators/chart-sim3
+        mojaloop-ttk-simulators
         eventstreamprocessor
         simulator
         monitoring/promfana
@@ -43,8 +50,6 @@ else
         bulk-api-adapter/
         mojaloop-bulk/
         mojaloop-simulator
-        ml-testing-toolkit
-        ml-testing-toolkit-cli
         thirdparty/chart-auth-svc
         thirdparty/chart-consent-oracle
         thirdparty/chart-tp-api-svc
