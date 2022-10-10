@@ -17,6 +17,8 @@ if [ "$1" ]; then
     declare -a charts=("$1")
 else
     declare -a charts=(
+        ml-testing-toolkit
+        ml-testing-toolkit-cli
         sdk-scheme-adapter/chart-service
         sdk-scheme-adapter
         mojaloop-ttk-simulators/chart-sim1
@@ -46,8 +48,6 @@ else
         bulk-api-adapter/
         mojaloop-bulk/
         mojaloop-simulator
-        ml-testing-toolkit
-        ml-testing-toolkit-cli
         mojaloop
         kube-system/ntpd/
         ml-operator

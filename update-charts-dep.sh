@@ -14,6 +14,7 @@ find ./ -name "tmpcharts"| xargs rm -Rf
 
 declare -a charts=(
     ml-testing-toolkit
+    ml-testing-toolkit-cli
     sdk-scheme-adapter/chart-service
     sdk-scheme-adapter
     mojaloop-ttk-simulators/chart-sim1
