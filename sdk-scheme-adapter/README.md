@@ -46,7 +46,7 @@ The following-backend dependency are required for each of the following services
 
    _IMPORTANT: The above command includes config changes to deploy a single instance with disable persistence, etc which is not recommended for Production grade installations. Please refer to the [Bitnami Redis values.yaml](https://github.com/bitnami/charts/blob/master/bitnami/kafka/values.yaml) for available configuration parameters._
 
-Ensure that you configure the appropriate configurations to match the above in the [SDK-Scheme-Adapter values.yaml](./values.yaml):
+Ensure that you configure the appropriate configurations to match the above in the [values.yaml](./values.yaml):
 
    ```yaml
    kafka:
