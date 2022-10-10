@@ -13,6 +13,7 @@ find ./ -name "charts"| xargs rm -Rf
 find ./ -name "tmpcharts"| xargs rm -Rf
 
 declare -a charts=(
+    ml-testing-toolkit
     sdk-scheme-adapter/chart-service
     sdk-scheme-adapter
     mojaloop-ttk-simulators/chart-sim1
@@ -41,7 +42,6 @@ declare -a charts=(
     bulk-api-adapter
     mojaloop-bulk
     mojaloop-simulator
-    ml-testing-toolkit
     thirdparty/chart-auth-svc
     thirdparty/chart-consent-oracle
     thirdparty/chart-tp-api-svc
