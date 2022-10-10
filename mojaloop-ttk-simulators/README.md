@@ -61,4 +61,12 @@ Or alternatively one can install the chart by adding the following `--set` param
 
 ### Validation
 
-Not available at this time.
+- Open TTK UI for SIM1 on http://ttksim1.ttk1.test.mojaloop.live/admin/outbound_request
+- Open TTK UI for SIM2 for monitoring the inbound requests as receiver http://ttksim2.ttk1.test.mojaloop.live/admin/monitoring
+- Download the following test cases
+  https://github.com/mojaloop/sdk-scheme-adapter/blob/mvp/feat/%232809-local-end-to-end-func-tests/test/func/ttk-testcases/bulk-happy-path.json
+- Import the test cases in TTK SIM1
+- Edit the first test case `TC-BHP1. Happy Path`
+- Goto `Editor` tab on each request and deselect the checkbox `Override with Custom URL`
+- Run the test cases by clicking on the `Send` button at the top right corner
+- You should see all tests passed
