@@ -39,10 +39,3 @@ app.kubernetes.io/instance: {{ .Release.Name }}
   {{- end -}}
 {{- end -}}
 
-{{- define "apiVersion.Ingress" -}}
-  {{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" -}}
-    {{- print "networking.k8s.io/v1" -}}
-  {{- else -}}
-    {{- print "networking.k8s.io/v1" -}}
-  {{- end -}}
-{{- end -}}

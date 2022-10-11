@@ -23,10 +23,3 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
   {{- end -}}
 {{- end -}}
 
-{{- define "centralledger-handler-bulk-transfer-fulfil.apiVersion.Ingress" -}}
-  {{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" -}}
-    {{- print "networking.k8s.io/v1" -}}
-  {{- else -}}
-    {{- print "networking.k8s.io/v1" -}}
-  {{- end -}}
-{{- end -}}

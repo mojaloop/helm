@@ -6,23 +6,24 @@ image:
   repository: mojaloop/bulk-api-adapter
   tag: v14.0.0
   command: '["node", "src/api/index.js"]'
-## Optionally specify an array of imagePullSecrets.
-## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
-##
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+    ##
 #  imagePullSecrets:
 #    - name: myregistrykey
   pullPolicy: IfNotPresent
 
-## Pod scheduling preferences.
-## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    ## Pod scheduling preferences.
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 affinity: {}
 
-## Node labels for pod assignment
-## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
 nodeSelector: {}
 
-## Set toleration for scheduler
-## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    ## Set toleration for scheduler
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
 
 init:
@@ -60,7 +61,7 @@ livenessProbe:
   initialDelaySeconds: 90
   periodSeconds: 15
 
-## metric configuration for prometheus instrumentation
+    ## metric configuration for prometheus instrumentation
 metrics:
   ## flag to enable/disable the metrics end-points
   enabled: true
@@ -87,8 +88,24 @@ config:
 
   # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
   # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-  protocol_versions: {"CONTENT": {"DEFAULT": "1.1", "VALIDATELIST": ["1", "1.0", "1.1"]}, "ACCEPT": {"DEFAULT": "1", "VALIDATELIST": ["1", "1.0", "1.1"]}}
-
+  protocol_versions: {
+    "CONTENT": {
+        "DEFAULT": "1.1",
+        "VALIDATELIST": [
+            "1",
+            "1.0",
+            "1.1"
+        ]
+    },
+    "ACCEPT": {
+        "DEFAULT": "1",
+        "VALIDATELIST": [
+            "1",
+            "1.0",
+            "1.1"
+        ]
+    }
+}
   ## MongoDB Configuration for Object Store
   objstore_uri: 'mongodb://$mongodbUsername:$mongodbPassword@$release_name-centralledger-obj:27017/$mongodbDatabase'
 
@@ -99,50 +116,51 @@ service:
 
 ingress:
   enabled: true
-  ## @param ingress.pathType Ingress path type
-  ##
+    ## @param ingress.pathType Ingress path type
+    ##
   pathType: ImplementationSpecific
-  ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
-  ##
+    ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+    ##
   apiVersion:
-  ## @param ingress.hostname Default host for the ingress record
-  ##
+    ## @param ingress.hostname Default host for the ingress record
+    ##
   hostname: bulk-api-adapter.local
-  ## @param servicePort : port for the service
-  ##
+    ## @param servicePort : port for the service
+    ##
   servicePort: 80
-  ## @param ingress.path Default path for the ingress record
-  ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+    ## @param ingress.path Default path for the ingress record
+    ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
   path: /
-  ## @param ingress.annotations Additional custom annotations for the ingress record
-  ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
-  ##
+    ## @param ingress.annotations Additional custom annotations for the ingress record
+    ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+    ##
   annotations:
-  ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
-  ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
-  ## You can:
-  ##   - Use the `ingress.secrets` parameter to create this TLS secret
-  ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
-  ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
-  ##
+    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+    ## You can:
+    ##   - Use the `ingress.secrets` parameter to create this TLS secret
+    ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+    ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+    ##
   tls: false
-  ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
-  ##
+    ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+    ##
   certManager: false
-  ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
-  ##
+    ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+    ##
   selfSigned: false
-  ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
-  ## e.g:
-  ## extraHosts:
-  ##   - name: transfer-api-svc.local
-  ##     path: /
-  ##
+    ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+    ## e.g:
+    ## extraHosts:
+    ##   - name: transfer-api-svc.local
+    ##     path: /
+    ##
   extraHosts:
   extraPaths:
   extraTls:
   secrets:
   className: "nginx"
+  ##
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
