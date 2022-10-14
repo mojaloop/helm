@@ -338,6 +338,25 @@ sdk-scheme-adapter-api-svc:
           value: {{ .Values.kafka.host | default .Values.global.kafka.host | quote }}
         - name: KAFKA_PORT
           value: {{ .Values.kafka.port | default .Values.global.kafka.port | quote }}
+    - name: kafka-topics-create
+      image: docker.io/bitnami/kafka:3.2
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - kafka-topics.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT} --list;
+          echo 'Creating kafka topics';
+          kafka-topics.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT} --create --if-not-exists --topic ${SIM_NAME}-topic-sdk-outbound-command-events --replication-factor 1 --partitions 1;
+          kafka-topics.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT} --create --if-not-exists --topic ${SIM_NAME}-topic-sdk-outbound-domain-events --replication-factor 1 --partitions 1;
+          echo -e 'Successfully created the following topics:';
+          kafka-topics.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT} --list;
+      env:
+        - name: KAFKA_HOST
+          value: {{ .Values.kafka.host | default .Values.global.kafka.host | quote }}
+        - name: KAFKA_PORT
+          value: {{ .Values.kafka.port | default .Values.global.kafka.port | quote }}
+        - name: SIM_NAME
+          value: {{ .Values.config.simName }}
     - name: wait-for-redis
       image: redis:7.0.5
       imagePullPolicy: IfNotPresent
@@ -731,6 +750,25 @@ sdk-scheme-adapter-dom-evt-handler:
           value: {{ .Values.kafka.host | default .Values.global.kafka.host | quote }}
         - name: KAFKA_PORT
           value: {{ .Values.kafka.port | default .Values.global.kafka.port | quote }}
+    - name: kafka-topics-create
+      image: docker.io/bitnami/kafka:3.2
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - kafka-topics.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT} --list;
+          echo 'Creating kafka topics';
+          kafka-topics.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT} --create --if-not-exists --topic ${SIM_NAME}-topic-sdk-outbound-command-events --replication-factor 1 --partitions 1;
+          kafka-topics.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT} --create --if-not-exists --topic ${SIM_NAME}-topic-sdk-outbound-domain-events --replication-factor 1 --partitions 1;
+          echo -e 'Successfully created the following topics:';
+          kafka-topics.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT} --list;
+      env:
+        - name: KAFKA_HOST
+          value: {{ .Values.kafka.host | default .Values.global.kafka.host | quote }}
+        - name: KAFKA_PORT
+          value: {{ .Values.kafka.port | default .Values.global.kafka.port | quote }}
+        - name: SIM_NAME
+          value: {{ .Values.config.simName }}
     - name: wait-for-redis
       image: redis:7.0.5
       imagePullPolicy: IfNotPresent
@@ -1127,6 +1165,25 @@ sdk-scheme-adapter-cmd-evt-handler:
           value: {{ .Values.kafka.host | default .Values.global.kafka.host | quote }}
         - name: KAFKA_PORT
           value: {{ .Values.kafka.port | default .Values.global.kafka.port | quote }}
+    - name: kafka-topics-create
+      image: docker.io/bitnami/kafka:3.2
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - kafka-topics.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT} --list;
+          echo 'Creating kafka topics';
+          kafka-topics.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT} --create --if-not-exists --topic ${SIM_NAME}-topic-sdk-outbound-command-events --replication-factor 1 --partitions 1;
+          kafka-topics.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT} --create --if-not-exists --topic ${SIM_NAME}-topic-sdk-outbound-domain-events --replication-factor 1 --partitions 1;
+          echo -e 'Successfully created the following topics:';
+          kafka-topics.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT} --list;
+      env:
+        - name: KAFKA_HOST
+          value: {{ .Values.kafka.host | default .Values.global.kafka.host | quote }}
+        - name: KAFKA_PORT
+          value: {{ .Values.kafka.port | default .Values.global.kafka.port | quote }}
+        - name: SIM_NAME
+          value: {{ .Values.config.simName }}
     - name: wait-for-redis
       image: redis:7.0.5
       imagePullPolicy: IfNotPresent
