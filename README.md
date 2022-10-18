@@ -168,7 +168,7 @@ Mojaloop Helm deployments currently include the following tests:
     - `ml-ttk-test-setup.tests.enabled=true`
     - `ml-ttk-test-val-gp.tests.enabled=true`
     - `ml-ttk-test-val-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true` is set_)
-    - `ml-ttk-test-val-sdk-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true` is set_)
+    - `ml-ttk-test-val-sdk-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true`, `mojaloop-ttk-simulators.enabled=true` is set_)
 
     Or alternatively add `--set` for each of the above parameters on the install command:
 
