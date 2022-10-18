@@ -1,5 +1,5 @@
 {{- if index .Values "ingress" "enabled" -}}
-apiVersion: {{ template "apiVersion.Ingress" . }}
+apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
 kind: Ingress
 metadata:
   name: {{ include "auth-svc.name" . }}-ingress
@@ -10,7 +10,9 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
-  ingressClassName: nginx
+  {{- if and .Values.ingress.className (semverCompare ">=1.22-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ $.Values.ingress.className }}
+  {{- end }}
   rules:
     {{- range $hostType, $service := .Values.ingress.hosts }}
       - host: {{ index $service "host" }}
@@ -18,12 +20,10 @@ spec:
           paths:
             {{- range $path := (index $service "paths") }}
             - path: {{ $path }}
-              pathType: ImplementationSpecific
-              backend:
-                service:
-                  name: {{ index $service "name" }}
-                  port:
-                    number: {{ index $service "port" }}
+              {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
+              pathType: {{ index $service "pathType" }}
+              {{- end }}
+              backend: {{- include "common.ingress.backend" (dict "serviceName" $service.name "servicePort"  $service.port "context" $)  | nindent 16 }}
             {{- end -}}
       {{- end -}}
     {{- if .Values.ingress.tls }}
