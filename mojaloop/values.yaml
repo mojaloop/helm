@@ -6341,6 +6341,70 @@ mojaloop-simulator:
     ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations: []
 
+mojaloop-ttk-simulators:
+  enabled: false
+  
+  mojaloop-ttk-sim1-svc:
+    enabled: true
+    ml-testing-toolkit:
+      ml-testing-toolkit-backend:
+        ingress:
+          enabled: true
+          hosts:
+            specApi:
+              host: 'ttksim1-specapi.local'
+            adminApi:
+              host: 'ttksim1.local'
+      ml-testing-toolkit-frontend:
+        ingress:
+          enabled: true
+          hosts:
+            ui:
+              host: ttksim1.local
+        config:
+          API_BASE_URL: 'http://ttksim1.local'
+
+  mojaloop-ttk-sim2-svc:
+    enabled: true
+    ml-testing-toolkit:
+      ml-testing-toolkit-backend:
+        ingress:
+          enabled: true
+          hosts:
+            specApi:
+              host: 'ttksim2-specapi.local'
+            adminApi:
+              host: 'ttksim2.local'
+      ml-testing-toolkit-frontend:
+        ingress:
+          enabled: true
+          hosts:
+            ui:
+              host: 'ttksim2.local'
+        config:
+          API_BASE_URL: 'http://ttksim2.local'
+
+  mojaloop-ttk-sim3-svc:
+    enabled: true
+    ml-testing-toolkit:
+      ml-testing-toolkit-backend:
+        ingress:
+          enabled: true
+          hosts:
+            specApi:
+              host: 'ttksim3-specapi.local'
+            adminApi:
+              host: 'ttksim3.local'
+      ml-testing-toolkit-frontend:
+        ingress:
+          enabled: true
+          hosts:
+            ui:
+              host: 'ttksim3.local'
+        config:
+          API_BASE_URL: 'http://ttksim3.local'
+
+
 mojaloop-bulk:
   enabled: false
 
@@ -7393,6 +7457,9 @@ ml-testing-toolkit:
       simNameTestfsp3: 'testfsp3'
       simNameTestfsp4: 'testfsp4'
       simNameNoResponsePayeefsp: 'noresponsepayeefsp'
+      simNameTTKSim1: 'ttksim1'
+      simNameTTKSim2: 'ttksim2'
+      simNameTTKSim3: 'ttksim3'
 
     extraEnvironments:
       hub-k8s-default-environment.json: &ttkInputValues {
@@ -7622,7 +7689,22 @@ ml-testing-toolkit:
           "DFSPB_BACKEND_TESTAPI_URL": "http://$release_name-sim-tp-dfspb-backend:3003",
           "DFSPB_CALLBACK_URL": "http://$release_name-sim-tp-dfspb-scheme-adapter:4000",
           "DFSPB_SDK_TESTAPI_URL": "http://$release_name-sim-tp-dfspb-scheme-adapter:4002",
-          "DFSPB_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-tp-dfspb-scheme-adapter:4002"
+          "DFSPB_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-tp-dfspb-scheme-adapter:4002",
+          "TTKSIM1_NAME": "$param_simNameTTKSim1",
+          "TTKSIM2_NAME": "$param_simNameTTKSim2",
+          "TTKSIM3_NAME": "$param_simNameTTKSim3",
+          "TTKSIM1_MSISDN": "16135551212",
+          "TTKSIM2_MSISDN": "56781234",
+          "TTKSIM3_MSISDN": "56781235",
+          "TTKSIM1_CALLBACK_URL": "http://$release_name-$param_simNameTTKSim1-sdk-api-svc:4000",
+          "TTKSIM1_SDK_TESTAPI_URL": "http://$release_name-$param_simNameTTKSim1-sdk-api-svc:4002",
+          "TTKSIM1_SDK_TESTAPI_WS_URL": "ws://$release_name-$param_simNameTTKSim1-sdk-api-svc:4002",
+          "TTKSIM2_CALLBACK_URL": "http://$release_name-$param_simNameTTKSim2-sdk-api-svc:4000",
+          "TTKSIM2_SDK_TESTAPI_URL": "http://$release_name-$param_simNameTTKSim2-sdk-api-svc:4002",
+          "TTKSIM2_SDK_TESTAPI_WS_URL": "ws://$release_name-$param_simNameTTKSim2-sdk-api-svc:4002",
+          "TTKSIM3_CALLBACK_URL": "http://$release_name-$param_simNameTTKSim3-sdk-api-svc:4000",
+          "TTKSIM3_SDK_TESTAPI_URL": "http://$release_name-$param_simNameTTKSim3-sdk-api-svc:4002",
+          "TTKSIM3_SDK_TESTAPI_WS_URL": "ws://$release_name-$param_simNameTTKSim3-sdk-api-svc:4002"
         }
       }
 
@@ -7744,8 +7826,11 @@ ml-ttk-test-setup:
     weight: -6
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
-    testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: *ttkGitPathSetup
+    # testCasesZipUrl: *ttkGitUrl
+    # testCasesPathInZip: *ttkGitPathSetup
+    ## TODO: We can remove the following lines and uncomment the above two lines after we merge the test-cases related sdk-bulk to master branch and release a version
+    testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/refs/heads/mvp/bulk-sdk.zip
+    testCasesPathInZip: testing-toolkit-test-cases-mvp-bulk-sdk/collections/hub/provisioning
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
   parameters:
     <<: *simNames
@@ -7878,6 +7963,46 @@ ml-ttk-test-val-tp:
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     testSuiteName: Thirdparty Tests
+    environmentName: Development
+
+  # configCreds:
+  #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
+  #   AWS_SECRET_ACCESS_KEY: 'some_aws_secret_key'
+  #   AWS_REGION: 'us-west-2'
+  #   SLACK_WEBHOOK_URL: 'slack_inbound_webhook'
+
+  ## Optionally specify the config file defaults for TTK CLI
+  ## You should specify at least mode here
+  # configFileDefaults: {
+  #   "mode": "outbound",
+  #   "reportFormat": "html",
+  #   "baseURL": "",
+  #   "reportTarget": "",
+  #   "reportAutoFilenameEnable": true,
+  #   "slackWebhookUrl": "",
+  #   "slackPassedImage": "",
+  #   "slackFailedImage": "",
+  #   "logLevel": "2"
+  # }
+  parameters:
+    <<: *simNames
+  testCaseEnvironmentFile:  *ttkInputValues
+
+ml-ttk-test-val-sdk-bulk:
+  tests:
+    enabled: false
+    weight: -1
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    # testCasesZipUrl: *ttkGitUrl
+    ## TODO: We can remove the following line and uncomment the above line after we merge the test-cases related sdk-bulk to master branch and release a version
+    testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/refs/heads/mvp/bulk-sdk.zip
+    testCasesPathInZip: testing-toolkit-test-cases-mvp-bulk-sdk/collections/hub/sdk-bulk
+    ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
+    # awsS3BucketName: aws-s3-bucket-name
+    # awsS3FilePath: ttk-tests/reports
+    ttkBackendURL: http://$release_name-ttksim1-ttk-backend:5050
+    testSuiteName: SDK Bulk Tests
     environmentName: Development
 
   # configCreds:
