@@ -75,7 +75,13 @@ N/A
 
 ## 5. Breaking changes
 
-TODO: Add note about ingress changes
+1. Mojaloop Helm Chart Ingress's have been refactored to support Kubernetes networking.k8s.io/v1 as part of [mojaloop/#2352](https://github.com/mojaloop/project/issues/2352). This means that Mojaloop v14.1.0 Helm release should support Kubernetes versions v1.22 onwards, however keep in mind that we have only tested this release with the current supported Kubernetes version v1.24.
+
+    What is the impact from v14.0.0?
+
+    1. Ingress Configs have changed. Please compare the Ingress values in [mojaloop/values.yaml](../mojaloop/values.yaml) configs to your customized config to see what changes are required.
+    2. Upgrades are supported from v14.0.0 to this release (v14.1.0), but ensure your Ingress configurations have been updated to reflect the above changes.
+    3. Take note that this change is part of a wider initiative to improve the maintainability of the Mojaloop Helm Charts and to support current Kubernetes versions. The next story as part of this initiative is to remove the external backend dependencies from the next Mojaloop Helm Release as part of [mojaloop/#2887](https://github.com/mojaloop/project/issues/2887).
 
 ## 6. Deprecations
 
