@@ -15,6 +15,7 @@ metadata:
       {{ $key }}: {{ $value | quote }}
     {{- end }}
 spec:
+  ingressClassName: nginx
   rules:
     {{- range $hostname, $service := .Values.ingress.hosts }}
     - host: {{ $hostname }}
@@ -22,9 +23,12 @@ spec:
         paths:
           {{- range $path := (index $service "paths") }}
           - path: {{ $path }}
+            pathType: ImplementationSpecific
             backend:
-              serviceName: {{ $serviceFullName }}
-              servicePort: {{ index $service "port" }}
+              service:
+                name: {{ $serviceFullName }}
+                port:
+                  number: {{ index $service "port" }}
           {{- end -}}
     {{- end -}}
 {{- end -}}

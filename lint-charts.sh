@@ -24,9 +24,9 @@ else
         account-lookup-service
         als-oracle-pathfinder
         centralkms
-        forensicloggingsidecar
+        # forensicloggingsidecar  # No longer supported
         centralledger
-        centralenduserregistry
+        # centralenduserregistry  # No longer supported
         centralsettlement
         emailnotifier
         centraleventprocessor
@@ -43,7 +43,7 @@ else
         ml-testing-toolkit
         ml-testing-toolkit-cli
         mojaloop
-        kube-system/ntpd/
+        # kube-system/ntpd/ # No longer supported
         ml-operator
         thirdparty/chart-auth-svc
         thirdparty/chart-consent-oracle
