@@ -1,6 +1,6 @@
 {{ if .Values.simulators }}
 {{- $prefix := include "mojaloop-simulator.prefix" . -}}
-apiVersion: {{ template "mojaloop-simulator.apiVersion.Ingress" . }}
+apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
 kind: Ingress
 metadata:
   name: {{ $prefix }}simulators
@@ -12,7 +12,9 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
-  ingressClassName: nginx
+  {{- if and .Values.ingress.className (semverCompare ">=1.22-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ default "nginx" .Values.ingress.className }}
+  {{- end }}
   rules:
   {{- range $name, $customConfig := .Values.simulators }}
   {{- $fullName := printf "%s%s" (include "mojaloop-simulator.prefix" $) $name -}}
@@ -24,34 +26,25 @@ spec:
         http:
           paths:
           - path: /sim/{{ $name }}/outbound{{ $.Values.ingress.ingressPathRewriteRegex }}
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ $fullName }}-scheme-adapter
-                port:
-                  number: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
+            {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
+            pathType: {{ default "ImplementationSpecific" $config.ingress.pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (printf "%s-%s" $fullName "scheme-adapter") "servicePort" "outboundapi" "context" $) | nindent 14 }}
           - path: /sim/{{ $name }}/inbound{{ $.Values.ingress.ingressPathRewriteRegex }}
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ $fullName }}-scheme-adapter
-                port:
-                  number: {{ $config.config.schemeAdapter.env.INBOUND_LISTEN_PORT }}
+            {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
+            pathType: {{ default "ImplementationSpecific" $config.ingress.pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (printf "%s-%s" $fullName "scheme-adapter") "servicePort" "inboundapi" "context" $) | nindent 14 }}
           - path: /sim/{{ $name }}/sdktest{{ $.Values.ingress.ingressPathRewriteRegex }}
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ $fullName }}-scheme-adapter
-                port:
-                  number: 3003
+            {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
+            pathType: {{ default "ImplementationSpecific" $config.ingress.pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (printf "%s-%s" $fullName "scheme-adapter") "servicePort" "testapi" "context" $) | nindent 14 }}
           - path: /sim/{{ $name }}/test{{ $.Values.ingress.ingressPathRewriteRegex }}
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ $fullName }}-backend
-                port:
-                  number: 3003
-
+            {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
+            pathType: {{ default "ImplementationSpecific" $config.ingress.pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (printf "%s-%s" $fullName "backend") "servicePort" "testapi" "context" $) | nindent 14 }}
     {{- end }}
   {{- end }}
   {{- end }}
