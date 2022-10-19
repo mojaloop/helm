@@ -13,6 +13,7 @@ find ./ -name "charts"| xargs rm -Rf
 find ./ -name "tmpcharts"| xargs rm -Rf
 
 declare -a charts=(
+    ml-operator
     simulator
     eventstreamprocessor
     monitoring/promfana
