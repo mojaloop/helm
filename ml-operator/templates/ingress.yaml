@@ -1,30 +1,61 @@
-{{- if index .Values "image-watcher" "ingress" "enabled" -}}
-apiVersion: {{ template "apiVersion.Ingress" . }}
+{{- if ( index .Values "image-watcher" "ingress" "enabled" ) }}
+apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
 kind: Ingress
 metadata:
-  name: {{ include "ml-operator.name" . }}-ingress
-  labels:
-    {{- include "ml-operator.labels" . | nindent 4 }}
-{{- with index .Values "image-watcher" "ingress" "annotations" }}
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: {{ template "common.names.chart" . }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or ( index .Values "image-watcher" "ingress" "annotations" ) .Values.commonAnnotations ( index .Values "image-watcher" "ingress" "certManager" ) }}
   annotations:
-{{ toYaml . | indent 4 }}
-{{- end }}
+    {{- if ( index .Values "image-watcher" "ingress" "certManager" ) }}
+    kubernetes.io/tls-acme: "true"
+    {{- end }}
+    {{- if ( index .Values "image-watcher" "ingress" "annotations" ) }}
+    {{- include "common.tplvalues.render" ( dict "value" ( index .Values "image-watcher" "ingress" "annotations" ) "context" $) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
 spec:
+  ingressClassName: {{ ( index .Values "image-watcher" "ingress" "className" ) }}
   rules:
-    # Host based ingress
-    - host: {{index .Values "image-watcher" "ingress" "host"}}
+    {{- if ( index .Values "image-watcher" "ingress" "hostname" ) }}
+    - host: {{ ( index .Values "image-watcher" "ingress" "hostname" ) }}
       http:
         paths:
-          - path: /
-            backend:
-              serviceName: image-watcher
-              servicePort: {{ index .Values "image-watcher" "ingress" "port" }}
-
-    # Path based ingress
-    - http:
+          {{- if ( index .Values "image-watcher" "ingress" "extraPaths" ) }}
+          {{- toYaml ( index .Values "image-watcher" "ingress" "extraPaths" ) | nindent 10 }}
+          {{- end }}
+          - path: {{ ( index .Values "image-watcher" "ingress" "path" ) }}
+            {{- if eq "true" (include "common.ingress.supportsPathType" .) }}
+            pathType: {{ ( index .Values "image-watcher" "ingress" "pathType" ) }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" "image-watcher" "servicePort"  ( index .Values "image-watcher" "ingress" "servicePort" ) "context" $)  | nindent 14 }}
+    {{- end }}
+    {{- range ( index .Values "image-watcher" "ingress" "extraHosts" ) }}
+    - host: {{ .name | quote }}
+      http:
         paths:
-          - path: {{ index .Values "image-watcher" "ingress" "path" }}
-            backend:
-              serviceName: image-watcher
-              servicePort: {{ index .Values "image-watcher" "ingress" "port" }}
+          - path: {{ default "/" .path }}
+            {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
+            pathType: {{ default "ImplementationSpecific" .pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "common.names.fullname" $) "servicePort" ( index .Values "image-watcher" "ingress" "servicePort" ) "context" $) | nindent 14 }}
+    {{- end }}
+  {{- if or (and ( index .Values "image-watcher" "ingress" "tls" ) (or ( index .Values "image-watcher" "ingress" "certManager" ) ( index .Values "image-watcher" "ingress" "selfSigned" ))) ( index .Values "image-watcher" "ingress" "extraTls" ) }}
+  tls:
+    {{- if and ( index .Values "image-watcher" "ingress" "tls" ) (or ( index .Values "image-watcher" "ingress" "certManager" ) ( index .Values "image-watcher" "ingress" "selfSigned" )) }}
+    - hosts:
+        - {{ ( index .Values "image-watcher" "ingress" "hostname" ) | quote }}
+      secretName: {{ printf "%s-tls" ( index .Values "image-watcher" "ingress" "hostname" ) }}
+    {{- end }}
+    {{- if ( index .Values "image-watcher" "ingress" "extraTls" ) }}
+    {{- include "common.tplvalues.render" (dict "value" ( index .Values "image-watcher" "ingress" "extraTls" ) "context" $) | nindent 4 }}
+    {{- end }}
+  {{- end }}
 {{- end }}

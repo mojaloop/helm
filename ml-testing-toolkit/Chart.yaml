@@ -1,7 +1,7 @@
-apiVersion: v1
-description:  ml-testing-toolkit Helm chart for Kubernetes
+apiVersion: v2
+description: ml-testing-toolkit Helm chart for Kubernetes
 name: ml-testing-toolkit
-version: 15.1.0
+version: 15.2.0
 appVersion: "ml-testing-toolkit: v15.1.0 ml-testing-toolkit-ui: v15.0.0"
 home: http://mojaloop.io
 icon: http://mojaloop.io/images/logo.png
@@ -13,9 +13,45 @@ sources:
   - https://github.com/modusbox/connection-manager-api
   - https://github.com/modusbox/connection-manager-ui
 maintainers:
-  - name: Georgi Logodazhki
-    email: georgi.logodazhki@modusbox.com
-  - name: Steven Oderayi
-    email: steven.oderayi@modusbox.com
   - name: Vijay Kumar
     email: vijaya.guthi@modusbox.com
+  - name: Tom Daly
+    email: tomd@crosslaketech.com
+  - name: Miguel de Barros
+    email: miguel.debarros@modusbox.com
+dependencies:
+  - name: ml-testing-toolkit-frontend
+    version: 15.1.0
+    repository: "file://./chart-frontend"
+    condition: ml-testing-toolkit-frontend.enabled
+  - name: ml-testing-toolkit-backend
+    version: 15.2.0
+    repository: "file://./chart-backend"
+    condition: ml-testing-toolkit-backend.enabled
+  - name: connection-manager-frontend
+    version: 11.1.0
+    repository: "file://./chart-connection-manager-frontend"
+    condition: connection-manager-frontend.enabled
+  - name: connection-manager-backend
+    version: 11.1.0
+    repository: "file://./chart-connection-manager-backend"
+    condition: connection-manager-backend.enabled
+  - name: percona-xtradb-cluster
+    version: 1.0.8
+    repository: https://charts.helm.sh/stable
+    alias: mysql
+    condition: mysql.enabled
+  - name: mongodb
+    version: 12.1.20
+    repository: https://charts.bitnami.com/bitnami/
+    alias: mongodb
+    condition: mongodb.enabled
+  - name: keycloak
+    version: 9.5.0
+    repository: "file://./chart-keycloak"
+    condition: keycloak.enabled
+  - name: common
+    repository: https://docs.mojaloop.io/charts/repo
+    version: 2.0.0
+    tags:
+      - moja-common
