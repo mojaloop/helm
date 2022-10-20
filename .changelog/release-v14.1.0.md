@@ -2,7 +2,7 @@
 
 Date | Revision | Description
 ---------|----------|---------
- 2022-10-18 | 0 | Initial draft
+ 2022-10-20 | 0 | Initial draft
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
