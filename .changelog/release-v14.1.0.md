@@ -9,45 +9,51 @@ Date | Revision | Description
 
 ## 1. New Features
 
-1. **mojaloop/#2352:**  Mojaloop Helm support for Kubernetes networking.k8s.io/v1 (Ingress) ([mojaloop/helm/pull/#508](https://github.com/mojaloop/helm/pull/508)), closes [mojaloop/#2352](https://github.com/mojaloop/project/issues/2352)
+1. **mojaloop/#2352:** Mojaloop Helm support for Kubernetes networking.k8s.io/v1 (Ingress) ([mojaloop/helm/pull/#508](https://github.com/mojaloop/helm/pull/508)), closes [mojaloop/#2352](https://github.com/mojaloop/project/issues/2352)
+2. **mojaloop/#2880** Simplify liquidity cover check and fix issue with validation, closes [mojaloop/#2880](https://github.com/mojaloop/project/issues/2880)
 
 ## 2. Bug Fixes
 
-N/A
+1. Bulk Fixes
+   1. **mojaloop/#2796** Duplicate transaction not getting callback for post /bulkTransfers ([central-ledger/pull/915](https://github.com/mojaloop/central-ledger/pull/915)), closes [mojaloop/#2796](https://github.com/mojaloop/project/issues/2796)
+   2. **mojaloop/#2798** No error callback when there's an Inactive participant in the transaction ([central-ledger/pull/#911](https://github.com/mojaloop/central-ledger/pull/911), [central-ledger/pull/#913](https://github.com/mojaloop/central-ledger/pull/913)), closes [mojaloop/#2798](https://github.com/mojaloop/project/issues/2798)
+   3. https://github.com/mojaloop/central-ledger/pull/911
+   4. **mojaloop/#2800** Invalid dfsp name in header or body does not return any error ([central-ledger/pull/#911](https://github.com/mojaloop/central-ledger/pull/911), [central-ledger/pull/#913](https://github.com/mojaloop/central-ledger/pull/913)), closes [mojaloop/#2800](https://github.com/mojaloop/project/issues/2800)
+   5. **mojaloop/#2801** Invalid timestamp scenario not shown as failed transaction ([documentation/pull/385](https://github.com/mojaloop/documentation/pull/385), [central-ledger/pull/916](https://github.com/mojaloop/central-ledger/pull/916), [central-services-shared/pull/333](https://github.com/mojaloop/central-services-shared/pull/333), [testing-toolkit-test-cases/pull/81](https://github.com/mojaloop/testing-toolkit-test-cases/pull/81), [helm/pull/492](https://github.com/mojaloop/helm/pull/492)), closes [mojaloop/#2801](https://github.com/mojaloop/project/issues/2801)
 
 ## 3. Application versions
 
-1. ml-api-adapter: v13.0.0 -> **v14.0.0**
-2. central-ledger: v13.16.1 -> **v15.1.2.1**
-3. account-lookup-service: v13.0.0 -> **v14.0.0**
-4. quoting-service: v14.0.0 -> **15.0.2**
-5. central-settlement: 13.4.1 -> **v15.0.0**
-6. central-event-processor: v11.0.2 -> **v12.0.0**
-7. bulk-api-adapter: v13.0.1 -> **v14.0.0**
-8. email-notifier: v11.0.2 -> **v12.0.0**
-9. als-oracle-pathfinder: v11.0.4 -> **v12.0.0**
-10. transaction-requests-service: v13.0.0 -> **v14.0.1**
+1. ml-api-adapter: v14.0.0
+2. central-ledger: v15.1.2.1 -> **v16.3.0** ([Compare](https://github.com/mojaloop/central-ledger/compare/v15.1.2.1...v16.3.0))
+3. account-lookup-service: v14.0.0
+4. quoting-service: v15.0.2
+5. central-settlement: v15.0.0
+6. central-event-processor: v12.0.0
+7. bulk-api-adapter: v14.0.0
+8. email-notifier: v12.0.0
+9. als-oracle-pathfinder: v12.0.0
+10. transaction-requests-service: v14.0.1
 11. finance-portal-ui: **v10.4.3** _(DEPRECATED)_
 12. finance-portal-backend-service: **v15.0.2** _(DEPRECATED)_
 13. settlement-management: **v11.0.0** _(DEPRECATED)_
 14. operator-settlement: **v11.0.0** _(DEPRECATED)_
 15. event-sidecar: **v12.0.0**
-16. event-stream-processor: v11.0.0-snapshot -> **v12.0.0-snapshot.7**
+16. event-stream-processor: v12.0.0-snapshot.7
 17. simulator: 12.0.0 -> **v12.0.0**
-18. mojaloop-simulator: v12.1.1 -> **v13.0.1**
-19. sdk-scheme-adapter: v11.18.11 -> **v18.0.2**
-20. ml-testing-toolkit: v14.0.4 -> **v15.0.0**
-21. ml-testing-toolkit-ui: v13.5.5 -> **v15.0.0**
+18. mojaloop-simulator: v13.0.1
+19. sdk-scheme-adapter: v18.0.2
+20. ml-testing-toolkit: v15.0.0
+21. ml-testing-toolkit-ui: v15.0.0
 22. ml-testing-toolkit-client-lib: **v1.0.0**
-23. auth-service: v11.11.1 -> **v13.0.2**
-24. als-consent-service: v0.0.8 -> **v0.2.0**
-25. thirdparty-api-svc: v11.21.0 -> **v13.0.2**
-26. thirdparty-sdk: v11.55.1 -> **v15.1.0**
+23. auth-service: v13.0.2
+24. als-consent-service: v0.2.0
+25. thirdparty-api-svc: v13.0.2
+26. thirdparty-sdk: v15.1.0
 
 ## 4. Application release notes
 
 1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v14.0.0
-2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v15.1.0
+2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v16.3.0
 3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v14.0.0
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v15.0.2
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v15.0.0
