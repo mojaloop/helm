@@ -14,11 +14,12 @@ Date | Revision | Description
 
 ## 2. Bug Fixes
 
-1. Bulk Fixes
-   1. **mojaloop/#2796** Duplicate transaction not getting callback for post /bulkTransfers ([central-ledger/pull/915](https://github.com/mojaloop/central-ledger/pull/915)), closes [mojaloop/#2796](https://github.com/mojaloop/project/issues/2796)
-   2. **mojaloop/#2798** No error callback when there's an Inactive participant in the transaction ([central-ledger/pull/#911](https://github.com/mojaloop/central-ledger/pull/911), [central-ledger/pull/#913](https://github.com/mojaloop/central-ledger/pull/913)), closes [mojaloop/#2798](https://github.com/mojaloop/project/issues/2798)
-   3. **mojaloop/#2800** Invalid dfsp name in header or body does not return any error ([central-ledger/pull/#911](https://github.com/mojaloop/central-ledger/pull/911), [central-ledger/pull/#913](https://github.com/mojaloop/central-ledger/pull/913)), closes [mojaloop/#2800](https://github.com/mojaloop/project/issues/2800)
-   4. **mojaloop/#2801** Invalid timestamp scenario not shown as failed transaction ([documentation/pull/385](https://github.com/mojaloop/documentation/pull/385), [central-ledger/pull/916](https://github.com/mojaloop/central-ledger/pull/916), [central-services-shared/pull/333](https://github.com/mojaloop/central-services-shared/pull/333), [testing-toolkit-test-cases/pull/81](https://github.com/mojaloop/testing-toolkit-test-cases/pull/81), [helm/pull/492](https://github.com/mojaloop/helm/pull/492)), closes [mojaloop/#2801](https://github.com/mojaloop/project/issues/2801)
+1. **mojaloop/#2796** Duplicate transaction not getting callback for post /bulkTransfers ([central-ledger/pull/915](https://github.com/mojaloop/central-ledger/pull/915)), closes [mojaloop/#2796](https://github.com/mojaloop/project/issues/2796)
+2. **mojaloop/#2798** No error callback when there's an Inactive participant in the transaction ([central-ledger/pull/#911](https://github.com/mojaloop/central-ledger/pull/911), [central-ledger/pull/#913](https://github.com/mojaloop/central-ledger/pull/913)), closes [mojaloop/#2798](https://github.com/mojaloop/project/issues/2798)
+3. **mojaloop/#2800** Invalid dfsp name in header or body does not return any error ([central-ledger/pull/#911](https://github.com/mojaloop/central-ledger/pull/911), [central-ledger/pull/#913](https://github.com/mojaloop/central-ledger/pull/913)), closes [mojaloop/#2800](https://github.com/mojaloop/project/issues/2800)
+4. **mojaloop/#2801** Invalid timestamp scenario not shown as failed transaction ([documentation/pull/385](https://github.com/mojaloop/documentation/pull/385), [central-ledger/pull/916](https://github.com/mojaloop/central-ledger/pull/916), [central-services-shared/pull/333](https://github.com/mojaloop/central-services-shared/pull/333), [testing-toolkit-test-cases/pull/81](https://github.com/mojaloop/testing-toolkit-test-cases/pull/81), [helm/pull/492](https://github.com/mojaloop/helm/pull/492)), closes [mojaloop/#2801](https://github.com/mojaloop/project/issues/2801)
+5. **Testing-Toolkit**:
+   1. **mojaloop/#2995** mobile simulator not responding ([ml-testing-toolkit-ui/pull/141](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/141), [helm/pull/512](https://github.com/mojaloop/helm/pull/512)), closes [mojaloop/#2994](https://github.com/mojaloop/project/issues/2995)
 
 ## 3. Application versions
 
