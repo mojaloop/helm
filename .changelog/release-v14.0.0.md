@@ -5,6 +5,7 @@ Date | Revision | Description
  2022-07-29 | 0 | Initial release
  2022-09-01 | 1 | Updates for init-containers [mojaloop/#2909](https://github.com/mojaloop/project/issues/2909)
  2022-09-08 | 2 | Updates for [mojaloop/#2734](https://github.com/mojaloop/project/issues/2734), [mojaloop/#2880](https://github.com/mojaloop/project/issues/2880)
+ 2022-11-01 | 3 | Updates for [mojaloop/#2995](https://github.com/mojaloop/project/issues/2995)
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
@@ -66,6 +67,7 @@ sdk-scheme-adapter/issues/2478)
     1. Added missing test currencies to FSPIOP apis provisioned in TTK [ml-testing-toolkit/pull/205](https://github.com/mojaloop/ml-testing-toolkit/pull/205)
     2. Unable to retain the renamed folder ([ml-testing-toolkit-ui/pull/126](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/126)), closes [mojaloop/#2656](https://github.com/mojaloop/project/issues/2656)
     3. TTK does not send callbacks after processing a Callback-Rule with a FIXED_CALLBACK ([ml-testing-toolkit-ui/pull/126](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/126)), closes [mojaloop/#2685](https://github.com/mojaloop/project/issues/2695)
+    4. Mobile simulator page is not working for helm deployments ([ml-testing-toolkit-ui/pull/141](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/141)), closes [mojaloop/#2995](https://github.com/mojaloop/project/issues/2995)
 
 ## 3. Application versions
 
