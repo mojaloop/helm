@@ -3,21 +3,38 @@
 # Declare global configurations
 global: {}
 
+## Reference: https://github.com/bitnami/charts/blob/main/bitnami/kafka/values.yaml
 kafka:
   enabled: true
+
   ## @param affinity Affinity for pod assignment
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
   ##
   affinity: {}
+
   ## @param nodeSelector Node labels for pod assignment
   ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
-  nodeSelector: {}
+  # nodeSelector: {}
+  ## TODO: REMOVE THIS and uncomment the above line
+  #  Label: node-role.mojaloop.io=kafka
+  nodeSelector:
+    "node-role.mojaloop.io": kafka
+
   ## @param tolerations Tolerations for pod assignment
   ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
-  tolerations: []
+  # tolerations: []
+
+  ## TODO: REMOVE THIS and uncomment the above line
+  #  Taints: node-role.mojaloop.io=kafka:NoSchedule 
+  tolerations:
+    - key: "node-role.mojaloop.io"
+      operator: "Equal"
+      value: kafka
+      effect: "NoSchedule"
+
   ## @section Persistence parameters
   ## Enable persistence using Persistent Volume Claims
   ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
@@ -26,6 +43,7 @@ kafka:
     ## @param persistence.enabled Enable Kafka data persistence using PVC, note that ZooKeeper persistence is unaffected
     ##
     enabled: false
+
   ## ZooKeeper chart configuration
   ## https://github.com/bitnami/charts/blob/main/bitnami/zookeeper/values.yaml
   ##
@@ -40,6 +58,34 @@ kafka:
     persistence:
       enabled: false
 
+    ## @param affinity Affinity for pod assignment
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
+    ##
+    affinity: {}
+
+    ## @param nodeSelector Node labels for pod assignment
+    ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+    ##
+    # nodeSelector: {}
+    ## TODO: REMOVE THIS and uncomment the above line
+    #  Label: node-role.mojaloop.io=kafka
+    nodeSelector:
+        "node-role.mojaloop.io": kafka
+
+    ## @param tolerations Tolerations for pod assignment
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    ##
+    # tolerations: []
+    ## TODO: REMOVE THIS and uncomment the above line
+    #  Taints: node-role.mojaloop.io=kafka:NoSchedule 
+    tolerations:
+      - key: "node-role.mojaloop.io"
+        operator: "Equal"
+        value: kafka
+        effect: "NoSchedule"
+
+## Reference: https://github.com/bitnami/charts/blob/main/bitnami/mysql/values.yaml
 centralledger-mysql:
   enabled: true
 
@@ -90,23 +136,39 @@ centralledger-mysql:
   primary:
     persistence:
       enabled: false
+
     ## @param secondary.affinity Affinity for MySQL secondary pods assignment
     ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
     ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
     ##
     affinity: {}
+
     ## @param secondary.nodeSelector Node labels for MySQL secondary pods assignment
     ## ref: https://kubernetes.io/docs/user-guide/node-selection/
     ##
-    nodeSelector: {}
+    # nodeSelector: {}
+    ## TODO: REMOVE THIS and uncomment the above line
+    #  Label: node-role.mojaloop.io=cledger
+    nodeSelector:
+        "node-role.mojaloop.io": cledger
+
     ## @param secondary.tolerations Tolerations for MySQL secondary pods assignment
     ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     ##
-    tolerations: []
+    # tolerations: []
+    ## TODO: REMOVE THIS and uncomment the above line
+    #  Taints: node-role.mojaloop.io=cledger:NoSchedule 
+    tolerations:
+      - key: "node-role.mojaloop.io"
+        operator: "Equal"
+        value: cledger
+        effect: "NoSchedule"
+
   secondary:
     persistence:
       enabled: false
 
+## Reference: https://github.com/bitnami/charts/blob/main/bitnami/mysql/values.yaml
 account-lookup-mysql:
   enabled: true
 
@@ -157,39 +219,70 @@ account-lookup-mysql:
   primary:
     persistence:
       enabled: false
+
     ## @param secondary.affinity Affinity for MySQL secondary pods assignment
     ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
     ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
     ##
     affinity: {}
+
     ## @param secondary.nodeSelector Node labels for MySQL secondary pods assignment
     ## ref: https://kubernetes.io/docs/user-guide/node-selection/
     ##
-    nodeSelector: {}
+    # nodeSelector: {}
+    ## TODO: REMOVE THIS and uncomment the above line
+    #  Label: node-role.mojaloop.io=als
+    nodeSelector:
+        "node-role.mojaloop.io": als
+
     ## @param secondary.tolerations Tolerations for MySQL secondary pods assignment
     ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     ##
-    tolerations: []
+    # tolerations: []
+    ## TODO: REMOVE THIS and uncomment the above line
+    #  Taints: node-role.mojaloop.io=als:NoSchedule 
+    tolerations:
+      - key: "node-role.mojaloop.io"
+        operator: "Equal"
+        value: als
+        effect: "NoSchedule"
+
   secondary:
     persistence:
       enabled: false
 
-
+## Reference: https://github.com/bitnami/charts/blob/main/bitnami/mongodb/values.yaml
 centralledger-obj:
   enabled: true
+
   ## @param affinity Affinity for pod assignment
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
   ##
   affinity: {}
+
   ## @param nodeSelector Node labels for pod assignment
   ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
-  nodeSelector: {}
+  # nodeSelector: {}
+  ## TODO: REMOVE THIS and uncomment the above line
+  #  Label: node-role.mojaloop.io=obj
+  nodeSelector:
+    "node-role.mojaloop.io": obj
+
+
   ## @param tolerations Tolerations for pod assignment
   ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   ##
-  tolerations: []
+  # tolerations: []
+  ## TODO: REMOVE THIS and uncomment the above line
+  #  Taints: node-role.mojaloop.io=obj:NoSchedule 
+  tolerations:
+    - key: "node-role.mojaloop.io"
+      operator: "Equal"
+      value: obj
+      effect: "NoSchedule"
+
   ## MongoDB(&reg;) Authentication parameters
   ##
   auth:
@@ -240,22 +333,14 @@ centralledger-obj:
     ##
     enabled: false
 
-
+## Reference: https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
 ttksims-redis:
   enabled: true
-  ## @param affinity Affinity for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
+
+  ## @param architecture Redis&reg; architecture. Allowed values: `standalone` or `replication`
   ##
-  affinity: {}
-  ## @param nodeSelector Node labels for pod assignment
-  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-  ## @param tolerations Tolerations for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
+  architecture: standalone
+
   ## Redis&reg; Authentication parameters
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/redis#setting-the-server-password-on-first-run
   ##
@@ -263,6 +348,7 @@ ttksims-redis:
     ## @param auth.enabled Enable password authentication
     ##
     enabled: false
+
   ## @section Persistence parameters
   ##
   master:
@@ -273,7 +359,36 @@ ttksims-redis:
       ## @param persistence.enabled Enable MongoDB(&reg;) data persistence using PVC
       ##
       enabled: false
+
+    ## @param affinity Affinity for pod assignment
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
+    ##
+    affinity: {}
+
+    ## @param nodeSelector Node labels for pod assignment
+    ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+    ##
+    # nodeSelector: {}
+    ## TODO: REMOVE THIS and uncomment the above line
+    #  Label: node-role.mojaloop.io=obj
+    nodeSelector:
+        "node-role.mojaloop.io": redis
+
+    ## @param tolerations Tolerations for pod assignment
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    ##
+    # tolerations: []
+    ## TODO: REMOVE THIS and uncomment the above line
+    #  Taints: node-role.mojaloop.io=obj:NoSchedule 
+    tolerations:
+      - key: "node-role.mojaloop.io"
+        operator: "Equal"
+        value: redis
+        effect: "NoSchedule"
+
   replica:
+    enabled: false
     ## Enable persistence using Persistent Volume Claims
     ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
     ##
@@ -282,5 +397,7 @@ ttksims-redis:
       ##
       enabled: false
 
+## TODO: Replace Kowl with https://github.com/redpanda-data/console/blob/master/helm/console/values.yaml
+## Reference: https://github.com/cloudhut/charts/blob/master/kowl/values.yaml
 kowl:
   enabled: false
