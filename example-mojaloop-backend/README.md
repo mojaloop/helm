@@ -7,7 +7,7 @@
 
 *PLACEHOLDER*
 
-## Configuratin
+## Configuration
 
 *PLACEHOLDER*
 
