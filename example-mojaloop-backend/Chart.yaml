@@ -1,0 +1,82 @@
+apiVersion: v2
+description: Example Helm chart for mojaloop backend dependencies
+name: example-mojaloop-backend
+version: 14.1.0
+appVersion: "mysql: 9.4.1; kafka: 19.0.2; mongodb: 13.3.1; redis:17.3.7; kowl:2.3.1"
+home: http://mojaloop.io
+icon: http://mojaloop.io/images/logo.png
+sources:
+  - https://github.com/mojaloop/mojaloop
+  - https://github.com/mojaloop/helm
+maintainers:
+  - name: Miguel de Barros
+    email: miguel.debarros@modusbox.com
+  - name: Vijay Kumar Guthi
+    email: vijaya.guthi@modusbox.com
+dependencies:
+  - name: kafka
+    alias: kafka
+    condition: kafka.enabled
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - mojaloop
+      - dependency
+      - backend
+      - kafka
+    version: 19.0.2
+  - name: mysql
+    alias: centralledger-mysql
+    condition: centralledger-mysql.enabled
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - mojaloop
+      - dependency
+      - backend
+      - mysql
+      - centralledger
+    version: 9.4.1
+  - name: mysql
+    alias: account-lookup-mysql
+    condition: account-lookup-mysql.enabled
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - mojaloop
+      - dependency
+      - backend
+      - mysql
+      - account-lookup
+    version: 9.4.1
+  - name: mongodb
+    alias: centralledger-obj
+    condition: centralledger-obj.enabled
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - mojaloop
+      - dependency
+      - backend
+      - mongodb
+      - centralledger
+    version: 13.3.1
+  - name: redis
+    alias: ttksims-redis
+    condition: ttksims-redis.enabled
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - mojaloop
+      - dependency
+      - backend
+      - redis
+      - sdk
+      - bulk
+      - ttksims
+    version: 17.3.7
+  - name: kowl
+    alias: kowl
+    condition: kowl.enabled
+    repository: "https://raw.githubusercontent.com/cloudhut/charts/master/archives"
+    tags:
+      - mojaloop
+      - debug
+      - kafka
+      - kowl
+    version: 2.3.1
