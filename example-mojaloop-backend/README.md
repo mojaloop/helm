@@ -14,3 +14,7 @@
 ## Installation
 
 *PLACEHOLDER*
+
+```bash
+helm -n mojaloop install backend .
+```
