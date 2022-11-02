@@ -21,6 +21,8 @@ declare -a charts=(
     mojaloop-ttk-simulators/chart-sim2
     mojaloop-ttk-simulators/chart-sim3
     mojaloop-ttk-simulators
+    ml-operator
+    simulator
     eventstreamprocessor
     monitoring/promfana
     monitoring/efk
