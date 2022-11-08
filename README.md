@@ -93,6 +93,14 @@
 
     Refer to [thirdparty/README.md](./thirdparty/README.md) for more information on what pre-requisites are required to enable Thirdparty components and how to  manually deploy backend dependencies.
 
+7. Deploy Mojaloop with Bulk-API-Adapter and SDK-TTK Bulk simulators
+
+    *Warning: This will deploy all core Mojaloop charts.*, the Bulk-API-Adapter and additional SDK+TTK simulators
+
+    - `helm --namespace <namespace> install <release_name> mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true `
+
+    e.g. `helm --namespace moja install dev mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true --set mojaloop-ttk-simulators.enabled=true --set global.kafka.host=<MOJALOOP_INSTALL_NAME>-kafka --set global.redis.host=<REDIS_INSTALL_NAME>-redis-master --set ml-ttk-test-val-sdk-bulk.tests.enabled=true`
+
 ### Deploying Backends (best practice)
 
 It is best practice to deploy External Backend Dependencies (i.e. MySQL, Kafka, MongoDB, etc) as separate deployments. We have provided an example of how this can be done using the [example-mojaloop-backend](./example-mojaloop-backend/README.md) Helm chart. The [example-mojaloop-backend](./example-mojaloop-backend/README.md) is provided purely as an example and should only be used for PoC environments. It is recommended that you deploy each External Backend Dependencies (i.e. MySQL, Kafka, MongoDB, etc) as a separate deployment as to ensure that each deployment is maintainable.
