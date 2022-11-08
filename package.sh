@@ -19,6 +19,7 @@ if [ "$1" ]; then
     declare -a charts=("$1")
 else
     declare -a charts=(
+        example-mojaloop-backend
         eventstreamprocessor
         simulator
         monitoring/promfana
