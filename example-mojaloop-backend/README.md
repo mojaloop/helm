@@ -28,3 +28,9 @@ And ensure that all backends are disabled [mojaloop/values.yaml](../mojaloop/val
 - `account-lookup-service.mysql.enabled=false`
 - `centraleventprocessor.mongodb=false`
 - `mojaloop-bulk.mongodb.enabled=false`
+
+This can be set by using the `--set` parameter when running the `helm install` command:
+
+```bash
+helm install moja ./mojaloop --set "central.centralledger.mysql.enabled=false" --set "central.centralledger.kafka.enabled=false" --set "account-lookup-service.mysql.enabled=false" --set "centraleventprocessor.mongodb=false" --set "mojaloop-bulk.mongodb.enabled=false"
+```
