@@ -17,6 +17,7 @@ if [ "$1" ]; then
     declare -a charts=("$1")
 else
     declare -a charts=(
+        example-mojaloop-backend
         ml-testing-toolkit
         ml-testing-toolkit-cli
         sdk-scheme-adapter/chart-service
@@ -32,9 +33,9 @@ else
         account-lookup-service
         als-oracle-pathfinder
         centralkms
-        forensicloggingsidecar
+        # forensicloggingsidecar  # No longer supported
         centralledger
-        centralenduserregistry
+        # centralenduserregistry  # No longer supported
         centralsettlement
         emailnotifier
         centraleventprocessor
@@ -49,7 +50,7 @@ else
         mojaloop-bulk/
         mojaloop-simulator
         mojaloop
-        kube-system/ntpd/
+        # kube-system/ntpd/ # No longer supported
         ml-operator
         thirdparty/chart-auth-svc
         thirdparty/chart-consent-oracle
