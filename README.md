@@ -26,8 +26,10 @@
     helm repo add kiwigrid https://kiwigrid.github.io
     helm repo add kokuwa https://kokuwaio.github.io/helm-charts
     helm repo add elastic https://helm.elastic.co
-    helm repo add bitnami https://charts.bitnami.com/bitnami
     helm repo add codecentric https://codecentric.github.io/helm-charts
+    helm repo add bitnami https://charts.bitnami.com/bitnami
+    helm repo add mojaloop-charts https://docs.mojaloop.io/charts/repo
+    helm repo add redpanda-console https://packages.vectorized.io/public/console/helm/charts/
     ```
 
 ## Configure remote Mojaloop Helm repo on your Helm Client
