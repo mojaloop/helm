@@ -5,16 +5,26 @@
 
 ## Pre-requisites
 
-*PLACEHOLDER*
+Run `helm dep up .`
 
-## Configuration
-
-*PLACEHOLDER*
+Or run the [update-charts-dep.sh](../update-charts-dep.sh) from the root folder.
 
 ## Installation
 
-*PLACEHOLDER*
+### Backends
 
 ```bash
 helm -n mojaloop install backend .
 ```
+
+## Mojaloop Configuration
+
+Ensure you modify the CONFIG section on the [mojaloop/values.yaml](../mojaloop/values.yaml) header by commenting out the sections under `FOR default` and uncommenting the lines under `FOR example-mojaloop-backend`.
+
+And ensure that all backends are disabled [mojaloop/values.yaml](../mojaloop/values.yaml):
+
+- `central.centralledger.mysql.enabled=false`
+- `central.centralledger.kafka.enabled=false`
+- `account-lookup-service.mysql.enabled=false`
+- `centraleventprocessor.mongodb=false`
+- `mojaloop-bulk.mongodb.enabled=false`
