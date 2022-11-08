@@ -20,6 +20,8 @@ spec:
     metadata:
       annotations: 
         checksum/config: {{ .Values.env | toString | sha256sum }}
+        checksum/secret-jws-signing-key: {{ .Values.config.jwsSigningKey | sha256sum }}
+        checksum/secret-jws-verification-keys: {{ .Values.config.jwsVerificationKeys | toString | sha256sum }}
       {{- if .Values.podAnnotations }}
       {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" $) | nindent 8 }}
       {{- end }}
