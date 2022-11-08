@@ -36,8 +36,8 @@ N/A
 17. simulator: 12.0.0 -> **v12.0.0**
 18. mojaloop-simulator: v12.1.1 -> **v13.0.1**
 19. sdk-scheme-adapter: v11.18.11 -> **v21.1.0**
-20. ml-testing-toolkit: v14.0.4 -> **v15.0.0**
-21. ml-testing-toolkit-ui: v13.5.5 -> **v15.0.0**
+20. ml-testing-toolkit: v14.0.4 -> **v15.2.0**
+21. ml-testing-toolkit-ui: v13.5.5 -> **v15.0.1**
 22. ml-testing-toolkit-client-lib: **v1.0.0**
 23. auth-service: v11.11.1 -> **v13.0.2**
 24. als-consent-service: v0.0.8 -> **v0.2.0**
@@ -65,8 +65,8 @@ N/A
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v13.0.1
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v21.1.0
-20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v15.0.0
-21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.0.0
+20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v15.2.0
+21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.0.1
 22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.0.0
 23. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v13.0.2
 24. als-consent-service - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.0
