@@ -1,3 +1,53 @@
+# Common YAML TEMPLATE Anchors
+CONFIG:
+  ## ACCOUNT-LOOKUP BACKEND
+  als_db_name: &ALS_DB_NAME "account_lookup"
+  als_db_password: &ALS_DB_PASSWORD "OdonPianoX"
+  ### FOR default
+  # als_db_host: &ALS_DB_HOST '$release_name-account-lookup-mysql'
+  ### FOR example-mojaloop-backend
+  als_db_host: &ALS_DB_HOST "backend-account-lookup-mysql"
+  als_db_port: &ALS_DB_PORT 3306
+  als_db_user: &ALS_DB_USER "account_lookup"
+
+  ## CENTRAL-LEDGER BACKEND
+  cl_db_name: &CL_DB_NAME "central_ledger"
+  cl_db_password: &CL_DB_PASSWORD "oyMxgZChuu"
+  ### FOR default
+  # cl_db_host: &CL_DB_HOST '$release_name-centralledger-mysql'
+  ### FOR example-mojaloop-backend
+  cl_db_host: &CL_DB_HOST "backend-centralledger-mysql"
+  cl_db_port: &CL_DB_PORT 3306
+  cl_db_user: &CL_DB_USER "central_ledger"
+
+  ## KAFKA BACKEND
+  ### FOR default
+  # kafka_host: &KAFKA_HOST '$release_name-kafka'
+  ### FOR example-mojaloop-backend
+  kafka_host: &KAFKA_HOST "backend-kafka-headless"
+  kafka_port: &KAFKA_PORT 9092
+
+  ## BULK OBJECT STORE BACKEND
+  obj_mongo_host: &OBJSTORE_MONGO_HOST backend-centralledger-obj
+  obj_mongo_port: &OBJSTORE_MONGO_PORT 27017
+  obj_mongo_user: &OBJSTORE_MONGO_USER mojaloop
+  obj_mongo_password: &OBJSTORE_MONGO_PASSWORD password
+  obj_mongo_database: &OBJSTORE_MONGO_DATABASE mlos
+  ### FOR default
+  # objstore_uri: &OBJSTORE_URI 'mongodb://mojaloop:password@$release_name-centralledger-obj:27017/mlos'
+  ### FOR example-mojaloop-backend
+  objstore_uri: &OBJSTORE_URI 'mongodb://mojaloop:password@backend-centralledger-obj:27017/mlos'
+
+  ## CENTRAL-EVEN-PROCESSOR Backend
+  ## FOR default
+  # cep_mongo_host: &CEP_MONGO_HOST '$release_name-cep-mongodb'
+  ## FOR example-mojaloop-backend
+  cep_mongo_host: &CEP_MONGO_HOST backend-cep-mongodb
+  cep_mongo_port: &CEP_MONGO_PORT 27017
+  cep_mongo_user: &CEP_MONGO_USER mojaloop
+  cep_mongo_password: &CEP_MONGO_PASSWORD password
+  cep_mongo_database: &CEP_MONGO_DATABASE mlos
+
 # Default values for central.
 # This is a YAML-formatted file.
 # Declare global configurations
@@ -97,11 +147,11 @@ central:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -122,8 +172,8 @@ central:
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
 
         ## Cache configuration
         cache_enabled: false
@@ -142,7 +192,7 @@ central:
           repository: mysql
           tag: 8.0.30
           pullPolicy: IfNotPresent
-          command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
+          command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
         migration:
           enabled: true
           name: run-migration
@@ -310,11 +360,11 @@ central:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -335,8 +385,8 @@ central:
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
 
         ## Cache configuration
         cache_enabled: false
@@ -533,11 +583,11 @@ central:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -558,8 +608,8 @@ central:
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
 
         ## Cache configuration
         cache_enabled: false
@@ -753,11 +803,11 @@ central:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -778,8 +828,8 @@ central:
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
 
         ## Cache configuration
         cache_enabled: false
@@ -973,11 +1023,11 @@ central:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -998,8 +1048,8 @@ central:
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
 
         ## Cache configuration
         cache_enabled: false
@@ -1193,11 +1243,11 @@ central:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -1218,8 +1268,8 @@ central:
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
 
         ## Cache configuration
         cache_enabled: false
@@ -1413,11 +1463,11 @@ central:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -1443,8 +1493,8 @@ central:
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
 
         ## Cache configuration
         cache_enabled: false
@@ -1580,8 +1630,8 @@ central:
 
       ## Uncomment to create a database user
       ##
-      mysqlUser: central_ledger
-      mysqlPassword: oyMxgZChuu
+      mysqlUser: *CL_DB_USER
+      mysqlPassword: *CL_DB_PASSWORD
 
       ## Allow unauthenticated access, uncomment to enable
       ##
@@ -1589,7 +1639,7 @@ central:
 
       ## Uncomment to Create a database
       ##
-      mysqlDatabase: central_ledger
+      mysqlDatabase: *CL_DB_NAME
 
       ## hosts to allow root user access from
       # set to "127.0.0.1" to deny remote root.
@@ -2105,8 +2155,9 @@ central:
       config:
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
         kafka:
           consumer:
             notification:
@@ -2188,11 +2239,11 @@ central:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -2422,8 +2473,9 @@ central:
       config:
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
         kafka:
           consumer:
             notification:
@@ -2505,11 +2557,11 @@ central:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -2746,8 +2798,9 @@ central:
       config:
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
         kafka:
           consumer:
             notification:
@@ -2829,11 +2882,11 @@ central:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -3070,8 +3123,9 @@ central:
       config:
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
         kafka:
           consumer:
             notification:
@@ -3153,11 +3207,11 @@ central:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -3511,14 +3565,14 @@ central:
     config:
       ## Kafka Configuration
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-      kafka_host: '$release_name-kafka'
-      kafka_port: 9092
+      kafka_host: *KAFKA_HOST
+      kafka_port: *KAFKA_PORT
       PORT: 3080
-      mongo_host: '$release_name-cep-mongodb'
-      mongo_port: 27017
-      mongo_user: mojaloop
-      mongo_password: password
-      mongo_database: mojaloop
+      mongo_host: *CEP_MONGO_HOST
+      mongo_port: *CEP_MONGO_PORT
+      mongo_user: *CEP_MONGO_USER
+      mongo_password: *CEP_MONGO_PASSWORD
+      mongo_database: *CEP_MONGO_DATABASE
       central_ledger_admin_host: '$release_name-centralledger-service'
       central_ledger_admin_port: 80
       hub_participant:
@@ -3558,11 +3612,11 @@ central:
         ## @param auth.databases List of custom databases to be created during the initialization
         ##
         usernames:
-          -   'mojaloop'
+          - *CEP_MONGO_USER
         passwords:
-          -   'password'
+          - *CEP_MONGO_PASSWORD
         databases:
-          -   'mojaloop'
+          - *CEP_MONGO_DATABASE
         ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
         ##
         replicaSetKey: ""
@@ -3661,8 +3715,8 @@ ml-api-adapter:
 
     config:
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-      kafka_host: '$release_name-kafka'
-      kafka_port: 9092
+      kafka_host: *KAFKA_HOST
+      kafka_port: *KAFKA_PORT
       central_services_host: '$release_name-centralledger-service'
       central_services_port: 80
       security:
@@ -3831,8 +3885,8 @@ ml-api-adapter:
 
     config:
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-      kafka_host: '$release_name-kafka'
-      kafka_port: 9092
+      kafka_host: *KAFKA_HOST
+      kafka_port: *KAFKA_PORT
       central_services_host: '$release_name-centralledger-service'
       central_services_port: 80
       security:
@@ -4026,8 +4080,8 @@ emailnotifier:
   config:
     ## Kafka Configuration
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-    kafka_host: '$release_name-kafka'
-    kafka_port: 9092
+    kafka_host: *KAFKA_HOST
+    kafka_port: *KAFKA_PORT
     email:
       host: 'smtp.gmail.com'
       port: 587
@@ -4255,11 +4309,11 @@ account-lookup-service:
       db_type: 'mysql'
       # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
       db_driver: 'mysql'
-      db_host: '$release_name-account-lookup-mysql'
-      db_port: 3306
-      db_user: account_lookup
-      db_password: OdonPianoX
-      db_database: account_lookup
+      db_host: *ALS_DB_HOST
+      db_port: *ALS_DB_PORT
+      db_user: *ALS_DB_USER
+      db_password: *ALS_DB_PASSWORD
+      db_database: *ALS_DB_NAME
       db_connection_pool_min: 10
       db_connection_pool_max: 30
       db_acquire_timeout_millis: 30000
@@ -4518,11 +4572,11 @@ account-lookup-service:
       db_type: 'mysql'
       # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
       db_driver: 'mysql'
-      db_host: '$release_name-account-lookup-mysql'
-      db_port: 3306
-      db_user: account_lookup
-      db_password: OdonPianoX
-      db_database: account_lookup
+      db_host: *ALS_DB_HOST
+      db_port: *ALS_DB_PORT
+      db_user: *ALS_DB_USER
+      db_password: *ALS_DB_PASSWORD
+      db_database: *ALS_DB_NAME
       db_connection_pool_min: 10
       db_connection_pool_max: 30
       db_acquire_timeout_millis: 30000
@@ -4687,17 +4741,17 @@ account-lookup-service:
         type: 'mysql'
         driver: 'mysql'
         central_ledger:
-          host: '$release_name-centralledger-mysql'
-          port: '3306'
-          database: 'central_ledger'
-          user: 'central_ledger'
-          password: 'oyMxgZChuu'
+          host: *CL_DB_HOST
+          port: *CL_DB_PORT
+          database: *CL_DB_NAME
+          user: *CL_DB_USER
+          password: *CL_DB_PASSWORD
         account_lookup:
-          host: '$release_name-account-lookup-mysql'
-          port: '3306'
-          database: 'account_lookup'
-          user: 'account_lookup'
-          password: 'OdonPianoX'
+          host: *ALS_DB_HOST
+          port: *ALS_DB_PORT
+          database: *ALS_DB_NAME
+          user: *ALS_DB_USER
+          password: *ALS_DB_PASSWORD
       log_level: 'info'
 
       pathfinder:
@@ -4948,8 +5002,8 @@ account-lookup-service:
 
     ## Uncomment to create a database user
     ##
-    mysqlUser: account_lookup
-    mysqlPassword: OdonPianoX
+    mysqlUser: *ALS_DB_USER
+    mysqlPassword: *ALS_DB_PASSWORD
 
     ## Allow unauthenticated access, uncomment to enable
     ##
@@ -4957,7 +5011,7 @@ account-lookup-service:
 
     ## Uncomment to Create a database
     ##
-    mysqlDatabase: account_lookup
+    mysqlDatabase: *ALS_DB_NAME
 
     ## hosts to allow root user access from
     # set to "127.0.0.1" to deny remote root.
@@ -5098,11 +5152,11 @@ quoting-service:
     db_type: 'mysql'
     # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
     db_driver: 'mysql'
-    db_host: '$release_name-centralledger-mysql'
-    db_port: 3306
-    db_user: central_ledger
-    db_password: oyMxgZChuu
-    db_database: central_ledger
+    db_host: *CL_DB_HOST
+    db_port: *CL_DB_PORT
+    db_user: *CL_DB_USER
+    db_password: *CL_DB_PASSWORD
+    db_database: *CL_DB_NAME
     db_connection_pool_min: 10
     db_connection_pool_max: 30
     db_acquire_timeout_millis: 30000
@@ -7084,8 +7138,8 @@ mojaloop-bulk:
 
       config:
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
         central_services_host: '$release_name-centralledger-service'
         central_services_port: 80
         security:
@@ -7115,7 +7169,7 @@ mojaloop-bulk:
           }
 
         ## MongoDB Configuration for Object Store
-        objstore_uri: 'mongodb://mojaloop:password@$release_name-centralledger-obj:27017/mlos'
+        objstore_uri: *OBJSTORE_URI
 
       service:
         type: ClusterIP
@@ -7246,8 +7300,8 @@ mojaloop-bulk:
 
       config:
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
         central_services_host: '$release_name-centralledger-service'
         central_services_port: 80
         security:
@@ -7277,7 +7331,7 @@ mojaloop-bulk:
           }
 
         ## MongoDB Configuration for Object Store
-        objstore_uri: 'mongodb://mojaloop:password@$release_name-centralledger-obj:27017/mlos'
+        objstore_uri: *OBJSTORE_URI
 
       service:
         type: ClusterIP
@@ -7403,11 +7457,11 @@ mojaloop-bulk:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -7420,12 +7474,12 @@ mojaloop-bulk:
 
         ## MongoDB Configuration for Object Store
         objstore_disabled: false
-        objstore_uri: 'mongodb://mojaloop:password@$release_name-centralledger-obj:27017/mlos'
+        objstore_uri: *OBJSTORE_URI
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
 
         ## Node Configuration
         log_level: 'info'
@@ -7601,11 +7655,11 @@ mojaloop-bulk:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -7618,12 +7672,12 @@ mojaloop-bulk:
 
         ## MongoDB Configuration for Object Store
         objstore_disabled: false
-        objstore_uri: 'mongodb://mojaloop:password@$release_name-centralledger-obj:27017/mlos'
+        objstore_uri: *OBJSTORE_URI
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
 
         ## Node Configuration
         log_level: 'info'
@@ -7796,11 +7850,11 @@ mojaloop-bulk:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -7813,12 +7867,12 @@ mojaloop-bulk:
 
         ## MongoDB Configuration for Object Store
         objstore_disabled: false
-        objstore_uri: 'mongodb://mojaloop:password@$release_name-centralledger-obj:27017/mlos'
+        objstore_uri: *OBJSTORE_URI
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
 
         ## Node Configuration
         log_level: 'info'
@@ -7991,11 +8045,11 @@ mojaloop-bulk:
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
         db_driver: 'mysql'
-        db_host: '$release_name-centralledger-mysql'
-        db_port: 3306
-        db_user: central_ledger
-        db_password: oyMxgZChuu
-        db_database: central_ledger
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
         db_acquire_timeout_millis: 30000
@@ -8008,12 +8062,12 @@ mojaloop-bulk:
 
         ## MongoDB Configuration for Object Store
         objstore_disabled: false
-        objstore_uri: 'mongodb://mojaloop:password@$release_name-centralledger-obj:27017/mlos'
+        objstore_uri: *OBJSTORE_URI
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-        kafka_host: '$release_name-kafka'
-        kafka_port: 9092
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
 
         ## Node Configuration
         log_level: 'info'
@@ -8161,11 +8215,11 @@ mojaloop-bulk:
       ## @param auth.databases List of custom databases to be created during the initialization
       ##
       usernames:
-        -   'mojaloop'
+        - *OBJSTORE_MONGO_USER
       passwords:
-        -   'password'
+        - *OBJSTORE_MONGO_PASSWORD
       databases:
-        -   'mlos'
+        - *OBJSTORE_MONGO_DATABASE
       ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
       ##
       replicaSetKey: ""
