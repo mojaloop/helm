@@ -20,6 +20,8 @@ spec:
     metadata:
       annotations: 
         checksum/config: {{ .Values.env | toString | sha256sum }}
+        checksum/secret-jws-signing-key: {{ .Values.config.jwsSigningKey | sha256sum }}
+        checksum/secret-jws-verification-keys: {{ .Values.config.jwsVerificationKeys | toString | sha256sum }}
       {{- if .Values.podAnnotations }}
       {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" $) | nindent 8 }}
       {{- end }}
@@ -63,6 +65,17 @@ spec:
         {{- if .Values.initContainers }}
           {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
         {{- end }}
+      volumes:
+      {{- if .Values.env.JWS_SIGN }}
+      - name: jws-private-key
+        secret:
+          secretName: {{ template "common.names.fullname" . }}-jws-priv-key
+      {{- end }}
+      {{- if .Values.env.VALIDATE_INBOUND_JWS }}
+      - name: jws-public-keys
+        secret:
+          secretName: {{ template "common.names.fullname" . }}-jws-public-keys
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: {{ template "sdk-scheme-adapter-svc.image" . }}
@@ -131,3 +144,13 @@ spec:
             - name: {{ $k }}
               value: {{ include "common.tplvalues.render" (dict "value" $v "context" $) | quote }}
             {{- end }}
+          volumeMounts:
+          {{- if .Values.env.JWS_SIGN }}
+          - name: jws-private-key
+            mountPath: "/jwsSigningKey.key"
+            subPath: private.key
+          {{- end }}
+          {{- if .Values.env.VALIDATE_INBOUND_JWS }}
+          - name: jws-public-keys
+            mountPath: "/jwsVerificationKeys/"
+          {{- end }}

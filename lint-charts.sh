@@ -17,6 +17,7 @@ if [ "$1" ]; then
     declare -a charts=("$1")
 else
     declare -a charts=(
+        example-mojaloop-backend
         ml-testing-toolkit
         ml-testing-toolkit-cli
         sdk-scheme-adapter/chart-service

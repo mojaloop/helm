@@ -13,6 +13,9 @@ find ./ -name "charts"| xargs rm -Rf
 find ./ -name "tmpcharts"| xargs rm -Rf
 
 declare -a charts=(
+    example-mojaloop-backend
+    ml-operator
+    simulator
     ml-testing-toolkit
     ml-testing-toolkit-cli
     sdk-scheme-adapter/chart-service
@@ -21,8 +24,6 @@ declare -a charts=(
     mojaloop-ttk-simulators/chart-sim2
     mojaloop-ttk-simulators/chart-sim3
     mojaloop-ttk-simulators
-    ml-operator
-    simulator
     eventstreamprocessor
     monitoring/promfana
     monitoring/efk
