@@ -16,6 +16,7 @@ metadata:
     {{- printf "%s: %s" $key (tpl $value $ | quote) | nindent 4 }}
     {{- end }}
 spec:
+  ingressClassName: nginx
 {{- if $ingress.tls }}
   tls:
     {{- range $ingress.tls }}
@@ -35,9 +36,12 @@ spec:
         paths:
           {{- range .paths }}
           - path: {{ . }}
+            pathType: ImplementationSpecific
             backend:
-              serviceName: {{ include "keycloak.fullname" $ }}-http
-              servicePort: {{ $ingress.servicePort }}
+              service:
+                name: {{ include "keycloak.fullname" $ }}-http
+                port:
+                  number: 80
           {{- end }}
     {{- end }}
 {{- end -}}
