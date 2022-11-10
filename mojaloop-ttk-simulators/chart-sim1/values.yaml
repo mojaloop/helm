@@ -28,6 +28,8 @@ sdk-scheme-adapter:
       FSPIOP_EVENT_CONSUMER_TOPICS: '{{ .Values.config.simName }}-topic-sdk-outbound-domain-events'
       FSPIOP_EVENT_PRODUCER_TOPIC: '{{ .Values.config.simName }}-topic-sdk-outbound-domain-events'
       BACKEND_ENDPOINT: '{{ .Release.Name }}-{{ .Values.config.simName }}-ttk-backend:4040'
+      REQUEST_PROCESSING_TIMEOUT_SECONDS: 180
+      EXPIRY_SECONDS: 240
 
   sdk-scheme-adapter-dom-evt-handler:
     enabled: true
@@ -75,6 +77,9 @@ ml-testing-toolkit:
     config:
       user_config.json:
         CALLBACK_ENDPOINT: 'http://$release_name-ttksim1-sdk-api-svc:4001'
+        SCRIPT_TIMEOUT: 60000
+        DEFAULT_REQUEST_TIMEOUT: 60000
+        CALLBACK_TIMEOUT: 240000
 
       system_config.json: {
         "API_DEFINITIONS": [
