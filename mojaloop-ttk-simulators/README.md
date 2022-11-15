@@ -61,6 +61,21 @@ Or alternatively one can install the chart by adding the following `--set` param
 
 ### Validation
 
+#### Helm
+
+Ensure you enable the following value configs are set when deploying via the main [Mojaloop Helm Chart](../mojaloop/Chart.yaml):
+
+- mojaloop-bulk.enabled: true <-- Enables deployment of core Mojaloop Bulk Services
+- mojaloop-ttk-simulators.enabled: true <-- Enables deployment of TTK-based SIMs
+- ml-ttk-test-val-bulk.tests.enabled=true <-- Handles standard Bulk Test-case collection
+- ml-ttk-test-setup-sdk-bulk.tests.enabled=true <- Handles provisioning of TTK-based SIMs
+- ml-ttk-test-val-sdk-bulk.tests.enabled=true <-- Handles the Functional Validation of the SDK Bulk Test-case collection
+
+This can either be set as a parameter when running the `helm install` command line, or set directly on a customized [../mojaloop/values.yaml](../mojaloop/values.yaml) file.
+
+#### Manual
+
+<!-- TODO: UPDATE TO POINT TO MASTER BRANCH -->
 - Open TTK UI for SIM1 on http://ttksim1.ttk1.test.mojaloop.live/admin/outbound_request
 - Open TTK UI for SIM2 for monitoring the inbound requests as receiver http://ttksim2.ttk1.test.mojaloop.live/admin/monitoring
 - Download the following test cases
