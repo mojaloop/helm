@@ -23,32 +23,32 @@ Date | Revision | Description
 
 ## 3. Application versions
 
-1. ml-api-adapter: v14.0.0
+1. ml-api-adapter: **v14.0.0**
 2. central-ledger: v15.1.2.1 -> **v16.3.0** ([Compare](https://github.com/mojaloop/central-ledger/compare/v15.1.2.1...v16.3.0))
-3. account-lookup-service: v14.0.0
-4. quoting-service: v15.0.2
-5. central-settlement: v15.0.0
-6. central-event-processor: v12.0.0
+3. account-lookup-service: **v14.0.0**
+4. quoting-service: **v15.0.2**
+5. central-settlement: **v15.0.0**
+6. central-event-processor: **v12.0.0**
 7. bulk-api-adapter: v14.0.0 -> **v14.1.1** ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v14.0.0...v14.1.1))
-8. email-notifier: v12.0.0
-9. als-oracle-pathfinder: v12.0.0
-10. transaction-requests-service: v14.0.1
+8. email-notifier: **v12.0.0**
+9. als-oracle-pathfinder: **v12.0.0**
+10. transaction-requests-service: **v14.0.1**
 11. finance-portal-ui: **v10.4.3** _(DEPRECATED)_
 12. finance-portal-backend-service: **v15.0.2** _(DEPRECATED)_
 13. settlement-management: **v11.0.0** _(DEPRECATED)_
 14. operator-settlement: **v11.0.0** _(DEPRECATED)_
 15. event-sidecar: **v12.0.0**
-16. event-stream-processor: v12.0.0-snapshot.7
-17. simulator: 12.0.0 -> **v12.0.0**
-18. mojaloop-simulator: v13.0.1
-19. sdk-scheme-adapter: v18.0.2
-20. ml-testing-toolkit: v15.0.0
-21. ml-testing-toolkit-ui: v15.0.0
+16. event-stream-processor: **v12.0.0-snapshot.7**
+17. simulator: **12.0.0**
+18. mojaloop-simulator: **v13.0.1**
+19. sdk-scheme-adapter: v11.18.11 -> **v21.3.2** ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v11.18.11...v21.4.0))
+20. ml-testing-toolkit: v15.0.0 -> **v15.2.0** ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v15.2.0))
+21. ml-testing-toolkit-ui: v15.0.0 -> **v15.0.1** ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.0.0...v15.0.1))
 22. ml-testing-toolkit-client-lib: **v1.0.0**
-23. auth-service: v13.0.2
-24. als-consent-service: v0.2.0
-25. thirdparty-api-svc: v13.0.2
-26. thirdparty-sdk: v15.1.0
+23. auth-service: **v13.0.2**
+24. als-consent-service: **v0.2.0**
+25. thirdparty-api-svc: **v13.0.2**
+26. thirdparty-sdk: **v15.1.0**
 
 ## 4. Application release notes
 
@@ -70,9 +70,9 @@ Date | Revision | Description
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.7
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v13.0.1
-19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v18.0.2
-20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v15.0.0
-21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.0.0
+19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v21.3.2
+20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v15.2.0
+21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.0.1
 22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.0.0
 23. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v13.0.2
 24. als-consent-service - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.0

@@ -91,25 +91,25 @@ containers:
   - secretRef:
       name: {{ template "ml-testing-toolkit-cli.fullname" . }}-aws-creds
   volumeMounts:
-    - name: {{ $serviceFullName }}-volume-testcase-environment-file
+    - name: {{ $serviceFullName }}-env
       mountPath: /opt/app/cli-testcase-environment.json
       subPath: cli-testcase-environment.json
-    - name: {{ $serviceFullName }}-volume-config-file-defaults
+    - name: {{ $serviceFullName }}-conf
       mountPath: /opt/app/cli-default-config.json
       subPath: cli-default-config.json
 {{- end }}
 
 {{- define "ml-testing-toolkit-cli.template.volumes" }}
 volumes:
-- name: {{ template "ml-testing-toolkit-cli.fullname" . }}-volume-config-file-defaults
+- name: {{ template "ml-testing-toolkit-cli.fullname" . }}-conf
   configMap:
-    name: {{ template "ml-testing-toolkit-cli.fullname" . }}-config-file-defaults
+    name: {{ template "ml-testing-toolkit-cli.fullname" . }}-conf
     items:
       - key: cli-default-config.json
         path: cli-default-config.json
-- name: {{ template "ml-testing-toolkit-cli.fullname" . }}-volume-testcase-environment-file
+- name: {{ template "ml-testing-toolkit-cli.fullname" . }}-env
   configMap:
-    name: {{ template "ml-testing-toolkit-cli.fullname" . }}-config-testcase-environment-file
+    name: {{ template "ml-testing-toolkit-cli.fullname" . }}-env
     items:
       - key: cli-testcase-environment.json
         path: cli-testcase-environment.json
