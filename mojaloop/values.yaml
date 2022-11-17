@@ -51,6 +51,13 @@ CONFIG:
   cep_mongo_password: &CEP_MONGO_PASSWORD password
   cep_mongo_database: &CEP_MONGO_DATABASE mlos
 
+  ## MOJALOOP-TTK-SIMULATORS Backend
+  moja_ttk_sim_kafka_host: &MOJA_TTK_SIM_KAFKA_HOST "{{ .Release.Name }}-kafka-headless"
+  moja_ttk_sim_kafka_port: &MOJA_TTK_SIM_KAFKA_PORT 9092
+  # The Redis Instance can be installed using the following command: helm -n <NAMESPACE> install backend ./example-mojaloop-backend --set "kafka.enabled=false" --set "centralledger-mysql.enabled=false" --set "account-lookup-mysql.enabled=false" --set "centralledger-obj.enabled=false" --set "cep-mongodb.enabled=false" --set "kafka-console.enabled=false" --set "ttksims-redis.enabled=true"
+  moja_ttk_sim_redis_host: &MOJA_TTK_SIM_REDIS_HOST backend-ttksims-redis-master
+  moja_ttk_sim_redis_port: &MOJA_TTK_SIM_REDIS_PORT 6379
+
 # Default values for central.
 # This is a YAML-formatted file.
 # Declare global configurations
@@ -7086,6 +7093,34 @@ mojaloop-ttk-simulators:
 
   mojaloop-ttk-sim1-svc:
     enabled: true
+    sdk-scheme-adapter: &MOJA_TTK_SIM_SDK
+      sdk-scheme-adapter-api-svc:
+        kafka:
+          host: *MOJA_TTK_SIM_KAFKA_HOST
+          port: *MOJA_TTK_SIM_KAFKA_PORT
+
+        redis:
+          host: *MOJA_TTK_SIM_REDIS_HOST
+          port: *MOJA_TTK_SIM_REDIS_PORT
+
+      sdk-scheme-adapter-dom-evt-handler:
+        kafka:
+          host: *MOJA_TTK_SIM_KAFKA_HOST
+          port: *MOJA_TTK_SIM_KAFKA_PORT
+
+        redis:
+          host: *MOJA_TTK_SIM_REDIS_HOST
+          port: *MOJA_TTK_SIM_REDIS_PORT
+
+      sdk-scheme-adapter-cmd-evt-handler:
+        kafka:
+          host: *MOJA_TTK_SIM_KAFKA_HOST
+          port: *MOJA_TTK_SIM_KAFKA_PORT
+
+        redis:
+          host: *MOJA_TTK_SIM_REDIS_HOST
+          port: *MOJA_TTK_SIM_REDIS_PORT
+
     ml-testing-toolkit:
       ml-testing-toolkit-backend:
         ingress:
@@ -7136,6 +7171,7 @@ mojaloop-ttk-simulators:
 
   mojaloop-ttk-sim2-svc:
     enabled: true
+    sdk-scheme-adapter: *MOJA_TTK_SIM_SDK
     ml-testing-toolkit:
       ml-testing-toolkit-backend:
         ingress:
@@ -7156,6 +7192,7 @@ mojaloop-ttk-simulators:
 
   mojaloop-ttk-sim3-svc:
     enabled: true
+    sdk-scheme-adapter: *MOJA_TTK_SIM_SDK
     ml-testing-toolkit:
       ml-testing-toolkit-backend:
         ingress:
@@ -8935,7 +8972,7 @@ ml-ttk-test-setup-sdk-bulk:
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
-    testSuiteName: Thirdparty Provisioning Collection
+    testSuiteName: SDK Bulk Provisioning Collection
     environmentName: Development
 
   # configCreds:
@@ -8973,7 +9010,7 @@ ml-ttk-test-val-sdk-bulk:
     ## TODO: UNCOMMENT THE LINE BELOW
     # testCasesPathInZip: testing-toolkit-test-cases-14.0.0.1/collections/hub/sdk-bulk
     ## TODO: REMOVE THE LINE BELOW
-    testCasesPathInZip: testing-toolkit-test-cases-mvp-bulk-sdk/collections/hub/sdk-bulk
+    testCasesPathInZip: testing-toolkit-test-cases-release-v14.1.0/collections/hub/sdk-bulk
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports

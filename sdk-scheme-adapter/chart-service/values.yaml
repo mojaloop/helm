@@ -95,7 +95,7 @@ env:
   LOG_INDENT: 0
 
   # REDIS CACHE CONNECTION
-  CACHE_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
+  CACHE_URL: redis://{{ include "common.tplvalues.render" (dict "value" .Values.redis.host "context" $) | default (include "common.tplvalues.render" (dict "value" .Values.global.redis.host "context" $)) }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
   CACHE_SHOULD_EXPIRE: false
   CACHE_EXPIRY_SECONDS: 3600
 
@@ -192,10 +192,10 @@ env:
   PM4ML_ENABLED: false
 
   ## API-SVC kafka config
-  BACKEND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
-  BACKEND_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
-  FSPIOP_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
-  FSPIOP_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+  BACKEND_EVENT_CONSUMER_BROKER_LIST: '{{ include "common.tplvalues.render" (dict "value" .Values.kafka.host "context" $) | default (include "common.tplvalues.render" (dict "value" .Values.global.kafka.host "context" $)) }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
+  BACKEND_EVENT_PRODUCER_BROKER_LIST: '{{ include "common.tplvalues.render" (dict "value" .Values.kafka.host "context" $) | default (include "common.tplvalues.render" (dict "value" .Values.global.kafka.host "context" $)) }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
+  FSPIOP_EVENT_CONSUMER_BROKER_LIST: '{{ include "common.tplvalues.render" (dict "value" .Values.kafka.host "context" $) | default (include "common.tplvalues.render" (dict "value" .Values.global.kafka.host "context" $)) }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
+  FSPIOP_EVENT_PRODUCER_BROKER_LIST: '{{ include "common.tplvalues.render" (dict "value" .Values.kafka.host "context" $) | default (include "common.tplvalues.render" (dict "value" .Values.global.kafka.host "context" $)) }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
   BACKEND_EVENT_CONSUMER_GROUP_ID: '{{ .Values.config.simName }}-sdk_api_backend_consumer_group'
   FSPIOP_EVENT_CONSUMER_GROUP_ID: '{{ .Values.config.simName }}-sdk_api_fspiop_consumer_group'
   BACKEND_EVENT_CONSUMER_TOPICS: '{{ .Values.config.simName }}-topic-sdk-outbound-domain-events'
@@ -207,9 +207,9 @@ env:
   # LOG_LEVEL: info
   COMMAND_EVENT_API_SERVER_ENABLED: true
   COMMAND_EVENT_API_SERVER_PORT: 8000
-  REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
-  COMMAND_EVENT_CONSUMER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
-  DOMAIN_EVENT_PRODUCER_BROKER_LIST: "{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}"
+  REDIS_CONNECTION_URL: redis://{{ include "common.tplvalues.render" (dict "value" .Values.redis.host "context" $) | default (include "common.tplvalues.render" (dict "value" .Values.global.redis.host "context" $)) }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
+  COMMAND_EVENT_CONSUMER_BROKER_LIST: '{{ include "common.tplvalues.render" (dict "value" .Values.kafka.host "context" $) | default (include "common.tplvalues.render" (dict "value" .Values.global.kafka.host "context" $)) }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
+  DOMAIN_EVENT_PRODUCER_BROKER_LIST: '{{ include "common.tplvalues.render" (dict "value" .Values.kafka.host "context" $) | default (include "common.tplvalues.render" (dict "value" .Values.global.kafka.host "context" $)) }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
   MAX_ITEMS_PER_BATCH: 1000
   COMMAND_EVENT_CONSUMER_GROUP_ID: '{{ .Values.config.simName }}-sdk-command_events_consumer_group'
   COMMAND_EVENT_CONSUMER_TOPICS: '{{ .Values.config.simName }}-topic-sdk-outbound-command-events'
@@ -219,9 +219,9 @@ env:
   # LOG_LEVEL: info
   DOMAIN_EVENT_API_SERVER_ENABLED: true
   DOMAIN_EVENT_API_SERVER_PORT: 8001
-  # REDIS_CONNECTION_URL: redis://{{ .Values.redis.host | default .Values.global.redis.host  }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
-  DOMAIN_EVENT_CONSUMER_BROKER_LIST: '{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
-  COMMAND_EVENT_PRODUCER_BROKER_LIST: '{{ .Values.kafka.host | default .Values.global.kafka.host }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
+  # REDIS_CONNECTION_URL: redis://{{ include "common.tplvalues.render" (dict "value" .Values.redis.host "context" $) | default (include "common.tplvalues.render" (dict "value" .Values.global.redis.host "context" $)) }}:{{ .Values.redis.port | default .Values.global.redis.port }}/{{ .Values.redis.database | default .Values.global.redis.database }}
+  DOMAIN_EVENT_CONSUMER_BROKER_LIST: '{{ include "common.tplvalues.render" (dict "value" .Values.kafka.host "context" $) | default (include "common.tplvalues.render" (dict "value" .Values.global.kafka.host "context" $)) }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
+  COMMAND_EVENT_PRODUCER_BROKER_LIST: '{{ include "common.tplvalues.render" (dict "value" .Values.kafka.host "context" $) | default (include "common.tplvalues.render" (dict "value" .Values.global.kafka.host "context" $)) }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
   DOMAIN_EVENT_CONSUMER_GROUP_ID: '{{ .Values.config.simName }}-sdk-domain_events_consumer_group'
   DOMAIN_EVENT_CONSUMER_TOPICS: '{{ .Values.config.simName }}-topic-sdk-outbound-domain-events'
   COMMAND_EVENT_PRODUCER_TOPIC: '{{ .Values.config.simName }}-topic-sdk-outbound-command-events'

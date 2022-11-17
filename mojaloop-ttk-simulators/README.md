@@ -58,6 +58,15 @@ Or alternatively one can install the chart by adding the following `--set` param
    ```bash
    helm <NAMESPACE> install <INSTALL_NAME> . --set global.kafka.host=<KAFKA_INSTALL_NAME>-kafka --set global.redis.host=<REDIS_INSTALL_NAME>-redis-master
    ```
+#### Helm
+
+The [Example-Mojaloop-Backend](../example-mojaloop-backend/README.md) can be used to deploy the necessary backends as follows:
+
+```bash
+helm -n moja3 install backend ./example-mojaloop-backend --set "centralledger-mysql.enabled=false" --set "account-lookup-mysql.enabled=false" --set "centralledger-obj.enabled=false" --set "cep-mongodb.enabled=false" --set "kafka-console.enabled=false" --set "ttksims-redis.enabled=true" --set "kafka.enabled=true"
+```
+
+_Note: Take note that all the unnecessary backends are disabled in the above example command, except for Kafka and Redis_
 
 ### Validation
 
