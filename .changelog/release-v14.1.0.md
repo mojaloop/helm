@@ -11,6 +11,7 @@ Date | Revision | Description
 
 1. **mojaloop/#2352:** Mojaloop Helm support for Kubernetes networking.k8s.io/v1 (Ingress) ([mojaloop/helm/pull/#508](https://github.com/mojaloop/helm/pull/508)), closes [mojaloop/#2352](https://github.com/mojaloop/project/issues/2352)
 2. **mojaloop/#2880** Simplify liquidity cover check and fix issue with validation, closes [mojaloop/#2880](https://github.com/mojaloop/project/issues/2880)
+3. **mojaloop/#2928** Upgrade logger to central-services-logger, closes [mojaloop/#2928](https://github.com/mojaloop/project/issues/2928)
 
 ## 2. Bug Fixes
 
@@ -40,7 +41,7 @@ Date | Revision | Description
 15. event-sidecar: **v12.0.0**
 16. event-stream-processor: **v12.0.0-snapshot.7**
 17. simulator: **12.0.0**
-18. mojaloop-simulator: **v13.0.1**
+18. mojaloop-simulator: **v13.0.1** -> **v13.1.0** ([Compare](https://github.com/mojaloop/mojaloop-simulator/compare/v13.0.1...v13.1.0))
 19. sdk-scheme-adapter: v11.18.11 -> **v21.3.2** ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v11.18.11...v21.4.0))
 20. ml-testing-toolkit: v15.0.0 -> **v15.2.0** ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v15.2.0))
 21. ml-testing-toolkit-ui: v15.0.0 -> **v15.0.1** ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.0.0...v15.0.1))
@@ -69,7 +70,7 @@ Date | Revision | Description
 15. event-sidecar - https://github.com/mojaloop/event-sidecar/releases/tag/v12.0.0
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.7
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
-18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v13.0.1
+18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v13.1.0
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v21.3.2
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v15.2.0
 21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.0.1
