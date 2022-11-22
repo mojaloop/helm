@@ -41,7 +41,7 @@ Date | Revision | Description
 15. event-sidecar: **v12.0.0**
 16. event-stream-processor: **v12.0.0-snapshot.7**
 17. simulator: **12.0.0**
-18. mojaloop-simulator: **v13.0.1** -> **v13.1.0** ([Compare](https://github.com/mojaloop/mojaloop-simulator/compare/v13.0.1...v13.1.0))
+18. mojaloop-simulator: **v13.0.1** -> **v13.1.1** ([Compare](https://github.com/mojaloop/mojaloop-simulator/compare/v13.0.1...v13.1.1))
 19. sdk-scheme-adapter: v11.18.11 -> **v21.3.2** ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v11.18.11...v21.4.0))
 20. ml-testing-toolkit: v15.0.0 -> **v15.2.0** ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v15.2.0))
 21. ml-testing-toolkit-ui: v15.0.0 -> **v15.0.1** ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.0.0...v15.0.1))
