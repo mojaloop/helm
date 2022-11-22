@@ -10,7 +10,6 @@ Date | Revision | Description
 ## 1. New Features
 
 1. **mojaloop/#2352:** Mojaloop Helm support for Kubernetes networking.k8s.io/v1 (Ingress) ([mojaloop/helm/pull/#508](https://github.com/mojaloop/helm/pull/508)), closes [mojaloop/#2352](https://github.com/mojaloop/project/issues/2352)
-2. **mojaloop/#2880** Simplify liquidity cover check and fix issue with validation, closes [mojaloop/#2880](https://github.com/mojaloop/project/issues/2880)
 
 ## 2. Bug Fixes
 
