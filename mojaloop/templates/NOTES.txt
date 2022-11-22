@@ -2,9 +2,13 @@ Thank you for installing {{ .Chart.Name }}.
 
 Your release is named: {{ .Release.Name }}.
 
-To learn more about Mojaloop: https://mojaloop.io/
-To learn more about Mojaloop deployments: https://docs.mojaloop.io/documentation/deployment-guide
+Mojaloop Official Website: https://mojaloop.io
+
+To learn more about Mojaloop: https://docs.mojaloop.io
+To learn more about Mojaloop deployments: https://docs.mojaloop.io/legacy/deployment-guide
 To learn more about this release: https://github.com/mojaloop/helm/releases/tag/v{{ .Chart.Version }}
+
+This Helm chart lives @ http://github.com/mojaloop/helm
 
 To learn more about this deployment, try:
 
@@ -36,6 +40,14 @@ Use the following command to execute Test cases and print logs to console:
 
   $ helm -n {{ .Release.Namespace }} test {{ .Release.Name }} --logs
 
+Use the following command to execute a specific Test case:
+
+  $ helm -n {{ .Release.Namespace }} test {{ .Release.Name }} --filter "name={{ .Release.Name }}-<TEST_NAME_1>,name={{ .Release.Name }}-<TEST_NAME_2>"
+
+Use the following command to ignore a specific Test case:
+
+  $ helm -n {{ .Release.Namespace }} test {{ .Release.Name }} --filter "!name={{ .Release.Name }}-<TEST_NAME_1>"
+
 View Test logs with the following commands:
 
 {{- if (index .Values "ml-ttk-test-setup" "tests" "enabled") }}
@@ -48,6 +60,18 @@ View Test logs with the following commands:
 
 {{- if (index .Values "ml-ttk-test-val-bulk" "tests" "enabled") }}
   $ kubectl -n {{ .Release.Namespace }} logs pod/{{ .Release.Name }}-ml-ttk-test-val-bulk
+{{- end}}
+
+{{- if (index .Values "ml-ttk-test-setup-sdk-bulk" "tests" "enabled") }}
+  $ kubectl -n {{ .Release.Namespace }} logs pod/{{ .Release.Name }}-ml-ttk-test-setup-sdk-bulk
+{{- end}}
+
+{{- if (index .Values "ml-ttk-test-val-sdk-bulk" "tests" "enabled") }}
+  $ kubectl -n {{ .Release.Namespace }} logs pod/{{ .Release.Name }}-ml-ttk-test-val-sdk-bulk
+{{- end}}
+
+{{- if (index .Values "ml-ttk-test-setup-tp" "tests" "enabled") }}
+  $ kubectl -n {{ .Release.Namespace }} logs pod/{{ .Release.Name }}-ml-ttk-test-setup-tp
 {{- end}}
 
 {{- if (index .Values "ml-ttk-test-val-tp" "tests" "enabled") }}
