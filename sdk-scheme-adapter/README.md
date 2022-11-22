@@ -6,7 +6,7 @@ Helm Chart for the [SDK-Scheme-Adapter](https://github.com/mojaloop/sdk-scheme-a
 
 The [SDK-Scheme-Adapter](https://github.com/mojaloop/sdk-scheme-adapter) provides an interoperable connector (i.e. a Mojaloop-Connector) hosted by a DFSP (Digital Financial Service Provider) between the DFSP's Backend and the Mojaloop Switch, simplifying API interactions for synchronous request-response patterns.
 
-It compromises of three distinct micro-services:
+It comprises of three distinct micro-services:
 
 1. API-SVC - The standard SDK-Scheme-Adapter offering two APIs
    1. Outbound - API used by the DFSP's Backend to make outgoing requests
