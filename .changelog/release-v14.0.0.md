@@ -61,7 +61,7 @@ Date | Revision | Description
 17. **mojaloop/#2810:** timeout events are being produced for transfers with an internal-state of ABORTED_ERROR ([#907](https://github.com/mojaloop/central-ledger/issues/907)) ([e77de0a](https://github.com/mojaloop/central-ledger/commit/e77de0a8e7dd473d3afbb27df464d27ff5ce98a7)), closes [mojaloop/#2810](https://github.com/mojaloop/project/issues/2810)
 18. **mojaloop/#2811:** sdk-scheme-adapter sending incorrect transferState on a PUT transfers Callback ([#331](https://github.com/mojaloop/sdk-scheme-adapter/issues/331)) ([f7e450c](https://github.com/mojaloop/sdk-scheme-adapter/commit/f7e450cc2568f70f6c9abbb39d9c2186787c31b7)), closes [mojaloop/#2811](https://github.com/mojaloop/sdk-scheme-adapter/issues/2811)
 19. **mojaloop/#2816:** SDK-Scheme-Adapter is missing/incorrect bulkTransferState on a PUT /bulkTransfer/{id} Callback by the PayeeFSP ([#331](https://github.com/mojaloop/sdk-scheme-adapter/issues/331)) ([f7e450c](https://github.com/mojaloop/sdk-scheme-adapter/commit/f7e450cc2568f70f6c9abbb39d9c2186787c31b7)), closes [mojaloop/#2816](https://github.com/mojaloop/sdk-scheme-adapter/issues/2816)
-20. **Testing Toolkit:**:
+20. **Testing Toolkit**:
     1. Added missing test currencies to FSPIOP apis provisioned in TTK [ml-testing-toolkit/pull/205](https://github.com/mojaloop/ml-testing-toolkit/pull/205)
     2. Unable to retain the renamed folder ([ml-testing-toolkit-ui/pull/126](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/126)), closes [mojaloop/#2656](https://github.com/mojaloop/project/issues/2656)
     3. TTK does not send callbacks after processing a Callback-Rule with a FIXED_CALLBACK ([ml-testing-toolkit-ui/pull/126](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/126)), closes [mojaloop/#2685](https://github.com/mojaloop/project/issues/2695)
@@ -98,7 +98,7 @@ Date | Revision | Description
 ## 4. Application release notes
 
 1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v14.0.0
-2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v15.1.0
+2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v15.1.2.1
 3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v14.0.0
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v15.0.2
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v15.0.0

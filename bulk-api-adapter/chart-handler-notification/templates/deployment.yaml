@@ -26,6 +26,9 @@ spec:
         helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+        {{- if .Values.config.endpointSecurity.jwsSign }}
+        checksum/secret-jws: {{ include (print $.Template.BasePath "/secret-jws.yaml") . | sha256sum }}
+        {{- end }}
       {{- if .Values.metrics.enabled }}
         prometheus.io/port: "{{ .Values.service.internalPort }}"
         prometheus.io/scrape: "true"
@@ -83,6 +86,10 @@ spec:
           volumeMounts:
             - name: {{ template "bulk-api-adapter-handler-notification.fullname" . }}-config-volume
               mountPath: /opt/app/config
+            {{- if .Values.config.endpointSecurity.jwsSign }}
+            - name: jws-signing-key
+              mountPath: /opt/app/secrets
+            {{- end }}
           env:
             - name: LOG_LEVEL
               value: {{ .Values.config.log_level }}
@@ -107,3 +114,8 @@ spec:
             items:
             - key: default.json
               path: default.json
+        {{- if .Values.config.endpointSecurity.jwsSign }}
+        - name: jws-signing-key
+          secret:
+            secretName: {{ template "bulk-api-adapter-handler-notification.fullname" . }}-jws-signing-key
+        {{- end }}

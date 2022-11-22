@@ -2,57 +2,62 @@
 
 Date | Revision | Description
 ---------|----------|---------
- 2022-10-18 | 0 | Initial draft
+ 2022-10-20 | 0 | Initial draft
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
 
 ## 1. New Features
 
-1. **mojaloop/#2352:**  Mojaloop Helm support for Kubernetes networking.k8s.io/v1 (Ingress) ([mojaloop/helm/pull/#508](https://github.com/mojaloop/helm/pull/508)), closes [mojaloop/#2352](https://github.com/mojaloop/project/issues/2352)
+1. **mojaloop/#2352:** Mojaloop Helm support for Kubernetes networking.k8s.io/v1 (Ingress) ([mojaloop/helm/pull/#508](https://github.com/mojaloop/helm/pull/508)), closes [mojaloop/#2352](https://github.com/mojaloop/project/issues/2352)
 
 ## 2. Bug Fixes
 
-N/A
+1. **mojaloop/#2796** Duplicate transaction not getting callback for post /bulkTransfers ([central-ledger/pull/915](https://github.com/mojaloop/central-ledger/pull/915)), closes [mojaloop/#2796](https://github.com/mojaloop/project/issues/2796)
+2. **mojaloop/#2798** No error callback when there's an Inactive participant in the transaction ([central-ledger/pull/#911](https://github.com/mojaloop/central-ledger/pull/911), [central-ledger/pull/#913](https://github.com/mojaloop/central-ledger/pull/913)), closes [mojaloop/#2798](https://github.com/mojaloop/project/issues/2798)
+3. **mojaloop/#2800** Invalid dfsp name in header or body does not return any error ([central-ledger/pull/#911](https://github.com/mojaloop/central-ledger/pull/911), [central-ledger/pull/#913](https://github.com/mojaloop/central-ledger/pull/913)), closes [mojaloop/#2800](https://github.com/mojaloop/project/issues/2800)
+4. **mojaloop/#2801** Invalid timestamp scenario not shown as failed transaction ([documentation/pull/385](https://github.com/mojaloop/documentation/pull/385), [central-ledger/pull/916](https://github.com/mojaloop/central-ledger/pull/916), [central-services-shared/pull/333](https://github.com/mojaloop/central-services-shared/pull/333), [testing-toolkit-test-cases/pull/81](https://github.com/mojaloop/testing-toolkit-test-cases/pull/81), [helm/pull/492](https://github.com/mojaloop/helm/pull/492)), closes [mojaloop/#2801](https://github.com/mojaloop/project/issues/2801)
+5. **Testing-Toolkit**:
+   1. **mojaloop/#2995** mobile simulator not responding ([ml-testing-toolkit-ui/pull/141](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/141), [helm/pull/512](https://github.com/mojaloop/helm/pull/512)), closes [mojaloop/#2994](https://github.com/mojaloop/project/issues/2995)
 
 ## 3. Application versions
 
-1. ml-api-adapter: v13.0.0 -> **v14.0.0**
-2. central-ledger: v13.16.1 -> **v15.1.2.1**
-3. account-lookup-service: v13.0.0 -> **v14.0.0**
-4. quoting-service: v14.0.0 -> **15.0.2**
-5. central-settlement: 13.4.1 -> **v15.0.0**
-6. central-event-processor: v11.0.2 -> **v12.0.0**
-7. bulk-api-adapter: v13.0.1 -> **v14.0.0**
-8. email-notifier: v11.0.2 -> **v12.0.0**
-9. als-oracle-pathfinder: v11.0.4 -> **v12.0.0**
-10. transaction-requests-service: v13.0.0 -> **v14.0.1**
+1. ml-api-adapter: **v14.0.0**
+2. central-ledger: v15.1.2.1 -> **v16.3.1** ([Compare](https://github.com/mojaloop/central-ledger/compare/v15.1.2.1...v16.3.1))
+3. account-lookup-service: **v14.0.0**
+4. quoting-service: **v15.0.2**
+5. central-settlement: **v15.0.0**
+6. central-event-processor: **v12.0.0**
+7. bulk-api-adapter: v14.0.0 -> **v14.2.0** ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v14.0.0...v14.2.0))
+8. email-notifier: **v12.0.0**
+9. als-oracle-pathfinder: **v12.0.0**
+10. transaction-requests-service: **v14.0.1**
 11. finance-portal-ui: **v10.4.3** _(DEPRECATED)_
 12. finance-portal-backend-service: **v15.0.2** _(DEPRECATED)_
 13. settlement-management: **v11.0.0** _(DEPRECATED)_
 14. operator-settlement: **v11.0.0** _(DEPRECATED)_
 15. event-sidecar: **v12.0.0**
-16. event-stream-processor: v11.0.0-snapshot -> **v12.0.0-snapshot.7**
-17. simulator: 12.0.0 -> **v12.0.0**
-18. mojaloop-simulator: v12.1.1 -> **v13.0.1**
-19. sdk-scheme-adapter: v11.18.11 -> **v18.0.2**
-20. ml-testing-toolkit: v14.0.4 -> **v15.0.0**
-21. ml-testing-toolkit-ui: v13.5.5 -> **v15.0.0**
+16. event-stream-processor: **v12.0.0-snapshot.7**
+17. simulator: **12.0.0**
+18. mojaloop-simulator: **v13.0.1**
+19. sdk-scheme-adapter: v11.18.11 -> **v21.4.0** ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v11.18.11...v21.4.0))
+20. ml-testing-toolkit: v15.0.0 -> **v15.2.0** ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v15.2.0))
+21. ml-testing-toolkit-ui: v15.0.0 -> **v15.0.1** ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.0.0...v15.0.1))
 22. ml-testing-toolkit-client-lib: **v1.0.0**
-23. auth-service: v11.11.1 -> **v13.0.2**
-24. als-consent-service: v0.0.8 -> **v0.2.0**
-25. thirdparty-api-svc: v11.21.0 -> **v13.0.2**
-26. thirdparty-sdk: v11.55.1 -> **v15.1.0**
+23. auth-service: **v13.0.2**
+24. als-consent-service: **v0.2.0**
+25. thirdparty-api-svc: **v13.0.2**
+26. thirdparty-sdk: **v15.1.0**
 
 ## 4. Application release notes
 
 1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v14.0.0
-2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v15.1.0
+2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v16.3.1
 3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v14.0.0
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v15.0.2
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v15.0.0
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v12.0.0
-7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v14.0.0
+7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v14.2.0
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.0
 9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v12.0.0
 10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.0.1
@@ -64,9 +69,9 @@ N/A
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.7
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v13.0.1
-19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v18.0.2
-20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v15.0.0
-21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.0.0
+19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v21.4.0
+20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v15.2.0
+21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.0.1
 22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.0.0
 23. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v13.0.2
 24. als-consent-service - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.0
@@ -110,8 +115,7 @@ More information can be found here:
 
 1. This release has been tested against the following:
     - Kubernetes: `v1.24.6`
-    - Nginx Ingress Controllers: `registry.k8s.io/ingress-nginx/controller:v1.4.0@sha256:34ee929b111ffc7aa426ffd409af44da48e5a0eea1eb2207994d9e0c0882d143`
-    - Testing Toolkit Test Cases: [v14.0.0.1](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v14.0.0.1)
+    - Testing Toolkit Test Cases: [v14.1.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v14.1.0)
 
 2. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
 

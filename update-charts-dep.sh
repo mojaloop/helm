@@ -16,6 +16,14 @@ declare -a charts=(
     example-mojaloop-backend
     ml-operator
     simulator
+    ml-testing-toolkit
+    ml-testing-toolkit-cli
+    sdk-scheme-adapter/chart-service
+    sdk-scheme-adapter
+    mojaloop-ttk-simulators/chart-sim1
+    mojaloop-ttk-simulators/chart-sim2
+    mojaloop-ttk-simulators/chart-sim3
+    mojaloop-ttk-simulators
     eventstreamprocessor
     monitoring/promfana
     monitoring/efk
@@ -38,7 +46,6 @@ declare -a charts=(
     bulk-api-adapter
     mojaloop-bulk
     mojaloop-simulator
-    ml-testing-toolkit
     thirdparty/chart-auth-svc
     thirdparty/chart-consent-oracle
     thirdparty/chart-tp-api-svc
