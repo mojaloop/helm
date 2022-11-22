@@ -16,7 +16,7 @@ N/A
 
 ### Pre-requisites
 
-The following-backend dependency are required for each of the following services.
+The following-backend dependencies are required for each of the following services.
 
 1. Kafka - used as a persistent state store, and for correlating async-to-sync requests/responses using the pub-sub mechanisms.
 
