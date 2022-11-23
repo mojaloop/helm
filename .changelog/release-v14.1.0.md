@@ -121,7 +121,7 @@ More information can be found here:
 
 1. This release has been tested against the following:
     - Kubernetes: `v1.24.6`
-    - Testing Toolkit Test Cases: [v14.0.0.1](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v14.0.0.1)
+    - Testing Toolkit Test Cases: [v14.1.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v14.0.1)
 
 2. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
 
