@@ -163,8 +163,7 @@ More information can be found here:
 7. [#2892 - Disabled DFSP showing getParty info ](https://github.com/mojaloop/project/issues/2892)
 8. [#2435 - Quoting-Service is incorrectly handling failed responses to FSPs when forwarding requests](https://github.com/mojaloop/project/issues/2435)
 9. [#2644 - Missing Error code for the transfer in the Central ledger DB](https://github.com/mojaloop/project/issues/2644)
-10. [#2106 - helm:Disabling finance-portal still creates the finance-portal deployment](https://github.com/mojaloop/project/issues/2106)
-11. Testing Toolkit Test Case issues causing instability/intermitant failures on Test Case Results
+10. Testing Toolkit Test Case issues causing instability/intermitant failures on Test Case Results
     1. [#2717 - Thirdparty TTK Test-Collection is not repeatable](https://github.com/mojaloop/project/issues/2717)
     2. [#2845 - QA: Replace Legacy-Simulator as a NORESPONSE_SIMPAYEE in Testing-Toolkit Goden Path Test-Suite](https://github.com/mojaloop/project/issues/2845)
     3. [#2846 - QA: Mojaloop TTK GP Test Collections to reset available liquidity after each run](https://github.com/mojaloop/project/issues/2846)
