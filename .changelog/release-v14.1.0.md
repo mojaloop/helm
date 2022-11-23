@@ -2,14 +2,18 @@
 
 Date | Revision | Description
 ---------|----------|---------
- 2022-10-20 | 0 | Initial draft
+ 2022-10-20 | 0 | Initial draft of RC
+ 2022-11-22 | 0 | Initial release v14.1.0
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
 
 ## 1. New Features
 
-1. **mojaloop/#2352:** Mojaloop Helm support for Kubernetes networking.k8s.io/v1 (Ingress) ([mojaloop/helm/pull/#508](https://github.com/mojaloop/helm/pull/508)), closes [mojaloop/#2352](https://github.com/mojaloop/project/issues/2352)
+v14.1.0 includes two major updates, features and a few minor ones
+
+1. **Bulk MVP feature for FSPs**: [Bulk support for FSPs](https://github.com/mojaloop/documentation/tree/master/docs/technical/sdk-scheme-adapter/BulkEnhancements) implemented to accelerate, support adoption. Epics: [Implementation epic #2797](https://github.com/mojaloop/project/issues/2797), [Testing epic #2805](https://github.com/mojaloop/project/issues/2805). Testing strategy [here](https://docs.mojaloop.io/technical/sdk-scheme-adapter/BulkEnhancements/SDKBulk-Tests.html)
+2. **Mojaloop Helm support for Kubernetes networking:** Mojaloop Helm support for Kubernetes networking.k8s.io/v1 (Ingress), mojaloop/#2352 ([mojaloop/helm/pull/#508](https://github.com/mojaloop/helm/pull/508)), closes [mojaloop/#2352](https://github.com/mojaloop/project/issues/2352)
 
 ## 2. Bug Fixes
 
@@ -17,7 +21,9 @@ Date | Revision | Description
 2. **mojaloop/#2798** No error callback when there's an Inactive participant in the transaction ([central-ledger/pull/#911](https://github.com/mojaloop/central-ledger/pull/911), [central-ledger/pull/#913](https://github.com/mojaloop/central-ledger/pull/913)), closes [mojaloop/#2798](https://github.com/mojaloop/project/issues/2798)
 3. **mojaloop/#2800** Invalid dfsp name in header or body does not return any error ([central-ledger/pull/#911](https://github.com/mojaloop/central-ledger/pull/911), [central-ledger/pull/#913](https://github.com/mojaloop/central-ledger/pull/913)), closes [mojaloop/#2800](https://github.com/mojaloop/project/issues/2800)
 4. **mojaloop/#2801** Invalid timestamp scenario not shown as failed transaction ([documentation/pull/385](https://github.com/mojaloop/documentation/pull/385), [central-ledger/pull/916](https://github.com/mojaloop/central-ledger/pull/916), [central-services-shared/pull/333](https://github.com/mojaloop/central-services-shared/pull/333), [testing-toolkit-test-cases/pull/81](https://github.com/mojaloop/testing-toolkit-test-cases/pull/81), [helm/pull/492](https://github.com/mojaloop/helm/pull/492)), closes [mojaloop/#2801](https://github.com/mojaloop/project/issues/2801)
-5. **Testing-Toolkit**:
+5. **mojaloop/#2863** [ML Bulk] PUT /bulkTransfers/{ID} should return proper 200 OK status code ([bulk-api-adapter/pull/#89](https://github.com/mojaloop/bulk-api-adapter/pull/89), [testing-toolkit-test-cases/pull/#83](https://github.com/mojaloop/testing-toolkit-test-cases/pull/83)), closes [mojaloop/#2863](https://github.com/mojaloop/project/issues/2863)
+6. **mojaloop/3024** Validation issues in Bulk fulfil handler, invalidating Switch as destination on Fulfil reqeusts from Payee FSP. PRs: [testing-toolkit-test-cases](https://github.com/mojaloop/testing-toolkit-test-cases/pull/98), [fix mojaloop/#3024](https://github.com/mojaloop/central-ledger/pull/926)
+7. **Testing-Toolkit**:
    1. **mojaloop/#2995** mobile simulator not responding ([ml-testing-toolkit-ui/pull/141](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/141), [helm/pull/512](https://github.com/mojaloop/helm/pull/512)), closes [mojaloop/#2994](https://github.com/mojaloop/project/issues/2995)
 
 ## 3. Application versions
@@ -45,7 +51,7 @@ Date | Revision | Description
 21. ml-testing-toolkit-ui: v15.0.0 -> **v15.0.1** ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.0.0...v15.0.1))
 22. ml-testing-toolkit-client-lib: **v1.0.0**
 23. auth-service: **v13.0.2**
-24. als-consent-service: **v0.2.0**
+24. als-consent-oracle: **v0.2.0**
 25. thirdparty-api-svc: **v13.0.2**
 26. thirdparty-sdk: **v15.1.0**
 
@@ -74,7 +80,7 @@ Date | Revision | Description
 21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.0.1
 22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.0.0
 23. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v13.0.2
-24. als-consent-service - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.0
+24. als-consent-oracle - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.0
 25. thirdparty-api-svc - https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v13.0.2
 26. thirdparty-sdk-adapter - https://github.com/mojaloop/thirdparty-sdk/releases/tag/v15.1.0
 
@@ -90,7 +96,7 @@ Date | Revision | Description
 
 ## 6. Deprecations
 
-The following components are being deprecated from the packaged Mojaloop Helm chart release:
+The following components have been deprecated from the packaged Mojaloop Helm chart release and have been with [Business Operation Framework (BOF)](https://github.com/mojaloop/business-operations-framework-docs), which can be deployed by the offical [BoF Helm Chart](https://github.com/mojaloop/charts/tree/master/mojaloop/bof):
 
 - [finance-portal](https://github.com/mojaloop/helm/tree/master/finance-portal) Helm Chart
   - [finance-portal-ui](https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3)
@@ -115,17 +121,17 @@ More information can be found here:
 
 1. This release has been tested against the following:
     - Kubernetes: `v1.24.6`
-    - Testing Toolkit Test Cases: [v14.1.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v14.1.0)
+    - Testing Toolkit Test Cases: [v14.1.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v14.0.1)
 
 2. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
 
-3. The [testing-toolkit-test-cases](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v14.0.0.1)' Golden Path collections expects:
-    - the Quoting service operating mode to be set [quoting-service.config.simple_routing_mode_enabled=true](https://github.com/mojaloop/helm/blob/v13.1.0/mojaloop/values.yaml#L4664). If this is incorrectly configured, it will result in several failures in the quoting-service tests (7 expected failures). If this is disabled, ensure that you update the corresponding test-case environment variable parameter [SIMPLE_ROUTING_MODE_ENABLED](https://github.com/mojaloop/helm/blob/v14.0.0/mojaloop/values.yaml#L7420) to match.
-    - the [on-us transfers](https://github.com/mojaloop/helm/blob/v14.0.0/mojaloop/values.yaml#L321) configuration to be disabled. The test-case environment variable parameter ([ON_US_TRANSFERS_ENABLED](https://github.com/mojaloop/helm/blob/v14.0.0/mojaloop/values.yaml#L7423), the same name used on postman collections) must similarly match this value.
+3. The [testing-toolkit-test-cases for v14.1.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v14.1.0)' Golden Path collections expects:
+    - the Quoting service operating mode to be set quoting-service.config.simple_routing_mode_enabled=true (in helm mojaloop/values.yaml under quoting-service config). If this is incorrectly configured, it will result in several failures in the quoting-service tests (7 expected failures). If this is disabled, ensure that you update the corresponding test-case environment variable parameter **SIMPLE_ROUTING_MODE_ENABLED** ( in helm mojaloop/values.yaml ml-testing-toolkit -> extraEnvironments.hub-k8s-default-environment.json.inputValues) to match.
+    - the **on-us transfers** (in mojaloop/values.yaml "enable_on_us_transfers: false" under centralledger-handler-transfer-prepare -> config and  cl-handler-bulk-transfer-prepare -> config) configuration to be disabled. The test-case environment variable parameter (**ON_US_TRANSFERS_ENABLED** (in helm mojaloop/values.yaml ml-testing-toolkit -> extraEnvironments.hub-k8s-default-environment.json.inputValues), the same name used on postman collections) must similarly match this value.
 
 4. Simulators
     - We recommend using Testing Toolkit instead of Postman which is better suited for the async nature of the Mojaloop API specification (see above)
-    - [Mojaloop-Simulator](https://github.com/mojaloop/mojaloop-simulator) is enabled by default (six instances used).
+    - [Mojaloop-Simulator](https://github.com/mojaloop/mojaloop-simulator) is enabled by default (six instances used for single transfers usually and three more specific to bulk).
     - Ensure that correct Postman Scripts are used if you wish to test against the Mojaloop-Simulators:
         - Setup Mojaloop Hub: [MojaloopHub_Setup](https://github.com/mojaloop/postman/blob/v12.0.0/MojaloopHub_Setup.postman_collection.json)
         - Setup Mojaloop Simulators for testing : [MojaloopSims_Onboarding](https://github.com/mojaloop/postman/blob/v12.0.0/MojaloopSims_Onboarding.postman_collection.json)
@@ -142,22 +148,29 @@ More information can be found here:
 
     Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](../thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
 
+8. Testing the new Bulk functionality (sdk-scheme-adapter)
+
+    For details regarding deployment and validation of simulators needed for bulk (for adoption provided in sdk-scheme-adapter) refer to [deploying Mojaloop TTK simulators](../mojaloop-ttk-simulators/README.md).
+
 ## 8. Known Issues
 
 1. [#2119 - Idempotency for duplicate quote request](https://github.com/mojaloop/project/issues/2119)
 2. [#2322 - Helm install failing with with "medium to large" release names](https://github.com/mojaloop/project/issues/2322)
-3. [#2352 - Mojaloop Helm support for Kubernetes 1.22](https://github.com/mojaloop/project/issues/2352)
-4. [#2448 - Nginx Ingress Controller v1.0.0 is incompatible with Mojaloop Helm v13.0.x releases](https://github.com/mojaloop/project/issues/2448)
-5. [#2317 - Mojaloop Helm deployments are not compatible when deployed to ARM-arch based hosts](https://github.com/mojaloop/project/issues/2317)
-6. Testing Toolkit Test Case issues causing instability/intermitant failures on Test Case Results
+3. [#2448 - Nginx Ingress Controller v1.0.0 is incompatible with Mojaloop Helm v13.0.x releases](https://github.com/mojaloop/project/issues/2448)
+4. [#2317 - Mojaloop Helm deployments are not compatible when deployed to ARM-arch based hosts](https://github.com/mojaloop/project/issues/2317)
+5. [#2740 - GP tests are failing when test currencies are used](https://github.com/mojaloop/project/issues/2740)
+6. [#3020 - Bulk prepare handler is freezing if MONGODB is disabled ](https://github.com/mojaloop/project/issues/3020)
+7. [#2892 - Disabled DFSP showing getParty info ](https://github.com/mojaloop/project/issues/2892)
+8. [#2435 - Quoting-Service is incorrectly handling failed responses to FSPs when forwarding requests](https://github.com/mojaloop/project/issues/2435)
+9. [#2644 - Missing Error code for the transfer in the Central ledger DB](https://github.com/mojaloop/project/issues/2644)
+10. Testing Toolkit Test Case issues causing instability/intermitant failures on Test Case Results
     1. [#2717 - Thirdparty TTK Test-Collection is not repeatable](https://github.com/mojaloop/project/issues/2717)
-    2. [#2734 - Failures in daily cron job running GP tests](https://github.com/mojaloop/project/issues/2734)
-    3. [#2845 - QA: Replace Legacy-Simulator as a NORESPONSE_SIMPAYEE in Testing-Toolkit Goden Path Test-Suite](https://github.com/mojaloop/project/issues/2845)
-    4. [#2846 - QA: Mojaloop TTK GP Test Collections to reset available liquidity after each run](https://github.com/mojaloop/project/issues/2846)
+    2. [#2845 - QA: Replace Legacy-Simulator as a NORESPONSE_SIMPAYEE in Testing-Toolkit Goden Path Test-Suite](https://github.com/mojaloop/project/issues/2845)
+    3. [#2846 - QA: Mojaloop TTK GP Test Collections to reset available liquidity after each run](https://github.com/mojaloop/project/issues/2846)
 
 ## 9. Contributors
 
-- Organizations: BMGF, CrossLake, ModusBox
-- Individuals: @elnyry-sam-k, @mdebarros, @vijayg10, @kleyow, @kirgene, @tdaly61
+- Organizations: BMGF, CrossLake, InFiTX
+- Individuals: @chris-me-law , @drfy , @elnyry-sam-k , @kirgene , @kleyow , @PaulGregoryBaker , @mdebarros , @sri-miriyala , @tdaly61 , @vijayg10 
 
 _Note: companies are in alphabetical order, individuals are in no particular order._
