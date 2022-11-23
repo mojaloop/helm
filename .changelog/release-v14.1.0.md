@@ -96,7 +96,7 @@ v14.1.0 includes two major updates, features and a few minor ones
 
 ## 6. Deprecations
 
-The following components are being deprecated from the packaged Mojaloop Helm chart release and will likely be replaced with [Business Operation Framework (BOF)](https://github.com/mojaloop/business-operations-framework-docs) in the next Mojaloop official release (possibly v15):
+The following components have been deprecated from the packaged Mojaloop Helm chart release and have been with [Business Operation Framework (BOF)](https://github.com/mojaloop/business-operations-framework-docs), which can be deployed by the offical [BoF Helm Chart](https://github.com/mojaloop/charts/tree/master/mojaloop/bof):
 
 - [finance-portal](https://github.com/mojaloop/helm/tree/master/finance-portal) Helm Chart
   - [finance-portal-ui](https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3)
