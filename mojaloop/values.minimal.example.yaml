@@ -9,7 +9,7 @@
 #### With Default Backends configured below:
 ### helm -n moja upgrade backend mojaloop/example-mojaloop-backend --install --set "kafka.enabled=false" --set "centralledger-mysql.enabled=false" --set "account-lookup-mysql.enabled=false" --set "centralledger-obj.enabled=false" --set "cep-mongodb.enabled=false" --set "kafka-console.enabled=false" --set "ttksims-redis.enabled=true"
 #### With Example Backends configured below:
-### helm -n moja upgrade backend mojaloop/example-mojaloop-backend --install --set "kafka-console.ingress.enabled=true" --set "kafka-console.ingress.hosts[0].host=kafka-console.mojaloop.test"
+### helm -n moja upgrade backend mojaloop/example-mojaloop-backend --install --set "kafka-console.ingress.enabled=true" --set "kafka-console.ingress.hosts[0].host=kafka-console.local"
 ###
 #
 ## 2. Install Backend Dependencies required for Thirdparty services
@@ -132,7 +132,7 @@ central:
         apiVersion:
         ## @param ingress.hostname Default host for the ingress record
         ##
-        hostname: central-ledger.mojaloop.test
+        hostname: central-ledger.local
         ## @param servicePort : port for the service
         ##
         servicePort: 80
@@ -349,7 +349,7 @@ central:
         apiVersion:
         ## @param ingress.hostname Default host for the ingress record
         ##
-        hostname: central-settlement-service.mojaloop.test
+        hostname: central-settlement-service.local
         ## @param servicePort : port for the service
         ##
         servicePort: 80
@@ -507,7 +507,7 @@ ml-api-adapter:
       apiVersion:
       ## @param ingress.hostname Default host for the ingress record
       ##
-      hostname: ml-api-adapter.mojaloop.test
+      hostname: ml-api-adapter.local
       ## @param servicePort : port for the service
       ##
       servicePort: 80
@@ -585,7 +585,7 @@ account-lookup-service:
       apiVersion:
     ## @param ingress.hostname Default host for the ingress record
     ##
-      hostname: account-lookup-service.mojaloop.test
+      hostname: account-lookup-service.local
     ## @param servicePort : port for the service
     ##
       servicePort: 80
@@ -655,7 +655,7 @@ account-lookup-service:
       apiVersion:
       ## @param ingress.hostname Default host for the ingress record
       ##
-      hostname: account-lookup-service-admin.mojaloop.test
+      hostname: account-lookup-service-admin.local
       ## @param servicePort : port for the service
       ##
       servicePort: 80
@@ -729,7 +729,7 @@ account-lookup-service:
       apiVersion:
     ## @param ingress.hostname Default host for the ingress record
     ##
-      hostname: als-oracle-pathfinder.mojaloop.test
+      hostname: als-oracle-pathfinder.local
     ## @param servicePort : port for the service
     ##
       servicePort: 80
@@ -800,7 +800,7 @@ quoting-service:
     apiVersion:
     ## @param ingress.hostname Default host for the ingress record
     ##
-    hostname: quoting-service.mojaloop.test
+    hostname: quoting-service.local
     ## @param servicePort : port for the service
     ##
     servicePort: 80
@@ -855,7 +855,7 @@ transaction-requests-service:
     apiVersion:
     ## @param ingress.hostname Default host for the ingress record
     ##
-    hostname: transaction-request-service.mojaloop.test
+    hostname: transaction-request-service.local
     ## @param servicePort : port for the service
     ##
     servicePort: 80
@@ -894,6 +894,7 @@ transaction-requests-service:
 
 thirdparty:
   enabled: true
+
   auth-svc:
     enabled: true
     
@@ -909,7 +910,7 @@ thirdparty:
       apiVersion:
       ## @param ingress.hostname Default host for the ingress record
       ##
-      hostname: auth-service.mojaloop.test
+      hostname: auth-service.local
       ## @param ingress.path Default path for the ingress record
       ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
       ##
@@ -994,7 +995,7 @@ thirdparty:
       apiVersion:
       ## @param ingress.hostname Default host for the ingress record
       ##
-      hostname: consent-oracle.mojaloop.test
+      hostname: consent-oracle.local
       ## @param ingress.path Default path for the ingress record
       ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
       ##
@@ -1079,7 +1080,7 @@ thirdparty:
       apiVersion:
       ## @param ingress.hostname Default host for the ingress record
       ##
-      hostname: tp-api-svc.mojaloop.test
+      hostname: tp-api-svc.local
       ## @param ingress.path Default path for the ingress record
       ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
       ##
@@ -1149,6 +1150,61 @@ thirdparty:
       secrets: []
       className: "nginx"
 
+  thirdparty-simulator:
+    enabled: true
+
+    simulators:
+      ## Every key added to this `simulators` object will be a simulator that takes on the default
+      ## config below. The default is deliberately left empty so nothing is deployed by default.
+      # payerfsp: {}
+      # payeefsp: {}
+      ## Default FSPs for Mojaloop Postman Scripts
+      dfspa:
+        ingress:
+          enabled: true
+          hosts:
+            -   sim-dfspa.local
+
+      dfspb:
+        ingress:
+          enabled: true
+          hosts:
+            -   sim-dfspb.local
+
+      pisp:
+        ingress:
+          enabled: true
+          hosts:
+            -   sim-pisp.local
+
+    ingress:
+      enabled: false
+      # If you're using nginx ingress controller >= v0.22.0 set this to (/|$)(.*). Ensure that you set the `"nginx.ingress.kubernetes.io/rewrite-target": "/$2"`
+      # If you're using nginx ingress controller < v0.22.0 set this to an empty string or "/". Ensure that you set the `"nginx.ingress.kubernetes.io/rewrite-target": "/"`
+      # This affects the way your rewrite target will work.
+      # For more information see "Breaking changes" here:
+      # https://github.com/kubernetes/ingress-nginx/blob/master/Changelog.md#0220
+
+      ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+      # nginx.ingress.kubernetes.io/rewrite-target: '/'
+      # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+      ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+      # kubernetes.io/ingress.class: nginx
+      ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
+      # kubernetes.io/tls-acme: "true""
+
+      ## nginx ingress controller >= v0.22.0
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+      ingressPathRewriteRegex: (/|$)(.*)
+      className: "nginx"
+      pathType: "ImplementationSpecific"
+
+      ## nginx ingress controller < v0.22.0
+      # annotations:
+      #   nginx.ingress.kubernetes.io/rewrite-target: '/'
+      # ingressPathRewriteRegex: "/"
+
 simulator:
   enabled: true
 
@@ -1162,7 +1218,7 @@ simulator:
     apiVersion:
     ## @param ingress.hostname Default host for the ingress record
     ##
-    hostname: moja-simulator.mojaloop.test
+    hostname: moja-simulator.local
     ## @param servicePort : port for the service
     ##
     servicePort: 80
@@ -1216,37 +1272,37 @@ mojaloop-simulator:
       ingress:
         enabled: true
         hosts:
-          -   sim-payerfsp.mojaloop.test
+          -   sim-payerfsp.local
 
     payeefsp:
       ingress:
         enabled: true
         hosts:
-          -   sim-payeefsp.mojaloop.test
+          -   sim-payeefsp.local
 
     testfsp1:
       ingress:
         enabled: true
         hosts:
-          -   sim-testfsp1.mojaloop.test
+          -   sim-testfsp1.local
 
     testfsp2:
       ingress:
         enabled: true
         hosts:
-          -   sim-testfsp2.mojaloop.test
+          -   sim-testfsp2.local
 
     testfsp3:
       ingress:
         enabled: true
         hosts:
-          -   sim-testfsp3.mojaloop.test
+          -   sim-testfsp3.local
 
     testfsp4:
       ingress:
         enabled: true
         hosts:
-          -   sim-testfsp4.mojaloop.test
+          -   sim-testfsp4.local
   ingress:
     enabled: false
     # If you're using nginx ingress controller >= v0.22.0 set this to (/|$)(.*). Ensure that you set the `"nginx.ingress.kubernetes.io/rewrite-target": "/$2"`
@@ -1343,18 +1399,18 @@ mojaloop-ttk-simulators:
           enabled: true
           hosts:
             specApi:
-              host: 'ttksim1-specapi.mojaloop.test'
+              host: 'ttksim1-specapi.local'
             adminApi:
-              host: 'ttksim1.mojaloop.test'
+              host: 'ttksim1.local'
 
       ml-testing-toolkit-frontend:
         ingress:
           enabled: true
           hosts:
             ui:
-              host: ttksim1.mojaloop.test
+              host: ttksim1.local
         config:
-          API_BASE_URL: 'http://ttksim1.mojaloop.test'
+          API_BASE_URL: 'http://ttksim1.local'
 
   mojaloop-ttk-sim2-svc:
     enabled: true
@@ -1367,18 +1423,18 @@ mojaloop-ttk-simulators:
           enabled: true
           hosts:
             specApi:
-              host: 'ttksim2-specapi.mojaloop.test'
+              host: 'ttksim2-specapi.local'
             adminApi:
-              host: 'ttksim2.mojaloop.test'
+              host: 'ttksim2.local'
 
       ml-testing-toolkit-frontend:
         ingress:
           enabled: true
           hosts:
             ui:
-              host: 'ttksim2.mojaloop.test'
+              host: 'ttksim2.local'
         config:
-          API_BASE_URL: 'http://ttksim2.mojaloop.test'
+          API_BASE_URL: 'http://ttksim2.local'
 
   mojaloop-ttk-sim3-svc:
     enabled: true
@@ -1391,18 +1447,18 @@ mojaloop-ttk-simulators:
           enabled: true
           hosts:
             specApi:
-              host: 'ttksim3-specapi.mojaloop.test'
+              host: 'ttksim3-specapi.local'
             adminApi:
-              host: 'ttksim3.mojaloop.test'
+              host: 'ttksim3.local'
 
       ml-testing-toolkit-frontend:
         ingress:
           enabled: true
           hosts:
             ui:
-              host: 'ttksim3.mojaloop.test'
+              host: 'ttksim3.local'
         config:
-          API_BASE_URL: 'http://ttksim3.mojaloop.test'
+          API_BASE_URL: 'http://ttksim3.local'
 
 mojaloop-bulk:
   enabled: true
@@ -1433,7 +1489,7 @@ mojaloop-bulk:
         apiVersion:
         ## @param ingress.hostname Default host for the ingress record
         ##
-        hostname: bulk-api-adapter.mojaloop.test
+        hostname: bulk-api-adapter.local
         ## @param servicePort : port for the service
         ##
         servicePort: 80
@@ -1606,18 +1662,18 @@ ml-testing-toolkit:
       enabled: true
       hosts:
         specApi:
-          host: testing-toolkit-specapi.mojaloop.test
+          host: testing-toolkit-specapi.local
         adminApi:
-          host: testing-toolkit.mojaloop.test
+          host: testing-toolkit.local
 
   ml-testing-toolkit-frontend:
     ingress:
       enabled: true
       hosts:
         ui:
-          host: testing-toolkit.mojaloop.test
+          host: testing-toolkit.local
     config:
-      API_BASE_URL: http://testing-toolkit.mojaloop.test
+      API_BASE_URL: http://testing-toolkit.local
 
 ml-ttk-posthook-setup:
   postInstallHook:
@@ -1629,7 +1685,7 @@ ml-ttk-posthook-setup:
     testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-14.1.0/collections/hub/provisioning
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     testSuiteName: Standard Provisioning Collection
-    environmentName: example.mojaloop.test@v14.1.0
+    environmentName: example.local@v14.1.0
 
 ml-ttk-posthook-tests:
   postInstallHook:
@@ -1641,7 +1697,7 @@ ml-ttk-posthook-tests:
     testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-14.1.0/collections/hub/golden_path
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     testSuiteName: GP Tests
-    environmentName: example.mojaloop.test@v14.1.0
+    environmentName: example.local@v14.1.0
 
 ml-ttk-cronjob-tests:
   scheduling:
@@ -1666,7 +1722,7 @@ ml-ttk-cronjob-tests:
 
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     testSuiteName: GP CronJob
-    environmentName: example.mojaloop.test@v14.1.0
+    environmentName: example.local@v14.1.0
 
 ml-ttk-test-setup:
   tests:
@@ -1678,7 +1734,7 @@ ml-ttk-test-setup:
     testCasesPathInZip: *ttkGitPathSetup
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     testSuiteName: Standard Provisioning Collection
-    environmentName: example.mojaloop.test@v14.1.0
+    environmentName: example.local@v14.1.0
 
 ml-ttk-test-val-gp:
   tests:
@@ -1691,7 +1747,7 @@ ml-ttk-test-val-gp:
 
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     testSuiteName: GP Tests
-    environmentName: example.mojaloop.test@v14.1.0
+    environmentName: example.local@v14.1.0
 
 ml-ttk-test-val-bulk:
   tests:
@@ -1704,7 +1760,7 @@ ml-ttk-test-val-bulk:
 
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     testSuiteName: Bulk Tests
-    environmentName: example.mojaloop.test@v14.1.0
+    environmentName: example.local@v14.1.0
 
 ml-ttk-test-setup-tp:
   tests:
@@ -1717,7 +1773,7 @@ ml-ttk-test-setup-tp:
 
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     testSuiteName: Thirdparty Provisioning Collection
-    environmentName: example.mojaloop.test@v14.1.0
+    environmentName: example.local@v14.1.0
 
 
 ml-ttk-test-val-tp:
@@ -1731,7 +1787,7 @@ ml-ttk-test-val-tp:
 
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     testSuiteName: Thirdparty Tests
-    environmentName: example.mojaloop.test@v14.1.0
+    environmentName: example.local@v14.1.0
 
 ml-ttk-test-setup-sdk-bulk:
   tests:
@@ -1744,7 +1800,7 @@ ml-ttk-test-setup-sdk-bulk:
 
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     testSuiteName: SDK Bulk Provisioning Collection
-    environmentName: example.mojaloop.test@v14.1.0
+    environmentName: example.local@v14.1.0
 
 ml-ttk-test-val-sdk-bulk:
   tests:
@@ -1757,4 +1813,4 @@ ml-ttk-test-val-sdk-bulk:
 
     ttkBackendURL: http://$release_name-ttksim1-ttk-backend:5050
     testSuiteName: SDK Bulk Tests
-    environmentName: example.mojaloop.test@v14.1.0
+    environmentName: example.local@v14.1.0
