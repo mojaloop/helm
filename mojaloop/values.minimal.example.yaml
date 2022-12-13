@@ -1,0 +1,1760 @@
+# Deploy Mojaloop with Backend Dependency Pre-requisites
+#
+## Description:
+## Example of a minimal reduced config to set Backends and Ingress configurations for a full deployment of Mojaloop.
+#
+## Pre-requisites:
+#
+## 1. Install Backend Dependencies required for TTK-Sims
+#### With Default Backends configured below:
+### helm -n moja upgrade backend mojaloop/example-mojaloop-backend --install --set "kafka.enabled=false" --set "centralledger-mysql.enabled=false" --set "account-lookup-mysql.enabled=false" --set "centralledger-obj.enabled=false" --set "cep-mongodb.enabled=false" --set "kafka-console.enabled=false" --set "ttksims-redis.enabled=true"
+#### With Example Backends configured below:
+### helm -n moja upgrade backend mojaloop/example-mojaloop-backend --install --set "kafka-console.ingress.enabled=true" --set "kafka-console.ingress.hosts[0].host=kafka-console.mojaloop.test"
+###
+#
+## 2. Install Backend Dependencies required for Thirdparty services
+### Git Clone https://github.com/mojaloop/helm
+### cd ./mojaloop
+### kubectl -n moja apply -f ./thirdparty/chart-auth-svc/example_dependencies.yaml
+### kubectl -n moja apply -f ./thirdparty/chart-consent-oracle/example_dependencies.yaml
+#
+## 3. Install Mojaloop
+### helm -n moja install moja mojaloop/mojaloop --version 14.1.0 -f ./values.minimal.example.yaml
+#
+## 4. Test Mojaloop
+### helm -n moja test moja --timeout 10m
+#
+
+# Common YAML TEMPLATE Anchors
+CONFIG:
+  ## ACCOUNT-LOOKUP BACKEND
+  als_db_name: &ALS_DB_NAME "account_lookup"
+  als_db_password: &ALS_DB_PASSWORD "OdonPianoX"
+  als_db_user: &ALS_DB_USER "account_lookup"
+  als_db_port: &ALS_DB_PORT 3306
+  ### FOR default
+  # als_db_host: &ALS_DB_HOST '$release_name-account-lookup-mysql'
+  ### FOR example-mojaloop-backend
+  als_db_host: &ALS_DB_HOST "backend-account-lookup-mysql"
+
+  ## CENTRAL-LEDGER BACKEND
+  cl_db_name: &CL_DB_NAME "central_ledger"
+  cl_db_password: &CL_DB_PASSWORD "oyMxgZChuu"
+  cl_db_user: &CL_DB_USER "central_ledger"
+  cl_db_port: &CL_DB_PORT 3306
+  ### FOR default
+  # cl_db_host: &CL_DB_HOST '$release_name-centralledger-mysql'
+  ### FOR example-mojaloop-backend
+  cl_db_host: &CL_DB_HOST "backend-centralledger-mysql"
+
+  ## KAFKA BACKEND
+  ### FOR default
+  # kafka_host: &KAFKA_HOST '$release_name-kafka'
+  ### FOR example-mojaloop-backend
+  kafka_host: &KAFKA_HOST "backend-kafka-headless"
+  kafka_port: &KAFKA_PORT 9092
+
+  ## BULK OBJECT STORE BACKEND
+  ### FOR default
+  # obj_mongo_host: &OBJSTORE_MONGO_HOST $release_name-centralledger-obj
+  ### FOR example-mojaloop-backend
+  obj_mongo_host: &OBJSTORE_MONGO_HOST backend-centralledger-obj
+  obj_mongo_port: &OBJSTORE_MONGO_PORT 27017
+  obj_mongo_user: &OBJSTORE_MONGO_USER mojaloop
+  obj_mongo_password: &OBJSTORE_MONGO_PASSWORD password
+  obj_mongo_database: &OBJSTORE_MONGO_DATABASE mlos
+  ### FOR default
+  # objstore_uri: &OBJSTORE_URI 'mongodb://mojaloop:password@$release_name-centralledger-obj:27017/mlos'
+  ### FOR example-mojaloop-backend
+  objstore_uri: &OBJSTORE_URI 'mongodb://mojaloop:password@backend-centralledger-obj:27017/mlos'
+
+  ## CENTRAL-EVEN-PROCESSOR Backend
+  ## FOR default
+  # cep_mongo_host: &CEP_MONGO_HOST '$release_name-cep-mongodb'
+  ## FOR example-mojaloop-backend
+  cep_mongo_host: &CEP_MONGO_HOST backend-cep-mongodb
+  cep_mongo_port: &CEP_MONGO_PORT 27017
+  cep_mongo_user: &CEP_MONGO_USER mojaloop
+  cep_mongo_password: &CEP_MONGO_PASSWORD password
+  cep_mongo_database: &CEP_MONGO_DATABASE mlos
+
+  ## MOJALOOP-TTK-SIMULATORS Backend
+  ### FOR default
+  # moja_ttk_sim_kafka_host: &MOJA_TTK_SIM_KAFKA_HOST "{{ .Release.Name }}-kafka-headless"
+  ### FOR example-mojaloop-backend
+  moja_ttk_sim_kafka_host: &MOJA_TTK_SIM_KAFKA_HOST "backend-kafka-headless"
+  moja_ttk_sim_kafka_port: &MOJA_TTK_SIM_KAFKA_PORT 9092
+  # The Redis Instance can be installed using the following command: helm -n <NAMESPACE> install backend ./example-mojaloop-backend --set "kafka.enabled=false" --set "centralledger-mysql.enabled=false" --set "account-lookup-mysql.enabled=false" --set "centralledger-obj.enabled=false" --set "cep-mongodb.enabled=false" --set "kafka-console.enabled=false" --set "ttksims-redis.enabled=true"
+  moja_ttk_sim_redis_host: &MOJA_TTK_SIM_REDIS_HOST backend-ttksims-redis-master
+  moja_ttk_sim_redis_port: &MOJA_TTK_SIM_REDIS_PORT 6379
+
+# Default values for central.
+# This is a YAML-formatted file.
+# Declare global configurations
+global: {}
+
+# Declare variables to be passed into your templates.
+
+central:
+  enabled: true
+
+  centralledger:
+    enabled: true
+
+    centralledger-service:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Log Configuration
+        log_level: info
+        log_transport: file
+
+      ingress:
+        enabled: true
+        ## @param ingress.pathType Ingress path type
+        ##
+        pathType: ImplementationSpecific
+        ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+        ##
+        apiVersion:
+        ## @param ingress.hostname Default host for the ingress record
+        ##
+        hostname: central-ledger.mojaloop.test
+        ## @param servicePort : port for the service
+        ##
+        servicePort: 80
+        ## @param ingress.path Default path for the ingress record
+        ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+        path: /
+        ## @param ingress.annotations Additional custom annotations for the ingress record
+        ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+        ##
+        annotations:
+        ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+        ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+        ## You can:
+        ##   - Use the `ingress.secrets` parameter to create this TLS secret
+        ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+        ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+        ##
+        tls: false
+        ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+        ##
+        certManager: false
+        ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+        ##
+        selfSigned: false
+        ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+        ## e.g:
+        ## extraHosts:
+        ##   - name: transfer-api-svc.local
+        ##     path: /
+        ##
+        extraHosts:
+        extraPaths:
+        extraTls:
+        secrets:
+        className: "nginx"
+        ##
+      resources: {}
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This also increases chances charts run on environments with little
+        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+        #  cpu: 100m
+        #  memory: 128Mi
+        # requests:
+        #  cpu: 100m
+        #  memory: 128Mi
+
+    centralledger-handler-transfer-prepare:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Log Configuration
+        log_level: info
+        log_transport: file
+
+    centralledger-handler-admin-transfer:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Log Configuration
+        log_level: info
+        log_transport: file
+
+    centralledger-handler-transfer-position:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Log Configuration
+        log_level: info
+        log_transport: file
+
+    centralledger-handler-transfer-get:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Log Configuration
+        log_level: info
+        log_transport: file
+
+    centralledger-handler-transfer-fulfil:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Log Configuration
+        log_level: info
+        log_transport: file
+
+    centralledger-handler-timeout:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Log Configuration
+        log_level: info
+        log_transport: file
+
+    mysql:
+      enabled: false
+
+    kafka:
+      enabled: false
+
+  centralsettlement:
+    centralsettlement-service:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+        db_type: 'mysql'
+        # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+        db_driver: 'mysql'
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Log config
+        log_level: info
+        log_transport: file
+
+      ingress:
+        enabled: true
+        ## @param ingress.pathType Ingress path type
+        ##
+        pathType: ImplementationSpecific
+        ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+        ##
+        apiVersion:
+        ## @param ingress.hostname Default host for the ingress record
+        ##
+        hostname: central-settlement-service.mojaloop.test
+        ## @param servicePort : port for the service
+        ##
+        servicePort: 80
+        ## @param ingress.path Default path for the ingress record
+        ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+        path: /
+        ## @param ingress.annotations Additional custom annotations for the ingress record
+        ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+        ##
+        annotations:
+        ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+        ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+        ## You can:
+        ##   - Use the `ingress.secrets` parameter to create this TLS secret
+        ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+        ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+        ##
+        tls: false
+        ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+        ##
+        certManager: false
+        ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+        ##
+        selfSigned: false
+        ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+        ## e.g:
+        ## extraHosts:
+        ##   - name: transfer-api-svc.local
+        ##     path: /
+        ##
+        extraHosts:
+        extraPaths:
+        extraTls:
+        secrets:
+        className: "nginx"
+
+    centralsettlement-handler-deferredsettlement:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+        db_type: 'mysql'
+        # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+        db_driver: 'mysql'
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Log config
+        log_level: info
+        log_transport: file
+
+    centralsettlement-handler-grosssettlement:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+        db_type: 'mysql'
+        # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+        db_driver: 'mysql'
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Log config
+        log_level: info
+        log_transport: file
+
+    centralsettlement-handler-rules:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+        db_type: 'mysql'
+        # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+        db_driver: 'mysql'
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Log config
+        log_level: info
+        log_transport: file
+
+  centraleventprocessor:
+    enabled: true
+    replicaCount: 1
+
+    config:
+      ## Kafka Configuration
+      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+      kafka_host: *KAFKA_HOST
+      kafka_port: *KAFKA_PORT
+
+      ## Mongo CEP Configuration
+      mongo_host: *CEP_MONGO_HOST
+      mongo_port: *CEP_MONGO_PORT
+      mongo_user: *CEP_MONGO_USER
+      mongo_password: *CEP_MONGO_PASSWORD
+      mongo_database: *CEP_MONGO_DATABASE
+
+      ## Log Levels
+      log_level: info
+      log_transport: file
+
+    mongodb:
+      enabled: false
+
+ml-api-adapter:
+  enabled: true
+
+  ml-api-adapter-service:
+    enabled: true
+    replicaCount: 1
+
+    config:
+      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+      kafka_host: *KAFKA_HOST
+      kafka_port: *KAFKA_PORT
+
+    ingress:
+      enabled: true
+      ## @param ingress.pathType Ingress path type
+      ##
+      pathType: ImplementationSpecific
+      ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+      ##
+      apiVersion:
+      ## @param ingress.hostname Default host for the ingress record
+      ##
+      hostname: ml-api-adapter.mojaloop.test
+      ## @param servicePort : port for the service
+      ##
+      servicePort: 80
+      ## @param ingress.path Default path for the ingress record
+      ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+      path: /
+      ## @param ingress.annotations Additional custom annotations for the ingress record
+      ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+      ##
+      annotations:
+      ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+      ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+      ## You can:
+      ##   - Use the `ingress.secrets` parameter to create this TLS secret
+      ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+      ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+      ##
+      tls: false
+      ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+      ##
+      certManager: false
+      ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+      ##
+      selfSigned: false
+      ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+      ## e.g:
+      ## extraHosts:
+      ##   - name: transfer-api-svc.local
+      ##     path: /
+      ##
+      extraHosts:
+      extraPaths:
+      extraTls:
+      secrets:
+      className: "nginx"
+
+  ml-api-adapter-handler-notification:
+    enabled: true
+    replicaCount: 1
+
+    config:
+      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+      kafka_host: *KAFKA_HOST
+      kafka_port: *KAFKA_PORT
+
+account-lookup-service:
+  enabled: true
+
+  account-lookup-service:
+    enabled: true
+    replicaCount: 1
+
+    config:
+      # Log config
+      log_level: 'info'
+      log_transport: 'file'
+
+      ## DB Configuration
+      db_host: *ALS_DB_HOST
+      db_port: *ALS_DB_PORT
+      db_user: *ALS_DB_USER
+      db_password: *ALS_DB_PASSWORD
+      db_database: *ALS_DB_NAME
+
+      # Thirdparty API Config
+      featureEnableExtendedPartyIdType: true
+
+    ingress:
+      enabled: true
+    ## @param ingress.pathType Ingress path type
+    ##
+      pathType: ImplementationSpecific
+    ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+    ##
+      apiVersion:
+    ## @param ingress.hostname Default host for the ingress record
+    ##
+      hostname: account-lookup-service.mojaloop.test
+    ## @param servicePort : port for the service
+    ##
+      servicePort: 80
+    ## @param ingress.path Default path for the ingress record
+    ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+      path: /
+    ## @param ingress.annotations Additional custom annotations for the ingress record
+    ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+    ##
+      annotations:
+    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+    ## You can:
+    ##   - Use the `ingress.secrets` parameter to create this TLS secret
+    ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+    ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+    ##
+      tls: false
+    ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+    ##
+      certManager: false
+    ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+    ##
+      selfSigned: false
+    ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+    ## e.g:
+    ## extraHosts:
+    ##   - name: transfer-api-svc.local
+    ##     path: /
+    ##
+      extraHosts:
+      extraPaths:
+      extraTls:
+      secrets:
+      className: "nginx"
+      ##
+      #  - secretName: chart-example-tls
+      #    hosts:
+      #      - chart-example.local
+
+  account-lookup-service-admin:
+    enabled: true
+    replicaCount: 1
+
+    config:
+      # Log config
+      log_level: 'info'
+      log_transport: 'file'
+
+      ## DB Configuration
+      db_host: *ALS_DB_HOST
+      db_port: *ALS_DB_PORT
+      db_user: *ALS_DB_USER
+      db_password: *ALS_DB_PASSWORD
+      db_database: *ALS_DB_NAME
+
+      # Thirdparty API Config
+      featureEnableExtendedPartyIdType: true
+
+    ingress:
+      enabled: true
+      ## @param ingress.pathType Ingress path type
+      ##
+      pathType: ImplementationSpecific
+      ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+      ##
+      apiVersion:
+      ## @param ingress.hostname Default host for the ingress record
+      ##
+      hostname: account-lookup-service-admin.mojaloop.test
+      ## @param servicePort : port for the service
+      ##
+      servicePort: 80
+      ## @param ingress.path Default path for the ingress record
+      ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+      path: /
+      ## @param ingress.annotations Additional custom annotations for the ingress record
+      ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+      ##
+      annotations:
+      ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+      ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+      ## You can:
+      ##   - Use the `ingress.secrets` parameter to create this TLS secret
+      ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+      ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+      ##
+      tls: false
+      ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+      ##
+      certManager: false
+      ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+      ##
+      selfSigned: false
+      ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+      ## e.g:
+      ## extraHosts:
+      ##   - name: transfer-api-svc.local
+      ##     path: /
+      ##
+      extraHosts:
+      extraPaths:
+      extraTls:
+      secrets:
+      className: "nginx"
+      ##
+      #  - secretName: chart-example-tls
+      #    hosts:
+      #      - chart-example.local
+
+  als-oracle-pathfinder:
+    enabled: false
+    replicaCount: 1
+
+    config:
+      ## DB
+      db:
+        central_ledger:
+          host: *CL_DB_HOST
+          port: *CL_DB_PORT
+          database: *CL_DB_NAME
+          user: *CL_DB_USER
+          password: *CL_DB_PASSWORD
+        account_lookup:
+          host: *ALS_DB_HOST
+          port: *ALS_DB_PORT
+          database: *ALS_DB_NAME
+          user: *ALS_DB_USER
+          password: *ALS_DB_PASSWORD
+
+      ## LOG LEVEL
+      log_level: 'info'
+
+    ingress:
+      enabled: true
+    ## @param ingress.pathType Ingress path type
+    ##
+      pathType: ImplementationSpecific
+    ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+    ##
+      apiVersion:
+    ## @param ingress.hostname Default host for the ingress record
+    ##
+      hostname: als-oracle-pathfinder.mojaloop.test
+    ## @param servicePort : port for the service
+    ##
+      servicePort: 80
+    ## @param ingress.path Default path for the ingress record
+    ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+      path: /
+    ## @param ingress.annotations Additional custom annotations for the ingress record
+    ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+    ##
+      annotations:
+    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+    ## You can:
+    ##   - Use the `ingress.secrets` parameter to create this TLS secret
+    ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+    ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+    ##
+      tls: false
+    ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+    ##
+      certManager: false
+    ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+    ##
+      selfSigned: false
+    ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+    ## e.g:
+    ## extraHosts:
+    ##   - name: transfer-api-svc.local
+    ##     path: /
+    ##
+      extraHosts:
+      extraPaths:
+      extraTls:
+      secrets:
+      className: "nginx"
+      ##
+
+  mysql:
+    enabled: false
+
+quoting-service:
+  enabled: true
+  replicaCount: 1
+
+  config:
+    ## DB Configuration
+    db_host: *CL_DB_HOST
+    db_port: *CL_DB_PORT
+    db_user: *CL_DB_USER
+    db_password: *CL_DB_PASSWORD
+    db_database: *CL_DB_NAME
+
+    log_level: 'info'
+    log_transport: 'file'
+
+    ## Kafka Configuration (used for sidecar)
+    # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+    kafka_host: '$release_name-kafka'
+    kafka_port: 9092
+
+  ingress:
+    enabled: true
+    ## @param ingress.pathType Ingress path type
+    ##
+    pathType: ImplementationSpecific
+    ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+    ##
+    apiVersion:
+    ## @param ingress.hostname Default host for the ingress record
+    ##
+    hostname: quoting-service.mojaloop.test
+    ## @param servicePort : port for the service
+    ##
+    servicePort: 80
+    ## @param ingress.path Default path for the ingress record
+    ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+    path: /
+    ## @param ingress.annotations Additional custom annotations for the ingress record
+    ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+    ##
+    annotations:
+    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+    ## You can:
+    ##   - Use the `ingress.secrets` parameter to create this TLS secret
+    ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+    ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+    ##
+    tls: false
+    ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+    ##
+    certManager: false
+    ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+    ##
+    selfSigned: false
+    ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+    ## e.g:
+    ## extraHosts:
+    ##   - name: transfer-api-svc.local
+    ##     path: /
+    ##
+    extraHosts:
+    extraPaths:
+    extraTls:
+    secrets:
+    className: "nginx"
+
+transaction-requests-service:
+  enabled: true
+  replicaCount: 1
+
+  config:
+    log_level: info
+    log_transport: file
+
+  ingress:
+    enabled: true
+    ## @param ingress.pathType Ingress path type
+    ##
+    pathType: ImplementationSpecific
+    ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+    ##
+    apiVersion:
+    ## @param ingress.hostname Default host for the ingress record
+    ##
+    hostname: transaction-request-service.mojaloop.test
+    ## @param servicePort : port for the service
+    ##
+    servicePort: 80
+    ## @param ingress.path Default path for the ingress record
+    ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+    path: /
+    ## @param ingress.annotations Additional custom annotations for the ingress record
+    ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+    ##
+    annotations:
+    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+    ## You can:
+    ##   - Use the `ingress.secrets` parameter to create this TLS secret
+    ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+    ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+    ##
+    tls: false
+    ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+    ##
+    certManager: false
+    ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+    ##
+    selfSigned: false
+    ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+    ## e.g:
+    ## extraHosts:
+    ##   - name: transfer-api-svc.local
+    ##     path: /
+    ##
+    extraHosts:
+    extraPaths:
+    extraTls:
+    secrets:
+    className: "nginx"
+
+thirdparty:
+  enabled: true
+  auth-svc:
+    enabled: true
+    
+    ingress:
+      ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
+      ##
+      enabled: false
+      ## @param ingress.pathType Ingress path type
+      ##
+      pathType: ImplementationSpecific
+      ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+      ##
+      apiVersion:
+      ## @param ingress.hostname Default host for the ingress record
+      ##
+      hostname: auth-service.mojaloop.test
+      ## @param ingress.path Default path for the ingress record
+      ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+      ##
+      path: /
+      ## @param ingress.annotations Additional custom annotations for the ingress record
+      ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+      ##
+      annotations: {}
+      ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+      ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+      ## You can:
+      ##   - Use the `ingress.secrets` parameter to create this TLS secret
+      ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+      ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+      ##
+      tls: false
+      ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+      ##
+      certManager: false
+      ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+      ##
+      selfSigned: false
+      ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+      ## e.g:
+      ## extraHosts:
+      ##   - name: transfer-api-svc.local
+      ##     path: /
+      ##
+      extraHosts: []
+      ## @param ingress.extraPaths An array with additional arbitrary paths that may need to be added to the ingress under the main host
+      ## e.g:
+      ## extraPaths:
+      ## - path: /*
+      ##   backend:
+      ##     serviceName: ssl-redirect
+      ##     servicePort: use-annotation
+      ##
+      extraPaths: []
+      ## @param ingress.extraTls TLS configuration for additional hostname(s) to be covered with this ingress record
+      ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+      ## e.g:
+      ## extraTls:
+      ## - hosts:
+      ##     - transfer-api-svc.local
+      ##   secretName: transfer-api-svc.local-tls
+      ##
+      extraTls: []
+      ## @param ingress.secrets Custom TLS certificates as secrets
+      ## NOTE: 'key' and 'certificate' are expected in PEM format
+      ## NOTE: 'name' should line up with a 'secretName' set further up
+      ## If it is not set and you're using cert-manager, this is unneeded, as it will create a secret for you with valid certificates
+      ## If it is not set and you're NOT using cert-manager either, self-signed certificates will be created valid for 365 days
+      ## It is also possible to create and manage the certificates outside of this helm chart
+      ## Please see README.md for more information
+      ## e.g:
+      ## secrets:
+      ##   - name: transfer-api-svc.local-tls
+      ##     key: |-
+      ##       -----BEGIN RSA PRIVATE KEY-----
+      ##       ...
+      ##       -----END RSA PRIVATE KEY-----
+      ##     certificate: |-
+      ##       -----BEGIN CERTIFICATE-----
+      ##       ...
+      ##       -----END CERTIFICATE-----
+      ##
+      secrets: []
+      className: "nginx"
+
+  consent-oracle:
+    enabled: true
+
+    ingress:
+      ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
+      ##
+      enabled: false
+      ## @param ingress.pathType Ingress path type
+      ##
+      pathType: ImplementationSpecific
+      ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+      ##
+      apiVersion:
+      ## @param ingress.hostname Default host for the ingress record
+      ##
+      hostname: consent-oracle.mojaloop.test
+      ## @param ingress.path Default path for the ingress record
+      ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+      ##
+      path: /
+      ## @param ingress.annotations Additional custom annotations for the ingress record
+      ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+      ##
+      annotations: {}
+      ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+      ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+      ## You can:
+      ##   - Use the `ingress.secrets` parameter to create this TLS secret
+      ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+      ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+      ##
+      tls: false
+      ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+      ##
+      certManager: false
+      ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+      ##
+      selfSigned: false
+      ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+      ## e.g:
+      ## extraHosts:
+      ##   - name: transfer-api-svc.local
+      ##     path: /
+      ##
+      extraHosts: []
+      ## @param ingress.extraPaths An array with additional arbitrary paths that may need to be added to the ingress under the main host
+      ## e.g:
+      ## extraPaths:
+      ## - path: /*
+      ##   backend:
+      ##     serviceName: ssl-redirect
+      ##     servicePort: use-annotation
+      ##
+      extraPaths: []
+      ## @param ingress.extraTls TLS configuration for additional hostname(s) to be covered with this ingress record
+      ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+      ## e.g:
+      ## extraTls:
+      ## - hosts:
+      ##     - transfer-api-svc.local
+      ##   secretName: transfer-api-svc.local-tls
+      ##
+      extraTls: []
+      ## @param ingress.secrets Custom TLS certificates as secrets
+      ## NOTE: 'key' and 'certificate' are expected in PEM format
+      ## NOTE: 'name' should line up with a 'secretName' set further up
+      ## If it is not set and you're using cert-manager, this is unneeded, as it will create a secret for you with valid certificates
+      ## If it is not set and you're NOT using cert-manager either, self-signed certificates will be created valid for 365 days
+      ## It is also possible to create and manage the certificates outside of this helm chart
+      ## Please see README.md for more information
+      ## e.g:
+      ## secrets:
+      ##   - name: transfer-api-svc.local-tls
+      ##     key: |-
+      ##       -----BEGIN RSA PRIVATE KEY-----
+      ##       ...
+      ##       -----END RSA PRIVATE KEY-----
+      ##     certificate: |-
+      ##       -----BEGIN CERTIFICATE-----
+      ##       ...
+      ##       -----END CERTIFICATE-----
+      ##
+      secrets: []
+      className: "nginx"
+
+  tp-api-svc:
+    enabled: true
+
+    ingress:
+      ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
+      ##
+      enabled: false
+      ## @param ingress.pathType Ingress path type
+      ##
+      pathType: ImplementationSpecific
+      ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+      ##
+      apiVersion:
+      ## @param ingress.hostname Default host for the ingress record
+      ##
+      hostname: tp-api-svc.mojaloop.test
+      ## @param ingress.path Default path for the ingress record
+      ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+      ##
+      path: /
+      ## @param ingress.annotations Additional custom annotations for the ingress record
+      ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+      ##
+      annotations: {}
+      ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+      ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+      ## You can:
+      ##   - Use the `ingress.secrets` parameter to create this TLS secret
+      ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+      ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+      ##
+      tls: false
+      ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+      ##
+      certManager: false
+      ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+      ##
+      selfSigned: false
+      ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+      ## e.g:
+      ## extraHosts:
+      ##   - name: transfer-api-svc.local
+      ##     path: /
+      ##
+      extraHosts: []
+      ## @param ingress.extraPaths An array with additional arbitrary paths that may need to be added to the ingress under the main host
+      ## e.g:
+      ## extraPaths:
+      ## - path: /*
+      ##   backend:
+      ##     serviceName: ssl-redirect
+      ##     servicePort: use-annotation
+      ##
+      extraPaths: []
+      ## @param ingress.extraTls TLS configuration for additional hostname(s) to be covered with this ingress record
+      ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+      ## e.g:
+      ## extraTls:
+      ## - hosts:
+      ##     - transfer-api-svc.local
+      ##   secretName: transfer-api-svc.local-tls
+      ##
+      extraTls: []
+      ## @param ingress.secrets Custom TLS certificates as secrets
+      ## NOTE: 'key' and 'certificate' are expected in PEM format
+      ## NOTE: 'name' should line up with a 'secretName' set further up
+      ## If it is not set and you're using cert-manager, this is unneeded, as it will create a secret for you with valid certificates
+      ## If it is not set and you're NOT using cert-manager either, self-signed certificates will be created valid for 365 days
+      ## It is also possible to create and manage the certificates outside of this helm chart
+      ## Please see README.md for more information
+      ## e.g:
+      ## secrets:
+      ##   - name: transfer-api-svc.local-tls
+      ##     key: |-
+      ##       -----BEGIN RSA PRIVATE KEY-----
+      ##       ...
+      ##       -----END RSA PRIVATE KEY-----
+      ##     certificate: |-
+      ##       -----BEGIN CERTIFICATE-----
+      ##       ...
+      ##       -----END CERTIFICATE-----
+      ##
+      secrets: []
+      className: "nginx"
+
+simulator:
+  enabled: true
+
+  ingress:
+    enabled: true
+    ## @param ingress.pathType Ingress path type
+    ##
+    pathType: ImplementationSpecific
+    ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+    ##
+    apiVersion:
+    ## @param ingress.hostname Default host for the ingress record
+    ##
+    hostname: moja-simulator.mojaloop.test
+    ## @param servicePort : port for the service
+    ##
+    servicePort: 80
+    ## @param ingress.path Default path for the ingress record
+    ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+    path: /
+    ## @param ingress.annotations Additional custom annotations for the ingress record
+    ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+    ##
+    annotations:
+    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+    ## You can:
+    ##   - Use the `ingress.secrets` parameter to create this TLS secret
+    ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+    ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+    ##
+    tls: false
+    ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+    ##
+    certManager: false
+    ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+    ##
+    selfSigned: false
+    ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+    ## e.g:
+    ## extraHosts:
+    ##   - name: transfer-api-svc.local
+    ##     path: /
+    ##
+    extraHosts:
+    extraPaths:
+    extraTls:
+    secrets:
+    className: "nginx"
+  ##
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+mojaloop-simulator:
+  enabled: true
+
+  simulators:
+    ## Every key added to this `simulators` object will be a simulator that takes on the default
+    ## config below. The default is deliberately left empty so nothing is deployed by default.
+    # payerfsp: {}
+    # payeefsp: {}
+    ## Default FSPs for Mojaloop Postman Scripts
+    payerfsp:
+      ingress:
+        enabled: true
+        hosts:
+          -   sim-payerfsp.mojaloop.test
+
+    payeefsp:
+      ingress:
+        enabled: true
+        hosts:
+          -   sim-payeefsp.mojaloop.test
+
+    testfsp1:
+      ingress:
+        enabled: true
+        hosts:
+          -   sim-testfsp1.mojaloop.test
+
+    testfsp2:
+      ingress:
+        enabled: true
+        hosts:
+          -   sim-testfsp2.mojaloop.test
+
+    testfsp3:
+      ingress:
+        enabled: true
+        hosts:
+          -   sim-testfsp3.mojaloop.test
+
+    testfsp4:
+      ingress:
+        enabled: true
+        hosts:
+          -   sim-testfsp4.mojaloop.test
+  ingress:
+    enabled: false
+    # If you're using nginx ingress controller >= v0.22.0 set this to (/|$)(.*). Ensure that you set the `"nginx.ingress.kubernetes.io/rewrite-target": "/$2"`
+    # If you're using nginx ingress controller < v0.22.0 set this to an empty string or "/". Ensure that you set the `"nginx.ingress.kubernetes.io/rewrite-target": "/"`
+    # This affects the way your rewrite target will work.
+    # For more information see "Breaking changes" here:
+    # https://github.com/kubernetes/ingress-nginx/blob/master/Changelog.md#0220
+
+    ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+    # nginx.ingress.kubernetes.io/rewrite-target: '/'
+    # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+    ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+    # kubernetes.io/ingress.class: nginx
+    ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
+    # kubernetes.io/tls-acme: "true""
+
+    ## nginx ingress controller >= v0.22.0
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+    ingressPathRewriteRegex: (/|$)(.*)
+
+    ## nginx ingress controller < v0.22.0
+    # annotations:
+    #   nginx.ingress.kubernetes.io/rewrite-target: '/'
+    # ingressPathRewriteRegex: "/"
+
+  # If you enable JWS validation and intend to communicate via a switch you will almost certainly
+  # want to put your switch JWS public key in this array. The name of the property in this object
+  # will correspond directly to the name of the signing key (e.g., in the example below,
+  # `switch.pem`). Do not include the `.pem` extension, this will be added for you. The scheme
+  # adapter will use the FSPIOP-Source header content to identify the relevant signing key to use.
+  # The below example assumes your switch will use `FSPIOP-Source: switch`. If instead, for example,
+  # your switch is using `FSPIOP-Source: peter` you will need a property `peter` in the following
+  # object. Do not add the public keys of your simulators to this object. Instead, put them in
+  # `mojaloop-simulator.simulators.$yourSimName.config.schemeAdapter.secrets.jws.publicKey`.
+  sharedJWSPubKeys:
+    # switch: |-
+    #   -----BEGIN PUBLIC KEY-----
+    #   blah blah blah
+    #   -----END PUBLIC KEY-----
+
+mojaloop-ttk-simulators:
+  enabled: true
+
+  mojaloop-ttk-sim1-svc:
+    enabled: true
+
+    sdk-scheme-adapter: &MOJA_TTK_SIM_SDK
+      sdk-scheme-adapter-api-svc:
+        ingress:
+          ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
+          ##
+          enabled: false
+      
+        kafka:
+          host: *MOJA_TTK_SIM_KAFKA_HOST
+          port: *MOJA_TTK_SIM_KAFKA_PORT
+
+        redis:
+          host: *MOJA_TTK_SIM_REDIS_HOST
+          port: *MOJA_TTK_SIM_REDIS_PORT
+
+      sdk-scheme-adapter-dom-evt-handler:
+        ingress:
+          ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
+          ##
+          enabled: false
+
+        kafka:
+          host: *MOJA_TTK_SIM_KAFKA_HOST
+          port: *MOJA_TTK_SIM_KAFKA_PORT
+
+        redis:
+          host: *MOJA_TTK_SIM_REDIS_HOST
+          port: *MOJA_TTK_SIM_REDIS_PORT
+
+      sdk-scheme-adapter-cmd-evt-handler:
+        ingress:
+          ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
+          ##
+          enabled: false
+
+        kafka:
+          host: *MOJA_TTK_SIM_KAFKA_HOST
+          port: *MOJA_TTK_SIM_KAFKA_PORT
+
+        redis:
+          host: *MOJA_TTK_SIM_REDIS_HOST
+          port: *MOJA_TTK_SIM_REDIS_PORT
+
+    ml-testing-toolkit:
+      ml-testing-toolkit-backend:
+        ingress:
+          enabled: true
+          hosts:
+            specApi:
+              host: 'ttksim1-specapi.mojaloop.test'
+            adminApi:
+              host: 'ttksim1.mojaloop.test'
+
+      ml-testing-toolkit-frontend:
+        ingress:
+          enabled: true
+          hosts:
+            ui:
+              host: ttksim1.mojaloop.test
+        config:
+          API_BASE_URL: 'http://ttksim1.mojaloop.test'
+
+  mojaloop-ttk-sim2-svc:
+    enabled: true
+
+    sdk-scheme-adapter: *MOJA_TTK_SIM_SDK
+
+    ml-testing-toolkit:
+      ml-testing-toolkit-backend:
+        ingress:
+          enabled: true
+          hosts:
+            specApi:
+              host: 'ttksim2-specapi.mojaloop.test'
+            adminApi:
+              host: 'ttksim2.mojaloop.test'
+
+      ml-testing-toolkit-frontend:
+        ingress:
+          enabled: true
+          hosts:
+            ui:
+              host: 'ttksim2.mojaloop.test'
+        config:
+          API_BASE_URL: 'http://ttksim2.mojaloop.test'
+
+  mojaloop-ttk-sim3-svc:
+    enabled: true
+
+    sdk-scheme-adapter: *MOJA_TTK_SIM_SDK
+
+    ml-testing-toolkit:
+      ml-testing-toolkit-backend:
+        ingress:
+          enabled: true
+          hosts:
+            specApi:
+              host: 'ttksim3-specapi.mojaloop.test'
+            adminApi:
+              host: 'ttksim3.mojaloop.test'
+
+      ml-testing-toolkit-frontend:
+        ingress:
+          enabled: true
+          hosts:
+            ui:
+              host: 'ttksim3.mojaloop.test'
+        config:
+          API_BASE_URL: 'http://ttksim3.mojaloop.test'
+
+mojaloop-bulk:
+  enabled: true
+
+  bulk-api-adapter:
+
+    bulk-api-adapter-service:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## MongoDB Configuration for Object Store
+        objstore_uri: *OBJSTORE_URI
+
+        log_level: 'info'
+
+      ingress:
+        enabled: true
+        ## @param ingress.pathType Ingress path type
+        ##
+        pathType: ImplementationSpecific
+        ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+        ##
+        apiVersion:
+        ## @param ingress.hostname Default host for the ingress record
+        ##
+        hostname: bulk-api-adapter.mojaloop.test
+        ## @param servicePort : port for the service
+        ##
+        servicePort: 80
+        ## @param ingress.path Default path for the ingress record
+        ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+        path: /
+        ## @param ingress.annotations Additional custom annotations for the ingress record
+        ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+        ##
+        annotations:
+        ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+        ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+        ## You can:
+        ##   - Use the `ingress.secrets` parameter to create this TLS secret
+        ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+        ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+        ##
+        tls: false
+        ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+        ##
+        certManager: false
+        ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+        ##
+        selfSigned: false
+        ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+        ## e.g:
+        ## extraHosts:
+        ##   - name: transfer-api-svc.local
+        ##     path: /
+        ##
+        extraHosts:
+        extraPaths:
+        extraTls:
+        secrets:
+        className: "nginx"
+        ##
+      resources: {}
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This also increases chances charts run on environments with little
+        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+      #  cpu: 100m
+      #  memory: 128Mi
+      # requests:
+      #  cpu: 100m
+      #  memory: 128Mi
+
+    bulk-api-adapter-handler-notification:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## MongoDB Configuration for Object Store
+        objstore_uri: *OBJSTORE_URI
+
+        log_level: 'info'
+
+  bulk-centralledger:
+
+    cl-handler-bulk-transfer-prepare:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## MongoDB Configuration for Object Store
+        objstore_disabled: false
+        objstore_uri: *OBJSTORE_URI
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Node Configuration
+        log_level: 'info'
+
+    cl-handler-bulk-transfer-fulfil:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## MongoDB Configuration for Object Store
+        objstore_disabled: false
+        objstore_uri: *OBJSTORE_URI
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Node Configuration
+        log_level: 'info'
+
+    cl-handler-bulk-transfer-processing:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## MongoDB Configuration for Object Store
+        objstore_disabled: false
+        objstore_uri: *OBJSTORE_URI
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Node Configuration
+        log_level: 'info'
+
+    cl-handler-bulk-transfer-get:
+      enabled: true
+      replicaCount: 1
+
+      config:
+        ## DB Configuration
+        db_host: *CL_DB_HOST
+        db_port: *CL_DB_PORT
+        db_user: *CL_DB_USER
+        db_password: *CL_DB_PASSWORD
+        db_database: *CL_DB_NAME
+
+        ## MongoDB Configuration for Object Store
+        objstore_disabled: false
+        objstore_uri: *OBJSTORE_URI
+
+        ## Kafka Configuration
+        # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+        kafka_host: *KAFKA_HOST
+        kafka_port: *KAFKA_PORT
+
+        ## Node Configuration
+        log_level: 'info'
+
+  # Declare variables to be passed into your templates.
+  mongodb:
+    enabled: false
+
+ml-testing-toolkit:
+  enabled: true
+
+  ml-testing-toolkit-backend:
+    ingress:
+      enabled: true
+      hosts:
+        specApi:
+          host: testing-toolkit-specapi.mojaloop.test
+        adminApi:
+          host: testing-toolkit.mojaloop.test
+
+  ml-testing-toolkit-frontend:
+    ingress:
+      enabled: true
+      hosts:
+        ui:
+          host: testing-toolkit.mojaloop.test
+    config:
+      API_BASE_URL: http://testing-toolkit.mojaloop.test
+
+ml-ttk-posthook-setup:
+  postInstallHook:
+    enabled: false
+    weight: -5
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v14.1.0.zip
+    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-14.1.0/collections/hub/provisioning
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: Standard Provisioning Collection
+    environmentName: example.mojaloop.test@v14.1.0
+
+ml-ttk-posthook-tests:
+  postInstallHook:
+    enabled: false
+    weight: -4
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: *ttkGitUrl
+    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-14.1.0/collections/hub/golden_path
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: GP Tests
+    environmentName: example.mojaloop.test@v14.1.0
+
+ml-ttk-cronjob-tests:
+  scheduling:
+    enabled: false
+    ## Note: First Cronjob may fail as the Hub setup & Sim onboarding may not be completed. These must be run either via Post-hooks or via running `Helm test`.
+    ## cronSchedule format as follows:
+    ## Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#example
+    ## ┌───────────── minute (0 - 59)
+    ## │ ┌───────────── hour (0 - 23)
+    ## │ │ ┌───────────── day of the month (1 - 31)
+    ## │ │ │ ┌───────────── month (1 - 12)
+    ## │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday;
+    ## │ │ │ │ │                                   7 is also Sunday on some systems)
+    ## │ │ │ │ │
+    ## │ │ │ │ │
+    ## * * * * *
+    cronSchedule: '0 8 * * *'
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: *ttkGitUrl
+    testCasesPathInZip: *ttkGitPathGP
+
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: GP CronJob
+    environmentName: example.mojaloop.test@v14.1.0
+
+ml-ttk-test-setup:
+  tests:
+    enabled: true
+    weight: -7
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: *ttkGitUrl
+    testCasesPathInZip: *ttkGitPathSetup
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: Standard Provisioning Collection
+    environmentName: example.mojaloop.test@v14.1.0
+
+ml-ttk-test-val-gp:
+  tests:
+    enabled: true
+    weight: -6
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: *ttkGitUrl
+    testCasesPathInZip: *ttkGitPathGP
+
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: GP Tests
+    environmentName: example.mojaloop.test@v14.1.0
+
+ml-ttk-test-val-bulk:
+  tests:
+    enabled: true
+    weight: -5
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: *ttkGitUrl
+    testCasesPathInZip: testing-toolkit-test-cases-14.1.0/collections/hub/other_tests/bulk_transfers
+
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: Bulk Tests
+    environmentName: example.mojaloop.test@v14.1.0
+
+ml-ttk-test-setup-tp:
+  tests:
+    enabled: true
+    weight: -4
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: *ttkGitUrl
+    testCasesPathInZip: testing-toolkit-test-cases-14.1.0/collections/hub/provisioning_thirdparty
+
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: Thirdparty Provisioning Collection
+    environmentName: example.mojaloop.test@v14.1.0
+
+
+ml-ttk-test-val-tp:
+  tests:
+    enabled: true
+    weight: -3
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: *ttkGitUrl
+    testCasesPathInZip: testing-toolkit-test-cases-14.1.0/collections/hub/thirdparty
+
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: Thirdparty Tests
+    environmentName: example.mojaloop.test@v14.1.0
+
+ml-ttk-test-setup-sdk-bulk:
+  tests:
+    enabled: true
+    weight: -2
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: *ttkGitUrl
+    testCasesPathInZip: testing-toolkit-test-cases-14.1.0/collections/hub/provisioning_sdkbulk
+
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: SDK Bulk Provisioning Collection
+    environmentName: example.mojaloop.test@v14.1.0
+
+ml-ttk-test-val-sdk-bulk:
+  tests:
+    enabled: true
+    weight: -1
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: *ttkGitUrl
+    testCasesPathInZip: testing-toolkit-test-cases-14.1.0/collections/hub/sdk-bulk
+
+    ttkBackendURL: http://$release_name-ttksim1-ttk-backend:5050
+    testSuiteName: SDK Bulk Tests
+    environmentName: example.mojaloop.test@v14.1.0
