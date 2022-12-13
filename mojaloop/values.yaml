@@ -52,7 +52,10 @@ CONFIG:
   cep_mongo_database: &CEP_MONGO_DATABASE mlos
 
   ## MOJALOOP-TTK-SIMULATORS Backend
+  ### FOR default
   moja_ttk_sim_kafka_host: &MOJA_TTK_SIM_KAFKA_HOST "{{ .Release.Name }}-kafka-headless"
+  ### FOR example-mojaloop-backend
+  # moja_ttk_sim_kafka_host: &MOJA_TTK_SIM_KAFKA_HOST "backend-kafka-headless"
   moja_ttk_sim_kafka_port: &MOJA_TTK_SIM_KAFKA_PORT 9092
   # The Redis Instance can be installed using the following command: helm -n <NAMESPACE> install backend ./example-mojaloop-backend --set "kafka.enabled=false" --set "centralledger-mysql.enabled=false" --set "account-lookup-mysql.enabled=false" --set "centralledger-obj.enabled=false" --set "cep-mongodb.enabled=false" --set "kafka-console.enabled=false" --set "ttksims-redis.enabled=true"
   moja_ttk_sim_redis_host: &MOJA_TTK_SIM_REDIS_HOST backend-ttksims-redis-master
@@ -3450,6 +3453,7 @@ central:
         #  memory: 128Mi
 
   centraleventprocessor:
+    enabled: true
     replicaCount: 1
     image:
       repository: mojaloop/central-event-processor
@@ -5186,8 +5190,8 @@ quoting-service:
 
     ## Kafka Configuration (used for sidecar)
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-    kafka_host: '$release_name-kafka'
-    kafka_port: 9092
+    kafka_host: *KAFKA_HOST
+    kafka_port: *KAFKA_PORT
 
     error_handling:
       include_cause_extension: false
