@@ -2,7 +2,7 @@ apiVersion: v2
 description: Example Helm chart for mojaloop backend dependencies
 name: example-mojaloop-backend
 version: 14.1.0
-appVersion: "mysql: 9.4.1; kafka: 19.0.2; mongodb: 13.3.1; redis:17.3.7; kowl:2.3.1"
+appVersion: "nginx: 4.4.2 ; mysql: 9.4.1; kafka: 19.0.2; mongodb: 13.3.1; redis:17.3.7"
 home: http://mojaloop.io
 icon: http://mojaloop.io/images/logo.png
 sources:
@@ -13,7 +13,19 @@ maintainers:
     email: miguel.debarros@modusbox.com
   - name: Vijay Kumar Guthi
     email: vijaya.guthi@modusbox.com
+  - name: Tom Daly
+    email: tomd@crosslaketech.com
 dependencies:
+  ## nginx ingress controller
+  - name: ingress-nginx 
+    alias: nginx 
+    condition: nginx.enabled
+    repository: https://kubernetes.github.io/ingress-nginx
+    tags: 
+      - dependency
+      - backend
+      - nginx 
+    version: 4.4.2
   ## Kafka backend
   - name: kafka
     alias: kafka
@@ -40,8 +52,8 @@ dependencies:
     version: 9.4.1
   ## Bulk backend
   - name: mongodb
-    alias: centralledger-obj
-    condition: centralledger-obj.enabled
+    alias: cl-mongodb
+    condition: cl-mongodb.enabled
     repository: https://charts.bitnami.com/bitnami
     tags:
       - mojaloop
