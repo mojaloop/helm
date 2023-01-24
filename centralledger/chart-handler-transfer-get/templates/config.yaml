@@ -11,6 +11,15 @@ metadata:
 data:
   default.json: {{ (tpl (.Files.Get "configs/default.json") . ) | quote }}
   knexfile.js: {{ (tpl (.Files.Get "configs/knexfile.js") . ) | quote }}
+  {{- if .Values.rules_settlement_model }}
+  {{- if (typeIs "string" .Values.rules_settlement_model) }}
+  rules_settlement_model.json: {{ .Values.rules_settlement_model | quote }}
+  {{- else }}
+  rules_settlement_model.json: {{ .Values.rules_settlement_model | toPrettyJson | quote }}
+  {{- end }}
+  {{- else }}
+  rules_settlement_model.json: "[]"
+  {{- end }}
 
 {{- if .Values.sidecar.enabled }}
 ---
