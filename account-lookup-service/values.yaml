@@ -71,6 +71,7 @@ account-lookup-service:
       generateTimeout: 30000
 
     ## DB Configuration
+    db_type: mysql
     db_driver: mysql
     db_host: mysqldb
     db_port: 3306
@@ -280,6 +281,7 @@ account-lookup-service-admin:
       generateTimeout: 30000
 
     ## DB Configuration
+    db_type: mysql    
     db_driver: mysql
     db_host: mysqldb
     db_port: 3306
@@ -687,89 +689,4 @@ als-oracle-pathfinder:
     #  cpu: 100m
   #  memory: 128Mi
 
-  ## Persist data to a persitent volume
-  persistence:
-    enabled: false
-    ## If defined, storageClassName: <storageClass>
-    ## If set to "-", storageClassName: "", which disables dynamic provisioning
-    ## If undefined (the default) or set to null, no storageClassName spec is
-    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-    ##   GKE, AWS & OpenStack)
-    ##
-    # storageClass: "-"
-    accessMode: ReadWriteOnce
-    size: 8Gi
-
-  ## Node labels for pod assignment
-  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-
-  ## Pod annotations
-  ## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations: {}
-
-  ## Tolerations labels for pod assignment
-  ## Allow the scheduling on tainted nodes (requires Kubernetes >= 1.6)
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
-
-  ## Configure resource requests and limits
-  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-  ##
-  # resources:
-  #  requests:
-  #    memory: 256Mi
-  #    cpu: 100m
-
-  ## Configure the following values below if required
-  #   performance_schema=ON
-  #   max_connections=999
-  #   max_user_connections=999
-  #   thread_cache_size=999
-  configFiles:
-    node.cnf: |
-      [client]
-      default-character-set=utf8mb4
-
-      [mysql]
-      default-character-set=utf8mb4
-
-      [mysqld]
-      collation-server = utf8mb4_unicode_ci
-      init-connect='SET NAMES utf8mb4'
-      character-set-server = utf8mb4
-      datadir=/var/lib/mysql
-      default_storage_engine=InnoDB
-      binlog_format=ROW
-      innodb_flush_log_at_trx_commit  = 1
-      innodb_flush_method             = O_DIRECT
-      innodb_file_per_table           = 1
-      innodb_autoinc_lock_mode=2
-      bind_address = 0.0.0.0
-      wsrep_slave_threads=2
-      wsrep_cluster_address=gcomm://
-      wsrep_provider=/usr/lib/galera3/libgalera_smm.so
-      wsrep_cluster_name=galera
-      wsrep_sst_method=xtrabackup-v2
-      pxc_strict_mode=DISABLED
-      max_connections=999
-      max_user_connections=994
-      thread_cache_size=999
-  ## When set to true will create sidecar for `prom/mysqld-exporter`
-  ## metrics exporting
-  metricsExporter:
-    enabled: true
-    tag: v0.11.0
-    commandOverrides: []
-    argsOverrides: []
-
-  ## When set to true will create sidecar to tail mysql log
-  logTail: true
-
-  service:
-    type: ClusterIP
-    port: 3306
-    externalIPs: []
+  
