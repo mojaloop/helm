@@ -5,11 +5,10 @@ global: {}
 
 ## Reference: https://github.com/bitnami/charts/blob/main/bitnami/kafka/values.yaml
 kafka:
-
+  enabled: true
   ## @param fullnameOverride String to fully override  template
   ##
   fullnameOverride: "kafka"
-  enabled: true
 
   ## @section Persistence parameters
   ## Enable persistence using Persistent Volume Claims
@@ -51,7 +50,7 @@ mysql:
     ## @param auth.rootPassword Password for the `root` user. Ignored if existing secret is provided
     ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#setting-the-root-password-on-first-run
     ##
-    rootPassword: ""
+    rootPassword: "db_password"
     ## @param auth.createDatabase Wheter to create the .Values.auth.database or not
     ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-on-first-run
     ##
@@ -98,28 +97,28 @@ mysql:
       DROP DATABASE IF EXISTS account_lookup;
       CREATE DATABASE account_lookup;
       DROP USER IF EXISTS account_lookup@'%';
-      CREATE USER 'account_lookup'@'%' IDENTIFIED WITH mysql_native_password BY 'HY#Mz%_z';
+      CREATE USER 'account_lookup'@'%' IDENTIFIED WITH mysql_native_password BY 'ml_password';
       GRANT ALL PRIVILEGES ON account_lookup.* TO 'account_lookup'@'%';
       FLUSH PRIVILEGES;
     centralLedgerInit.sql: |-
       DROP DATABASE IF EXISTS central_ledger;
       CREATE DATABASE central_ledger;
       DROP USER IF EXISTS central_ledger@'%';
-      CREATE USER 'central_ledger'@'%' IDENTIFIED WITH mysql_native_password BY 'HY#Mz%_z';
+      CREATE USER 'central_ledger'@'%' IDENTIFIED WITH mysql_native_password BY 'ml_password';
       GRANT ALL PRIVILEGES ON central_ledger.* TO 'central_ledger'@'%';
       FLUSH PRIVILEGES;  
     consentOracleInit.sql: |-
       DROP DATABASE IF EXISTS consent_oracle;
       CREATE DATABASE consent_oracle;
       DROP USER IF EXISTS consent_oracle@'%';
-      CREATE USER 'consent_oracle'@'%' IDENTIFIED WITH mysql_native_password BY 'HY#Mz%_z';
+      CREATE USER 'consent_oracle'@'%' IDENTIFIED WITH mysql_native_password BY 'ml_password';
       GRANT ALL PRIVILEGES ON consent_oracle.* TO 'consent_oracle'@'%';
       FLUSH PRIVILEGES;
     authSvcInit.sql: |-
       DROP DATABASE IF EXISTS `auth-svc`;
       CREATE DATABASE `auth-svc`;
       DROP USER IF EXISTS `auth-svc`@'%';
-      CREATE USER 'auth-svc'@'%' IDENTIFIED WITH mysql_native_password BY 'HY#Mz%_z';
+      CREATE USER 'auth-svc'@'%' IDENTIFIED WITH mysql_native_password BY 'ml_password';
       GRANT ALL PRIVILEGES ON `auth-svc`.* TO 'auth-svc'@'%';
       FLUSH PRIVILEGES;
 
@@ -129,7 +128,7 @@ cl-mongodb:
 
   ## @param fullnameOverride String to fully override mongodb.fullname template
   ##
-  fullnameOverride: cl-mongo
+  fullnameOverride: "cl-mongodb"
   ## MongoDB(&reg;) Authentication parameters
   ##
   auth:
@@ -169,10 +168,10 @@ cl-mongodb:
   ## Enable persistence using Persistent Volume Claims
   ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
   ##
-  # persistence:
-  #   ## @param persistence.enabled Enable MongoDB(&reg;) data persistence using PVC
-  #   ##
-  #   enabled: false
+  persistence:
+    ## @param persistence.enabled Enable MongoDB(&reg;) data persistence using PVC
+    ##
+    enabled: false
 
 ## TODO: Add 
 cep-mongodb:
