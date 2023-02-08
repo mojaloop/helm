@@ -6,32 +6,9 @@ global: {}
 ## Reference: https://github.com/bitnami/charts/blob/main/bitnami/kafka/values.yaml
 kafka:
   enabled: true
-
-  ## @param affinity Affinity for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
+  ## @param fullnameOverride String to fully override  template
   ##
-  affinity: {}
-
-  ## @param nodeSelector Node labels for pod assignment
-  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  # nodeSelector: {}
-  ## Example:
-  # nodeSelector:
-  #   "node-role.mojaloop.io": kafka
-
-  ## @param tolerations Tolerations for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  # tolerations: []
-
-  ## Example
-  # tolerations:
-  #   - key: "node-role.mojaloop.io"
-  #     operator: "Equal"
-  #     value: kafka
-  #     effect: "NoSchedule"
+  fullnameOverride: "kafka"
 
   ## @section Persistence parameters
   ## Enable persistence using Persistent Volume Claims
@@ -56,44 +33,24 @@ kafka:
     persistence:
       enabled: false
 
-    ## @param affinity Affinity for pod assignment
-    ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-    ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
+    ## @param fullnameOverride String to fully override  template
     ##
-    affinity: {}
-
-    ## @param nodeSelector Node labels for pod assignment
-    ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
-    ##
-    # nodeSelector: {}
-    
-    ## Example
-    # nodeSelector:
-    #     "node-role.mojaloop.io": kafka
-
-    ## @param tolerations Tolerations for pod assignment
-    ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    ##
-    # tolerations: []
-    
-    ## Example
-    # tolerations:
-    #   - key: "node-role.mojaloop.io"
-    #     operator: "Equal"
-    #     value: kafka
-    #     effect: "NoSchedule"
+    fullnameOverride: "zookeeper"
 
 ## Reference: https://github.com/bitnami/charts/blob/main/bitnami/mysql/values.yaml
-centralledger-mysql:
+mysql:
   enabled: true
 
-  ## MySQL Authentication parameters
+  ## @param fullnameOverride String to fully override template
+  ##
+  fullnameOverride: "mysqldb"
+  ## @param fullnameOverride String to fully override common.names.fullname template
   ##
   auth:
     ## @param auth.rootPassword Password for the `root` user. Ignored if existing secret is provided
     ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#setting-the-root-password-on-first-run
     ##
-    rootPassword: ""
+    rootPassword: "db_password"
     ## @param auth.createDatabase Wheter to create the .Values.auth.database or not
     ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-on-first-run
     ##
@@ -101,14 +58,14 @@ centralledger-mysql:
     ## @param auth.database Name for a custom database to create
     ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-on-first-run
     ##
-    database: "central_ledger"
+    database: mldb
     ## @param auth.username Name for a custom user to create
     ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-user-on-first-run
     ##
-    username: "central_ledger"
+    username: "mluser"
     ## @param auth.password Password for the new user. Ignored if existing secret is provided
     ##
-    password: "oyMxgZChuu"
+    password: 'ml_password'
     ## @param auth.replicationUser MySQL replication user
     ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#setting-up-a-replication-cluster
     ##
@@ -131,156 +88,54 @@ centralledger-mysql:
     ##   replicator: /vault/secrets/mysql-replicator
     ##
     customPasswordFiles: {}
+  ## @param initdbScripts Dictionary of initdb scripts
+  ## Specify dictionary of scripts to be run at first boot
+  initdbScripts:
+    # This script enables legacy authentication for MySQL v8. NodeJS MySQL Client currently does not support authentication plugins, reference: https://github.com/mysqljs/mysql/pull/2233
+    # Note : also initialises mysql DBs to support thirdparty charts
+    accountLookupInit.sql: |-
+      DROP DATABASE IF EXISTS account_lookup;
+      CREATE DATABASE account_lookup;
+      DROP USER IF EXISTS account_lookup@'%';
+      CREATE USER 'account_lookup'@'%' IDENTIFIED WITH mysql_native_password BY 'ml_password';
+      GRANT ALL PRIVILEGES ON account_lookup.* TO 'account_lookup'@'%';
+      FLUSH PRIVILEGES;
+    centralLedgerInit.sql: |-
+      DROP DATABASE IF EXISTS central_ledger;
+      CREATE DATABASE central_ledger;
+      DROP USER IF EXISTS central_ledger@'%';
+      CREATE USER 'central_ledger'@'%' IDENTIFIED WITH mysql_native_password BY 'ml_password';
+      GRANT ALL PRIVILEGES ON central_ledger.* TO 'central_ledger'@'%';
+      FLUSH PRIVILEGES;  
+    consentOracleInit.sql: |-
+      DROP DATABASE IF EXISTS consent_oracle;
+      CREATE DATABASE consent_oracle;
+      DROP USER IF EXISTS consent_oracle@'%';
+      CREATE USER 'consent_oracle'@'%' IDENTIFIED WITH mysql_native_password BY 'ml_password';
+      GRANT ALL PRIVILEGES ON consent_oracle.* TO 'consent_oracle'@'%';
+      FLUSH PRIVILEGES;
+    authSvcInit.sql: |-
+      DROP DATABASE IF EXISTS `auth-svc`;
+      CREATE DATABASE `auth-svc`;
+      DROP USER IF EXISTS `auth-svc`@'%';
+      CREATE USER 'auth-svc'@'%' IDENTIFIED WITH mysql_native_password BY 'ml_password';
+      GRANT ALL PRIVILEGES ON `auth-svc`.* TO 'auth-svc'@'%';
+      FLUSH PRIVILEGES;
+
+  ## @section MySQL Primary parameters
   primary:
     persistence:
-      enabled: false
-
-    ## @param secondary.affinity Affinity for MySQL secondary pods assignment
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-    ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
+    ## @param primary.persistence.enabled Enable persistence on MySQL primary replicas using a `PersistentVolumeClaim`. If false, use emptyDir
     ##
-    affinity: {}
-
-    ## @param secondary.nodeSelector Node labels for MySQL secondary pods assignment
-    ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-    ##
-    # nodeSelector: {}
-    
-    ## Example
-    # nodeSelector:
-    #     "node-role.mojaloop.io": cledger
-
-    ## @param secondary.tolerations Tolerations for MySQL secondary pods assignment
-    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    ##
-    # tolerations: []
-    
-    ## Example
-    # tolerations:
-    #   - key: "node-role.mojaloop.io"
-    #     operator: "Equal"
-    #     value: cledger
-    #     effect: "NoSchedule"
-
-  secondary:
-    persistence:
-      enabled: false
-
-## Reference: https://github.com/bitnami/charts/blob/main/bitnami/mysql/values.yaml
-account-lookup-mysql:
-  enabled: true
-
-  ## MySQL Authentication parameters
-  ##
-  auth:
-    ## @param auth.rootPassword Password for the `root` user. Ignored if existing secret is provided
-    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#setting-the-root-password-on-first-run
-    ##
-    rootPassword: ""
-    ## @param auth.createDatabase Wheter to create the .Values.auth.database or not
-    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-on-first-run
-    ##
-    createDatabase: true
-    ## @param auth.database Name for a custom database to create
-    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-on-first-run
-    ##
-    database: "account_lookup"
-    ## @param auth.username Name for a custom user to create
-    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#creating-a-database-user-on-first-run
-    ##
-    username: "account_lookup"
-    ## @param auth.password Password for the new user. Ignored if existing secret is provided
-    ##
-    password: "OdonPianoX"
-    ## @param auth.replicationUser MySQL replication user
-    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mysql#setting-up-a-replication-cluster
-    ##
-    replicationUser: replicator
-    ## @param auth.replicationPassword MySQL replication user password. Ignored if existing secret is provided
-    ##
-    replicationPassword: ""
-    ## @param auth.existingSecret Use existing secret for password details. The secret has to contain the keys `mysql-root-password`, `mysql-replication-password` and `mysql-password`
-    ## NOTE: When it's set the auth.rootPassword, auth.password, auth.replicationPassword are ignored.
-    ##
-    existingSecret: ""
-    ## @param auth.usePasswordFiles Mount credentials as files instead of using an environment variable
-    ##
-    usePasswordFiles: false
-    ## @param auth.customPasswordFiles Use custom password files when `auth.usePasswordFiles` is set to `true`. Define path for keys `root` and `user`, also define `replicator` if `architecture` is set to `replication`
-    ## Example:
-    ## customPasswordFiles:
-    ##   root: /vault/secrets/mysql-root
-    ##   user: /vault/secrets/mysql-user
-    ##   replicator: /vault/secrets/mysql-replicator
-    ##
-    customPasswordFiles: {}
-  primary:
-    persistence:
-      enabled: false
-
-    ## @param secondary.affinity Affinity for MySQL secondary pods assignment
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-    ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
-    ##
-    affinity: {}
-
-    ## @param secondary.nodeSelector Node labels for MySQL secondary pods assignment
-    ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-    ##
-    # nodeSelector: {}
-    
-    ## Example
-    # nodeSelector:
-    #     "node-role.mojaloop.io": als
-
-    ## @param secondary.tolerations Tolerations for MySQL secondary pods assignment
-    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    ##
-    # tolerations: []
-    
-    ## Example
-    # tolerations:
-    #   - key: "node-role.mojaloop.io"
-    #     operator: "Equal"
-    #     value: als
-    #     effect: "NoSchedule"
-
-  secondary:
-    persistence:
       enabled: false
 
 ## Reference: https://github.com/bitnami/charts/blob/main/bitnami/mongodb/values.yaml
-centralledger-obj:
+cl-mongodb:
   enabled: true
 
-  ## @param affinity Affinity for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
+  ## @param fullnameOverride String to fully override mongodb.fullname template
   ##
-  affinity: {}
-
-  ## @param nodeSelector Node labels for pod assignment
-  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  # nodeSelector: {}
-  
-  ## Example
-  # nodeSelector:
-  #   "node-role.mojaloop.io": obj
-
-
-  ## @param tolerations Tolerations for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  # tolerations: []
-  
-  ## Example
-  # tolerations:
-  #   - key: "node-role.mojaloop.io"
-  #     operator: "Equal"
-  #     value: obj
-  #     effect: "NoSchedule"
-
+  fullnameOverride: "cl-mongodb"
   ## MongoDB(&reg;) Authentication parameters
   ##
   auth:
@@ -307,12 +162,6 @@ centralledger-obj:
       -   'password'
     databases:
       -   'mlos'
-    ## @param auth.username DEPRECATED: use `auth.usernames` instead
-    ## @param auth.password DEPRECATED: use `auth.passwords` instead
-    ## @param auth.database DEPRECATED: use `auth.databases` instead
-    username: ""
-    password: ""
-    database: ""
     ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
     ##
     replicaSetKey: ""
@@ -335,38 +184,15 @@ centralledger-obj:
 cep-mongodb:
   enabled: true
 
-  ## @param nameOverride String to partially override mongodb.fullname template (will maintain the release name)
+  ## @param fullnameOverride String to fully override mongodb.fullname template (will maintain the release name)
   ##
-  nameOverride: cep-mongodb
-
+  fullnameOverride: cep-mongodb
 
   ## @param affinity Affinity for pod assignment
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
   ##
   affinity: {}
-
-  ## @param nodeSelector Node labels for pod assignment
-  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  # nodeSelector: {}
-  
-  ## Example
-  # nodeSelector:
-  #   "node-role.mojaloop.io": cep
-
-
-  ## @param tolerations Tolerations for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  # tolerations: []
-  
-  ## Example
-  # tolerations:
-  #   - key: "node-role.mojaloop.io"
-  #     operator: "Equal"
-  #     value: cep
-  #     effect: "NoSchedule"
 
   ## MongoDB(&reg;) Authentication parameters
   ##
@@ -410,9 +236,9 @@ cep-mongodb:
   ## @section Persistence parameters
   ##
 
-  ## Enable persistence using Persistent Volume Claims
-  ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-  ##
+  # Enable persistence using Persistent Volume Claims
+  # ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+  #
   persistence:
     ## @param persistence.enabled Enable MongoDB(&reg;) data persistence using PVC
     ##
@@ -425,6 +251,10 @@ ttksims-redis:
   ## @param architecture Redis&reg; architecture. Allowed values: `standalone` or `replication`
   ##
   architecture: standalone
+
+  ## @param fullnameOverride String to fully override  template
+  ##
+  fullnameOverride: ttksims-redis 
 
   ## Redis&reg; Authentication parameters
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/redis#setting-the-server-password-on-first-run
@@ -439,131 +269,7 @@ ttksims-redis:
   master:
     ## Enable persistence using Persistent Volume Claims
     ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-    ##
     persistence:
-      ## @param persistence.enabled Enable MongoDB(&reg;) data persistence using PVC
+      ## @param master.persistence.enabled Enable persistence on Redis&reg; master nodes using Persistent Volume Claims
       ##
       enabled: false
-
-    ## @param affinity Affinity for pod assignment
-    ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-    ## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
-    ##
-    affinity: {}
-
-    ## @param nodeSelector Node labels for pod assignment
-    ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
-    ##
-    # nodeSelector: {}
-    
-    ## Example
-    # nodeSelector:
-    #     "node-role.mojaloop.io": redis
-
-    ## @param tolerations Tolerations for pod assignment
-    ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    ##
-    # tolerations: []
-
-    ## Example
-    # tolerations:
-    #   - key: "node-role.mojaloop.io"
-    #     operator: "Equal"
-    #     value: redis
-    #     effect: "NoSchedule"
-
-  replica:
-    enabled: false
-    ## Enable persistence using Persistent Volume Claims
-    ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-    ##
-    persistence:
-      ## @param persistence.enabled Enable MongoDB(&reg;) data persistence using PVC
-      ##
-      enabled: false
-
-## Reference: https://github.com/redpanda-data/console/blob/master/helm/console/values.yaml
-kafka-console:
-  enabled: true
-
-  console:
-  # Config.yaml is required for Console
-  # See reference config: https://github.com/redpanda-data/console/blob/master/docs/config/console.yaml)
-    config:
-      kafka:
-        brokers:
-          - backend-kafka-headless:9092
-
-  # SecretMounts is an abstraction to make a secret available in the container's filesystem.
-  # Under the hood it creates a volume + volume mount for the Console container.
-  secretMounts: []
-  #  - name: kafka-certs
-  #    secretName: kafka-certs
-  #    path: /etc/console/certs
-  #    defaultMode: 0755
-
-  # Secret can be used to create a new Kubernetes secret for all sensitive config inputs.
-  # Each provided secret will be mounted automatically and thus made available to the Console
-  # pod.
-  # If you want to use one or more existing secrets you can use "extraEnvFrom" to mount env
-  # variables from string and secretMounts to mount files such as certificates from secrets.
-  secret:
-    create: true
-
-    # Secret values in case you want the chart to create a secret. All certificates will be mounted
-    # as a file and the path to that file will be configured via environment variables as well, so
-    # that Console will automatically pick them up.
-    # Kafka secrets
-    kafka: {}
-      # saslPassword:
-      # awsMskIamSecretKey:
-      # tlsCa:
-      # tlsCert:
-      # tlsKey:
-      # tlsPassphrase:
-      # schemaRegistryPassword:
-      # schemaRegistryTlsCa:
-      # schemaRegistryTlsCert:
-      # schemaRegistryTlsKey:
-      # protobufGitBasicAuthPassword
-
-    # Enterprise version secrets
-    # SSO secrets (enterprise version)
-    login:
-      google: {}
-        # clientSecret:
-        # groupsServiceAccount:
-      github: {}
-        # clientSecret:
-        # personalAccessToken:
-      okta: {}
-        # clientSecret:
-        # directoryApiToken:
-      oidc: {}
-        # clientSecret:
-
-    enterprise: {}
-      # license:
-
-    redpanda:
-      adminApi: {}
-        # password:
-        # tlsCa:
-        # tlsCert:
-        # tlsKey:
-
-  ingress:
-    enabled: false
-    className: ""
-    annotations: {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
-    hosts:
-      - host: kafka-console.local
-        paths:
-          - path: /
-            pathType: ImplementationSpecific
-    tls: []
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - kafka-console.local
