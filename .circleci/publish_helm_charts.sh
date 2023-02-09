@@ -20,7 +20,7 @@ echo "Fetching tags from remote $GITHUB_PROJECT_USERNAME" | tee git.log
 git fetch -q --tags $GITHUB_PROJECT_USERNAME &> git.log
 
 echo "Clone fresh directory into target branch" | tee git.log
-git clone -b $GITHUB_TARGET_BRANCH --single-branch $CIRCLE_REPOSITORY_URL.git $WORKING_RELEASE_DIRECTORY &> git.log
+git clone -b $GITHUB_TARGET_BRANCH --single-branch $CIRCLE_REPOSITORY_URL $WORKING_RELEASE_DIRECTORY &> git.log
 
 echo "Package helm charts..." | tee git.log
 bash package.sh
