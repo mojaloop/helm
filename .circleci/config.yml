@@ -99,46 +99,45 @@ jobs:
           command: |
             bash lint-charts.sh
 
-  #audit-licenses:
-  #  executor: default-machine
-  #  steps:
-  #    - checkout
-  #    - run:
-  #        <<: *defaults_license_scanner
-  #    - run:
-  #        name: Set up nvm
-  #        command: |
-  #          # Note: this needs to be separate from the nvm install step
-  #          echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
-  #          echo "[ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"" >> $BASH_ENV
-  #    - run:
-  #        name: Set up correct node version
-  #        command: |
-  #          nvm install v10.15.3 && nvm alias default v10.15.3
-  #          node --version
-  #    - run:
-  #        name: Run the license-scanner
-  #        command: |
-  #          source $BASH_ENV
-  #          env | grep docker
-  #          cd /tmp/license-scanner && make run
-  #    - run:
-  #        name: Build and save license-scanner summary
-  #        command: |
-  #          node --version
-  #          cd /tmp/license-scanner && make postprocess
-  #    - run:
-  #        name: If this is a release, upload the license-scanner file to the github release
-  #        command: |
-  #          if [ "${CIRCLE_TAG}" = "" ]; then
-  #            exit 0
-  #          fi
-  #          mv /tmp/license-scanner/results/license-summary.xlsx ./license-summary-${CIRCLE_TAG}.xlsx
-  #          .circleci/upload-github-release-asset.sh github_api_token=$GITHUB_TOKEN owner=mojaloop repo=helm tag=${CIRCLE_TAG} filename=license-summary-${CIRCLE_TAG}.xlsx
-#
-  #    - store_artifacts:
-  #        path: /tmp/license-scanner/results
-  #        prefix: licenses
+  audit-licenses:
+    executor: default-machine
+    steps:
+      - checkout
+      - run:
+          <<: *defaults_license_scanner
+      - run:
+          name: Set up nvm
+          command: |
+            # Note: this needs to be separate from the nvm install step
+            echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
+            echo "[ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"" >> $BASH_ENV
+      - run:
+          name: Set up correct node version
+          command: |
+            nvm install v10.15.3 && nvm alias default v10.15.3
+            node --version
+      - run:
+          name: Run the license-scanner
+          command: |
+            source $BASH_ENV
+            env | grep docker
+            cd /tmp/license-scanner && make run
+      - run:
+          name: Build and save license-scanner summary
+          command: |
+            node --version
+            cd /tmp/license-scanner && make postprocess
+      - run:
+          name: If this is a release, upload the license-scanner file to the github release
+          command: |
+            if [ "${CIRCLE_TAG}" = "" ]; then
+              exit 0
+            fi
+            mv /tmp/license-scanner/results/license-summary.xlsx ./license-summary-${CIRCLE_TAG}.xlsx
+            .circleci/upload-github-release-asset.sh github_api_token=$GITHUB_TOKEN owner=mojaloop repo=helm tag=${CIRCLE_TAG} filename=license-summary-${CIRCLE_TAG}.xlsx
+      - store_artifacts:
+          path: /tmp/license-scanner/results
+          prefix: licenses
 
   # build:
   #   executor: default-docker-helm
@@ -187,14 +186,14 @@ jobs:
           name: Publish Helm Charts
           command: .circleci/publish_helm_charts.sh
 
-  #slack-announcement:
-  #  executor: default-docker-helm
-  #  steps:
-  #    - run:
-  #        <<: *defaults_Dependencies
-  #    - slack/status:
-  #        webhook: "$SLACK_WEBHOOK_ANNOUNCEMENT"
-  #        success_message: '*"${CIRCLE_PROJECT_REPONAME}"* - Release \`"${CIRCLE_TAG}"\` \nhttps://github.com/mojaloop/"${CIRCLE_PROJECT_REPONAME}"/releases/tag/"${CIRCLE_TAG}"'
+  slack-announcement:
+    executor: default-docker-helm
+    steps:
+      - run:
+          <<: *defaults_Dependencies
+      - slack/status:
+          webhook: "$SLACK_WEBHOOK_ANNOUNCEMENT"
+          success_message: '*"${CIRCLE_PROJECT_REPONAME}"* - Release \`"${CIRCLE_TAG}"\` \nhttps://github.com/mojaloop/"${CIRCLE_PROJECT_REPONAME}"/releases/tag/"${CIRCLE_TAG}"'
 
 workflows:
   version: 2
@@ -220,13 +219,13 @@ workflows:
           filters:
             tags:
               only: /.*/
-      # - audit-licenses:
-      #     context: org-global
-      #     requires:
-      #       - setup
-      #     filters:
-      #       tags:
-      #         only: /.*/
+      - audit-licenses:
+          context: org-global
+          requires:
+            - setup
+          filters:
+            tags:
+              only: /.*/
       # - build:
       #     context: org-global
       #     requires:
@@ -239,18 +238,18 @@ workflows:
           context: org-global
           requires:
             - test
-            # - audit-licenses
+            - audit-licenses
           filters:
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
             branches:
               only: master
-      #- slack-announcement:
-      #    context: org-global
-      #    requires:
-      #      - deploy
-      #    filters:
-      #      tags:
-      #        only: /v[0-9]+(\.[0-9]+)*/
-      #      branches:
-      #        ignore: /.*/
+      - slack-announcement:
+          context: org-global
+          requires:
+            - deploy
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/
