@@ -13,24 +13,17 @@ set -eox pipefail
 echo "Setting BASH_ENV..." | tee git.log
 source $BASH_ENV
 
-echo "Fetching info from remote $GITHUB_PROJECT_USERNAME" | tee git.log
-git fetch -q $GITHUB_PROJECT_USERNAME &> git.log
-
-echo "Fetching tags from remote $GITHUB_PROJECT_USERNAME" | tee git.log
-git fetch -q --tags $GITHUB_PROJECT_USERNAME &> git.log
-
-echo "Clone fresh directory checked out with release branch" | tee git.log
-git clone -b $GITHUB_TARGET_BRANCH --single-branch $CIRCLE_REPOSITORY_URL $WORKING_RELEASE_DIRECTORY &> git.log
-
 echo "Package helm charts..." | tee git.log
 bash package.sh
 
-echo "Move packaged charts to release directory and repo folder" | tee git.log
+echo "Cloning fresh directory checked out with release branch" | tee git.log
+git clone -b $GITHUB_TARGET_BRANCH --single-branch $CIRCLE_REPOSITORY_URL $WORKING_RELEASE_DIRECTORY &> git.log
+
+echo "Moving packaged charts to release directory and repo folder" | tee git.log
 mv repo/*.* $WORKING_RELEASE_DIRECTORY/repo
 
-echo "Switch to release directory" | tee git.log
+echo "Switching to release directory" | tee git.log
 cd $WORKING_RELEASE_DIRECTORY
-ls
 git status
 
 echo "Staging packaged Helm charts..." | tee git.log
