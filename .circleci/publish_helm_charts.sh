@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 REVISION=${GITHUB_TAG:-$GIT_SHA1}
+WORKING_RELEASE_DIRECTORY=/tmp/release
 if [ -n ${GITHUB_TAG} ]; then
   COMMIT_MESSAGE="Updating development release to $REVISION"
 else
@@ -18,34 +19,26 @@ git fetch -q $GITHUB_PROJECT_USERNAME &> git.log
 echo "Fetching tags from remote $GITHUB_PROJECT_USERNAME" | tee git.log
 git fetch -q --tags $GITHUB_PROJECT_USERNAME &> git.log
 
-echo "Checking out $GITHUB_TARGET_BRANCH" | tee git.log
-git checkout -b $GITHUB_TARGET_BRANCH $GITHUB_PROJECT_USERNAME/$GITHUB_TARGET_BRANCH &> git.log
-
-echo "Merging code from $REVISION..." | tee git.log
-git merge --no-commit $REVISION &> git.log
-
-echo "Checking for merge conflicts" | tee git.log
-if [ $(git ls-files -u | wc -l) == 0 ]
-then
-  echo "Merge conflict not-detected. Continuing..." | tee git.log
-else
-  echo "Merge conflict detected. Abort!" | tee git.log && exit 1
-fi
+echo "Clone fresh directory into target branch" | tee git.log
+git clone -b $GITHUB_TARGET_BRANCH --single-branch $CIRCLE_REPOSITORY_URL.git $WORKING_RELEASE_DIRECTORY &> git.log
 
 echo "Package helm charts..." | tee git.log
 bash package.sh
 
-echo "Remove codebase" | tee git.log
-rm -rf !(repo)
+echo "Move packaged charts to release directory" | tee git.log
+mv repo/*.* $WORKING_RELEASE_DIRECTORY
 
-echo "Staging general changes..." | tee git.log
-git add -A
+echo "Switch to release directory" | tee git.log
+cd $WORKING_RELEASE_DIRECTORY
+ls
+git status
 
 echo "Staging packaged Helm charts..." | tee git.log
 git add -f repo/*.*
 
 echo "Commiting changes..." | tee git.log
 git commit -a -m "'$COMMIT_MESSAGE'"
+git log
 
 echo "Publishing $REVISION release to $GITHUB_TARGET_BRANCH on github..." | tee git.log
-git push -q $GITHUB_PROJECT_USERNAME $GITHUB_TARGET_BRANCH &> git.log
+# git push -q $GITHUB_PROJECT_USERNAME $GITHUB_TARGET_BRANCH &> git.log
