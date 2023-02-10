@@ -19,6 +19,12 @@ spec:
       targetPort: http
       protocol: TCP
       name: {{ .Values.service.name }}
+  {{- if .Values.diagnosticMode.enabled }}
+    - name: debug
+      port: {{ .Values.diagnosticMode.debug.port }}
+      targetPort: {{ .Values.diagnosticMode.debug.internalPort }}
+      protocol: TCP
+  {{- end }}
 {{- if not .Values.service.external.enabled }}
   selector:
     app.kubernetes.io/name: {{ include "als-oracle-pathfinder.name" . }}

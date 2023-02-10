@@ -150,13 +150,13 @@ account-lookup-service:
   # initContainers: []
   initContainers:
     - name: wait-for-mysql
-      image: mysql
+      image: mysql:5.7
       imagePullPolicy: IfNotPresent
       command:
         - sh
         - -c
         - |
-          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
           do
             echo --------------------;
             echo Waiting for MySQL...;
@@ -444,7 +444,7 @@ account-lookup-service-admin:
   # initContainers: []
   initContainers:
     - name: wait-for-mysql
-      image: mysql
+      image: mysql:5.7
       imagePullPolicy: IfNotPresent
       command:
         - sh
@@ -610,13 +610,47 @@ account-lookup-service-admin:
 als-oracle-pathfinder:
   enabled: false
   # Declare variables to be passed into your templates.
-  replicaCount: 1
   image:
     repository: mojaloop/als-oracle-pathfinder
     tag: v12.0.0
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
     pullPolicy: IfNotPresent
-    command: '["node", "/opt/app/src/index.js"]'
-    imagePullSecrets: []
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+
+  replicaCount: 1
+  command: '["node", "/opt/app/src/index.js"]'
+
+  ## Enable diagnostic mode in the deployment
+  ##
+  diagnosticMode:
+    ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+    ##
+    enabled: false
+    ## @param diagnosticMode.command Command to override all containers in the deployment
+    ##
+    command: 
+      - node
+      - /opt/app/src/index.js
+    ## @param diagnosticMode.args Args to override all containers in the deployment
+    ##
+    args:
+      - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+    
+    ## @param diagnosticMode.debug config to override all debug information
+    ##
+    debug:
+      internalPort: 9229
+      port: 9229
 
   readinessProbe:
     enabled: true
@@ -641,13 +675,33 @@ als-oracle-pathfinder:
         port: '3306'
         database: 'central_ledger'
         user: 'central_ledger'
+        ## Secret-Management
+        ### Set this is you are using a clear password configured in the config section
         password: 'oyMxgZChuu'
+        ### Configure this if you want to use a secret. Note, this will override the db_password,
+        ### except for the init-container where you will need to uncomment out the appropriate config line.
+        ### Use the next line if you do wish to use the db_password value instead.
+        # secret:
+        ### Example config for an existing secret
+        # secret:
+        #   name: mysqldb
+        #   key: mysql-password
       account_lookup:
         host: '$release_name-account-lookup-mysql'
         port: '3306'
         database: 'account_lookup'
         user: 'account_lookup'
+        ## Secret-Management
+        ### Set this is you are using a clear password configured in the config section
         password: 'OdonPianoX'
+        ### Configure this if you want to use a secret. Note, this will override the db_password,
+        ### except for the init-container where you will need to uncomment out the appropriate config line.
+        ### Use the next line if you do wish to use the db_password value instead.
+        # secret:
+        ### Example config for an existing secret
+        # secret:
+        #   name: mysqldb
+        #   key: mysql-password
     log_level: 'info'
 
     pathfinder:
@@ -764,33 +818,149 @@ als-oracle-pathfinder:
         # certs in the Mozilla bundle, which is used by Node as default.
         intermediate_cert_path: '/opt/app/secrets/pathfinder_intermediate_cert.pem'
 
-  init:
-    enabled: true
-    waitForMysql:
-      name: wait-for-mysql
-      repository: mysql
-      tag: 8.0.30
-      pullPolicy: IfNotPresent
-      command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
-    initMysql:
-      centralLedger:
-        name: init-central-ledger-mysql
-        repository: mojaloop/als-oracle-pathfinder
-        tag: latest
-        pullPolicy: IfNotPresent
-        command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -e "SET @service_name='$service_name'; source /opt/app/init-central-ledger.sql;";
-      accountLookup:
-        name: init-account-lookup-mysql
-        repository: mojaloop/als-oracle-pathfinder
-        tag: latest
-        pullPolicy: IfNotPresent
-        command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password $db_database -e "SET @service_name='$service_name'; source /opt/app/init-account-lookup.sql;";
-    populateMysql:
-      name: populate-mysql-tables
-      repository: mysql
-      tag: 8.0.30
-      pullPolicy: IfNotPresent
-      command: "echo 'Nothing configured to be populated. Continuing...';"
+  ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  # initContainers: []
+  initContainers:
+    - name: wait-for-mysql-central-ledger
+      image: mysql:5.7
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          do
+            echo --------------------;
+            echo Waiting for MySQL...;
+            sleep 2; 
+          done;
+          echo ====================; 
+          echo MySQL ok!;
+      env:
+        - name: DB_HOST
+          value: '{{ .Values.config.db.central_ledger.host }}'
+        - name: DB_PORT
+          value: '{{ .Values.config.db.central_ledger.port }}'
+        - name: DB_USER
+          value: '{{ .Values.config.db.central_ledger.user }}'
+        ## Secret-Management
+        ### Uncomment this is you are using a clear password configured in the config section
+        # - name: DB_PASSWORD
+        #   value: '{{ .Values.config.db.central_ledger.password }}'
+        ### Use this if you wish to reference an existing secret
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: '{{ .Values.config.db.central_ledger.secret.name }}'
+              key: '{{ .Values.config.db.central_ledger.secret.key }}'
+        - name: DB_DATABASE
+          value: '{{ .Values.config.db.central_ledger.database }}'
+    - name: init-mysql-central-ledger
+      image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          echo Running MySQL init scripts;
+          mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -e "SET @service_name='${SERVICE_NAME}'; source /opt/app/init-central-ledger.sql;";
+          echo ====================; 
+          echo MySQL ok!;
+      env:
+        - name: DB_HOST
+          value: '{{ .Values.config.db.central_ledger.host }}'
+        - name: DB_PORT
+          value: '{{ .Values.config.db.central_ledger.port }}'
+        - name: DB_USER
+          value: '{{ .Values.config.db.central_ledger.user }}'
+        ## Secret-Management
+        ### Uncomment this is you are using a clear password configured in the config section
+        # - name: DB_PASSWORD
+        #   value: '{{ .Values.config.db.central_ledger.password }}'
+        ### Use this if you wish to reference an existing secret
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: '{{ .Values.config.db.central_ledger.secret.name }}'
+              key: '{{ .Values.config.db.central_ledger.secret.key }}'
+        - name: DB_DATABASE
+          value: '{{ .Values.config.db.central_ledger.database }}'
+        - name: SERVICE_NAME
+          value: '{{ include "als-oracle-pathfinder.name" . }}'
+    - name: wait-for-mysql-account-lookup
+      image: mysql:5.7
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          do
+            echo --------------------;
+            echo Waiting for MySQL...;
+            sleep 2; 
+          done;
+          echo ====================; 
+          echo MySQL ok!;
+      env:
+        - name: DB_HOST
+          value: '{{ .Values.config.db.account_lookup.host }}'
+        - name: DB_PORT
+          value: '{{ .Values.config.db.account_lookup.port }}'
+        - name: DB_USER
+          value: '{{ .Values.config.db.account_lookup.user }}'
+        ## Secret-Management
+        ### Uncomment this is you are using a clear password configured in the config section
+        # - name: DB_PASSWORD
+        #   value: '{{ .Values.config.db.account_lookup.password }}'
+        ### Use this if you wish to reference an existing secret
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: '{{ .Values.config.db.account_lookup.secret.name }}'
+              key: '{{ .Values.config.db.account_lookup.secret.key }}'
+        - name: DB_DATABASE
+          value: '{{ .Values.config.db.account_lookup.database }}'
+    - name: init-mysql-account-lookup
+      image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          echo Running MySQL init scripts;
+          mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -e "SET @service_name='${SERVICE_NAME}'; source /opt/app/init-account-lookup.sql;";
+          echo ====================; 
+          echo MySQL ok!;
+      env:
+        - name: DB_HOST
+          value: '{{ .Values.config.db.account_lookup.host }}'
+        - name: DB_PORT
+          value: '{{ .Values.config.db.account_lookup.port }}'
+        - name: DB_USER
+          value: '{{ .Values.config.db.account_lookup.user }}'
+        ## Secret-Management
+        ### Uncomment this is you are using a clear password configured in the config section
+        # - name: DB_PASSWORD
+        #   value: '{{ .Values.config.db.account_lookup.password }}'
+        ### Use this if you wish to reference an existing secret
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: '{{ .Values.config.db.account_lookup.secret.name }}'
+              key: '{{ .Values.config.db.account_lookup.secret.key }}'
+        - name: DB_DATABASE
+          value: '{{ .Values.config.db.account_lookup.database }}'
+        - name: SERVICE_NAME
+          value: '{{ include "als-oracle-pathfinder.name" . }}'
   service:
     type: ClusterIP
     name: http-api

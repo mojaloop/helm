@@ -241,13 +241,13 @@ config:
 # initContainers: []
 initContainers:
   - name: wait-for-mysql
-    image: mysql
+    image: mysql:5.7
     imagePullPolicy: IfNotPresent
     command:
       - sh
       - -c
       - |
-        until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+        until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
         do
           echo --------------------;
           echo Waiting for MySQL...;

@@ -41,53 +41,35 @@ spec:
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
 {{- end }}
-      {{- if .Values.init.enabled }}
       initContainers:
-        {{- if eq .Values.config.db.type "mysql"}}
-        - name: {{ .Values.init.waitForMysql.name }}
-          image: {{ .Values.init.waitForMysql.repository }}:{{ .Values.init.waitForMysql.tag }}
-          imagePullPolicy: {{ .Values.init.waitForMysql.pullPolicy }}
-          command:
-            - sh
-            - "-c"
-            - {{ (.Values.init.waitForMysql.command | replace "$db_user" (print .Values.config.db.central_ledger.user) | replace "$db_password" (print .Values.config.db.central_ledger.password) | replace "$db_host" $dbHostCentralLedger | replace "$db_database" (print .Values.config.db.central_ledger.database) | replace "$db_port" (print .Values.config.db.central_ledger.port) )| quote }}
-        {{- if .Values.init.initMysql.centralLedger.enabled }}
-        - name: {{ .Values.init.initMysql.centralLedger.name }}
-          image: {{ .Values.init.initMysql.centralLedger.repository }}:{{ .Values.init.initMysql.centralLedger.tag }}
-          imagePullPolicy: {{ .Values.init.initMysql.centralLedger.pullPolicy }}
-          command:
-            - sh
-            - "-c"
-            - {{ (.Values.init.initMysql.centralLedger.command | replace "$db_user" (print .Values.config.db.central_ledger.user) | replace "$db_password" (print .Values.config.db.central_ledger.password) | replace "$db_host" $dbHostCentralLedger | replace "$db_database" (print .Values.config.db.central_ledger.database) | replace "$db_port" (print .Values.config.db.central_ledger.port) | replace "$service_name" $serviceName )| quote }}
+        {{- if .Values.initContainers }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
         {{- end }}
-        {{- if .Values.init.initMysql.accountLookup.enabled }}
-        - name: {{ .Values.init.initMysql.accountLookup.name }}
-          image: {{ .Values.init.initMysql.accountLookup.repository }}:{{ .Values.init.initMysql.accountLookup.tag }}
-          imagePullPolicy: {{ .Values.init.initMysql.accountLookup.pullPolicy }}
-          command:
-            - sh
-            - "-c"
-            - {{ (.Values.init.initMysql.accountLookup.command | replace "$db_user" (print .Values.config.db.account_lookup.user) | replace "$db_password" (print .Values.config.db.account_lookup.password) | replace "$db_host" $dbHostAccountLookup | replace "$db_database" (print .Values.config.db.account_lookup.database) | replace "$db_port" (print .Values.config.db.account_lookup.port) | replace "$service_name" $serviceName )| quote }}
-        {{- end }}
-        {{- if .Values.init.populateMysql.enabled }}
-        - name: {{ .Values.init.populateMysql.name }}
-          image: {{ .Values.init.populateMysql.repository }}:{{ .Values.init.populateMysql.tag }}
-          imagePullPolicy: {{ .Values.init.populateMysql.pullPolicy }}
-          command:
-            - sh
-            - "-c"
-            - {{ (.Values.init.populateMysql.command | replace "$db_user" (print .Values.config.db.central_ledger.user) | replace "$db_password" (print .Values.config.db.central_ledger.password) | replace "$db_host" $dbHostCentralLedger | replace "$db_database" (print .Values.config.db.central_ledger.database) | replace "$db_port" (print .Values.config.db.central_ledger.port) | replace "$service_name" $serviceName )| quote }}
-        {{- end }}
-        {{- end }}
-      {{- end }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- if .Values.containerSecurityContext.enabled }}
+        securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+        {{- end }}
+        {{- if .Values.diagnosticMode.enabled }}
+        command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+        {{- else if .Values.command }}
+        command: {{- include "common.tplvalues.render" (dict "value" .Values.command "context" $) | nindent 12 }}
+        {{- end }}
+        {{- if .Values.diagnosticMode.enabled }}
+        args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+        {{- else if .Values.args }}
+        args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
+        {{- end }}
         ports:
         - name: http
           containerPort: {{ .Values.service.port }}
           protocol: TCP
+        {{- if .Values.diagnosticMode.enabled }}
+        - name: debug
+          containerPort: {{ .Values.diagnosticMode.debug.internalPort }}
+        {{- end }}
         {{- if .Values.readinessProbe.enabled }}
         readinessProbe:
           httpGet:
@@ -108,10 +90,14 @@ spec:
           - name: LOG_LEVEL
             value: {{ .Values.config.log_level }}
           - name: DB_PASSWORD
+          {{- if .Values.config.db.central_ledger.secret }}
             valueFrom:
               secretKeyRef:
-                name: {{ template "als-oracle-pathfinder.fullname" . }}
-                key: db_password
+                name: '{{ .Values.config.db.central_ledger.secret.name }}'
+                key: '{{ .Values.config.db.central_ledger.secret.key }}'
+          {{- else }}
+            value: {{ .Values.config.db_password }}
+          {{- end }}
         envFrom:
           - configMapRef:
               name: {{ template "als-oracle-pathfinder.fullname" . }}
