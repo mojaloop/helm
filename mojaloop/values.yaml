@@ -10,6 +10,9 @@ CONFIG:
   ## CENTRAL-LEDGER BACKEND
   cl_db_name: &CL_DB_NAME "central_ledger"
   cl_db_password: &CL_DB_PASSWORD "ml_password"
+  cl_db_secret: &CL_DB_SECRET
+    name: &CL_DB_SECRET_NAME mysqldb
+    key: &CL_DB_SECRET_KEY mysql-password
   cl_db_host: &CL_DB_HOST 'mysqldb'
   cl_db_port: &CL_DB_PORT 3306
   cl_db_user: &CL_DB_USER "central_ledger"
@@ -3849,7 +3852,18 @@ account-lookup-service:
       db_host: *ALS_DB_HOST
       db_port: *ALS_DB_PORT
       db_user: *ALS_DB_USER
-      db_password: *ALS_DB_PASSWORD
+      # db_password: *ALS_DB_PASSWORD
+      ## Secret-Management
+      ### Set this is you are using a clear password configured in the config section
+      # db_password: HY#Mz%_z
+      ### Configure this if you want to use a secret. Note, this will override the db_password,
+      ### except for the init-container where you will need to uncomment out the appropriate config line.
+      ### Use the next line if you do wish to use the db_password value instead.
+      # db_secret:
+      ### Example config for an existing secret
+      db_secret:
+        name: *CL_DB_SECRET_NAME
+        key: *CL_DB_SECRET_KEY
       db_database: *ALS_DB_NAME
       db_connection_pool_min: 10
       db_connection_pool_max: 30
@@ -3913,43 +3927,51 @@ account-lookup-service:
       # Thirdparty API Config
       featureEnableExtendedPartyIdType: false
 
-    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
-    ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
-    ##
-    # initContainers: []
+    # @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    # ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    # e.g:
     # initContainers:
-    #   - name: wait-for-mysql
-    #     image: mysql
-    #     imagePullPolicy: IfNotPresent
-    #     command:
-    #       - sh
-    #       - -c
-    #       - |
-    #         until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
-    #         do
-    #           echo --------------------;
-    #           echo Waiting for MySQL...;
-    #           sleep 2; 
-    #         done;
-    #         echo ====================; 
-    #         echo MySQL ok!;
-    #     env:
-    #       - name: DB_HOST
-    #         value: '{{ .Values.config.db_host }}'
-    #       - name: DB_PORT
-    #         value: '{{ .Values.config.db_port }}'
-    #       - name: DB_USER
-    #         value: '{{ .Values.config.db_user }}'
-    #       - name: DB_PASSWORD
-    #         value: '{{ .Values.config.db_password }}'
-    #       - name: DB_DATABASE
-    #         value: '{{ .Values.config.db_database }}'
+    #  - name: your-image-name
+    #    image: your-image
+    #    imagePullPolicy: Always
+    #    command: ['sh', '-c', 'echo "hello world"']
+    #
+    # initContainers: []
+    initContainers:
+      - name: wait-for-mysql
+        image: mysql
+        imagePullPolicy: IfNotPresent
+        command:
+          - sh
+          - -c
+          - |
+            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+            do
+              echo --------------------;
+              echo Waiting for MySQL...;
+              sleep 2; 
+            done;
+            echo ====================; 
+            echo MySQL ok!;
+        env:
+          - name: DB_HOST
+            value: '{{ .Values.config.db_host }}'
+          - name: DB_PORT
+            value: '{{ .Values.config.db_port }}'
+          - name: DB_USER
+            value: '{{ .Values.config.db_user }}'
+          ## Secret-Management
+          ### Uncomment this is you are using a clear password configured in the config section
+          # - name: DB_PASSWORD
+          #   value: '{{ .Values.config.db_password }}'
+          ### Use this if you wish to reference an existing secret
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.db_secret.name }}'
+                key: '{{ .Values.config.db_secret.key }}'
+          - name: DB_DATABASE
+            value: '{{ .Values.config.db_database }}'
 
     service:
       internalPort: 4002
@@ -4175,7 +4197,18 @@ account-lookup-service:
       db_host: *ALS_DB_HOST
       db_port: *ALS_DB_PORT
       db_user: *ALS_DB_USER
-      db_password: *ALS_DB_PASSWORD
+      # db_password: *ALS_DB_PASSWORD
+      ## Secret-Management
+      ### Set this is you are using a clear password configured in the config section
+      # db_password: HY#Mz%_z
+      ### Configure this if you want to use a secret. Note, this will override the db_password,
+      ### except for the init-container where you will need to uncomment out the appropriate config line.
+      ### Use the next line if you do wish to use the db_password value instead.
+      # db_secret:
+      ### Example config for an existing secret
+      db_secret:
+        name: *CL_DB_SECRET_NAME
+        key: *CL_DB_SECRET_KEY
       db_database: *ALS_DB_NAME
       db_connection_pool_min: 10
       db_connection_pool_max: 30
@@ -4239,48 +4272,64 @@ account-lookup-service:
     ##    command: ['sh', '-c', 'echo "hello world"']
     ##
     # initContainers: []
-    # initContainers:
-    #   - name: wait-for-mysql
-    #     image: mysql
-    #     imagePullPolicy: IfNotPresent
-    #     command:
-    #       - sh
-    #       - -c
-    #       - |
-    #         until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
-    #         do
-    #           echo --------------------;
-    #           echo Waiting for MySQL...;
-    #           sleep 2; 
-    #         done;
-    #         echo ====================; 
-    #         echo MySQL ok!;
-    #     env:
-    #       - name: DB_HOST
-    #         value: '{{ .Values.config.db_host }}'
-    #       - name: DB_PORT
-    #         value: '{{ .Values.config.db_port }}'
-    #       - name: DB_USER
-    #         value: '{{ .Values.config.db_user }}'
-    #       - name: DB_PASSWORD
-    #         value: '{{ .Values.config.db_password }}'
-    #       - name: DB_DATABASE
-    #         value: '{{ .Values.config.db_database }}'
-    #   - name: run-migration
-    #     image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
-    #     imagePullPolicy: IfNotPresent
-    #     command:
-    #       - sh
-    #       - -c
-    #       - npm run migrate
-    #     env:
-    #       - name: ALS_MIGRATIONS__RUN_DATA_MIGRATIONS
-    #         value: 'true'
-    #       - name: ALS_DATABASE__PASSWORD
-    #          value: '{{ .Values.config.db_password }}'
-    #     volumeMounts:
-    #       - name: '{{ template "account-lookup-service-admin.fullname" . }}-config-volume'
-    #         mountPath: /opt/app/config
+    initContainers:
+      - name: wait-for-mysql
+        image: mysql
+        imagePullPolicy: IfNotPresent
+        command:
+          - sh
+          - -c
+          - |
+            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+            do
+              echo --------------------;
+              echo Waiting for MySQL...;
+              sleep 2; 
+            done;
+            echo ====================; 
+            echo MySQL ok!;
+        env:
+          - name: DB_HOST
+            value: '{{ .Values.config.db_host }}'
+          - name: DB_PORT
+            value: '{{ .Values.config.db_port }}'
+          - name: DB_USER
+            value: '{{ .Values.config.db_user }}'
+          ## Secret-Management
+          ### Uncomment this is you are using a clear password configured in the config section
+          # - name: DB_PASSWORD
+          #   value: '{{ .Values.config.db_password }}'
+          ### Use this if you wish to reference an existing secret
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.db_secret.name }}'
+                key: '{{ .Values.config.db_secret.key }}'
+          - name: DB_DATABASE
+            value: '{{ .Values.config.db_database }}'
+      - name: run-migration
+        image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+        imagePullPolicy: IfNotPresent
+        command:
+          - sh
+          - -c
+          - npm run migrate
+        env:
+          - name: ALS_MIGRATIONS__RUN_DATA_MIGRATIONS
+            value: 'true'
+          ## Secret-Management
+          ### Uncomment this is you are using a clear password configured in the config section
+          # - name: ALS_DATABASE__PASSWORD
+          #   value: '{{ .Values.config.db_password }}'
+          ### Use this if you wish to reference an existing secret
+          - name: ALS_DATABASE__PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.db_secret.name }}'
+                key: '{{ .Values.config.db_secret.key }}'
+        volumeMounts:
+          - name: '{{ template "account-lookup-service-admin.fullname" . }}-config-volume'
+            mountPath: /opt/app/config
 
     service:
       internalPort: 4001

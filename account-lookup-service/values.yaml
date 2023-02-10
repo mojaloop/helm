@@ -72,7 +72,17 @@ account-lookup-service:
     db_host: mysqldb
     db_port: 3306
     db_user: account_lookup
-    db_password: ml_password
+    ## Secret-Management
+    ### Set this is you are using a clear password configured in the config section
+    db_password: HY#Mz%_z
+    ### Configure this if you want to use a secret. Note, this will override the db_password,
+    ### except for the init-container where you will need to uncomment out the appropriate config line.
+    ### Use the next line if you do wish to use the db_password value instead.
+    # db_secret:
+    ### Example config for an existing secret
+    # db_secret:
+    #   name: mysqldb
+    #   key: mysql-password
     db_database: account_lookup
     db_connection_pool_min: 10
     db_connection_pool_max: 30
@@ -161,8 +171,16 @@ account-lookup-service:
           value: '{{ .Values.config.db_port }}'
         - name: DB_USER
           value: '{{ .Values.config.db_user }}'
+        ## Secret-Management
+        ### Uncomment this is you are using a clear password configured in the config section
         - name: DB_PASSWORD
           value: '{{ .Values.config.db_password }}'
+        ### Use this if you wish to reference an existing secret
+        # - name: DB_PASSWORD
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: '{{ .Values.config.db_secret.name }}'
+        #       key: '{{ .Values.config.db_secret.key }}'
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
 
@@ -344,7 +362,17 @@ account-lookup-service-admin:
     db_host: mysqldb
     db_port: 3306
     db_user: account_lookup
-    db_password: ml_password
+    ## Secret-Management
+    ### Set this is you are using a clear password configured in the config section
+    db_password: HY#Mz%_z
+    ### Configure this if you want to use a secret. Note, this will override the db_password,
+    ### except for the init-container where you will need to uncomment out the appropriate config line.
+    ### Use the next line if you do wish to use the db_password value instead.
+    # db_secret:
+    ### Example config for an existing secret
+    # db_secret:
+    #   name: mysqldb
+    #   key: mysql-password
     db_database: account_lookup
     db_connection_pool_min: 10
     db_connection_pool_max: 30
@@ -437,8 +465,16 @@ account-lookup-service-admin:
           value: '{{ .Values.config.db_port }}'
         - name: DB_USER
           value: '{{ .Values.config.db_user }}'
+        ## Secret-Management
+        ### Uncomment this is you are using a clear password configured in the config section
         - name: DB_PASSWORD
           value: '{{ .Values.config.db_password }}'
+        ### Use this if you wish to reference an existing secret
+        # - name: DB_PASSWORD
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: '{{ .Values.config.db_secret.name }}'
+        #       key: '{{ .Values.config.db_secret.key }}'
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
     - name: run-migration
@@ -451,8 +487,16 @@ account-lookup-service-admin:
       env:
         - name: ALS_MIGRATIONS__RUN_DATA_MIGRATIONS
           value: 'true'
+        ## Secret-Management
+        ### Uncomment this is you are using a clear password configured in the config section
         - name: ALS_DATABASE__PASSWORD
           value: '{{ .Values.config.db_password }}'
+        ### Use this if you wish to reference an existing secret
+        # - name: ALS_DATABASE__PASSWORD
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: '{{ .Values.config.db_secret.name }}'
+        #       key: '{{ .Values.config.db_secret.key }}'
       volumeMounts:
         - name: '{{ template "account-lookup-service-admin.fullname" . }}-config-volume'
           mountPath: /opt/app/config

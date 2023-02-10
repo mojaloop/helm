@@ -54,7 +54,14 @@ spec:
           {{- end }}
           env:
             - name: ALS_DATABASE__PASSWORD
+            {{- if .Values.config.db_secret }}
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ .Values.config.db_secret.name }}'
+                  key: '{{ .Values.config.db_secret.key }}'
+            {{- else }}
               value: {{ .Values.config.db_password }}
+            {{- end }}
             - name: LOG_LEVEL
               value: {{ .Values.config.log_level }}
             - name: CSL_LOG_TRANSPORT
