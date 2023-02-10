@@ -10,11 +10,26 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   type: {{ .Values.service.type }}
+  {{- if (or (eq .Values.service.type "LoadBalancer") (eq .Values.service.type "NodePort")) }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy | quote }}
+  {{- end }}
+  {{- if eq .Values.service.type "LoadBalancer" }}
+  loadBalancerSourceRanges: {{ .Values.service.loadBalancerSourceRanges }}
+  {{- end }}
+  {{- if (and (eq .Values.service.type "LoadBalancer") (not (empty .Values.service.loadBalancerIP))) }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+  {{- end }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http-admin
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.internalPort }}
       protocol: TCP
-      name: http-admin
+  {{- if .Values.diagnosticMode.enabled }}
+    - name: debug
+      port: {{ .Values.diagnosticMode.debug.port }}
+      targetPort: {{ .Values.diagnosticMode.debug.internalPort }}
+      protocol: TCP
+  {{- end }}
   selector:
     app.kubernetes.io/name: {{ include "account-lookup-service-admin.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

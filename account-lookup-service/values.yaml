@@ -4,30 +4,26 @@ account-lookup-service:
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
 
+  image:
+    registry: "docker.io"
+    repository: mojaloop/account-lookup-service
+    tag: v14.0.0
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+
   replicaCount: 1
-  containers:
-    api:
-      image:
-        repository: mojaloop/account-lookup-service
-        tag: v14.0.0
-        pullPolicy: IfNotPresent
-        command: '["node", "src/index.js", "server", "--api"]'
-      service:
-        ports:
-          api:
-            name: http-api
-            port: 4002
-    admin:
-      image:
-        repository: mojaloop/account-lookup-service
-        tag: v14.0.0
-        pullPolicy: IfNotPresent
-        command: '["node", "src/index.js", "server", "--admin"]'
-      service:
-        ports:
-          api:
-            name: http-admin
-            port: 4001
+  command: '["node", "src/index.js", "server", "--api"]'
 
   nameOverride: ""
   fullnameOverride: ""
@@ -132,20 +128,86 @@ account-lookup-service:
     # Thirdparty API Config
     featureEnableExtendedPartyIdType: false
 
-
-  init:
-    enabled: true
-    mysql:
-      enabled: true
-      name: wait-for-mysql
-      repository: mysql
-      tag: 8.0.30
-      pullPolicy: IfNotPresent
-      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+  ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  # initContainers: []
+  initContainers:
+    - name: wait-for-mysql
+      image: mysql
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          do
+            echo --------------------;
+            echo Waiting for MySQL...;
+            sleep 2; 
+          done;
+          echo ====================; 
+          echo MySQL ok!;
+      env:
+        - name: DB_HOST
+          value: '{{ .Values.config.db_host }}'
+        - name: DB_PORT
+          value: '{{ .Values.config.db_port }}'
+        - name: DB_USER
+          value: '{{ .Values.config.db_user }}'
+        - name: DB_PASSWORD
+          value: '{{ .Values.config.db_password }}'
+        - name: DB_DATABASE
+          value: '{{ .Values.config.db_database }}'
 
   service:
+    internalPort: 4002
+    ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+    ##
     type: ClusterIP
+    ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+    ##
     port: 80
+    ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+    ##
+    httpsPort: 443
+    ## Node ports to expose
+    ## @param service.nodePorts.http Node port for HTTP
+    ## @param service.nodePorts.https Node port for HTTPS
+    ## NOTE: choose port between <30000-32767>
+    ##
+    nodePorts:
+      http:
+      https:
+    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+    ## e.g.:
+    ## clusterIP: None
+    ##
+    clusterIP:
+    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    ##
+    loadBalancerIP:
+    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+    loadBalancerSourceRanges: []
+    ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+    ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    ##
+    externalTrafficPolicy: Cluster
+    ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+    ##
+    annotations: {}
 
   ingress:
     enabled: true
@@ -217,30 +279,26 @@ account-lookup-service-admin:
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
 
+  image:
+    registry: "docker.io"
+    repository: mojaloop/account-lookup-service
+    tag: v14.0.0
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+
   replicaCount: 1
-  containers:
-    api:
-      image:
-        repository: mojaloop/account-lookup-service
-        tag: v14.0.0
-        pullPolicy: IfNotPresent
-        command: '["node", "src/index.js", "server", "--api"]'
-      service:
-        ports:
-          api:
-            name: http-api
-            port: 4002
-    admin:
-      image:
-        repository: mojaloop/account-lookup-service
-        tag: v14.0.0
-        pullPolicy: IfNotPresent
-        command: '["node", "src/index.js", "server", "--admin"]'
-      service:
-        ports:
-          api:
-            name: http-admin
-            port: 4001
+  command: '["node", "src/index.js", "server", "--admin"]'
 
   nameOverride: ""
   fullnameOverride: ""
@@ -346,22 +404,101 @@ account-lookup-service-admin:
     # Thirdparty API Config
     featureEnableExtendedPartyIdType: false
 
-  init:
-    enabled: true
-    mysql:
-      name: wait-for-mysql
-      repository: mysql
-      tag: 8.0.30
-      pullPolicy: IfNotPresent
-      command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password $db_database -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
-    migration:
-      enabled: true
-      name: run-migration
-      command: npm run migrate
+  ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  # initContainers: []
+  initContainers:
+    - name: wait-for-mysql
+      image: mysql
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          do
+            echo --------------------;
+            echo Waiting for MySQL...;
+            sleep 2; 
+          done;
+          echo ====================; 
+          echo MySQL ok!;
+      env:
+        - name: DB_HOST
+          value: '{{ .Values.config.db_host }}'
+        - name: DB_PORT
+          value: '{{ .Values.config.db_port }}'
+        - name: DB_USER
+          value: '{{ .Values.config.db_user }}'
+        - name: DB_PASSWORD
+          value: '{{ .Values.config.db_password }}'
+        - name: DB_DATABASE
+          value: '{{ .Values.config.db_database }}'
+    - name: run-migration
+      image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - npm run migrate
+      env:
+        - name: ALS_MIGRATIONS__RUN_DATA_MIGRATIONS
+          value: 'true'
+        - name: ALS_DATABASE__PASSWORD
+          value: '{{ .Values.config.db_password }}'
+      volumeMounts:
+        - name: '{{ template "account-lookup-service-admin.fullname" . }}-config-volume'
+          mountPath: /opt/app/config
 
   service:
+    internalPort: 4001
+    ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+    ##
     type: ClusterIP
+    ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+    ##
     port: 80
+    ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+    ##
+    httpsPort: 443
+    ## Node ports to expose
+    ## @param service.nodePorts.http Node port for HTTP
+    ## @param service.nodePorts.https Node port for HTTPS
+    ## NOTE: choose port between <30000-32767>
+    ##
+    nodePorts:
+      http:
+      https:
+    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+    ## e.g.:
+    ## clusterIP: None
+    ##
+    clusterIP:
+    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    ##
+    loadBalancerIP:
+    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+    loadBalancerSourceRanges: []
+    ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+    ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    ##
+    externalTrafficPolicy: Cluster
+    ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+    ##
+    annotations: {}
 
   ingress:
     enabled: true
