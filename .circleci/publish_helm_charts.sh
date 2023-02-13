@@ -32,7 +32,7 @@ cd $WORKING_RELEASE_DIRECTORY
 git status
 
 echo "Staging packaged Helm charts..." | tee git.log
-git add -f repo/*.*
+git add -f ./*.*
 
 echo "Commiting changes..." | tee git.log
 git commit -a -m "'$COMMIT_MESSAGE'"
