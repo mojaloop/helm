@@ -22,6 +22,11 @@ git clone -b $GITHUB_TARGET_BRANCH --single-branch $CIRCLE_REPOSITORY_URL $WORKI
 echo "Moving packaged charts to release directory and repo folder" | tee git.log
 mv repo/*.* $WORKING_RELEASE_DIRECTORY/repo
 
+cd repo
+
+echo "Indexing repo folder" | tee git.log
+helm repo index . --url $LOCAL_HELM_MOJALOOP_REPO_URI
+
 echo "Switching to release directory" | tee git.log
 cd $WORKING_RELEASE_DIRECTORY
 git status
