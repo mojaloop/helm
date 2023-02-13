@@ -35,7 +35,7 @@ git status
 
 echo "Staging packaged Helm charts..." | tee git.log
 git config advice.addIgnoredFile false
-git add ./*.* ../README.md ../LICENSE.md ../CODEOWNERS
+git add ./*.tgz ./index.yaml ../README.md ../LICENSE.md ../CODEOWNERS
 
 echo "Commiting changes..." | tee git.log
 git commit -a -m "'$COMMIT_MESSAGE'"
