@@ -34,6 +34,7 @@ helm repo index . --url $LOCAL_HELM_MOJALOOP_REPO_URI
 git status
 
 echo "Staging packaged Helm charts..." | tee git.log
+git config advice.addIgnoredFile false
 git add ./*.* ../README.md ../LICENSE.md ../CODEOWNERS
 
 echo "Commiting changes..." | tee git.log
