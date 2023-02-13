@@ -24,10 +24,15 @@ mv repo/*.* $WORKING_RELEASE_DIRECTORY/repo
 
 echo "Switching to release directory" | tee git.log
 cd $WORKING_RELEASE_DIRECTORY
+
+echo "Indexing repo folder" | tee git.log
+cd $WORKING_RELEASE_DIRECTORY/repo
+helm repo index . --url $LOCAL_HELM_MOJALOOP_REPO_URI
+
 git status
 
 echo "Staging packaged Helm charts..." | tee git.log
-git add -f repo/*.*
+git add -f ./*.*
 
 echo "Commiting changes..." | tee git.log
 git commit -a -m "'$COMMIT_MESSAGE'"
