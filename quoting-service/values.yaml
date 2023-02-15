@@ -4,12 +4,48 @@
 # Declare global configurations
 global: {}
 
-# Declare variables to be passed into your templates.
-replicaCount: 1
 image:
+  registry: "docker.io"
   repository: mojaloop/quoting-service
   tag: v15.0.2
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
   pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## e.g:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
+
+replicaCount: 1
+command: '["node", "src/index.js"]' 
+
+## Enable diagnostic mode in the deployment
+##
+diagnosticMode:
+  ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+  ##
+  enabled: false
+  ## @param diagnosticMode.command Command to override all containers in the deployment
+  ##
+  command: 
+    - node
+    - src/index.js
+  ## @param diagnosticMode.args Args to override all containers in the deployment
+  ##
+  args:
+    - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+  
+  ## @param diagnosticMode.debug config to override all debug information
+  ##
+  debug:
+    internalPort: 9229
+    port: 9229
 
 readinessProbe:
   enabled: true
@@ -36,6 +72,15 @@ nodeSelector: {}
 ## Set toleration for scheduler
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
+
+## Configure Container Security Context
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+## @param containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+##
+containerSecurityContext:
+  enabled: true
+  runAsUser: 1001
 
 sidecar:
   enabled: true
@@ -71,23 +116,24 @@ config:
   # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
   # and for generating requests/callbacks from the Switch itself (DEFAULT value)
   protocol_versions: {
-    "CONTENT": {
-        "DEFAULT": "1.1",
-        "VALIDATELIST": [
-            "1",
-            "1.0",
-            "1.1"
-        ]
-    },
-    "ACCEPT": {
-        "DEFAULT": "1",
-        "VALIDATELIST": [
-            "1",
-            "1.0",
-            "1.1"
-        ]
+        "CONTENT": {
+            "DEFAULT": "1.1",
+            "VALIDATELIST": [
+                "1",
+                "1.0",
+                "1.1"
+            ]
+        },
+        "ACCEPT": {
+            "DEFAULT": "1",
+            "VALIDATELIST": [
+                "1",
+                "1.0",
+                "1.1"
+            ]
+        }
     }
-}
+
   ## DB Configuration
   # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
   db_type: 'mysql'
@@ -96,7 +142,17 @@ config:
   db_host: mysqldb
   db_port: 3306
   db_user: central_ledger
-  db_password: ml_password
+  ## Secret-Management
+  ### Set this is you are using a clear password configured in the config section
+  db_password: ''
+  ### Configure this if you want to use a secret. Note, this will override the db_password,
+  ### except for the init-container where you will need to uncomment out the appropriate config line.
+  ### Use the next line if you do wish to use the db_password value instead.
+  # db_secret:
+  ### Example config for an existing secret
+  # db_secret:
+  #   name: mysqldb
+  #   key: mysql-password
   db_database: central_ledger
   db_connection_pool_min: 10
   db_connection_pool_max: 30
@@ -150,37 +206,93 @@ config:
 
 rules: []
 
-init:
-  enabled: true
-  mysql:
-    name: wait-for-mysql
-    repository: mysql
-    tag: 8.0.30
-    pullPolicy: IfNotPresent
-    command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+## e.g:
+## initContainers:
+##  - name: your-image-name
+##    image: your-image
+##    imagePullPolicy: Always
+##    command: ['sh', '-c', 'echo "hello world"']
+##
+# initContainers: []
+initContainers: |
+  - name: wait-for-mysql
+    image: mysql:5.7
+    imagePullPolicy: IfNotPresent
+    command:
+      - sh
+      - -c
+      - |
+        until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
+        do
+          echo --------------------;
+          echo Waiting for MySQL...;
+          sleep 2; 
+        done;
+        echo ====================; 
+        echo MySQL ok!;
+    env:
+      - name: DB_HOST
+        value: '{{ .Values.config.db_host }}'
+      - name: DB_PORT
+        value: '{{ .Values.config.db_port }}'
+      - name: DB_USER
+        value: '{{ .Values.config.db_user }}'
+      - name: DB_PASSWORD
+        {{- if not (empty .Values.config.db_secret) }}
+        valueFrom:
+            secretKeyRef:
+              name: '{{ .Values.config.db_secret.name }}'
+              key: '{{ .Values.config.db_secret.key }}'
+        {{- else }}
+          value: {{ .Values.config.db_password }}
+        {{- end }}
+      - name: DB_DATABASE
+        value: '{{ .Values.config.db_database }}'
 
 service:
+  internalPort: 3002
+  ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+  ##
   type: ClusterIP
-  ports:
-    api:
-      name: http-api
-      externalPort: 80
-      internalPort: 3002
-
+  ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+  ##
+  port: 80
+  ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+  ##
+  httpsPort: 443
+  ## Node ports to expose
+  ## @param service.nodePorts.http Node port for HTTP
+  ## @param service.nodePorts.https Node port for HTTPS
+  ## NOTE: choose port between <30000-32767>
+  ##
+  nodePorts:
+    http:
+    https:
+  ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+  ## e.g.:
+  ## clusterIP: None
+  ##
+  clusterIP:
+  ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+  ##
+  loadBalancerIP:
+  ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+  ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+  ## e.g:
+  ## loadBalancerSourceRanges:
+  ##   - 10.10.10.0/24
+  ##
+  loadBalancerSourceRanges: []
+  ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+  ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  ##
+  externalTrafficPolicy: Cluster
+  ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+  ##
   annotations: {}
-
-  # This allows one to point the service to an external backend.
-  # This is useful for local development where one wishes to hijack
-  # the communication from the service to the node layer and point
-  # to a specific endpoint (IP, Port, etc).
-  external:
-    enabled: false
-    # 10.0.2.2 is the magic IP for the host on virtualbox's network
-    ip: 10.0.2.2
-    ports:
-      api:
-        name: http-api
-        externalPort: 3002
 
 ingress:
   enabled: true
