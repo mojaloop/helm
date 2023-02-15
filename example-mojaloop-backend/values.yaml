@@ -88,6 +88,39 @@ mysql:
     ##   replicator: /vault/secrets/mysql-replicator
     ##
     customPasswordFiles: {}
+
+  ## @section MySQL Primary parameters
+  primary:
+    persistence:
+    ## @param primary.persistence.enabled Enable persistence on MySQL primary replicas using a `PersistentVolumeClaim`. If false, use emptyDir
+    ##
+      enabled: false
+
+    ## @param primary.extraEnvVars Extra environment variables to be set on MySQL primary containers
+    ## E.g.
+    ## extraEnvVars:
+    ##  - name: TZ
+    ##    value: "Europe/Paris"
+    ##
+    # extraEnvVars: []
+    extraEnvVars:
+      - name: ACCOUNT_LOOKUP_DATABASE
+        value: "account_lookup"
+      - name: ACCOUNT_LOOKUP_USER
+        value: "account_lookup"
+      - name: CENTRAL_LEDGER_DATABASE
+        value: "central_ledger"
+      - name: CENTRAL_LEDGER_USER
+        value: "central_ledger"
+      - name: CONTENT_ORACLE_DATABASE
+        value: "consent_oracle"
+      - name: CONTENT_ORACLE_USER
+        value: "consent_oracle"
+      - name: AUTH_SVC_DATABASE
+        value: "auth_svc"
+      - name: AUTH_SVC_USER
+        value: "auth_svc"
+
   ## @param initdbScripts Dictionary of initdb scripts
   ## Specify dictionary of scripts to be run at first boot
   initdbScripts:
@@ -96,14 +129,15 @@ mysql:
     accountLookupInit.sh: |
       #!/bin/bash
       set -e
-      DB_NAME=account_lookup
-      DB_USER=account_lookup
+      DB_NAME=$ACCOUNT_LOOKUP_DATABASE
+      DB_USER=$ACCOUNT_LOOKUP_USER
+      DB_PASS=$MYSQL_PASSWORD
       echo "******* Creating '$DB_NAME' DB with user '$DB_USER' *******"
       mysql -u root -p$MYSQL_ROOT_PASSWORD -e \
         "DROP DATABASE IF EXISTS $DB_NAME;
         CREATE DATABASE $DB_NAME;
         DROP USER IF EXISTS $DB_USER@'%';
-        CREATE USER '$DB_USER'@'%' IDENTIFIED WITH mysql_native_password BY '$MYSQL_PASSWORD';
+        CREATE USER '$DB_USER'@'%' IDENTIFIED WITH mysql_native_password BY '$DB_PASS';
         GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%';
         FLUSH PRIVILEGES;"
       echo "******* Database '$DB_NAME' config complete *******"
@@ -111,14 +145,15 @@ mysql:
     centralLedgerInit.sh: |
       #!/bin/bash
       set -e
-      DB_NAME=central_ledger
-      DB_USER=central_ledger
+      DB_NAME=$CENTRAL_LEDGER_DATABASE
+      DB_USER=$CENTRAL_LEDGER_USER
+      DB_PASS=$MYSQL_PASSWORD
       echo "******* Creating '$DB_NAME' DB with user '$DB_USER' *******"
       mysql -u root -p$MYSQL_ROOT_PASSWORD -e \
         "DROP DATABASE IF EXISTS $DB_NAME;
         CREATE DATABASE $DB_NAME;
         DROP USER IF EXISTS $DB_USER@'%';
-        CREATE USER '$DB_USER'@'%' IDENTIFIED WITH mysql_native_password BY '$MYSQL_PASSWORD';
+        CREATE USER '$DB_USER'@'%' IDENTIFIED WITH mysql_native_password BY '$DB_PASS';
         GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%';
         FLUSH PRIVILEGES;"
       echo "******* Database '$DB_NAME' config complete *******"
@@ -126,14 +161,15 @@ mysql:
     consentOracleInit.sh: |
       #!/bin/bash
       set -e
-      DB_NAME=consent_oracle
-      DB_USER=consent_oracle
+      DB_NAME=$CONTENT_ORACLE_DATABASE
+      DB_USER=$CONTENT_ORACLE_USER
+      DB_PASS=$MYSQL_PASSWORD
       echo "******* Creating '$DB_NAME' DB with user '$DB_USER' *******"
       mysql -u root -p$MYSQL_ROOT_PASSWORD -e \
         "DROP DATABASE IF EXISTS $DB_NAME;
         CREATE DATABASE $DB_NAME;
         DROP USER IF EXISTS $DB_USER@'%';
-        CREATE USER '$DB_USER'@'%' IDENTIFIED WITH mysql_native_password BY '$MYSQL_PASSWORD';
+        CREATE USER '$DB_USER'@'%' IDENTIFIED WITH mysql_native_password BY '$DB_PASS';
         GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%';
         FLUSH PRIVILEGES;"
       echo "******* Database '$DB_NAME' config complete *******"
@@ -141,24 +177,18 @@ mysql:
     authSvcInit.sh: |-
       #!/bin/bash
       set -e
-      DB_NAME=auth_svc
-      DB_USER=auth_svc
+      DB_NAME=$AUTH_SVC_DATABASE
+      DB_USER=$AUTH_SVC_USER
+      DB_PASS=$MYSQL_PASSWORD
       echo "******* Creating '$DB_NAME' DB with user '$DB_USER' *******"
       mysql -u root -p$MYSQL_ROOT_PASSWORD -e \
         "DROP DATABASE IF EXISTS $DB_NAME;
         CREATE DATABASE $DB_NAME;
         DROP USER IF EXISTS $DB_USER@'%';
-        CREATE USER '$DB_USER'@'%' IDENTIFIED WITH mysql_native_password BY '$MYSQL_PASSWORD';
+        CREATE USER '$DB_USER'@'%' IDENTIFIED WITH mysql_native_password BY '$DB_PASS';
         GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%';
         FLUSH PRIVILEGES;"
       echo "******* Database '$DB_NAME' config complete *******"
-
-  ## @section MySQL Primary parameters
-  primary:
-    persistence:
-    ## @param primary.persistence.enabled Enable persistence on MySQL primary replicas using a `PersistentVolumeClaim`. If false, use emptyDir
-    ##
-      enabled: false
 
 ## Reference: https://github.com/bitnami/charts/blob/main/bitnami/mongodb/values.yaml
 cl-mongodb:
