@@ -28,7 +28,7 @@
     helm repo add elastic https://helm.elastic.co
     helm repo add codecentric https://codecentric.github.io/helm-charts
     helm repo add bitnami https://charts.bitnami.com/bitnami
-    helm repo add mojaloop-charts https://docs.mojaloop.io/charts/repo
+    helm repo add mojaloop-charts https://mojaloop.github.io/charts/repo 
     helm repo add redpanda-console https://packages.vectorized.io/public/console/helm/charts/
     ```
 
