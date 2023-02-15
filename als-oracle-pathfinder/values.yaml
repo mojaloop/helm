@@ -93,7 +93,7 @@ config:
       user: 'central_ledger'
       ## Secret-Management
       ### Set this is you are using a clear password configured in the config section
-      password: 'oyMxgZChuu'
+      password: ''
       ### Configure this if you want to use a secret. Note, this will override the db_password,
       ### except for the init-container where you will need to uncomment out the appropriate config line.
       ### Use the next line if you do wish to use the db_password value instead.
@@ -109,7 +109,7 @@ config:
       user: 'account_lookup'
       ## Secret-Management
       ### Set this is you are using a clear password configured in the config section
-      password: 'OdonPianoX'
+      password: ''
       ### Configure this if you want to use a secret. Note, this will override the db_password,
       ### except for the init-container where you will need to uncomment out the appropriate config line.
       ### Use the next line if you do wish to use the db_password value instead.
@@ -267,7 +267,7 @@ config:
 ##    command: ['sh', '-c', 'echo "hello world"']
 ##
 # initContainers: []
-initContainers:
+initContainers: |
   - name: wait-for-mysql-central-ledger
     image: mysql:5.7
     imagePullPolicy: IfNotPresent
@@ -290,16 +290,15 @@ initContainers:
         value: '{{ .Values.config.db.central_ledger.port }}'
       - name: DB_USER
         value: '{{ .Values.config.db.central_ledger.user }}'
-      ## Secret-Management
-      ### Uncomment this is you are using a clear password configured in the config section
       - name: DB_PASSWORD
-      #   value: '{{ .Values.config.db.central_ledger.password }}'
-      ### Use this if you wish to reference an existing secret
-      # - name: DB_PASSWORD
-      #   valueFrom:
-      #     secretKeyRef:
-      #       name: '{{ .Values.config.db.central_ledger.secret.name }}'
-      #       key: '{{ .Values.config.db.central_ledger.secret.key }}'
+        {{- if not (empty .Values.config.db.central_ledger.secret) }}
+        valueFrom:
+            secretKeyRef:
+              name: '{{ .Values.config.db.central_ledger.secret.name }}'
+              key: '{{ .Values.config.db.central_ledger.secret.key }}'
+        {{- else }}
+          value: {{ .Values.config.db.central_ledger.password }}
+        {{- end }}
       - name: DB_DATABASE
         value: '{{ .Values.config.db.central_ledger.database }}'
   - name: init-mysql-central-ledger
@@ -320,16 +319,15 @@ initContainers:
         value: '{{ .Values.config.db.central_ledger.port }}'
       - name: DB_USER
         value: '{{ .Values.config.db.central_ledger.user }}'
-      ## Secret-Management
-      ### Uncomment this is you are using a clear password configured in the config section
       - name: DB_PASSWORD
-        value: '{{ .Values.config.db.central_ledger.password }}'
-      ### Use this if you wish to reference an existing secret
-      # - name: DB_PASSWORD
-      #   valueFrom:
-      #     secretKeyRef:
-      #       name: '{{ .Values.config.db.central_ledger.secret.name }}'
-      #       key: '{{ .Values.config.db.central_ledger.secret.key }}'
+        {{- if not (empty .Values.config.db.central_ledger.secret) }}
+        valueFrom:
+            secretKeyRef:
+              name: '{{ .Values.config.db.central_ledger.secret.name }}'
+              key: '{{ .Values.config.db.central_ledger.secret.key }}'
+        {{- else }}
+          value: {{ .Values.config.db.central_ledger.password }}
+        {{- end }}
       - name: DB_DATABASE
         value: '{{ .Values.config.db.central_ledger.database }}'
       - name: SERVICE_NAME
@@ -356,16 +354,15 @@ initContainers:
         value: '{{ .Values.config.db.account_lookup.port }}'
       - name: DB_USER
         value: '{{ .Values.config.db.account_lookup.user }}'
-      ## Secret-Management
-      ### Uncomment this is you are using a clear password configured in the config section
       - name: DB_PASSWORD
-        value: '{{ .Values.config.db.account_lookup.password }}'
-      ### Use this if you wish to reference an existing secret
-      # - name: DB_PASSWORD
-      #   valueFrom:
-      #     secretKeyRef:
-      #       name: '{{ .Values.config.db.account_lookup.secret.name }}'
-      #       key: '{{ .Values.config.db.account_lookup.secret.key }}'
+        {{- if not (empty .Values.config.db.account_lookup.secret) }}
+        valueFrom:
+            secretKeyRef:
+              name: '{{ .Values.config.db.account_lookup.secret.name }}'
+              key: '{{ .Values.config.db.account_lookup.secret.key }}'
+        {{- else }}
+          value: {{ .Values.config.db.account_lookup.password }}
+        {{- end }}
       - name: DB_DATABASE
         value: '{{ .Values.config.db.account_lookup.database }}'
   - name: init-mysql-account-lookup
@@ -386,16 +383,15 @@ initContainers:
         value: '{{ .Values.config.db.account_lookup.port }}'
       - name: DB_USER
         value: '{{ .Values.config.db.account_lookup.user }}'
-      ## Secret-Management
-      ### Uncomment this is you are using a clear password configured in the config section
       - name: DB_PASSWORD
-        value: '{{ .Values.config.db.account_lookup.password }}'
-      ### Use this if you wish to reference an existing secret
-      # - name: DB_PASSWORD
-      #   valueFrom:
-      #     secretKeyRef:
-      #       name: '{{ .Values.config.db.account_lookup.secret.name }}'
-      #       key: '{{ .Values.config.db.account_lookup.secret.key }}'
+        {{- if not (empty .Values.config.db.account_lookup.secret) }}
+        valueFrom:
+            secretKeyRef:
+              name: '{{ .Values.config.db.account_lookup.secret.name }}'
+              key: '{{ .Values.config.db.account_lookup.secret.key }}'
+        {{- else }}
+          value: {{ .Values.config.db.account_lookup.password }}
+        {{- end }}
       - name: DB_DATABASE
         value: '{{ .Values.config.db.account_lookup.database }}'
       - name: SERVICE_NAME
