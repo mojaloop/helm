@@ -15,7 +15,9 @@ metadata:
       {{ $key }}: {{ $value | quote }}
     {{- end }}
 spec:
-  ingressClassName: nginx
+  {{- if and $.Values.ingress.className (semverCompare ">=1.22-0" $.Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ default "nginx" $.Values.ingress.className }}
+  {{- end }}
   rules:
     {{- range $hostname, $service := .Values.ingress.hosts }}
     - host: {{ $hostname }}
