@@ -47,6 +47,10 @@ spec:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.image.imagePullSecrets }}
+          imagePullSecrets:
+          {{- include "common.tplvalues.render" (dict "value" .Values.image.imagePullSecrets  "context" $) | nindent 10 }}
+          {{- end }}
           {{- if .Values.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
