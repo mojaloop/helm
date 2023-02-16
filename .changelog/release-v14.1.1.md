@@ -92,11 +92,11 @@ Date | Revision | Description
 
 ## 5. Breaking changes
 
-[Breaking changes from v14.1.0 Release notes](https://github.com/mojaloop/helm/blob/master/.changelog/release-v14.1.0.md#5-breaking-changes) are applicable here if upgrading from v14.0.0.
+[Breaking changes from v14.1.0 Release notes](./release-v14.1.0.md#5-breaking-changes) are applicable here if upgrading from v14.0.0.
 
 ## 6. Deprecations
 
-[Deprecation notices from v14.1.0 Release notes](https://github.com/mojaloop/helm/blob/master/.changelog/release-v14.1.0.md#6-deprecations) are applicable.
+[Deprecation notices from v14.1.0 Release notes](./release-v14.1.0.md#6-deprecations) are applicable.
 
 ## 7. Testing notes
 
