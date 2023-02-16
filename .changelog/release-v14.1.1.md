@@ -55,7 +55,7 @@ Date | Revision | Description
 19. sdk-scheme-adapter: **v21.4.0**
 20. ml-testing-toolkit: v15.2.0 -> **v15.7.0** ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.2.0...v15.7.0))
 21. ml-testing-toolkit-ui: v15.0.1 -> **v15.1.3** ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.0.1...v15.1.3))
-22. ml-testing-toolkit-client-lib: v1.0.0 -> **v1.0.1** ([Compare](https://github.com/mojaloop/ml-testing-toolkit-client-lib/compare/v1.0.0...v1.1.1))
+22. ml-testing-toolkit-client-lib: v1.0.0 -> **v1.1.1** ([Compare](https://github.com/mojaloop/ml-testing-toolkit-client-lib/compare/v1.0.0...v1.1.1))
 23. auth-service: **v13.0.2**
 24. als-consent-oracle: **v0.2.0**
 25. thirdparty-api-svc: **v13.0.2**
@@ -84,7 +84,7 @@ Date | Revision | Description
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v21.4.0
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v15.7.0
 21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.1.3
-22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.1.0
+22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.1.1
 23. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v13.0.2
 24. als-consent-oracle - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.0
 25. thirdparty-api-svc - https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v13.0.2
@@ -92,7 +92,11 @@ Date | Revision | Description
 
 ## 5. Breaking changes
 
+[Breaking changes from v14.1.0 Release notes](https://github.com/mojaloop/helm/blob/master/.changelog/release-v14.1.0.md#5-breaking-changes) are applicable here if upgrading from v14.0.0.
+
 ## 6. Deprecations
+
+[Deprecation notices from v14.1.0 Release notes](https://github.com/mojaloop/helm/blob/master/.changelog/release-v14.1.0.md#6-deprecations) are applicable.
 
 ## 7. Testing notes
 
