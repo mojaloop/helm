@@ -96,6 +96,10 @@ Date | Revision | Description
 
 ## 7. Testing notes
 
+1. This release has been tested against the following:
+    - Kubernetes: `v1.24.8`
+    - Testing Toolkit Test Cases: [v14.1.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v14.1.0)
+
 ## 8. Known Issues
 
 1. [#2119 - Idempotency for duplicate quote request](https://github.com/mojaloop/project/issues/2119)
