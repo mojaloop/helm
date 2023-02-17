@@ -32,6 +32,17 @@ CONFIG:
   obj_mongo_database: &OBJSTORE_MONGO_DATABASE mlos
   objstore_uri: &OBJSTORE_URI 'mongodb://mojaloop:password@cl-mongodb:27017/mlos'
 
+  ## TTK MONGODB BACKEND (Using the existing central ledger object store)
+  ### FOR default
+  ttk_mongodb_host: &TTK_MONGODB_HOST "$release_name-centralledger-obj"
+  ### FOR example-mojaloop-backend
+  # ttk_mongodb_host: &TTK_MONGODB_HOST backend-centralledger-obj
+  ttk_mongodb_port: &TTK_MONGODB_PORT "27017"
+  ### FOR default
+  ttk_mongodb_uri: &TTK_MONGODB_URI 'mongodb://ttk:ttk@$release_name-centralledger-obj:27017/ttk'
+  ### FOR example-mojaloop-backend
+  # ttk_mongodb_uri: &TTK_MONGODB_URI 'mongodb://ttk:ttk@backend-centralledger-obj:27017/ttk'
+
   ## CENTRAL-EVEN-PROCESSOR Backend
   cep_mongo_host: &CEP_MONGO_HOST 'cep-mongodb'
   cep_mongo_port: &CEP_MONGO_PORT 27017
@@ -7035,7 +7046,7 @@ thirdparty:
       ports:
         externalPort: 4004
         internalPort: 4004
-    
+
     ingress:
       ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
       ##
@@ -8633,14 +8644,21 @@ mojaloop-ttk-simulators:
               host: 'ttksim1-specapi.local'
             adminApi:
               host: 'ttksim1.local'
-
+        dependencies:
+          mongodb:
+            enabled: true
+            host: *TTK_MONGODB_HOST
+            port: *TTK_MONGODB_PORT
         config:
-          ## TODO: Update the below line once the rules have been migrated to https://github.com/mojaloop/sdk-scheme-adapter 
-          rules_response__default.json: 'https://github.com/mojaloop/testing-toolkit-test-cases/raw/v14.1.0/rules/sdk-bulk/response_rules.json'
-          # rules_response__default.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.4.0/test/func/config/ttk-ttksim1/spec_files/rules_response/default.json'
-          api_definitions__mojaloop_simulator_sim_1.4__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.4.0/test/func/config/ttk-ttksim1/spec_files/api_definitions/mojaloop_simulator_sim_1.4/api_spec.yaml'
-          api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.4.0/test/func/config/ttk-ttksim1/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/api_spec.yaml'
-          api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__callback_map.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.4.0/test/func/config/ttk-ttksim1/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/callback_map.json'
+          system_config.json: {
+            "DB": {
+              "URI": *TTK_MONGODB_URI
+            }
+          }
+          rules_response__default.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim1/spec_files/rules_response/default.json'
+          api_definitions__mojaloop_simulator_sim_1.4__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim1/spec_files/api_definitions/mojaloop_simulator_sim_1.4/api_spec.yaml'
+          api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim1/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/api_spec.yaml'
+          api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__callback_map.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim1/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/callback_map.json'
 
         extraEnvironments:
           hub-k8s-default-environment.json: &ttksim1InputValues {
@@ -8841,12 +8859,10 @@ mojaloop-ttk-simulators:
             adminApi:
               host: 'ttksim2.local'
         config:
-          ## TODO: Update the below line once the rules have been migrated to https://github.com/mojaloop/sdk-scheme-adapter 
-          rules_response__default.json: 'https://github.com/mojaloop/testing-toolkit-test-cases/raw/v14.1.0/rules/sdk-bulk/response_rules.json'
-          # rules_response__default.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.4.0/test/func/config/ttk-ttksim2/spec_files/rules_response/default.json'
-          api_definitions__mojaloop_simulator_sim_1.4__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.4.0/test/func/config/ttk-ttksim2/spec_files/api_definitions/mojaloop_simulator_sim_1.4/api_spec.yaml'
-          api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.4.0/test/func/config/ttk-ttksim2/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/api_spec.yaml'
-          api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__callback_map.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.4.0/test/func/config/ttk-ttksim2/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/callback_map.json'
+          rules_response__default.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim2/spec_files/rules_response/default.json'
+          api_definitions__mojaloop_simulator_sim_1.4__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim2/spec_files/api_definitions/mojaloop_simulator_sim_1.4/api_spec.yaml'
+          api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim2/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/api_spec.yaml'
+          api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__callback_map.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim2/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/callback_map.json'
 
       ml-testing-toolkit-frontend:
         ingress:
@@ -9017,12 +9033,10 @@ mojaloop-ttk-simulators:
             adminApi:
               host: 'ttksim3.local'
         config:
-          ## TODO: Update the below line once the rules have been migrated to https://github.com/mojaloop/sdk-scheme-adapter 
-          rules_response__default.json: 'https://github.com/mojaloop/testing-toolkit-test-cases/raw/v14.1.0/rules/sdk-bulk/response_rules.json'
-          # rules_response__default.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.4.0/test/func/config/ttk-ttksim3/spec_files/rules_response/default.json'
-          api_definitions__mojaloop_simulator_sim_1.4__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.4.0/test/func/config/ttk-ttksim3/spec_files/api_definitions/mojaloop_simulator_sim_1.4/api_spec.yaml'
-          api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.4.0/test/func/config/ttk-ttksim3/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/api_spec.yaml'
-          api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__callback_map.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.4.0/test/func/config/ttk-ttksim3/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/callback_map.json'
+          rules_response__default.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim3/spec_files/rules_response/default.json'
+          api_definitions__mojaloop_simulator_sim_1.4__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim3/spec_files/api_definitions/mojaloop_simulator_sim_1.4/api_spec.yaml'
+          api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim3/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/api_spec.yaml'
+          api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__callback_map.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim3/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/callback_map.json'
 
       ml-testing-toolkit-frontend:
         ingress:
@@ -10214,6 +10228,11 @@ ml-testing-toolkit:
   enabled: true
 
   ml-testing-toolkit-backend:
+    dependencies:
+      mongodb:
+        enabled: true
+        host: *TTK_MONGODB_HOST
+        port: *TTK_MONGODB_PORT
     ingress:
       enabled: true
       hosts:
@@ -10223,7 +10242,12 @@ ml-testing-toolkit:
           host: testing-toolkit.local
     config:
       user_config.json: {
-        "DEFAULT_ENVIRONMENT_FILE_NAME": "hub-k8s-default-environment.json" 
+        "DEFAULT_ENVIRONMENT_FILE_NAME": "hub-k8s-default-environment.json"
+      }
+      system_config.json: {
+        "DB": {
+          "URI": *TTK_MONGODB_URI
+        }
       }
       ## We can specify the files and folders here those we want to override in the TTK `spec_files` directory.
       ## For example, you can specify user_config.json, system_config.json ...etc
@@ -10631,6 +10655,8 @@ ml-ttk-test-val-gp:
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     testSuiteName: GP Tests
     environmentName: Development
+    saveReport: true
+    saveReportBaseUrl: "testing-toolkit.local"
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -10669,6 +10695,8 @@ ml-ttk-test-val-bulk:
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     testSuiteName: Bulk Tests
     environmentName: Development
+    saveReport: true
+    saveReportBaseUrl: "testing-toolkit.local"
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -10745,6 +10773,8 @@ ml-ttk-test-val-tp:
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     testSuiteName: Thirdparty Tests
     environmentName: Development
+    saveReport: true
+    saveReportBaseUrl: "testing-toolkit.local"
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -10821,6 +10851,8 @@ ml-ttk-test-val-sdk-bulk:
     ttkBackendURL: http://$release_name-ttksim1-ttk-backend:5050
     testSuiteName: SDK Bulk Tests
     environmentName: Development
+    saveReport: true
+    saveReportBaseUrl: "testing-toolkit.local"
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'

@@ -135,7 +135,6 @@ jobs:
             fi
             mv /tmp/license-scanner/results/license-summary.xlsx ./license-summary-${CIRCLE_TAG}.xlsx
             .circleci/upload-github-release-asset.sh github_api_token=$GITHUB_TOKEN owner=mojaloop repo=helm tag=${CIRCLE_TAG} filename=license-summary-${CIRCLE_TAG}.xlsx
-
       - store_artifacts:
           path: /tmp/license-scanner/results
           prefix: licenses
@@ -178,11 +177,10 @@ jobs:
           command: |
             echo "Setting BASH_ENV..."
             source $BASH_ENV
-
             git config --global user.email "$GIT_CI_USER"
-            git config --global user.password "$GIT_CI_PASSWORD"
             git config --global user.name "$GIT_CI_EMAIL"
-            git remote add $GITHUB_PROJECT_USERNAME https://$GIT_CI_USER:$GITHUB_TOKEN@github.com/$GITHUB_PROJECT_USERNAME/$GITHUB_PROJECT_REPONAME.git
+      ## Commenting this out because it might be conflicting with circleci user ssh key
+      #      git remote add $GITHUB_PROJECT_USERNAME https://$GIT_CI_USER:$GITHUB_TOKEN@github.com/$GITHUB_PROJECT_USERNAME/$GITHUB_PROJECT_REPONAME.git
       - run:
           name: Publish Helm Charts
           command: .circleci/publish_helm_charts.sh
