@@ -39,7 +39,6 @@ else
         centralsettlement
         emailnotifier
         centraleventprocessor
-        central
         ml-api-adapter
         quoting-service
         finance-portal
