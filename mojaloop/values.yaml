@@ -32,16 +32,13 @@ CONFIG:
   obj_mongo_database: &OBJSTORE_MONGO_DATABASE mlos
   objstore_uri: &OBJSTORE_URI 'mongodb://mojaloop:password@cl-mongodb:27017/mlos'
 
-  ## TTK MONGODB BACKEND (Using the existing central ledger object store)
-  ### FOR default
-  ttk_mongodb_host: &TTK_MONGODB_HOST "$release_name-centralledger-obj"
-  ### FOR example-mojaloop-backend
-  # ttk_mongodb_host: &TTK_MONGODB_HOST backend-centralledger-obj
-  ttk_mongodb_port: &TTK_MONGODB_PORT "27017"
-  ### FOR default
-  ttk_mongodb_uri: &TTK_MONGODB_URI 'mongodb://ttk:ttk@$release_name-centralledger-obj:27017/ttk'
-  ### FOR example-mojaloop-backend
-  # ttk_mongodb_uri: &TTK_MONGODB_URI 'mongodb://ttk:ttk@backend-centralledger-obj:27017/ttk'
+  ## TTK MONGODB BACKEND
+  ttk_mongo_host: &TTK_MONGO_HOST "ttk-mongodb"
+  ttk_mongo_port: &TTK_MONGO_PORT "27017"
+  ttk_mongo_user: &TTK_MONGO_USER "ttk"
+  ttk_mongo_password: &TTK_MONGO_PASSWORD "ttk"
+  ttk_mongo_database: &TTK_MONGO_DATABASE "ttk"
+  ttk_mongo_uri: &TTK_MONGO_URI 'mongodb://ttk:ttk@ttk-mongodb:27017/ttk'
 
   ## CENTRAL-EVEN-PROCESSOR Backend
   cep_mongo_host: &CEP_MONGO_HOST 'cep-mongodb'
@@ -8647,12 +8644,12 @@ mojaloop-ttk-simulators:
         dependencies:
           mongodb:
             enabled: true
-            host: *TTK_MONGODB_HOST
-            port: *TTK_MONGODB_PORT
+            host: *TTK_MONGO_HOST
+            port: *TTK_MONGO_PORT
         config:
           system_config.json: {
             "DB": {
-              "URI": *TTK_MONGODB_URI
+              "URI": *TTK_MONGO_URI
             }
           }
           rules_response__default.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim1/spec_files/rules_response/default.json'
@@ -10231,8 +10228,8 @@ ml-testing-toolkit:
     dependencies:
       mongodb:
         enabled: true
-        host: *TTK_MONGODB_HOST
-        port: *TTK_MONGODB_PORT
+        host: *TTK_MONGO_HOST
+        port: *TTK_MONGO_PORT
     ingress:
       enabled: true
       hosts:
@@ -10246,7 +10243,7 @@ ml-testing-toolkit:
       }
       system_config.json: {
         "DB": {
-          "URI": *TTK_MONGODB_URI
+          "URI": *TTK_MONGO_URI
         }
       }
       ## We can specify the files and folders here those we want to override in the TTK `spec_files` directory.

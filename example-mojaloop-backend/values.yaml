@@ -250,7 +250,7 @@ cl-mongodb:
     ##
     enabled: false
 
-## TODO: Add 
+## Reference: https://github.com/bitnami/charts/blob/main/bitnami/mongodb/values.yaml
 cep-mongodb:
   enabled: true
 
@@ -290,12 +290,6 @@ cep-mongodb:
       - 'password'
     databases:
       - 'mlos'
-    ## @param auth.username DEPRECATED: use `auth.usernames` instead
-    ## @param auth.password DEPRECATED: use `auth.passwords` instead
-    ## @param auth.database DEPRECATED: use `auth.databases` instead
-    username: ""
-    password: ""
-    database: ""
     ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
     ##
     replicaSetKey: ""
@@ -309,6 +303,58 @@ cep-mongodb:
   # Enable persistence using Persistent Volume Claims
   # ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
   #
+  persistence:
+    ## @param persistence.enabled Enable MongoDB(&reg;) data persistence using PVC
+    ##
+    enabled: false
+
+## Reference: https://github.com/bitnami/charts/blob/main/bitnami/mongodb/values.yaml
+ttk-mongodb:
+  enabled: true
+
+  ## @param fullnameOverride String to fully override mongodb.fullname template
+  ##
+  fullnameOverride: "ttk-mongodb"
+  ## MongoDB(&reg;) Authentication parameters
+  ##
+  auth:
+    ## @param auth.enabled Enable authentication
+    ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
+    ##
+    enabled: true
+    ## @param auth.rootUser MongoDB(&reg;) root user
+    ##
+    rootUser: root
+    ## @param auth.rootPassword MongoDB(&reg;) root password
+    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mongodb#setting-the-root-user-and-password-on-first-run
+    ##
+    rootPassword: "adminpass"
+    ## MongoDB(&reg;) custom users and databases
+    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mongodb#creating-a-user-and-database-on-first-run
+    ## @param auth.usernames List of custom users to be created during the initialization
+    ## @param auth.passwords List of passwords for the custom users set at `auth.usernames`
+    ## @param auth.databases List of custom databases to be created during the initialization
+    ##
+    usernames:
+      - 'ttk'
+    passwords:
+      - 'ttk'
+    databases:
+      - 'ttk'
+
+    ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
+    ##
+    replicaSetKey: ""
+    ## @param auth.existingSecret Existing secret with MongoDB(&reg;) credentials (keys: `mongodb-passwords`, `mongodb-root-password`, `mongodb-metrics-password`, ` mongodb-replica-set-key`)
+    ## NOTE: When it's set the previous parameters are ignored.
+    ##
+    existingSecret: ""
+  ## @section Persistence parameters
+  ##
+
+  ## Enable persistence using Persistent Volume Claims
+  ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+  ##
   persistence:
     ## @param persistence.enabled Enable MongoDB(&reg;) data persistence using PVC
     ##
