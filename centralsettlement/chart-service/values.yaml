@@ -5,59 +5,85 @@
 global: {}
 
 # Declare variables to be passed into your templates.
+image:
+  registry: "docker.io"
+  repository: mojaloop/central-settlement
+  tag: v15.0.0
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
+  pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## e.g:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
+
 replicaCount: 1
+command: '["node", "src/handlers/index.js", "h", "--grossSettlement"]'
 
-containers:
-  api:
-    image:
-      repository: mojaloop/central-settlement
-      tag: v15.0.0
-      pullPolicy: IfNotPresent
-      command: '["node", "src/handlers/index.js", "h", "--grossSettlement"]'
-    service:
-      type: ClusterIP
-      ports:
-        api:
-          name: http-api
-          externalPort: 80
-          internalPort: 3007
-      annotations: {}
-      # This allows one to point the service to an external backend.
-      # This is useful for local development where one wishes to hijack
-      # the communication from the service to the node layer and point
-      # to a specific endpoint (IP, Port, etc).
-      external:
-        enabled: false
-        # 10.0.2.2 is the magic IP for the host on virtualbox's network
-        ip: 10.0.2.2
-        ports:
-          api:
-            name: http-api
-            externalPort: 3007
-    readinessProbe:
-      enabled: false
-      httpGet:
-        path: /health
-      initialDelaySeconds: 60
-      periodSeconds: 15
-    livenessProbe:
-      enabled: false
-      httpGet:
-        path: /health
-      initialDelaySeconds: 60
-      periodSeconds: 15
+## Enable diagnostic mode in the deployment
+##
+diagnosticMode:
+  ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+  ##
+  enabled: false
+  ## @param diagnosticMode.command Command to override all containers in the deployment
+  ##
+  command: 
+    - node
+    - src/handlers/index.js
+    - h
+    - '--grossSettlement'
+  ## @param diagnosticMode.args Args to override all containers in the deployment
+  ##
+  args:
+    - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+  
+  ## @param diagnosticMode.debug config to override all debug information
+  ##
+  debug:
+    internalPort: 9229
+    port: 9229
 
-    ## Pod scheduling preferences.
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /v2/health
+  initialDelaySeconds: 60
+  periodSeconds: 15
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /v2/health
+  initialDelaySeconds: 60
+  periodSeconds: 15
+
+## Pod scheduling preferences.
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 affinity: {}
 
-    ## Node labels for pod assignment
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+## Node labels for pod assignment
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
 nodeSelector: {}
 
-    ## Set toleration for scheduler
-    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+## Set toleration for scheduler
+## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
+
+## Configure Container Security Context
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+## @param containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+##
+containerSecurityContext:
+  enabled: true
+  runAsUser: 1001
 
 sidecar:
   enabled: false
@@ -88,7 +114,7 @@ sidecar:
     log_level: info
     log_filter: 'error, warn, info'
 
-    ## metric configuration for prometheus instrumentation
+## metric configuration for prometheus instrumentation
 metrics:
   ## flag to enable/disable the metrics end-points
   enabled: false
@@ -188,7 +214,16 @@ config:
   db_host: mysqldb
   db_port: 3306
   db_user: central_ledger
-  db_password: HY#Mz%_z
+  ## Secret-Management
+  ### Set this is you are using a clear password configured in the config section
+  db_password: ''
+  ### Configure this if you want to use a secret. Note, this will override the db_password,
+  ### Use the next line if you do wish to use the db_password value instead.
+  # db_secret:
+  ### Example config for an existing secret
+  # db_secret:
+  #   name: mysqldb
+  #   key: mysql-password
   db_database: central_ledger
   db_connection_pool_min: 10
   db_connection_pool_max: 30
@@ -291,97 +326,168 @@ config:
     #       payeeFspId)
     #   }
 
-init:
-  enabled: true
-  mysql:
-    name: wait-for-mysql
-    repository: mysql
-    tag: 8.0.30
-    pullPolicy: IfNotPresent
-    command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
-  kafka:
-    name: wait-for-kafka
-    repository: solsson/kafka
-    tag: 2.8.1
-    pullPolicy: IfNotPresent
-    command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
-    env: {}
+## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+## e.g:
+## initContainers:
+##  - name: your-image-name
+##    image: your-image
+##    imagePullPolicy: Always
+##    command: ['sh', '-c', 'echo "hello world"']
+##
+# initContainers: []
+initContainers: |
+  - name: wait-for-kafka
+    image: solsson/kafka:2.8.1
+    imagePullPolicy: IfNotPresent
+    command:
+      - sh
+      - -c
+      - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+        do
+          echo --------------------;
+          echo Waiting for Kafka...;
+          sleep 2; 
+        done;
+        echo ====================; 
+        echo Kafka ok!;
+    env:
+      - name: KAFKA_HOST
+        value: '{{ .Values.config.kafka_host }}'
+      - name: KAFKA_PORT
+        value: '{{ .Values.config.kafka_port }}'
+  - name: wait-for-mysql
+    image: mysql:5.7
+    imagePullPolicy: IfNotPresent
+    command:
+      - sh
+      - -c
+      - |
+        until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
+        do
+          echo --------------------;
+          echo Waiting for MySQL...;
+          sleep 2; 
+        done;
+        echo ====================; 
+        echo MySQL ok!;
+    env:
+      - name: DB_HOST
+        value: '{{ .Values.config.db_host }}'
+      - name: DB_PORT
+        value: '{{ .Values.config.db_port }}'
+      - name: DB_USER
+        value: '{{ .Values.config.db_user }}'
+      - name: DB_PASSWORD
+        {{- if not (empty .Values.config.db_secret) }}
+        valueFrom:
+            secretKeyRef:
+              name: '{{ .Values.config.db_secret.name }}'
+              key: '{{ .Values.config.db_secret.key }}'
+        {{- else }}
+        value: {{ .Values.config.db_password }}
+        {{- end }}
+      - name: DB_DATABASE
+        value: '{{ .Values.config.db_database }}'
+
 service:
+  internalPort: 3007
+  ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+  ##
   type: ClusterIP
-  ports:
-    api:
-      name: http-api
-      externalPort: 80
-      internalPort: 3007
+  ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+  ##
+  port: 80
+  ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+  ##
+  httpsPort: 443
+  ## Node ports to expose
+  ## @param service.nodePorts.http Node port for HTTP
+  ## @param service.nodePorts.https Node port for HTTPS
+  ## NOTE: choose port between <30000-32767>
+  ##
+  nodePorts:
+    http:
+    https:
+  ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+  ## e.g.:
+  ## clusterIP: None
+  ##
+  clusterIP:
+  ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+  ##
+  loadBalancerIP:
+  ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+  ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+  ## e.g:
+  ## loadBalancerSourceRanges:
+  ##   - 10.10.10.0/24
+  ##
+  loadBalancerSourceRanges: []
+  ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+  ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  ##
+  externalTrafficPolicy: Cluster
+  ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+  ##
   annotations: {}
 
-  # This allows one to point the service to an external backend.
-  # This is useful for local development where one wishes to hijack
-  # the communication from the service to the node layer and point
-  # to a specific endpoint (IP, Port, etc).
-  external:
-    enabled: false
-    # 10.0.2.2 is the magic IP for the host on virtualbox's network
-    ip: 10.0.2.2
-    ports:
-      api:
-        name: http-api
-        externalPort: 3007
 ingress:
   enabled: true
-    ## @param ingress.pathType Ingress path type
-    ##
+  ## @param ingress.pathType Ingress path type
+  ##
   pathType: ImplementationSpecific
-    ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
-    ##
+  ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+  ##
   apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
-    ##
+  ## @param ingress.hostname Default host for the ingress record
+  ##
   hostname: central-settlement-grosssettlement.local
-    ## @param servicePort : port for the service
-    ##
+  ## @param servicePort : port for the service
+  ##
   servicePort: 80
-    ## @param ingress.path Default path for the ingress record
-    ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+  ## @param ingress.path Default path for the ingress record
+  ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
   path: /
-    ## @param ingress.annotations Additional custom annotations for the ingress record
-    ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
-    ##
+  ## @param ingress.annotations Additional custom annotations for the ingress record
+  ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+  ##
   annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
-    ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
-    ## You can:
-    ##   - Use the `ingress.secrets` parameter to create this TLS secret
-    ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
-    ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
-    ##
+  ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+  ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+  ## You can:
+  ##   - Use the `ingress.secrets` parameter to create this TLS secret
+  ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+  ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+  ##
   tls: false
-    ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
-    ##
+  ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+  ##
   certManager: false
-    ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
-    ##
+  ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+  ##
   selfSigned: false
-    ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
-    ## e.g:
-    ## extraHosts:
-    ##   - name: transfer-api-svc.local
-    ##     path: /
-    ##
+  ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+  ## e.g:
+  ## extraHosts:
+  ##   - name: transfer-api-svc.local
+  ##     path: /
+  ##
   extraHosts:
   extraPaths:
   extraTls:
   secrets:
   className: "nginx"
-  ##
+
+# We usually recommend not to specify default resources and to leave this as a conscious
+# choice for the user. This also increases chances charts run on environments with little
+# resources, such as Minikube. If you do want to specify resources, uncomment the following
+# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+# limits:
+#  cpu: 100m
+#  memory: 128Mi
+# requests:
+#  cpu: 100m
+#  memory: 128Mi
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
