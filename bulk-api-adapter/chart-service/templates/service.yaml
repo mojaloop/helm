@@ -8,13 +8,32 @@ metadata:
     app.kubernetes.io/version: {{ .Chart.Version }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+  annotations:
+    {{- if (or (eq .Values.service.type "LoadBalancer") (eq .Values.service.type "NodePort")) }}
+    externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy | quote }}
+    {{- end }}
+    {{- if eq .Values.service.type "LoadBalancer" }}
+    loadBalancerSourceRanges: {{ .Values.service.loadBalancerSourceRanges }}
+    {{- end }}
+    {{- if (and (eq .Values.service.type "LoadBalancer") (not (empty .Values.service.loadBalancerIP))) }}
+    loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+    {{- end }}
+    {{- range $key, $value := .Values.service.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.externalPort }}
+    - name: http
+      port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.internalPort }}
       protocol: TCP
-      name: {{ .Values.service.name }}
+  {{- if .Values.diagnosticMode.enabled }}
+    - name: debug
+      port: {{ .Values.diagnosticMode.debug.port }}
+      targetPort: {{ .Values.diagnosticMode.debug.internalPort }}
+      protocol: TCP
+  {{- end }}
   selector:
     app.kubernetes.io/name: {{ include "bulk-api-adapter-service.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
