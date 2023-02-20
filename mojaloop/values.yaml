@@ -7460,16 +7460,66 @@ simulator:
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
 
-  replicaCount: 1
-
   image:
+    registry: "docker.io"
     repository: mojaloop/simulator
     tag: v12.0.0
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
     pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
 
-  imagePullSecrets: []
-  #  - name: {{replace with credential}}
+  replicaCount: 1
+  command: '["node", "src/index.js"]'
 
+  ## Enable diagnostic mode in the deployment
+  ##
+  diagnosticMode:
+    ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+    ##
+    enabled: false
+    ## @param diagnosticMode.command Command to override all containers in the deployment
+    ##
+    command: 
+      - node
+      - src/index.js
+    ## @param diagnosticMode.args Args to override all containers in the deployment
+    ##
+    args:
+      - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+    
+    ## @param diagnosticMode.debug config to override all debug information
+    ##
+    debug:
+      internalPort: 9229
+      port: 9229
+
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+      port: 8444
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 15
+
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+      port: 8444
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 15
       ## Pod scheduling preferences.
       ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
@@ -7508,26 +7558,47 @@ simulator:
     MOCK_JWS_SIGNATURE: 'abcJjvNrkyK2KBieDUbGfhaBUn75aDUATNF4joqA8OLs4QgSD7i6EO8BIdy6Crph3LnXnTM20Ai1Z6nt0zliS_qPPLU9_vi6qLb15FOkl64DQs9hnfoGeo2tcjZJ88gm19uLY_s27AJqC1GH1B8E2emLrwQMDMikwQcYvXoyLrL7LL3CjaLMKdzR7KTcQi1tCK4sNg0noIQLpV3eA61kess'
 
   service:
+    internalPort: 8444
+    ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+    ##
     type: ClusterIP
+    ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+    ##
     port: 80
-    targetPort: http
-
-  readinessProbe:
-    enabled: true
-    httpGet:
-      path: /health
-      port: 8444
-      scheme: HTTP
-    initialDelaySeconds: 5
-    periodSeconds: 15
-  livenessProbe:
-    enabled: true
-    httpGet:
-      path: /health
-      port: 8444
-      scheme: HTTP
-    initialDelaySeconds: 5
-    periodSeconds: 15
+    ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+    ##
+    httpsPort: 443
+    ## Node ports to expose
+    ## @param service.nodePorts.http Node port for HTTP
+    ## @param service.nodePorts.https Node port for HTTPS
+    ## NOTE: choose port between <30000-32767>
+    ##
+    nodePorts:
+      http:
+      https:
+    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+    ## e.g.:
+    ## clusterIP: None
+    ##
+    clusterIP:
+    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    ##
+    loadBalancerIP:
+    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+    loadBalancerSourceRanges: []
+    ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+    ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    ##
+    externalTrafficPolicy: Cluster
+    ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+    ##
+    annotations: {}
 
   ingress:
     enabled: true
@@ -7575,22 +7646,18 @@ simulator:
     extraTls:
     secrets:
     className: "nginx"
-  ##
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
 
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
-    #  memory: 128Mi
 
 mojaloop-simulator:
   enabled: true
