@@ -7028,6 +7028,7 @@ thirdparty:
       # - name: LOG_LEVEL
       #   value: debug
 
+    ## Svc configs
     config:
       ## DB Configuration
       db_host: *TP_AUTH_SVC_DB_HOST
@@ -7048,7 +7049,8 @@ thirdparty:
       ## Redis Configuration
       redis_host: *TP_AUTH_SVC_REDIS_HOST
       redis_port: *TP_AUTH_SVC_REDIS_PORT
-      
+
+    ## Svc config files
     config_files:
       production.json: |
         {
@@ -7066,7 +7068,7 @@ thirdparty:
               "COLOR": true
           },
           "SHARED": {
-              "THIRDPARTY_REQUESTS_ENDPOINT": "tp-api-svc:3008",
+              "THIRDPARTY_REQUESTS_ENDPOINT": "tp-api-svc",
               "ALS_ENDPOINT": "{{ .Release.Name }}-account-lookup-service",
               "JWS_SIGN": false,
               "JWS_SIGNING_KEY": "/secrets/jwsSigningKey.key",
@@ -7329,6 +7331,7 @@ thirdparty:
       # - name: LOG_LEVEL
       #   value: debug
 
+    ## Svc configs
     config:
       ## DB Configuration
       db_host: *TP_ALS_CONSENT_SVC_DB_HOST
@@ -7346,6 +7349,7 @@ thirdparty:
         key: *TP_ALS_CONSENT_SVC_DB_SECRET_KEY
       db_database: *TP_ALS_CONSENT_SVC_DB_NAME
 
+    ## Svc config files
     config_files:
       default.json: |
         {
@@ -7501,12 +7505,64 @@ thirdparty:
 
   tp-api-svc:
     enabled: true
-    replicaCount: 1
+
     image:
+      registry: "docker.io"
       repository: mojaloop/thirdparty-api-svc
       tag: v13.0.2
-      command: '[ "npm", "run", "start" ]'
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
       pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## e.g:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+
+    replicaCount: 1
+    command: '["node", "./dist/src/cli.js", "all"]'
+
+    ## Enable diagnostic mode in the deployment
+    ##
+    diagnosticMode:
+      ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+      ##
+      enabled: false
+      ## @param diagnosticMode.command Command to override all containers in the deployment
+      ##
+      command: 
+        - node
+        - ./dist/src/cli.js
+        - all
+      ## @param diagnosticMode.args Args to override all containers in the deployment
+      ##
+      args:
+        - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      
+      ## @param diagnosticMode.debug config to override all debug information
+      ##
+      debug:
+        internalPort: 9229
+        port: 9229
+
+    readinessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+      initialDelaySeconds: 60
+      periodSeconds: 15
+
+    livenessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+      initialDelaySeconds: 60
+      periodSeconds: 15
 
     ## Pod scheduling preferences.
     ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -7520,76 +7576,121 @@ thirdparty:
     ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations: []
 
-    livenessProbe:
-      initialDelaySeconds: 30
-      httpGet:
-        path: /health
-        port: 3008
-    readinessProbe:
-      initialDelaySeconds: 30
-      httpGet:
-        path: /health
-        port: 3008
-
     # Add exta environment variables here
     env: []
       # e.g. to change the Log Level:
       # - name: LOG_LEVEL
       #   value: debug
 
-    config:
-      default.json: {
-        "PORT": 3008,
-        "HOST": "0.0.0.0",
-        "INSPECT": {
-            "DEPTH": 4,
-            "SHOW_HIDDEN": false,
-            "COLOR": true
-        },
-        "ENDPOINT_CACHE_CONFIG": {
-            "expiresIn": 180000,
-            "generateTimeout": 30000
-        },
-        "ENDPOINT_SERVICE_URL": "http://$release_name-centralledger-service",
-        "PARTICIPANT_LIST_LOCAL": [
-            "dfspa",
-            "dfspb"
-        ],
-        "ERROR_HANDLING": {
-            "includeCauseExtension": true,
-            "truncateExtensions": true
-        },
-        "INSTRUMENTATION": {
-            "METRICS": {
+    ## Svc configs
+    config: {}
+
+    ## Svc config files
+    config_files:
+      default.json: |
+        {
+            "PORT": {{ .Values.service.internalPort }},
+            "HOST": "0.0.0.0",
+            "INSPECT": {
+              "DEPTH": 4,
+              "SHOW_HIDDEN": false,
+              "COLOR": true
+            },
+            "ENDPOINT_CACHE_CONFIG": {
+              "expiresIn": 180000,
+              "generateTimeout": 30000
+            },
+            "ENDPOINT_SERVICE_URL": "http://{{ .Release.Name }}-centralledger-service",
+            "PARTICIPANT_LIST_LOCAL": [
+              "dfspa",
+              "dfspb"
+            ],
+            "ERROR_HANDLING": {
+              "includeCauseExtension": true,
+              "truncateExtensions": true
+            },
+            "INSTRUMENTATION": {
+              "METRICS": {
                 "DISABLED": false,
                 "labels": {
-                    "eventId": "*"
+                  "eventId": "*"
                 },
                 "config": {
-                    "timeout": 5000,
-                    "prefix": "moja_3p_api",
-                    "defaultLabels": {
-                        "serviceName": "thirdparty-api-svc"
-                    }
+                  "timeout": 5000,
+                  "prefix": "moja_3p_api",
+                  "defaultLabels": {
+                    "serviceName": "thirdparty-api-svc"
+                  }
                 }
+              }
+            },
+            "MOCK_CALLBACK": {
+              "transactionRequestId": "abc-12345",
+              "pispId": "pisp"
             }
-        },
-        "MOCK_CALLBACK": {
-            "transactionRequestId": "abc-12345",
-            "pispId": "pisp"
-        }
-      }
+          }
+
+    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    ## e.g:
+    ## initContainers:
+    ##  - name: your-image-name
+    ##    image: your-image
+    ##    imagePullPolicy: Always
+    ##    command: ['sh', '-c', 'echo "hello world"']
+    ##    env:
+    ##      - name: debug
+    ##        value: trace
+    ##
+    initContainers: []
 
     service:
+      internalPort: 3008
+      ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+      ##
       type: ClusterIP
-      ports:
-        externalPort: 3008
-        internalPort: 3008
+      ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+      ##
+      port: 80
+      ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+      ##
+      httpsPort: 443
+      ## Node ports to expose
+      ## @param service.nodePorts.http Node port for HTTP
+      ## @param service.nodePorts.https Node port for HTTPS
+      ## NOTE: choose port between <30000-32767>
+      ##
+      nodePorts:
+        http:
+        https:
+      ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      ## e.g.:
+      ## clusterIP: None
+      ##
+      clusterIP:
+      ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+      ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+      ##
+      loadBalancerIP:
+      ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+      ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+      ## e.g:
+      ## loadBalancerSourceRanges:
+      ##   - 10.10.10.0/24
+      ##
+      loadBalancerSourceRanges: []
+      ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+      ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+      ##
+      externalTrafficPolicy: Cluster
+      ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+      ##
+      annotations: {}
 
     ingress:
       ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
       ##
-      enabled: false
+      enabled: true
       ## @param ingress.pathType Ingress path type
       ##
       pathType: ImplementationSpecific
@@ -11518,7 +11619,7 @@ ml-testing-toolkit:
           "payerfspMSISDN": "17891239876",
           "settlementtestNonExistingMSISDN": "22244803917",
           "NET_DEBIT_CAP": "50000",
-          "HOST_ORACLE_CONSENT": "http://consent-oracle:3000",
+          "HOST_ORACLE_CONSENT": "http://consent-oracle",
           "DFSPA_NAME": "dfspa",
           "DFSPA_CB_FSPIOP": "http://$release_name-sim-tp-dfspa-scheme-adapter:4000",
           "DFSPA_CB_THIRDPARTY": "http://$release_name-sim-tp-dfspa-thirdparty-sdk:4005",
@@ -11529,7 +11630,7 @@ ml-testing-toolkit:
           "PISP_CB_FSPIOP": "http://$release_name-sim-tp-pisp-scheme-adapter:4000",
           "PISP_CB_THIRDPARTY": "http://$release_name-sim-tp-pisp-thirdparty-sdk:4005",
           "CENTRALAUTH_NAME": "centralauth",
-          "CENTRALAUTH_CB_FSPIOP": "http://auth-svc:4004",
+          "CENTRALAUTH_CB_FSPIOP": "http://auth-svc",
           "PISP_THIRDPARTY_SDK_OUTBOUND_URL": "http://$release_name-sim-tp-pisp-thirdparty-sdk:4006",
           "PISP_BACKEND_TESTAPI_URL": "http://$release_name-sim-tp-pisp-backend:3003",
           "PISP_CALLBACK_URL": "http://$release_name-sim-tp-pisp-scheme-adapter:4000",

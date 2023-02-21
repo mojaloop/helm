@@ -1,11 +1,63 @@
 auth-svc:
   enabled: true
-  replicaCount: 1
+
   image:
+    registry: "docker.io"
     repository: mojaloop/auth-service
     tag: v13.0.2
-    command: '[ "npm", "run", "start" ]'
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
     pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+
+  replicaCount: 1
+  command: '["node", "./dist/src/cli.js", "all"]'
+
+  ## Enable diagnostic mode in the deployment
+  ##
+  diagnosticMode:
+    ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+    ##
+    enabled: false
+    ## @param diagnosticMode.command Command to override all containers in the deployment
+    ##
+    command: 
+      - node
+      - ./dist/src/cli.js
+      - all
+    ## @param diagnosticMode.args Args to override all containers in the deployment
+    ##
+    args:
+      - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+    
+    ## @param diagnosticMode.debug config to override all debug information
+    ##
+    debug:
+      internalPort: 9229
+      port: 9229
+
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 60
+    periodSeconds: 15
+
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 60
+    periodSeconds: 15
 
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -19,18 +71,16 @@ auth-svc:
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
 
-  livenessProbe:
-    initialDelaySeconds: 30
-    httpGet:
-      path: /health
-      port: 4004
-  readinessProbe:
-    initialDelaySeconds: 30
-    httpGet:
-      path: /health
-      port: 4004
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+  ## @param containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+  ##
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 1001
 
-  # Add exta environment variables here  b
+  # Add extra environment variables here
   env:
     - name: NODE_ENV
       value: production
@@ -38,88 +88,238 @@ auth-svc:
     # - name: LOG_LEVEL
     #   value: debug
 
+  ## Svc configs
   config:
-    production.json: {
-      "PORT": 4004,
-      "HOST": "0.0.0.0",
-      "PARTICIPANT_ID": "centralauth",
-      "REDIS": {
-        "PORT": 6379,
-        "HOST": "auth-svc-redis-svc",
-        "TIMEOUT": 100
-      },
-      "INSPECT": {
-        "DEPTH": 4,
-        "SHOW_HIDDEN": false,
-        "COLOR": true
-      },
-      "SHARED": {
-        "THIRDPARTY_REQUESTS_ENDPOINT": "tp-api-svc:3008",
-        "ALS_ENDPOINT": "$release_name-account-lookup-service",
-        "JWS_SIGN": false,
-        "JWS_SIGNING_KEY": "/secrets/jwsSigningKey.key",
-        "WSO2_AUTH": {
-          "staticToken": "0706c62f-c022-3c42-8d14-8b5df128876d",
-          "tokenEndpoint": "",
-          "clientKey": "test-client-key",
-          "clientSecret": "test-client-secret",
-          "refreshSeconds": 3600
+    ## DB Configuration
+    db_host: mysqldb
+    db_port: 3306
+    db_user: auth_svc
+    ## Secret-Management
+    ### Set this is you are using a clear password configured in the config section
+    db_password: ''
+    ### Configure this if you want to use a secret. Note, this will override the db_password,
+    ### Use the next line if you do wish to use the db_password value instead.
+    # db_secret:
+    ### Example config for an existing secret
+    # db_secret:
+    #   name: mysqldb
+    #   key: mysql-password
+    db_database: auth_svc
+
+    ## Redis Configuration
+    redis_host: 6379
+    redis_port: auth-svc-redis-svc
+
+  ## Svc config files
+  config_files:
+    production.json: | 
+      {
+        "PORT": {{ .Values.service.internalPort }},
+        "HOST": "0.0.0.0",
+        "PARTICIPANT_ID": "centralauth",
+        "REDIS": {
+          "PORT": {{ .Values.config.redis_port }},
+          "HOST": "{{ .Values.config.redis_host }}",
+          "TIMEOUT": 100
         },
-        "TLS": {
-          "mutualTLS": {
-            "enabled": false
+        "INSPECT": {
+          "DEPTH": 4,
+          "SHOW_HIDDEN": false,
+          "COLOR": true
+        },
+        "SHARED": {
+          "THIRDPARTY_REQUESTS_ENDPOINT": "tp-api-svc",
+          "ALS_ENDPOINT": "{{ .Release.Name }}-account-lookup-service",
+          "JWS_SIGN": false,
+          "JWS_SIGNING_KEY": "/secrets/jwsSigningKey.key",
+          "WSO2_AUTH": {
+            "staticToken": "0706c62f-c022-3c42-8d14-8b5df128876d",
+            "tokenEndpoint": "",
+            "clientKey": "test-client-key",
+            "clientSecret": "test-client-secret",
+            "refreshSeconds": 3600
           },
-          "creds": {
-            "ca": "/secrets/client.crt",
-            "cert": "/secrets/client.crt",
-            "key": "/secrets/client.crt"
+          "TLS": {
+            "mutualTLS": {
+              "enabled": false
+            },
+            "creds": {
+              "ca": "/secrets/client.crt",
+              "cert": "/secrets/client.crt",
+              "key": "/secrets/client.crt"
+            }
           }
-        }
-      },
-      "DATABASE": {
-        "client": "mysql",
-        "version": "5.5",
-        "connection": {
-          "host": "mysql-auth-svc",
-          "port": 3306,
-          "user": "auth-svc",
-          "password": "password",
-          "database": "auth-svc",
-          "timezone": "UTC"
         },
-        "pool": {
-          "min": 10,
-          "max": 10,
-          "acquireTimeoutMillis": 30000,
-          "createTimeoutMillis": 30000,
-          "destroyTimeoutMillis": 5000,
-          "idleTimeoutMillis": 30000,
-          "reapIntervalMillis": 1000,
-          "createRetryIntervalMillis": 200
+        "DATABASE": {
+          "client": "mysql",
+          "version": "5.5",
+          "connection": {
+            "host": "{{ .Values.config.db_host }}",
+            "port": {{ .Values.config.db_port }},
+            "user": "{{ .Values.config.db_user }}",
+            "password": "{{ .Values.config.db_password }}",
+            "database": "{{ .Values.config.db_database }}",
+            "timezone": "UTC"
+          },
+          "pool": {
+            "min": 10,
+            "max": 10,
+            "acquireTimeoutMillis": 30000,
+            "createTimeoutMillis": 30000,
+            "destroyTimeoutMillis": 5000,
+            "idleTimeoutMillis": 30000,
+            "reapIntervalMillis": 1000,
+            "createRetryIntervalMillis": 200
+          },
+          "migrations": {
+            "tableName": "auth-svc",
+            "loadExtensions": [
+              ".js"
+            ]
+          },
+          "seeds": {
+            "loadExtensions": [
+              ".js"
+            ]
+          }
         },
-        "migrations": {
-          "tableName": "auth-svc",
-          "loadExtensions": [
-            ".js"
-          ]
-        },
-        "seeds": {
-          "loadExtensions": [
-            ".js"
-          ]
-        }
-      },
-      "DEMO_SKIP_VALIDATION_FOR_CREDENTIAL_IDS": [
-        "Jfo5k6w4np09IUtYNHnxMM696jJHqvccUdBmd0xP6XEWwH0xLei1PUzDJCM19SZ3A2Ex0fNLw0nc2hrIlFnAtw=="
-      ]
-    }
+        "DEMO_SKIP_VALIDATION_FOR_CREDENTIAL_IDS": [
+          "Jfo5k6w4np09IUtYNHnxMM696jJHqvccUdBmd0xP6XEWwH0xLei1PUzDJCM19SZ3A2Ex0fNLw0nc2hrIlFnAtw=="
+        ]
+      }
+
+  ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##    env:
+  ##      - name: debug
+  ##        value: trace
+  ##
+  # initContainers: []
+  initContainers: |
+    - name: wait-for-redis
+      image: redis:7.0.5
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - until redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} ping;
+          do
+            echo --------------------;
+            echo Waiting for Redis...;
+            sleep 2;
+          done;
+          echo ====================;
+          echo Redis ok!;
+      env:
+        - name: REDIS_HOST
+          value: {{ include "common.tplvalues.render" (dict "value" .Values.config.redis_host "context" $) | quote }}
+        - name: REDIS_PORT
+          value: {{ .Values.config.redis_port | quote }}
+    - name: wait-for-mysql
+      image: mysql:5.7
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          do
+            echo --------------------;
+            echo Waiting for MySQL...;
+            sleep 2; 
+          done;
+          echo ====================; 
+          echo MySQL ok!;
+      env:
+        - name: DB_HOST
+          value: '{{ .Values.config.db_host }}'
+        - name: DB_PORT
+          value: '{{ .Values.config.db_port }}'
+        - name: DB_USER
+          value: '{{ .Values.config.db_user }}'
+        - name: DB_PASSWORD
+          {{- if not (empty .Values.config.db_secret) }}
+          valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.db_secret.name }}'
+                key: '{{ .Values.config.db_secret.key }}'
+          {{- else }}
+          value: {{ .Values.config.db_password }}
+          {{- end }}
+        - name: DB_DATABASE
+          value: '{{ .Values.config.db_database }}'
+    - name: run-migration
+      image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - npm run migrate
+      env:
+        - name: THIRD_PARTY_DATABASE__CONNECTION__PASSWORD
+          {{- if not (empty .Values.config.db_secret) }}
+          valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.db_secret.name }}'
+                key: '{{ .Values.config.db_secret.key }}'
+          {{- else }}
+          value: {{ .Values.config.db_password }}
+          {{- end }}
+        - name: NODE_ENV
+          value: production
+      volumeMounts:
+        - name: auth-svc-config-volume
+          mountPath: /opt/app/dist/config/production.json
+          subPath: production.json
 
   service:
+    internalPort: 4004
+    ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+    ##
     type: ClusterIP
-    ports:
-      name: http
-      externalPort: 4004
-      internalPort: 4004
+    ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+    ##
+    port: 80
+    ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+    ##
+    httpsPort: 443
+    ## Node ports to expose
+    ## @param service.nodePorts.http Node port for HTTP
+    ## @param service.nodePorts.https Node port for HTTPS
+    ## NOTE: choose port between <30000-32767>
+    ##
+    nodePorts:
+      http:
+      https:
+    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+    ## e.g.:
+    ## clusterIP: None
+    ##
+    clusterIP:
+    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    ##
+    loadBalancerIP:
+    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+    loadBalancerSourceRanges: []
+    ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+    ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    ##
+    externalTrafficPolicy: Cluster
+    ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+    ##
+    annotations: {}
 
   ingress:
     ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
@@ -205,12 +405,63 @@ auth-svc:
 
 consent-oracle:
   enabled: true
-  replicaCount: 1
+
   image:
+    registry: "docker.io"
     repository: mojaloop/als-consent-oracle
     tag: v0.2.0
-    command: '[ "npm", "run", "start" ]'
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
     pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+
+  replicaCount: 1
+  command: '["node", "./dist/src/cli.js"]'
+
+  ## Enable diagnostic mode in the deployment
+  ##
+  diagnosticMode:
+    ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+    ##
+    enabled: false
+    ## @param diagnosticMode.command Command to override all containers in the deployment
+    ##
+    command: 
+      - node
+      - ./dist/src/cli.js
+    ## @param diagnosticMode.args Args to override all containers in the deployment
+    ##
+    args:
+      - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+    
+    ## @param diagnosticMode.debug config to override all debug information
+    ##
+    debug:
+      internalPort: 9229
+      port: 9229
+
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 60
+    periodSeconds: 15
+
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 60
+    periodSeconds: 15
 
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -224,19 +475,14 @@ consent-oracle:
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
 
-  livenessProbe:
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+  ## @param containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+  ##
+  containerSecurityContext:
     enabled: true
-    initialDelaySeconds: 30
-    httpGet:
-      path: /health
-      port: 3000
-
-  readinessProbe:
-    enabled: true
-    initialDelaySeconds: 30
-    httpGet:
-      path: /health
-      port: 3000
+    runAsUser: 1001
 
   # Add exta environment variables here
   env: {}
@@ -244,39 +490,166 @@ consent-oracle:
     # - name: LOG_LEVEL
     #   value: debug
 
+  ## Svc configs
   config:
-    default.json: {
-      "PORT": 3000,
-      "HOST": "0.0.0.0",
-      "INSPECT": {
-        "DEPTH": 4,
-        "SHOW_HIDDEN": false,
-        "COLOR": true
-      },
-      "DATABASE": {
-        "DIALECT": "mysql",
-        "HOST": "mysql-consent-oracle",
-        "PORT": 3306,
-        "USER": "consent-oracle",
-        "PASSWORD": "password",
-        "DATABASE": "consent-oracle",
-        "POOL_MIN_SIZE": 10,
-        "POOL_MAX_SIZE": 10,
-        "ACQUIRE_TIMEOUT_MILLIS": 30000,
-        "CREATE_TIMEOUT_MILLIS": 30000,
-        "DESTROY_TIMEOUT_MILLIS": 5000,
-        "IDLE_TIMEOUT_MILLIS": 30000,
-        "REAP_INTERVAL_MILLIS": 1000,
-        "CREATE_RETRY_INTERVAL_MILLIS": 200
+    ## DB Configuration
+    db_host: mysqldb
+    db_port: 3306
+    db_user: consent_oracle
+    ## Secret-Management
+    ### Set this is you are using a clear password configured in the config section
+    db_password: ''
+    ### Configure this if you want to use a secret. Note, this will override the db_password,
+    ### Use the next line if you do wish to use the db_password value instead.
+    # db_secret:
+    ### Example config for an existing secret
+    # db_secret:
+    #   name: mysqldb
+    #   key: mysql-password
+    db_database: consent_oracle
+
+  ## Svc config files
+  config_files:
+    default.json: |
+      {
+        "PORT": {{ .Values.service.internalPort }},
+        "HOST": "0.0.0.0",
+        "INSPECT": {
+          "DEPTH": 4,
+          "SHOW_HIDDEN": false,
+          "COLOR": true
+        },
+        "DATABASE": {
+          "DIALECT": "mysql",
+          "HOST": "{{ .Values.config.db_host }}",
+          "PORT": {{ .Values.config.db_port }},
+          "USER": "{{ .Values.config.db_user }}",
+          "PASSWORD": "{{ .Values.config.db_password }}",
+          "DATABASE": "{{ .Values.config.db_database }}",
+          "POOL_MIN_SIZE": 10,
+          "POOL_MAX_SIZE": 10,
+          "ACQUIRE_TIMEOUT_MILLIS": 30000,
+          "CREATE_TIMEOUT_MILLIS": 30000,
+          "DESTROY_TIMEOUT_MILLIS": 5000,
+          "IDLE_TIMEOUT_MILLIS": 30000,
+          "REAP_INTERVAL_MILLIS": 1000,
+          "CREATE_RETRY_INTERVAL_MILLIS": 200
+        }
       }
-    }
+
+  ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##    env:
+  ##      - name: debug
+  ##        value: trace
+  ##
+  # initContainers: []
+  initContainers: |
+    - name: wait-for-mysql
+      image: mysql:5.7
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          do
+            echo --------------------;
+            echo Waiting for MySQL...;
+            sleep 2; 
+          done;
+          echo ====================; 
+          echo MySQL ok!;
+      env:
+        - name: DB_HOST
+          value: '{{ .Values.config.db_host }}'
+        - name: DB_PORT
+          value: '{{ .Values.config.db_port }}'
+        - name: DB_USER
+          value: '{{ .Values.config.db_user }}'
+        - name: DB_PASSWORD
+          {{- if not (empty .Values.config.db_secret) }}
+          valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.db_secret.name }}'
+                key: '{{ .Values.config.db_secret.key }}'
+          {{- else }}
+          value: {{ .Values.config.db_password }}
+          {{- end }}
+        - name: DB_DATABASE
+          value: '{{ .Values.config.db_database }}'
+    - name: run-migration
+      image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - npm run migrate
+      env:
+        - name: ALS_CO_DATABASE_PASSWORD
+          {{- if not (empty .Values.config.db_secret) }}
+          valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.db_secret.name }}'
+                key: '{{ .Values.config.db_secret.key }}'
+          {{- else }}
+          value: {{ .Values.config.db_password }}
+          {{- end }}
+        - name: NODE_ENV
+          value: production
+      volumeMounts:
+        - name: consent-oracle-config-volume
+          mountPath: /opt/app/dist/config/default.json
+          subPath: default.json
 
   service:
+    internalPort: 3000
+    ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+    ##
     type: ClusterIP
-    ports:
-      name: http
-      externalPort: 3000
-      internalPort: 3000
+    ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+    ##
+    port: 80
+    ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+    ##
+    httpsPort: 443
+    ## Node ports to expose
+    ## @param service.nodePorts.http Node port for HTTP
+    ## @param service.nodePorts.https Node port for HTTPS
+    ## NOTE: choose port between <30000-32767>
+    ##
+    nodePorts:
+      http:
+      https:
+    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+    ## e.g.:
+    ## clusterIP: None
+    ##
+    clusterIP:
+    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    ##
+    loadBalancerIP:
+    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+    loadBalancerSourceRanges: []
+    ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+    ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    ##
+    externalTrafficPolicy: Cluster
+    ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+    ##
+    annotations: {}
 
   ingress:
     ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
@@ -362,12 +735,64 @@ consent-oracle:
 
 tp-api-svc:
   enabled: true
-  replicaCount: 1
+
   image:
+    registry: "docker.io"
     repository: mojaloop/thirdparty-api-svc
     tag: v13.0.2
-    command: '[ "npm", "run", "start" ]'
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
     pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+
+  replicaCount: 1
+  command: '["node", "./dist/src/cli.js", "all"]'
+
+  ## Enable diagnostic mode in the deployment
+  ##
+  diagnosticMode:
+    ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+    ##
+    enabled: false
+    ## @param diagnosticMode.command Command to override all containers in the deployment
+    ##
+    command: 
+      - node
+      - ./dist/src/cli.js
+      - all
+    ## @param diagnosticMode.args Args to override all containers in the deployment
+    ##
+    args:
+      - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+    
+    ## @param diagnosticMode.debug config to override all debug information
+    ##
+    debug:
+      internalPort: 9229
+      port: 9229
+
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 60
+    periodSeconds: 15
+
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 60
+    periodSeconds: 15
 
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -381,16 +806,14 @@ tp-api-svc:
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
 
-  livenessProbe:
-    initialDelaySeconds: 30
-    httpGet:
-      path: /health
-      port: 3008
-  readinessProbe:
-    initialDelaySeconds: 30
-    httpGet:
-      path: /health
-      port: 3008
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+  ## @param containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+  ##
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 1001
 
   # Add exta environment variables here
   env: []
@@ -398,57 +821,110 @@ tp-api-svc:
     # - name: LOG_LEVEL
     #   value: debug
 
-  config:
-    default.json: {
-      "PORT": 3008,
-      "HOST": "0.0.0.0",
-      "INSPECT": {
-        "DEPTH": 4,
-        "SHOW_HIDDEN": false,
-        "COLOR": true
-      },
-      "ENDPOINT_CACHE_CONFIG": {
-        "expiresIn": 180000,
-        "generateTimeout": 30000
-      },
-      # Location of central ledger to lookup endpoints for
-      "ENDPOINT_SERVICE_URL": "http://$release_name-centralledger-service",
-      # Static list of participantIds that support account linking
-      "PARTICIPANT_LIST_LOCAL": [
-        "dfspa",
-        "dfspb"
-      ],
-      "ERROR_HANDLING": {
-        "includeCauseExtension": true,
-        "truncateExtensions": true
-      },
-      "INSTRUMENTATION": {
-        "METRICS": {
-          "DISABLED": false,
-          "labels": {
-            "eventId": "*"
+  ## Svc configs
+  config: {}
+
+  ## Svc config files
+  config_files:
+    default.json: |
+      {
+          "PORT": {{ .Values.service.internalPort }},
+          "HOST": "0.0.0.0",
+          "INSPECT": {
+            "DEPTH": 4,
+            "SHOW_HIDDEN": false,
+            "COLOR": true
           },
-          "config": {
-            "timeout": 5000,
-            "prefix": "moja_3p_api",
-            "defaultLabels": {
-              "serviceName": "thirdparty-api-svc"
+          "ENDPOINT_CACHE_CONFIG": {
+            "expiresIn": 180000,
+            "generateTimeout": 30000
+          },
+          "ENDPOINT_SERVICE_URL": "http://{{ .Release.Name }}-centralledger-service",
+          "PARTICIPANT_LIST_LOCAL": [
+            "dfspa",
+            "dfspb"
+          ],
+          "ERROR_HANDLING": {
+            "includeCauseExtension": true,
+            "truncateExtensions": true
+          },
+          "INSTRUMENTATION": {
+            "METRICS": {
+              "DISABLED": false,
+              "labels": {
+                "eventId": "*"
+              },
+              "config": {
+                "timeout": 5000,
+                "prefix": "moja_3p_api",
+                "defaultLabels": {
+                  "serviceName": "thirdparty-api-svc"
+                }
+              }
             }
+          },
+          "MOCK_CALLBACK": {
+            "transactionRequestId": "abc-12345",
+            "pispId": "pisp"
           }
         }
-      },
-      "MOCK_CALLBACK": {
-        "transactionRequestId": "abc-12345",
-        "pispId": "pisp"
-      }
-    }
+
+  ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##    env:
+  ##      - name: debug
+  ##        value: trace
+  ##
+  initContainers: []
 
   service:
+    internalPort: 3008
+    ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+    ##
     type: ClusterIP
-    ports:
-      name: http
-      externalPort: 3008
-      internalPort: 3008
+    ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+    ##
+    port: 80
+    ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+    ##
+    httpsPort: 443
+    ## Node ports to expose
+    ## @param service.nodePorts.http Node port for HTTP
+    ## @param service.nodePorts.https Node port for HTTPS
+    ## NOTE: choose port between <30000-32767>
+    ##
+    nodePorts:
+      http:
+      https:
+    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+    ## e.g.:
+    ## clusterIP: None
+    ##
+    clusterIP:
+    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    ##
+    loadBalancerIP:
+    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+    loadBalancerSourceRanges: []
+    ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+    ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    ##
+    externalTrafficPolicy: Cluster
+    ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+    ##
+    annotations: {}
 
   ingress:
     ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
@@ -704,8 +1180,8 @@ thirdparty-simulator:
               },
               "shared": {
                 "authServiceParticipantId": "centralauth",
-                "thirdpartyRequestsEndpoint": "tp-api-svc:3008",
-                "servicesEndpoint": "tp-api-svc:3008",
+                "thirdpartyRequestsEndpoint": "tp-api-svc",
+                "servicesEndpoint": "tp-api-svc",
                 "alsEndpoint": "$release_name-account-lookup-service",
                 "quotesEndpoint": "$release_name-quoting-service",
                 "transfersEndpoint": "$release_name-ml-api-adapter-service",
@@ -1894,8 +2370,8 @@ thirdparty-simulator:
             },
             "shared": {
               "authServiceParticipantId": "centralauth",
-              "thirdpartyRequestsEndpoint": "tp-api-svc:3008",
-              "servicesEndpoint": "tp-api-svc:3008",
+              "thirdpartyRequestsEndpoint": "tp-api-svc",
+              "servicesEndpoint": "tp-api-svc",
               "alsEndpoint": "$release_name-account-lookup-service",
               "quotesEndpoint": "$release_name-quoting-service",
               "transfersEndpoint": "$release_name-ml-api-adapter-service",
