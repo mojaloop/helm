@@ -6,6 +6,7 @@ metadata:
   labels:
     {{- include "auth-svc.labels" . | nindent 4 }}
 data:
-  {{- range $k, $v := index .Values.config }}
-    {{ $k }}: {{ ($v | toPrettyJson | squote | replace "$release_name" $RELEASE_NAME ) }}
+  {{- range $k, $v := index .Values.config_files }}
+    {{ $k }}: | 
+      {{- include "common.tplvalues.render" (dict "value" $v "context" $) | nindent 6 }}
   {{- end }}
