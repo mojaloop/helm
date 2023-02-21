@@ -68,6 +68,16 @@ CONFIG:
   tp_auth_svc_db_user: &TP_AUTH_SVC_DB_USER "auth_svc"
   tp_auth_svc_redis_host: &TP_AUTH_SVC_REDIS_HOST auth-svc-redis-master
   tp_auth_svc_redis_port: &TP_AUTH_SVC_REDIS_PORT 6379
+  
+  ## THIRDPARTY ALS_CONSENT-SVC BACKEND
+  tp_als_consent_svc_db_name: &TP_ALS_CONSENT_SVC_DB_NAME "consent_oracle"
+  tp_als_consent_svc_db_password: &TP_ALS_CONSENT_SVC_DB_PASSWORD ""
+  tp_als_consent_svc_db_secret: &TP_ALS_CONSENT_SVC_DB_SECRET
+    name: &TP_ALS_CONSENT_SVC_DB_SECRET_NAME mysqldb
+    key: &TP_ALS_CONSENT_SVC_DB_SECRET_KEY mysql-password
+  tp_als_consent_svc_db_host: &TP_ALS_CONSENT_SVC_DB_HOST 'mysqldb'
+  tp_als_consent_svc_db_port: &TP_ALS_CONSENT_SVC_DB_PORT 3306
+  tp_als_consent_svc_db_user: &TP_ALS_CONSENT_SVC_DB_USER "consent_oracle"
 
 # Default values for central.
 # This is a YAML-formatted file.
@@ -7243,12 +7253,63 @@ thirdparty:
 
   consent-oracle:
     enabled: true
-    replicaCount: 1
+
     image:
+      registry: "docker.io"
       repository: mojaloop/als-consent-oracle
       tag: v0.2.0
-      command: '[ "npm", "run", "start" ]'
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
       pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## e.g:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+
+    replicaCount: 1
+    command: '["node", "./dist/src/cli.js"]'
+
+    ## Enable diagnostic mode in the deployment
+    ##
+    diagnosticMode:
+      ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+      ##
+      enabled: false
+      ## @param diagnosticMode.command Command to override all containers in the deployment
+      ##
+      command: 
+        - node
+        - ./dist/src/cli.js
+      ## @param diagnosticMode.args Args to override all containers in the deployment
+      ##
+      args:
+        - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      
+      ## @param diagnosticMode.debug config to override all debug information
+      ##
+      debug:
+        internalPort: 9229
+        port: 9229
+
+    readinessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+      initialDelaySeconds: 60
+      periodSeconds: 15
+
+    livenessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+      initialDelaySeconds: 60
+      periodSeconds: 15
 
     ## Pod scheduling preferences.
     ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -7262,20 +7323,6 @@ thirdparty:
     ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
     tolerations: []
 
-    livenessProbe:
-      enabled: true
-      initialDelaySeconds: 30
-      httpGet:
-        path: /health
-        port: 3000
-
-    readinessProbe:
-      enabled: true
-      initialDelaySeconds: 30
-      httpGet:
-        path: /health
-        port: 3000
-
     # Add exta environment variables here
     env: []
       # e.g.
@@ -7283,37 +7330,92 @@ thirdparty:
       #   value: debug
 
     config:
-      default.json: {
-        "PORT": 3000,
-        "HOST": "0.0.0.0",
-        "INSPECT": {
-            "DEPTH": 4,
-            "SHOW_HIDDEN": false,
-            "COLOR": true
-        },
-        "DATABASE": {
-            "DIALECT": "mysql",
-            "HOST": "mysql-consent-oracle",
-            "PORT": 3306,
-            "USER": "consent-oracle",
-            "PASSWORD": "password",
-            "DATABASE": "consent-oracle",
-            "POOL_MIN_SIZE": 10,
-            "POOL_MAX_SIZE": 10,
-            "ACQUIRE_TIMEOUT_MILLIS": 30000,
-            "CREATE_TIMEOUT_MILLIS": 30000,
-            "DESTROY_TIMEOUT_MILLIS": 5000,
-            "IDLE_TIMEOUT_MILLIS": 30000,
-            "REAP_INTERVAL_MILLIS": 1000,
-            "CREATE_RETRY_INTERVAL_MILLIS": 200
+      ## DB Configuration
+      db_host: *TP_ALS_CONSENT_SVC_DB_HOST
+      db_port: *TP_ALS_CONSENT_SVC_DB_PORT
+      db_user: *TP_ALS_CONSENT_SVC_DB_USER
+      ## Secret-Management
+      ### Set this is you are using a clear password configured in the config section
+      # db_password: *TP_ALS_CONSENT_SVC_DB_PASSWORD
+      ### Configure this if you want to use a secret. Note, this will override the db_password,
+      ### Use the next line if you do wish to use the db_password value instead.
+      # db_secret:
+      ### Example config for an existing secret
+      db_secret:
+        name: *TP_ALS_CONSENT_SVC_DB_SECRET_NAME
+        key: *TP_ALS_CONSENT_SVC_DB_SECRET_KEY
+      db_database: *TP_ALS_CONSENT_SVC_DB_NAME
+
+    config_files:
+      default.json: |
+        {
+          "PORT": {{ .Values.service.internalPort }},
+          "HOST": "0.0.0.0",
+          "INSPECT": {
+              "DEPTH": 4,
+              "SHOW_HIDDEN": false,
+              "COLOR": true
+          },
+          "DATABASE": {
+              "DIALECT": "mysql",
+              "HOST": "{{ .Values.config.db_host }}",
+              "PORT": {{ .Values.config.db_port }},
+              "USER": "{{ .Values.config.db_user }}",
+              "PASSWORD": "{{ .Values.config.db_password }}",
+              "DATABASE": "{{ .Values.config.db_database }}",
+              "POOL_MIN_SIZE": 10,
+              "POOL_MAX_SIZE": 10,
+              "ACQUIRE_TIMEOUT_MILLIS": 30000,
+              "CREATE_TIMEOUT_MILLIS": 30000,
+              "DESTROY_TIMEOUT_MILLIS": 5000,
+              "IDLE_TIMEOUT_MILLIS": 30000,
+              "REAP_INTERVAL_MILLIS": 1000,
+              "CREATE_RETRY_INTERVAL_MILLIS": 200
+          }
         }
-      }
 
     service:
+      internalPort: 3000
+      ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+      ##
       type: ClusterIP
-      ports:
-        externalPort: 3000
-        internalPort: 3000
+      ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+      ##
+      port: 80
+      ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+      ##
+      httpsPort: 443
+      ## Node ports to expose
+      ## @param service.nodePorts.http Node port for HTTP
+      ## @param service.nodePorts.https Node port for HTTPS
+      ## NOTE: choose port between <30000-32767>
+      ##
+      nodePorts:
+        http:
+        https:
+      ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      ## e.g.:
+      ## clusterIP: None
+      ##
+      clusterIP:
+      ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+      ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+      ##
+      loadBalancerIP:
+      ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+      ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+      ## e.g:
+      ## loadBalancerSourceRanges:
+      ##   - 10.10.10.0/24
+      ##
+      loadBalancerSourceRanges: []
+      ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+      ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+      ##
+      externalTrafficPolicy: Cluster
+      ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+      ##
+      annotations: {}
 
     ingress:
       ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%

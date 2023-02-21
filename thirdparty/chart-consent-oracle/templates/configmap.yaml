@@ -1,4 +1,3 @@
-{{- $RELEASE_NAME := .Release.Name -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,6 +5,7 @@ metadata:
   labels:
     {{- include "consent-oracle.labels" . | nindent 4 }}
 data:
-  {{- range $k, $v := index .Values.config }}
-    {{ $k }}: {{ ($v | toPrettyJson | squote | replace "$release_name" $RELEASE_NAME) }}
+  {{- range $k, $v := index .Values.config_files }}
+    {{ $k }}: | 
+      {{- include "common.tplvalues.render" (dict "value" $v "context" $) | nindent 6 }}
   {{- end }}

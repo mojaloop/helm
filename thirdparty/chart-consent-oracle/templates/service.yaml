@@ -5,13 +5,31 @@ metadata:
   labels:
     app: consent-oracle
     {{- include "consent-oracle.labels" . | nindent 4 }}
-spec:
-  ports:
-    {{- with .Values.service.ports }}
-    - port: {{ .externalPort }}
-      targetPort: {{ .internalPort }}
-      name: {{ .name }}
+  annotations:
+    {{- if (or (eq .Values.service.type "LoadBalancer") (eq .Values.service.type "NodePort")) }}
+    externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy | quote }}
     {{- end }}
+    {{- if eq .Values.service.type "LoadBalancer" }}
+    loadBalancerSourceRanges: {{ .Values.service.loadBalancerSourceRanges }}
+    {{- end }}
+    {{- if (and (eq .Values.service.type "LoadBalancer") (not (empty .Values.service.loadBalancerIP))) }}
+    loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+    {{- end }}
+    {{- range $key, $value := .Values.service.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.internalPort }}
+      protocol: TCP
+  {{- if .Values.diagnosticMode.enabled }}
+    - name: debug
+      port: {{ .Values.diagnosticMode.debug.port }}
+      targetPort: {{ .Values.diagnosticMode.debug.internalPort }}
+      protocol: TCP
+  {{- end }}
   selector:
     {{- include "consent-oracle.selectorLabels" . | nindent 6 }}
-  clusterIP: None
