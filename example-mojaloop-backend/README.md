@@ -25,24 +25,34 @@ helm -n mojaloop install backend mojaloop/example-mojaloop-backend
 
 ## Mojaloop Configuration
 
-Ensure you modify the CONFIG section on the [mojaloop/values.yaml](../mojaloop/values.yaml) header by commenting out the sections under `FOR default` and uncommenting the lines under `FOR example-mojaloop-backend`.
+The default CONFIG header section on the [mojaloop/values.yaml](../mojaloop/values.yaml) header has been configured to work with the backend dependencies deployed by this Helm wrapper chart.
 
-And ensure that all backends are disabled [mojaloop/values.yaml](../mojaloop/values.yaml):
+Several backends are shared between services, specifically:
 
-- `central.centralledger.mysql.enabled=false`
-- `central.centralledger.kafka.enabled=false`
-- `central.centraleventprocessor.mongodb.enabled=false`
-- `account-lookup-service.mysql.enabled=false`
-- `mojaloop-bulk.mongodb.enabled=false`
+- MySQL - Specific Database are created to isolate the schemas for each service, however the same common password is used for convenience.
+- Kafka - No special configuration are made here.
+- Redis
+  - ttksims - A unique namespace is used for each TTK Simulator to isolate the key-space.
 
-This can be set by using the `--set` parameter when running the `helm install` command:
+It includes backends for the following services:
 
-```bash
-helm install moja ./mojaloop --set "central.centralledger.mysql.enabled=false" --set "central.centralledger.kafka.enabled=false" --set "central.centraleventprocessor.mongodb.enabled=false" --set "account-lookup-service.mysql.enabled=false" --set "mojaloop-bulk.mongodb.enabled=false"
-```
 
-Ensure you also include the following to enable Bulk Components:
-
-```bash
---set "mojaloop-bulk.enabled=true" --set "ml-ttk-test-val-bulk.tests.enabled=true"
-```
+|  Chart   |  Dependency   |  Notes   |
+| --- | --- | --- |
+|  Account-Lookup-Service   |  MySQL   |     |
+|   Quoting-Service  |  MySQL   |     |
+|  ML-API-Adapter   |  Kafka   |     |
+|  Central-Ledger  |   Kafka, MySQL, MongoDB  |     |
+|  Central-Settlements   |  MySQL   |     |
+|  Central-Event-Processor   |  Kafka, MongoDB   |     |
+|  Transaction-Request-Service   |   N/A  |     |
+|  Thirdparty Auth-Service   |   Redis, MySQL  |     |
+|   Thirdparty Consent Oracle  |   MySQL  |     |
+|  Thirdparty SDK  |   N/A  |     |
+|  Simulator   |   N/A  |     |
+|   Mojaloop-Simulator  |  N/A   |   There is a dependency on Redis, however due to the dynamic nature of the Mojaloop-Simulator, a Redis container will be created dynamically for each configured Simulator.  |
+|  Mojaloop-Testing-Toolkit   |   MongoDB  |     |
+|  Mojaloop-TTK-Simulators   |   Redis, MongoDB  |     |
+|  SDK-Scheme-Adapter   |   N/A  |  There is a dependency on Redis, however this chart is not deployed directly, but rather used in wrappers like the Mojaloop-TTK-Simulators.   |
+|   Bulk-API-Adapter  |   Kafka, MongoDB  |     |
+|     |     |     |
