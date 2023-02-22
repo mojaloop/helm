@@ -32,7 +32,7 @@
     helm repo add redpanda-console https://packages.vectorized.io/public/console/helm/charts/
     ```
 
-## Configure remote Mojaloop Helm repo on your Helm Client
+### Configure remote Mojaloop Helm repo on your Helm Client
 
 1. Add Mojaloop repo
 
@@ -44,44 +44,47 @@
 
 ## Deployment
 
-1. Deploy specific chart
+### Deploying Backend Dependencies
 
-   - `helm --namespace <namespace> install <release_name> mojaloop/<chart_name>`
+It is best practice to deploy External Backend Dependencies (i.e. MySQL, Kafka, MongoDB, etc) as separate deployments. We have provided an example of how this can be done using the [example-mojaloop-backend](./example-mojaloop-backend/README.md) Helm chart. The [example-mojaloop-backend](./example-mojaloop-backend/README.md) is provided purely as an example and should only be used for PoC environments. It is recommended that you deploy each External Backend Dependencies (i.e. MySQL, Kafka, MongoDB, etc) as a separate deployment as to ensure that each deployment is maintainable.
 
-    e.g. `helm --namespace moja install dev mojaloop/centralledger`
+Refer to [example-mojaloop-backend/README.md#installation](./example-mojaloop-backend/README.md#installation) on how to deploy the `example-mojaloop-backend`.
 
-    Alternative directly from remote repo:
+The following Helm Charts have the following external dependencies:
 
-    - `helm --namespace <namespace> install <release_name> --repo=http://mojaloop.io/helm/repo <chart_name>`
+|  Chart   |  Dependency   |  Notes   |
+| --- | --- | --- |
+|  Account-Lookup-Service   |  MySQL   |     |
+|   Quoting-Service  |  MySQL   |     |
+|  ML-API-Adapter   |  Kafka   |     |
+|  Central-Ledger  |   Kafka, MySQL, MongoDB  |     |
+|  Central-Settlements   |  MySQL   |     |
+|  Central-Event-Processor   |  Kafka, MongoDB   |     |
+|  Transaction-Request-Service   |   N/A  |     |
+|  Thirdparty Auth-Service   |   Redis, MySQL  |     |
+|   Thirdparty Consent Oracle  |   MySQL  |     |
+|  Thirdparty SDK  |   N/A  |     |
+|  Simulator   |   N/A  |     |
+|   Mojaloop-Simulator  |  Redis   |   There is a dependency on Redis, however due to the dynamic nature of the Mojaloop-Simulator, a Redis container will be created dynamically for each configured Simulator.  |
+|  Mojaloop-Testing-Toolkit   |   MongoDB  |     |
+|  Mojaloop-TTK-Simulators   |   Redis, MongoDB  |     |
+|  SDK-Scheme-Adapter   |   Redis  |    |
+|   Bulk-API-Adapter  |   Kafka, MongoDB  |     |
+|     |     |     |
 
-2. Deploy specific chart overriding values
+### Deploying Mojaloop Helm Charts
 
-   - `helm --namespace <namespace> install <release_name> mojaloop/<chart_name> -f {custom-values.yaml}`
+1. Deploy the Mojaloop chart
 
-   e.g. `helm --namespace moja install dev mojaloop/centralledger -f ./values.yaml`
+    This chart is a "Wrapper" chart that packages the core Mojaloop components that one would use as a base "Switch" deployment. It includes all the components that one needs for executing and testing the Discovery, Quoting, and Transfer phases of the FSPIOP API specification, as well as supporting components for Bulk, and Settlement Processing.
 
-   Refer to the following default chart config file for values: http://mojaloop.io/helm/<chart_name>/values.yaml
-
-   Alternatively one can set specific values via cli arguments based on the config file above:
-   - `helm --namespace <namespace> install <release_name> mojaloop/<chart_name> --set foo=bar --set {key.subkey.subsubkey}={value}`
-
-3. Deploy specific version for a chart
-
-   - `helm --namespace <namespace> install <release_name> mojaloop/<chart_name> --version {version}`
-
-   e.g. `helm --namespace moja install dev mojaloop/centralledger --version v1.0.0`
-
-   Refer to the following default chart config file for values: http://mojaloop.io/helm/<chart_name>/values.yaml
-
-4. Deploy the Mojaloop chart
-
-    *Warning: This will deploy all core Mojaloop charts with default backends. See [#deploying-backends](#deploying-backends) on how to disabled the default backends and deploy them using the [example-mojaloop-backend/README.md](./example-mojaloop-backend/README.md) Helm chart.*
+    *Warning: This will deploy all core Mojaloop charts with default backends configurations. See [#deploying-backend-dependencies](#deploying-backend-dependencies) on how to deploy them using the [example-mojaloop-backend/README.md](./example-mojaloop-backend/README.md) Helm chart.*
 
     - `helm --namespace <namespace> install <release_name> mojaloop/mojaloop`
 
     e.g. `helm --namespace moja install dev mojaloop/mojaloop`
 
-5. Deploy Mojaloop with Bulk-API-Adapter
+2. Deploy Mojaloop with Bulk-API-Adapter
 
     *Warning: This will deploy all core Mojaloop charts.* and the Bulk-API-Adapter
 
@@ -89,11 +92,11 @@
 
     e.g. `helm --namespace moja install dev mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true `
 
-6. Deploy Mojaloop with Thirdparty components
+3. Deploy Mojaloop with Thirdparty components
 
     Refer to [thirdparty/README.md](./thirdparty/README.md) for more information on what pre-requisites are required to enable Thirdparty components and how to  manually deploy backend dependencies.
 
-7. Deploy Mojaloop with Bulk-API-Adapter and SDK-TTK Bulk simulators
+4. Deploy Mojaloop with Bulk-API-Adapter and SDK-TTK Bulk simulators
 
     *Warning: This will deploy all core Mojaloop charts.*, the Bulk-API-Adapter and additional SDK+TTK simulators
 
@@ -101,13 +104,26 @@
 
     e.g. `helm --namespace moja install dev mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true --set mojaloop-ttk-simulators.enabled=true --set global.kafka.host=<MOJALOOP_INSTALL_NAME>-kafka --set global.redis.host=<REDIS_INSTALL_NAME>-redis-master --set ml-ttk-test-val-sdk-bulk.tests.enabled=true`
 
-### Deploying Backends (best practice)
+5. Deploy specific chart
 
-It is best practice to deploy External Backend Dependencies (i.e. MySQL, Kafka, MongoDB, etc) as separate deployments. We have provided an example of how this can be done using the [example-mojaloop-backend](./example-mojaloop-backend/README.md) Helm chart. The [example-mojaloop-backend](./example-mojaloop-backend/README.md) is provided purely as an example and should only be used for PoC environments. It is recommended that you deploy each External Backend Dependencies (i.e. MySQL, Kafka, MongoDB, etc) as a separate deployment as to ensure that each deployment is maintainable.
+    *Warning: This will deploy a single Mojaloop charts. You will need to ensure that you have met all pre-requisites for that chart (e.g. external dependencies such as MySQL, Kafka, AND internal dependencies such as the Central-Ledger API Service). This can be done by customization the values.yaml of each chart to suite your environment.*
 
-Refer to [example-mojaloop-backend/README.md#installation](./example-mojaloop-backend/README.md#installation) on how to deploy the `example-mojaloop-backend`, and disabled the default backend.
+   - `helm --namespace <namespace> install <release_name> mojaloop/<chart_name> -f {custom-values.yaml}`
 
-_Note: This is required when deploying to Kubernetes v1.22+._
+   e.g. `helm --namespace moja install dev mojaloop/centralledger -f ./values.yaml`
+
+   Refer to the following default chart config file for configurable values: http://mojaloop.io/helm/<chart_name>/values.yaml
+
+   Alternatively one can set specific values via cli arguments based on the config file above:
+   - `helm --namespace <namespace> install <release_name> mojaloop/<chart_name> --set foo=bar --set {key.subkey.subsubkey}={value}`
+
+6. Deploy specific version for a chart
+
+   - `helm --namespace <namespace> install <release_name> mojaloop/<chart_name> --version {version}`
+
+   e.g. `helm --namespace moja install dev mojaloop/centralledger --version v1.0.0`
+
+   Refer to the following default chart config file for values: http://mojaloop.io/helm/<chart_name>/values.yaml
 
 ### Deploying development versions
 

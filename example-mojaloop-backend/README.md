@@ -13,46 +13,33 @@ Or run the [update-charts-dep.sh](../update-charts-dep.sh) from the root folder.
 
 ### Backends
 
+Deploying from Git repo directly:
+
 ```bash
 helm -n mojaloop install backend ./example-mojaloop-backend
 ```
 
-Or from the Helm repo:
+Or from the published Helm repo:
 
 ```bash
 helm -n mojaloop install backend mojaloop/example-mojaloop-backend
 ```
 
-## Mojaloop Configuration
+Ensure that you [add the published repo to your Helm client](../README.md#configure-remote-mojaloop-helm-repo-on-your-helm-client) prior to running the above command.
+
+## Mojaloop
 
 The default CONFIG header section on the [mojaloop/values.yaml](../mojaloop/values.yaml) header has been configured to work with the backend dependencies deployed by this Helm wrapper chart.
 
-Several backends are shared between services, specifically:
+Several backends are defined as follows:
 
-- MySQL - Specific Database are created to isolate the schemas for each service, however the same common password is used for convenience.
-- Kafka - No special configuration are made here.
-- Redis
-  - ttksims - A unique namespace is used for each TTK Simulator to isolate the key-space.
-
-It includes backends for the following services:
-
-
-|  Chart   |  Dependency   |  Notes   |
+|  Backend   |  Description   |  Notes   |
 | --- | --- | --- |
-|  Account-Lookup-Service   |  MySQL   |     |
-|   Quoting-Service  |  MySQL   |     |
-|  ML-API-Adapter   |  Kafka   |     |
-|  Central-Ledger  |   Kafka, MySQL, MongoDB  |     |
-|  Central-Settlements   |  MySQL   |     |
-|  Central-Event-Processor   |  Kafka, MongoDB   |     |
-|  Transaction-Request-Service   |   N/A  |     |
-|  Thirdparty Auth-Service   |   Redis, MySQL  |     |
-|   Thirdparty Consent Oracle  |   MySQL  |     |
-|  Thirdparty SDK  |   N/A  |     |
-|  Simulator   |   N/A  |     |
-|   Mojaloop-Simulator  |  N/A   |   There is a dependency on Redis, however due to the dynamic nature of the Mojaloop-Simulator, a Redis container will be created dynamically for each configured Simulator.  |
-|  Mojaloop-Testing-Toolkit   |   MongoDB  |     |
-|  Mojaloop-TTK-Simulators   |   Redis, MongoDB  |     |
-|  SDK-Scheme-Adapter   |   N/A  |  There is a dependency on Redis, however this chart is not deployed directly, but rather used in wrappers like the Mojaloop-TTK-Simulators.   |
-|   Bulk-API-Adapter  |   Kafka, MongoDB  |     |
+|  MysqlDb   |  Shared MySQL server   |  Specific Databases are created to isolate the schemas for each service, however the same common password is used for convenience.   |
+|  Kafka  |  Shared Kafka server   |     |
+|  cl-mongodb   |  MongoDB Object Store by the Bulk-API-Adapter, Central-Ledger for Bulk Processing   |     |
+|  cep-mongodb   |  MongoDB Object Store used by the Central-Event-Processor   |     |
+|  ttk-mongodb   |  MongoDB Object Store used by the Mojaloop Testing Toolkit (TTK)   |     |
+|  ttksim-redis   |  Shared Redis instance for TTK based Simulators   |     |
+|  auth-svc-redis   |  Redis instance for the Thirdparty Auth-Service   |     |
 |     |     |     |
