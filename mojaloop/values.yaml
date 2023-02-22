@@ -12,7 +12,7 @@ CONFIG:
 
   ## CENTRAL-LEDGER BACKEND
   cl_db_name: &CL_DB_NAME "central_ledger"
-  cl_db_password: &CL_DB_PASSWORD "ml_password"
+  cl_db_password: &CL_DB_PASSWORD ''
   cl_db_secret: &CL_DB_SECRET
     name: &CL_DB_SECRET_NAME mysqldb
     key: &CL_DB_SECRET_KEY mysql-password
@@ -28,12 +28,11 @@ CONFIG:
   obj_mongo_host: &OBJSTORE_MONGO_HOST 'cl-mongodb'
   obj_mongo_port: &OBJSTORE_MONGO_PORT 27017
   obj_mongo_user: &OBJSTORE_MONGO_USER mojaloop
-  obj_mongo_password: &OBJSTORE_MONGO_PASSWORD password
+  obj_mongo_password: &OBJSTORE_MONGO_PASSWORD ''
   obj_moongo_secret: &OBJSTORE_MONGO_SECRET
     name: &OBJSTORE_MONGO_SECRET_NAME cl-mongodb
     key: &OBJSTORE_MONGO_SECRET_KEY mongodb-passwords
   obj_mongo_database: &OBJSTORE_MONGO_DATABASE mlos
-  objstore_uri: &OBJSTORE_URI 'mongodb://mojaloop:password@cl-mongodb:27017/mlos'
 
   ## TTK MONGODB BACKEND
   ttk_mongo_host: &TTK_MONGO_HOST "ttk-mongodb"
@@ -43,14 +42,14 @@ CONFIG:
   ttk_mongo_database: &TTK_MONGO_DATABASE "ttk"
   ttk_mongo_uri: &TTK_MONGO_URI 'mongodb://ttk:ttk@ttk-mongodb:27017/ttk'
 
-  ## CENTRAL-EVEN-PROCESSOR Backend
+  ## CENTRAL-EVEN-PROCESSOR BACKEND
   cep_mongo_host: &CEP_MONGO_HOST 'cep-mongodb'
   cep_mongo_port: &CEP_MONGO_PORT 27017
   cep_mongo_user: &CEP_MONGO_USER mojaloop
   cep_mongo_password: &CEP_MONGO_PASSWORD password
   cep_mongo_database: &CEP_MONGO_DATABASE mlos
 
-  ## MOJALOOP-TTK-SIMULATORS Backend
+  ## MOJALOOP-TTK-SIMULATORS BACKEND
   moja_ttk_sim_kafka_host: &MOJA_TTK_SIM_KAFKA_HOST kafka
   moja_ttk_sim_kafka_port: &MOJA_TTK_SIM_KAFKA_PORT 9092
   # The Redis Instance can be installed using the following command: helm -n <NAMESPACE> install backend ./example-mojaloop-backend --set "kafka.enabled=false" --set "centralledger-mysql.enabled=false" --set "account-lookup-mysql.enabled=false" --set "centralledger-obj.enabled=false" --set "cep-mongodb.enabled=false" --set "kafka-console.enabled=false" --set "ttksims-redis.enabled=true"
@@ -2139,6 +2138,7 @@ centralledger:
   # Default values for central-ledger.
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
+
   centralledger-service:
     enabled: true
     # Default values for central-ledger.
@@ -2148,7 +2148,7 @@ centralledger:
     image:
       registry: "docker.io"
       repository: mojaloop/central-ledger
-      tag: v16.3.1
+      tag: v17.0.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2473,7 +2473,7 @@ centralledger:
     image:
       registry: "docker.io"
       repository: mojaloop/central-ledger
-      tag: v16.3.1
+      tag: v17.0.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2800,7 +2800,7 @@ centralledger:
     image:
       registry: "docker.io"
       repository: mojaloop/central-ledger
-      tag: v16.3.1
+      tag: v17.0.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3124,7 +3124,7 @@ centralledger:
     image:
       registry: "docker.io"
       repository: mojaloop/central-ledger
-      tag: v16.3.1
+      tag: v17.0.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3448,7 +3448,7 @@ centralledger:
     image:
       registry: "docker.io"
       repository: mojaloop/central-ledger
-      tag: v16.3.1
+      tag: v17.0.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3772,7 +3772,7 @@ centralledger:
     image:
       registry: "docker.io"
       repository: mojaloop/central-ledger
-      tag: v16.3.1
+      tag: v17.0.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -4101,7 +4101,7 @@ centralledger:
     image:
       registry: "docker.io"
       repository: mojaloop/central-ledger
-      tag: v16.3.1
+      tag: v17.0.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -9444,7 +9444,7 @@ mojaloop-bulk:
       image:
         registry: "docker.io"
         repository: mojaloop/bulk-api-adapter
-        tag: v14.2.0
+        tag: v15.0.0
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -9525,6 +9525,7 @@ mojaloop-bulk:
         kafka_host: *KAFKA_HOST
         kafka_port: *KAFKA_PORT
 
+        ## MongoDB Configuration for Object Store
         mongo_host: *OBJSTORE_MONGO_HOST
         mongo_port: *OBJSTORE_MONGO_PORT
         mongo_user: *OBJSTORE_MONGO_USER
@@ -9539,8 +9540,6 @@ mojaloop-bulk:
           name: *OBJSTORE_MONGO_SECRET_NAME
           key: *OBJSTORE_MONGO_SECRET_KEY
         mongo_database: mlos
-        ## MongoDB Configuration for Object Store
-        objstore_uri: *OBJSTORE_URI
 
         central_services_host: '$release_name-centralledger-service'
         central_services_port: 80
@@ -9703,7 +9702,7 @@ mojaloop-bulk:
       image:
         registry: "docker.io"
         repository: mojaloop/bulk-api-adapter
-        tag: v14.2.0
+        tag: v15.0.0
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -9774,6 +9773,7 @@ mojaloop-bulk:
         kafka_host: *KAFKA_HOST
         kafka_port: *KAFKA_PORT
 
+        ## MongoDB Configuration for Object Store
         mongo_host: *OBJSTORE_MONGO_HOST
         mongo_port: *OBJSTORE_MONGO_PORT
         mongo_user: *OBJSTORE_MONGO_USER
@@ -9788,8 +9788,6 @@ mojaloop-bulk:
           name: *OBJSTORE_MONGO_SECRET_NAME
           key: *OBJSTORE_MONGO_SECRET_KEY
         mongo_database: mlos
-        ## MongoDB Configuration for Object Store
-        objstore_uri: *OBJSTORE_URI
 
         central_services_host: '$release_name-centralledger-service'
         central_services_port: 80
@@ -9998,7 +9996,7 @@ mojaloop-bulk:
       image:
         registry: "docker.io"
         repository: mojaloop/central-ledger
-        tag: v16.3.1
+        tag: v17.0.0-snapshot.0
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -10095,7 +10093,16 @@ mojaloop-bulk:
         db_host: *CL_DB_HOST
         db_port: *CL_DB_PORT
         db_user: *CL_DB_USER
-        db_password: *CL_DB_PASSWORD
+        ## Secret-Management
+        ### Set this is you are using a clear password configured in the config section
+        # db_password: *CL_DB_PASSWORD
+        ### Configure this if you want to use a secret. Note, this will override the db_password,
+        ### Use the next line if you do wish to use the db_password value instead.
+        # db_secret:
+        ### Example config for an existing secret
+        db_secret:
+          name: *CL_DB_SECRET_NAME
+          key: *CL_DB_SECRET_KEY
         db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
@@ -10108,6 +10115,7 @@ mojaloop-bulk:
         db_debug: false
 
         ## MongoDB Configuration for Object Store
+        objstore_disabled: false
         mongo_host: *OBJSTORE_MONGO_HOST
         mongo_port: *OBJSTORE_MONGO_PORT
         mongo_user: *OBJSTORE_MONGO_USER
@@ -10122,9 +10130,6 @@ mojaloop-bulk:
           name: *OBJSTORE_MONGO_SECRET_NAME
           key: *OBJSTORE_MONGO_SECRET_KEY
         mongo_database: mlos
-        ## Legacy Configuration for Object Store
-        objstore_disabled: false
-        objstore_uri: *OBJSTORE_URI
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
@@ -10345,7 +10350,7 @@ mojaloop-bulk:
       image:
         registry: "docker.io"
         repository: mojaloop/central-ledger
-        tag: v16.3.1
+        tag: v17.0.0-snapshot.0
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -10442,7 +10447,16 @@ mojaloop-bulk:
         db_host: *CL_DB_HOST
         db_port: *CL_DB_PORT
         db_user: *CL_DB_USER
-        db_password: *CL_DB_PASSWORD
+        ## Secret-Management
+        ### Set this is you are using a clear password configured in the config section
+        # db_password: *CL_DB_PASSWORD
+        ### Configure this if you want to use a secret. Note, this will override the db_password,
+        ### Use the next line if you do wish to use the db_password value instead.
+        # db_secret:
+        ### Example config for an existing secret
+        db_secret:
+          name: *CL_DB_SECRET_NAME
+          key: *CL_DB_SECRET_KEY
         db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
@@ -10455,6 +10469,7 @@ mojaloop-bulk:
         db_debug: false
 
         ## MongoDB Configuration for Object Store
+        objstore_disabled: false
         mongo_host: *OBJSTORE_MONGO_HOST
         mongo_port: *OBJSTORE_MONGO_PORT
         mongo_user: *OBJSTORE_MONGO_USER
@@ -10469,9 +10484,6 @@ mojaloop-bulk:
           name: *OBJSTORE_MONGO_SECRET_NAME
           key: *OBJSTORE_MONGO_SECRET_KEY
         mongo_database: mlos
-        ## Legacy Configuration for Object Store
-        objstore_disabled: false
-        objstore_uri: *OBJSTORE_URI
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
@@ -10689,7 +10701,7 @@ mojaloop-bulk:
       image:
         registry: "docker.io"
         repository: mojaloop/central-ledger
-        tag: v16.3.1
+        tag: v17.0.0-snapshot.0
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -10786,7 +10798,16 @@ mojaloop-bulk:
         db_host: *CL_DB_HOST
         db_port: *CL_DB_PORT
         db_user: *CL_DB_USER
-        db_password: *CL_DB_PASSWORD
+        ## Secret-Management
+        ### Set this is you are using a clear password configured in the config section
+        # db_password: *CL_DB_PASSWORD
+        ### Configure this if you want to use a secret. Note, this will override the db_password,
+        ### Use the next line if you do wish to use the db_password value instead.
+        # db_secret:
+        ### Example config for an existing secret
+        db_secret:
+          name: *CL_DB_SECRET_NAME
+          key: *CL_DB_SECRET_KEY
         db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
@@ -10799,6 +10820,7 @@ mojaloop-bulk:
         db_debug: false
 
         ## MongoDB Configuration for Object Store
+        objstore_disabled: false
         mongo_host: *OBJSTORE_MONGO_HOST
         mongo_port: *OBJSTORE_MONGO_PORT
         mongo_user: *OBJSTORE_MONGO_USER
@@ -10813,9 +10835,6 @@ mojaloop-bulk:
           name: *OBJSTORE_MONGO_SECRET_NAME
           key: *OBJSTORE_MONGO_SECRET_KEY
         mongo_database: mlos
-        ## Legacy Configuration for Object Store
-        objstore_disabled: false
-        objstore_uri: *OBJSTORE_URI
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
@@ -11033,7 +11052,7 @@ mojaloop-bulk:
       image:
         registry: "docker.io"
         repository: mojaloop/central-ledger
-        tag: v16.3.1
+        tag: v17.0.0-snapshot.0
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -11130,7 +11149,16 @@ mojaloop-bulk:
         db_host: *CL_DB_HOST
         db_port: *CL_DB_PORT
         db_user: *CL_DB_USER
-        db_password: *CL_DB_PASSWORD
+        ## Secret-Management
+        ### Set this is you are using a clear password configured in the config section
+        # db_password: *CL_DB_PASSWORD
+        ### Configure this if you want to use a secret. Note, this will override the db_password,
+        ### Use the next line if you do wish to use the db_password value instead.
+        # db_secret:
+        ### Example config for an existing secret
+        db_secret:
+          name: *CL_DB_SECRET_NAME
+          key: *CL_DB_SECRET_KEY
         db_database: *CL_DB_NAME
         db_connection_pool_min: 10
         db_connection_pool_max: 30
@@ -11158,8 +11186,6 @@ mojaloop-bulk:
           name: *OBJSTORE_MONGO_SECRET_NAME
           key: *OBJSTORE_MONGO_SECRET_KEY
         mongo_database: mlos
-        ## Legacy Configuration for Object Store
-        objstore_uri: *OBJSTORE_URI
 
         ## Kafka Configuration
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.

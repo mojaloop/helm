@@ -46,7 +46,9 @@
 
 ### Deploying Backend Dependencies
 
-It is best practice to deploy External Backend Dependencies (i.e. MySQL, Kafka, MongoDB, etc) as separate deployments. We have provided an example of how this can be done using the [example-mojaloop-backend](./example-mojaloop-backend/README.md) Helm chart. The [example-mojaloop-backend](./example-mojaloop-backend/README.md) is provided purely as an example and should only be used for PoC environments. It is recommended that you deploy each External Backend Dependencies (i.e. MySQL, Kafka, MongoDB, etc) as a separate deployment as to ensure that each deployment is maintainable.
+It is recommended and it is a best practice that you deploy each External Backend Dependencies (i.e. MySQL, Kafka, MongoDB, etc) as a separate deployment as to ensure that each deployment is operationally isolated and maintainable.
+
+We have provided an example Helm Wrapper chart that packages all dependencies, called the [example-mojaloop-backend](./example-mojaloop-backend/README.md) Helm chart. The [example-mojaloop-backend](./example-mojaloop-backend/README.md) is provided purely for convenience and should only be used for PoC environments, and for testing purposes. You can also use this as a reference to determine which External Dependency Helm charts can be utilized for this purpose, and how to potentially configure them.
 
 Refer to [example-mojaloop-backend/README.md#installation](./example-mojaloop-backend/README.md#installation) on how to deploy the `example-mojaloop-backend`.
 

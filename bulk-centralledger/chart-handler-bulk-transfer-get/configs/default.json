@@ -1,6 +1,6 @@
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
-{{- $objStoreUri := ( .Values.config.objstore_uri | replace "$release_name" .Release.Name ) -}}
-{{- $dbDeployHost := (.Values.config.db_host | replace "$release_name" .Release.Name) }}
+{{- $mongoHost := ( .Values.config.mongo_host | replace "$release_name" .Release.Name ) -}}
+{{- $dbDeployHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
 {
     "PORT": {{ .Values.service.internalPort }},
     "HOSTNAME": "{{ .Values.ingress.hostname }}",
@@ -42,7 +42,11 @@
     },
     "MONGODB": {
         "DISABLED": {{ .Values.config.objstore_disabled }},
-        "URI": {{ (default .Values.config.objstore_uri $objStoreUri) | quote }}
+        "HOST": "{{ $mongoHost }}",
+        "PORT": "{{ .Values.config.mongo_port }}",
+        "USER": "{{ .Values.config.mongo_user }}",
+        "PASSWORD": "{{ .Values.config.mongo_password }}",
+        "DATABASE": "{{ .Values.config.mongo_database }}"
     },
     "HANDLERS": {
         "DISABLED": false,

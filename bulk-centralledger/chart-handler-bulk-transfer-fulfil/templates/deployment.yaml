@@ -1,6 +1,3 @@
-{{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
-{{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
-{{- $objStoreUri := ( .Values.config.objstore_uri | replace "$release_name" .Release.Name ) -}}
 apiVersion: {{ template "centralledger-handler-bulk-transfer-fulfil.apiVersion.Deployment" . }}
 kind: Deployment
 metadata:
@@ -102,16 +99,15 @@ spec:
             {{- else }}
               value: {{ .Values.config.db_password }}
             {{- end }}
-            ## TODO: Add env var injection for password/secret once supported
-            # - name: ?_DATABASE__PASSWORD
-            # {{- if not (empty .Values.config.mongo_secret) }}
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: '{{ .Values.config.mongo_secret.name }}'
-            #       key: '{{ .Values.config.mongo_secret.key }}'
-            # {{- else }}
-            #   value: {{ .Values.config.mongo_password }}
-            # {{- end }}
+            - name: CLEDG_MONGODB__PASSWORD
+            {{- if not (empty .Values.config.mongo_secret) }}
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ .Values.config.mongo_secret.name }}'
+                  key: '{{ .Values.config.mongo_secret.key }}'
+            {{- else }}
+              value: {{ .Values.config.mongo_password }}
+            {{- end }}
             - name: LOG_LEVEL
               value: {{ .Values.config.log_level }}
             - name: CSL_LOG_TRANSPORT

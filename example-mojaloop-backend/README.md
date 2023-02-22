@@ -5,6 +5,12 @@
 
 ## Pre-requisites
 
+### Configure remote Mojaloop Helm repo on your Helm Client
+
+Ensure that you [add the published repo to your Helm client](../README.md#configure-remote-mojaloop-helm-repo-on-your-helm-client) prior to running the above command.
+
+### Setup local GIT repo
+
 Run `helm dep up .`
 
 Or run the [update-charts-dep.sh](../update-charts-dep.sh) from the root folder.
@@ -13,19 +19,21 @@ Or run the [update-charts-dep.sh](../update-charts-dep.sh) from the root folder.
 
 ### Backends
 
-Deploying from Git repo directly:
-
-```bash
-helm -n mojaloop install backend ./example-mojaloop-backend
-```
-
-Or from the published Helm repo:
+from the published Helm repo:
 
 ```bash
 helm -n mojaloop install backend mojaloop/example-mojaloop-backend
 ```
 
-Ensure that you [add the published repo to your Helm client](../README.md#configure-remote-mojaloop-helm-repo-on-your-helm-client) prior to running the above command.
+### Configure remote Mojaloop Helm repo on your Helm Client
+
+1. Add Mojaloop repo
+
+    `helm repo add mojaloop http://mojaloop.io/helm/repo/`
+
+2. Keep your local Mojaloop repo up to date
+
+    `helm repo update`
 
 ## Mojaloop
 

@@ -22,12 +22,12 @@ Date | Revision | Description
 ## 3. Application versions
 
 1. ml-api-adapter: **v14.0.0**
-2. central-ledger: v15.1.2.1 -> **v16.3.1** ([Compare](https://github.com/mojaloop/central-ledger/compare/v15.1.2.1...v16.3.1))
+2. central-ledger: v16.3.1 -> **v17.0.0-snapshot.0** ([Compare](https://github.com/mojaloop/central-ledger/compare/v16.3.1...v17.0.0-snapshot.0))
 3. account-lookup-service: **v14.0.0**
 4. quoting-service: **v15.0.2**
 5. central-settlement: **v15.0.0**
 6. central-event-processor: **v12.0.0**
-7. bulk-api-adapter: v14.0.0 -> **v14.2.0** ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v14.0.0...v14.2.0))
+7. bulk-api-adapter: v14.2.0 -> **v15.0.0** ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v14.2.0...v15.0.0))
 8. email-notifier: **v12.0.0**
 9. als-oracle-pathfinder: **v12.0.0**
 10. transaction-requests-service: **v14.0.1**
@@ -51,12 +51,12 @@ Date | Revision | Description
 ## 4. Application release notes
 
 1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v14.0.0
-2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v16.3.1
+2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v17.0.0-snapshot.0
 3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v14.0.0
 4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v15.0.2
 5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v15.0.0
 6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v12.0.0
-7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v14.2.0
+7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v15.0.0
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.0
 9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v12.0.0
 10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.0.1
@@ -106,13 +106,23 @@ More information can be found here:
 
 ## 7. Testing notes
 
-1. This release has been tested against the following:
-    - Kubernetes: `v1.24.6`
-    - Testing Toolkit Test Cases: [v14.1.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v14.0.1)
+1. This release has been validated against the following dependency test matrix:
+
+| Dependency | Version |  Notes   |
+| ---------- | ------- | --- |
+| Kubernetes | v1.24.8 |     |
+| Nginx Ingress Controller | ? |     |
+|  Ubuntu   |  v?   |     |
+|  MySQL   |  v?   |     |
+|  Kafka   |  v?   |     |
+|  Redis   |  v?   |     |
+|  MongoDB   |  v?   |     |
+|  Testing Toolkit Test Cases   |  [v15.0.0-snapshot.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.0-snapshot.0)   |     |
+|     |     |     |
 
 2. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
 
-3. The [testing-toolkit-test-cases for v14.1.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v14.1.0)' Golden Path collections expects:
+3. The [testing-toolkit-test-cases for v15.0.0-snapshot.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.0-snapshot.0)' Golden Path collections expects:
     - the Quoting service operating mode to be set quoting-service.config.simple_routing_mode_enabled=true (in helm mojaloop/values.yaml under quoting-service config). If this is incorrectly configured, it will result in several failures in the quoting-service tests (7 expected failures). If this is disabled, ensure that you update the corresponding test-case environment variable parameter **SIMPLE_ROUTING_MODE_ENABLED** ( in helm mojaloop/values.yaml ml-testing-toolkit -> extraEnvironments.hub-k8s-default-environment.json.inputValues) to match.
     - the **on-us transfers** (in mojaloop/values.yaml "enable_on_us_transfers: false" under centralledger-handler-transfer-prepare -> config and  cl-handler-bulk-transfer-prepare -> config) configuration to be disabled. The test-case environment variable parameter (**ON_US_TRANSFERS_ENABLED** (in helm mojaloop/values.yaml ml-testing-toolkit -> extraEnvironments.hub-k8s-default-environment.json.inputValues), the same name used on postman collections) must similarly match this value.
 
