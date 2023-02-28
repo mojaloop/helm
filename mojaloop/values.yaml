@@ -58,13 +58,14 @@ CONFIG:
 
   ## THIRDPARTY AUTH-SVC BACKEND
   tp_auth_svc_db_name: &TP_AUTH_SVC_DB_NAME "auth_svc"
-  tp_auth_svc_db_password: &TP_AUTH_SVC_DB_PASSWORD "ml_password"
+  tp_auth_svc_db_password: &TP_AUTH_SVC_DB_PASSWORD ""
   tp_auth_svc_db_secret: &TP_AUTH_SVC_DB_SECRET
     name: &TP_AUTH_SVC_DB_SECRET_NAME mysqldb
     key: &TP_AUTH_SVC_DB_SECRET_KEY mysql-password
   tp_auth_svc_db_host: &TP_AUTH_SVC_DB_HOST 'mysqldb'
   tp_auth_svc_db_port: &TP_AUTH_SVC_DB_PORT 3306
   tp_auth_svc_db_user: &TP_AUTH_SVC_DB_USER "auth_svc"
+  tp_auth_svc_db_database: &TP_AUTH_SVC_DB_DATABASE "auth_svc"
   tp_auth_svc_redis_host: &TP_AUTH_SVC_REDIS_HOST auth-svc-redis-master
   tp_auth_svc_redis_port: &TP_AUTH_SVC_REDIS_PORT 6379
   
@@ -6953,7 +6954,7 @@ thirdparty:
     image:
       registry: "docker.io"
       repository: mojaloop/auth-service
-      tag: v13.0.2
+      tag: v13.1.0-snapshot.1
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -7040,11 +7041,11 @@ thirdparty:
       ### Configure this if you want to use a secret. Note, this will override the db_password,
       ### Use the next line if you do wish to use the db_password value instead.
       # db_secret:
-      ### Example config for an existing secret
-      # db_secret:
-      #   name: *TP_AUTH_SVC_DB_SECRET_NAME
-      #   key: *TP_AUTH_SVC_DB_SECRET_KEY
-      db_database: auth_svc
+      ## Example config for an existing secret
+      db_secret:
+        name: *TP_AUTH_SVC_DB_SECRET_NAME
+        key: *TP_AUTH_SVC_DB_SECRET_KEY
+      db_database: *TP_AUTH_SVC_DB_DATABASE
 
       ## Redis Configuration
       redis_host: *TP_AUTH_SVC_REDIS_HOST
@@ -7127,6 +7128,96 @@ thirdparty:
               "HskU2gw4np09IUtYNHnxMM696jJHqvccUdBmd0xP6XEWwH0xLei1PUzDJCM19SZ3A2Ex0fNLw0nc2hrIlFnAtw"
           ]
         }
+
+    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    ## e.g:
+    ## initContainers:
+    ##  - name: your-image-name
+    ##    image: your-image
+    ##    imagePullPolicy: Always
+    ##    command: ['sh', '-c', 'echo "hello world"']
+    ##    env:
+    ##      - name: debug
+    ##        value: trace
+    ##
+    # initContainers: []
+    initContainers: |
+      - name: wait-for-redis
+        image: redis:7.0.5
+        imagePullPolicy: IfNotPresent
+        command:
+          - sh
+          - -c
+          - until redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} ping;
+            do
+              echo --------------------;
+              echo Waiting for Redis...;
+              sleep 2;
+            done;
+            echo ====================;
+            echo Redis ok!;
+        env:
+          - name: REDIS_HOST
+            value: {{ include "common.tplvalues.render" (dict "value" .Values.config.redis_host "context" $) | quote }}
+          - name: REDIS_PORT
+            value: {{ .Values.config.redis_port | quote }}
+      - name: wait-for-mysql
+        image: mysql:5.7
+        imagePullPolicy: IfNotPresent
+        command:
+          - sh
+          - -c
+          - |
+            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+            do
+              echo --------------------;
+              echo Waiting for MySQL...;
+              sleep 2; 
+            done;
+            echo ====================; 
+            echo MySQL ok!;
+        env:
+          - name: DB_HOST
+            value: '{{ .Values.config.db_host }}'
+          - name: DB_PORT
+            value: '{{ .Values.config.db_port }}'
+          - name: DB_USER
+            value: '{{ .Values.config.db_user }}'
+          - name: DB_PASSWORD
+            {{- if not (empty .Values.config.db_secret) }}
+            valueFrom:
+                secretKeyRef:
+                  name: '{{ .Values.config.db_secret.name }}'
+                  key: '{{ .Values.config.db_secret.key }}'
+            {{- else }}
+            value: {{ .Values.config.db_password }}
+            {{- end }}
+          - name: DB_DATABASE
+            value: '{{ .Values.config.db_database }}'
+      - name: run-migration
+        image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+        imagePullPolicy: IfNotPresent
+        command:
+          - sh
+          - -c
+          - npm run migrate
+        env:
+          - name: DB_CONNECTION_PASSWORD
+            {{- if not (empty .Values.config.db_secret) }}
+            valueFrom:
+                secretKeyRef:
+                  name: '{{ .Values.config.db_secret.name }}'
+                  key: '{{ .Values.config.db_secret.key }}'
+            {{- else }}
+            value: {{ .Values.config.db_password }}
+            {{- end }}
+          - name: NODE_ENV
+            value: production
+        volumeMounts:
+          - name: auth-svc-config-volume
+            mountPath: /opt/app/dist/config/production.json
+            subPath: production.json
 
     service:
       internalPort: 4004
