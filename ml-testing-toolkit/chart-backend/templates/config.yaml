@@ -1,8 +1,6 @@
 {{- $RELEASE_NAME := .Release.Name -}}
 {{- $MONGODB := (.Values.dependencies.mongodb) -}}
 {{- $PARAMETERS := .Values.parameters -}}
-{{- $CONNECTION_MANAGER := (.Values.dependencies.connectionManagerBackend) -}}
-{{- $API_AUTHENTICATION := index .Values.dependencies (ternary "keycloak" "adminApiAuthentication" .Values.dependencies.keycloak.enabled) -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -15,7 +13,7 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   {{- range $k, $v := .Values.config }}
-    {{ $k }}: {{ ($v | toPrettyJson | squote | replace "$mongodb_host" (index $MONGODB "host") | replace "$mongodb_port" (index $MONGODB "port") | replace "$auth_host" (index $API_AUTHENTICATION "host")  | replace "$auth_port" (index $API_AUTHENTICATION "port") | replace "$auth_issuer_path" (index $API_AUTHENTICATION "paths" "issuer") | replace "$auth_token_iss_path" (index $API_AUTHENTICATION "paths" "tokenIss") | replace "$auth_embedded_certificate" (index $API_AUTHENTICATION "embeddedCertificate") | replace "$connection_manager_host" (index $CONNECTION_MANAGER "host") | replace "$connection_manager_port" (index $CONNECTION_MANAGER "port") | replace "$release_name" $RELEASE_NAME)  }}
+    {{ $k }}: {{ ($v | toPrettyJson | squote | replace "$mongodb_host" (index $MONGODB "host") | replace "$mongodb_port" (index $MONGODB "port") | replace "$release_name" $RELEASE_NAME)  }}
   {{- end }}
 ---
 apiVersion: v1
