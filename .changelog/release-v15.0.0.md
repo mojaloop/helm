@@ -43,7 +43,7 @@ Date | Revision | Description
 20. ml-testing-toolkit: v15.0.0 -> **v15.2.0** ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v15.2.0))
 21. ml-testing-toolkit-ui: v15.0.0 -> **v15.0.1** ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.0.0...v15.0.1))
 22. ml-testing-toolkit-client-lib: **v1.0.0**
-23. auth-service: **v13.1.0-snapshot.1**
+23. auth-service: v13.0.2 -> **v14.0.0** ([Compare](https://github.com/mojaloop/auth-service/compare/v13.0.2...v14.0.0))
 24. als-consent-oracle: **v0.2.0**
 25. thirdparty-api-svc: **v13.0.2**
 26. thirdparty-sdk: **v15.1.0**
@@ -72,7 +72,7 @@ Date | Revision | Description
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v15.2.0
 21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.0.1
 22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.0.0
-23. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v13.1.0-snapshot.1
+23. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v14.0.0
 24. als-consent-oracle - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.0
 25. thirdparty-api-svc - https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v13.0.2
 26. thirdparty-sdk-adapter - https://github.com/mojaloop/thirdparty-sdk/releases/tag/v15.1.0
