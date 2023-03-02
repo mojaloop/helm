@@ -40,7 +40,7 @@ Date | Revision | Description
 17. simulator: **12.0.0**
 18. mojaloop-simulator: **v13.0.1**
 19. sdk-scheme-adapter: v11.18.11 -> **v21.4.0** ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v11.18.11...v21.4.0))
-20. ml-testing-toolkit: v15.7.0 -> **v16.0.0-snapshot.1** ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v16.0.0-snapshot.1))
+20. ml-testing-toolkit: v15.7.0 -> **v16.0.0** ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v16.0.0))
 21. ml-testing-toolkit-ui: **v15.1.3**
 22. ml-testing-toolkit-client-lib: **v1.1.1**
 23. auth-service: v13.0.2 -> **v14.0.0** ([Compare](https://github.com/mojaloop/auth-service/compare/v13.0.2...v14.0.0))
@@ -69,7 +69,7 @@ Date | Revision | Description
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v13.0.1
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v21.4.0
-20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v16.0.0-snapshot.1
+20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v16.0.0
 21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.1.3
 22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.1.1
 23. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v14.0.0
