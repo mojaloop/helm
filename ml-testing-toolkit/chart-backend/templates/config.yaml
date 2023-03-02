@@ -1,5 +1,4 @@
 {{- $RELEASE_NAME := .Release.Name -}}
-{{- $MONGODB := (.Values.dependencies.mongodb) -}}
 {{- $PARAMETERS := .Values.parameters -}}
 apiVersion: v1
 kind: ConfigMap
@@ -13,7 +12,8 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
   {{- range $k, $v := .Values.config }}
-    {{ $k }}: {{ ($v | toPrettyJson | squote | replace "$mongodb_host" (index $MONGODB "host") | replace "$mongodb_port" (index $MONGODB "port") | replace "$release_name" $RELEASE_NAME)  }}
+    {{ $k }}: |
+      {{- include "common.tplvalues.render" (dict "value" ($v | toPrettyJson | replace "$release_name" $RELEASE_NAME) "context" $) | nindent 6 }}
   {{- end }}
 ---
 apiVersion: v1

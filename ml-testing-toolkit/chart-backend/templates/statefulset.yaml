@@ -65,6 +65,16 @@ spec:
           {{- else }}
           command: {{ .Values.image.command }}
           {{- end }}
+          env:
+            - name: REPORTING_DB_CONNECTION_PASSWORD
+            {{- if not (empty .Values.dependencies.mongodb.secret) }}
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ .Values.dependencies.mongodb.secret.name }}'
+                  key: '{{ .Values.dependencies.mongodb.secret.key }}'
+            {{- else }}
+              value: {{ .Values.dependencies.mongodb.password }}
+            {{- end }}
           ports:
             - containerPort: {{ .Values.service.ports.specApi.internalPort }}
             - containerPort: {{ .Values.service.ports.adminApi.internalPort }}
