@@ -9,6 +9,19 @@ image:
   tag: v16.0.0
   commandPersistence: '["sh", "-c", "cd /opt/default_config; for FILE in *; do newFileName=/opt/app/spec_files/${FILE//__/\\/}; mkdir -p ${newFileName%/*}; firstLine=$(head -n 1 $FILE | tr -d \\\"); regex=\"^(http|https|ftp)://\"; if [[ \"$firstLine\" =~ $regex ]]; then wget $firstLine -O $newFileName; else cp $FILE $newFileName; fi; done; cd /opt/app; if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_bkp; ln -s /opt/ttk-data/spec_files spec_files; fi; npm run start;"]'
   command: '["sh", "-c", "cd /opt/default_config; for FILE in *; do newFileName=/opt/app/spec_files/${FILE//__/\\/}; mkdir -p ${newFileName%/*}; firstLine=$(head -n 1 $FILE | tr -d \\\"); regex=\"^(http|https|ftp)://\"; if [[ \"$firstLine\" =~ $regex ]]; then wget $firstLine -O $newFileName; else cp $FILE $newFileName; fi; done; cd /opt/app; npm run start;"]'
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
+  pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## e.g:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
 
   # command: '["npm", "run", "start"]'
 ## Optionally specify an array of imagePullSecrets.
@@ -31,6 +44,15 @@ nodeSelector: {}
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
 
+## Configure Container Security Context
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+## @param containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+##
+containerSecurityContext:
+  enabled: true
+  runAsUser: 1001
+
 readinessProbe:
   enabled: false
   httpGet:
@@ -44,7 +66,7 @@ livenessProbe:
   initialDelaySeconds: 90
   periodSeconds: 15
 
-dependencies:
+config:
   mongodb:
     host: "ttk-mongodb"
     port: "27017"
@@ -61,8 +83,9 @@ dependencies:
     #   key: mongodb-passwords
     database: "ttk"
 
+## Svc config files
 ## $snake_case values are dynamic
-config:
+config_files:
   ## We can specify the files and folders here those we want to override in the TTK `spec_files` directory.
   ## For example, you can specify user_config.json, system_config.json ...etc
   ## Files inside the folders can be defined with full path of the files with slashes replaced by two underscores `__`.
@@ -179,11 +202,11 @@ config:
         "userSettings": 1
       },
       "DB": {
-        "HOST": "{{ .Values.dependencies.mongodb.host }}",
-        "PORT": "{{ .Values.dependencies.mongodb.port }}",
-        "USER": "{{ .Values.dependencies.mongodb.user }}",
-        "PASSWORD": "{{ .Values.dependencies.mongodb.password }}",
-        "DATABASE": "{{ .Values.dependencies.mongodb.database }}"
+        "HOST": "{{ .Values.config.mongodb.host }}",
+        "PORT": "{{ .Values.config.mongodb.port }}",
+        "USER": "{{ .Values.config.mongodb.user }}",
+        "PASSWORD": "{{ .Values.config.mongodb.password }}",
+        "DATABASE": "{{ .Values.config.mongodb.database }}"
       },
       "OAUTH": {
         "AUTH_ENABLED": false,
@@ -296,17 +319,85 @@ config:
 extraEnvironments: {}
 parameters: {}
 
+## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+## e.g:
+## initContainers:
+##  - name: your-image-name
+##    image: your-image
+##    imagePullPolicy: Always
+##    command: ['sh', '-c', 'echo "hello world"']
+##
+initContainers: [] # We want to disable init-containers as there is no need
+## Use the following initContainers if you are using a MongoDB as a dependency
+# initContainers: |
+#   - name: wait-for-mongodb
+#     image: bitnami/mongodb:6.0.1
+#     imagePullPolicy: IfNotPresent
+#     command:
+#       - sh
+#       - -c
+#       - |
+#         until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
+#         do
+#           echo --------------------;
+#           echo Waiting for MongoDB...;
+#           sleep 2; 
+#         done;
+#         echo ====================; 
+#         echo MongoDB ok!;
+#     env:
+#       - name: DB_HOST
+#         value: '{{ .Values.config.mongodb.host }}'
+#       - name: DB_PORT
+#         value: '{{ .Values.config.mongodb.port }}'
+#       - name: DB_USER
+#         value: '{{ .Values.config.mongodb.user }}'
+#       - name: DB_PASS
+#       {{- if not (empty .Values.config.mongodb.secret) }}
+#         valueFrom:
+#           secretKeyRef:
+#             name: '{{ .Values.config.mongodb.secret.name }}'
+#             key: '{{ .Values.config.mongodb.secret.key }}'
+#       {{- else }}
+#         value: {{ .Values.config.mongodb.password }}
+#       {{- end }}
+#       - name: DB_DATABASE
+#         value: '{{ .Values.config.mongodb.database }}'
+
 service:
+  ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+  ##
   type: ClusterIP
+  ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+  ##
   ports:
     specApi:
       name: "spec-api"
+      port: 4040
       externalPort: 4040
-      internalPort: 4040
     adminApi:
       name: "admin-api"
+      port: 5050
       externalPort: 5050
-      internalPort: 5050
+  ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+  ##
+  loadBalancerIP:
+  ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+  ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+  ## e.g:
+  ## loadBalancerSourceRanges:
+  ##   - 10.10.10.0/24
+  ##
+  loadBalancerSourceRanges: []
+  ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+  ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  ##
+  externalTrafficPolicy: Cluster
+  ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+  ##
+  annotations: {}
 
 ingress:
   enabled: true
@@ -332,21 +423,22 @@ ingress:
     ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
     # kubernetes.io/tls-acme: "true"
   tls: []
-    # Secrets must be manually created in the namespace.
-    # - secretName: chart-example-tls
-    #   hosts:
-    #     - chart-example.local
+  # Secrets must be manually created in the namespace.
+  # - secretName: chart-example-tls
+  #   hosts:
+  #     - chart-example.local
+
+# We usually recommend not to specify default resources and to leave this as a conscious
+# choice for the user. This also increases chances charts run on environments with little
+# resources, such as Minikube. If you do want to specify resources, uncomment the following
+# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+# limits:
+#  cpu: 100m
+#  memory: 128Mi
+# requests:
+#  cpu: 100m
+#  memory: 128Mi
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
 
 ## Persist data to a persistent volume
 persistence:

@@ -1,6 +1,6 @@
 {{- if .Values.enabled -}}
 {{- $serviceFullName := include "ml-testing-toolkit-backend.fullname" . -}}
-{{- $MONGODB_COMMAND := ("until printf \".\" && nc -z -w 2 $mongodb_host $mongodb_port; do sleep 2; done;" | replace "$mongodb_host" (.Values.dependencies.mongodb.host) | replace "$mongodb_port" (print .Values.dependencies.mongodb.port) | replace "$release_name" (.Release.Name) ) -}}
+{{- $MONGODB_COMMAND := ("until printf \".\" && nc -z -w 2 $mongodb_host $mongodb_port; do sleep 2; done;" | replace "$mongodb_host" (.Values.config.mongodb.host) | replace "$mongodb_port" (print .Values.config.mongodb.port) | replace "$release_name" (.Release.Name) ) -}}
 
 apiVersion: {{ template "ml-testing-toolkit-backend.apiVersion.StatefulSet" . }}
 kind: StatefulSet
@@ -43,22 +43,18 @@ spec:
 {{ toYaml .Values.tolerations | indent 8 }}
 {{- end }}
       initContainers:
-        {{- if .Values.dependencies.mongodb.enabled }}
-        - name: mongodb-checker
-          image: "docker.io/busybox:1.32"
-          imagePullPolicy: IfNotPresent
-          command:
-            - sh
-            - -c
-            - {{ $MONGODB_COMMAND }}
+        {{- if .Values.initContainers }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
         {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" $) | nindent 6 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.image.imagePullSecrets }}
-          imagePullSecrets:
-          {{ toYaml .Values.image.imagePullSecrets | indent 10 }}
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           {{- if .Values.persistence.enabled }}
           command: {{ .Values.image.commandPersistence }}
@@ -67,22 +63,22 @@ spec:
           {{- end }}
           env:
             - name: REPORTING_DB_CONNECTION_PASSWORD
-            {{- if not (empty .Values.dependencies.mongodb.secret) }}
+            {{- if not (empty .Values.config.mongodb.secret) }}
               valueFrom:
                 secretKeyRef:
-                  name: '{{ .Values.dependencies.mongodb.secret.name }}'
-                  key: '{{ .Values.dependencies.mongodb.secret.key }}'
+                  name: '{{ .Values.config.mongodb.secret.name }}'
+                  key: '{{ .Values.config.mongodb.secret.key }}'
             {{- else }}
-              value: {{ .Values.dependencies.mongodb.password }}
+              value: {{ .Values.config.mongodb.password }}
             {{- end }}
           ports:
-            - containerPort: {{ .Values.service.ports.specApi.internalPort }}
-            - containerPort: {{ .Values.service.ports.adminApi.internalPort }}
+            - containerPort: {{ .Values.service.ports.specApi.port }}
+            - containerPort: {{ .Values.service.ports.adminApi.port }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
               path: {{ .Values.readinessProbe.httpGet.path }}
-              port: {{ .Values.service.ports.adminApi.internalPort }}
+              port: {{ .Values.service.ports.adminApi.port }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
           {{- end }}
@@ -90,7 +86,7 @@ spec:
           livenessProbe:
             httpGet:
               path: {{ .Values.livenessProbe.httpGet.path }}
-              port: {{ .Values.service.ports.adminApi.internalPort }}
+              port: {{ .Values.service.ports.adminApi.port }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
@@ -115,7 +111,7 @@ spec:
           configMap:
             name: {{ template "ml-testing-toolkit-backend.fullname" . }}-config-default
             items:
-              {{- range $k, $v := .Values.config }}
+              {{- range $k, $v := .Values.config_files }}
               - key: {{ $k }}
                 path: {{ $k }}
               {{- end }}

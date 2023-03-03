@@ -9112,6 +9112,53 @@ mojaloop-ttk-simulators:
 
     ml-testing-toolkit:
       ml-testing-toolkit-backend:
+
+        ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+        ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+        ## e.g:
+        ## initContainers:
+        ##  - name: your-image-name
+        ##    image: your-image
+        ##    imagePullPolicy: Always
+        ##    command: ['sh', '-c', 'echo "hello world"']
+        ##
+        # initContainers: [] # We want to disable init-containers as there is no need
+        ## Use the following initContainers if you are using a MongoDB as a dependency
+        initContainers: |
+          - name: wait-for-mongodb
+            image: bitnami/mongodb:6.0.1
+            imagePullPolicy: IfNotPresent
+            command:
+              - sh
+              - -c
+              - |
+                until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
+                do
+                  echo --------------------;
+                  echo Waiting for MongoDB...;
+                  sleep 2; 
+                done;
+                echo ====================; 
+                echo MongoDB ok!;
+            env:
+              - name: DB_HOST
+                value: '{{ .Values.config.mongodb.host }}'
+              - name: DB_PORT
+                value: '{{ .Values.config.mongodb.port }}'
+              - name: DB_USER
+                value: '{{ .Values.config.mongodb.user }}'
+              - name: DB_PASS
+              {{- if not (empty .Values.config.mongodb.secret) }}
+                valueFrom:
+                  secretKeyRef:
+                    name: '{{ .Values.config.mongodb.secret.name }}'
+                    key: '{{ .Values.config.mongodb.secret.key }}'
+              {{- else }}
+                value: {{ .Values.config.mongodb.password }}
+              {{- end }}
+              - name: DB_DATABASE
+                value: '{{ .Values.config.mongodb.database }}'
+
         ingress:
           enabled: true
           hosts:
@@ -9120,7 +9167,7 @@ mojaloop-ttk-simulators:
             adminApi:
               host: 'ttksim1.local'
 
-        dependencies:
+        config:
           mongodb:
             host: *TTK_MONGO_HOST
             port: *TTK_MONGO_PORT
@@ -9137,7 +9184,7 @@ mojaloop-ttk-simulators:
               key: *TTK_MONGO_SECRET_KEY
             database: *TTK_MONGO_DATABASE
 
-        config:
+        config_files:
           rules_response__default.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim1/spec_files/rules_response/default.json'
           api_definitions__mojaloop_simulator_sim_1.4__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim1/spec_files/api_definitions/mojaloop_simulator_sim_1.4/api_spec.yaml'
           api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim1/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/api_spec.yaml'
@@ -9175,6 +9222,7 @@ mojaloop-ttk-simulators:
               "HOST_CENTRAL_SETTLEMENT": "http://$release_name-centralsettlement-service/v2"
             }
           }
+
       ml-testing-toolkit-frontend:
         ingress:
           enabled: true
@@ -9344,7 +9392,7 @@ mojaloop-ttk-simulators:
             adminApi:
               host: 'ttksim2.local'
 
-        config:
+        config_files:
           rules_response__default.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim2/spec_files/rules_response/default.json'
           api_definitions__mojaloop_simulator_sim_1.4__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim2/spec_files/api_definitions/mojaloop_simulator_sim_1.4/api_spec.yaml'
           api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim2/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/api_spec.yaml'
@@ -9520,7 +9568,7 @@ mojaloop-ttk-simulators:
             adminApi:
               host: 'ttksim3.local'
 
-        config:
+        config_files:
           rules_response__default.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim3/spec_files/rules_response/default.json'
           api_definitions__mojaloop_simulator_sim_1.4__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim3/spec_files/api_definitions/mojaloop_simulator_sim_1.4/api_spec.yaml'
           api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim3/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/api_spec.yaml'
@@ -11504,7 +11552,54 @@ ml-testing-toolkit:
   enabled: true
 
   ml-testing-toolkit-backend:
-    dependencies:
+
+    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    ## e.g:
+    ## initContainers:
+    ##  - name: your-image-name
+    ##    image: your-image
+    ##    imagePullPolicy: Always
+    ##    command: ['sh', '-c', 'echo "hello world"']
+    ##
+    # initContainers: [] # We want to disable init-containers as there is no need
+    ## Use the following initContainers if you are using a MongoDB as a dependency
+    initContainers: |
+      - name: wait-for-mongodb
+        image: bitnami/mongodb:6.0.1
+        imagePullPolicy: IfNotPresent
+        command:
+          - sh
+          - -c
+          - |
+            until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
+            do
+              echo --------------------;
+              echo Waiting for MongoDB...;
+              sleep 2; 
+            done;
+            echo ====================; 
+            echo MongoDB ok!;
+        env:
+          - name: DB_HOST
+            value: '{{ .Values.config.mongodb.host }}'
+          - name: DB_PORT
+            value: '{{ .Values.config.mongodb.port }}'
+          - name: DB_USER
+            value: '{{ .Values.config.mongodb.user }}'
+          - name: DB_PASS
+          {{- if not (empty .Values.config.mongodb.secret) }}
+            valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.mongodb.secret.name }}'
+                key: '{{ .Values.config.mongodb.secret.key }}'
+          {{- else }}
+            value: {{ .Values.config.mongodb.password }}
+          {{- end }}
+          - name: DB_DATABASE
+            value: '{{ .Values.config.mongodb.database }}'
+
+    config:
       mongodb:
         host: *TTK_MONGO_HOST
         port: *TTK_MONGO_PORT
@@ -11520,6 +11615,7 @@ ml-testing-toolkit:
           name: *TTK_MONGO_SECRET_NAME
           key: *TTK_MONGO_SECRET_KEY
         database: *TTK_MONGO_DATABASE
+
     ingress:
       enabled: true
       hosts:
@@ -11527,7 +11623,8 @@ ml-testing-toolkit:
           host: testing-toolkit-specapi.local
         adminApi:
           host: testing-toolkit.local
-    config:
+
+    config_files:
       user_config.json: {
         "DEFAULT_ENVIRONMENT_FILE_NAME": "hub-k8s-default-environment.json"
       }
