@@ -70,7 +70,7 @@ The following Helm Charts have the following external dependencies:
 |   Mojaloop-Simulator  |  Redis   |   There is a dependency on Redis, however due to the dynamic nature of the Mojaloop-Simulator, a Redis container will be created dynamically for each configured Simulator.  |
 |  Mojaloop-Testing-Toolkit   |   MongoDB  |     |
 |  Mojaloop-TTK-Simulators   |   Redis, MongoDB  |     |
-|  SDK-Scheme-Adapter   |   Redis  |    |
+|  SDK-Scheme-Adapter   |   Redis, Kafka  |    |
 |   Bulk-API-Adapter  |   Kafka, MongoDB  |     |
 |     |     |     |
 
