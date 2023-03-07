@@ -63,7 +63,10 @@ CONFIG:
   cep_mongo_database: &CEP_MONGO_DATABASE mlos
 
   ## MOJALOOP-TTK-SIMULATORS Backend
+  ### FOR default
   moja_ttk_sim_kafka_host: &MOJA_TTK_SIM_KAFKA_HOST "{{ .Release.Name }}-kafka-headless"
+  ### FOR example-mojaloop-backend
+  # moja_ttk_sim_kafka_host: &MOJA_TTK_SIM_KAFKA_HOST "backend-kafka-headless"
   moja_ttk_sim_kafka_port: &MOJA_TTK_SIM_KAFKA_PORT 9092
   # The Redis Instance can be installed using the following command: helm -n <NAMESPACE> install backend ./example-mojaloop-backend --set "kafka.enabled=false" --set "centralledger-mysql.enabled=false" --set "account-lookup-mysql.enabled=false" --set "centralledger-obj.enabled=false" --set "cep-mongodb.enabled=false" --set "kafka-console.enabled=false" --set "ttksims-redis.enabled=true"
   moja_ttk_sim_redis_host: &MOJA_TTK_SIM_REDIS_HOST backend-ttksims-redis-master
@@ -463,7 +466,7 @@ central:
               externalPort: 3001
 
       ingress:
-        enabled: true
+        enabled: false
         ## @param ingress.pathType Ingress path type
         ##
         pathType: ImplementationSpecific
@@ -683,7 +686,7 @@ central:
               externalPort: 3001
 
       ingress:
-        enabled: true
+        enabled: false
         ## @param ingress.pathType Ingress path type
         ##
         pathType: ImplementationSpecific
@@ -903,7 +906,7 @@ central:
               externalPort: 3001
 
       ingress:
-        enabled: true
+        enabled: false
         ## @param ingress.pathType Ingress path type
         ##
         pathType: ImplementationSpecific
@@ -1123,7 +1126,7 @@ central:
               externalPort: 3001
 
       ingress:
-        enabled: true
+        enabled: false
         ## @param ingress.pathType Ingress path type
         ##
         pathType: ImplementationSpecific
@@ -1343,7 +1346,7 @@ central:
               externalPort: 3001
 
       ingress:
-        enabled: true
+        enabled: false
         ## @param ingress.pathType Ingress path type
         ##
         pathType: ImplementationSpecific
@@ -1568,7 +1571,7 @@ central:
               externalPort: 3001
 
       ingress:
-        enabled: true
+        enabled: false
         ## @param ingress.pathType Ingress path type
         ##
         pathType: ImplementationSpecific
@@ -2662,7 +2665,7 @@ central:
               name: http-api
               externalPort: 3007
       ingress:
-        enabled: true
+        enabled: false
         ## @param ingress.pathType Ingress path type
         ##
         pathType: ImplementationSpecific
@@ -2987,7 +2990,7 @@ central:
               name: http-api
               externalPort: 3007
       ingress:
-        enabled: true
+        enabled: false
         ## @param ingress.pathType Ingress path type
         ##
         pathType: ImplementationSpecific
@@ -3402,7 +3405,7 @@ central:
               name: http-api
               externalPort: 3007
       ingress:
-        enabled: true
+        enabled: false
         ## @param ingress.pathType Ingress path type
         ##
         pathType: ImplementationSpecific
@@ -3461,6 +3464,7 @@ central:
         #  memory: 128Mi
 
   centraleventprocessor:
+    enabled: true
     replicaCount: 1
     image:
       repository: mojaloop/central-event-processor
@@ -3524,7 +3528,7 @@ central:
       periodSeconds: 15
 
     ingress:
-      enabled: true
+      enabled: false
     ## @param ingress.pathType Ingress path type
     ##
       pathType: ImplementationSpecific
@@ -4016,7 +4020,7 @@ ml-api-adapter:
       internalPort: 3000
 
     ingress:
-      enabled: true
+      enabled: false
     ## @param ingress.pathType Ingress path type
     ##
       pathType: ImplementationSpecific
@@ -4152,7 +4156,7 @@ emailnotifier:
     periodSeconds: 15
 
   ingress:
-    enabled: true
+    enabled: false
     ## @param ingress.pathType Ingress path type
     ##
     pathType: ImplementationSpecific
@@ -4940,7 +4944,7 @@ account-lookup-service:
             externalPort: 3000
 
     ingress:
-      enabled: true
+      enabled: false
     ## @param ingress.pathType Ingress path type
     ##
       pathType: ImplementationSpecific
@@ -5197,8 +5201,8 @@ quoting-service:
 
     ## Kafka Configuration (used for sidecar)
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-    kafka_host: '$release_name-kafka'
-    kafka_port: 9092
+    kafka_host: *KAFKA_HOST
+    kafka_port: *KAFKA_PORT
 
     error_handling:
       include_cause_extension: false
@@ -6070,6 +6074,61 @@ thirdparty:
       ##
       secrets: []
       className: "nginx"
+
+  thirdparty-simulator:
+    enabled: true
+
+    simulators:
+      ## Every key added to this `simulators` object will be a simulator that takes on the default
+      ## config below. The default is deliberately left empty so nothing is deployed by default.
+      # payerfsp: {}
+      # payeefsp: {}
+      ## Default FSPs for Mojaloop Postman Scripts
+      dfspa:
+        ingress:
+          enabled: true
+          hosts:
+            -   sim-dfspa.local
+
+      dfspb:
+        ingress:
+          enabled: true
+          hosts:
+            -   sim-dfspb.local
+
+      pisp:
+        ingress:
+          enabled: true
+          hosts:
+            -   sim-pisp.local
+
+    ingress:
+      enabled: false
+      # If you're using nginx ingress controller >= v0.22.0 set this to (/|$)(.*). Ensure that you set the `"nginx.ingress.kubernetes.io/rewrite-target": "/$2"`
+      # If you're using nginx ingress controller < v0.22.0 set this to an empty string or "/". Ensure that you set the `"nginx.ingress.kubernetes.io/rewrite-target": "/"`
+      # This affects the way your rewrite target will work.
+      # For more information see "Breaking changes" here:
+      # https://github.com/kubernetes/ingress-nginx/blob/master/Changelog.md#0220
+
+      ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+      # nginx.ingress.kubernetes.io/rewrite-target: '/'
+      # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+      ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+      # kubernetes.io/ingress.class: nginx
+      ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
+      # kubernetes.io/tls-acme: "true""
+
+      ## nginx ingress controller >= v0.22.0
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+      ingressPathRewriteRegex: (/|$)(.*)
+      className: "nginx"
+      pathType: "ImplementationSpecific"
+
+      ## nginx ingress controller < v0.22.0
+      # annotations:
+      #   nginx.ingress.kubernetes.io/rewrite-target: '/'
+      # ingressPathRewriteRegex: "/"
 
 simulator:
   enabled: true
@@ -7066,7 +7125,7 @@ mojaloop-simulator:
           JWS_VERIFICATION_KEYS_DIRECTORY: "/jwsVerificationKeys"
 
     ingress:
-      enabled: true
+      enabled: false
       path: /
       hosts:
         -   mojaloop-simulators.local
@@ -7521,7 +7580,7 @@ mojaloop-bulk:
         internalPort: 8088
 
       ingress:
-        enabled: true
+        enabled: false
         ## @param ingress.pathType Ingress path type
         ##
         pathType: ImplementationSpecific
@@ -7916,7 +7975,7 @@ mojaloop-bulk:
               externalPort: 3001
 
       ingress:
-        enabled: true
+        enabled: false
         ## @param ingress.pathType Ingress path type
         ##
         pathType: ImplementationSpecific
@@ -8111,7 +8170,7 @@ mojaloop-bulk:
               externalPort: 3001
 
       ingress:
-        enabled: true
+        enabled: false
         ## @param ingress.pathType Ingress path type
         ##
         pathType: ImplementationSpecific
@@ -8306,7 +8365,7 @@ mojaloop-bulk:
               externalPort: 3001
 
       ingress:
-        enabled: true
+        enabled: false
         ## @param ingress.pathType Ingress path type
         ##
         pathType: ImplementationSpecific

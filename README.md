@@ -42,6 +42,12 @@
 
     `helm repo update`
 
+## Example Mojaloop Minimal Values Configuration
+
+Refer to the following: [./mojaloop/values.minimal.example.yaml](./mojaloop/values.minimal.example.yaml).
+
+The above example configuration provides the minimum configurations to set Ingress overrides and External Backend Dependencies (i.e. Kafka, MySQL, etc).
+
 ## Deployment
 
 1. Deploy specific chart
