@@ -88,39 +88,6 @@ mysql:
     ##   replicator: /vault/secrets/mysql-replicator
     ##
     customPasswordFiles: {}
-  ## @param initdbScripts Dictionary of initdb scripts
-  ## Specify dictionary of scripts to be run at first boot
-  initdbScripts:
-    # This script enables legacy authentication for MySQL v8. NodeJS MySQL Client currently does not support authentication plugins, reference: https://github.com/mysqljs/mysql/pull/2233
-    # Note : also initialises mysql DBs to support thirdparty charts
-    accountLookupInit.sql: |-
-      DROP DATABASE IF EXISTS account_lookup;
-      CREATE DATABASE account_lookup;
-      DROP USER IF EXISTS account_lookup@'%';
-      CREATE USER 'account_lookup'@'%' IDENTIFIED WITH mysql_native_password BY 'ml_password';
-      GRANT ALL PRIVILEGES ON account_lookup.* TO 'account_lookup'@'%';
-      FLUSH PRIVILEGES;
-    centralLedgerInit.sql: |-
-      DROP DATABASE IF EXISTS central_ledger;
-      CREATE DATABASE central_ledger;
-      DROP USER IF EXISTS central_ledger@'%';
-      CREATE USER 'central_ledger'@'%' IDENTIFIED WITH mysql_native_password BY 'ml_password';
-      GRANT ALL PRIVILEGES ON central_ledger.* TO 'central_ledger'@'%';
-      FLUSH PRIVILEGES;  
-    consentOracleInit.sql: |-
-      DROP DATABASE IF EXISTS consent_oracle;
-      CREATE DATABASE consent_oracle;
-      DROP USER IF EXISTS consent_oracle@'%';
-      CREATE USER 'consent_oracle'@'%' IDENTIFIED WITH mysql_native_password BY 'ml_password';
-      GRANT ALL PRIVILEGES ON consent_oracle.* TO 'consent_oracle'@'%';
-      FLUSH PRIVILEGES;
-    authSvcInit.sql: |-
-      DROP DATABASE IF EXISTS `auth-svc`;
-      CREATE DATABASE `auth-svc`;
-      DROP USER IF EXISTS `auth-svc`@'%';
-      CREATE USER 'auth-svc'@'%' IDENTIFIED WITH mysql_native_password BY 'ml_password';
-      GRANT ALL PRIVILEGES ON `auth-svc`.* TO 'auth-svc'@'%';
-      FLUSH PRIVILEGES;
 
   ## @section MySQL Primary parameters
   primary:
@@ -128,6 +95,100 @@ mysql:
     ## @param primary.persistence.enabled Enable persistence on MySQL primary replicas using a `PersistentVolumeClaim`. If false, use emptyDir
     ##
       enabled: false
+
+    ## @param primary.extraEnvVars Extra environment variables to be set on MySQL primary containers
+    ## E.g.
+    ## extraEnvVars:
+    ##  - name: TZ
+    ##    value: "Europe/Paris"
+    ##
+    # extraEnvVars: []
+    extraEnvVars:
+      - name: ACCOUNT_LOOKUP_DATABASE
+        value: "account_lookup"
+      - name: ACCOUNT_LOOKUP_USER
+        value: "account_lookup"
+      - name: CENTRAL_LEDGER_DATABASE
+        value: "central_ledger"
+      - name: CENTRAL_LEDGER_USER
+        value: "central_ledger"
+      - name: CONTENT_ORACLE_DATABASE
+        value: "consent_oracle"
+      - name: CONTENT_ORACLE_USER
+        value: "consent_oracle"
+      - name: AUTH_SVC_DATABASE
+        value: "auth_svc"
+      - name: AUTH_SVC_USER
+        value: "auth_svc"
+
+  ## @param initdbScripts Dictionary of initdb scripts
+  ## Specify dictionary of scripts to be run at first boot
+  initdbScripts:
+    # This script enables legacy authentication for MySQL v8. NodeJS MySQL Client currently does not support authentication plugins, reference: https://github.com/mysqljs/mysql/pull/2233
+
+    accountLookupInit.sh: |
+      #!/bin/bash
+      set -e
+      DB_NAME=$ACCOUNT_LOOKUP_DATABASE
+      DB_USER=$ACCOUNT_LOOKUP_USER
+      DB_PASS=$MYSQL_PASSWORD
+      echo "******* Creating '$DB_NAME' DB with user '$DB_USER' *******"
+      mysql -u root -p$MYSQL_ROOT_PASSWORD -e \
+        "DROP DATABASE IF EXISTS $DB_NAME;
+        CREATE DATABASE $DB_NAME;
+        DROP USER IF EXISTS $DB_USER@'%';
+        CREATE USER '$DB_USER'@'%' IDENTIFIED WITH mysql_native_password BY '$DB_PASS';
+        GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%';
+        FLUSH PRIVILEGES;"
+      echo "******* Database '$DB_NAME' config complete *******"
+
+    centralLedgerInit.sh: |
+      #!/bin/bash
+      set -e
+      DB_NAME=$CENTRAL_LEDGER_DATABASE
+      DB_USER=$CENTRAL_LEDGER_USER
+      DB_PASS=$MYSQL_PASSWORD
+      echo "******* Creating '$DB_NAME' DB with user '$DB_USER' *******"
+      mysql -u root -p$MYSQL_ROOT_PASSWORD -e \
+        "DROP DATABASE IF EXISTS $DB_NAME;
+        CREATE DATABASE $DB_NAME;
+        DROP USER IF EXISTS $DB_USER@'%';
+        CREATE USER '$DB_USER'@'%' IDENTIFIED WITH mysql_native_password BY '$DB_PASS';
+        GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%';
+        FLUSH PRIVILEGES;"
+      echo "******* Database '$DB_NAME' config complete *******"
+
+    consentOracleInit.sh: |
+      #!/bin/bash
+      set -e
+      DB_NAME=$CONTENT_ORACLE_DATABASE
+      DB_USER=$CONTENT_ORACLE_USER
+      DB_PASS=$MYSQL_PASSWORD
+      echo "******* Creating '$DB_NAME' DB with user '$DB_USER' *******"
+      mysql -u root -p$MYSQL_ROOT_PASSWORD -e \
+        "DROP DATABASE IF EXISTS $DB_NAME;
+        CREATE DATABASE $DB_NAME;
+        DROP USER IF EXISTS $DB_USER@'%';
+        CREATE USER '$DB_USER'@'%' IDENTIFIED WITH mysql_native_password BY '$DB_PASS';
+        GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%';
+        FLUSH PRIVILEGES;"
+      echo "******* Database '$DB_NAME' config complete *******"
+
+    authSvcInit.sh: |-
+      #!/bin/bash
+      set -e
+      DB_NAME=$AUTH_SVC_DATABASE
+      DB_USER=$AUTH_SVC_USER
+      DB_PASS=$MYSQL_PASSWORD
+      echo "******* Creating '$DB_NAME' DB with user '$DB_USER' *******"
+      mysql -u root -p$MYSQL_ROOT_PASSWORD -e \
+        "DROP DATABASE IF EXISTS $DB_NAME;
+        CREATE DATABASE $DB_NAME;
+        DROP USER IF EXISTS $DB_USER@'%';
+        CREATE USER '$DB_USER'@'%' IDENTIFIED WITH mysql_native_password BY '$DB_PASS';
+        GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%';
+        FLUSH PRIVILEGES;"
+      echo "******* Database '$DB_NAME' config complete *******"
 
 ## Reference: https://github.com/bitnami/charts/blob/main/bitnami/mongodb/values.yaml
 cl-mongodb:
@@ -162,6 +223,12 @@ cl-mongodb:
       -   'password'
     databases:
       -   'mlos'
+    ## @param auth.username DEPRECATED: use `auth.usernames` instead
+    ## @param auth.password DEPRECATED: use `auth.passwords` instead
+    ## @param auth.database DEPRECATED: use `auth.databases` instead
+    username: ""
+    password: ""
+    database: ""
     ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
     ##
     replicaSetKey: ""
@@ -180,7 +247,7 @@ cl-mongodb:
     ##
     enabled: false
 
-## TODO: Add 
+## Reference: https://github.com/bitnami/charts/blob/main/bitnami/mongodb/values.yaml
 cep-mongodb:
   enabled: true
 
@@ -220,12 +287,6 @@ cep-mongodb:
       - 'password'
     databases:
       - 'mlos'
-    ## @param auth.username DEPRECATED: use `auth.usernames` instead
-    ## @param auth.password DEPRECATED: use `auth.passwords` instead
-    ## @param auth.database DEPRECATED: use `auth.databases` instead
-    username: ""
-    password: ""
-    database: ""
     ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
     ##
     replicaSetKey: ""
@@ -244,6 +305,58 @@ cep-mongodb:
     ##
     enabled: false
 
+## Reference: https://github.com/bitnami/charts/blob/main/bitnami/mongodb/values.yaml
+ttk-mongodb:
+  enabled: true
+
+  ## @param fullnameOverride String to fully override mongodb.fullname template
+  ##
+  fullnameOverride: "ttk-mongodb"
+  ## MongoDB(&reg;) Authentication parameters
+  ##
+  auth:
+    ## @param auth.enabled Enable authentication
+    ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
+    ##
+    enabled: true
+    ## @param auth.rootUser MongoDB(&reg;) root user
+    ##
+    rootUser: root
+    ## @param auth.rootPassword MongoDB(&reg;) root password
+    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mongodb#setting-the-root-user-and-password-on-first-run
+    ##
+    rootPassword: "adminpass"
+    ## MongoDB(&reg;) custom users and databases
+    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mongodb#creating-a-user-and-database-on-first-run
+    ## @param auth.usernames List of custom users to be created during the initialization
+    ## @param auth.passwords List of passwords for the custom users set at `auth.usernames`
+    ## @param auth.databases List of custom databases to be created during the initialization
+    ##
+    usernames:
+      - 'ttk'
+    passwords:
+      - 'ttk'
+    databases:
+      - 'ttk'
+
+    ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
+    ##
+    replicaSetKey: ""
+    ## @param auth.existingSecret Existing secret with MongoDB(&reg;) credentials (keys: `mongodb-passwords`, `mongodb-root-password`, `mongodb-metrics-password`, ` mongodb-replica-set-key`)
+    ## NOTE: When it's set the previous parameters are ignored.
+    ##
+    existingSecret: ""
+  ## @section Persistence parameters
+  ##
+
+  ## Enable persistence using Persistent Volume Claims
+  ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+  ##
+  persistence:
+    ## @param persistence.enabled Enable MongoDB(&reg;) data persistence using PVC
+    ##
+    enabled: false
+
 ## Reference: https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
 ttksims-redis:
   enabled: true
@@ -255,6 +368,36 @@ ttksims-redis:
   ## @param fullnameOverride String to fully override  template
   ##
   fullnameOverride: ttksims-redis 
+
+  ## Redis&reg; Authentication parameters
+  ## ref: https://github.com/bitnami/containers/tree/main/bitnami/redis#setting-the-server-password-on-first-run
+  ##
+  auth:
+    ## @param auth.enabled Enable password authentication
+    ##
+    enabled: false
+
+  ## @section Persistence parameters
+  ##
+  master:
+    ## Enable persistence using Persistent Volume Claims
+    ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    persistence:
+      ## @param master.persistence.enabled Enable persistence on Redis&reg; master nodes using Persistent Volume Claims
+      ##
+      enabled: false
+
+## Reference: https://github.com/bitnami/charts/blob/main/bitnami/redis/values.yaml
+auth-svc-redis:
+  enabled: true
+
+  ## @param architecture Redis&reg; architecture. Allowed values: `standalone` or `replication`
+  ##
+  architecture: standalone
+
+  ## @param fullnameOverride String to fully override  template
+  ##
+  fullnameOverride: auth-svc-redis 
 
   ## Redis&reg; Authentication parameters
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/redis#setting-the-server-password-on-first-run

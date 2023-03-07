@@ -1,5 +1,3 @@
-{{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
-{{- $objStoreUri := ( .Values.config.objstore_uri | replace "$release_name" .Release.Name ) -}}
 apiVersion: {{ template "bulk-api-adapter-handler-notification.apiVersion.Deployment" . }}
 kind: Deployment
 metadata:
@@ -34,39 +32,37 @@ spec:
         prometheus.io/scrape: "true"
       {{- end }}
     spec:
-      {{- if .Values.init.enabled }}
       initContainers:
-        - name: {{ .Values.init.mongodb.name }}
-          image: {{ .Values.init.mongodb.repository }}:{{ .Values.init.mongodb.tag }}
-          imagePullPolicy: {{ .Values.init.mongodb.pullPolicy }}
-          command:
-            - sh
-            - "-c"
-            - {{ (.Values.init.mongodb.command | replace "$mongouri" $objStoreUri) | quote }}
-        - name: {{ .Values.init.kafka.name }}
-          image: {{ .Values.init.kafka.repository }}:{{ .Values.init.kafka.tag }}
-          imagePullPolicy: {{ .Values.init.kafka.pullPolicy }}
-          command:
-            - sh
-            - "-c"
-            - {{ (.Values.init.kafka.command | replace "$kafka_host" $kafkaHost | replace "$kafka_port" (printf "%.0f" .Values.config.kafka_port) ) | quote }}
-          env:
-          {{- range $envItem := .Values.init.kafka.env }}
-            - name: {{ $envItem.name }}
-              value: {{ $envItem.value }}
-          {{- end }}
+        {{- if .Values.initContainers }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
+        {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" $) | nindent 6 }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.image.imagePullSecrets }}
-          imagePullSecrets:
-          {{ toYaml .Values.image.imagePullSecrets | indent 10 }}
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          command: {{ .Values.image.command }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
+          {{- end }}
           ports:
-            - containerPort: {{ .Values.service.internalPort }}
+            - name: http
+              containerPort: {{ .Values.service.internalPort }}
+            {{- if .Values.diagnosticMode.enabled }}
+            - name: debug
+              containerPort: {{ .Values.diagnosticMode.debug.internalPort }}
+            {{- end }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
@@ -83,6 +79,20 @@ spec:
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
+          env:
+            - name: BKAPI_MONGODB__PASSWORD
+            {{- if not (empty .Values.config.mongo_secret) }}
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ .Values.config.mongo_secret.name }}'
+                  key: '{{ .Values.config.mongo_secret.key }}'
+            {{- else }}
+              value: {{ .Values.config.mongo_password }}
+            {{- end }}
+            - name: LOG_LEVEL
+              value: {{ .Values.config.log_level }}
+            - name: CSL_LOG_TRANSPORT
+              value: {{ .Values.config.log_transport}}
           volumeMounts:
             - name: {{ template "bulk-api-adapter-handler-notification.fullname" . }}-config-volume
               mountPath: /opt/app/config
@@ -90,11 +100,6 @@ spec:
             - name: jws-signing-key
               mountPath: /opt/app/secrets
             {{- end }}
-          env:
-            - name: LOG_LEVEL
-              value: {{ .Values.config.log_level }}
-            - name: CSL_LOG_TRANSPORT
-              value: {{ .Values.config.log_transport}}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

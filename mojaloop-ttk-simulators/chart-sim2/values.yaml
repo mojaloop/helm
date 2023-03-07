@@ -157,6 +157,7 @@ sdk-scheme-adapter:
       simName: *CONFIG_SIM2_NAME
 
     nameOverride: 'ttksim2-sdk-dom-evt-handler'
+
     env:
       DOMAIN_EVENT_CONSUMER_GROUP_ID: '{{ .Values.config.simName }}-domain_events_consumer_group'
       DOMAIN_EVENT_CONSUMER_TOPICS: '{{ .Values.config.simName }}-topic-sdk-outbound-domain-events'
@@ -183,7 +184,8 @@ ml-testing-toolkit:
   ml-testing-toolkit-backend:
     enabled: true
     nameOverride: 'ttksim2-ttk-backend'
-    config:
+
+    config_files:
       user_config.json:
         CALLBACK_ENDPOINT: 'http://$release_name-ttksim2-sdk-api-svc:4001'
       system_config.json: {
@@ -204,10 +206,21 @@ ml-testing-toolkit:
           }
         ]
       }
-      rules_response__default.json: 'https://raw.githubusercontent.com/mojaloop/sdk-scheme-adapter/master/test/func/config/ttk-ttksim2/spec_files/rules_response/default.json'
-      api_definitions__mojaloop_simulator_sim_1.4__api_spec.yaml: 'https://raw.githubusercontent.com/mojaloop/sdk-scheme-adapter/master/test/func/config/ttk-ttksim2/spec_files/api_definitions/mojaloop_simulator_sim_1.4/api_spec.yaml'
-      api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__api_spec.yaml: 'https://raw.githubusercontent.com/mojaloop/sdk-scheme-adapter/master/test/func/config/ttk-ttksim2/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/api_spec.yaml'
-      api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__callback_map.json: 'https://raw.githubusercontent.com/mojaloop/sdk-scheme-adapter/master/test/func/config/ttk-ttksim2/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/callback_map.json'
+      rules_response__default.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim2/spec_files/rules_response/default.json'
+      api_definitions__mojaloop_simulator_sim_1.4__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim2/spec_files/api_definitions/mojaloop_simulator_sim_1.4/api_spec.yaml'
+      api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim2/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/api_spec.yaml'
+      api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__callback_map.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v21.6.0/test/func/config/ttk-ttksim2/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/callback_map.json'
+
+  ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: [] # We want to disable init-containers as there is no need
 
   #   ingress:
   #     enabled: true

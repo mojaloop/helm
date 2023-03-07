@@ -35,6 +35,24 @@ The Consent oracle stores the relationship between a `consentId` and an `fspId`.
 
 ## Deploying the 3P-API
 
+Ensure that Backend Dependencies are deployed. Refer to the [example-mojaloop-backend](../example-mojaloop-backend/README.md) Helm chart for instructions details.
+
+Or manually deploy them using the following:
+
+```bash
+# install the example dependencies for the thirdparty charts
+# skip these steps if you want to deploy them yourself
+cd chart-auth-svc
+kubectl apply -f ./example_dependencies.yaml
+cd ../chart-consent-oracle
+kubectl apply -f ./example_dependencies.yaml
+```
+
+*Note:* you will need to customize the [./values.yaml](./values.yaml) with the appropriate configs for MySQL, and Redis dependencies if the `example_dependencies.yaml` is used. Refer to the service names in each of the deployment descriptors:
+
+- [./chart-auth-svc/example_dependencies.yaml](./chart-auth-svc/example_dependencies.yaml)
+- [./chart-consent-oracle/example_dependencies.yaml](./chart-consent-oracle/example_dependencies.yaml)
+
 In addition to enabling the above charts, a few options must be configured to allow 3P-API support when you deploy Mojaloop.
 
 For the `mojaloop/mojaloop` helm chart, enable the following in your `values.yaml`:
@@ -49,23 +67,17 @@ account-lookup-service:
   account-lookup-service-admin:
     config:
       featureEnableExtendedPartyIdType: true # allows the ALS to support newer THIRD_PARTY_LINK PartyIdType
+...
 ```
 
 And run the following from the `/thirdparty` directory
 
 ```bash
-# install the example dependencies for the thirdparty charts
-# skip these steps if you want to deploy them yourself
-cd chart-auth-svc
-kubectl apply -f ./example_dependencies.yaml
-cd ../chart-consent-oracle
-kubectl apply -f ./example_dependencies.yaml
-
 # install as a standalone chart, alongside Mojaloop
 helm upgrade --install thirdparty mojaloop/thirdparty --values ./values.yaml
 ```
 
-You could also install the thirdparty charts _with_ a mojaloop deployment by configuring the following in your master `values.yaml`:
+You could also install the Thirdparty charts _with_ a mojaloop deployment by configuring the following in your master `values.yaml`:
 
 ```yaml
 ...

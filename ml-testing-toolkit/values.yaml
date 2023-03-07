@@ -39,20 +39,23 @@ ml-testing-toolkit-backend:
       #   AUTH_ENABLED: true
       # KEYCLOAK:
       #   ENABLED: true
-  dependencies:
-    keycloak:
-      enabled: false
-      # # For Hosted Mode
-      # enabled: true
-      embeddedCertificate: '-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDda1T6cyWogfG/xlUb3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHIc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7oCweP68CPbIrTWjR9gyjmSHfYhwIDAQAB\n-----END PUBLIC KEY-----'
+
+  config:
     mongodb:
-      enabled: false
-      # # For Hosted Mode
-      # enabled: true
-    connectionManagerBackend:
-      enabled: false
-      # # For Hosted Mode
-      # enabled: true
+      host: "ttk-mongodb"
+      port: "27017"
+      user: "ttk"
+      ## Secret-Management
+      ### Set this if you are using a clear password configured in the config section
+      password: ''
+      ### Configure this if you want to use a secret. Note, this will override the db_password,
+      ### Use the next line if you do wish to use the db_password value instead.
+      # secret:
+      ### Example config for an existing secret
+      # secret:
+      #   name: ttk-mongodb
+      #   key: mongodb-passwords
+      database: "ttk"
 
 ml-testing-toolkit-frontend:
   enabled: true
@@ -69,230 +72,3 @@ ml-testing-toolkit-frontend:
     # API_BASE_URL: http://ttk-bankend-url
     # # For Hosted Mode
     # AUTH_ENABLED: "TRUE"
-
-connection-manager-backend:
-  enabled: false
-  # # For Hosted Mode
-  # enabled: true
-  config:
-    AUTH_ENABLED: "DISABLED" ## TRUE or DISABLED
-    # # For Hosted Mode
-    # AUTH_ENABLED: "TRUE"
-  dependencies:
-    mysql:
-      enabled: true
-    keycloak:
-      enabled: false
-      # # For Hosted Mode
-      # enabled: true
-      embeddedCertificate: '-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDda1T6cyWogfG/xlUb3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHIc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7oCweP68CPbIrTWjR9gyjmSHfYhwIDAQAB\n-----END PUBLIC KEY-----'
-  # ingress:
-  #   enabled: true
-  #   hosts:
-  #     connection-manager.localdomain:
-  #       port: 5061
-  #       paths: ['/api/']
-
-connection-manager-frontend:
-  enabled: false
-  # # For Hosted Mode
-  # enabled: true
-  config:
-    AUTH_ENABLED: "FALSE" ## TRUE or FALSE
-    # # For Hosted Mode
-    # API_BASE_URL: http://connection-manager.localdomain
-    # AUTH_ENABLED: "TRUE"
-  # ingress:
-  #   enabled: true
-  #   hosts:
-  #     connection-manager.localdomain:
-  #       port: 5060
-  #       paths: ['/']
-
-mysql:
-  ## repo and documentation https://github.com/helm/charts/tree/master/stable/percona-xtradb-cluster
-
-  ## disable when connection-manager-backend is disabled
-  enabled: false
-  # # For Hosted Mode
-  # enabled: true
-  image:
-    repository: "percona/percona-xtradb-cluster"
-    tag: "5.7.19"
-    pullPolicy: IfNotPresent
-
-  nameOverride: mysql
-
-  replicas: 1
-
-  mysqlUser: mcm
-  mysqlPassword: mcm
-  mysqlDatabase: mcm
-  allowRootFrom: "%"
-
-  persistence:
-    enabled: false
-    accessMode: ReadWriteOnce
-    size: 8Gi
-
-  nodeSelector: {}
-
-  podAnnotations: {}
-
-  tolerations: []
-
-  configFiles:
-    node.cnf: |+
-      [client]
-      default-character-set=utf8mb4
-
-      [mysql]
-      default-character-set=utf8mb4
-
-      [mysqld]
-      collation-server = utf8mb4_unicode_ci
-      init-connect='SET NAMES utf8mb4'
-      character-set-server = utf8mb4
-      datadir=/var/lib/mysql
-      default_storage_engine=InnoDB
-      binlog_format=ROW
-      innodb_flush_log_at_trx_commit  = 1
-      innodb_flush_method             = O_DIRECT
-      innodb_file_per_table           = 1
-      innodb_autoinc_lock_mode=2
-      bind_address = 0.0.0.0
-      wsrep_slave_threads=2
-      wsrep_cluster_address=gcomm://
-      wsrep_provider=/usr/lib/galera3/libgalera_smm.so
-      wsrep_cluster_name=galera
-      wsrep_sst_method=xtrabackup-v2
-      pxc_strict_mode=DISABLED
-      max_connections=999
-      max_user_connections=994
-      thread_cache_size=999
-
-  # metricsExporter:
-  #   enabled: true
-  #   tag: v0.11.0
-  #   commandOverrides: []
-  #   argsOverrides: []
-
-  # logTail: true
-
-  service:
-    type: ClusterIP
-    port: 3306
-    externalIPs: []
-
-
-mongodb:
-  ## repo and documentation https://github.com/bitnami/charts/tree/master/bitnami/mysql
-
-  enabled: false
-  # # For Hosted Mode
-  # enabled: true
-
-  nameOverride: ttk-mongodb
-
-  ## @param architecture MongoDB(&reg;) architecture (`standalone` or `replicaset`)
-  ##
-  architecture: replicaset
-  ## @param useStatefulSet Set to true to use a StatefulSet instead of a Deployment (only when `architecture=standalone`)
-  ##
-  ## MongoDB(&reg;) Authentication parameters
-  ##
-  auth:
-    ## @param auth.enabled Enable authentication
-    ## ref: https://docs.mongodb.com/manual/tutorial/enable-authentication/
-    ##
-    enabled: true
-    ## @param auth.rootUser MongoDB(&reg;) root user
-    ##
-    rootUser: root
-    ## @param auth.rootPassword MongoDB(&reg;) root password
-    ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
-    ##
-    rootPassword: adminpass
-    ## MongoDB(&reg;) custom users and databases
-    ## ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-users-and-databases-on-first-run
-    ## @param auth.usernames List of custom users to be created during the initialization
-    ## @param auth.passwords List of passwords for the custom users set at `auth.usernames`
-    ## @param auth.databases List of custom databases to be created during the initialization
-    ##
-    usernames:
-      -   'ttk'
-    passwords:
-      -   'ttk'
-    databases:
-      -   'ttk'
-
-    ## @param auth.replicaSetKey Key used for authentication in the replicaset (only when `architecture=replicaset`)
-    ##
-    replicaSetKey: ""
-    ## @param auth.existingSecret Existing secret with MongoDB(&reg;) credentials (keys: `mongodb-passwords`, `mongodb-root-password`, `mongodb-metrics-password`, ` mongodb-replica-set-key`)
-    ## NOTE: When it's set the previous parameters are ignored.
-    ##
-    existingSecret: ""
-  tls:
-    ## @param tls.enabled Enable MongoDB(&reg;) TLS support between nodes in the cluster as well as between mongo clients and nodes
-    ##
-    enabled: false
-    ## @param tls.autoGenerated Generate a custom CA and self-signed certificates
-    ##
-    autoGenerated: true
-    ## @param tls.existingSecret Existing secret with TLS certificates (keys: `mongodb-ca-cert`, `mongodb-ca-key`, `client-pem`)
-    ## NOTE: When it's set it will disable certificate creation
-    ##
-    existingSecret: ""
-    ## Add Custom CA certificate
-    ## @param tls.caCert Custom CA certificated (base64 encoded)
-    ## @param tls.caKey CA certificate private key (base64 encoded)
-    ##
-    caCert: ""
-    caKey: ""
-
-keycloak:
-  ## repo and documentation https://github.com/codecentric/helm-charts/tree/master/charts/keycloak
-  ## check the documentation in the repo for additional details
-
-  enabled: false
-  # # For Hosted Mode
-  # enabled: true
-  image:
-    repository: quay.io/keycloak/keycloak
-    tag: "11.0.2"
-  extraEnv: |
-    - name: KEYCLOAK_USER
-      value: admin
-    - name: KEYCLOAK_PASSWORD
-      value: admin
-    - name: KEYCLOAK_IMPORT
-      value: /realm/realm.json -Dkeycloak.profile.feature.upload_scripts=enabled
-
-  extraVolumes: |
-    - name: realm-secret
-      secret:
-        secretName: realm-secret
-  extraVolumeMounts: |
-    - name: realm-secret
-      mountPath: "/realm/"
-      readOnly: true
-  service:
-    type: ClusterIP
-    httpPort: 7080
-    rules:
-      -   host: testing-toolkit-keycloak.local
-          paths: [/]
-    tls: []
-  ingress:
-    enabled: true
-    rules:
-      -   host: testing-toolkit-keycloak.local
-          paths: [/]
-    tls: []
-  ## secrets used in config/keycloak-realm.json
-  realmConfig:
-    privateKey: '-----BEGIN RSA PRIVATE KEY-----\nMIICWwIBAAKBgQDda1T6cyWogfG/xlUb3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A\n2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHIc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI\n6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7oCweP68CPbIrTWjR9gyjmSHfYhwIDAQAB\nAoGAexcdAbIboEbE7xjB3aIm8rPpZovkOAkGJVKRm4OwN4S77FubPIoCjk631cWn\npcdoWBuqcGzcNfNDZL2szIPmdZU/Cx9I1wjFKRI1pKVS6E8giFLxKDg4KytLDUB2\nToU63yIGQ3lw2GL9Uj66AztAbcJcjsbWLPgtDiiEJlqFzVECQQDvr8pC1lChqgAQ\n8lWxh0LhuXBpGOpnnylWzloZ/kj9Xjh7ZNCRTRSGLDlANL040tzqOeJw3gvwLPtS\nKueUOCBZAkEA7H1B4dShqsXEKVMsy/7BqjT9EMUadYatJel47V5Hql9SO2Z0iK4f\nA22WWokXARb2bXk0awEw2lI6H2GgP3Oj3wJABM1PzxD+Io8GW1CPmPPtyhnt/50J\nLTRKHrwZoAWxLqpRlV9Ksm6J57pBF2E3HUlUNbkdKUe5k4FDM706UITjWQJAc4hp\n9Drd1EETqSCyROKrmEyUyWmRmJL36gqaglRJ7Kju0ogmLFPsYM9b4dURgP3H3AmX\nmyMUy8PaE1StZfJHvwJAA+SRSj+FFajdzrIlYFo7TirFWyQ/wdQ3+IKVGohOFQms\nYEi2xYZD4hWgztz4AbyHVFPLnS1mhwoO/uE2qbNHjw==\n-----END RSA PRIVATE KEY-----'
-    embeddedCertificate: '-----BEGIN CERTIFICATE-----\nMIICrDCCAhWgAwIBAgIUBQ88qYAqQ1+I+ISsaIgYPqbya9QwDQYJKoZIhvcNAQEL\nBQAwaDELMAkGA1UEBhMCVUsxDzANBgNVBAgMBkxvbmRvbjEPMA0GA1UEBwwGTG9u\nZG9uMREwDwYDVQQKDAhNb2R1c2JveDERMA8GA1UECwwITW9kdXNib3gxETAPBgNV\nBAMMCE1vZHVzYm94MB4XDTIwMDkzMDE3MDYwNloXDTIxMDkzMDE3MDYwNlowaDEL\nMAkGA1UEBhMCVUsxDzANBgNVBAgMBkxvbmRvbjEPMA0GA1UEBwwGTG9uZG9uMREw\nDwYDVQQKDAhNb2R1c2JveDERMA8GA1UECwwITW9kdXNib3gxETAPBgNVBAMMCE1v\nZHVzYm94MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDda1T6cyWogfG/xlUb\n3+gWZI0jsnlSGbf3PF89NCgS+n6HUJ0A2Ezmu/n9Gfkm8Rjyst914Vq9ebsueXHI\nc+Ad76+q3MASF1hRUTfnvH/v6rDguPvI6Jb/M9jGn5b2hglcg3B9Y7Tgv70bcV7o\nCweP68CPbIrTWjR9gyjmSHfYhwIDAQABo1MwUTAdBgNVHQ4EFgQUEE+og3aDjUzC\nywQo45Fhjp5S9EowHwYDVR0jBBgwFoAUEE+og3aDjUzCywQo45Fhjp5S9EowDwYD\nVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOBgQC2a7sxisCTQa9oRGMZRmJs\nFMZjia126qlRYm6ljjM2wWlqIBdxjzLhLJbAiWMyzGKTZdMOG51Ujc+NapKRLS4K\nHVnzcbtgRNq6GZk5C1L8BEzR6NxU/CdOkm2Vx811CTOT/YijpjtjF01K1aIZE+z8\nmdzyVY9ZybXqbNclLU7rwA==\n-----END CERTIFICATE-----'
-    clientSecret: 23b898a5-63d2-4055-bbe1-54efcda37e7d
-    hubPassword: hub

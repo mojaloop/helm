@@ -35,15 +35,38 @@ spec:
         {{- if .Values.initContainers }}
           {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
         {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" $) | nindent 6 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          command: {{ .Values.image.command }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.internalPort }}
+            {{- if .Values.diagnosticMode.enabled }}
+            - name: debug
+              containerPort: {{ .Values.diagnosticMode.debug.internalPort }}
+            {{- end }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
               path: {{ .Values.readinessProbe.httpGet.path }}
-              port: {{ .Values.service.ports.internalPort }}
+              port: {{ .Values.service.internalPort }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
           {{- end }}
@@ -51,19 +74,28 @@ spec:
           livenessProbe:
             httpGet:
               path: {{ .Values.livenessProbe.httpGet.path }}
-              port: {{ .Values.service.ports.internalPort }}
+              port: {{ .Values.service.internalPort }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          {{- end }}
+          env:
+            - name: ALS_CO_DATABASE_PASSWORD
+            {{- if not (empty .Values.config.db_secret) }}
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ .Values.config.db_secret.name }}'
+                  key: '{{ .Values.config.db_secret.key }}'
+            {{- else }}
+              value: {{ .Values.config.db_password }}
+            {{- end }}
+          {{- range $envItem := .Values.env }}
+            - name: {{ $envItem.name }}
+              value: {{ $envItem.value }}
           {{- end }}
           volumeMounts:
             - name: consent-oracle-config-volume
               mountPath: /opt/app/dist/config/default.json
               subPath: default.json
-          env:
-          {{- range $envItem := .Values.env }}
-            - name: {{ $envItem.name }}
-              value: {{ $envItem.value }}
-          {{- end }}
       volumes:
         - name: consent-oracle-config-volume
           configMap:

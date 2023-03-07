@@ -41,7 +41,6 @@ declare -a charts=(
     transaction-requests-service
     emailnotifier
     centraleventprocessor
-    central
     bulk-centralledger
     bulk-api-adapter
     mojaloop-bulk
