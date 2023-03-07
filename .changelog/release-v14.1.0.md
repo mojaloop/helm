@@ -172,6 +172,6 @@ More information can be found here:
 ## 9. Contributors
 
 - Organizations: BMGF, CrossLake, InFiTX
-- Individuals: @chris-me-law , @drfy , @elnyry-sam-k , @kirgene , @kleyow , @PaulGregoryBaker , @mdebarros , @sri-miriyala , @tdaly61 , @vijayg10
+- Individuals: @chris-me-law , @dfry , @elnyry-sam-k , @kirgene , @kleyow , @PaulGregoryBaker , @mdebarros , @sri-miriyala , @tdaly61 , @vijayg10
 
 _Note: companies are in alphabetical order, individuals are in no particular order._
