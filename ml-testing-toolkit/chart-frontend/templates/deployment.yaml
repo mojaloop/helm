@@ -37,17 +37,27 @@ spec:
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
 {{- end }}
+      initContainers:
+        {{- if .Values.initContainers }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
+        {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" $) | nindent 6 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           {{- if .Values.image.imagePullSecrets }}
           imagePullSecrets:
           {{ toYaml .Values.image.imagePullSecrets | indent 10 }}
           {{- end }}
-          command: {{ .Values.image.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.command "context" $) | nindent 12 }}
           ports:
-            - containerPort: {{ .Values.service.ports.webUi.internalPort }}
+            - containerPort: {{ .Values.service.internalPort }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
@@ -67,5 +77,3 @@ spec:
           envFrom:
           - configMapRef:
               name: {{ template "ml-testing-toolkit-frontend.fullname" . }}-config
-
-
