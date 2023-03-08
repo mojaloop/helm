@@ -77,7 +77,7 @@ Date | Revision | Description
 15. event-sidecar: **v12.0.0**
 16. event-stream-processor: **v12.0.0-snapshot.7**
 17. simulator: **12.0.0**
-18. mojaloop-simulator: **v13.0.1**
+18. mojaloop-simulator: v13.0.1 -> **v14.0.1** ([Compare](https://github.com/mojaloop/mojaloop-simulator/compare/v13.0.1...v14.0.1))
 19. sdk-scheme-adapter: v11.18.11 -> **v21.4.0** ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v11.18.11...v21.4.0))
 20. ml-testing-toolkit: v15.7.0 -> **v16.0.0** ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v16.0.0))
 21. ml-testing-toolkit-ui: **v15.1.3**
@@ -106,7 +106,7 @@ Date | Revision | Description
 15. event-sidecar - https://github.com/mojaloop/event-sidecar/releases/tag/v12.0.0
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.7
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
-18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v13.0.1
+18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v14.0.1
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v21.4.0
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v16.0.0
 21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.1.3
