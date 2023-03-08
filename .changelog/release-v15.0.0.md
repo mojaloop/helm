@@ -162,7 +162,7 @@ More information can be found here:
 
 | Dependency | Version |  Notes   |
 | ---------- | ------- | --- |
-| Kubernetes | v1.24.8 |     |
+| Kubernetes | v1.24.8 |  [Rancher v2.6.8](https://www.suse.com/suse-rancher/support-matrix/all-supported-versions/rancher-v2-6-8/)   |
 | Docker  |  v20.10.21  |  |
 | Nginx Ingress Controller | rancher/nginx-ingress-controller:nginx-1.2.1-rancher1 |     |
 |  Ubuntu   |  v20.04 LTS   |     |
