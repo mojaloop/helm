@@ -158,17 +158,17 @@ More information can be found here:
 
 ## 7. Testing notes
 
-1. This release has been validated against the following dependency test matrix:
+1. This release has been validated against the following dependency Test Matrix:
 
 | Dependency | Version |  Notes   |
 | ---------- | ------- | --- |
 | Kubernetes | v1.24.8 |     |
-| Nginx Ingress Controller | ? |     |
-|  Ubuntu   |  v?   |     |
-|  MySQL   |  v?   |     |
-|  Kafka   |  v?   |     |
-|  Redis   |  v?   |     |
-|  MongoDB   |  v?   |     |
+| Nginx Ingress Controller | rancher/nginx-ingress-controller:nginx-1.2.1-rancher1 |     |
+|  Ubuntu   |  v20.04 LTS   |     |
+|  MySQL   |  bitnami/mysql:8.0.32-debian-11-r0   |     |
+|  Kafka   |  bitnami/kafka:3.3.1-debian-11-r1   |     |
+|  Redis   |  bitnami/redis:7.0.5-debian-11-r7   |     |
+|  MongoDB   |  bitnami/mongodb:6.0.2-debian-11-r11   |     |
 |  Testing Toolkit Test Cases   |  [v15.0.0-snapshot.5](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.0-snapshot.5)   |     |
 |     |     |     |
 
