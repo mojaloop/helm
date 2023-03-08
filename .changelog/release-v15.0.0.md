@@ -28,14 +28,18 @@ Date | Revision | Description
 17. **mojaloop/#?**: merge Mojaloop-Connector into SDK-Scheme-Adapter ([sdk-scheme-adapter/pull/314](https://github.com/mojaloop/sdk-scheme-adapter/pull/314)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
 18. **mojaloop/#?**: change config structure and remove unused code ([sdk-scheme-adapter/pull/311](https://github.com/mojaloop/sdk-scheme-adapter/pull/311)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
 19. **mojaloop/#?**: update typescript interfaces using latest api-snippets ([sdk-scheme-adapter/pull/297](https://github.com/mojaloop/sdk-scheme-adapter/pull/297)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-20. **mojaloop/#3130**: alter db config and allow password env setting ([ml-testing-toolkit/pull/237](https://github.com/mojaloop/ml-testing-toolkit/pull/237)), closes [mojaloop/#3130)](https://github.com/mojaloop/project/issues/3130)
-21. **mojaloop/#3075**: add config option to configure socket io ([ml-testing-toolkit/pull/232](https://github.com/mojaloop/ml-testing-toolkit/pull/232)), closes [mojaloop/#3075)](https://github.com/mojaloop/project/issues/3075)
-22. **mojaloop/#3060**: add list reports endpoint ([ml-testing-toolkit/pull/226](https://github.com/mojaloop/ml-testing-toolkit/pull/226)), closes [mojaloop/#3060)](https://github.com/mojaloop/project/issues/3060)
-23. **mojaloop/#3058**: added report save option ([ml-testing-toolkit/pull/224](https://github.com/mojaloop/ml-testing-toolkit/pull/224)), closes [mojaloop/#3058)](https://github.com/mojaloop/project/issues/3058)
-24. **mojaloop/#3033**: add rule import and export ([ml-testing-toolkit/pull/225](https://github.com/mojaloop/ml-testing-toolkit/pull/225)), closes [mojaloop/#3033)](https://github.com/mojaloop/project/issues/3033)
-25. **mojaloop/#2890**: redesigned ttk definition report ([ml-testing-toolkit/pull/223](https://github.com/mojaloop/ml-testing-toolkit/pull/223)), closes [mojaloop/#2890)](https://github.com/mojaloop/project/issues/2890)
-26. **mojaloop/#2997**: dynamic ttk rules and request mutation ([ml-testing-toolkit/pull/219](https://github.com/mojaloop/ml-testing-toolkit/pull/219)), closes [mojaloop/#2997)](https://github.com/mojaloop/project/issues/2997)
-27. **mojaloop/#2814**: added moja sim inbound api ([ml-testing-toolkit/pull/218](https://github.com/mojaloop/ml-testing-toolkit/pull/218)), closes [mojaloop/#2814)](https://github.com/mojaloop/project/issues/2814)
+20. **mojaloop/#2928:** upgrade logger to central-services-logger ([#148](https://github.com/mojaloop/mojaloop-simulator/issues/148)) ([8a1573e](https://github.com/mojaloop/mojaloop-simulator/commit/8a1573ec984d994777de773a678024476dc0fb35), [6583dec](https://github.com/mojaloop/mojaloop-simulator/commit/6583dec2e76ec45bd100650813bee905eb94ca9a)), closes [mojaloop/#2928](https://github.com/mojaloop/mojaloop-simulator/issues/2928)
+21. update backend simulator api ([#156](https://github.com/mojaloop/mojaloop-simulator/issues/156)) ([ff253a5](https://github.com/mojaloop/mojaloop-simulator/commit/ff253a5c9199de8aa1cdfa32740c08b64d348f35))
+22. **mojaloop/#3053:** update sdk backend api ([#159](https://github.com/mojaloop/mojaloop-simulator/issues/159)) ([165e08a](https://github.com/mojaloop/mojaloop-simulator/commit/165e08ac10e5dbf119b917e443b628f9ace5279e)), closes [mojaloop/#3053](https://github.com/mojaloop/mojaloop-simulator/issues/3053) [mojaloop/#3053](https://github.com/mojaloop/mojaloop-simulator/issues/3053)
+23. **mojaloop/#2740:** add test currencies to api ([#154](https://github.com/mojaloop/mojaloop-simulator/issues/154)) ([64c80a1](https://github.com/mojaloop/mojaloop-simulator/commit/64c80a12559276da74617b6cdeff5a27e10c9e81)), closes [mojaloop/#2740](https://github.com/mojaloop/mojaloop-simulator/issues/2740)
+24. **mojaloop/#3130**: alter db config and allow password env setting ([ml-testing-toolkit/pull/237](https://github.com/mojaloop/ml-testing-toolkit/pull/237)), closes [mojaloop/#3130)](https://github.com/mojaloop/project/issues/3130)
+25. **mojaloop/#3075**: add config option to configure socket io ([ml-testing-toolkit/pull/232](https://github.com/mojaloop/ml-testing-toolkit/pull/232)), closes [mojaloop/#3075)](https://github.com/mojaloop/project/issues/3075)
+26. **mojaloop/#3060**: add list reports endpoint ([ml-testing-toolkit/pull/226](https://github.com/mojaloop/ml-testing-toolkit/pull/226)), closes [mojaloop/#3060)](https://github.com/mojaloop/project/issues/3060)
+27. **mojaloop/#3058**: added report save option ([ml-testing-toolkit/pull/224](https://github.com/mojaloop/ml-testing-toolkit/pull/224)), closes [mojaloop/#3058)](https://github.com/mojaloop/project/issues/3058)
+28. **mojaloop/#3033**: add rule import and export ([ml-testing-toolkit/pull/225](https://github.com/mojaloop/ml-testing-toolkit/pull/225)), closes [mojaloop/#3033)](https://github.com/mojaloop/project/issues/3033)
+29. **mojaloop/#2890**: redesigned ttk definition report ([ml-testing-toolkit/pull/223](https://github.com/mojaloop/ml-testing-toolkit/pull/223)), closes [mojaloop/#2890)](https://github.com/mojaloop/project/issues/2890)
+30. **mojaloop/#2997**: dynamic ttk rules and request mutation ([ml-testing-toolkit/pull/219](https://github.com/mojaloop/ml-testing-toolkit/pull/219)), closes [mojaloop/#2997)](https://github.com/mojaloop/project/issues/2997)
+31. **mojaloop/#2814**: added moja sim inbound api ([ml-testing-toolkit/pull/218](https://github.com/mojaloop/ml-testing-toolkit/pull/218)), closes [mojaloop/#2814)](https://github.com/mojaloop/project/issues/2814)
 
 ## 2. Bug Fixes
 
@@ -122,10 +126,10 @@ Date | Revision | Description
         - "config" is used for general configurations.
         - "config_files" are used for actual config files as per the name.
 2. The following services no longer support a "Connection URL" for backend configurations to support Password Injection via Env Vars. You will now explicitly configure the Host, User, Pass, DB, Port, etc instead.
-     - Central-Ledger for MongoDB.
-     - Bulk-API-Adapter for MongoDB.
-     - ML-Testing-Toolkit-Backend for MongoDB.
-     - Auth-Service for MySQL.
+     - Central-Ledger for MongoDB. (Ref: [central-ledger/pull/945](https://github.com/mojaloop/central-ledger/pull/945))
+     - Bulk-API-Adapter for MongoDB. (Ref: [bulk-api-adapter/pull/95](https://github.com/mojaloop/bulk-api-adapter/pull/95))
+     - ML-Testing-Toolkit-Backend for MongoDB. (Ref: [ml-testing-toolkit/pull/237](https://github.com/mojaloop/ml-testing-toolkit/pull/237))
+     - Auth-Service for MySQL. (Ref: [auth-service/pull/132](https://github.com/mojaloop/auth-service/pull/132))
 3. Several ML-Testing-Toolkit Backend Dependencies are no longer needed as the associated functionality has been deprecated
      - removed deprecated dependencies: Keycloak, Connection-Manager
 
