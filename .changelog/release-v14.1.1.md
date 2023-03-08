@@ -120,10 +120,11 @@ Date | Revision | Description
     2. [#2845 - QA: Replace Legacy-Simulator as a NORESPONSE_SIMPAYEE in Testing-Toolkit Goden Path Test-Suite](https://github.com/mojaloop/project/issues/2845)
     3. [#2846 - QA: Mojaloop TTK GP Test Collections to reset available liquidity after each run](https://github.com/mojaloop/project/issues/2846)
     4. [#3027 - QA: Mojaloop Helm v14.1.0 Release - Bulk Tests fail on first run](https://github.com/mojaloop/project/issues/3027)
+11. [#2925 - Helm Test Intermittent failure with 'Generic ID not found'](https://github.com/mojaloop/project/issues/2925)
 
 ## 9. Contributors
 
 - Organizations: BMGF, CrossLake, InFiTX
-- Individuals: @chris-me-law , @drfy , @elnyry-sam-k , @kirgene , @kleyow , @PaulGregoryBaker , @mdebarros , @sri-miriyala , @tdaly61 , @vijayg10
+- Individuals: @chris-me-law , @dfry , @elnyry-sam-k , @kirgene , @kleyow , @PaulGregoryBaker , @mdebarros , @sri-miriyala , @tdaly61 , @vijayg10
 
 _Note: companies are in alphabetical order, individuals are in no particular order._
