@@ -17,29 +17,21 @@ Date | Revision | Description
 6. **mojaloop/#3129**: separate mongodb uri config ([central-ledger/pull/945](https://github.com/mojaloop/central-ledger/pull/945)), closes [mojaloop/#3129)](https://github.com/mojaloop/project/issues/3129)
 7. **mojaloop/#3131**: separate mongodb uri config ([bulk-api-adapter/pull/95](https://github.com/mojaloop/bulk-api-adapter/pull/95)), closes [mojaloop/#3131)](https://github.com/mojaloop/project/issues/3131)
 8. **mojaloop/#3139**: rework config to accept env variables for DB ([auth-service/pull/132](https://github.com/mojaloop/auth-service/pull/132)), closes [mojaloop/#3131)](https://github.com/mojaloop/project/issues/3139)
-9. **mojaloop/#?**: added outbound bulk api ([sdk-scheme-adapter/pull/320](https://github.com/mojaloop/sdk-scheme-adapter/pull/320)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-10. **mojaloop/#?**: bump nodejs version and update central services ([sdk-scheme-adapter/pull/319](https://github.com/mojaloop/sdk-scheme-adapter/pull/319)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-11. **mojaloop/#?**: reformat error information response ([sdk-scheme-adapter/pull/318](https://github.com/mojaloop/sdk-scheme-adapter/pull/318)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-12. **mojaloop/#?**: pull in live reconfiguration logic ([sdk-scheme-adapter/pull/313](https://github.com/mojaloop/sdk-scheme-adapter/pull/313)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-13. **mojaloop/#?**: port over prom client metrics ([sdk-scheme-adapter/pull/312](https://github.com/mojaloop/sdk-scheme-adapter/pull/312)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-14. **mojaloop/#?**: port over prom client metrics ([sdk-scheme-adapter/pull/312](https://github.com/mojaloop/sdk-scheme-adapter/pull/312)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-15. **mojaloop/#?**: port use payee FSPID as GET /parties destination header if provided ([sdk-scheme-adapter/pull/301](https://github.com/mojaloop/sdk-scheme-adapter/pull/301)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-16. **mojaloop/#?**: port control client and service from ml connector ([sdk-scheme-adapter/pull/308](https://github.com/mojaloop/sdk-scheme-adapter/pull/308)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-17. **mojaloop/#?**: merge Mojaloop-Connector into SDK-Scheme-Adapter ([sdk-scheme-adapter/pull/314](https://github.com/mojaloop/sdk-scheme-adapter/pull/314)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-18. **mojaloop/#?**: change config structure and remove unused code ([sdk-scheme-adapter/pull/311](https://github.com/mojaloop/sdk-scheme-adapter/pull/311)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-19. **mojaloop/#?**: update typescript interfaces using latest api-snippets ([sdk-scheme-adapter/pull/297](https://github.com/mojaloop/sdk-scheme-adapter/pull/297)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-20. **mojaloop/#2928:** upgrade logger to central-services-logger ([#148](https://github.com/mojaloop/mojaloop-simulator/issues/148)) ([8a1573e](https://github.com/mojaloop/mojaloop-simulator/commit/8a1573ec984d994777de773a678024476dc0fb35), [6583dec](https://github.com/mojaloop/mojaloop-simulator/commit/6583dec2e76ec45bd100650813bee905eb94ca9a)), closes [mojaloop/#2928](https://github.com/mojaloop/mojaloop-simulator/issues/2928)
-21. update backend simulator api ([#156](https://github.com/mojaloop/mojaloop-simulator/issues/156)) ([ff253a5](https://github.com/mojaloop/mojaloop-simulator/commit/ff253a5c9199de8aa1cdfa32740c08b64d348f35))
-22. **mojaloop/#3053:** update sdk backend api ([#159](https://github.com/mojaloop/mojaloop-simulator/issues/159)) ([165e08a](https://github.com/mojaloop/mojaloop-simulator/commit/165e08ac10e5dbf119b917e443b628f9ace5279e)), closes [mojaloop/#3053](https://github.com/mojaloop/mojaloop-simulator/issues/3053) [mojaloop/#3053](https://github.com/mojaloop/mojaloop-simulator/issues/3053)
-23. **mojaloop/#2740:** add test currencies to api ([#154](https://github.com/mojaloop/mojaloop-simulator/issues/154)) ([64c80a1](https://github.com/mojaloop/mojaloop-simulator/commit/64c80a12559276da74617b6cdeff5a27e10c9e81)), closes [mojaloop/#2740](https://github.com/mojaloop/mojaloop-simulator/issues/2740)
-24. **mojaloop/#3130**: alter db config and allow password env setting ([ml-testing-toolkit/pull/237](https://github.com/mojaloop/ml-testing-toolkit/pull/237)), closes [mojaloop/#3130)](https://github.com/mojaloop/project/issues/3130)
-25. **mojaloop/#3075**: add config option to configure socket io ([ml-testing-toolkit/pull/232](https://github.com/mojaloop/ml-testing-toolkit/pull/232)), closes [mojaloop/#3075)](https://github.com/mojaloop/project/issues/3075)
-26. **mojaloop/#3060**: add list reports endpoint ([ml-testing-toolkit/pull/226](https://github.com/mojaloop/ml-testing-toolkit/pull/226)), closes [mojaloop/#3060)](https://github.com/mojaloop/project/issues/3060)
-27. **mojaloop/#3058**: added report save option ([ml-testing-toolkit/pull/224](https://github.com/mojaloop/ml-testing-toolkit/pull/224)), closes [mojaloop/#3058)](https://github.com/mojaloop/project/issues/3058)
-28. **mojaloop/#3033**: add rule import and export ([ml-testing-toolkit/pull/225](https://github.com/mojaloop/ml-testing-toolkit/pull/225)), closes [mojaloop/#3033)](https://github.com/mojaloop/project/issues/3033)
-29. **mojaloop/#2890**: redesigned ttk definition report ([ml-testing-toolkit/pull/223](https://github.com/mojaloop/ml-testing-toolkit/pull/223)), closes [mojaloop/#2890)](https://github.com/mojaloop/project/issues/2890)
-30. **mojaloop/#2997**: dynamic ttk rules and request mutation ([ml-testing-toolkit/pull/219](https://github.com/mojaloop/ml-testing-toolkit/pull/219)), closes [mojaloop/#2997)](https://github.com/mojaloop/project/issues/2997)
-31. **mojaloop/#2814**: added moja sim inbound api ([ml-testing-toolkit/pull/218](https://github.com/mojaloop/ml-testing-toolkit/pull/218)), closes [mojaloop/#2814)](https://github.com/mojaloop/project/issues/2814)
+9. **mojaloop/3023:** align ttk func tests from ttk testcases repo ([#425](https://github.com/mojaloop/sdk-scheme-adapter/issues/425)) ([973faa7](https://github.com/mojaloop/sdk-scheme-adapter/commit/973faa7bd09e69608b324fb754c20d2a0719da85))
+10. **mojaloop/#3074:** sync DFSP backend api with api-snippets ([#428](https://github.com/mojaloop/sdk-scheme-adapter/issues/428)) ([edf601e](https://github.com/mojaloop/sdk-scheme-adapter/commit/edf601ea407c5d8624c3cc2d8ff96e012805a71e)), closes [mojaloop/#3074](https://github.com/mojaloop/project/issues/3074)
+11. **mojaloop/#3053:** add support for subscenarios to backend, outboud and ilp ([#430](https://github.com/mojaloop/sdk-scheme-adapter/issues/430)) ([f6c739a](https://github.com/mojaloop/sdk-scheme-adapter/commit/f6c739a93ab6e64a0bd824ed31fc45e1ec56c948)), closes [mojaloop/#3053](https://github.com/mojaloop/project/issues/3053)
+12. **mojaloop/#2928:** upgrade logger to central-services-logger ([#148](https://github.com/mojaloop/mojaloop-simulator/issues/148)) ([8a1573e](https://github.com/mojaloop/mojaloop-simulator/commit/8a1573ec984d994777de773a678024476dc0fb35), [6583dec](https://github.com/mojaloop/mojaloop-simulator/commit/6583dec2e76ec45bd100650813bee905eb94ca9a)), closes [mojaloop/#2928](https://github.com/mojaloop/mojaloop-simulator/issues/2928)
+13. update backend simulator api ([#156](https://github.com/mojaloop/mojaloop-simulator/issues/156)) ([ff253a5](https://github.com/mojaloop/mojaloop-simulator/commit/ff253a5c9199de8aa1cdfa32740c08b64d348f35))
+14. **mojaloop/#3053:** update sdk backend api ([#159](https://github.com/mojaloop/mojaloop-simulator/issues/159)) ([165e08a](https://github.com/mojaloop/mojaloop-simulator/commit/165e08ac10e5dbf119b917e443b628f9ace5279e)), closes [mojaloop/#3053](https://github.com/mojaloop/mojaloop-simulator/issues/3053) [mojaloop/#3053](https://github.com/mojaloop/mojaloop-simulator/issues/3053)
+15. **mojaloop/#2740:** add test currencies to api ([#154](https://github.com/mojaloop/mojaloop-simulator/issues/154)) ([64c80a1](https://github.com/mojaloop/mojaloop-simulator/commit/64c80a12559276da74617b6cdeff5a27e10c9e81)), closes [mojaloop/#2740](https://github.com/mojaloop/mojaloop-simulator/issues/2740)
+16. **mojaloop/#3130**: alter db config and allow password env setting ([ml-testing-toolkit/pull/237](https://github.com/mojaloop/ml-testing-toolkit/pull/237)), closes [mojaloop/#3130)](https://github.com/mojaloop/project/issues/3130)
+17. **mojaloop/#3075**: add config option to configure socket io ([ml-testing-toolkit/pull/232](https://github.com/mojaloop/ml-testing-toolkit/pull/232)), closes [mojaloop/#3075)](https://github.com/mojaloop/project/issues/3075)
+18. **mojaloop/#3060**: add list reports endpoint ([ml-testing-toolkit/pull/226](https://github.com/mojaloop/ml-testing-toolkit/pull/226)), closes [mojaloop/#3060)](https://github.com/mojaloop/project/issues/3060)
+19. **mojaloop/#3058**: added report save option ([ml-testing-toolkit/pull/224](https://github.com/mojaloop/ml-testing-toolkit/pull/224)), closes [mojaloop/#3058)](https://github.com/mojaloop/project/issues/3058)
+20. **mojaloop/#3033**: add rule import and export ([ml-testing-toolkit/pull/225](https://github.com/mojaloop/ml-testing-toolkit/pull/225)), closes [mojaloop/#3033)](https://github.com/mojaloop/project/issues/3033)
+21. **mojaloop/#2890**: redesigned ttk definition report ([ml-testing-toolkit/pull/223](https://github.com/mojaloop/ml-testing-toolkit/pull/223)), closes [mojaloop/#2890)](https://github.com/mojaloop/project/issues/2890)
+23. **mojaloop/#2997**: dynamic ttk rules and request mutation ([ml-testing-toolkit/pull/219](https://github.com/mojaloop/ml-testing-toolkit/pull/219)), closes [mojaloop/#2997)](https://github.com/mojaloop/project/issues/2997)
+24. **mojaloop/#2814**: added moja sim inbound api ([ml-testing-toolkit/pull/218](https://github.com/mojaloop/ml-testing-toolkit/pull/218)), closes [mojaloop/#2814)](https://github.com/mojaloop/project/issues/2814)
 
 ## 2. Bug Fixes
 
@@ -47,16 +39,13 @@ Date | Revision | Description
 2. **mojaloop/#3020**: add checks for when mongodb is disabled ([central-ledger/pull/927](https://github.com/mojaloop/central-ledger/pull/927)), closes [mojaloop/#3020)](https://github.com/mojaloop/project/issues/3020)
 3. **mojaloop/#2644**: missing error-code for the transfer in the central-ledger db ([central-ledger/pull/929](https://github.com/mojaloop/central-ledger/pull/929)), closes [mojaloop/#2644)](https://github.com/mojaloop/project/issues/2644)
 4. **mojaloop/#3096**: unable to upgrade knex dependency on centralLedger ([central-ledger/pull/939](https://github.com/mojaloop/central-ledger/pull/939)), closes [mojaloop/#3096)](https://github.com/mojaloop/project/issues/3096)
-5. **mojaloop/#?**: reformat error information response ([sdk-scheme-adapter/pull/318](https://github.com/mojaloop/sdk-scheme-adapter/pull/318)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-6. **mojaloop/#?**: update outbound interface and response oa3 defs ([sdk-scheme-adapter/pull/316](https://github.com/mojaloop/sdk-scheme-adapter/pull/316)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-7. **mojaloop/#?**: update package.json with main and type correct path ([sdk-scheme-adapter/pull/315](https://github.com/mojaloop/sdk-scheme-adapter/pull/315)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-8. **mojaloop/#?**: update package.json with main and type correct path ([sdk-scheme-adapter/pull/315](https://github.com/mojaloop/sdk-scheme-adapter/pull/315)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-9. **mojaloop/#?**: make management url config option optional ([sdk-scheme-adapter/pull/310](https://github.com/mojaloop/sdk-scheme-adapter/pull/310)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-10. **mojaloop/#?**: remove outdated koa2-oauth-server and bump to node 16 ([sdk-scheme-adapter/pull/302](https://github.com/mojaloop/sdk-scheme-adapter/pull/302)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-11. **mojaloop/#?**: fix config async changes ([ml-testing-toolkit/pull/229](https://github.com/mojaloop/ml-testing-toolkit/pull/229)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-12. **mojaloop/#?**: fix config fetching for monitoring payload condition ([ml-testing-toolkit/pull/228](https://github.com/mojaloop/ml-testing-toolkit/pull/228)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-13. **mojaloop/#?**: refactor break on error ([ml-testing-toolkit/pull/227](https://github.com/mojaloop/ml-testing-toolkit/pull/227)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
-14. **mojaloop/#?**: parameterized the inbound request size ([ml-testing-toolkit/pull/221](https://github.com/mojaloop/ml-testing-toolkit/pull/221)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
+5. **mojaloop/2891:** fix outbound fspiop headers ([#436](https://github.com/mojaloop/sdk-scheme-adapter/issues/436)) ([bfce0b0](https://github.com/mojaloop/sdk-scheme-adapter/commit/bfce0b097d40d565da47b5c56a0e7a84ff47fb1d))
+6. **mojaloop/3132:** wso2 auth fix fspiop handler ([#437](https://github.com/mojaloop/sdk-scheme-adapter/issues/437)) ([4260361](https://github.com/mojaloop/sdk-scheme-adapter/commit/4260361f537606de15d114da3aa897e6124e1a34))
+7. **mojaloop/3137:** bulk transactions sdk crash ([#440](https://github.com/mojaloop/sdk-scheme-adapter/issues/440)) ([acb7a01](https://github.com/mojaloop/sdk-scheme-adapter/commit/acb7a0172a3a43d0cc20350622ae68162f4b9252))
+8. **mojaloop/#?**: fix config async changes ([ml-testing-toolkit/pull/229](https://github.com/mojaloop/ml-testing-toolkit/pull/229)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
+9. **mojaloop/#?**: fix config fetching for monitoring payload condition ([ml-testing-toolkit/pull/228](https://github.com/mojaloop/ml-testing-toolkit/pull/228)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
+10. **mojaloop/#?**: refactor break on error ([ml-testing-toolkit/pull/227](https://github.com/mojaloop/ml-testing-toolkit/pull/227)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
+11. **mojaloop/#?**: parameterized the inbound request size ([ml-testing-toolkit/pull/221](https://github.com/mojaloop/ml-testing-toolkit/pull/221)), closes [mojaloop/#?)](https://github.com/mojaloop/project/issues/?)
 
 ## 3. Application versions
 
@@ -78,7 +67,7 @@ Date | Revision | Description
 16. event-stream-processor: **v12.0.0-snapshot.7**
 17. simulator: **12.0.0**
 18. mojaloop-simulator: v13.0.1 -> **v14.0.1** ([Compare](https://github.com/mojaloop/mojaloop-simulator/compare/v13.0.1...v14.0.1))
-19. sdk-scheme-adapter: v11.18.11 -> **v21.4.0** ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v11.18.11...v21.4.0))
+19. sdk-scheme-adapter: v21.4.0 -> **v22.0.1** ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v21.4.0...v22.0.1))
 20. ml-testing-toolkit: v15.7.0 -> **v16.0.0** ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v16.0.0))
 21. ml-testing-toolkit-ui: **v15.1.3**
 22. ml-testing-toolkit-client-lib: **v1.1.1**
@@ -107,7 +96,7 @@ Date | Revision | Description
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.7
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v14.0.1
-19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v21.4.0
+19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v22.0.1
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v16.0.0
 21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.1.3
 22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.1.1
@@ -222,7 +211,7 @@ More information can be found here:
 
 ## 9. Contributors
 
-- Organizations: TBD
-- Individuals: TBD
+- Organizations: BMGF, CrossLake, InFiTX
+- Individuals: @chris-me-law , @dfry , @elnyry-sam-k , @kirgene , @kleyow , @PaulGregoryBaker , @mdebarros , @sri-miriyala , @tdaly61 , @vijayg10
 
 _Note: companies are in alphabetical order, individuals are in no particular order._
