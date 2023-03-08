@@ -163,6 +163,7 @@ More information can be found here:
 | Dependency | Version |  Notes   |
 | ---------- | ------- | --- |
 | Kubernetes | v1.24.8 |     |
+| Docker  |  v20.10.21  |  |
 | Nginx Ingress Controller | rancher/nginx-ingress-controller:nginx-1.2.1-rancher1 |     |
 |  Ubuntu   |  v20.04 LTS   |     |
 |  MySQL   |  bitnami/mysql:8.0.32-debian-11-r0   |     |
