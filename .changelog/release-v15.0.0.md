@@ -108,7 +108,7 @@ Date | Revision | Description
 
 ## 5. Breaking changes
 
-1. Backend dependencies have been externalized, see [upgrade-strategy-guide](https://docs.mojaloop.io/legacy/deployment-guide/upgrade-strategy-guide.html) for best practices on deployment topologies and upgrading.
+1. Backend dependencies have been externalized, see [upgrade-strategy-guide](https://docs.mojaloop.io/legacy/deployment-guide/upgrade-strategy-guide.html) for best practices on deployment topologies and upgrading, and [deploying-backend-dependencies](../README.md#deploying-backend-dependencies) on how to deploy backends.
 2. Charts have been re-factored for consistency, which will impact the following value configs. These are not necessarily breaking changes, but you will need to ensure any customized values files are updated to reflect these changes:
     - Image, Command definitions have been made consistent, with added "debug" added.
     - InitContainers definitions have been made consistent.
