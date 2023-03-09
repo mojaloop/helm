@@ -36,10 +36,10 @@ Date | Revision | Description
 6. **mojaloop/#3132**: wso2 auth fix fspiop handler ([sdk-scheme-adapter/issues/#437](https://github.com/mojaloop/sdk-scheme-adapter/issues/437)) ([sdk-scheme-adapter/commit/4260361](https://github.com/mojaloop/sdk-scheme-adapter/commit/4260361f537606de15d114da3aa897e6124e1a34))
 7. **mojaloop/#3137**: bulk transactions sdk crash ([sdk-scheme-adapter/issues/#440](https://github.com/mojaloop/sdk-scheme-adapter/issues/440)) ([sdk-scheme-adapter/commit/acb7a01](https://github.com/mojaloop/sdk-scheme-adapter/commit/acb7a0172a3a43d0cc20350622ae68162f4b9252))
 8. **mojaloop/#3156**: ML Toolkit Mobile sim demo having issues with ML V15 RC-1 ([helm/commit/32f2699](https://github.com/mojaloop/helm/commit/32f26994929c86fc249e15ca5ee113769dc61cb3)), closes [mojaloop/#3156](https://github.com/mojaloop/project/issues/3156)
-9. **mojaloop/#?**: fix config async changes ([ml-testing-toolkit/pull/229](https://github.com/mojaloop/ml-testing-toolkit/pull/229)), closes [mojaloop/#?](https://github.com/mojaloop/project/issues/?)
-10. **mojaloop/#?**: fix config fetching for monitoring payload condition ([ml-testing-toolkit/pull/228](https://github.com/mojaloop/ml-testing-toolkit/pull/228)), closes [mojaloop/#?](https://github.com/mojaloop/project/issues/?)
-11. **mojaloop/#?**: refactor break on error ([ml-testing-toolkit/pull/227](https://github.com/mojaloop/ml-testing-toolkit/pull/227)), closes [mojaloop/#?](https://github.com/mojaloop/project/issues/?)
-12. **mojaloop/#?**: parameterized the inbound request size ([ml-testing-toolkit/pull/221](https://github.com/mojaloop/ml-testing-toolkit/pull/221)), closes [mojaloop/#?](https://github.com/mojaloop/project/issues/?)
+9. **mojaloop/#3053**: fix config async changes ([ml-testing-toolkit/pull/229](https://github.com/mojaloop/ml-testing-toolkit/pull/229)), closes [mojaloop/#3053](https://github.com/mojaloop/project/issues/3053)
+10. **mojaloop/#3053**: fix config fetching for monitoring payload condition ([ml-testing-toolkit/pull/228](https://github.com/mojaloop/ml-testing-toolkit/pull/228)), closes [mojaloop/#3053](https://github.com/mojaloop/project/issues/3053)
+11. **mojaloop/#3076**: refactor break on error ([ml-testing-toolkit/pull/227](https://github.com/mojaloop/ml-testing-toolkit/pull/227)), closes [mojaloop/#3076](https://github.com/mojaloop/project/issues/3076)
+12. **mojaloop/#3000**: parameterized the inbound request size ([ml-testing-toolkit/pull/221](https://github.com/mojaloop/ml-testing-toolkit/pull/221)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3000)
 
 ## 3. Application versions
 
