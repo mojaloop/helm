@@ -10,7 +10,7 @@ Date | Revision | Description
 ## 1. New Features
 
 1. **mojaloop/#2887** Externalize Backend Dependencies ([helm/pull/915](https://github.com/mojaloop/helm/pull/535), [helm/pull/535](https://github.com/mojaloop/helm/pull/535)), closes [mojaloop/#2887](https://github.com/mojaloop/project/issues/2887)
-2. **mojaloop/#3083** Externalize Backend Dependencies for Thirdparty Helm Charts ([helm/pull/538](https://github.com/mojaloop/helm/pull/538)), closes [mojaloop/#3083](https://github.com/mojaloop/project/issues/3083)
+2. **mojaloop/#3083** Externalize Backend Dependencies for Thirdparty Helm Charts ([helm/pull/915](https://github.com/mojaloop/helm/pull/915)), closes [mojaloop/#3083](https://github.com/mojaloop/project/issues/3083)
 3. **mojaloop/#3091** Externalize Backend Dependencies for TTK Helm Charts ([helm/pull/915](https://github.com/mojaloop/helm/pull/915)), closes [mojaloop/#3091](https://github.com/mojaloop/project/issues/3091)
 4. **mojaloop/#3082** Utilize externalized secrets for user/password management ([helm/pull/915](https://github.com/mojaloop/helm/pull/915)), closes [mojaloop/#3082](https://github.com/mojaloop/project/issues/3082)
 5. **mojaloop/#3078**: get /trans callback is wrong for exp trans ([central-ledger/pull/938](https://github.com/mojaloop/central-ledger/pull/938)), closes [mojaloop/#3078](https://github.com/mojaloop/project/issues/3078)
