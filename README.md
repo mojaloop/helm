@@ -4,6 +4,27 @@
 [![Git Releases](https://img.shields.io/github/release/mojaloop/helm.svg?style=flat)](https://github.com/mojaloop/helm/releases)
 [![CircleCI](https://circleci.com/gh/mojaloop/helm.svg?style=svg)](https://circleci.com/gh/mojaloop/helm)
 
+- [Mojaloop Helm Charts](#mojaloop-helm-charts)
+  - [Quick Links](#quick-links)
+  - [Pre-requisites](#pre-requisites)
+    - [Configure remote Mojaloop Helm repo on your Helm Client](#configure-remote-mojaloop-helm-repo-on-your-helm-client)
+  - [Deployment](#deployment)
+    - [Deploying Backend Dependencies](#deploying-backend-dependencies)
+    - [Deploying Mojaloop Helm Charts](#deploying-mojaloop-helm-charts)
+    - [Deploying development versions](#deploying-development-versions)
+  - [Upgrading Deployments from Repo](#upgrading-deployments-from-repo)
+  - [Deployment from Source for local repo deployments](#deployment-from-source-for-local-repo-deployments)
+    - [Update Chart Dependencies for Source for local repo deployments (i.e. from the cloned github repository)](#update-chart-dependencies-for-source-for-local-repo-deployments-ie-from-the-cloned-github-repository)
+    - [Deployment](#deployment-1)
+  - [Upgrading Deployments from Source](#upgrading-deployments-from-source)
+  - [Testing Deployments](#testing-deployments)
+    - [Validation](#validation)
+    - [Ingress](#ingress)
+  - [Removing Deployments](#removing-deployments)
+  - [Debugging Charts](#debugging-charts)
+  - [Helper scripts](#helper-scripts)
+  - [Monitoring Mojaloop](#monitoring-mojaloop)
+
 ## Quick Links
 
 - [http://mojaloop.io/helm/repo/](http://mojaloop.io/helm/repo/index.yaml) Mojaloop Published Helm Repo
