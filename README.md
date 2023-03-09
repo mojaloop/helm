@@ -218,7 +218,7 @@ Mojaloop Helm deployments currently include the following tests:
 
 1. Add the following to your hosts file and ensure you have installed Ingress Controller on your Kubernetes Cluster:
 
-    `<ip-of-k8s-node-ingress>	 ml-api-adapter.local central-ledger.local account-lookup-service.local quoting-service.local central-settlement.local moja-simulator.local`
+    `<ip-of-k8s-node-ingress>	 ml-api-adapter.local central-ledger.local account-lookup-service.local quoting-service.local central-settlement.local moja-simulator.local testing-toolkit.local testing-toolkit-specapi.local`
 
 2. Curl Health End-points for ML-API-Adapter
 
@@ -235,6 +235,14 @@ Mojaloop Helm deployments currently include the following tests:
    Expected output:
 
    `{"status":"OK"}`
+
+4. Testing Toolkit
+
+    Open [http://testing-toolkit.local](http://testing-toolkit.local) in your browser.
+
+    Or access the [Mobile Simulator](http://testing-toolkit.local/mobilesimulator) Demo directly on [http://testing-toolkit.local/mobilesimulator](http://testing-toolkit.local/mobilesimulator).
+
+    Check out the [User Guide](https://github.com/mojaloop/ml-testing-toolkit/blob/master/documents/User-Guide.md) to learn more about the [Testing Toolkit](https://github.com/mojaloop/ml-testing-toolkit/blob/master/documents/Mojaloop-Testing-Toolkit.md).
 
 ## Removing Deployments
 
