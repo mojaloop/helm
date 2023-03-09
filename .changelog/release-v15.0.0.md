@@ -25,13 +25,6 @@ Date | Revision | Description
 14. **mojaloop/#3053:** update sdk backend api ([mojaloop-simulator/issues/#159](https://github.com/mojaloop/mojaloop-simulator/issues/159)) ([mojaloop-simulator/commit/165e08a](https://github.com/mojaloop/mojaloop-simulator/commit/165e08ac10e5dbf119b917e443b628f9ace5279e)), closes [mojaloop/#3053](https://github.com/mojaloop/mojaloop-simulator/issues/3053) [mojaloop/#3053](https://github.com/mojaloop/mojaloop-simulator/issues/3053)
 15. **mojaloop/#2740:** add test currencies to api ([mojaloop-simulator/issues/#154](https://github.com/mojaloop/mojaloop-simulator/issues/154)) ([mojaloop-simulator/commit/64c80a1](https://github.com/mojaloop/mojaloop-simulator/commit/64c80a12559276da74617b6cdeff5a27e10c9e81)), closes [mojaloop/#2740](https://github.com/mojaloop/mojaloop-simulator/issues/2740)
 16. **mojaloop/#3130**: alter db config and allow password env setting ([ml-testing-toolkit/pull/237](https://github.com/mojaloop/ml-testing-toolkit/pull/237)), closes [mojaloop/#3130](https://github.com/mojaloop/project/issues/3130)
-17. **mojaloop/#3075**: add config option to configure socket io ([ml-testing-toolkit/pull/232](https://github.com/mojaloop/ml-testing-toolkit/pull/232)), closes [mojaloop/#3075](https://github.com/mojaloop/project/issues/3075)
-18. **mojaloop/#3060**: add list reports endpoint ([ml-testing-toolkit/pull/226](https://github.com/mojaloop/ml-testing-toolkit/pull/226)), closes [mojaloop/#3060](https://github.com/mojaloop/project/issues/3060)
-19. **mojaloop/#3058**: added report save option ([ml-testing-toolkit/pull/224](https://github.com/mojaloop/ml-testing-toolkit/pull/224)), closes [mojaloop/#3058](https://github.com/mojaloop/project/issues/3058)
-20. **mojaloop/#3033**: add rule import and export ([ml-testing-toolkit/pull/225](https://github.com/mojaloop/ml-testing-toolkit/pull/225)), closes [mojaloop/#3033](https://github.com/mojaloop/project/issues/3033)
-21. **mojaloop/#2890**: redesigned ttk definition report ([ml-testing-toolkit/pull/223](https://github.com/mojaloop/ml-testing-toolkit/pull/223)), closes [mojaloop/#2890](https://github.com/mojaloop/project/issues/2890)
-23. **mojaloop/#2997**: dynamic ttk rules and request mutation ([ml-testing-toolkit/pull/219](https://github.com/mojaloop/ml-testing-toolkit/pull/219)), closes [mojaloop/#2997](https://github.com/mojaloop/project/issues/2997)
-24. **mojaloop/#2814**: added moja sim inbound api ([ml-testing-toolkit/pull/218](https://github.com/mojaloop/ml-testing-toolkit/pull/218)), closes [mojaloop/#2814](https://github.com/mojaloop/project/issues/2814)
 
 ## 2. Bug Fixes
 
