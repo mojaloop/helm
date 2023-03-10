@@ -155,6 +155,7 @@ More information can be found here:
 |  Redis   |  bitnami/redis:7.0.5-debian-11-r7   |     |
 |  MongoDB   |  bitnami/mongodb:6.0.2-debian-11-r11   |     |
 |  Testing Toolkit Test Cases   |  [v15.0.0-snapshot.6](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.0-snapshot.6)   |     |
+|  example-mojaloop-backend   |  v14.1.0   |  [README](../example-mojaloop-backend/README.md)   |
 |     |     |     |
 
 2. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
