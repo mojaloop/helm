@@ -117,6 +117,54 @@ Date | Revision | Description
 4. Several ML-Testing-Toolkit Backend Dependencies are no longer needed as the associated functionality has been deprecated
      - removed deprecated dependencies: Keycloak, Connection-Manager
 5. Migrations `tableName` for the Thirdparty Auth-Svc has changed from `auth-svc` to `migration` for consistency. If you have an existing migrated/seeded database, ensure that you rename this table to `migration` or otherwise manually customize the values.yaml to use `"tableName": "auth-svc",` instead of `"tableName": "migration"`.
+6. When upgrading from v14.x release, the following Thirdparty Services are incorrectly deployed as a headless service:
+
+    1. `tp-api-svc`
+    2. `auth-svc`
+    3. `consent-oracle`
+
+    To fix this going forward one must manually re-create the affected services prior to the upgrade by removing the following JSON keys:
+
+   - `.spec.clusterIP`
+   - `.spec.clusterIPs`
+
+    *NOTE: This DOES not impact new installations.*
+
+    Execute the following commands in your terminal or save it to a bash script, and ensure you update the exported env variables as follows:
+
+    - `SERVICE_NS` - Namespace of the deployment
+    - `HELM_NAME` - Helm installation name
+    - `SERVICE_NAME` - Name of the Service to be re-created. Remove the `$HELM_NAME-` prefix if not required.
+
+    Pre-requisites:
+
+    - [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl) - Kubernetes command-line tool, with configured access to your target Kubernetes cluster.
+    - [jq](https://stedolan.github.io/jq/) - A lightweight and flexible command-line JSON processor.
+
+    Script to execute:
+
+    ```bash
+    export SERVICE_NS="<NAMESPACE>";
+    export HELM_NAME="<HELM INSTALL NAME>";
+
+    export SERVICE_NAME="$HELM_NAME-tp-api-svc"; \
+    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME for Helm install $HELM_NAME"; \
+    export K8_DESCRIPTOR=$(kubectl -n $SERVICE_NS get svc/$SERVICE_NAME -o json | jq 'del(.spec.clusterIP) | del(.spec.clusterIPs)') && \
+    kubectl -n $SERVICE_NS delete svc/$SERVICE_NAME && \
+    echo $K8_DESCRIPTOR | kubectl create --save-config -f -;
+
+    export SERVICE_NAME="$HELM_NAME-auth-svc"; \
+    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME for Helm install $HELM_NAME"; \
+    export K8_DESCRIPTOR=$(kubectl -n $SERVICE_NS get svc/$SERVICE_NAME -o json | jq 'del(.spec.clusterIP) | del(.spec.clusterIPs)') && \
+    kubectl -n $SERVICE_NS delete svc/$SERVICE_NAME && \
+    echo $K8_DESCRIPTOR | kubectl create --save-config -f -;
+
+    export SERVICE_NAME="$HELM_NAME-consent-oracle"; \
+    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME for Helm install $HELM_NAME"; \
+    export K8_DESCRIPTOR=$(kubectl -n $SERVICE_NS get svc/$SERVICE_NAME -o json | jq 'del(.spec.clusterIP) | del(.spec.clusterIPs)') && \
+    kubectl -n $SERVICE_NS delete svc/$SERVICE_NAME && \
+    echo $K8_DESCRIPTOR | kubectl create --save-config -f -;
+    ```
 
 ## 6. Deprecations
 
