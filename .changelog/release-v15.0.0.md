@@ -130,7 +130,7 @@ Date | Revision | Description
 
     *NOTE: This DOES not impact new installations.*
 
-    Execute the following commands in your terminal or save it to a bash script, and ensure you update the exported env variables as follows:
+    Alternatively, you can execute the following commands in your terminal or save it to a bash script, and ensure you update the exported env variables:
 
     - `SERVICE_NS` - Namespace of the deployment
     - `HELM_NAME` - Helm installation name
