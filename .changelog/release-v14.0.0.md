@@ -258,6 +258,7 @@ More information can be found here:
     2. [#2734 - Failures in daily cron job running GP tests](https://github.com/mojaloop/project/issues/2734)
     3. [#2845 - QA: Replace Legacy-Simulator as a NORESPONSE_SIMPAYEE in Testing-Toolkit Goden Path Test-Suite](https://github.com/mojaloop/project/issues/2845)
     4. [#2846 - QA: Mojaloop TTK GP Test Collections to reset available liquidity after each run](https://github.com/mojaloop/project/issues/2846)
+7. [#3163 - Thirdparty Helm Charts are not scalable due to the Kubernetes Service being a headless service](https://github.com/mojaloop/project/issues/3163)
 
 ## 9. Contributors
 

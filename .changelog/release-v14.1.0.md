@@ -168,6 +168,7 @@ More information can be found here:
     2. [#2845 - QA: Replace Legacy-Simulator as a NORESPONSE_SIMPAYEE in Testing-Toolkit Goden Path Test-Suite](https://github.com/mojaloop/project/issues/2845)
     3. [#2846 - QA: Mojaloop TTK GP Test Collections to reset available liquidity after each run](https://github.com/mojaloop/project/issues/2846)
     4. [#3027 - QA: Mojaloop Helm v14.1.0 Release - Bulk Tests fail on first run](https://github.com/mojaloop/project/issues/3027)
+11. [#3163 - Thirdparty Helm Charts are not scalable due to the Kubernetes Service being a headless service](https://github.com/mojaloop/project/issues/3163)
 
 ## 9. Contributors
 

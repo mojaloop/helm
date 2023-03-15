@@ -121,6 +121,7 @@ Date | Revision | Description
     3. [#2846 - QA: Mojaloop TTK GP Test Collections to reset available liquidity after each run](https://github.com/mojaloop/project/issues/2846)
     4. [#3027 - QA: Mojaloop Helm v14.1.0 Release - Bulk Tests fail on first run](https://github.com/mojaloop/project/issues/3027)
 11. [#2925 - Helm Test Intermittent failure with 'Generic ID not found'](https://github.com/mojaloop/project/issues/2925)
+12. [#3163 - Thirdparty Helm Charts are not scalable due to the Kubernetes Service being a headless service](https://github.com/mojaloop/project/issues/3163)
 
 ## 9. Contributors
 
