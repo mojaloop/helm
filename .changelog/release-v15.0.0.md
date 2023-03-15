@@ -209,13 +209,13 @@ More information can be found here:
 |  Kafka   |  bitnami/kafka:3.3.1-debian-11-r1   |     |
 |  Redis   |  bitnami/redis:7.0.5-debian-11-r7   |     |
 |  MongoDB   |  bitnami/mongodb:6.0.2-debian-11-r11   |     |
-|  Testing Toolkit Test Cases   |  [v15.0.0-snapshot.6](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.0-snapshot.6)   |     |
+|  Testing Toolkit Test Cases   |  [v15.0.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.0)   |     |
 |  example-mojaloop-backend   |  v15.0.0   |  [README](../example-mojaloop-backend/README.md)   |
 |     |     |     |
 
 2. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
 
-3. The [testing-toolkit-test-cases for v15.0.0-snapshot.6](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.0-snapshot.6)' Golden Path collections expects:
+3. The [testing-toolkit-test-cases for v15.0.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.0)' Golden Path collections expects:
     - the Quoting service operating mode to be set quoting-service.config.simple_routing_mode_enabled=true (in helm mojaloop/values.yaml under quoting-service config). If this is incorrectly configured, it will result in several failures in the quoting-service tests (7 expected failures). If this is disabled, ensure that you update the corresponding test-case environment variable parameter **SIMPLE_ROUTING_MODE_ENABLED** ( in helm mojaloop/values.yaml ml-testing-toolkit -> extraEnvironments.hub-k8s-default-environment.json.inputValues) to match.
     - the **on-us transfers** (in mojaloop/values.yaml "enable_on_us_transfers: false" under centralledger-handler-transfer-prepare -> config and  cl-handler-bulk-transfer-prepare -> config) configuration to be disabled. The test-case environment variable parameter (**ON_US_TRANSFERS_ENABLED** (in helm mojaloop/values.yaml ml-testing-toolkit -> extraEnvironments.hub-k8s-default-environment.json.inputValues), the same name used on postman collections) must similarly match this value.
 
