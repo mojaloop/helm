@@ -32,24 +32,24 @@ else
         monitoring/efk
         account-lookup-service
         als-oracle-pathfinder
-        centralkms
-        # forensicloggingsidecar  # No longer supported
+        # centralkms # Deprecated - No longer supported
+        # forensicloggingsidecar # Deprecated - No longer supported
         centralledger
-        # centralenduserregistry  # No longer supported
+        # centralenduserregistry # Deprecated - No longer supported
         centralsettlement
         emailnotifier
         centraleventprocessor
         ml-api-adapter
         quoting-service
-        finance-portal
-        finance-portal-settlement-management
+        # finance-portal # Deprecated - No longer supported
+        # finance-portal-settlement-management # Deprecated - No longer supported
         transaction-requests-service
         bulk-centralledger/
         bulk-api-adapter/
         mojaloop-bulk/
         mojaloop-simulator
         mojaloop
-        # kube-system/ntpd/ # No longer supported
+        # kube-system/ntpd/ # Deprecated - No longer supported
         ml-operator
         thirdparty/chart-auth-svc
         thirdparty/chart-consent-oracle

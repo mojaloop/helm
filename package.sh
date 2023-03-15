@@ -34,17 +34,17 @@ else
         monitoring/efk
         account-lookup-service
         als-oracle-pathfinder
-        # centralkms #deprecated
-        # forensicloggingsidecar #deprecated
+        # centralkms # Deprecated - No longer supported
+        # forensicloggingsidecar # Deprecated - No longer supported
         centralledger
-        # centralenduserregistry #deprecated
+        # centralenduserregistry # Deprecated - No longer supported
         centralsettlement
         emailnotifier
         centraleventprocessor
         ml-api-adapter
         quoting-service
-        # finance-portal #deprecated
-        # finance-portal-settlement-management #deprecated
+        # finance-portal # Deprecated - No longer supported
+        # finance-portal-settlement-management # Deprecated - No longer supported
         transaction-requests-service
         bulk-centralledger/
         bulk-api-adapter/
