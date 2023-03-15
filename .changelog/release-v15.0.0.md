@@ -117,20 +117,25 @@ Date | Revision | Description
 4. Several ML-Testing-Toolkit Backend Dependencies are no longer needed as the associated functionality has been deprecated
      - removed deprecated dependencies: Keycloak, Connection-Manager
 5. Migrations `tableName` for the Thirdparty Auth-Svc has changed from `auth-svc` to `migration` for consistency. If you have an existing migrated/seeded database, ensure that you rename this table to `migration` or otherwise manually customize the values.yaml to use `"tableName": "auth-svc",` instead of `"tableName": "migration"`.
-6. When upgrading from v14.x release, the following Thirdparty Services are incorrectly deployed as a headless service:
+6. Thirdparty Kubernetes Services ports were standardized to port `80` for the following components: `tp-api-svc`, `auth-svc` & `consent-oracle`.
+7. When upgrading from v14.x release, the following Thirdparty Kubernetes Services are incorrectly deployed as a [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services):
 
     1. `tp-api-svc`
     2. `auth-svc`
     3. `consent-oracle`
 
-    To fix this going forward one must manually re-create the affected services prior to the upgrade by removing the following JSON keys:
+    [Headless services](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) cannot be used for load-balancing purposes, and thus we would not be able to access these components if scaled out.
+
+    *NOTE: This DOES not impact new installations!*
+
+    To fix this going forward one must manually re-create (delete & create) the affected services prior to the upgrade by removing the following JSON keys:
 
    - `.spec.clusterIP`
    - `.spec.clusterIPs`
 
-    *NOTE: This DOES not impact new installations.*
+    *NOTE: Modifying the existing Kubernetes definition will NOT take effect, thus the need to completely re-create the Kubernetes service by deleting it and then creating it!*
 
-    Alternatively, you can execute the following commands in your terminal or save it to a bash script, and ensure you update the exported env variables:
+    Alternatively, you can execute the following commands in your terminal or save it to a bash script, and ensure you update the exported env variables prior to execution:
 
     - `SERVICE_NS` - Namespace of the deployment
     - `HELM_NAME` - Helm installation name
