@@ -2,9 +2,17 @@
 apiVersion: {{ template "apiVersion.Deployment" . }}
 kind: Deployment
 metadata:
-  name: {{ include "tp-api-svc.name" . }}
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
   labels:
-    {{- include "tp-api-svc.labels" . | nindent 4 }}
+    {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: {{ .Chart.Name }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
@@ -12,12 +20,17 @@ spec:
     rollingUpdate:
       maxSurge: 1
   selector:
-    matchLabels:
-      {{- include "tp-api-svc.selectorLabels" . | nindent 6 }}
+    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: {{ .Chart.Name }}
   template:
     metadata:
       labels:
-        {{- include "tp-api-svc.labels" . | nindent 8 }}
+        {{- include "common.labels.standard" . | nindent 8 }}
+        app.kubernetes.io/component: {{ .Chart.Name }}
+        app.kubernetes.io/version: {{ .Chart.Version }}
+        {{- if .Values.podLabels }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.podLabels "context" $) | nindent 8 }}
+        {{- end }}
     spec:
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -90,7 +103,7 @@ spec:
       volumes:
         - name: tp-api-svc-config-volume
           configMap:
-            name: tp-api-svc-config
+            name: {{ template "common.names.fullname" . }}-config
             items:
               - key: default.json
                 path: default.json

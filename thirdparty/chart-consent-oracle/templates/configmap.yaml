@@ -1,9 +1,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "consent-oracle-config"
-  labels:
-    {{- include "consent-oracle.labels" . | nindent 4 }}
+  name: {{ template "common.names.fullname" . }}-config
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: {{ .Chart.Name }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
 data:
   {{- range $k, $v := index .Values.config_files }}
     {{ $k }}: | 

@@ -1,10 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name:  {{ include "consent-oracle.name" . }}
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
   labels:
-    app: consent-oracle
-    {{- include "consent-oracle.labels" . | nindent 4 }}
+    {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: {{ .Chart.Name }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
   annotations:
     {{- if .Values.service.annotations }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.service.annotations "context" $ ) | nindent 4 }}
@@ -49,4 +53,5 @@ spec:
       protocol: TCP
   {{- end }}
   selector:
-    {{- include "consent-oracle.selectorLabels" . | nindent 6 }}
+    {{- include "common.labels.matchLabels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ .Chart.Name }}
