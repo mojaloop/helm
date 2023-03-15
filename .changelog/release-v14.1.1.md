@@ -4,6 +4,7 @@ Date | Revision | Description
 ---------|----------|---------
  2022-12-16 | 0 | Initial draft of RC
  2023-02-20 | 0 | Initial release v14.1.1
+ 2023-03-15 | 0 | Updated Known Issues with [mojaloop/#3163](https://github.com/mojaloop/project/issues/3163)
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
