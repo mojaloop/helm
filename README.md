@@ -207,11 +207,15 @@ _Note: This is currently only supported by Helm v3._
 
 Mojaloop Helm deployments currently include the following tests:
 
-| Helm Test | Test Cases | Enabled by default? | Notes |
-|---------|----------|----------|----------|
-| ml-ttk-test-setup.tests | [hub/provisioning](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/provisioning) | Yes | Required as a pre-requisite for all tests. |
-| ml-ttk-test-val-gp | [hub/golden_path](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/golden_path)  | Yes | Previously named `ml-ttk-test-validation` prior to v13.1.0 release. |
-| ml-ttk-test-val-bulk | [hub/other_tests/bulk_transfers](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/other_tests/bulk_transfers) | No | `mojaloop-bulk.enabled=true` must be set to deploy the Bulk-API-Adapter components. |
+| Helm Test                  | Test Cases                                                                                                                                      |  Description   | Enabled by default? | Notes                                                                                                                                                                                                                                                                               |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ml-ttk-test-setup.tests    | [hub/provisioning](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/provisioning)                             |  Standard Provisioning Collection   | Yes                 | Required as a pre-requisite for all tests.                                                                                                                                                                                                                                          |
+| ml-ttk-test-val-gp         | [hub/golden_path](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/golden_path)                               |  Golden-Path (GP) Test Collection   | Yes                 | Previously named `ml-ttk-test-validation` prior to v13.1.0 release.                                                                                                                                                                                                                 |
+| ml-ttk-test-val-bulk       | [hub/other_tests/bulk_transfers](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/other_tests/bulk_transfers) |  Bulk Test Collection   | No                  | `mojaloop-bulk.enabled=true` must be set to deploy the Bulk-API-Adapter components.                                                                                                                                                                                                 |
+| ml-ttk-test-setup-sdk-bulk | [hub/provisioning_sdkbulk](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/provisioning_sdkbulk)             |  SDK Bulk Provisioning Collection   | No                  | `mojaloop-bulk.enabled=true` & `mojaloop-ttk-simulators.enabled=true` must be set to deploy the Bulk-API-Adapter components.                                                                                                                                                       |
+| ml-ttk-test-val-sdk-bulk   | [hub/sdk-bulk](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/sdk-bulk)                                     |  SDK Bulk Test Collection   | No                  | `mojaloop-bulk.enabled=true` & `mojaloop-ttk-simulators.enabled=true` must be set to deploy the Thirdparty components.                                                                                                                                                              |
+| ml-ttk-test-setup-tp       | [hub/provisioning_thirdparty](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/provisioning_thirdparty)       |  Thirdparty Provisioning Collection   | No                  | `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` must be set to deploy the Thirdparty components.       |
+| ml-ttk-test-val-tp         | [hub/thirdparty](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/thirdparty)                                 |  Thirdparty Test Collection   | No                  | `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` must be set to deploy the Bulk-API-Adapter components. |
 
 1. Ensure Tests are enabled
 
@@ -220,11 +224,14 @@ Mojaloop Helm deployments currently include the following tests:
     - `ml-ttk-test-setup.tests.enabled=true`
     - `ml-ttk-test-val-gp.tests.enabled=true`
     - `ml-ttk-test-val-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true` is set_)
+    - `ml-ttk-test-setup-sdk-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true`, `mojaloop-ttk-simulators.enabled=true` is set_)
     - `ml-ttk-test-val-sdk-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true`, `mojaloop-ttk-simulators.enabled=true` is set_)
+    - `ml-ttk-test-setup-tp.test.enabled=true`
+    - `ml-ttk-test-val-tp.test,enabled=true` (_Note: only applicable if `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` is set_)
 
     Or alternatively add `--set` for each of the above parameters on the install command:
 
-    `helm install ... --set ml-ttk-test-setup.tests.enabled=true --set ml-ttk-test-val-gp.tests.enabled=true --set ml-ttk-test-val-bulk=true --set ml-ttk-test-val-bulk.tests.enabled=true`
+    `helm install ... --set ml-ttk-test-setup.tests.enabled=true --set ml-ttk-test-val-gp.tests.enabled=true ...`
 
 2. Run Tests
 
