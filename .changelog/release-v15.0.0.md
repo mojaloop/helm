@@ -107,7 +107,12 @@ Date | Revision | Description
 
    1. `central-event-processor` - Refer to [centraleventprocessor/values.yaml](../centraleventprocessor/values.yaml) for configuration options.
 
-        Use the following command for deployment:
+        Pre-requisites:
+
+        - The `central-event-processor` has a dependency on a `MongoDB` datastore.
+        - Refer to [example-mojaloop-backend](../example-mojaloop-backend/README.md) for an example on how to deploy this dependency. This can be enabled in the [example-mojaloop-backend/values.yaml](../example-mojaloop-backend/values.yaml)  by setting `cep-mongodb.enabled` to `true`.
+
+        Use the following command to deploy `central-event-processor` :
 
         ```bash
         helm -n <NAMESPACE> install mojaloop/centraleventprocessor -v <VERSION> -f <CUSTOMIZED_VALUES.yaml>
@@ -115,7 +120,12 @@ Date | Revision | Description
 
    2. `email-notifier` - Refer to [emailnotifier/values.yaml](../emailnotifier/values.yaml) for configuration options.
 
-        Use the following command for deployment:
+        Pre-requisites:
+
+        - The `email-notifier` has a dependency on a `Kafka`.
+        - Refer to [example-mojaloop-backend](../example-mojaloop-backend/README.md) for an example on how to deploy this dependency. This can be enabled in the [example-mojaloop-backend/values.yaml](../example-mojaloop-backend/values.yaml)  by setting `kafka.enabled` to `true`.
+
+        Use the following command to deploy `email-notifier`:
 
         ```bash
         helm -n <NAMESPACE> install mojaloop/emailnotifier -v <VERSION> -f <CUSTOMIZED_VALUES.yaml>
