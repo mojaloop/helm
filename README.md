@@ -205,7 +205,7 @@ e.g. `helm --namespace mojaloop upgrade dev ./centralenduserregistry`
 
 _Note: This is currently only supported by Helm v3._
 
-Mojaloop Helm deployments currently include the following tests:
+Mojaloop Helm deployments currently include the following provisioning (`setup`) and test (`val`) collections:
 
 | Helm Test                  | Test Cases                                                                                                                                      |  Description   | Enabled by default? | Notes                                                                                                                                                                                                                                                                               |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
