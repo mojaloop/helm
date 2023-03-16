@@ -1,10 +1,62 @@
 enabled: true
-replicaCount: 1
+
 image:
+  registry: "docker.io"
   repository: mojaloop/thirdparty-api-svc
   tag: v13.0.2
-  command: '[ "npm", "run", "start" ]'
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
   pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## e.g:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
+
+replicaCount: 1
+command: '["node", "./dist/src/cli.js", "all"]'
+
+## Enable diagnostic mode in the deployment
+##
+diagnosticMode:
+  ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+  ##
+  enabled: false
+  ## @param diagnosticMode.command Command to override all containers in the deployment
+  ##
+  command: 
+    - node
+    - ./dist/src/cli.js
+    - all
+  ## @param diagnosticMode.args Args to override all containers in the deployment
+  ##
+  args:
+    - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+  
+  ## @param diagnosticMode.debug config to override all debug information
+  ##
+  debug:
+    internalPort: 9229
+    port: 9229
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+  initialDelaySeconds: 60
+  periodSeconds: 15
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+  initialDelaySeconds: 60
+  periodSeconds: 15
 
 ## Pod scheduling preferences.
 ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -18,16 +70,14 @@ nodeSelector: {}
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
 
-livenessProbe:
-  initialDelaySeconds: 30
-  httpGet:
-    path: /health
-    port: 3008
-readinessProbe:
-  initialDelaySeconds: 30
-  httpGet:
-    path: /health
-    port: 3008
+## Configure Container Security Context
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+## @param containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+##
+containerSecurityContext:
+  enabled: true
+  runAsUser: 1001
 
 # Add exta environment variables here
 env: []
@@ -35,57 +85,110 @@ env: []
   # - name: LOG_LEVEL
   #   value: debug
 
-config:
-  default.json: {
-      "PORT": 3008,
-      "HOST": "0.0.0.0",
-      "INSPECT": {
-        "DEPTH": 4,
-        "SHOW_HIDDEN": false,
-        "COLOR": true
-      },
-      "ENDPOINT_CACHE_CONFIG": {
-        "expiresIn": 180000,
-        "generateTimeout": 30000
-      },
-      # Location of central ledger to lookup endpoints for
-      "ENDPOINT_SERVICE_URL": "http://$release_name-centralledger-service",
-      # Static list of participantIds that support account linking
-      "PARTICIPANT_LIST_LOCAL": [
-        "dfspa",
-        "dfspb"
-      ],
-      "ERROR_HANDLING": {
-        "includeCauseExtension": true,
-        "truncateExtensions": true
-      },
-      "INSTRUMENTATION": {
-        "METRICS": {
-          "DISABLED": false,
-          "labels": {
-            "eventId": "*"
-          },
-          "config": {
-            "timeout": 5000,
-            "prefix": "moja_3p_api",
-            "defaultLabels": {
-              "serviceName": "thirdparty-api-svc"
+## Svc configs
+config: {}
+
+## Svc config files
+config_files:
+  default.json: |
+    {
+        "PORT": {{ .Values.service.internalPort }},
+        "HOST": "0.0.0.0",
+        "INSPECT": {
+          "DEPTH": 4,
+          "SHOW_HIDDEN": false,
+          "COLOR": true
+        },
+        "ENDPOINT_CACHE_CONFIG": {
+          "expiresIn": 180000,
+          "generateTimeout": 30000
+        },
+        "ENDPOINT_SERVICE_URL": "http://{{ .Release.Name }}-centralledger-service",
+        "PARTICIPANT_LIST_LOCAL": [
+          "dfspa",
+          "dfspb"
+        ],
+        "ERROR_HANDLING": {
+          "includeCauseExtension": true,
+          "truncateExtensions": true
+        },
+        "INSTRUMENTATION": {
+          "METRICS": {
+            "DISABLED": false,
+            "labels": {
+              "eventId": "*"
+            },
+            "config": {
+              "timeout": 5000,
+              "prefix": "moja_3p_api",
+              "defaultLabels": {
+                "serviceName": "thirdparty-api-svc"
+              }
             }
           }
+        },
+        "MOCK_CALLBACK": {
+          "transactionRequestId": "abc-12345",
+          "pispId": "pisp"
         }
-      },
-      "MOCK_CALLBACK": {
-        "transactionRequestId": "abc-12345",
-        "pispId": "pisp"
       }
-    }
+
+## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+## e.g:
+## initContainers:
+##  - name: your-image-name
+##    image: your-image
+##    imagePullPolicy: Always
+##    command: ['sh', '-c', 'echo "hello world"']
+##    env:
+##      - name: debug
+##        value: trace
+##
+initContainers: []
 
 service:
+  internalPort: 3008
+  ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+  ##
   type: ClusterIP
-  ports:
-    name: http
-    externalPort: 3008
-    internalPort: 3008
+  ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+  ##
+  port: 80
+  ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+  ## e.g.:
+  ## clusterIP: None
+  ##
+  clusterIP:
+  ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+  ##
+  loadBalancerIP:
+  ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+  ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+  ## e.g:
+  ## loadBalancerSourceRanges:
+  ##   - 10.10.10.0/24
+  ##
+  loadBalancerSourceRanges: []
+  ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+  ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  ##
+  externalTrafficPolicy: Cluster
+  ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+  ##
+  annotations: {}
+  ## @param master.service.sessionAffinity Session Affinity for Kubernetes service, can be "None" or "ClientIP"
+  ## If "ClientIP", consecutive client requests will be directed to the same Pod
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+  ##
+  sessionAffinity: None
+  ## @param master.service.sessionAffinityConfig Additional settings for the sessionAffinity
+  ## sessionAffinityConfig:
+  ##   clientIP:
+  ##     timeoutSeconds: 300
+  ##
+  sessionAffinityConfig: {}
 
 ingress:
   ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%

@@ -5,6 +5,12 @@
 
 ## Pre-requisites
 
+### Configure remote Mojaloop Helm repo on your Helm Client
+
+Ensure that you [add the published repo to your Helm client](../README.md#configure-remote-mojaloop-helm-repo-on-your-helm-client) prior to running the above command.
+
+### Setup local GIT repo
+
 Run `helm dep up .`
 
 Or run the [update-charts-dep.sh](../update-charts-dep.sh) from the root folder.
@@ -13,36 +19,35 @@ Or run the [update-charts-dep.sh](../update-charts-dep.sh) from the root folder.
 
 ### Backends
 
-```bash
-helm -n mojaloop install backend ./example-mojaloop-backend
-```
-
-Or from the Helm repo:
+from the published Helm repo:
 
 ```bash
 helm -n mojaloop install backend mojaloop/example-mojaloop-backend
 ```
 
-## Mojaloop Configuration
+### Configure remote Mojaloop Helm repo on your Helm Client
 
-Ensure you modify the CONFIG section on the [mojaloop/values.yaml](../mojaloop/values.yaml) header by commenting out the sections under `FOR default` and uncommenting the lines under `FOR example-mojaloop-backend`.
+1. Add Mojaloop repo
 
-And ensure that all backends are disabled [mojaloop/values.yaml](../mojaloop/values.yaml):
+    `helm repo add mojaloop http://mojaloop.io/helm/repo/`
 
-- `central.centralledger.mysql.enabled=false`
-- `central.centralledger.kafka.enabled=false`
-- `central.centraleventprocessor.mongodb.enabled=false`
-- `account-lookup-service.mysql.enabled=false`
-- `mojaloop-bulk.mongodb.enabled=false`
+2. Keep your local Mojaloop repo up to date
 
-This can be set by using the `--set` parameter when running the `helm install` command:
+    `helm repo update`
 
-```bash
-helm install moja ./mojaloop --set "central.centralledger.mysql.enabled=false" --set "central.centralledger.kafka.enabled=false" --set "central.centraleventprocessor.mongodb.enabled=false" --set "account-lookup-service.mysql.enabled=false" --set "mojaloop-bulk.mongodb.enabled=false"
-```
+## Mojaloop
 
-Ensure you also include the following to enable Bulk Components:
+The default CONFIG header section on the [mojaloop/values.yaml](../mojaloop/values.yaml) header has been configured to work with the backend dependencies deployed by this Helm wrapper chart.
 
-```bash
---set "mojaloop-bulk.enabled=true" --set "ml-ttk-test-val-bulk.tests.enabled=true"
-```
+Several backends are defined as follows:
+
+|  Backend   |  Description   |  Notes   |
+| --- | --- | --- |
+|  MysqlDb   |  Shared MySQL server   |  Specific Databases are created to isolate the schemas for each service, however the same common password is used for convenience.   |
+|  Kafka  |  Shared Kafka server   |     |
+|  cl-mongodb   |  MongoDB Object Store by the Bulk-API-Adapter, Central-Ledger for Bulk Processing   |     |
+|  cep-mongodb   |  MongoDB Object Store used by the Central-Event-Processor   |     |
+|  ttk-mongodb   |  MongoDB Object Store used by the Mojaloop Testing Toolkit (TTK)   |     |
+|  ttksim-redis   |  Shared Redis instance for TTK based Simulators   |     |
+|  auth-svc-redis   |  Redis instance for the Thirdparty Auth-Service   |     |
+|     |     |     |

@@ -4,30 +4,26 @@ account-lookup-service:
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
 
+  image:
+    registry: "docker.io"
+    repository: mojaloop/account-lookup-service
+    tag: v14.0.0
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+
   replicaCount: 1
-  containers:
-    api:
-      image:
-        repository: mojaloop/account-lookup-service
-        tag: v14.0.0
-        pullPolicy: IfNotPresent
-        command: '["node", "src/index.js", "server", "--api"]'
-      service:
-        ports:
-          api:
-            name: http-api
-            port: 4002
-    admin:
-      image:
-        repository: mojaloop/account-lookup-service
-        tag: v14.0.0
-        pullPolicy: IfNotPresent
-        command: '["node", "src/index.js", "server", "--admin"]'
-      service:
-        ports:
-          api:
-            name: http-admin
-            port: 4001
+  command: '["node", "src/index.js", "server", "--api"]'
 
   nameOverride: ""
   fullnameOverride: ""
@@ -71,15 +67,24 @@ account-lookup-service:
       generateTimeout: 30000
 
     ## DB Configuration
-    # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
-    db_type: 'mysql'
-    # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-    db_driver: 'mysql'
-    db_host: '$release_name-account-lookup-mysql'
+    db_type: mysql
+    db_driver: mysql
+    db_host: mysqldb
     db_port: 3306
     db_user: account_lookup
-    db_password: OdonPianoX
+    ## Secret-Management
+    ### Set this if you are using a clear text password configured in the config section
+    db_password: ''
+    ### Configure this if you want to use a secret. Note, this will override the db_password,
+    ### Use the next line if you do wish to use the db_password value instead.
+    # db_secret:
+    ### Example config for an existing secret
+    # db_secret:
+    #   name: mysqldb
+    #   key: mysql-password
     db_database: account_lookup
+    db_connection_pool_min: 10
+    db_connection_pool_max: 30
     db_acquire_timeout_millis: 30000
     db_create_timeout_millis: 30000
     db_destroy_timeout_millis: 5000
@@ -132,20 +137,104 @@ account-lookup-service:
     # Thirdparty API Config
     featureEnableExtendedPartyIdType: false
 
-
-  init:
-    enabled: true
-    mysql:
-      enabled: true
-      name: wait-for-mysql
-      repository: mysql
-      tag: 8.0.30
-      pullPolicy: IfNotPresent
-      command: "until result=$(mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi; do echo waiting for MySQL; sleep 2; done;"
+  ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  # initContainers: []
+  initContainers: |
+    - name: wait-for-mysql
+      image: mysql:5.7
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
+          do
+            echo --------------------;
+            echo Waiting for MySQL...;
+            sleep 2; 
+          done;
+          echo ====================; 
+          echo MySQL ok!;
+      env:
+        - name: DB_HOST
+          value: '{{ .Values.config.db_host }}'
+        - name: DB_PORT
+          value: '{{ .Values.config.db_port }}'
+        - name: DB_USER
+          value: '{{ .Values.config.db_user }}'
+        - name: DB_PASSWORD
+          {{- if not (empty .Values.config.db_secret) }}
+          valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.db_secret.name }}'
+                key: '{{ .Values.config.db_secret.key }}'
+          {{- else }}
+          value: {{ .Values.config.db_password }}
+          {{- end }}
+        - name: DB_DATABASE
+          value: '{{ .Values.config.db_database }}'
 
   service:
+    internalPort: 4002
+    ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+    ##
     type: ClusterIP
+    ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+    ##
     port: 80
+    ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+    ##
+    httpsPort: 443
+    ## Node ports to expose
+    ## @param service.nodePorts.http Node port for HTTP
+    ## @param service.nodePorts.https Node port for HTTPS
+    ## NOTE: choose port between <30000-32767>
+    ##
+    nodePorts:
+      http:
+      https:
+    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+    ## e.g.:
+    ## clusterIP: None
+    ##
+    clusterIP:
+    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    ##
+    loadBalancerIP:
+    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+    loadBalancerSourceRanges: []
+    ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+    ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    ##
+    externalTrafficPolicy: Cluster
+    ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+    ##
+    annotations: {}
+    ## @param master.service.sessionAffinity Session Affinity for Kubernetes service, can be "None" or "ClientIP"
+    ## If "ClientIP", consecutive client requests will be directed to the same Pod
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+    ##
+    sessionAffinity: None
+    ## @param master.service.sessionAffinityConfig Additional settings for the sessionAffinity
+    ## sessionAffinityConfig:
+    ##   clientIP:
+    ##     timeoutSeconds: 300
+    ##
+    sessionAffinityConfig: {}
 
   ingress:
     enabled: true
@@ -217,30 +306,26 @@ account-lookup-service-admin:
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
 
+  image:
+    registry: "docker.io"
+    repository: mojaloop/account-lookup-service
+    tag: v14.0.0
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+
   replicaCount: 1
-  containers:
-    api:
-      image:
-        repository: mojaloop/account-lookup-service
-        tag: v14.0.0
-        pullPolicy: IfNotPresent
-        command: '["node", "src/index.js", "server", "--api"]'
-      service:
-        ports:
-          api:
-            name: http-api
-            port: 4002
-    admin:
-      image:
-        repository: mojaloop/account-lookup-service
-        tag: v14.0.0
-        pullPolicy: IfNotPresent
-        command: '["node", "src/index.js", "server", "--admin"]'
-      service:
-        ports:
-          api:
-            name: http-admin
-            port: 4001
+  command: '["node", "src/index.js", "server", "--admin"]'
 
   nameOverride: ""
   fullnameOverride: ""
@@ -281,14 +366,21 @@ account-lookup-service-admin:
       generateTimeout: 30000
 
     ## DB Configuration
-    # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
-    db_type: 'mysql'
-    # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-    db_driver: 'mysql'
-    db_host: '$release_name-account-lookup-mysql'
+    db_type: mysql    
+    db_driver: mysql
+    db_host: mysqldb
     db_port: 3306
     db_user: account_lookup
-    db_password: OdonPianoX
+    ## Secret-Management
+    ### Set this if you are using a clear password configured in the config section
+    db_password: ''
+    ### Configure this if you want to use a secret. Note, this will override the db_password,
+    ### Use the next line if you do wish to use the db_password value instead.
+    # db_secret:
+    ### Example config for an existing secret
+    db_secret:
+      name: mysqldb
+      key: mysql-password
     db_database: account_lookup
     db_connection_pool_min: 10
     db_connection_pool_max: 30
@@ -348,22 +440,126 @@ account-lookup-service-admin:
     # Thirdparty API Config
     featureEnableExtendedPartyIdType: false
 
-  init:
-    enabled: true
-    mysql:
-      name: wait-for-mysql
-      repository: mysql
-      tag: 8.0.30
-      pullPolicy: IfNotPresent
-      command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password $db_database -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
-    migration:
-      enabled: true
-      name: run-migration
-      command: npm run migrate
+  ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  # initContainers: []
+  initContainers: |
+    - name: wait-for-mysql
+      image: mysql:5.7
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          do
+            echo --------------------;
+            echo Waiting for MySQL...;
+            sleep 2; 
+          done;
+          echo ====================; 
+          echo MySQL ok!;
+      env:
+        - name: DB_HOST
+          value: '{{ .Values.config.db_host }}'
+        - name: DB_PORT
+          value: '{{ .Values.config.db_port }}'
+        - name: DB_USER
+          value: '{{ .Values.config.db_user }}'
+        - name: DB_PASSWORD
+          {{- if not (empty .Values.config.db_secret) }}
+          valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.db_secret.name }}'
+                key: '{{ .Values.config.db_secret.key }}'
+          {{- else }}
+          value: {{ .Values.config.db_password }}
+          {{- end }}
+        - name: DB_DATABASE
+          value: '{{ .Values.config.db_database }}'
+    - name: run-migration
+      image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - npm run migrate
+      env:
+        - name: ALS_MIGRATIONS__RUN_DATA_MIGRATIONS
+          value: 'true'
+        - name: ALS_DATABASE__PASSWORD
+          {{- if not (empty .Values.config.db_secret) }}
+          valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.db_secret.name }}'
+                key: '{{ .Values.config.db_secret.key }}'
+          {{- else }}
+          value: {{ .Values.config.db_password }}
+          {{- end }}
+      volumeMounts:
+        - name: '{{ template "account-lookup-service-admin.fullname" . }}-config-volume'
+          mountPath: /opt/app/config
 
   service:
+    internalPort: 4001
+    ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+    ##
     type: ClusterIP
+    ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+    ##
     port: 80
+    ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
+    ##
+    httpsPort: 443
+    ## Node ports to expose
+    ## @param service.nodePorts.http Node port for HTTP
+    ## @param service.nodePorts.https Node port for HTTPS
+    ## NOTE: choose port between <30000-32767>
+    ##
+    nodePorts:
+      http:
+      https:
+    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+    ## e.g.:
+    ## clusterIP: None
+    ##
+    clusterIP:
+    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+    ##
+    loadBalancerIP:
+    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+    ## e.g:
+    ## loadBalancerSourceRanges:
+    ##   - 10.10.10.0/24
+    ##
+    loadBalancerSourceRanges: []
+    ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+    ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    ##
+    externalTrafficPolicy: Cluster
+    ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+    ##
+    annotations: {}
+    ## @param master.service.sessionAffinity Session Affinity for Kubernetes service, can be "None" or "ClientIP"
+    ## If "ClientIP", consecutive client requests will be directed to the same Pod
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+    ##
+    sessionAffinity: None
+    ## @param master.service.sessionAffinityConfig Additional settings for the sessionAffinity
+    ## sessionAffinityConfig:
+    ##   clientIP:
+    ##     timeoutSeconds: 300
+    ##
+    sessionAffinityConfig: {}
 
   ingress:
     enabled: true
@@ -431,13 +627,47 @@ account-lookup-service-admin:
 als-oracle-pathfinder:
   enabled: false
   # Declare variables to be passed into your templates.
-  replicaCount: 1
   image:
     repository: mojaloop/als-oracle-pathfinder
     tag: v12.0.0
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
     pullPolicy: IfNotPresent
-    command: '["node", "/opt/app/src/index.js"]'
-    imagePullSecrets: []
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+
+  replicaCount: 1
+  command: '["node", "/opt/app/src/index.js"]'
+
+  ## Enable diagnostic mode in the deployment
+  ##
+  diagnosticMode:
+    ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+    ##
+    enabled: false
+    ## @param diagnosticMode.command Command to override all containers in the deployment
+    ##
+    command: 
+      - node
+      - /opt/app/src/index.js
+    ## @param diagnosticMode.args Args to override all containers in the deployment
+    ##
+    args:
+      - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+    
+    ## @param diagnosticMode.debug config to override all debug information
+    ##
+    debug:
+      internalPort: 9229
+      port: 9229
 
   readinessProbe:
     enabled: true
@@ -462,13 +692,31 @@ als-oracle-pathfinder:
         port: '3306'
         database: 'central_ledger'
         user: 'central_ledger'
-        password: 'oyMxgZChuu'
+        ## Secret-Management
+        ### Set this if you are using a clear password configured in the config section
+        password: ''
+        ### Configure this if you want to use a secret. Note, this will override the db_password,
+        ### Use the next line if you do wish to use the db_password value instead.
+        # secret:
+        ### Example config for an existing secret
+        # secret:
+        #   name: mysqldb
+        #   key: mysql-password
       account_lookup:
         host: '$release_name-account-lookup-mysql'
         port: '3306'
         database: 'account_lookup'
         user: 'account_lookup'
-        password: 'OdonPianoX'
+        ## Secret-Management
+        ### Set this if you are using a clear password configured in the config section
+        password: ''
+        ### Configure this if you want to use a secret. Note, this will override the db_password,
+        ### Use the next line if you do wish to use the db_password value instead.
+        # secret:
+        ### Example config for an existing secret
+        # secret:
+        #   name: mysqldb
+        #   key: mysql-password
     log_level: 'info'
 
     pathfinder:
@@ -585,33 +833,146 @@ als-oracle-pathfinder:
         # certs in the Mozilla bundle, which is used by Node as default.
         intermediate_cert_path: '/opt/app/secrets/pathfinder_intermediate_cert.pem'
 
-  init:
-    enabled: true
-    waitForMysql:
-      name: wait-for-mysql
-      repository: mysql
-      tag: 8.0.30
-      pullPolicy: IfNotPresent
-      command: "until mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database   -e 'select version()' ; do echo waiting for MySQL; sleep 2; done;"
-    initMysql:
-      centralLedger:
-        name: init-central-ledger-mysql
-        repository: mojaloop/als-oracle-pathfinder
-        tag: latest
-        pullPolicy: IfNotPresent
-        command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password  $db_database -e "SET @service_name='$service_name'; source /opt/app/init-central-ledger.sql;";
-      accountLookup:
-        name: init-account-lookup-mysql
-        repository: mojaloop/als-oracle-pathfinder
-        tag: latest
-        pullPolicy: IfNotPresent
-        command: mysql -h $db_host -P $db_port -u $db_user --password=$db_password $db_database -e "SET @service_name='$service_name'; source /opt/app/init-account-lookup.sql;";
-    populateMysql:
-      name: populate-mysql-tables
-      repository: mysql
-      tag: 8.0.30
-      pullPolicy: IfNotPresent
-      command: "echo 'Nothing configured to be populated. Continuing...';"
+  ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  # initContainers: []
+  initContainers: |
+    - name: wait-for-mysql-central-ledger
+      image: mysql:5.7
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          do
+            echo --------------------;
+            echo Waiting for MySQL...;
+            sleep 2; 
+          done;
+          echo ====================; 
+          echo MySQL ok!;
+      env:
+        - name: DB_HOST
+          value: '{{ .Values.config.db.central_ledger.host }}'
+        - name: DB_PORT
+          value: '{{ .Values.config.db.central_ledger.port }}'
+        - name: DB_USER
+          value: '{{ .Values.config.db.central_ledger.user }}'
+        - name: DB_PASSWORD
+          {{- if not (empty .Values.config.db.central_ledger.secret) }}
+          valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.db.central_ledger.secret.name }}'
+                key: '{{ .Values.config.db.central_ledger.secret.key }}'
+          {{- else }}
+          value: {{ .Values.config.db.central_ledger.password }}
+          {{- end }}
+        - name: DB_DATABASE
+          value: '{{ .Values.config.db.central_ledger.database }}'
+    - name: init-mysql-central-ledger
+      image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          echo Running MySQL init scripts;
+          mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -e "SET @service_name='${SERVICE_NAME}'; source /opt/app/init-central-ledger.sql;";
+          echo ====================; 
+          echo MySQL ok!;
+      env:
+        - name: DB_HOST
+          value: '{{ .Values.config.db.central_ledger.host }}'
+        - name: DB_PORT
+          value: '{{ .Values.config.db.central_ledger.port }}'
+        - name: DB_USER
+          value: '{{ .Values.config.db.central_ledger.user }}'
+        - name: DB_PASSWORD
+          {{- if not (empty .Values.config.db.central_ledger.secret) }}
+          valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.db.central_ledger.secret.name }}'
+                key: '{{ .Values.config.db.central_ledger.secret.key }}'
+          {{- else }}
+          value: {{ .Values.config.db.central_ledger.password }}
+          {{- end }}
+        - name: DB_DATABASE
+          value: '{{ .Values.config.db.central_ledger.database }}'
+        - name: SERVICE_NAME
+          value: '{{ include "als-oracle-pathfinder.name" . }}'
+    - name: wait-for-mysql-account-lookup
+      image: mysql:5.7
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          do
+            echo --------------------;
+            echo Waiting for MySQL...;
+            sleep 2; 
+          done;
+          echo ====================; 
+          echo MySQL ok!;
+      env:
+        - name: DB_HOST
+          value: '{{ .Values.config.db.account_lookup.host }}'
+        - name: DB_PORT
+          value: '{{ .Values.config.db.account_lookup.port }}'
+        - name: DB_USER
+          value: '{{ .Values.config.db.account_lookup.user }}'
+        - name: DB_PASSWORD
+          {{- if not (empty .Values.config.db.account_lookup.secret) }}
+          valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.db.account_lookup.secret.name }}'
+                key: '{{ .Values.config.db.account_lookup.secret.key }}'
+          {{- else }}
+          value: {{ .Values.config.db.account_lookup.password }}
+          {{- end }}
+        - name: DB_DATABASE
+          value: '{{ .Values.config.db.account_lookup.database }}'
+    - name: init-mysql-account-lookup
+      image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - |
+          echo Running MySQL init scripts;
+          mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -e "SET @service_name='${SERVICE_NAME}'; source /opt/app/init-account-lookup.sql;";
+          echo ====================; 
+          echo MySQL ok!;
+      env:
+        - name: DB_HOST
+          value: '{{ .Values.config.db.account_lookup.host }}'
+        - name: DB_PORT
+          value: '{{ .Values.config.db.account_lookup.port }}'
+        - name: DB_USER
+          value: '{{ .Values.config.db.account_lookup.user }}'
+        - name: DB_PASSWORD
+          {{- if not (empty .Values.config.db.account_lookup.secret) }}
+          valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.db.account_lookup.secret.name }}'
+                key: '{{ .Values.config.db.account_lookup.secret.key }}'
+          {{- else }}
+          value: {{ .Values.config.db.account_lookup.password }}
+          {{- end }}
+        - name: DB_DATABASE
+          value: '{{ .Values.config.db.account_lookup.database }}'
+        - name: SERVICE_NAME
+          value: '{{ include "als-oracle-pathfinder.name" . }}'
+
   service:
     type: ClusterIP
     name: http-api
@@ -691,130 +1052,4 @@ als-oracle-pathfinder:
     #  cpu: 100m
   #  memory: 128Mi
 
-mysql:
-  enabled: true
-  nameOverride: "account-lookup-mysql"
-  # Default values for Percona XtraDB Cluster
-
-  ## percona image and version
-  ## ref: https://hub.docker.com/r/percona/percona-xtradb-cluster/tags/
-  image:
-    repository: "percona/percona-xtradb-cluster"
-    tag: "5.7.19"
-    pullPolicy: IfNotPresent
-
-  # Desired number of members of xtradb cluster
-  replicas: 1
-
-  ## Specify password for root user
-  ##
-  # mysqlRootPassword: not-a-secure-password
-
-  ## Specify password for xtradb backup user
-  ##
-  # xtraBackupPassword: replicate-my-data
-
-  ## Uncomment to create a database user
-  ##
-  mysqlUser: account_lookup
-  mysqlPassword: OdonPianoX
-
-  ## Allow unauthenticated access, uncomment to enable
-  ##
-  # mysqlAllowEmptyPassword: true
-
-  ## Uncomment to Create a database
-  ##
-  mysqlDatabase: account_lookup
-
-  ## hosts to allow root user access from
-  # set to "127.0.0.1" to deny remote root.
-  allowRootFrom: "%"
-
-  ## Persist data to a persitent volume
-  persistence:
-    enabled: false
-    ## percona data Persistent Volume Storage Class
-    ## If defined, storageClassName: <storageClass>
-    ## If set to "-", storageClassName: "", which disables dynamic provisioning
-    ## If undefined (the default) or set to null, no storageClassName spec is
-    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-    ##   GKE, AWS & OpenStack)
-    ##
-    # storageClass: "-"
-    accessMode: ReadWriteOnce
-    size: 8Gi
-
-  ## Node labels for pod assignment
-  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
-  ##
-  nodeSelector: {}
-
-  ## Pod annotations
-  ## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations: {}
-
-  ## Tolerations labels for pod assignment
-  ## Allow the scheduling on tainted nodes (requires Kubernetes >= 1.6)
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
-
-  ## Configure resource requests and limits
-  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-  ##
-  # resources:
-  #  requests:
-  #    memory: 256Mi
-  #    cpu: 100m
-
-  ## Configure the following values below if required
-  #   performance_schema=ON
-  #   max_connections=999
-  #   max_user_connections=999
-  #   thread_cache_size=999
-  configFiles:
-    node.cnf: |
-      [client]
-      default-character-set=utf8mb4
-
-      [mysql]
-      default-character-set=utf8mb4
-
-      [mysqld]
-      collation-server = utf8mb4_unicode_ci
-      init-connect='SET NAMES utf8mb4'
-      character-set-server = utf8mb4
-      datadir=/var/lib/mysql
-      default_storage_engine=InnoDB
-      binlog_format=ROW
-      innodb_flush_log_at_trx_commit  = 1
-      innodb_flush_method             = O_DIRECT
-      innodb_file_per_table           = 1
-      innodb_autoinc_lock_mode=2
-      bind_address = 0.0.0.0
-      wsrep_slave_threads=2
-      wsrep_cluster_address=gcomm://
-      wsrep_provider=/usr/lib/galera3/libgalera_smm.so
-      wsrep_cluster_name=galera
-      wsrep_sst_method=xtrabackup-v2
-      pxc_strict_mode=DISABLED
-      max_connections=999
-      max_user_connections=994
-      thread_cache_size=999
-  ## When set to true will create sidecar for `prom/mysqld-exporter`
-  ## metrics exporting
-  metricsExporter:
-    enabled: true
-    tag: v0.11.0
-    commandOverrides: []
-    argsOverrides: []
-
-  ## When set to true will create sidecar to tail mysql log
-  logTail: true
-
-  service:
-    type: ClusterIP
-    port: 3306
-    externalIPs: []
+  

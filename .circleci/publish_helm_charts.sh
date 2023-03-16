@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-LOCAL_HELM_MOJALOOP_REPO_URI=${HELM_MOJALOOP_REPO_URI:-'https://docs.mojaloop.io/helm/repo'}
+LOCAL_HELM_MOJALOOP_REPO_URI=${HELM_MOJALOOP_REPO_URI:-'https://mojaloop.github.io/charts/repo'}
 REVISION=${GITHUB_TAG:-$GIT_SHA1}
 WORKING_RELEASE_DIRECTORY=/tmp/release
 if [ -n ${GITHUB_TAG} ]; then

@@ -1,12 +1,11 @@
-{{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
 {{- $centralServicesHost := ( .Values.config.central_services_host | replace "$release_name" .Release.Name ) -}}
 {
-  "ADMIN_PORT":  {{ .Values.containers.admin.service.ports.api.port }},
-  "API_PORT":  {{ .Values.containers.api.service.ports.api.port }},
+  "ADMIN_PORT":  {{ .Values.service.internalPort }},
+  "API_PORT":  4002,
   "PROTOCOL_VERSIONS": {{ .Values.config.protocol_versions | toPrettyJson }},
   "DATABASE": {
     "DIALECT": "{{ .Values.config.db_driver }}",
-    "HOST": {{ $dbHost | quote }},
+    "HOST": {{ .Values.config.db_host | quote }},
     "PORT": {{ .Values.config.db_port }},
     "USER": "{{ .Values.config.db_user }}",
     "PASSWORD": "{{ .Values.config.db_password }}",

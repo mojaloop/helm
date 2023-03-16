@@ -1,30 +1,69 @@
 # Default values for ml-api-adapter.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-replicaCount: 1
 image:
+  registry: "docker.io"
   repository: mojaloop/ml-api-adapter
   tag: v14.0.0
-  command: '["node", "src/api/index.js"]'
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
-    ##
-#  imagePullSecrets:
-#    - name: myregistrykey
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
   pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## e.g:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
 
-    ## Pod scheduling preferences.
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+replicaCount: 1
+command: '["node", "src/api/index.js"]' 
+
+## Enable diagnostic mode in the deployment
+##
+diagnosticMode:
+  ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+  ##
+  enabled: false
+  ## @param diagnosticMode.command Command to override all containers in the deployment
+  ##
+  command: 
+    - node
+    - src/api/index.js
+  ## @param diagnosticMode.args Args to override all containers in the deployment
+  ##
+  args:
+    - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+  
+  ## @param diagnosticMode.debug config to override all debug information
+  ##
+  debug:
+    internalPort: 9229
+    port: 9229
+
+## Pod scheduling preferences.
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 affinity: {}
 
-    ## Node labels for pod assignment
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+## Node labels for pod assignment
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
 nodeSelector: {}
 
-    ## Set toleration for scheduler
-    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+## Set toleration for scheduler
+## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
+
+## Configure Container Security Context
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+## @param containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+##
+containerSecurityContext:
+  enabled: true
+  runAsUser: 1001
 
 sidecar:
   enabled: true
@@ -55,21 +94,36 @@ sidecar:
     log_level: info
     log_filter: 'error, warn, info'
 
-init:
-  enabled: true
-  image:
-    name: wait-for-kafka
-    repository: solsson/kafka
-    tag: 2.8.1
-    pullPolicy: IfNotPresent
-    command: "until ./bin/kafka-broker-api-versions.sh --bootstrap-server $kafka_host:$kafka_port; do echo waiting for Kafka; sleep 2; done;"
-    env: {}
-    ## Env example
-    # env:
-    #   envItem1:
-    #     name: hello
-    #     value: world
-    #
+## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+## e.g:
+## initContainers:
+##  - name: your-image-name
+##    image: your-image
+##    imagePullPolicy: Always
+##    command: ['sh', '-c', 'echo "hello world"']
+##
+# initContainers: []
+initContainers:
+  - name: wait-for-kafka
+    image: solsson/kafka:2.8.1
+    imagePullPolicy: IfNotPresent
+    command:
+      - sh
+      - -c
+      - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+        do
+          echo --------------------;
+          echo Waiting for Kafka...;
+          sleep 2; 
+        done;
+        echo ====================; 
+        echo Kafka ok!;
+    env:
+      - name: KAFKA_HOST
+        value: '{{ .Values.config.kafka_host }}'
+      - name: KAFKA_PORT
+        value: '{{ .Values.config.kafka_port }}'
 
 readinessProbe:
   enabled: true
@@ -77,6 +131,7 @@ readinessProbe:
     path: /health
   initialDelaySeconds: 120
   periodSeconds: 15
+
 livenessProbe:
   enabled: true
   httpGet:
@@ -85,6 +140,7 @@ livenessProbe:
   periodSeconds: 15
 
     ## metric configuration for prometheus instrumentation
+
 metrics:
   ## flag to enable/disable the metrics end-points
   enabled: true
@@ -96,7 +152,7 @@ metrics:
 
 config:
   # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-  kafka_host: '$release_name-kafka'
+  kafka_host: kafka
   kafka_port: 9092
   kafka_partitioner: 'murmur2_random'
   central_services_host: '$release_name-centralledger-service'
@@ -110,23 +166,24 @@ config:
   # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
   # and for generating requests/callbacks from the Switch itself (DEFAULT value)
   protocol_versions: {
-    "CONTENT": {
-        "DEFAULT": "1.1",
-        "VALIDATELIST": [
-            "1",
-            "1.0",
-            "1.1"
-        ]
-    },
-    "ACCEPT": {
-        "DEFAULT": "1",
-        "VALIDATELIST": [
-            "1",
-            "1.0",
-            "1.1"
-        ]
+        "CONTENT": {
+            "DEFAULT": "1.1",
+            "VALIDATELIST": [
+                "1",
+                "1.0",
+                "1.1"
+            ]
+        },
+        "ACCEPT": {
+            "DEFAULT": "1",
+            "VALIDATELIST": [
+                "1",
+                "1.0",
+                "1.1"
+            ]
+        }
     }
-}
+
   ## Log Configuration
   log_level: info
   log_filter: 'error, warn, info'
@@ -152,66 +209,103 @@ config:
     truncate_extensions: true
 
 service:
-  type: ClusterIP
-  externalPort: 80
   internalPort: 3000
+  ## @param service.type %%MAIN_CONTAINER_NAME%% service type
+  ##
+  type: ClusterIP
+  ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
+  ##
+  port: 80
+  ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+  ## e.g.:
+  ## clusterIP: None
+  ##
+  clusterIP:
+  ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+  ##
+  loadBalancerIP:
+  ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+  ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+  ## e.g:
+  ## loadBalancerSourceRanges:
+  ##   - 10.10.10.0/24
+  ##
+  loadBalancerSourceRanges: []
+  ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
+  ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  ##
+  externalTrafficPolicy: Cluster
+  ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
+  ##
+  annotations: {}
+  ## @param master.service.sessionAffinity Session Affinity for Kubernetes service, can be "None" or "ClientIP"
+  ## If "ClientIP", consecutive client requests will be directed to the same Pod
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+  ##
+  sessionAffinity: None
+  ## @param master.service.sessionAffinityConfig Additional settings for the sessionAffinity
+  ## sessionAffinityConfig:
+  ##   clientIP:
+  ##     timeoutSeconds: 300
+  ##
+  sessionAffinityConfig: {}
 
 ingress:
   enabled: true
-    ## @param ingress.pathType Ingress path type
-    ##
+  ## @param ingress.pathType Ingress path type
+  ##
   pathType: ImplementationSpecific
-    ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
-    ##
+  ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+  ##
   apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
-    ##
+  ## @param ingress.hostname Default host for the ingress record
+  ##
   hostname: ml-api-adapter.local
-    ## @param servicePort : port for the service
-    ##
+  ## @param servicePort : port for the service
+  ##
   servicePort: 80
-    ## @param ingress.path Default path for the ingress record
-    ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+  ## @param ingress.path Default path for the ingress record
+  ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
   path: /
-    ## @param ingress.annotations Additional custom annotations for the ingress record
-    ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
-    ##
+  ## @param ingress.annotations Additional custom annotations for the ingress record
+  ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+  ##
   annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
-    ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
-    ## You can:
-    ##   - Use the `ingress.secrets` parameter to create this TLS secret
-    ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
-    ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
-    ##
+  ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+  ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+  ## You can:
+  ##   - Use the `ingress.secrets` parameter to create this TLS secret
+  ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+  ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+  ##
   tls: false
-    ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
-    ##
+  ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+  ##
   certManager: false
-    ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
-    ##
+  ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+  ##
   selfSigned: false
-    ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
-    ## e.g:
-    ## extraHosts:
-    ##   - name: transfer-api-svc.local
-    ##     path: /
-    ##
+  ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+  ## e.g:
+  ## extraHosts:
+  ##   - name: transfer-api-svc.local
+  ##     path: /
+  ##
   extraHosts:
   extraPaths:
   extraTls:
   secrets:
   className: "nginx"
-  ##
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
 
+# We usually recommend not to specify default resources and to leave this as a conscious
+# choice for the user. This also increases chances charts run on environments with little
+# resources, such as Minikube. If you do want to specify resources, uncomment the following
+# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+# limits:
+#  cpu: 100m
+#  memory: 128Mi
+# requests:
+#  cpu: 100m
+#  memory: 128Mi
+resources: {}

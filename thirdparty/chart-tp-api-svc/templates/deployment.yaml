@@ -2,9 +2,17 @@
 apiVersion: {{ template "apiVersion.Deployment" . }}
 kind: Deployment
 metadata:
-  name: {{ include "tp-api-svc.name" . }}
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
   labels:
-    {{- include "tp-api-svc.labels" . | nindent 4 }}
+    {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: {{ .Chart.Name }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
@@ -12,12 +20,17 @@ spec:
     rollingUpdate:
       maxSurge: 1
   selector:
-    matchLabels:
-      {{- include "tp-api-svc.selectorLabels" . | nindent 6 }}
+    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: {{ .Chart.Name }}
   template:
     metadata:
       labels:
-        {{- include "tp-api-svc.labels" . | nindent 8 }}
+        {{- include "common.labels.standard" . | nindent 8 }}
+        app.kubernetes.io/component: {{ .Chart.Name }}
+        app.kubernetes.io/version: {{ .Chart.Version }}
+        {{- if .Values.podLabels }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.podLabels "context" $) | nindent 8 }}
+        {{- end }}
     spec:
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -31,15 +44,42 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      initContainers:
+        {{- if .Values.initContainers }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
+        {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" $) | nindent 6 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          command: {{ .Values.image.command }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.internalPort }}
+            {{- if .Values.diagnosticMode.enabled }}
+            - name: debug
+              containerPort: {{ .Values.diagnosticMode.debug.internalPort }}
+            {{- end }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
               path: {{ .Values.readinessProbe.httpGet.path }}
-              port: {{ .Values.service.ports.internalPort }}
+              port: {{ .Values.service.internalPort }}
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
           {{- end }}
@@ -47,23 +87,23 @@ spec:
           livenessProbe:
             httpGet:
               path: {{ .Values.livenessProbe.httpGet.path }}
-              port: {{ .Values.service.ports.internalPort }}
+              port: {{ .Values.service.internalPort }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
-          volumeMounts:
-            - name: tp-api-svc-config-volume
-              mountPath: /opt/app/dist/config/default.json
-              subPath: default.json
           env:
           {{- range $envItem := .Values.env }}
             - name: {{ $envItem.name }}
               value: {{ $envItem.value }}
           {{- end }}
+          volumeMounts:
+            - name: tp-api-svc-config-volume
+              mountPath: /opt/app/dist/config/default.json
+              subPath: default.json
       volumes:
         - name: tp-api-svc-config-volume
           configMap:
-            name: tp-api-svc-config
+            name: {{ template "common.names.fullname" . }}-config
             items:
               - key: default.json
                 path: default.json

@@ -286,7 +286,7 @@ containerSecurityContext:
 image:
   registry: docker.io
   repository: mojaloop/sdk-scheme-adapter
-  tag: v21.4.0
+  tag: v22.0.1
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -300,9 +300,6 @@ image:
   ##   - myRegistryKeySecretName
   ##
   pullSecrets: []
-  ## Enable debug mode
-  ##
-  debug: false
 
 replicaCount: 1
 command:
@@ -441,17 +438,6 @@ service:
   ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
   ##
   port: 80
-  ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
-  ##
-  httpsPort: 443
-  ## Node ports to expose
-  ## @param service.nodePorts.http Node port for HTTP
-  ## @param service.nodePorts.https Node port for HTTPS
-  ## NOTE: choose port between <30000-32767>
-  ##
-  nodePorts:
-    http:
-    https:
   ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
   ## e.g.:
   ## clusterIP: None
@@ -475,6 +461,17 @@ service:
   ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
   ##
   annotations: {}
+  ## @param master.service.sessionAffinity Session Affinity for Kubernetes service, can be "None" or "ClientIP"
+  ## If "ClientIP", consecutive client requests will be directed to the same Pod
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+  ##
+  sessionAffinity: None
+  ## @param master.service.sessionAffinityConfig Additional settings for the sessionAffinity
+  ## sessionAffinityConfig:
+  ##   clientIP:
+  ##     timeoutSeconds: 300
+  ##
+  sessionAffinityConfig: {}
 
 ingress:
   ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%

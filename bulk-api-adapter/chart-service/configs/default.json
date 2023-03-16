@@ -1,6 +1,6 @@
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
 {{- $centralServicesHost := ( .Values.config.central_services_host | replace "$release_name" .Release.Name ) -}}
-{{- $objStoreUri := ( .Values.config.objstore_uri | replace "$release_name" .Release.Name ) -}}
+{{- $mongoHost := ( .Values.config.mongo_host | replace "$release_name" .Release.Name ) -}}
 {
   "PORT": {{ .Values.service.internalPort }},
   "HOSTNAME": "{{ .Values.ingress.hostname }}",
@@ -12,7 +12,11 @@
     "generateTimeout": 30000
   },
   "MONGODB": {
-    "URI": {{ (default .Values.config.objstore_uri $objStoreUri) | quote }}
+    "HOST": "{{ $mongoHost }}",
+    "PORT": "{{ .Values.config.mongo_port }}",
+    "USER": "{{ .Values.config.mongo_user }}",
+    "PASSWORD": "{{ .Values.config.mongo_password }}",
+    "DATABASE": "{{ .Values.config.mongo_database }}"
   },
   "ENDPOINT_SECURITY": {
     "TLS": {

@@ -5,6 +5,7 @@ Date | Revision | Description
  2022-07-29 | 0 | Initial release
  2022-09-01 | 1 | Updates for init-containers [mojaloop/#2909](https://github.com/mojaloop/project/issues/2909)
  2022-09-08 | 2 | Updates for [mojaloop/#2734](https://github.com/mojaloop/project/issues/2734), [mojaloop/#2880](https://github.com/mojaloop/project/issues/2880)
+ 2023-03-15 | 0 | Updated Known Issues with [mojaloop/#3163](https://github.com/mojaloop/project/issues/3163)
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
@@ -258,6 +259,7 @@ More information can be found here:
     2. [#2734 - Failures in daily cron job running GP tests](https://github.com/mojaloop/project/issues/2734)
     3. [#2845 - QA: Replace Legacy-Simulator as a NORESPONSE_SIMPAYEE in Testing-Toolkit Goden Path Test-Suite](https://github.com/mojaloop/project/issues/2845)
     4. [#2846 - QA: Mojaloop TTK GP Test Collections to reset available liquidity after each run](https://github.com/mojaloop/project/issues/2846)
+7. [#3163 - Thirdparty Helm Charts are not scalable due to the Kubernetes Service being a headless service](https://github.com/mojaloop/project/issues/3163)
 
 ## 9. Contributors
 
