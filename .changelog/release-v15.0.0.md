@@ -117,15 +117,15 @@ Date | Revision | Description
      - Auth-Service for MySQL. (Ref: [auth-service/pull/132](https://github.com/mojaloop/auth-service/pull/132))
 4. Several ML-Testing-Toolkit Backend Dependencies are no longer needed as the associated functionality has been deprecated
      - removed deprecated dependencies: Keycloak, Connection-Manager
-5. Migrations `tableName` for the Thirdparty Auth-Svc has changed from `auth-svc` to `migration` for consistency. If you have an existing migrated/seeded database, ensure that you rename this table to `migration` or otherwise manually customize the values.yaml to use `"tableName": "auth-svc",` instead of `"tableName": "migration"`.
+5. Migrations `tableName` for the Thirdparty Auth-Svc has changed from `auth-svc` to `migration` for consistency. If you have an existing migrated/seeded database, ensure that you rename this table to `migration` or otherwise manually customize your configuration ([values.yaml](../mojaloop/values.yaml)) to use `"tableName": "auth-svc",` instead of `"tableName": "migration"`.
 6. Thirdparty Kubernetes Services ports were standardized to port `80` for the following components: `tp-api-svc`, `auth-svc` & `consent-oracle`.
-7. When upgrading from v14.x release, the following Thirdparty Kubernetes Services are incorrectly deployed as a [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services):
+7. The following Thirdparty Kubernetes Services are incorrectly deployed as a [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) in v14.x releases:
 
     1. `tp-api-svc`
     2. `auth-svc`
     3. `consent-oracle`
 
-    [Headless services](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) cannot be used for load-balancing purposes, and thus we would not be able to access these components if scaled out.
+    [Headless services](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) cannot be used for load-balancing purposes, and thus the service would be unavailable if scaled-up.
 
     *NOTE: This DOES not impact new installations!*
 
@@ -139,8 +139,7 @@ Date | Revision | Description
     Alternatively, you can execute the following commands in your terminal or save it to a bash script, and ensure you update the exported env variables prior to execution:
 
     - `SERVICE_NS` - Namespace of the deployment
-    - `HELM_NAME` - Helm installation name
-    - `SERVICE_NAME` - Name of the Service to be re-created. Remove the `$HELM_NAME-` prefix if not required.
+    - `SERVICE_NAME` - Name of the Service to be re-created. If you are running this against v14.x or earlier, no change is necessary.
 
     Pre-requisites:
 
@@ -151,22 +150,21 @@ Date | Revision | Description
 
     ```bash
     export SERVICE_NS="<NAMESPACE>";
-    export HELM_NAME="<HELM INSTALL NAME>";
 
-    export SERVICE_NAME="$HELM_NAME-tp-api-svc"; \
-    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME for Helm install $HELM_NAME"; \
+    export SERVICE_NAME="tp-api-svc"; \
+    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME"; \
     export K8_DESCRIPTOR=$(kubectl -n $SERVICE_NS get svc/$SERVICE_NAME -o json | jq 'del(.spec.clusterIP) | del(.spec.clusterIPs)') && \
     kubectl -n $SERVICE_NS delete svc/$SERVICE_NAME && \
     echo $K8_DESCRIPTOR | kubectl create --save-config -f -;
 
-    export SERVICE_NAME="$HELM_NAME-auth-svc"; \
-    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME for Helm install $HELM_NAME"; \
+    export SERVICE_NAME="auth-svc"; \
+    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME"; \
     export K8_DESCRIPTOR=$(kubectl -n $SERVICE_NS get svc/$SERVICE_NAME -o json | jq 'del(.spec.clusterIP) | del(.spec.clusterIPs)') && \
     kubectl -n $SERVICE_NS delete svc/$SERVICE_NAME && \
     echo $K8_DESCRIPTOR | kubectl create --save-config -f -;
 
-    export SERVICE_NAME="$HELM_NAME-consent-oracle"; \
-    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME for Helm install $HELM_NAME"; \
+    export SERVICE_NAME="consent-oracle"; \
+    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME"; \
     export K8_DESCRIPTOR=$(kubectl -n $SERVICE_NS get svc/$SERVICE_NAME -o json | jq 'del(.spec.clusterIP) | del(.spec.clusterIPs)') && \
     kubectl -n $SERVICE_NS delete svc/$SERVICE_NAME && \
     echo $K8_DESCRIPTOR | kubectl create --save-config -f -;
