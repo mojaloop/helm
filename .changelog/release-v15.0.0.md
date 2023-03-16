@@ -103,23 +103,41 @@ Date | Revision | Description
 ## 5. Breaking changes
 
 1. Backend dependencies have been externalized, see [deploying-backend-dependencies](../README.md#deploying-backend-dependencies) for an example on how to deploy backend dependencies, and refer to the [upgrade-strategy-guide](https://docs.mojaloop.io/legacy/deployment-guide/upgrade-strategy-guide.html) for best practices on deployment topologies.
-2. Charts have been re-factored for consistency, which will impact the following value configs. These are not necessarily breaking changes, but you will need to ensure any customized values files are updated to reflect these changes:
+2. The `central-event-processor` and `email-notifier` services are no longer packaged as part of the main Mojaloop Helm chart, but can be deployed independently:
+
+   1. `central-event-processor` - Refer to [centraleventprocessor/values.yaml](../centraleventprocessor/values.yaml) for configuration options.
+
+        Use the following command for deployment:
+
+        ```bash
+        helm -n <NAMESPACE> install mojaloop/centraleventprocessor -v <VERSION> -f <CUSTOMIZED_VALUES.yaml>
+        ```
+
+   2. `email-notifier` - Refer to [emailnotifier/values.yaml](../emailnotifier/values.yaml) for configuration options.
+
+        Use the following command for deployment:
+
+        ```bash
+        helm -n <NAMESPACE> install mojaloop/emailnotifier -v <VERSION> -f <CUSTOMIZED_VALUES.yaml>
+        ```
+
+3. Charts have been re-factored for consistency, which will impact the following value configs. These are not necessarily breaking changes, but you will need to ensure any customized values files are updated to reflect these changes:
     - Image, Command definitions have been made consistent, with added "debug" added.
     - InitContainers definitions have been made consistent.
     - Service definitions have been made consistent.
     - "config" and "config_files" are being used for consistency. This mainly impacts ML-Testing-Toolkit-Backend and ThirdParty Services.
         - "config" is used for general configurations.
         - "config_files" are used for actual config files as per the name.
-3. The following services no longer support a "Connection URL" for backend configurations to support Password Injection via Env Vars. You will now explicitly configure the Host, User, Pass, DB, Port, etc instead.
+4. The following services no longer support a "Connection URL" for backend configurations to support Password Injection via Env Vars. You will now explicitly configure the Host, User, Pass, DB, Port, etc instead.
      - Central-Ledger for MongoDB. (Ref: [central-ledger/pull/945](https://github.com/mojaloop/central-ledger/pull/945))
      - Bulk-API-Adapter for MongoDB. (Ref: [bulk-api-adapter/pull/95](https://github.com/mojaloop/bulk-api-adapter/pull/95))
      - ML-Testing-Toolkit-Backend for MongoDB. (Ref: [ml-testing-toolkit/pull/237](https://github.com/mojaloop/ml-testing-toolkit/pull/237))
      - Auth-Service for MySQL. (Ref: [auth-service/pull/132](https://github.com/mojaloop/auth-service/pull/132))
-4. Several ML-Testing-Toolkit Backend Dependencies are no longer needed as the associated functionality has been deprecated
+5. Several ML-Testing-Toolkit Backend Dependencies are no longer needed as the associated functionality has been deprecated
      - removed deprecated dependencies: Keycloak, Connection-Manager
-5. Migrations `tableName` for the Thirdparty Auth-Svc has changed from `auth-svc` to `migration` for consistency. If you have an existing migrated/seeded database, ensure that you rename this table to `migration` or otherwise manually customize your configuration ([values.yaml](../mojaloop/values.yaml)) to use `"tableName": "auth-svc",` instead of `"tableName": "migration"`.
-6. Thirdparty Kubernetes Services ports were standardized to port `80` for the following components: `tp-api-svc`, `auth-svc` & `consent-oracle`.
-7. The following Thirdparty Kubernetes Services are incorrectly deployed as a [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) in v14.x releases:
+6. Migrations `tableName` for the Thirdparty Auth-Svc has changed from `auth-svc` to `migration` for consistency. If you have an existing migrated/seeded database, ensure that you rename this table to `migration` or otherwise manually customize your configuration ([values.yaml](../mojaloop/values.yaml)) to use `"tableName": "auth-svc",` instead of `"tableName": "migration"`.
+7. Thirdparty Kubernetes Services ports were standardized to port `80` for the following components: `tp-api-svc`, `auth-svc` & `consent-oracle`.
+8. The following Thirdparty Kubernetes Services are incorrectly deployed as a [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) in v14.x releases:
 
     1. `tp-api-svc`
     2. `auth-svc`
