@@ -136,7 +136,9 @@ Date | Revision | Description
 
     *NOTE: Modifying the existing Kubernetes definition will NOT take effect, thus the need to completely re-create the Kubernetes service by deleting it and then creating it!*
 
-    Alternatively, you can execute the following commands in your terminal or save it to a bash script, and ensure you update the exported env variables prior to execution:
+    Alternatively, you can execute the following commands against your existing v14.x deployment - copy and paste them in to your terminal or save them to an executable bash script.
+
+    Ensure you update the exported env variables prior to execution:
 
     - `SERVICE_NS` - Namespace of the deployment
     - `SERVICE_NAME` - Name of the Service to be re-created. If you are running this against v14.x or earlier, no change is necessary.
