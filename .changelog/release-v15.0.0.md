@@ -103,29 +103,57 @@ Date | Revision | Description
 ## 5. Breaking changes
 
 1. Backend dependencies have been externalized, see [deploying-backend-dependencies](../README.md#deploying-backend-dependencies) for an example on how to deploy backend dependencies, and refer to the [upgrade-strategy-guide](https://docs.mojaloop.io/legacy/deployment-guide/upgrade-strategy-guide.html) for best practices on deployment topologies.
-2. Charts have been re-factored for consistency, which will impact the following value configs. These are not necessarily breaking changes, but you will need to ensure any customized values files are updated to reflect these changes:
+2. The `central-event-processor` and `email-notifier` services are no longer packaged as part of the main Mojaloop Helm chart, but can be deployed independently:
+
+   1. `central-event-processor` - Refer to [centraleventprocessor/values.yaml](../centraleventprocessor/values.yaml) for configuration options.
+
+        Pre-requisites:
+
+        - The `central-event-processor` has a dependency on a `MongoDB` datastore.
+        - Refer to [example-mojaloop-backend](../example-mojaloop-backend/README.md) for an example on how to deploy this dependency. This can be enabled in the [example-mojaloop-backend/values.yaml](../example-mojaloop-backend/values.yaml)  by setting `cep-mongodb.enabled` to `true`.
+
+        Use the following command to deploy `central-event-processor` :
+
+        ```bash
+        helm -n <NAMESPACE> install mojaloop/centraleventprocessor -v <VERSION> -f <CUSTOMIZED_VALUES.yaml>
+        ```
+
+   2. `email-notifier` - Refer to [emailnotifier/values.yaml](../emailnotifier/values.yaml) for configuration options.
+
+        Pre-requisites:
+
+        - The `email-notifier` has a dependency on a `Kafka`.
+        - Refer to [example-mojaloop-backend](../example-mojaloop-backend/README.md) for an example on how to deploy this dependency. This can be enabled in the [example-mojaloop-backend/values.yaml](../example-mojaloop-backend/values.yaml)  by setting `kafka.enabled` to `true`.
+
+        Use the following command to deploy `email-notifier`:
+
+        ```bash
+        helm -n <NAMESPACE> install mojaloop/emailnotifier -v <VERSION> -f <CUSTOMIZED_VALUES.yaml>
+        ```
+
+3. Charts have been re-factored for consistency, which will impact the following value configs. These are not necessarily breaking changes, but you will need to ensure any customized values files are updated to reflect these changes:
     - Image, Command definitions have been made consistent, with added "debug" added.
     - InitContainers definitions have been made consistent.
     - Service definitions have been made consistent.
     - "config" and "config_files" are being used for consistency. This mainly impacts ML-Testing-Toolkit-Backend and ThirdParty Services.
         - "config" is used for general configurations.
         - "config_files" are used for actual config files as per the name.
-3. The following services no longer support a "Connection URL" for backend configurations to support Password Injection via Env Vars. You will now explicitly configure the Host, User, Pass, DB, Port, etc instead.
+4. The following services no longer support a "Connection URL" for backend configurations to support Password Injection via Env Vars. You will now explicitly configure the Host, User, Pass, DB, Port, etc instead.
      - Central-Ledger for MongoDB. (Ref: [central-ledger/pull/945](https://github.com/mojaloop/central-ledger/pull/945))
      - Bulk-API-Adapter for MongoDB. (Ref: [bulk-api-adapter/pull/95](https://github.com/mojaloop/bulk-api-adapter/pull/95))
      - ML-Testing-Toolkit-Backend for MongoDB. (Ref: [ml-testing-toolkit/pull/237](https://github.com/mojaloop/ml-testing-toolkit/pull/237))
      - Auth-Service for MySQL. (Ref: [auth-service/pull/132](https://github.com/mojaloop/auth-service/pull/132))
-4. Several ML-Testing-Toolkit Backend Dependencies are no longer needed as the associated functionality has been deprecated
+5. Several ML-Testing-Toolkit Backend Dependencies are no longer needed as the associated functionality has been deprecated
      - removed deprecated dependencies: Keycloak, Connection-Manager
-5. Migrations `tableName` for the Thirdparty Auth-Svc has changed from `auth-svc` to `migration` for consistency. If you have an existing migrated/seeded database, ensure that you rename this table to `migration` or otherwise manually customize the values.yaml to use `"tableName": "auth-svc",` instead of `"tableName": "migration"`.
-6. Thirdparty Kubernetes Services ports were standardized to port `80` for the following components: `tp-api-svc`, `auth-svc` & `consent-oracle`.
-7. When upgrading from v14.x release, the following Thirdparty Kubernetes Services are incorrectly deployed as a [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services):
+6. Migrations `tableName` for the Thirdparty Auth-Svc has changed from `auth-svc` to `migration` for consistency. If you have an existing migrated/seeded database, ensure that you rename this table to `migration` or otherwise manually customize your configuration ([values.yaml](../mojaloop/values.yaml)) to use `"tableName": "auth-svc",` instead of `"tableName": "migration"`.
+7. Thirdparty Kubernetes Services ports were standardized to port `80` for the following components: `tp-api-svc`, `auth-svc` & `consent-oracle`.
+8. The following Thirdparty Kubernetes Services are incorrectly deployed as a [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) in v14.x releases:
 
     1. `tp-api-svc`
     2. `auth-svc`
     3. `consent-oracle`
 
-    [Headless services](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) cannot be used for load-balancing purposes, and thus we would not be able to access these components if scaled out.
+    [Headless services](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) cannot be used for load-balancing purposes, and thus the service would be unavailable if scaled-up.
 
     *NOTE: This DOES not impact new installations!*
 
@@ -136,11 +164,12 @@ Date | Revision | Description
 
     *NOTE: Modifying the existing Kubernetes definition will NOT take effect, thus the need to completely re-create the Kubernetes service by deleting it and then creating it!*
 
-    Alternatively, you can execute the following commands in your terminal or save it to a bash script, and ensure you update the exported env variables prior to execution:
+    Alternatively, you can execute the following commands against your existing v14.x deployment - copy and paste them in to your terminal or save them to an executable bash script.
+
+    Ensure you update the exported env variables prior to execution:
 
     - `SERVICE_NS` - Namespace of the deployment
-    - `HELM_NAME` - Helm installation name
-    - `SERVICE_NAME` - Name of the Service to be re-created. Remove the `$HELM_NAME-` prefix if not required.
+    - `SERVICE_NAME` - Name of the Service to be re-created. If you are running this against v14.x or earlier, no change is necessary.
 
     Pre-requisites:
 
@@ -151,22 +180,21 @@ Date | Revision | Description
 
     ```bash
     export SERVICE_NS="<NAMESPACE>";
-    export HELM_NAME="<HELM INSTALL NAME>";
 
-    export SERVICE_NAME="$HELM_NAME-tp-api-svc"; \
-    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME for Helm install $HELM_NAME"; \
+    export SERVICE_NAME="tp-api-svc"; \
+    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME"; \
     export K8_DESCRIPTOR=$(kubectl -n $SERVICE_NS get svc/$SERVICE_NAME -o json | jq 'del(.spec.clusterIP) | del(.spec.clusterIPs)') && \
     kubectl -n $SERVICE_NS delete svc/$SERVICE_NAME && \
     echo $K8_DESCRIPTOR | kubectl create --save-config -f -;
 
-    export SERVICE_NAME="$HELM_NAME-auth-svc"; \
-    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME for Helm install $HELM_NAME"; \
+    export SERVICE_NAME="auth-svc"; \
+    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME"; \
     export K8_DESCRIPTOR=$(kubectl -n $SERVICE_NS get svc/$SERVICE_NAME -o json | jq 'del(.spec.clusterIP) | del(.spec.clusterIPs)') && \
     kubectl -n $SERVICE_NS delete svc/$SERVICE_NAME && \
     echo $K8_DESCRIPTOR | kubectl create --save-config -f -;
 
-    export SERVICE_NAME="$HELM_NAME-consent-oracle"; \
-    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME for Helm install $HELM_NAME"; \
+    export SERVICE_NAME="consent-oracle"; \
+    echo "Re-creating the $SERVICE_NS/$SERVICE_NAME"; \
     export K8_DESCRIPTOR=$(kubectl -n $SERVICE_NS get svc/$SERVICE_NAME -o json | jq 'del(.spec.clusterIP) | del(.spec.clusterIPs)') && \
     kubectl -n $SERVICE_NS delete svc/$SERVICE_NAME && \
     echo $K8_DESCRIPTOR | kubectl create --save-config -f -;
