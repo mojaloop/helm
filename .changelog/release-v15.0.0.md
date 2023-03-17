@@ -25,6 +25,8 @@ Date | Revision | Description
 14. **mojaloop/#3053:** update sdk backend api ([mojaloop-simulator/issues/#159](https://github.com/mojaloop/mojaloop-simulator/issues/159)) ([mojaloop-simulator/commit/165e08a](https://github.com/mojaloop/mojaloop-simulator/commit/165e08ac10e5dbf119b917e443b628f9ace5279e)), closes [mojaloop/#3053](https://github.com/mojaloop/mojaloop-simulator/issues/3053) [mojaloop/#3053](https://github.com/mojaloop/mojaloop-simulator/issues/3053)
 15. **mojaloop/#2740:** add test currencies to api ([mojaloop-simulator/issues/#154](https://github.com/mojaloop/mojaloop-simulator/issues/154)) ([mojaloop-simulator/commit/64c80a1](https://github.com/mojaloop/mojaloop-simulator/commit/64c80a12559276da74617b6cdeff5a27e10c9e81)), closes [mojaloop/#2740](https://github.com/mojaloop/mojaloop-simulator/issues/2740)
 16. **mojaloop/#3130**: alter db config and allow password env setting ([ml-testing-toolkit/pull/237](https://github.com/mojaloop/ml-testing-toolkit/pull/237)), closes [mojaloop/#3130](https://github.com/mojaloop/project/issues/3130)
+17. **mojaloop/#3133** add report name customization and saving option ([ml-testing-toolkit-ui/pull/171](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/171)), closes [mojaloop/#3133](https://github.com/mojaloop/project/issues/3133)
+18. **mojaloop/#3133** add option to specify report name saved to TTK backend ([ml-testing-toolkit-client-lib/pull/6](https://github.com/mojaloop/ml-testing-toolkit-client-lib/pull/6)), closes [mojaloop/#3133](https://github.com/mojaloop/project/issues/3133)
 
 ## 2. Bug Fixes
 
@@ -64,8 +66,8 @@ Date | Revision | Description
 18. mojaloop-simulator: v13.0.1 -> **v14.0.1** ([Compare](https://github.com/mojaloop/mojaloop-simulator/compare/v13.0.1...v14.0.1))
 19. sdk-scheme-adapter: v21.4.0 -> **v22.0.1** ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v21.4.0...v22.0.1))
 20. ml-testing-toolkit: v15.7.0 -> **v16.0.0** ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v16.0.0))
-21. ml-testing-toolkit-ui: **v15.1.3**
-22. ml-testing-toolkit-client-lib: **v1.1.1**
+21. ml-testing-toolkit-ui: v15.1.3 -> **v15.2.1** ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.1.3...v15.2.1))
+22. ml-testing-toolkit-client-lib: v1.1.1 -> **v1.2.0** ([Compare](https://github.com/mojaloop/ml-testing-toolkit-client-lib/compare/v1.1.1...v1.2.0))
 23. auth-service: v13.0.2 -> **v14.0.0** ([Compare](https://github.com/mojaloop/auth-service/compare/v13.0.2...v14.0.0))
 24. als-consent-oracle: **v0.2.0**
 25. thirdparty-api-svc: **v13.0.2**
@@ -93,8 +95,8 @@ Date | Revision | Description
 18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v14.0.1
 19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v22.0.1
 20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v16.0.0
-21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.1.3
-22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.1.1
+21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.2.1
+22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.2.0
 23. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v14.0.0
 24. als-consent-oracle - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.0
 25. thirdparty-api-svc - https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v13.0.2
