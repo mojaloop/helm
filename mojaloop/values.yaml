@@ -62,7 +62,7 @@ CONFIG:
   tp_auth_svc_db_user: &TP_AUTH_SVC_DB_USER "auth_svc"
   tp_auth_svc_redis_host: &TP_AUTH_SVC_REDIS_HOST auth-svc-redis-master
   tp_auth_svc_redis_port: &TP_AUTH_SVC_REDIS_PORT 6379
-  
+
   ## THIRDPARTY ALS_CONSENT-SVC BACKEND
   tp_als_consent_svc_db_name: &TP_ALS_CONSENT_SVC_DB_NAME "consent_oracle"
   tp_als_consent_svc_db_password: &TP_ALS_CONSENT_SVC_DB_PASSWORD ""
@@ -293,9 +293,9 @@ account-lookup-service:
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -632,13 +632,13 @@ account-lookup-service:
           - sh
           - -c
           - |
-            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ;
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -841,14 +841,14 @@ account-lookup-service:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - /opt/app/src/index.js
       ## @param diagnosticMode.args Args to override all containers in the deployment
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -1037,13 +1037,13 @@ account-lookup-service:
           - sh
           - -c
           - |
-            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ;
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -1072,7 +1072,7 @@ account-lookup-service:
           - |
             echo Running MySQL init scripts;
             mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -e "SET @service_name='${SERVICE_NAME}'; source /opt/app/init-central-ledger.sql;";
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -1101,13 +1101,13 @@ account-lookup-service:
           - sh
           - -c
           - |
-            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ;
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -1136,7 +1136,7 @@ account-lookup-service:
           - |
             echo Running MySQL init scripts;
             mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -e "SET @service_name='${SERVICE_NAME}'; source /opt/app/init-account-lookup.sql;";
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -1238,7 +1238,7 @@ account-lookup-service:
 
 quoting-service:
   enabled: true
-  
+
   # Declare variables to be passed into your templates.
   image:
     registry: "docker.io"
@@ -1259,7 +1259,7 @@ quoting-service:
     pullSecrets: []
 
   replicaCount: 1
-  command: '["node", "src/index.js"]' 
+  command: '["node", "src/index.js"]'
 
   readinessProbe:
     enabled: true
@@ -1431,9 +1431,9 @@ quoting-service:
           do
             echo --------------------;
             echo Waiting for MySQL...;
-            sleep 2; 
+            sleep 2;
           done;
-          echo ====================; 
+          echo ====================;
           echo MySQL ok!;
       env:
         - name: DB_HOST
@@ -1594,7 +1594,7 @@ ml-api-adapter:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/api/index.js"]' 
+    command: '["node", "src/api/index.js"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -1604,14 +1604,14 @@ ml-api-adapter:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - src/api/index.js
       ## @param diagnosticMode.args Args to override all containers in the deployment
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -1664,13 +1664,13 @@ ml-api-adapter:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
             do
               echo --------------------;
               echo Waiting for Kafka...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo Kafka ok!;
         env:
           - name: KAFKA_HOST
@@ -1882,7 +1882,7 @@ ml-api-adapter:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - src/handlers/index.js
         - handler
@@ -1891,7 +1891,7 @@ ml-api-adapter:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -1944,13 +1944,13 @@ ml-api-adapter:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
             do
               echo --------------------;
               echo Waiting for Kafka...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo Kafka ok!;
         env:
           - name: KAFKA_HOST
@@ -2214,7 +2214,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/api/index.js"]' 
+    command: '["node", "src/api/index.js"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -2224,14 +2224,14 @@ centralledger:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - src/api/index.js
       ## @param diagnosticMode.args Args to override all containers in the deployment
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -2362,13 +2362,13 @@ centralledger:
           - sh
           - -c
           - |
-            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ;
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -2560,7 +2560,7 @@ centralledger:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - src/handlers/index.js
         - handler
@@ -2569,7 +2569,7 @@ centralledger:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -2702,13 +2702,13 @@ centralledger:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
             do
               echo --------------------;
               echo Waiting for Kafka...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo Kafka ok!;
         env:
           - name: KAFKA_HOST
@@ -2726,9 +2726,9 @@ centralledger:
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -2898,7 +2898,7 @@ centralledger:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - src/handlers/index.js
         - handler
@@ -2907,7 +2907,7 @@ centralledger:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -3037,13 +3037,13 @@ centralledger:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
             do
               echo --------------------;
               echo Waiting for Kafka...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo Kafka ok!;
         env:
           - name: KAFKA_HOST
@@ -3061,9 +3061,9 @@ centralledger:
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -3233,7 +3233,7 @@ centralledger:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - src/handlers/index.js
         - handler
@@ -3242,7 +3242,7 @@ centralledger:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -3372,13 +3372,13 @@ centralledger:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
             do
               echo --------------------;
               echo Waiting for Kafka...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo Kafka ok!;
         env:
           - name: KAFKA_HOST
@@ -3396,9 +3396,9 @@ centralledger:
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -3568,7 +3568,7 @@ centralledger:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - src/handlers/index.js
         - handler
@@ -3577,7 +3577,7 @@ centralledger:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -3707,13 +3707,13 @@ centralledger:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
             do
               echo --------------------;
               echo Waiting for Kafka...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo Kafka ok!;
         env:
           - name: KAFKA_HOST
@@ -3731,9 +3731,9 @@ centralledger:
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -3903,7 +3903,7 @@ centralledger:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - src/handlers/index.js
         - handler
@@ -3912,7 +3912,7 @@ centralledger:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -4047,13 +4047,13 @@ centralledger:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
             do
               echo --------------------;
               echo Waiting for Kafka...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo Kafka ok!;
         env:
           - name: KAFKA_HOST
@@ -4071,9 +4071,9 @@ centralledger:
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -4243,7 +4243,7 @@ centralledger:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - src/handlers/index.js
         - handler
@@ -4252,7 +4252,7 @@ centralledger:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -4382,13 +4382,13 @@ centralledger:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
             do
               echo --------------------;
               echo Waiting for Kafka...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo Kafka ok!;
         env:
           - name: KAFKA_HOST
@@ -4406,9 +4406,9 @@ centralledger:
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -4577,14 +4577,14 @@ centralsettlement:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - src/api/index.js
       ## @param diagnosticMode.args Args to override all containers in the deployment
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -4816,13 +4816,13 @@ centralsettlement:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
             do
               echo --------------------;
               echo Waiting for Kafka...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo Kafka ok!;
         env:
           - name: KAFKA_HOST
@@ -4840,9 +4840,9 @@ centralsettlement:
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -4978,7 +4978,7 @@ centralsettlement:
 
   centralsettlement-handler-deferredsettlement:
     enabled: true
-    
+
     image:
       registry: "docker.io"
       repository: mojaloop/central-settlement
@@ -5008,7 +5008,7 @@ centralsettlement:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - src/handlers/index.js
         - h
@@ -5017,7 +5017,7 @@ centralsettlement:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -5249,13 +5249,13 @@ centralsettlement:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
             do
               echo --------------------;
               echo Waiting for Kafka...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo Kafka ok!;
         env:
           - name: KAFKA_HOST
@@ -5273,9 +5273,9 @@ centralsettlement:
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -5443,7 +5443,7 @@ centralsettlement:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - src/handlers/index.js
         - h
@@ -5452,7 +5452,7 @@ centralsettlement:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -5684,13 +5684,13 @@ centralsettlement:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
             do
               echo --------------------;
               echo Waiting for Kafka...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo Kafka ok!;
         env:
           - name: KAFKA_HOST
@@ -5708,9 +5708,9 @@ centralsettlement:
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -5878,7 +5878,7 @@ centralsettlement:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - src/handlers/index.js
         - h
@@ -5887,7 +5887,7 @@ centralsettlement:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -6209,13 +6209,13 @@ centralsettlement:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
             do
               echo --------------------;
               echo Waiting for Kafka...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo Kafka ok!;
         env:
           - name: KAFKA_HOST
@@ -6233,9 +6233,9 @@ centralsettlement:
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -6402,7 +6402,7 @@ transaction-requests-service:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - src/index.js
       - api
@@ -6410,7 +6410,7 @@ transaction-requests-service:
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
+
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
@@ -6674,7 +6674,7 @@ thirdparty:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - ./dist/src/cli.js
         - all
@@ -6682,7 +6682,7 @@ thirdparty:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -6863,13 +6863,13 @@ thirdparty:
           - sh
           - -c
           - |
-            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ;
             do
               echo --------------------;
               echo Waiting for MySQL...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MySQL ok!;
         env:
           - name: DB_HOST
@@ -7081,14 +7081,14 @@ thirdparty:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - ./dist/src/cli.js
       ## @param diagnosticMode.args Args to override all containers in the deployment
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -7342,7 +7342,7 @@ thirdparty:
       enabled: false
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
-      command: 
+      command:
         - node
         - ./dist/src/cli.js
         - all
@@ -7350,7 +7350,7 @@ thirdparty:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-      
+
       ## @param diagnosticMode.debug config to override all debug information
       ##
       debug:
@@ -9051,14 +9051,14 @@ simulator:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - src/index.js
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
+
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
@@ -10301,9 +10301,9 @@ mojaloop-ttk-simulators:
                 do
                   echo --------------------;
                   echo Waiting for MongoDB...;
-                  sleep 2; 
+                  sleep 2;
                 done;
-                echo ====================; 
+                echo ====================;
                 echo MongoDB ok!;
             env:
               - name: DB_HOST
@@ -10789,14 +10789,14 @@ mojaloop-bulk:
         enabled: false
         ## @param diagnosticMode.command Command to override all containers in the deployment
         ##
-        command: 
+        command:
           - node
           - src/api/index.js
         ## @param diagnosticMode.args Args to override all containers in the deployment
         ##
         args:
           - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        
+
         ## @param diagnosticMode.debug config to override all debug information
         ##
         debug:
@@ -10906,13 +10906,13 @@ mojaloop-bulk:
           command:
             - sh
             - -c
-            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
               do
                 echo --------------------;
                 echo Waiting for Kafka...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo Kafka ok!;
           env:
             - name: KAFKA_HOST
@@ -10930,9 +10930,9 @@ mojaloop-bulk:
               do
                 echo --------------------;
                 echo Waiting for MongoDB...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo MongoDB ok!;
           env:
             - name: DB_HOST
@@ -11047,7 +11047,7 @@ mojaloop-bulk:
         enabled: false
         ## @param diagnosticMode.command Command to override all containers in the deployment
         ##
-        command: 
+        command:
           - node
           - src/handlers/index.js
           - handler
@@ -11056,7 +11056,7 @@ mojaloop-bulk:
         ##
         args:
           - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        
+
         ## @param diagnosticMode.debug config to override all debug information
         ##
         debug:
@@ -11154,13 +11154,13 @@ mojaloop-bulk:
           command:
             - sh
             - -c
-            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
               do
                 echo --------------------;
                 echo Waiting for Kafka...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo Kafka ok!;
           env:
             - name: KAFKA_HOST
@@ -11178,9 +11178,9 @@ mojaloop-bulk:
               do
                 echo --------------------;
                 echo Waiting for MongoDB...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo MongoDB ok!;
           env:
             - name: DB_HOST
@@ -11352,7 +11352,7 @@ mojaloop-bulk:
         enabled: false
         ## @param diagnosticMode.command Command to override all containers in the deployment
         ##
-        command: 
+        command:
           - node
           - src/handlers/index.js
           - handler
@@ -11361,7 +11361,7 @@ mojaloop-bulk:
         ##
         args:
           - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        
+
         ## @param diagnosticMode.debug config to override all debug information
         ##
         debug:
@@ -11489,13 +11489,13 @@ mojaloop-bulk:
           command:
             - sh
             - -c
-            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
               do
                 echo --------------------;
                 echo Waiting for Kafka...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo Kafka ok!;
           env:
             - name: KAFKA_HOST
@@ -11513,9 +11513,9 @@ mojaloop-bulk:
               do
                 echo --------------------;
                 echo Waiting for MySQL...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo MySQL ok!;
           env:
             - name: DB_HOST
@@ -11546,9 +11546,9 @@ mojaloop-bulk:
               do
                 echo --------------------;
                 echo Waiting for MongoDB...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo MongoDB ok!;
           env:
             - name: DB_HOST
@@ -11717,7 +11717,7 @@ mojaloop-bulk:
         enabled: false
         ## @param diagnosticMode.command Command to override all containers in the deployment
         ##
-        command: 
+        command:
           - node
           - src/handlers/index.js
           - handler
@@ -11726,7 +11726,7 @@ mojaloop-bulk:
         ##
         args:
           - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        
+
         ## @param diagnosticMode.debug config to override all debug information
         ##
         debug:
@@ -11851,13 +11851,13 @@ mojaloop-bulk:
           command:
             - sh
             - -c
-            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
               do
                 echo --------------------;
                 echo Waiting for Kafka...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo Kafka ok!;
           env:
             - name: KAFKA_HOST
@@ -11875,9 +11875,9 @@ mojaloop-bulk:
               do
                 echo --------------------;
                 echo Waiting for MySQL...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo MySQL ok!;
           env:
             - name: DB_HOST
@@ -11908,9 +11908,9 @@ mojaloop-bulk:
               do
                 echo --------------------;
                 echo Waiting for MongoDB...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo MongoDB ok!;
           env:
             - name: DB_HOST
@@ -12079,7 +12079,7 @@ mojaloop-bulk:
         enabled: false
         ## @param diagnosticMode.command Command to override all containers in the deployment
         ##
-        command: 
+        command:
           - node
           - src/handlers/index.js
           - handler
@@ -12088,7 +12088,7 @@ mojaloop-bulk:
         ##
         args:
           - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        
+
         ## @param diagnosticMode.debug config to override all debug information
         ##
         debug:
@@ -12213,13 +12213,13 @@ mojaloop-bulk:
           command:
             - sh
             - -c
-            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
               do
                 echo --------------------;
                 echo Waiting for Kafka...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo Kafka ok!;
           env:
             - name: KAFKA_HOST
@@ -12237,9 +12237,9 @@ mojaloop-bulk:
               do
                 echo --------------------;
                 echo Waiting for MySQL...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo MySQL ok!;
           env:
             - name: DB_HOST
@@ -12270,9 +12270,9 @@ mojaloop-bulk:
               do
                 echo --------------------;
                 echo Waiting for MongoDB...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo MongoDB ok!;
           env:
             - name: DB_HOST
@@ -12441,7 +12441,7 @@ mojaloop-bulk:
         enabled: false
         ## @param diagnosticMode.command Command to override all containers in the deployment
         ##
-        command: 
+        command:
           - node
           - src/handlers/index.js
           - handler
@@ -12450,7 +12450,7 @@ mojaloop-bulk:
         ##
         args:
           - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        
+
         ## @param diagnosticMode.debug config to override all debug information
         ##
         debug:
@@ -12575,13 +12575,13 @@ mojaloop-bulk:
           command:
             - sh
             - -c
-            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
               do
                 echo --------------------;
                 echo Waiting for Kafka...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo Kafka ok!;
           env:
             - name: KAFKA_HOST
@@ -12599,9 +12599,9 @@ mojaloop-bulk:
               do
                 echo --------------------;
                 echo Waiting for MySQL...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo MySQL ok!;
           env:
             - name: DB_HOST
@@ -12632,9 +12632,9 @@ mojaloop-bulk:
               do
                 echo --------------------;
                 echo Waiting for MongoDB...;
-                sleep 2; 
+                sleep 2;
               done;
-              echo ====================; 
+              echo ====================;
               echo MongoDB ok!;
           env:
             - name: DB_HOST
@@ -12796,9 +12796,9 @@ ml-testing-toolkit:
             do
               echo --------------------;
               echo Waiting for MongoDB...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo MongoDB ok!;
         env:
           - name: DB_HOST
@@ -13247,7 +13247,8 @@ ml-ttk-test-setup:
     environmentName: Development
     saveReport: true
     saveReportBaseUrl: "testing-toolkit.local"
-    
+    reportName: standard_provisioning_collection
+
   parameters:
     <<: *simNames
   testCaseEnvironmentFile: *ttkInputValues
@@ -13268,6 +13269,7 @@ ml-ttk-test-val-gp:
     environmentName: Development
     saveReport: true
     saveReportBaseUrl: "testing-toolkit.local"
+    reportName: gp_tests
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -13308,6 +13310,7 @@ ml-ttk-test-val-bulk:
     environmentName: Development
     saveReport: true
     saveReportBaseUrl: "testing-toolkit.local"
+    reportName: bulk_tests
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -13348,6 +13351,7 @@ ml-ttk-test-setup-tp:
     environmentName: Development
     saveReport: true
     saveReportBaseUrl: "testing-toolkit.local"
+    reportName: thirdparty_provisioning_collection
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -13388,6 +13392,7 @@ ml-ttk-test-val-tp:
     environmentName: Development
     saveReport: true
     saveReportBaseUrl: "testing-toolkit.local"
+    reportName: thirdparty_tests
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -13428,6 +13433,7 @@ ml-ttk-test-setup-sdk-bulk:
     environmentName: Development
     saveReport: true
     saveReportBaseUrl: "testing-toolkit.local"
+    reportName: sdk_bulk_provisioning_collection
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -13468,6 +13474,7 @@ ml-ttk-test-val-sdk-bulk:
     environmentName: Development
     saveReport: true
     saveReportBaseUrl: "testing-toolkit.local"
+    reportName: sdk_bulk_tests
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
