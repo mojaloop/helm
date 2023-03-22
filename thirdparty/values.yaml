@@ -244,7 +244,7 @@ auth-svc:
         - name: DB_USER
           value: '{{ .Values.config.db_user }}'
         - name: DB_PASSWORD
-          {{- if not (empty .Values.config.db_secret) }}
+          {{- if .Values.config.db_secret }}
           valueFrom:
               secretKeyRef:
                 name: '{{ .Values.config.db_secret.name }}'
@@ -263,7 +263,7 @@ auth-svc:
         - npm run migrate
       env:
         - name: DB_CONNECTION_PASSWORD
-          {{- if not (empty .Values.config.db_secret) }}
+          {{- if .Values.config.db_secret }}
           valueFrom:
               secretKeyRef:
                 name: '{{ .Values.config.db_secret.name }}'
@@ -585,7 +585,7 @@ consent-oracle:
         - name: DB_USER
           value: '{{ .Values.config.db_user }}'
         - name: DB_PASSWORD
-          {{- if not (empty .Values.config.db_secret) }}
+          {{- if .Values.config.db_secret }}
           valueFrom:
               secretKeyRef:
                 name: '{{ .Values.config.db_secret.name }}'
@@ -604,7 +604,7 @@ consent-oracle:
         - npm run migrate
       env:
         - name: ALS_CO_DATABASE_PASSWORD
-          {{- if not (empty .Values.config.db_secret) }}
+          {{- if .Values.config.db_secret }}
           valueFrom:
               secretKeyRef:
                 name: '{{ .Values.config.db_secret.name }}'
