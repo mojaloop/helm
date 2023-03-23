@@ -214,7 +214,7 @@ The following components have been deprecated from the packaged Mojaloop Helm ch
   - [settlement-management](https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0)
   - [operator-settlement](https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0)
 
-> _Note these Helm Chart are still available for deployment in the [Mojaloop Helm Repo (http://mojaloop.io/helm/repo/)](http://mojaloop.io/helm/repo/index.yaml)._
+> *Note these Helm Chart are still available for deployment in the [Mojaloop Helm Repo (http://mojaloop.io/helm/repo/)](http://mojaloop.io/helm/repo/index.yaml).*
 
 This is due to the underlying services having been deprecated by the Micro-Services provided by the [Business Operation Framework (BOF)](https://github.com/mojaloop/business-operations-framework-docs) for Financial Management and Reporting.
 
