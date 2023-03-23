@@ -57,10 +57,10 @@ Date | Revision | Description
 8. email-notifier: **v12.0.0**
 9. als-oracle-pathfinder: **v12.0.0**
 10. transaction-requests-service: **v14.0.1**
-11. finance-portal-ui: **v10.4.3** _(DEPRECATED)_
-12. finance-portal-backend-service: **v15.0.2** _(DEPRECATED)_
-13. settlement-management: **v11.0.0** _(DEPRECATED)_
-14. operator-settlement: **v11.0.0** _(DEPRECATED)_
+11. finance-portal-ui: **v10.4.3** *(DEPRECATED)*
+12. finance-portal-backend-service: **v15.0.2** *(DEPRECATED)*
+13. settlement-management: **v11.0.0** *(DEPRECATED)*
+14. operator-settlement: **v11.0.0** *(DEPRECATED)*
 15. event-sidecar: **v12.0.0**
 16. event-stream-processor: **v12.0.0-snapshot.7**
 17. simulator: **12.0.0**
@@ -86,10 +86,10 @@ Date | Revision | Description
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.0
 9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v12.0.0
 10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.0.1
-11. finance-portal-ui _(DEPRECATED)_ - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
-12. finance-portal-backend-service _(DEPRECATED)_ - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
-13. settlement-management _(DEPRECATED)_ - https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0
-14. operator-settlement _(DEPRECATED)_ - https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0
+11. finance-portal-ui *(DEPRECATED)* - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
+12. finance-portal-backend-service *(DEPRECATED)* - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
+13. settlement-management *(DEPRECATED)* - https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0
+14. operator-settlement *(DEPRECATED)* - https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0
 15. event-sidecar - https://github.com/mojaloop/event-sidecar/releases/tag/v12.0.0
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.7
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
