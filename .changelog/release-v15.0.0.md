@@ -43,6 +43,7 @@ Date | Revision | Description
 11. **mojaloop/#3053**: fix config fetching for monitoring payload condition ([ml-testing-toolkit/pull/228](https://github.com/mojaloop/ml-testing-toolkit/pull/228)), closes [mojaloop/#3053](https://github.com/mojaloop/project/issues/3053)
 12. **mojaloop/#3076**: refactor break on error ([ml-testing-toolkit/pull/227](https://github.com/mojaloop/ml-testing-toolkit/pull/227)), closes [mojaloop/#3076](https://github.com/mojaloop/project/issues/3076)
 13. **mojaloop/#3000**: parameterized the inbound request size ([ml-testing-toolkit/pull/221](https://github.com/mojaloop/ml-testing-toolkit/pull/221)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3000)
+14. **mojaloop/#3165**: post clean up scripts failing ([mojaloop/testing-toolkit-test-cases/pull/117](https://github.com/mojaloop/testing-toolkit-test-cases/pull/117), [mojaloop/helm/pull/557](https://github.com/mojaloop/helm/pull/557)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3165)
 
 ## 3. Application versions
 
