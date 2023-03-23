@@ -8,6 +8,16 @@ Date | Revision | Description
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
 
+## 0. Summary
+
+Major updates with this release include:
+
+1. Externalize Backend Dependencies for services including TTK, 3PPI services - which helps make maintenance of Mojaloop easier (and reduces breaking changes)
+2. Utilize externalized secrets for user/password management (and removing plain text passwords in config files)
+3. Support sub-scenarios for transfers and thereby use-cases that are enabled by this field
+
+Refer to full feature and bug fix list below for more info; and testing improvements listed separately.
+
 ## 1. New Features
 
 1. **mojaloop/#2887** Externalize Backend Dependencies ([helm/pull/535](https://github.com/mojaloop/helm/pull/535), [helm/pull/551](https://github.com/mojaloop/helm/pull/551)), closes [mojaloop/#2887](https://github.com/mojaloop/project/issues/2887)
