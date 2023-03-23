@@ -3,6 +3,7 @@
 Date | Revision | Description
 ---------|----------|---------
  2023-02-20 | 0 | Initial draft
+ 2023-03-23 | 0 | Initial release
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
