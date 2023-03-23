@@ -3,6 +3,7 @@
 Date | Revision | Description
 ---------|----------|---------
  2023-02-20 | 0 | Initial draft
+ 2023-03-23 | 0 | Initial release
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
@@ -245,7 +246,7 @@ More information can be found here:
 
 2. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
 
-3. The [testing-toolkit-test-cases for v15.0.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.0)' Golden Path collections expects:
+3. The [testing-toolkit-test-cases for v15.0.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.0) Golden Path collections expects:
     - the Quoting service operating mode to be set quoting-service.config.simple_routing_mode_enabled=true (in helm mojaloop/values.yaml under quoting-service config). If this is incorrectly configured, it will result in several failures in the quoting-service tests (7 expected failures). If this is disabled, ensure that you update the corresponding test-case environment variable parameter **SIMPLE_ROUTING_MODE_ENABLED** ( in helm mojaloop/values.yaml ml-testing-toolkit -> extraEnvironments.hub-k8s-default-environment.json.inputValues) to match.
     - the **on-us transfers** (in mojaloop/values.yaml "enable_on_us_transfers: false" under centralledger-handler-transfer-prepare -> config and  cl-handler-bulk-transfer-prepare -> config) configuration to be disabled. The test-case environment variable parameter (**ON_US_TRANSFERS_ENABLED** (in helm mojaloop/values.yaml ml-testing-toolkit -> extraEnvironments.hub-k8s-default-environment.json.inputValues), the same name used on postman collections) must similarly match this value.
 
@@ -276,20 +277,15 @@ More information can be found here:
 
 1. [#2119 - Idempotency for duplicate quote request](https://github.com/mojaloop/project/issues/2119)
 2. [#2322 - Helm install failing with with "medium to large" release names](https://github.com/mojaloop/project/issues/2322)
-3. [#2448 - Nginx Ingress Controller v1.0.0 is incompatible with Mojaloop Helm v13.0.x releases](https://github.com/mojaloop/project/issues/2448)
-4. [#2317 - Mojaloop Helm deployments are not compatible when deployed to ARM-arch based hosts](https://github.com/mojaloop/project/issues/2317)
-5. [#2740 - GP tests are failing when test currencies are used](https://github.com/mojaloop/project/issues/2740)
-6. [#3020 - Bulk prepare handler is freezing if MONGODB is disabled](https://github.com/mojaloop/project/issues/3020)
-7. [#2892 - Disabled DFSP showing getParty info](https://github.com/mojaloop/project/issues/2892)
-8. [#2435 - Quoting-Service is incorrectly handling failed responses to FSPs when forwarding requests](https://github.com/mojaloop/project/issues/2435)
-9. [#2644 - Missing Error code for the transfer in the Central ledger DB](https://github.com/mojaloop/project/issues/2644)
-10. Testing Toolkit Test Case issues causing instability/intermitant failures on Test Case Results
+3. [#2317 - Mojaloop Helm deployments are not compatible when deployed to ARM-arch based hosts](https://github.com/mojaloop/project/issues/2317)
+4. [#2892 - Disabled DFSP showing getParty info](https://github.com/mojaloop/project/issues/2892)
+5. [#2435 - Quoting-Service is incorrectly handling failed responses to FSPs when forwarding requests](https://github.com/mojaloop/project/issues/2435)
+6. Test issues causing instability/intermitant failures on Test Case Results
     1. [#2717 - Thirdparty TTK Test-Collection is not repeatable](https://github.com/mojaloop/project/issues/2717)
     2. [#2845 - QA: Replace Legacy-Simulator as a NORESPONSE_SIMPAYEE in Testing-Toolkit Goden Path Test-Suite](https://github.com/mojaloop/project/issues/2845)
-    3. [#2846 - QA: Mojaloop TTK GP Test Collections to reset available liquidity after each run](https://github.com/mojaloop/project/issues/2846)
-    4. [#3027 - QA: Mojaloop Helm v14.1.0 Release - Bulk Tests fail on first run](https://github.com/mojaloop/project/issues/3027)
-11. [#2925 - Helm Test Intermittent failure with 'Generic ID not found](https://github.com/mojaloop/project/issues/2925)
-12. [#3164 - GP Tests fail intermitantly when upgrading a release from v14.1.1 to v15 due to WS issues between TTK and SDKs](https://github.com/mojaloop/project/issues/3164)
+    3. [#3027 - QA: Mojaloop Helm v14.1.0 Release - Bulk Tests fail on first run](https://github.com/mojaloop/project/issues/3027)
+    4. [#2925 - Helm Test Intermittent failure with 'Generic ID not found](https://github.com/mojaloop/project/issues/2925)
+    5. [#3164 - GP Tests fail intermitantly when upgrading a release from v14.1.1 to v15 due to WS issues between TTK and SDKs](https://github.com/mojaloop/project/issues/3164)
 
 ## 9. Contributors
 
