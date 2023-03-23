@@ -216,10 +216,11 @@ Mojaloop Helm deployments currently include the following provisioning (`setup`)
 | ml-ttk-test-val-sdk-bulk   | [hub/sdk-bulk](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/sdk-bulk)                                     |  SDK Bulk Test Collection   | No                  | `mojaloop-bulk.enabled=true` & `mojaloop-ttk-simulators.enabled=true` must be set to deploy the Thirdparty components.                                                                                                                                                              |
 | ml-ttk-test-setup-tp       | [hub/provisioning_thirdparty](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/provisioning_thirdparty)       |  Thirdparty Provisioning Collection   | No                  | `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` must be set to deploy the Thirdparty components.       |
 | ml-ttk-test-val-tp         | [hub/thirdparty](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/thirdparty)                                 |  Thirdparty Test Collection   | No                  | `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` must be set to deploy the Bulk-API-Adapter components. |
+| ml-ttk-test-cleanup         | [hub/cleanup](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/cleanup)                                 |  Thirdparty Test Collection   | Yes                  |  Post cleanup scripts, e.g. executes position reset test collection. Note that `ml-ttk-test-cleanup.test.config.saveReport` is disabled by default. |
 
 1. Ensure Tests are enabled
 
-    Ensure the following properties are set in your values file:
+    Ensure the following properties are set in your [values.yaml](./mojaloop/values.yaml) file depending on which tests you wish to execute:
 
     - `ml-ttk-test-setup.tests.enabled=true`
     - `ml-ttk-test-val-gp.tests.enabled=true`
@@ -228,6 +229,7 @@ Mojaloop Helm deployments currently include the following provisioning (`setup`)
     - `ml-ttk-test-val-sdk-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true`, `mojaloop-ttk-simulators.enabled=true` is set_)
     - `ml-ttk-test-setup-tp.test.enabled=true` (_Note: only applicable if `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` is set_)
     - `ml-ttk-test-val-tp.test,enabled=true` (_Note: only applicable if `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` is set_)
+    - `ml-ttk-test-cleanup.test.enabled=true`
 
     Or alternatively add `--set` for each of the above parameters on the install command:
 

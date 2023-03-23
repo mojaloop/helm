@@ -13237,7 +13237,7 @@ ml-ttk-cronjob-tests:
 ml-ttk-test-setup:
   tests:
     enabled: true
-    weight: -7
+    weight: -8
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
@@ -13256,7 +13256,7 @@ ml-ttk-test-setup:
 ml-ttk-test-val-gp:
   tests:
     enabled: true
-    weight: -6
+    weight: -7
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
@@ -13298,6 +13298,7 @@ ml-ttk-test-val-bulk:
   tests:
     enabled: false
     weight: -5
+    weight: -6
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
@@ -13339,6 +13340,7 @@ ml-ttk-test-setup-tp:
   tests:
     enabled: false
     weight: -4
+    weight: -5
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
@@ -13380,6 +13382,7 @@ ml-ttk-test-val-tp:
   tests:
     enabled: false
     weight: -3
+    weight: -4
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
@@ -13421,6 +13424,7 @@ ml-ttk-test-setup-sdk-bulk:
   tests:
     enabled: false
     weight: -2
+    weight: -3
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
@@ -13462,6 +13466,7 @@ ml-ttk-test-val-sdk-bulk:
   tests:
     enabled: false
     weight: -1
+    weight: -2
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
@@ -13498,3 +13503,44 @@ ml-ttk-test-val-sdk-bulk:
   parameters:
     <<: *simNames
   testCaseEnvironmentFile:  *ttksim1InputValues
+
+ml-ttk-test-cleanup:
+  tests:
+    enabled: true
+    weight: -1
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    testCasesZipUrl: *ttkGitUrl
+    testCasesPathInZip: testing-toolkit-test-cases-15.0.0/collections/hub/positions_cleanup
+    ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
+    # awsS3BucketName: aws-s3-bucket-name
+    # awsS3FilePath: ttk-tests/reports
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: Post Cleanup
+    environmentName: Development
+    saveReport: false
+    saveReportBaseUrl: "testing-toolkit.local"
+    reportName: post_cleanup
+
+  # configCreds:
+  #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
+  #   AWS_SECRET_ACCESS_KEY: 'some_aws_secret_key'
+  #   AWS_REGION: 'us-west-2'
+  #   SLACK_WEBHOOK_URL: 'slack_inbound_webhook'
+
+  ## Optionally specify the config file defaults for TTK CLI
+  ## You should specify at least mode here
+  # configFileDefaults: {
+  #   "mode": "outbound",
+  #   "reportFormat": "html",
+  #   "baseURL": "",
+  #   "reportTarget": "",
+  #   "reportAutoFilenameEnable": true,
+  #   "slackWebhookUrl": "",
+  #   "slackPassedImage": "",
+  #   "slackFailedImage": "",
+  #   "logLevel": "2"
+  # }
+  parameters:
+    <<: *simNames
+  testCaseEnvironmentFile: *ttkInputValues

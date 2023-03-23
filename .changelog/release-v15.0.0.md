@@ -43,6 +43,7 @@ Date | Revision | Description
 11. **mojaloop/#3053**: fix config fetching for monitoring payload condition ([ml-testing-toolkit/pull/228](https://github.com/mojaloop/ml-testing-toolkit/pull/228)), closes [mojaloop/#3053](https://github.com/mojaloop/project/issues/3053)
 12. **mojaloop/#3076**: refactor break on error ([ml-testing-toolkit/pull/227](https://github.com/mojaloop/ml-testing-toolkit/pull/227)), closes [mojaloop/#3076](https://github.com/mojaloop/project/issues/3076)
 13. **mojaloop/#3000**: parameterized the inbound request size ([ml-testing-toolkit/pull/221](https://github.com/mojaloop/ml-testing-toolkit/pull/221)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3000)
+14. **mojaloop/#3165**: post clean up scripts failing ([mojaloop/testing-toolkit-test-cases/pull/117](https://github.com/mojaloop/testing-toolkit-test-cases/pull/117), [mojaloop/helm/pull/557](https://github.com/mojaloop/helm/pull/557)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3165)
 
 ## 3. Application versions
 
@@ -56,10 +57,10 @@ Date | Revision | Description
 8. email-notifier: **v12.0.0**
 9. als-oracle-pathfinder: **v12.0.0**
 10. transaction-requests-service: **v14.0.1**
-11. finance-portal-ui: **v10.4.3** _(DEPRECATED)_
-12. finance-portal-backend-service: **v15.0.2** _(DEPRECATED)_
-13. settlement-management: **v11.0.0** _(DEPRECATED)_
-14. operator-settlement: **v11.0.0** _(DEPRECATED)_
+11. finance-portal-ui: **v10.4.3** *(DEPRECATED)*
+12. finance-portal-backend-service: **v15.0.2** *(DEPRECATED)*
+13. settlement-management: **v11.0.0** *(DEPRECATED)*
+14. operator-settlement: **v11.0.0** *(DEPRECATED)*
 15. event-sidecar: **v12.0.0**
 16. event-stream-processor: **v12.0.0-snapshot.7**
 17. simulator: **12.0.0**
@@ -85,10 +86,10 @@ Date | Revision | Description
 8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.0
 9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v12.0.0
 10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.0.1
-11. finance-portal-ui _(DEPRECATED)_ - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
-12. finance-portal-backend-service _(DEPRECATED)_ - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
-13. settlement-management _(DEPRECATED)_ - https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0
-14. operator-settlement _(DEPRECATED)_ - https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0
+11. finance-portal-ui *(DEPRECATED)* - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
+12. finance-portal-backend-service *(DEPRECATED)* - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
+13. settlement-management *(DEPRECATED)* - https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0
+14. operator-settlement *(DEPRECATED)* - https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0
 15. event-sidecar - https://github.com/mojaloop/event-sidecar/releases/tag/v12.0.0
 16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.7
 17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
@@ -213,7 +214,7 @@ The following components have been deprecated from the packaged Mojaloop Helm ch
   - [settlement-management](https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0)
   - [operator-settlement](https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0)
 
-> _Note these Helm Chart are still available for deployment in the [Mojaloop Helm Repo (http://mojaloop.io/helm/repo/)](http://mojaloop.io/helm/repo/index.yaml)._
+> *Note these Helm Chart are still available for deployment in the [Mojaloop Helm Repo (http://mojaloop.io/helm/repo/)](http://mojaloop.io/helm/repo/index.yaml).*
 
 This is due to the underlying services having been deprecated by the Micro-Services provided by the [Business Operation Framework (BOF)](https://github.com/mojaloop/business-operations-framework-docs) for Financial Management and Reporting.
 
@@ -229,19 +230,18 @@ More information can be found here:
 
 1. This release has been validated against the following dependency Test Matrix:
 
-| Dependency | Version |  Notes   |
-| ---------- | ------- | --- |
-| Kubernetes | v1.24.8 |  [Rancher v2.6.8](https://www.suse.com/suse-rancher/support-matrix/all-supported-versions/rancher-v2-6-8/)   |
-| Docker  |  v20.10.21  |  |
-| Nginx Ingress Controller | rancher/nginx-ingress-controller:nginx-1.2.1-rancher1 |     |
-|  Ubuntu   |  v20.04 LTS   |     |
-|  MySQL   |  bitnami/mysql:8.0.32-debian-11-r0   |     |
-|  Kafka   |  bitnami/kafka:3.3.1-debian-11-r1   |     |
-|  Redis   |  bitnami/redis:7.0.5-debian-11-r7   |     |
-|  MongoDB   |  bitnami/mongodb:6.0.2-debian-11-r11   |     |
-|  Testing Toolkit Test Cases   |  [v15.0.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.0)   |     |
-|  example-mojaloop-backend   |  v15.0.0   |  [README](../example-mojaloop-backend/README.md)   |
-|     |     |     |
+    | Dependency | Version |  Notes   |
+    | ---------- | ------- | --- |
+    | Kubernetes | v1.24.8 |  [Rancher v2.6.8](https://www.suse.com/suse-rancher/support-matrix/all-supported-versions/rancher-v2-6-8/)   |
+    | Docker  |  v20.10.21  |  |
+    | Nginx Ingress Controller | rancher/nginx-ingress-controller:nginx-1.2.1-rancher1 |     |
+    |  Ubuntu   |  v20.04 LTS   |     |
+    |  MySQL   |  bitnami/mysql:8.0.32-debian-11-r0   |     |
+    |  Kafka   |  bitnami/kafka:3.3.1-debian-11-r1   |     |
+    |  Redis   |  bitnami/redis:7.0.5-debian-11-r7   |     |
+    |  MongoDB   |  bitnami/mongodb:6.0.2-debian-11-r11   |     |
+    |  Testing Toolkit Test Cases   |  [v15.0.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.0)   |     |
+    |  example-mojaloop-backend   |  v15.0.0   |  [README](../example-mojaloop-backend/README.md)   |
 
 2. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
 
@@ -279,8 +279,8 @@ More information can be found here:
 3. [#2448 - Nginx Ingress Controller v1.0.0 is incompatible with Mojaloop Helm v13.0.x releases](https://github.com/mojaloop/project/issues/2448)
 4. [#2317 - Mojaloop Helm deployments are not compatible when deployed to ARM-arch based hosts](https://github.com/mojaloop/project/issues/2317)
 5. [#2740 - GP tests are failing when test currencies are used](https://github.com/mojaloop/project/issues/2740)
-6. [#3020 - Bulk prepare handler is freezing if MONGODB is disabled ](https://github.com/mojaloop/project/issues/3020)
-7. [#2892 - Disabled DFSP showing getParty info ](https://github.com/mojaloop/project/issues/2892)
+6. [#3020 - Bulk prepare handler is freezing if MONGODB is disabled](https://github.com/mojaloop/project/issues/3020)
+7. [#2892 - Disabled DFSP showing getParty info](https://github.com/mojaloop/project/issues/2892)
 8. [#2435 - Quoting-Service is incorrectly handling failed responses to FSPs when forwarding requests](https://github.com/mojaloop/project/issues/2435)
 9. [#2644 - Missing Error code for the transfer in the Central ledger DB](https://github.com/mojaloop/project/issues/2644)
 10. Testing Toolkit Test Case issues causing instability/intermitant failures on Test Case Results
@@ -288,7 +288,7 @@ More information can be found here:
     2. [#2845 - QA: Replace Legacy-Simulator as a NORESPONSE_SIMPAYEE in Testing-Toolkit Goden Path Test-Suite](https://github.com/mojaloop/project/issues/2845)
     3. [#2846 - QA: Mojaloop TTK GP Test Collections to reset available liquidity after each run](https://github.com/mojaloop/project/issues/2846)
     4. [#3027 - QA: Mojaloop Helm v14.1.0 Release - Bulk Tests fail on first run](https://github.com/mojaloop/project/issues/3027)
-11. [#2925 - Helm Test Intermittent failure with 'Generic ID not found'](https://github.com/mojaloop/project/issues/2925)
+11. [#2925 - Helm Test Intermittent failure with 'Generic ID not found](https://github.com/mojaloop/project/issues/2925)
 12. [#3164 - GP Tests fail intermitantly when upgrading a release from v14.1.1 to v15 due to WS issues between TTK and SDKs](https://github.com/mojaloop/project/issues/3164)
 
 ## 9. Contributors
@@ -296,4 +296,4 @@ More information can be found here:
 - Organizations: BMGF, CrossLake, InFiTX
 - Individuals: @chris-me-law , @dfry , @elnyry-sam-k , @kirgene , @kleyow , @PaulGregoryBaker , @mdebarros , @sri-miriyala , @tdaly61 , @vijayg10
 
-_Note: companies are in alphabetical order, individuals are in no particular order._
+*Note: companies are in alphabetical order, individuals are in no particular order.*
