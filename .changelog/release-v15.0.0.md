@@ -230,19 +230,19 @@ More information can be found here:
 
 1. This release has been validated against the following dependency Test Matrix:
 
-| Dependency | Version |  Notes   |
-| ---------- | ------- | --- |
-| Kubernetes | v1.24.8 |  [Rancher v2.6.8](https://www.suse.com/suse-rancher/support-matrix/all-supported-versions/rancher-v2-6-8/)   |
-| Docker  |  v20.10.21  |  |
-| Nginx Ingress Controller | rancher/nginx-ingress-controller:nginx-1.2.1-rancher1 |     |
-|  Ubuntu   |  v20.04 LTS   |     |
-|  MySQL   |  bitnami/mysql:8.0.32-debian-11-r0   |     |
-|  Kafka   |  bitnami/kafka:3.3.1-debian-11-r1   |     |
-|  Redis   |  bitnami/redis:7.0.5-debian-11-r7   |     |
-|  MongoDB   |  bitnami/mongodb:6.0.2-debian-11-r11   |     |
-|  Testing Toolkit Test Cases   |  [v15.0.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.0)   |     |
-|  example-mojaloop-backend   |  v15.0.0   |  [README](../example-mojaloop-backend/README.md)   |
-|     |     |     |
+    | Dependency | Version |  Notes   |
+    | ---------- | ------- | --- |
+    | Kubernetes | v1.24.8 |  [Rancher v2.6.8](https://www.suse.com/suse-rancher/support-matrix/all-supported-versions/rancher-v2-6-8/)   |
+    | Docker  |  v20.10.21  |  |
+    | Nginx Ingress Controller | rancher/nginx-ingress-controller:nginx-1.2.1-rancher1 |     |
+    |  Ubuntu   |  v20.04 LTS   |     |
+    |  MySQL   |  bitnami/mysql:8.0.32-debian-11-r0   |     |
+    |  Kafka   |  bitnami/kafka:3.3.1-debian-11-r1   |     |
+    |  Redis   |  bitnami/redis:7.0.5-debian-11-r7   |     |
+    |  MongoDB   |  bitnami/mongodb:6.0.2-debian-11-r11   |     |
+    |  Testing Toolkit Test Cases   |  [v15.0.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.0)   |     |
+    |  example-mojaloop-backend   |  v15.0.0   |  [README](../example-mojaloop-backend/README.md)   |
+    |     |     |     |
 
 2. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
 
