@@ -279,8 +279,8 @@ More information can be found here:
 3. [#2448 - Nginx Ingress Controller v1.0.0 is incompatible with Mojaloop Helm v13.0.x releases](https://github.com/mojaloop/project/issues/2448)
 4. [#2317 - Mojaloop Helm deployments are not compatible when deployed to ARM-arch based hosts](https://github.com/mojaloop/project/issues/2317)
 5. [#2740 - GP tests are failing when test currencies are used](https://github.com/mojaloop/project/issues/2740)
-6. [#3020 - Bulk prepare handler is freezing if MONGODB is disabled ](https://github.com/mojaloop/project/issues/3020)
-7. [#2892 - Disabled DFSP showing getParty info ](https://github.com/mojaloop/project/issues/2892)
+6. [#3020 - Bulk prepare handler is freezing if MONGODB is disabled](https://github.com/mojaloop/project/issues/3020)
+7. [#2892 - Disabled DFSP showing getParty info](https://github.com/mojaloop/project/issues/2892)
 8. [#2435 - Quoting-Service is incorrectly handling failed responses to FSPs when forwarding requests](https://github.com/mojaloop/project/issues/2435)
 9. [#2644 - Missing Error code for the transfer in the Central ledger DB](https://github.com/mojaloop/project/issues/2644)
 10. Testing Toolkit Test Case issues causing instability/intermitant failures on Test Case Results
