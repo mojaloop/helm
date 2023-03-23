@@ -8,6 +8,16 @@ Date | Revision | Description
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
 
+## 0. Summary
+
+Major updates with this release include:
+
+1. Externalize Backend Dependencies for services including TTK, 3PPI services - which helps make maintenance of Mojaloop easier (and reduces breaking changes)
+2. Utilize externalized secrets for user/password management (and removing plain text passwords in config files)
+3. Support sub-scenarios for transfers and thereby use-cases that are enabled by this field
+
+Refer to full feature and bug fix list below for more info; and testing improvements listed separately.
+
 ## 1. New Features
 
 1. **mojaloop/#2887** Externalize Backend Dependencies ([helm/pull/535](https://github.com/mojaloop/helm/pull/535), [helm/pull/551](https://github.com/mojaloop/helm/pull/551)), closes [mojaloop/#2887](https://github.com/mojaloop/project/issues/2887)
@@ -31,20 +41,21 @@ Date | Revision | Description
 
 ## 2. Bug Fixes
 
-1. **mojaloop/#3163**: Thirdparty Helm Charts are not scalable due to the Kubernetes Service being a headless service ([central-ledger/pull/551](https://github.com/mojaloop/helm/pull/551)), closes [mojaloop/#3163](https://github.com/mojaloop/project/issues/3163)
-2. **mojaloop/#3152**: initial open settlementWindow is failing on clean install ([central-ledger/pull/946](https://github.com/mojaloop/central-ledger/pull/946)), closes [mojaloop/#3152](https://github.com/mojaloop/project/issues/3152)
-3. **mojaloop/#3020**: add checks for when mongodb is disabled ([central-ledger/pull/927](https://github.com/mojaloop/central-ledger/pull/927)), closes [mojaloop/#3020](https://github.com/mojaloop/project/issues/3020)
-4. **mojaloop/#2644**: missing error-code for the transfer in the central-ledger db ([central-ledger/pull/929](https://github.com/mojaloop/central-ledger/pull/929)), closes [mojaloop/#2644](https://github.com/mojaloop/project/issues/2644)
-5. **mojaloop/#3096**: unable to upgrade knex dependency on centralLedger ([central-ledger/pull/939](https://github.com/mojaloop/central-ledger/pull/939)), closes [mojaloop/#3096](https://github.com/mojaloop/project/issues/3096)
-6. **mojaloop/#2891**: fix outbound fspiop headers ([sdk-scheme-adapter/issues/#436](https://github.com/mojaloop/sdk-scheme-adapter/issues/436)) ([sdk-scheme-adapter/commit/bfce0b0](https://github.com/mojaloop/sdk-scheme-adapter/commit/bfce0b097d40d565da47b5c56a0e7a84ff47fb1d))
-7. **mojaloop/#3132**: wso2 auth fix fspiop handler ([sdk-scheme-adapter/issues/#437](https://github.com/mojaloop/sdk-scheme-adapter/issues/437)) ([sdk-scheme-adapter/commit/4260361](https://github.com/mojaloop/sdk-scheme-adapter/commit/4260361f537606de15d114da3aa897e6124e1a34))
-8. **mojaloop/#3137**: bulk transactions sdk crash ([sdk-scheme-adapter/issues/#440](https://github.com/mojaloop/sdk-scheme-adapter/issues/440)) ([sdk-scheme-adapter/commit/acb7a01](https://github.com/mojaloop/sdk-scheme-adapter/commit/acb7a0172a3a43d0cc20350622ae68162f4b9252))
-9. **mojaloop/#3156**: ML Toolkit Mobile sim demo having issues with ML V15 RC-1 ([helm/commit/32f2699](https://github.com/mojaloop/helm/commit/32f26994929c86fc249e15ca5ee113769dc61cb3)), closes [mojaloop/#3156](https://github.com/mojaloop/project/issues/3156)
-10. **mojaloop/#3053**: fix config async changes ([ml-testing-toolkit/pull/229](https://github.com/mojaloop/ml-testing-toolkit/pull/229)), closes [mojaloop/#3053](https://github.com/mojaloop/project/issues/3053)
-11. **mojaloop/#3053**: fix config fetching for monitoring payload condition ([ml-testing-toolkit/pull/228](https://github.com/mojaloop/ml-testing-toolkit/pull/228)), closes [mojaloop/#3053](https://github.com/mojaloop/project/issues/3053)
-12. **mojaloop/#3076**: refactor break on error ([ml-testing-toolkit/pull/227](https://github.com/mojaloop/ml-testing-toolkit/pull/227)), closes [mojaloop/#3076](https://github.com/mojaloop/project/issues/3076)
-13. **mojaloop/#3000**: parameterized the inbound request size ([ml-testing-toolkit/pull/221](https://github.com/mojaloop/ml-testing-toolkit/pull/221)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3000)
-14. **mojaloop/#3165**: post clean up scripts failing ([mojaloop/testing-toolkit-test-cases/pull/117](https://github.com/mojaloop/testing-toolkit-test-cases/pull/117), [mojaloop/helm/pull/557](https://github.com/mojaloop/helm/pull/557)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3165)
+1. **mojaloop/#3163**: Thirdparty Helm Charts are not scalable due to the Kubernetes Service being a headless service ([helm/pull/551](https://github.com/mojaloop/helm/pull/551)), closes [mojaloop/#3163](https://github.com/mojaloop/project/issues/3163)
+2. **mojaloop/#3171**: cronjob support for k8s v1.25 ([helm/pull/559](https://github.com/mojaloop/helm/pull/559)), closes [mojaloop/#3171](https://github.com/mojaloop/project/issues/3171)
+3. **mojaloop/#3152**: initial open settlementWindow is failing on clean install ([central-ledger/pull/946](https://github.com/mojaloop/central-ledger/pull/946)), closes [mojaloop/#3152](https://github.com/mojaloop/project/issues/3152)
+4. **mojaloop/#3020**: add checks for when mongodb is disabled ([central-ledger/pull/927](https://github.com/mojaloop/central-ledger/pull/927)), closes [mojaloop/#3020](https://github.com/mojaloop/project/issues/3020)
+5. **mojaloop/#2644**: missing error-code for the transfer in the central-ledger db ([central-ledger/pull/929](https://github.com/mojaloop/central-ledger/pull/929)), closes [mojaloop/#2644](https://github.com/mojaloop/project/issues/2644)
+6. **mojaloop/#3096**: unable to upgrade knex dependency on centralLedger ([central-ledger/pull/939](https://github.com/mojaloop/central-ledger/pull/939)), closes [mojaloop/#3096](https://github.com/mojaloop/project/issues/3096)
+7. **mojaloop/#2891**: fix outbound fspiop headers ([sdk-scheme-adapter/issues/#436](https://github.com/mojaloop/sdk-scheme-adapter/issues/436)) ([sdk-scheme-adapter/commit/bfce0b0](https://github.com/mojaloop/sdk-scheme-adapter/commit/bfce0b097d40d565da47b5c56a0e7a84ff47fb1d))
+8. **mojaloop/#3132**: wso2 auth fix fspiop handler ([sdk-scheme-adapter/issues/#437](https://github.com/mojaloop/sdk-scheme-adapter/issues/437)) ([sdk-scheme-adapter/commit/4260361](https://github.com/mojaloop/sdk-scheme-adapter/commit/4260361f537606de15d114da3aa897e6124e1a34))
+9. **mojaloop/#3137**: bulk transactions sdk crash ([sdk-scheme-adapter/issues/#440](https://github.com/mojaloop/sdk-scheme-adapter/issues/440)) ([sdk-scheme-adapter/commit/acb7a01](https://github.com/mojaloop/sdk-scheme-adapter/commit/acb7a0172a3a43d0cc20350622ae68162f4b9252))
+10. **mojaloop/#3156**: ML Toolkit Mobile sim demo having issues with ML V15 RC-1 ([helm/commit/32f2699](https://github.com/mojaloop/helm/commit/32f26994929c86fc249e15ca5ee113769dc61cb3)), closes [mojaloop/#3156](https://github.com/mojaloop/project/issues/3156)
+11. **mojaloop/#3053**: fix config async changes ([ml-testing-toolkit/pull/229](https://github.com/mojaloop/ml-testing-toolkit/pull/229)), closes [mojaloop/#3053](https://github.com/mojaloop/project/issues/3053)
+12. **mojaloop/#3053**: fix config fetching for monitoring payload condition ([ml-testing-toolkit/pull/228](https://github.com/mojaloop/ml-testing-toolkit/pull/228)), closes [mojaloop/#3053](https://github.com/mojaloop/project/issues/3053)
+13. **mojaloop/#3076**: refactor break on error ([ml-testing-toolkit/pull/227](https://github.com/mojaloop/ml-testing-toolkit/pull/227)), closes [mojaloop/#3076](https://github.com/mojaloop/project/issues/3076)
+14. **mojaloop/#3000**: parameterized the inbound request size ([ml-testing-toolkit/pull/221](https://github.com/mojaloop/ml-testing-toolkit/pull/221)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3000)
+15. **mojaloop/#3165**: post clean up scripts failing ([mojaloop/testing-toolkit-test-cases/pull/117](https://github.com/mojaloop/testing-toolkit-test-cases/pull/117), [mojaloop/helm/pull/557](https://github.com/mojaloop/helm/pull/557)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3165)
 
 ## 3. Application versions
 

@@ -51,7 +51,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{- define "ml-testing-toolkit-cli.apiVersion.CronJob" -}}
-  {{- print "batch/v1beta1" -}}
+  {{- if .Capabilities.APIVersions.Has "batch/v1" -}}
+    {{- print "batch/v1" -}}
+  {{- else -}}
+    {{- print "batch/v1beta1" -}}
+  {{- end -}}
 {{- end -}}
 
 {{- define "ml-testing-toolkit-cli.jobtemplate" }}
