@@ -4,6 +4,7 @@ Date | Revision | Description
 ---------|----------|---------
  2023-02-20 | 0 | Initial draft
  2023-03-23 | 0 | Initial release
+ 2023-03-24 | 1 | Fix [mojaloop/#3178](https://github.com/mojaloop/project/issues/3178) applied
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
@@ -43,77 +44,61 @@ Refer to full feature and bug fix list below for more info; and testing improvem
 
 1. **mojaloop/#3163**: Thirdparty Helm Charts are not scalable due to the Kubernetes Service being a headless service ([helm/pull/551](https://github.com/mojaloop/helm/pull/551)), closes [mojaloop/#3163](https://github.com/mojaloop/project/issues/3163)
 2. **mojaloop/#3171**: cronjob support for k8s v1.25 ([helm/pull/559](https://github.com/mojaloop/helm/pull/559)), closes [mojaloop/#3171](https://github.com/mojaloop/project/issues/3171)
-3. **mojaloop/#3152**: initial open settlementWindow is failing on clean install ([central-ledger/pull/946](https://github.com/mojaloop/central-ledger/pull/946)), closes [mojaloop/#3152](https://github.com/mojaloop/project/issues/3152)
-4. **mojaloop/#3020**: add checks for when mongodb is disabled ([central-ledger/pull/927](https://github.com/mojaloop/central-ledger/pull/927)), closes [mojaloop/#3020](https://github.com/mojaloop/project/issues/3020)
-5. **mojaloop/#2644**: missing error-code for the transfer in the central-ledger db ([central-ledger/pull/929](https://github.com/mojaloop/central-ledger/pull/929)), closes [mojaloop/#2644](https://github.com/mojaloop/project/issues/2644)
-6. **mojaloop/#3096**: unable to upgrade knex dependency on centralLedger ([central-ledger/pull/939](https://github.com/mojaloop/central-ledger/pull/939)), closes [mojaloop/#3096](https://github.com/mojaloop/project/issues/3096)
-7. **mojaloop/#2891**: fix outbound fspiop headers ([sdk-scheme-adapter/issues/#436](https://github.com/mojaloop/sdk-scheme-adapter/issues/436)) ([sdk-scheme-adapter/commit/bfce0b0](https://github.com/mojaloop/sdk-scheme-adapter/commit/bfce0b097d40d565da47b5c56a0e7a84ff47fb1d))
-8. **mojaloop/#3132**: wso2 auth fix fspiop handler ([sdk-scheme-adapter/issues/#437](https://github.com/mojaloop/sdk-scheme-adapter/issues/437)) ([sdk-scheme-adapter/commit/4260361](https://github.com/mojaloop/sdk-scheme-adapter/commit/4260361f537606de15d114da3aa897e6124e1a34))
-9. **mojaloop/#3137**: bulk transactions sdk crash ([sdk-scheme-adapter/issues/#440](https://github.com/mojaloop/sdk-scheme-adapter/issues/440)) ([sdk-scheme-adapter/commit/acb7a01](https://github.com/mojaloop/sdk-scheme-adapter/commit/acb7a0172a3a43d0cc20350622ae68162f4b9252))
-10. **mojaloop/#3156**: ML Toolkit Mobile sim demo having issues with ML V15 RC-1 ([helm/commit/32f2699](https://github.com/mojaloop/helm/commit/32f26994929c86fc249e15ca5ee113769dc61cb3)), closes [mojaloop/#3156](https://github.com/mojaloop/project/issues/3156)
-11. **mojaloop/#3053**: fix config async changes ([ml-testing-toolkit/pull/229](https://github.com/mojaloop/ml-testing-toolkit/pull/229)), closes [mojaloop/#3053](https://github.com/mojaloop/project/issues/3053)
-12. **mojaloop/#3053**: fix config fetching for monitoring payload condition ([ml-testing-toolkit/pull/228](https://github.com/mojaloop/ml-testing-toolkit/pull/228)), closes [mojaloop/#3053](https://github.com/mojaloop/project/issues/3053)
-13. **mojaloop/#3076**: refactor break on error ([ml-testing-toolkit/pull/227](https://github.com/mojaloop/ml-testing-toolkit/pull/227)), closes [mojaloop/#3076](https://github.com/mojaloop/project/issues/3076)
-14. **mojaloop/#3000**: parameterized the inbound request size ([ml-testing-toolkit/pull/221](https://github.com/mojaloop/ml-testing-toolkit/pull/221)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3000)
-15. **mojaloop/#3165**: post clean up scripts failing ([mojaloop/testing-toolkit-test-cases/pull/117](https://github.com/mojaloop/testing-toolkit-test-cases/pull/117), [mojaloop/helm/pull/557](https://github.com/mojaloop/helm/pull/557)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3165)
+3. **mojaloop/#3178**: ml-ttk-test-cleanup is failing ([helm/pull/560](https://github.com/mojaloop/helm/pull/560)), closes [mojaloop/#3178](https://github.com/mojaloop/project/issues/3178)
+4. **mojaloop/#3152**: initial open settlementWindow is failing on clean install ([central-ledger/pull/946](https://github.com/mojaloop/central-ledger/pull/946)), closes [mojaloop/#3152](https://github.com/mojaloop/project/issues/3152)
+5. **mojaloop/#3020**: add checks for when mongodb is disabled ([central-ledger/pull/927](https://github.com/mojaloop/central-ledger/pull/927)), closes [mojaloop/#3020](https://github.com/mojaloop/project/issues/3020)
+6. **mojaloop/#2644**: missing error-code for the transfer in the central-ledger db ([central-ledger/pull/929](https://github.com/mojaloop/central-ledger/pull/929)), closes [mojaloop/#2644](https://github.com/mojaloop/project/issues/2644)
+7. **mojaloop/#3096**: unable to upgrade knex dependency on centralLedger ([central-ledger/pull/939](https://github.com/mojaloop/central-ledger/pull/939)), closes [mojaloop/#3096](https://github.com/mojaloop/project/issues/3096)
+8. **mojaloop/#2891**: fix outbound fspiop headers ([sdk-scheme-adapter/issues/#436](https://github.com/mojaloop/sdk-scheme-adapter/issues/436)) ([sdk-scheme-adapter/commit/bfce0b0](https://github.com/mojaloop/sdk-scheme-adapter/commit/bfce0b097d40d565da47b5c56a0e7a84ff47fb1d))
+9. **mojaloop/#3132**: wso2 auth fix fspiop handler ([sdk-scheme-adapter/issues/#437](https://github.com/mojaloop/sdk-scheme-adapter/issues/437)) ([sdk-scheme-adapter/commit/4260361](https://github.com/mojaloop/sdk-scheme-adapter/commit/4260361f537606de15d114da3aa897e6124e1a34))
+10. **mojaloop/#3137**: bulk transactions sdk crash ([sdk-scheme-adapter/issues/#440](https://github.com/mojaloop/sdk-scheme-adapter/issues/440)) ([sdk-scheme-adapter/commit/acb7a01](https://github.com/mojaloop/sdk-scheme-adapter/commit/acb7a0172a3a43d0cc20350622ae68162f4b9252))
+11. **mojaloop/#3156**: ML Toolkit Mobile sim demo having issues with ML V15 RC-1 ([helm/commit/32f2699](https://github.com/mojaloop/helm/commit/32f26994929c86fc249e15ca5ee113769dc61cb3)), closes [mojaloop/#3156](https://github.com/mojaloop/project/issues/3156)
+12. **mojaloop/#3053**: fix config async changes ([ml-testing-toolkit/pull/229](https://github.com/mojaloop/ml-testing-toolkit/pull/229)), closes [mojaloop/#3053](https://github.com/mojaloop/project/issues/3053)
+13. **mojaloop/#3053**: fix config fetching for monitoring payload condition ([ml-testing-toolkit/pull/228](https://github.com/mojaloop/ml-testing-toolkit/pull/228)), closes [mojaloop/#3053](https://github.com/mojaloop/project/issues/3053)
+14. **mojaloop/#3076**: refactor break on error ([ml-testing-toolkit/pull/227](https://github.com/mojaloop/ml-testing-toolkit/pull/227)), closes [mojaloop/#3076](https://github.com/mojaloop/project/issues/3076)
+15. **mojaloop/#3000**: parameterized the inbound request size ([ml-testing-toolkit/pull/221](https://github.com/mojaloop/ml-testing-toolkit/pull/221)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3000)
+16. **mojaloop/#3165**: post clean up scripts failing ([mojaloop/testing-toolkit-test-cases/pull/117](https://github.com/mojaloop/testing-toolkit-test-cases/pull/117), [mojaloop/helm/pull/557](https://github.com/mojaloop/helm/pull/557)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3165)
 
 ## 3. Application versions
 
-1. ml-api-adapter: **v14.0.0**
-2. central-ledger: v16.3.1 -> **v17.0.1** ([Compare](https://github.com/mojaloop/central-ledger/compare/v16.3.1...v17.0.1))
-3. account-lookup-service: **v14.0.0**
-4. quoting-service: **v15.0.2**
-5. central-settlement: **v15.0.0**
-6. central-event-processor: **v12.0.0**
-7. bulk-api-adapter: v14.2.0 -> **v15.0.0** ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v14.2.0...v15.0.0))
-8. email-notifier: **v12.0.0**
-9. als-oracle-pathfinder: **v12.0.0**
-10. transaction-requests-service: **v14.0.1**
-11. finance-portal-ui: **v10.4.3** *(DEPRECATED)*
-12. finance-portal-backend-service: **v15.0.2** *(DEPRECATED)*
-13. settlement-management: **v11.0.0** *(DEPRECATED)*
-14. operator-settlement: **v11.0.0** *(DEPRECATED)*
-15. event-sidecar: **v12.0.0**
-16. event-stream-processor: **v12.0.0-snapshot.7**
-17. simulator: **12.0.0**
-18. mojaloop-simulator: v13.0.1 -> **v14.0.1** ([Compare](https://github.com/mojaloop/mojaloop-simulator/compare/v13.0.1...v14.0.1))
-19. sdk-scheme-adapter: v21.4.0 -> **v22.0.1** ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v21.4.0...v22.0.1))
-20. ml-testing-toolkit: v15.7.0 -> **v16.0.0** ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v16.0.0))
-21. ml-testing-toolkit-ui: v15.1.3 -> **v15.2.1** ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.1.3...v15.2.1))
-22. ml-testing-toolkit-client-lib: v1.1.1 -> **v1.2.0** ([Compare](https://github.com/mojaloop/ml-testing-toolkit-client-lib/compare/v1.1.1...v1.2.0))
-23. auth-service: v13.0.2 -> **v14.0.0** ([Compare](https://github.com/mojaloop/auth-service/compare/v13.0.2...v14.0.0))
-24. als-consent-oracle: **v0.2.0**
-25. thirdparty-api-svc: **v13.0.2**
-26. thirdparty-sdk: **v15.1.0**
+1. ml-api-adapter: [v14.0.0](https://github.com/mojaloop/ml-api-adapter/releases/tag/v14.0.0)
+2. central-ledger: v16.3.1 -> [v17.0.1](https://github.com/mojaloop/central-ledger/releases/tag/v17.0.1) ([Compare](https://github.com/mojaloop/central-ledger/compare/v16.3.1...v17.0.1))
+3. account-lookup-service: [v14.0.0](https://github.com/mojaloop/account-lookup-service/releases/tag/v14.0.0)
+4. quoting-service: [v15.0.2](https://github.com/mojaloop/quoting-service/releases/tag/v15.0.2)
+5. central-settlement: [v15.0.0](https://github.com/mojaloop/central-settlement/releases/tag/v15.0.0)
+6. central-event-processor: [v12.0.0](https://github.com/mojaloop/central-event-processor/releases/tag/v12.0.0)
+7. bulk-api-adapter: v14.2.0 -> [v15.0.0](https://github.com/mojaloop/bulk-api-adapter/releases/tag/v15.0.0) ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v14.2.0...v15.0.0))
+8. email-notifier: [v12.0.0](https://github.com/mojaloop/email-notifier/releases/tag/v12.0.0)
+9. als-oracle-pathfinder: [v12.0.0](https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v12.0.0)
+10. transaction-requests-service: [v14.0.1](https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.0.1)
+11. finance-portal-ui: [v10.4.3](https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3) *(DEPRECATED)*
+12. finance-portal-backend-service: [v15.0.2](https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2) *(DEPRECATED)*
+13. settlement-management: [v11.0.0](https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0) *(DEPRECATED)*
+14. operator-settlement: [v11.0.0](https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0) *(DEPRECATED)*
+15. event-sidecar: [v12.0.0](https://github.com/mojaloop/event-sidecar/releases/tag/v12.0.0)
+16. event-stream-processor: [v12.0.0-snapshot.7](https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.7)
+17. simulator: [12.0.0](https://github.com/mojaloop/simulator/releases/tag/v12.0.0)
+18. mojaloop-simulator: v13.0.1 -> [v14.0.1](https://github.com/mojaloop/mojaloop-simulator/releases/tag/v14.0.1) ([Compare](https://github.com/mojaloop/mojaloop-simulator/compare/v13.0.1...v14.0.1))
+19. sdk-scheme-adapter: v21.4.0 -> [v22.0.1](https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v22.0.1) ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v21.4.0...v22.0.1))
+20. ml-testing-toolkit: v15.7.0 -> [v16.0.0](https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v16.0.0) ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v16.0.0))
+21. ml-testing-toolkit-ui: v15.1.3 -> [v15.2.1](https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.2.1) ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.1.3...v15.2.1))
+22. ml-testing-toolkit-client-lib: v1.1.1 -> [v1.2.0](https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.2.0) ([Compare](https://github.com/mojaloop/ml-testing-toolkit-client-lib/compare/v1.1.1...v1.2.0))
+23. auth-service: v13.0.2 -> [v14.0.0](https://github.com/mojaloop/auth-service/releases/tag/v14.0.0) ([Compare](https://github.com/mojaloop/auth-service/compare/v13.0.2...v14.0.0))
+24. als-consent-oracle: [v0.2.0](https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.0)
+25. thirdparty-api-svc: [v13.0.2](https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v13.0.2)
+26. thirdparty-sdk: [v15.1.0](https://github.com/mojaloop/thirdparty-sdk/releases/tag/v15.1.0)
 
-## 4. Application release notes
+## 4. API Versions
 
-1. ml-api-adapter - https://github.com/mojaloop/ml-api-adapter/releases/tag/v14.0.0
-2. central-ledger - https://github.com/mojaloop/central-ledger/releases/tag/v17.0.1
-3. account-lookup-service - https://github.com/mojaloop/account-lookup-service/releases/tag/v14.0.0
-4. quoting-service - https://github.com/mojaloop/quoting-service/releases/tag/v15.0.2
-5. central-settlement- https://github.com/mojaloop/central-settlement/releases/tag/v15.0.0
-6. central-event-processor - https://github.com/mojaloop/central-event-processor/releases/tag/v12.0.0
-7. bulk-api-adapter - https://github.com/mojaloop/bulk-api-adapter/releases/tag/v15.0.0
-8. email-notifier - https://github.com/mojaloop/email-notifier/releases/tag/v12.0.0
-9. als-oracle-pathfinder - https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v12.0.0
-10. transaction-requests-service - https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.0.1
-11. finance-portal-ui *(DEPRECATED)* - https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3
-12. finance-portal-backend-service *(DEPRECATED)* - https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2
-13. settlement-management *(DEPRECATED)* - https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0
-14. operator-settlement *(DEPRECATED)* - https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0
-15. event-sidecar - https://github.com/mojaloop/event-sidecar/releases/tag/v12.0.0
-16. event-stream-processor - https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.7
-17. simulator - https://github.com/mojaloop/simulator/releases/tag/v12.0.0
-18. mojaloop-simulator - https://github.com/mojaloop/mojaloop-simulator/releases/tag/v14.0.1
-19. sdk-scheme-adapter - https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v22.0.1
-20. ml-testing-toolkit - https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v16.0.0
-21. ml-testing-toolkit-ui - https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.2.1
-22. ml-testing-toolkit-client-lib - https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.2.0
-23. auth-service - https://github.com/mojaloop/auth-service/releases/tag/v14.0.0
-24. als-consent-oracle - https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.0
-25. thirdparty-api-svc - https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v13.0.2
-26. thirdparty-sdk-adapter - https://github.com/mojaloop/thirdparty-sdk/releases/tag/v15.1.0
+This release supports the following versions of the [Mojaloop family of APIs](https://docs.mojaloop.io/api):
+
+| API         | Supported Versions                                                                                                                                    | Notes |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| FSPIOP      | [v1.1](https://docs.mojaloop.io/api/fspiop/v1.1/api-definition.html), [v1.0](https://docs.mojaloop.io/api/fspiop/v1.0/api-definition.html) |       |
+| Settlements | [v2.0](https://docs.mojaloop.io/api/settlement)                                                                                            |       |
+| Admin       | [v1.0](https://docs.mojaloop.io/api/administration/central-ledger-api.html)                                                                |       |
+| Oracle      | [v1.0](https://docs.mojaloop.io/legacy/api/als-oracle-api-specification.html)                                                              |       |
+| Thirdparty  | [v1.0](https://docs.mojaloop.io/api/thirdparty)                                                                                           |       |
 
 ## 5. Breaking changes
 
@@ -146,23 +131,26 @@ Refer to full feature and bug fix list below for more info; and testing improvem
         helm -n <NAMESPACE> install mojaloop/emailnotifier -v <VERSION> -f <CUSTOMIZED_VALUES.yaml>
         ```
 
-3. Charts have been re-factored for consistency, which will impact the following value configs. These are not necessarily breaking changes, but you will need to ensure any customized values files are updated to reflect these changes:
+3. The `central` wrapper chart has been removed and the child charts have been flattened to the project root folder. This means the following charts are now configured at a root level for the [mojaloop/values.yaml](../mojaloop/values.yaml):
+    - `centralledger`
+    - `centralsettlements`
+4. Charts have been re-factored for consistency, which will impact the following value configs. These are not necessarily breaking changes, but you will need to ensure any customized values files are updated to reflect these changes:
     - Image, Command definitions have been made consistent, with added "debug" added.
     - InitContainers definitions have been made consistent.
     - Service definitions have been made consistent.
     - "config" and "config_files" are being used for consistency. This mainly impacts ML-Testing-Toolkit-Backend and ThirdParty Services.
         - "config" is used for general configurations.
         - "config_files" are used for actual config files as per the name.
-4. The following services no longer support a "Connection URL" for backend configurations to support Password Injection via Env Vars. You will now explicitly configure the Host, User, Pass, DB, Port, etc instead.
+5. The following services no longer support a "Connection URL" for backend configurations to support Password Injection via Env Vars. You will now explicitly configure the Host, User, Pass, DB, Port, etc instead.
      - Central-Ledger for MongoDB. (Ref: [central-ledger/pull/945](https://github.com/mojaloop/central-ledger/pull/945))
      - Bulk-API-Adapter for MongoDB. (Ref: [bulk-api-adapter/pull/95](https://github.com/mojaloop/bulk-api-adapter/pull/95))
      - ML-Testing-Toolkit-Backend for MongoDB. (Ref: [ml-testing-toolkit/pull/237](https://github.com/mojaloop/ml-testing-toolkit/pull/237))
      - Auth-Service for MySQL. (Ref: [auth-service/pull/132](https://github.com/mojaloop/auth-service/pull/132))
-5. Several ML-Testing-Toolkit Backend Dependencies are no longer needed as the associated functionality has been deprecated
+6. Several ML-Testing-Toolkit Backend Dependencies are no longer needed as the associated functionality has been deprecated
      - removed deprecated dependencies: Keycloak, Connection-Manager
-6. Migrations `tableName` for the Thirdparty Auth-Svc has changed from `auth-svc` to `migration` for consistency. If you have an existing migrated/seeded database, ensure that you rename this table to `migration` or otherwise manually customize your configuration ([values.yaml](../mojaloop/values.yaml)) to use `"tableName": "auth-svc",` instead of `"tableName": "migration"`.
-7. Thirdparty Kubernetes Services ports were standardized to port `80` for the following components: `tp-api-svc`, `auth-svc` & `consent-oracle`.
-8. The following Thirdparty Kubernetes Services are incorrectly deployed as a [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) in v14.x releases:
+7. Migrations `tableName` for the Thirdparty Auth-Svc has changed from `auth-svc` to `migration` for consistency. If you have an existing migrated/seeded database, ensure that you rename this table to `migration` or otherwise manually customize your configuration ([values.yaml](../mojaloop/values.yaml)) to use `"tableName": "auth-svc",` instead of `"tableName": "migration"`.
+8. Thirdparty Kubernetes Services ports were standardized to port `80` for the following components: `tp-api-svc`, `auth-svc` & `consent-oracle`.
+9. The following Thirdparty Kubernetes Services are incorrectly deployed as a [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) in v14.x releases:
 
     1. `tp-api-svc`
     2. `auth-svc`
