@@ -67,7 +67,7 @@ Refer to full feature and bug fix list below for more info; and testing improvem
 4. quoting-service: [v15.0.2](https://github.com/mojaloop/quoting-service/releases/tag/v15.0.2)
 5. central-settlement: [v15.0.0](https://github.com/mojaloop/central-settlement/releases/tag/v15.0.0)
 6. central-event-processor: [v12.0.0](https://github.com/mojaloop/central-event-processor/releases/tag/v12.0.0)
-7. bulk-api-adapter: v14.2.0 -> **v15.0.0** ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v14.2.0...v15.0.0))
+7. bulk-api-adapter: v14.2.0 -> [v15.0.0](https://github.com/mojaloop/bulk-api-adapter/releases/tag/v15.0.0) ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v14.2.0...v15.0.0))
 8. email-notifier: [v12.0.0](https://github.com/mojaloop/email-notifier/releases/tag/v12.0.0)
 9. als-oracle-pathfinder: [v12.0.0](https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v12.0.0)
 10. transaction-requests-service: [v14.0.1](https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.0.1)
