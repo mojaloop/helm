@@ -4,7 +4,7 @@ Date | Revision | Description
 ---------|----------|---------
  2023-02-20 | 0 | Initial draft
  2023-03-23 | 0 | Initial release
- 2023-03-24 | 1 | Fix [mojaloop/project/issues/3178](https://github.com/mojaloop/project/issues/3178) applied
+ 2023-03-24 | 1 | Fix [mojaloop/#3178](https://github.com/mojaloop/project/issues/3178) applied
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
