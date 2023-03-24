@@ -131,23 +131,26 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
         helm -n <NAMESPACE> install mojaloop/emailnotifier -v <VERSION> -f <CUSTOMIZED_VALUES.yaml>
         ```
 
-3. Charts have been re-factored for consistency, which will impact the following value configs. These are not necessarily breaking changes, but you will need to ensure any customized values files are updated to reflect these changes:
+3. The `central` wrapper chart has been removed and the child charts have been flattened to the project root folder. This means the following charts are now configured at a root level for the [mojaloop/values.yaml](../mojaloop/values.yaml):
+    - `centralledger`
+    - `centralsettlements`
+4. Charts have been re-factored for consistency, which will impact the following value configs. These are not necessarily breaking changes, but you will need to ensure any customized values files are updated to reflect these changes:
     - Image, Command definitions have been made consistent, with added "debug" added.
     - InitContainers definitions have been made consistent.
     - Service definitions have been made consistent.
     - "config" and "config_files" are being used for consistency. This mainly impacts ML-Testing-Toolkit-Backend and ThirdParty Services.
         - "config" is used for general configurations.
         - "config_files" are used for actual config files as per the name.
-4. The following services no longer support a "Connection URL" for backend configurations to support Password Injection via Env Vars. You will now explicitly configure the Host, User, Pass, DB, Port, etc instead.
+5. The following services no longer support a "Connection URL" for backend configurations to support Password Injection via Env Vars. You will now explicitly configure the Host, User, Pass, DB, Port, etc instead.
      - Central-Ledger for MongoDB. (Ref: [central-ledger/pull/945](https://github.com/mojaloop/central-ledger/pull/945))
      - Bulk-API-Adapter for MongoDB. (Ref: [bulk-api-adapter/pull/95](https://github.com/mojaloop/bulk-api-adapter/pull/95))
      - ML-Testing-Toolkit-Backend for MongoDB. (Ref: [ml-testing-toolkit/pull/237](https://github.com/mojaloop/ml-testing-toolkit/pull/237))
      - Auth-Service for MySQL. (Ref: [auth-service/pull/132](https://github.com/mojaloop/auth-service/pull/132))
-5. Several ML-Testing-Toolkit Backend Dependencies are no longer needed as the associated functionality has been deprecated
+6. Several ML-Testing-Toolkit Backend Dependencies are no longer needed as the associated functionality has been deprecated
      - removed deprecated dependencies: Keycloak, Connection-Manager
-6. Migrations `tableName` for the Thirdparty Auth-Svc has changed from `auth-svc` to `migration` for consistency. If you have an existing migrated/seeded database, ensure that you rename this table to `migration` or otherwise manually customize your configuration ([values.yaml](../mojaloop/values.yaml)) to use `"tableName": "auth-svc",` instead of `"tableName": "migration"`.
-7. Thirdparty Kubernetes Services ports were standardized to port `80` for the following components: `tp-api-svc`, `auth-svc` & `consent-oracle`.
-8. The following Thirdparty Kubernetes Services are incorrectly deployed as a [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) in v14.x releases:
+7. Migrations `tableName` for the Thirdparty Auth-Svc has changed from `auth-svc` to `migration` for consistency. If you have an existing migrated/seeded database, ensure that you rename this table to `migration` or otherwise manually customize your configuration ([values.yaml](../mojaloop/values.yaml)) to use `"tableName": "auth-svc",` instead of `"tableName": "migration"`.
+8. Thirdparty Kubernetes Services ports were standardized to port `80` for the following components: `tp-api-svc`, `auth-svc` & `consent-oracle`.
+9. The following Thirdparty Kubernetes Services are incorrectly deployed as a [headless service](https://kubernetes.io/docs/concepts/services-networking/service/#headless-services) in v14.x releases:
 
     1. `tp-api-svc`
     2. `auth-svc`
