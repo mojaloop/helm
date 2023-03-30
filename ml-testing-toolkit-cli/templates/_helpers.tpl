@@ -90,6 +90,7 @@ containers:
     mkdir tmp_test_cases;
     unzip -d tmp_test_cases -o downloaded-test-collections.zip;
     npm run cli -- -c cli-default-config.json -e cli-testcase-environment.json -i tmp_test_cases/{{ .Values.config.testCasesPathInZip }} -u {{ .Values.config.ttkBackendURL | replace "$release_name" .Release.Name }} --report-format html {{- if .Values.config.awsS3BucketName }} --report-target s3://{{ .Values.config.awsS3BucketName }}/{{ .Values.config.awsS3FilePath }}/report.html {{- end }} --report-auto-filename-enable true {{- if .Values.configCreds.SLACK_WEBHOOK_URL }} --slack-webhook-url $SLACK_WEBHOOK_URL {{- end }} --extra-summary-information="Test Suite:{{ .Values.config.testSuiteName }},Environment:{{ .Values.config.environmentName }}" {{- if .Values.config.saveReport }} --save-report true {{- end }} {{- if .Values.config.reportName }} --report-name {{ .Values.config.reportName }} {{- end }} {{- if .Values.config.saveReportBaseUrl }} --save-report-base-url {{ .Values.config.saveReportBaseUrl }} {{- end }};
+    echo "APP_EXIT_CODE=$?;";
   envFrom:
   - secretRef:
       name: {{ template "ml-testing-toolkit-cli.fullname" . }}-aws-creds
