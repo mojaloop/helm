@@ -5,6 +5,8 @@ Date | Revision | Description
  2023-02-20 | 0 | Initial draft
  2023-03-23 | 0 | Initial release
  2023-03-24 | 1 | Fix [mojaloop/#3178](https://github.com/mojaloop/project/issues/3178) applied
+ 2023-03-29 | 2 | Fix [mojaloop/#3254](https://github.com/mojaloop/project/issues/3254),[mojaloop/#3255](https://github.com/mojaloop/project/issues/3254),[mojaloop/#3256](https://github.com/mojaloop/project/issues/3254) applied
+
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
@@ -58,17 +60,20 @@ Refer to full feature and bug fix list below for more info; and testing improvem
 14. **mojaloop/#3076**: refactor break on error ([ml-testing-toolkit/pull/227](https://github.com/mojaloop/ml-testing-toolkit/pull/227)), closes [mojaloop/#3076](https://github.com/mojaloop/project/issues/3076)
 15. **mojaloop/#3000**: parameterized the inbound request size ([ml-testing-toolkit/pull/221](https://github.com/mojaloop/ml-testing-toolkit/pull/221)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3000)
 16. **mojaloop/#3165**: post clean up scripts failing ([mojaloop/testing-toolkit-test-cases/pull/117](https://github.com/mojaloop/testing-toolkit-test-cases/pull/117), [mojaloop/helm/pull/557](https://github.com/mojaloop/helm/pull/557)), closes [mojaloop/#3000](https://github.com/mojaloop/project/issues/3165)
+17. **mojaloop/#3254**: MongoDB connection URI failing when authentication details contain special chars ([central-ledger/pull/560](https://github.com/mojaloop/central-ledger/pull/951)), closes [mojaloop/#3254](https://github.com/mojaloop/project/issues/3254)
+18. **mojaloop/#3255**: MongoDB connection URI failing when authentication details contain special chars ([bulk-api-adapter/pull/560](https://github.com/mojaloop/bulk-api-adapter/pull/96)), closes [mojaloop/#3255](https://github.com/mojaloop/project/issues/3255)
+19. **mojaloop/#3256**: MongoDB connection URI failing when authentication details contain special chars ([ml-testing-toolkit/pull/239](https://github.com/mojaloop/ml-testing-toolkit/pull/239)), closes [mojaloop/#3256](https://github.com/mojaloop/project/issues/3256)
 
 ## 3. Application versions
 
 1. ml-api-adapter: [v14.0.0](https://github.com/mojaloop/ml-api-adapter/releases/tag/v14.0.0)
-2. central-ledger: v16.3.1 -> [v17.0.1](https://github.com/mojaloop/central-ledger/releases/tag/v17.0.1) ([Compare](https://github.com/mojaloop/central-ledger/compare/v16.3.1...v17.0.1))
+2. central-ledger: v16.3.1 -> [v17.0.3](https://github.com/mojaloop/central-ledger/releases/tag/v17.0.3) ([Compare](https://github.com/mojaloop/central-ledger/compare/v16.3.1...v17.0.3))
 3. account-lookup-service: [v14.0.0](https://github.com/mojaloop/account-lookup-service/releases/tag/v14.0.0)
 4. quoting-service: [v15.0.2](https://github.com/mojaloop/quoting-service/releases/tag/v15.0.2)
 5. central-settlement: [v15.0.0](https://github.com/mojaloop/central-settlement/releases/tag/v15.0.0)
-6. central-event-processor: [v12.0.0](https://github.com/mojaloop/central-event-processor/releases/tag/v12.0.0)
-7. bulk-api-adapter: v14.2.0 -> [v15.0.0](https://github.com/mojaloop/bulk-api-adapter/releases/tag/v15.0.0) ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v14.2.0...v15.0.0))
-8. email-notifier: [v12.0.0](https://github.com/mojaloop/email-notifier/releases/tag/v12.0.0)
+6. bulk-api-adapter: v14.2.0 -> [v15.0.3](https://github.com/mojaloop/bulk-api-adapter/releases/tag/v15.0.3) ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v14.2.0...v15.0.3))
+7. central-event-processor: [v12.0.0](https://github.com/mojaloop/central-event-processor/releases/tag/v12.0.0) *(Refer to section 5. BREAKING CHANGES)*
+8. email-notifier: [v12.0.0](https://github.com/mojaloop/email-notifier/releases/tag/v12.0.0) *(Refer to section 5. BREAKING CHANGES)*
 9. als-oracle-pathfinder: [v12.0.0](https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v12.0.0)
 10. transaction-requests-service: [v14.0.1](https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.0.1)
 11. finance-portal-ui: [v10.4.3](https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3) *(DEPRECATED)*
@@ -80,7 +85,7 @@ Refer to full feature and bug fix list below for more info; and testing improvem
 17. simulator: [12.0.0](https://github.com/mojaloop/simulator/releases/tag/v12.0.0)
 18. mojaloop-simulator: v13.0.1 -> [v14.0.1](https://github.com/mojaloop/mojaloop-simulator/releases/tag/v14.0.1) ([Compare](https://github.com/mojaloop/mojaloop-simulator/compare/v13.0.1...v14.0.1))
 19. sdk-scheme-adapter: v21.4.0 -> [v22.0.1](https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v22.0.1) ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v21.4.0...v22.0.1))
-20. ml-testing-toolkit: v15.7.0 -> [v16.0.0](https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v16.0.0) ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v16.0.0))
+20. ml-testing-toolkit: v15.7.0 -> [v16.0.1](https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v16.0.1) ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v16.0.1))
 21. ml-testing-toolkit-ui: v15.1.3 -> [v15.2.1](https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.2.1) ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.1.3...v15.2.1))
 22. ml-testing-toolkit-client-lib: v1.1.1 -> [v1.2.0](https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.2.0) ([Compare](https://github.com/mojaloop/ml-testing-toolkit-client-lib/compare/v1.1.1...v1.2.0))
 23. auth-service: v13.0.2 -> [v14.0.0](https://github.com/mojaloop/auth-service/releases/tag/v14.0.0) ([Compare](https://github.com/mojaloop/auth-service/compare/v13.0.2...v14.0.0))
