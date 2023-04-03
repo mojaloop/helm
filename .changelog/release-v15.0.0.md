@@ -107,7 +107,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 
 ## 5. Breaking changes
 
-1. Backend dependencies have been externalized, see [deploying-backend-dependencies](../README.md#deploying-backend-dependencies) for an example on how to deploy backend dependencies, and refer to the [upgrade-strategy-guide](https://docs.mojaloop.io/legacy/deployment-guide/upgrade-strategy-guide.html) for best practices on deployment topologies.
+1. Backend dependencies have been externalized, see [deploying-backend-dependencies](../README.md#deploying-backend-dependencies) for an example on how to deploy backend dependencies, and refer to the [upgrade-strategy-guide](https://docs.mojaloop.io/technical/deployment-guide/upgrade-strategy-guide.html) for best practices on deployment topologies.
 2. The `central-event-processor` and `email-notifier` services are no longer packaged as part of the main Mojaloop Helm chart, but can be deployed independently:
 
    1. `central-event-processor` - Refer to [centraleventprocessor/values.yaml](../centraleventprocessor/values.yaml) for configuration options.
