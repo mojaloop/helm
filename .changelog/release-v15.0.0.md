@@ -6,7 +6,7 @@ Date | Revision | Description
  2023-03-23 | 0 | Initial release
  2023-03-24 | 1 | Fix [mojaloop/#3178](https://github.com/mojaloop/project/issues/3178) applied
  2023-03-29 | 2 | Fix [mojaloop/#3254](https://github.com/mojaloop/project/issues/3254),[mojaloop/#3255](https://github.com/mojaloop/project/issues/3254),[mojaloop/#3256](https://github.com/mojaloop/project/issues/3254) applied
-
+ 2023-04-04 | 3 | Fix [mojaloop/#2845](https://github.com/mojaloop/project/issues/2845),[mojaloop/#3176](https://github.com/mojaloop/project/issues/3176) applied
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
@@ -41,6 +41,8 @@ Refer to full feature and bug fix list below for more info; and testing improvem
 16. **mojaloop/#3130**: alter db config and allow password env setting ([ml-testing-toolkit/pull/237](https://github.com/mojaloop/ml-testing-toolkit/pull/237)), closes [mojaloop/#3130](https://github.com/mojaloop/project/issues/3130)
 17. **mojaloop/#3133** add report name customization and saving option ([ml-testing-toolkit-ui/pull/171](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/171)), closes [mojaloop/#3133](https://github.com/mojaloop/project/issues/3133)
 18. **mojaloop/#3133** add option to specify report name saved to TTK backend ([ml-testing-toolkit-client-lib/pull/6](https://github.com/mojaloop/ml-testing-toolkit-client-lib/pull/6)), closes [mojaloop/#3133](https://github.com/mojaloop/project/issues/3133)
+19. **mojaloop/#3176** add option for no callback in callback/validation rules ([ml-testing-toolkit-ui/pull/176](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/176)), closes [mojaloop/#3176](https://github.com/mojaloop/project/issues/3176)
+20. **mojaloop/#3176** add no response callback option ([ml-testing-toolkit/pull/240](https://github.com/mojaloop/ml-testing-toolkit/pull/240)), closes [mojaloop/#3176](https://github.com/mojaloop/project/issues/3176)
 
 ## 2. Bug Fixes
 
@@ -85,8 +87,8 @@ Refer to full feature and bug fix list below for more info; and testing improvem
 17. simulator: [12.0.0](https://github.com/mojaloop/simulator/releases/tag/v12.0.0)
 18. mojaloop-simulator: v13.0.1 -> [v14.0.1](https://github.com/mojaloop/mojaloop-simulator/releases/tag/v14.0.1) ([Compare](https://github.com/mojaloop/mojaloop-simulator/compare/v13.0.1...v14.0.1))
 19. sdk-scheme-adapter: v21.4.0 -> [v22.0.1](https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v22.0.1) ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v21.4.0...v22.0.1))
-20. ml-testing-toolkit: v15.7.0 -> [v16.0.1](https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v16.0.1) ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v16.0.1))
-21. ml-testing-toolkit-ui: v15.1.3 -> [v15.2.1](https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.2.1) ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.1.3...v15.2.1))
+20. ml-testing-toolkit: v15.7.0 -> [v16.1.1](https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v16.1.1) ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v15.0.0...v16.1.1))
+21. ml-testing-toolkit-ui: v15.1.3 -> [v15.3.0](https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.3.0) ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.1.3...v15.3.0))
 22. ml-testing-toolkit-client-lib: v1.1.1 -> [v1.2.0](https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.2.0) ([Compare](https://github.com/mojaloop/ml-testing-toolkit-client-lib/compare/v1.1.1...v1.2.0))
 23. auth-service: v13.0.2 -> [v14.0.0](https://github.com/mojaloop/auth-service/releases/tag/v14.0.0) ([Compare](https://github.com/mojaloop/auth-service/compare/v13.0.2...v14.0.0))
 24. als-consent-oracle: [v0.2.0](https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.0)
