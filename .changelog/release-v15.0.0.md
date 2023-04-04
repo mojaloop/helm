@@ -6,7 +6,7 @@ Date | Revision | Description
  2023-03-23 | 0 | Initial release
  2023-03-24 | 1 | Fix [mojaloop/#3178](https://github.com/mojaloop/project/issues/3178) applied
  2023-03-29 | 2 | Fix [mojaloop/#3254](https://github.com/mojaloop/project/issues/3254),[mojaloop/#3255](https://github.com/mojaloop/project/issues/3254),[mojaloop/#3256](https://github.com/mojaloop/project/issues/3254) applied
- 2023-04-04 | 3 | Fix [mojaloop/#2845](https://github.com/mojaloop/project/issues/2845),[mojaloop/#3176](https://github.com/mojaloop/project/issues/3176) applied
+ 2023-04-04 | 3 | Feature [mojaloop/#2845](https://github.com/mojaloop/project/issues/2845),[mojaloop/#3176](https://github.com/mojaloop/project/issues/3176) applied
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
