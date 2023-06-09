@@ -8,13 +8,11 @@ Date | Revision | Description
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
 
-This is a patch release for [v15.0.0 Release](./release-v15.0.0.md).
-
 ## 0. Summary
 
-Major updates with this release include:
+Minor parch release for [v15.0.0 Release](./release-v15.0.0.md) includes:
 
-1. TBD
+1. CronJob for cleanup scripts to ensure that liquidity is reset. This should allow daily cron-jobs to run indefinitely.
 
 Refer to full feature and bug fix list below for more info; and testing improvements listed separately.
 
