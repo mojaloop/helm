@@ -8,6 +8,8 @@ Date | Revision | Description
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
 
+This is a patch release for [v15.0.0 Release](./release-v15.0.0.md).
+
 ## 0. Summary
 
 Major updates with this release include:
