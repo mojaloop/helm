@@ -19,7 +19,6 @@ Refer to full feature and bug fix list below for more info; and testing improvem
 ## 1. New Features
 
 1. **mojaloop/#3361** Reset Liquidity - Add CRON Job to reset ([helm/pull/?](https://github.com/mojaloop/helm/pull/?)), closes [mojaloop/#3361](https://github.com/mojaloop/project/issues/3361)
-...
 
 ## 2. Bug Fixes
 
