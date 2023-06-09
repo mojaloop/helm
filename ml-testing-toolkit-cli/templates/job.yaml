@@ -5,11 +5,14 @@ metadata:
   name: {{ template "ml-testing-toolkit-cli.fullname" . }}
 spec:
   schedule: {{ .Values.scheduling.cronSchedule | quote }}
-  successfulJobsHistoryLimit: 7
-  failedJobsHistoryLimit: 7
+  suspend: {{ .Values.scheduling.suspend }}
+  successfulJobsHistoryLimit: {{ .Values.scheduling.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.scheduling.failedJobsHistoryLimit }}
+  timeZone: {{ .Values.scheduling.timeZone | quote }}
   jobTemplate:
     spec:
-      backoffLimit: 0
+      backoffLimit: {{ .Values.backoffLimit }}
+      restartPolicy: {{ .Values.restartPolicy }}
       {{- include "ml-testing-toolkit-cli.jobtemplate" . | nindent 6 }}
 {{- else if not .Values.tests.enabled }}
 apiVersion: {{ template "ml-testing-toolkit-cli.apiVersion.Job" . }}
@@ -23,6 +26,7 @@ metadata:
     "helm.sh/hook-delete-policy": {{ .Values.postInstallHook.deletePolicy }}
   {{- end }}
 spec:
-  backoffLimit: 0
+  backoffLimit: {{ .Values.backoffLimit }}
+  restartPolicy: {{ .Values.restartPolicy }}
   {{- include "ml-testing-toolkit-cli.jobtemplate" . | indent 2 }}
 {{- end }}

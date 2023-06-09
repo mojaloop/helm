@@ -79,17 +79,14 @@ containers:
 - name: {{ .Chart.Name }}
   image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
   imagePullPolicy: {{ .Values.image.pullPolicy }}
-  {{- if .Values.image.imagePullSecrets }}
+  {{- if .Values.image.pullSecrets }}
   imagePullSecrets:
-  {{ toYaml .Values.image.imagePullSecrets | indent 10 }}
+  {{ toYaml .Values.image.pullSecrets | indent 10 }}
   {{- end }}
   command: ["/bin/sh", "-c"]
   args:
-  - echo "Downloading the test collection...";
-    wget {{ .Values.config.testCasesZipUrl }} -O downloaded-test-collections.zip;
-    mkdir tmp_test_cases;
-    unzip -d tmp_test_cases -o downloaded-test-collections.zip;
-    npm run cli -- -c cli-default-config.json -e cli-testcase-environment.json -i tmp_test_cases/{{ .Values.config.testCasesPathInZip }} -u {{ .Values.config.ttkBackendURL | replace "$release_name" .Release.Name }} --report-format html {{- if .Values.config.awsS3BucketName }} --report-target s3://{{ .Values.config.awsS3BucketName }}/{{ .Values.config.awsS3FilePath }}/report.html {{- end }} --report-auto-filename-enable true {{- if .Values.configCreds.SLACK_WEBHOOK_URL }} --slack-webhook-url $SLACK_WEBHOOK_URL {{- end }} --extra-summary-information="Test Suite:{{ .Values.config.testSuiteName }},Environment:{{ .Values.config.environmentName }}" {{- if .Values.config.saveReport }} --save-report true {{- end }} {{- if .Values.config.reportName }} --report-name {{ .Values.config.reportName }} {{- end }} {{- if .Values.config.saveReportBaseUrl }} --save-report-base-url {{ .Values.config.saveReportBaseUrl }} {{- end }};
+  - |
+    {{- include "common.tplvalues.render" (dict "value" .Values.script "context" $) | nindent 12 }}
   envFrom:
   - secretRef:
       name: {{ template "ml-testing-toolkit-cli.fullname" . }}-aws-creds
