@@ -134,6 +134,22 @@ env:
   # cnofirmation call will be required to progress the transfer to quotes state.
   AUTO_ACCEPT_PARTY: false
 
+  # if set to false the SDK will not automatically accept a resolved party on a requestToPay operation
+  # but will halt the operation after a party lookup response is received. A further
+  # confirmation call will be required to progress the requestToPay to transactionRequest state.
+  AUTO_ACCEPT_R2P_PARTY: false
+
+  # This parameter is only for the requestToPay transfers when the initiator is of type BUSINESS.
+  # if set to false the SDK will not automatically accept quote on a requestToPayTransfer.
+  # but will halt the operation after a quote response is received. A further
+  # confirmation call will be required to progress the requestToPayTransfer to authorization step.
+  AUTO_ACCEPT_R2P_BUSINESS_QUOTES: false
+
+  # if set to false the SDK will not automatically accept OTP on a requestToPay operation
+  # but will halt the operation after receiving entered OTP from payee. A further
+  # confirmation call will be required to progress the requestToPayTransfer to transfer step.
+  AUTO_ACCEPT_R2P_DEVICE_OTP: false
+
   # when set to true, when sending money via the outbound API, the SDK will use the value
   # of FSPIOP-Source header from the received quote response as the payeeFsp value in the
   # transfer prepare request body instead of the value received in the payee party lookup.
@@ -286,7 +302,7 @@ containerSecurityContext:
 image:
   registry: docker.io
   repository: mojaloop/sdk-scheme-adapter
-  tag: v22.0.1
+  tag: v23.0.0
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -476,7 +492,7 @@ service:
 ingress:
   ## @param ingress.enabled Enable ingress record generation for %%MAIN_CONTAINER_NAME%%
   ##
-  enabled: true
+  enabled: false
   ## @param ingress.pathType Ingress path type
   ##
   pathType: ImplementationSpecific
