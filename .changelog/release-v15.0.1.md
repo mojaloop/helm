@@ -18,11 +18,15 @@ Refer to full feature and bug fix list below for more info; and testing improvem
 
 ## 1. New Features
 
-1. **mojaloop/#3361** Reset Liquidity - Add CRON Job to reset ([helm/pull/?](https://github.com/mojaloop/helm/pull/?)), closes [mojaloop/#3361](https://github.com/mojaloop/project/issues/3361)
+1. **mojaloop/#3361** [Helm] Add CRON Job to reset liquidity ([helm/pull/569](https://github.com/mojaloop/helm/pull/569)), closes [mojaloop/#3361](https://github.com/mojaloop/project/issues/3361)
+2. **mojaloop/#3344** [SDK-Scheme-Adapter] Enhance SDK Scheme Adaptor to support the request to Pay use case([sdk-scheme-adapter/pull/442](https://github.com/mojaloop/sdk-scheme-adapter/pull/442), [sdk-scheme-adapter/pull/446](https://github.com/mojaloop/sdk-scheme-adapter/pull/446)), epic [mojaloop/#3344](https://github.com/mojaloop/project/issues/3344)
+    1. feat(mojaloop/#3345): Extend Payee requestToPay API process to support the validation of the payer details , closes [mojaloop/#3345](https://github.com/mojaloop/project/issues/3345)
+    2. feat(mojaloop/#3347): Enhance the requestToPayTransfer API process for Payer Acceptance flow, closes [mojaloop/#3347](https://github.com/mojaloop/project/issues/3347)
 
 ## 2. Bug Fixes
 
-N/A.
+1. **mojaloop/#3285** [SDK-Scheme-Adapter] /requestToPay is failing at validation ([sdk-scheme-adapter/pull/442](https://github.com/mojaloop/sdk-scheme-adapter/pull/442)), closes [mojaloop/#3285](https://github.com/mojaloop/project/issues/3285)
+2. **mojaloop/#3382** [SDK-Scheme-Adapter] Sdk-Scheme-Adapter config.transactionRequestsEndpoint is not being set correctly ([sdk-scheme-adapter/pull/451](https://github.com/mojaloop/sdk-scheme-adapter/pull/451)), closes [mojaloop/#3382](https://github.com/mojaloop/project/issues/3382)
 
 ## 3. Application versions
 
@@ -44,7 +48,7 @@ N/A.
 16. event-stream-processor: [v12.0.0-snapshot.7](https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.7)
 17. simulator: [12.0.0](https://github.com/mojaloop/simulator/releases/tag/v12.0.0)
 18. mojaloop-simulator: [v14.0.1](https://github.com/mojaloop/mojaloop-simulator/releases/tag/v14.0.1)
-19. sdk-scheme-adapter: [v22.0.1](https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v22.0.1)
+19. sdk-scheme-adapter: v22.0.1 -> [v23.0.1](https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v23.0.2) ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v22.0.1...v23.0.1))
 20. ml-testing-toolkit: [v16.1.1](https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v16.1.1)
 21. ml-testing-toolkit-ui: [v15.3.0](https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.3.0)
 22. ml-testing-toolkit-client-lib: [v1.2.0](https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.2.0)
