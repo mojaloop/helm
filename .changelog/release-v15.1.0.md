@@ -128,7 +128,7 @@ More information can be found here:
     |  Kafka   |  bitnami/kafka:3.3.1-debian-11-r1   |     |
     |  Redis   |  bitnami/redis:7.0.5-debian-11-r7   |     |
     |  MongoDB   |  bitnami/mongodb:6.0.2-debian-11-r11   |     |
-    |  Testing Toolkit Test Cases   |  [v15.0.1](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.0.1)   |     |
+    |  Testing Toolkit Test Cases   |  [v15.1.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v15.1.0)   |     |
     |  example-mojaloop-backend   |  v15.0.0   |  [README](../example-mojaloop-backend/README.md)   |
 
 2. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
