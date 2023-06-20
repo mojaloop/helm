@@ -60,7 +60,7 @@
 
 1. Add Mojaloop repo
 
-    `helm repo add mojaloop http://mojaloop.io/helm/repo/`
+    `helm repo add mojaloop https://mojaloop.io/helm/repo/`
 
 2. Keep your local Mojaloop repo up to date
 
