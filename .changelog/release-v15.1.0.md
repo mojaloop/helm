@@ -3,14 +3,14 @@
 Date | Revision | Description
 ---------|----------|---------
  2023-06-08 | 0 | Initial draft
-  |  |
+ 2023-06-21 | 1 | Initial release
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
 
 ## 0. Summary
 
-Patch release for [v15.0.0 Release](./release-v15.0.0.md), which includes the following changes:
+Minor enhancements for [v15.0.0 Release](./release-v15.0.0.md), which includes the following changes:
 
 1. CronJob for cleanup scripts to ensure that liquidity is reset. This should allow daily cron-jobs to run indefinitely.
 2. SDK Scheme Adapter support for non-auth based Request-To-Pay scenarios has been enhanced and closely aligned to the [FSPIOP v1.1 Specification](https://docs.mojaloop.io/api/fspiop/v1.1/api-definition.html#api-resource-transactionrequests), with Helm tests added to verify this functionality. Ensure you enable them by configuring the following [mojaloop/values.yaml](../mojaloop/values.yaml) values if required:
