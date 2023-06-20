@@ -10,9 +10,25 @@ Date | Revision | Description
 
 ## 0. Summary
 
-Minor parch release for [v15.0.0 Release](./release-v15.0.0.md) includes:
+Minor parch release for [v15.0.0 Release](./release-v15.0.0.md), which includes the following changes:
 
 1. CronJob for cleanup scripts to ensure that liquidity is reset. This should allow daily cron-jobs to run indefinitely.
+2. SDK Scheme Adapter support for non-auth based Request-To-Pay scenarios has been enhanced and closely aligned to the [FSPIOP v1.1 Specification](https://docs.mojaloop.io/api/fspiop/v1.1/api-definition.html#api-resource-transactionrequests), with Helm tests added to verify this functionality. Ensure you enable them by configuring the following [mojaloop/values.yaml](../mojaloop/values.yaml) values if required:
+   1. `mojaloop-ttk-simulators.enabled=true` - Enable Mojaloop Testing Toolkit based simulators required to execute the tests.
+   2. `ml-ttk-test-val-sdk-r2p.tests.enabled=true` - Enable SDK Request To Pay Helm test.
+3. Some additional quality of life improvements have been made to the Helm Tests and CronJobs:
+    1. Helm Tests now support `allowFailures` configuration, this allows the TTK CLI Test Runner to return failure exit-codes to the terminal:
+       - By default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
+       - If this is set to `true` - it will allow the next consecutive Helm test to be executed regardless of any failures.
+    2. The following configuration values have now been parameterized: `restartPolicy`, `backoffLimit` - see [here](https://kubernetes.io/docs/concepts/workloads/controllers/job/#handling-pod-and-container-failures).
+    3. The following configuration values have been added to CronJobs:
+       1. `successfulJobsHistoryLimit`, and `failedJobsHistoryLimit` - see [here](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#jobs-history-limits).
+       2. `suspend` - see [here](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#schedule-suspension).
+       3. `timeZone` - see [here](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#time-zones).
+    4. Moved `command arguments` to parameterized script value configuration to allow for override.
+4. Testing-Toolkit improvements
+   1. Now supports "No Callback" rules, which has allowed us to replace the `legacy-simulator` for `noresponsepayeefsp` test-cases with the Testing-Toolkit. Note that we still require the `legacy-simulator` for the simulated oracle.
+   2. Configurable Payer name in Mobile Simulator, which is useful for demo purposes.
 
 Refer to full feature and bug fix list below for more info; and testing improvements listed separately.
 
@@ -22,6 +38,8 @@ Refer to full feature and bug fix list below for more info; and testing improvem
 2. **mojaloop/#3344** [SDK-Scheme-Adapter] Enhance SDK Scheme Adaptor to support the request to Pay use case([sdk-scheme-adapter/pull/442](https://github.com/mojaloop/sdk-scheme-adapter/pull/442), [sdk-scheme-adapter/pull/446](https://github.com/mojaloop/sdk-scheme-adapter/pull/446)), epic [mojaloop/#3344](https://github.com/mojaloop/project/issues/3344)
     1. feat(mojaloop/#3345): Extend Payee requestToPay API process to support the validation of the payer details , closes [mojaloop/#3345](https://github.com/mojaloop/project/issues/3345)
     2. feat(mojaloop/#3347): Enhance the requestToPayTransfer API process for Payer Acceptance flow, closes [mojaloop/#3347](https://github.com/mojaloop/project/issues/3347)
+3. **mojaloop/#3176** [Testing-Toolkit] add option for no callback in callback/validation rules ([ml-testing-toolkit-ui/issues/176](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/177)) (b783a92), closes [mojaloop/#3176](https://github.com/mojaloop/project/issues/3176)
+4. [Testing-Toolkit] configurable payer name in mobilesim ([ml-testing-toolkit-ui/issues/176](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/177))
 
 ## 2. Bug Fixes
 
@@ -50,7 +68,7 @@ Refer to full feature and bug fix list below for more info; and testing improvem
 18. mojaloop-simulator: [v14.0.1](https://github.com/mojaloop/mojaloop-simulator/releases/tag/v14.0.1)
 19. sdk-scheme-adapter: v22.0.1 -> [v23.0.1](https://github.com/mojaloop/sdk-scheme-adapter/releases/tag/v23.0.2) ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v22.0.1...v23.0.1))
 20. ml-testing-toolkit: [v16.1.1](https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v16.1.1)
-21. ml-testing-toolkit-ui: [v15.3.0](https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.3.0)
+21. ml-testing-toolkit-ui: v15.3.0 -> [v15.4.0](https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.3.0) ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.3.0...v15.4.0))
 22. ml-testing-toolkit-client-lib: [v1.2.0](https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.2.0)
 23. auth-service: [v14.0.0](https://github.com/mojaloop/auth-service/releases/tag/v14.0.0)
 24. als-consent-oracle: [v0.2.0](https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.0)
