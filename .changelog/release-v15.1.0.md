@@ -12,7 +12,7 @@ Date | Revision | Description
 
 Minor enhancements for [v15.0.0 Release](./release-v15.0.0.md), which includes the following changes:
 
-1. Account Lookup Service updated to support test ISO currencies: `XTS`, `XXX`
+1. Account Lookup Service & Transaction Request Service updated to support test ISO currencies: `XTS`, `XXX`
 2. CronJob for cleanup scripts to ensure that liquidity is reset. This should allow daily cron-jobs to run indefinitely.
 2. SDK Scheme Adapter support for non-auth based Request-To-Pay scenarios has been enhanced and closely aligned to the [FSPIOP v1.1 Specification](https://docs.mojaloop.io/api/fspiop/v1.1/api-definition.html#api-resource-transactionrequests), with Helm tests added to verify this functionality. Ensure you enable them by configuring the following [mojaloop/values.yaml](../mojaloop/values.yaml) values if required:
    1. `mojaloop-ttk-simulators.enabled=true` - Enable Mojaloop Testing Toolkit based simulators required to execute the tests.
@@ -35,7 +35,7 @@ Refer to full feature and bug fix list below for more info; and testing improvem
 
 ## 1. New Features
 
-1. **mojaloop/#2740** add testing currency codes and update codeowners ([account-lookup-service/pull/450](https://github.com/mojaloop/account-lookup-service/pull/450)), closes [mojaloop/#2740](https://github.com/mojaloop/project/issues/2740)
+1. **mojaloop/#2740** add testing currency codes and update codeowners ([account-lookup-service/pull/450](https://github.com/mojaloop/account-lookup-service/pull/450), [transaction-requests-service/pull/92](https://github.com/mojaloop/transaction-requests-service/pull/92)), closes [mojaloop/#2740](https://github.com/mojaloop/project/issues/2740)
 2. **mojaloop/#3361** [Helm] Add CRON Job to reset liquidity ([helm/pull/569](https://github.com/mojaloop/helm/pull/569)), closes [mojaloop/#3361](https://github.com/mojaloop/project/issues/3361)
 3. **mojaloop/#3344** [SDK-Scheme-Adapter] Enhance SDK Scheme Adaptor to support the request to Pay use case([sdk-scheme-adapter/pull/442](https://github.com/mojaloop/sdk-scheme-adapter/pull/442), [sdk-scheme-adapter/pull/446](https://github.com/mojaloop/sdk-scheme-adapter/pull/446)), epic [mojaloop/#3344](https://github.com/mojaloop/project/issues/3344)
     1. feat(mojaloop/#3345): Extend Payee requestToPay API process to support the validation of the payer details , closes [mojaloop/#3345](https://github.com/mojaloop/project/issues/3345)
