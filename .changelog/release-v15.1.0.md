@@ -12,11 +12,12 @@ Date | Revision | Description
 
 Minor enhancements for [v15.0.0 Release](./release-v15.0.0.md), which includes the following changes:
 
-1. CronJob for cleanup scripts to ensure that liquidity is reset. This should allow daily cron-jobs to run indefinitely.
+1. Account Lookup Service updated to support test ISO currencies: `XTS`, `XXX`
+2. CronJob for cleanup scripts to ensure that liquidity is reset. This should allow daily cron-jobs to run indefinitely.
 2. SDK Scheme Adapter support for non-auth based Request-To-Pay scenarios has been enhanced and closely aligned to the [FSPIOP v1.1 Specification](https://docs.mojaloop.io/api/fspiop/v1.1/api-definition.html#api-resource-transactionrequests), with Helm tests added to verify this functionality. Ensure you enable them by configuring the following [mojaloop/values.yaml](../mojaloop/values.yaml) values if required:
    1. `mojaloop-ttk-simulators.enabled=true` - Enable Mojaloop Testing Toolkit based simulators required to execute the tests.
    2. `ml-ttk-test-val-sdk-r2p.tests.enabled=true` - Enable SDK Request To Pay Helm test.
-3. Some additional quality of life improvements have been made to the Helm Tests and CronJobs:
+4. Some additional quality of life improvements have been made to the Helm Tests and CronJobs:
     1. Helm Tests now support `allowFailures` configuration, this allows the TTK CLI Test Runner to return failure exit-codes to the terminal:
        - By default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
        - If this is set to `true` - it will allow the next consecutive Helm test to be executed regardless of any failures.
@@ -26,7 +27,7 @@ Minor enhancements for [v15.0.0 Release](./release-v15.0.0.md), which includes t
        2. `suspend` - see [here](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#schedule-suspension).
        3. `timeZone` - see [here](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#time-zones).
     4. Moved `command arguments` to parameterized script value configuration to allow for override.
-4. Testing-Toolkit improvements
+5. Testing-Toolkit improvements
    1. Now supports "No Callback" rules, which has allowed us to replace the `legacy-simulator` for `noresponsepayeefsp` test-cases with the Testing-Toolkit. Note that we still require the `legacy-simulator` for the simulated oracle.
    2. Configurable Payer name in Mobile Simulator, which is useful for demo purposes.
 
@@ -34,12 +35,13 @@ Refer to full feature and bug fix list below for more info; and testing improvem
 
 ## 1. New Features
 
-1. **mojaloop/#3361** [Helm] Add CRON Job to reset liquidity ([helm/pull/569](https://github.com/mojaloop/helm/pull/569)), closes [mojaloop/#3361](https://github.com/mojaloop/project/issues/3361)
-2. **mojaloop/#3344** [SDK-Scheme-Adapter] Enhance SDK Scheme Adaptor to support the request to Pay use case([sdk-scheme-adapter/pull/442](https://github.com/mojaloop/sdk-scheme-adapter/pull/442), [sdk-scheme-adapter/pull/446](https://github.com/mojaloop/sdk-scheme-adapter/pull/446)), epic [mojaloop/#3344](https://github.com/mojaloop/project/issues/3344)
+1. **mojaloop/#2740** add testing currency codes and update codeowners ([account-lookup-service/pull/450](https://github.com/mojaloop/account-lookup-service/pull/450)), closes [mojaloop/#2740](https://github.com/mojaloop/project/issues/2740)
+2. **mojaloop/#3361** [Helm] Add CRON Job to reset liquidity ([helm/pull/569](https://github.com/mojaloop/helm/pull/569)), closes [mojaloop/#3361](https://github.com/mojaloop/project/issues/3361)
+3. **mojaloop/#3344** [SDK-Scheme-Adapter] Enhance SDK Scheme Adaptor to support the request to Pay use case([sdk-scheme-adapter/pull/442](https://github.com/mojaloop/sdk-scheme-adapter/pull/442), [sdk-scheme-adapter/pull/446](https://github.com/mojaloop/sdk-scheme-adapter/pull/446)), epic [mojaloop/#3344](https://github.com/mojaloop/project/issues/3344)
     1. feat(mojaloop/#3345): Extend Payee requestToPay API process to support the validation of the payer details , closes [mojaloop/#3345](https://github.com/mojaloop/project/issues/3345)
     2. feat(mojaloop/#3347): Enhance the requestToPayTransfer API process for Payer Acceptance flow, closes [mojaloop/#3347](https://github.com/mojaloop/project/issues/3347)
-3. **mojaloop/#3176** [Testing-Toolkit] add option for no callback in callback/validation rules ([ml-testing-toolkit-ui/issues/176](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/177)) (b783a92), closes [mojaloop/#3176](https://github.com/mojaloop/project/issues/3176)
-4. [Testing-Toolkit] configurable payer name in mobilesim ([ml-testing-toolkit-ui/issues/176](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/177))
+4. **mojaloop/#3176** [Testing-Toolkit] add option for no callback in callback/validation rules ([ml-testing-toolkit-ui/issues/176](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/177)) (b783a92), closes [mojaloop/#3176](https://github.com/mojaloop/project/issues/3176)
+5. [Testing-Toolkit] configurable payer name in mobilesim ([ml-testing-toolkit-ui/issues/176](https://github.com/mojaloop/ml-testing-toolkit-ui/pull/177))
 
 ## 2. Bug Fixes
 
@@ -50,14 +52,14 @@ Refer to full feature and bug fix list below for more info; and testing improvem
 
 1. ml-api-adapter: [v14.0.0](https://github.com/mojaloop/ml-api-adapter/releases/tag/v14.0.0)
 2. central-ledger: [v17.0.3](https://github.com/mojaloop/central-ledger/releases/tag/v17.0.3)
-3. account-lookup-service: [v14.0.0](https://github.com/mojaloop/account-lookup-service/releases/tag/v14.0.0)
+3. account-lookup-service: 14.0.0 -> [v14.1.0](https://github.com/mojaloop/account-lookup-service/releases/tag/v14.0.0) ([Compare](https://github.com/mojaloop/account-lookup-service/compare/v14.0.0...v14.1.0))
 4. quoting-service: [v15.0.2](https://github.com/mojaloop/quoting-service/releases/tag/v15.0.2)
 5. central-settlement: [v15.0.0](https://github.com/mojaloop/central-settlement/releases/tag/v15.0.0)
 6. bulk-api-adapter: [v15.0.3](https://github.com/mojaloop/bulk-api-adapter/releases/tag/v15.0.3)
 7. central-event-processor: [v12.0.0](https://github.com/mojaloop/central-event-processor/releases/tag/v12.0.0) *(Refer to section 5. BREAKING CHANGES)*
 8. email-notifier: [v12.0.0](https://github.com/mojaloop/email-notifier/releases/tag/v12.0.0) *(Refer to section 5. BREAKING CHANGES)*
 9. als-oracle-pathfinder: [v12.0.0](https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v12.0.0)
-10. transaction-requests-service: [v14.0.1](https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.0.1)
+10. transaction-requests-service: v14.0.1 -> [v14.1.0](https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.1.0) ([Compare](https://github.com/mojaloop/transaction-requests-service/compare/v14.0.1...v14.1.0))
 11. finance-portal-ui: [v10.4.3](https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3) *(DEPRECATED)*
 12. finance-portal-backend-service: [v15.0.2](https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2) *(DEPRECATED)*
 13. settlement-management: [v11.0.0](https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0) *(DEPRECATED)*
