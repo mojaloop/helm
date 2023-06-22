@@ -144,6 +144,7 @@ jobs:
     executor: default-docker-helm
     environment:
       GIT_PROJECT_URL: << pipeline.project.git_url >>
+      GIT_BRANCH: << pipeline.git.branch >>
     steps:
       - run:
           <<: *defaults_Dependencies
@@ -170,7 +171,7 @@ jobs:
             else
               echo "CIRCLE_SHA1=${CIRCLE_SHA1} exists setting env configs for Helm Snapshot"
               echo "export GIT_RELEASE_URL=${GIT_PROJECT_URL}/commit/${CIRCLE_SHA1}" >> $BASH_ENV
-              echo "export GIT_RELEASE_TAG=${CIRCLE_SHA1}" >> $BASH_ENV
+              echo "export GIT_RELEASE_TAG='${GIT_BRANCH}@${CIRCLE_SHA1:0:7}'" >> $BASH_ENV
               echo "export GIT_RELEASE_TYPE='Helm Snapshot'" >> $BASH_ENV
             fi
             source $BASH_ENV
