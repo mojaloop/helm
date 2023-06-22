@@ -25,16 +25,6 @@ from the published Helm repo:
 helm -n mojaloop install backend mojaloop/example-mojaloop-backend
 ```
 
-### Configure remote Mojaloop Helm repo on your Helm Client
-
-1. Add Mojaloop repo
-
-    `helm repo add mojaloop http://mojaloop.io/helm/repo/`
-
-2. Keep your local Mojaloop repo up to date
-
-    `helm repo update`
-
 ## Mojaloop
 
 The default CONFIG header section on the [mojaloop/values.yaml](../mojaloop/values.yaml) header has been configured to work with the backend dependencies deployed by this Helm wrapper chart.
