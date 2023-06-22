@@ -140,19 +140,6 @@ jobs:
           path: /tmp/license-scanner/results
           prefix: licenses
 
-  # build:
-  #   executor: default-docker-helm
-  #   steps:
-  #     - run:
-  #         <<: *defaults_Dependencies
-  #     - checkout
-  #     - run:
-  #         <<: *defaults_environment
-  #     - run:
-  #         name: Update Helm Charts
-  #         command: |
-  #           bash update-charts-dep.sh
-
   deploy:
     executor: default-docker-helm
     environment:
@@ -232,14 +219,6 @@ workflows:
           filters:
             tags:
               only: /.*/
-      # - build:
-      #     context: org-global
-      #     requires:
-      #       - test
-      #       - audit-licenses
-      #     filters:
-      #       tags:
-      #         only: /.*/
       - deploy:
           context: org-global
           requires:
