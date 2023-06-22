@@ -167,8 +167,8 @@ jobs:
           command: |
             echo "export SLACK_PROJECT_NAME=${CIRCLE_PROJECT_REPONAME}" >> $BASH_ENV
             echo "export SLACK_RELEASE_TYPE='Helm Release'" >> $BASH_ENV
-            echo "export SLACK_RELEASE_TAG=v${CIRCLE_TAG:1}" >> $BASH_ENV
-            echo "export SLACK_RELEASE_URL=${GIT_PROJECT_URL}/v${CIRCLE_TAG:1}" >> $BASH_ENV
+            echo "export SLACK_RELEASE_TAG=${GITHUB_TAG:-$GIT_SHA1}" >> $BASH_ENV
+            echo "export SLACK_RELEASE_URL=${GIT_PROJECT_URL}/${ \"/releases/tag/${CIRCLE_TAG}\" :- \"/commit/${GIT_SHA1}\" }" >> $BASH_ENV
             echo "export SLACK_BUILD_ID=${CIRCLE_BUILD_NUM}" >> $BASH_ENV
             echo "export SLACK_CI_URL=${CIRCLE_BUILD_URL}" >> $BASH_ENV
       - run:
