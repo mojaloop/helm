@@ -165,15 +165,17 @@ jobs:
             if [ -n ${CIRCLE_TAG} ]; then
               echo "export GIT_RELEASE_URL=${GIT_PROJECT_URL}/releases/tag/${CIRCLE_TAG}" >> $BASH_ENV
               echo "export GIT_RELEASE_TAG=${CIRCLE_TAG}" >> $BASH_ENV
+              echo "export GIT_RELEASE_TYPE='Helm Release'" >> $BASH_ENV
             else
               echo "export GIT_RELEASE_URL=${GIT_PROJECT_URL}/commit/${GIT_SHA1}"
               echo "export GIT_RELEASE_TAG=${GIT_SHA1}" >> $BASH_ENV
+              echo "export GIT_RELEASE_TYPE='Helm Snapshot'" >> $BASH_ENV
             fi
       - run:
           name: Setup Slack config
           command: |
             echo "export SLACK_PROJECT_NAME=${CIRCLE_PROJECT_REPONAME}" >> $BASH_ENV
-            echo "export SLACK_RELEASE_TYPE='Helm Release'" >> $BASH_ENV
+            echo "export SLACK_RELEASE_TYPE=${GIT_RELEASE_TYPE}" >> $BASH_ENV
             echo "export SLACK_RELEASE_TAG=${GIT_RELEASE_TAG}" >> $BASH_ENV
             echo "export SLACK_RELEASE_URL=${GIT_RELEASE_URL}" >> $BASH_ENV
             echo "export SLACK_BUILD_ID=${CIRCLE_BUILD_NUM}" >> $BASH_ENV
