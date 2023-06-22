@@ -7,7 +7,7 @@ version: 2.1
 # Orbs used in this pipeline
 ##
 orbs:
-  slack: circleci/slack@3.4.2
+  slack: circleci/slack@4.12.5 # Ref: https://github.com/mojaloop/ci-config/tree/master/slack-templates
   pr-tools: mojaloop/pr-tools@0.1.10
 
 ##
@@ -154,6 +154,8 @@ jobs:
 
   deploy:
     executor: default-docker-helm
+    environment:
+      GIT_PROJECT_URL: << pipeline.project.git_url >>
     steps:
       - run:
           <<: *defaults_Dependencies
@@ -173,26 +175,30 @@ jobs:
             echo 'export GIT_SHA1=$CIRCLE_SHA1' >> $BASH_ENV
             echo 'export BUILD_NUM=$CIRCLE_BUILD_NUM' >> $BASH_ENV
       - run:
+          name: Setup Slack config
+          command: |
+            echo "export SLACK_PROJECT_NAME=${CIRCLE_PROJECT_REPONAME}" >> $BASH_ENV
+            echo "export SLACK_RELEASE_TYPE='Helm Release'" >> $BASH_ENV
+            echo "export SLACK_RELEASE_TAG=v${CIRCLE_TAG:1}" >> $BASH_ENV
+            echo "export SLACK_RELEASE_URL=${GIT_PROJECT_URL}/v${CIRCLE_TAG:1}" >> $BASH_ENV
+            echo "export SLACK_BUILD_ID=${CIRCLE_BUILD_NUM}" >> $BASH_ENV
+            echo "export SLACK_CI_URL=${CIRCLE_BUILD_URL}" >> $BASH_ENV
+      - run:
           name: Setup Git Identity
           command: |
             echo "Setting BASH_ENV..."
             source $BASH_ENV
             git config --global user.email "$GIT_CI_USER"
             git config --global user.name "$GIT_CI_EMAIL"
-      ## Commenting this out because it might be conflicting with circleci user ssh key
-      #      git remote add $GITHUB_PROJECT_USERNAME https://$GIT_CI_USER:$GITHUB_TOKEN@github.com/$GITHUB_PROJECT_USERNAME/$GITHUB_PROJECT_REPONAME.git
       - run:
           name: Publish Helm Charts
           command: .circleci/publish_helm_charts.sh
-
-  slack-announcement:
-    executor: default-docker-helm
-    steps:
-      - run:
-          <<: *defaults_Dependencies
-      - slack/status:
-          webhook: "$SLACK_WEBHOOK_ANNOUNCEMENT"
-          success_message: '*"${CIRCLE_PROJECT_REPONAME}"* - Release \`"${CIRCLE_TAG}"\` \nhttps://github.com/mojaloop/"${CIRCLE_PROJECT_REPONAME}"/releases/tag/"${CIRCLE_TAG}"'
+      - slack/notify:
+          event: pass
+          template: SLACK_TEMP_RELEASE_SUCCESS
+      - slack/notify:
+          event: fail
+          template: SLACK_TEMP_RELEASE_FAILURE
 
 workflows:
   version: 2
@@ -243,12 +249,3 @@ workflows:
               only: /v[0-9]+(\.[0-9]+)*/
             branches:
               only: master
-      - slack-announcement:
-          context: org-global
-          requires:
-            - deploy
-          filters:
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*/
-            branches:
-              ignore: /.*/
