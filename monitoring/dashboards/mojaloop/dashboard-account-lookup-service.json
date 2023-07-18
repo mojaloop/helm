@@ -12,16 +12,34 @@
   "__elements": {},
   "__requires": [
     {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
       "version": "10.0.2"
     },
     {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph (old)",
+      "version": ""
+    },
+    {
       "type": "datasource",
       "id": "prometheus",
       "name": "Prometheus",
       "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
     },
     {
       "type": "panel",
@@ -54,6 +72,7 @@
   "liveNow": false,
   "panels": [
     {
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -61,8 +80,229 @@
         "y": 0
       },
       "id": 10,
+      "panels": [],
       "title": "Participant Resource",
       "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "index": 0,
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "id": 27,
+      "interval": "1s",
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "max"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(moja_als_ing_getParticipantsByTypeAndID_count)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(moja_als_ing_getParticipantsByTypeIdAndSubID_count)",
+          "hide": false,
+          "instant": false,
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Total Count Incoming GET /participants requests",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "binary": {
+              "left": "sum(moja_als_ing_getPartiesByTypeAndID_count)",
+              "reducer": "sum",
+              "right": "sum(moja_als_ing_getPartiesByTypeIDAndSubID_count)"
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "index": 0,
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "id": 28,
+      "interval": "1s",
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "max"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(moja_als_ing_putParticipantsByTypeAndID_count)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(moja_als_ing_putParticipantsByTypeIDAndSubID_count)",
+          "hide": false,
+          "instant": false,
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Total Count Incoming PUT /participant requests",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "binary": {
+              "left": "sum(moja_als_ing_getPartiesByTypeAndID_count)",
+              "reducer": "sum",
+              "right": "sum(moja_als_ing_getPartiesByTypeIDAndSubID_count)"
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
+      "type": "stat"
     },
     {
       "datasource": {
@@ -125,14 +365,19 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 1
+        "y": 4
       },
       "id": 3,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "min",
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -147,7 +392,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_getParticipantsByTypeAndID_sum[30s]) / irate(moja_als_ing_getParticipantsByTypeAndID_count[30s])",
+          "expr": "irate(moja_als_ing_getParticipantsByTypeAndID_sum[$interval]) / irate(moja_als_ing_getParticipantsByTypeAndID_count[$interval])",
           "instant": false,
           "legendFormat": "getParticipantsByTypeAndID",
           "range": true,
@@ -159,7 +404,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_putParticipantsByTypeAndID_sum[30s]) / irate(moja_als_ing_putParticipantsByTypeAndID_count[30s])",
+          "expr": "irate(moja_als_ing_putParticipantsByTypeAndID_sum[$interval]) / irate(moja_als_ing_putParticipantsByTypeAndID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "putParticipantsByTypeAndID",
@@ -172,7 +417,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_postParticipantsbyTypeAndID_sum[30s]) / irate(moja_als_ing_postParticipantsbyTypeAndID_count[30s])",
+          "expr": "irate(moja_als_ing_postParticipantsbyTypeAndID_sum[$interval]) / irate(moja_als_ing_postParticipantsbyTypeAndID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "postParticipantsbyTypeAndID",
@@ -185,7 +430,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_deleteParticipantsByTypeAndID_sum[30s]) / irate(moja_als_ing_deleteParticipantsByTypeAndID_count[30s])",
+          "expr": "irate(moja_als_ing_deleteParticipantsByTypeAndID_sum[$interval]) / irate(moja_als_ing_deleteParticipantsByTypeAndID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "deleteParticipantsByTypeAndID",
@@ -198,7 +443,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_getParticipantsByTypeIdAndSubID_sum[30s]) / irate(moja_als_ing_getParticipantsByTypeIdAndSubID_count[30s])",
+          "expr": "irate(moja_als_ing_getParticipantsByTypeIdAndSubID_sum[$interval]) / irate(moja_als_ing_getParticipantsByTypeIdAndSubID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "getParticipantsByTypeIdAndSubID",
@@ -211,7 +456,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_putParticipantsByTypeIDAndSubID_sum[30s]) / irate(moja_als_ing_putParticipantsByTypeIDAndSubID_count[30s])",
+          "expr": "irate(moja_als_ing_putParticipantsByTypeIDAndSubID_sum[$interval]) / irate(moja_als_ing_putParticipantsByTypeIDAndSubID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "putParticipantsByTypeIDAndSubID",
@@ -224,7 +469,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_postParticipantsByTypeIDAndSubID_sum[30s]) / irate(moja_als_ing_postParticipantsByTypeIDAndSubID_count[30s])",
+          "expr": "irate(moja_als_ing_postParticipantsByTypeIDAndSubID_sum[$interval]) / irate(moja_als_ing_postParticipantsByTypeIDAndSubID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "postParticipantsByTypeIDAndSubID",
@@ -237,7 +482,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_deleteParticipantsByTypeIDAndSubID_sum[30s]) / irate(moja_als_ing_deleteParticipantsByTypeIDAndSubID_count[30s])",
+          "expr": "irate(moja_als_ing_deleteParticipantsByTypeIDAndSubID_sum[$interval]) / irate(moja_als_ing_deleteParticipantsByTypeIDAndSubID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "deleteParticipantsByTypeIDAndSubID",
@@ -250,7 +495,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_putParticipantsErrorByTypeAndID_sum[30s]) / irate(moja_als_ing_putParticipantsErrorByTypeAndID_count[30s])",
+          "expr": "irate(moja_als_ing_putParticipantsErrorByTypeAndID_sum[$interval]) / irate(moja_als_ing_putParticipantsErrorByTypeAndID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "putParticipantsErrorByTypeAndID",
@@ -263,7 +508,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_putParticipantsErrorByTypeIDAndSubID_sum[30s]) / irate(moja_als_ing_putParticipantsErrorByTypeIDAndSubID_count[30s])",
+          "expr": "irate(moja_als_ing_putParticipantsErrorByTypeIDAndSubID_sum[$interval]) / irate(moja_als_ing_putParticipantsErrorByTypeIDAndSubID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "putParticipantsErrorByTypeIDAndSubID",
@@ -335,14 +580,19 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 1
+        "y": 4
       },
       "id": 4,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "min",
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -357,7 +607,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_getParticipantsByTypeAndID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_getParticipantsByTypeAndID_count[$interval])) by (success)",
           "instant": false,
           "interval": "",
           "legendFormat": "getParticipantsByTypeAndID success:{{success}}",
@@ -370,7 +620,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_putParticipantsByTypeAndID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_putParticipantsByTypeAndID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "putParticipantsByTypeAndID success:{{success}}",
@@ -383,7 +633,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_postParticipantsbyTypeAndID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_postParticipantsbyTypeAndID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "postParticipantsbyTypeAndID success:{{success}}",
@@ -396,7 +646,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_deleteParticipantsByTypeAndID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_deleteParticipantsByTypeAndID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "deleteParticipantsByTypeAndID success:{{success}}",
@@ -409,7 +659,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_getParticipantsByTypeIdAndSubID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_getParticipantsByTypeIdAndSubID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "getParticipantsByTypeIdAndSubID success:{{success}}",
@@ -422,7 +672,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_putParticipantsByTypeIDAndSubID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_putParticipantsByTypeIDAndSubID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "putParticipantsByTypeIDAndSubID success:{{success}}",
@@ -435,7 +685,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_postParticipantsByTypeIDAndSubID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_postParticipantsByTypeIDAndSubID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "postParticipantsByTypeIDAndSubID success:{{success}}",
@@ -448,7 +698,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_deleteParticipantsByTypeIDAndSubID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_deleteParticipantsByTypeIDAndSubID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "deleteParticipantsByTypeIDAndSubID success:{{success}}",
@@ -461,7 +711,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_putParticipantsErrorByTypeAndID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_putParticipantsErrorByTypeAndID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "putParticipantsErrorByTypeAndID success:{{success}}",
@@ -474,7 +724,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_putParticipantsErrorByTypeIDAndSubID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_putParticipantsErrorByTypeIDAndSubID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "putParticipantsErrorByTypeIDAndSubID success:{{success}}",
@@ -546,14 +796,19 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 12
       },
       "id": 7,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "min",
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -568,7 +823,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_getParticipantsByTypeAndID_sum[30s]) / irate(moja_als_getParticipantsByTypeAndID_count[30s])",
+          "expr": "irate(moja_als_getParticipantsByTypeAndID_sum[$interval]) / irate(moja_als_getParticipantsByTypeAndID_count[$interval])",
           "instant": false,
           "legendFormat": "getParticipantsByTypeAndID",
           "range": true,
@@ -580,7 +835,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_putParticipantsByTypeAndID_sum[30s]) / irate(moja_als_putParticipantsByTypeAndID_count[30s])",
+          "expr": "irate(moja_als_putParticipantsByTypeAndID_sum[$interval]) / irate(moja_als_putParticipantsByTypeAndID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "putParticipantsByTypeAndID",
@@ -593,7 +848,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_putParticipantsErrorByTypeAndID_sum[30s]) / irate(moja_als_putParticipantsErrorByTypeAndID_count[30s])",
+          "expr": "irate(moja_als_putParticipantsErrorByTypeAndID_sum[$interval]) / irate(moja_als_putParticipantsErrorByTypeAndID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "putParticipantsErrorByTypeAndID",
@@ -606,7 +861,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_postParticipants_sum[30s]) / irate(moja_als_postParticipants_count[30s])",
+          "expr": "irate(moja_als_postParticipants_sum[$interval]) / irate(moja_als_postParticipants_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "postParticipants",
@@ -619,7 +874,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_postParticipantsBatch_sum[30s]) / irate(moja_als_postParticipantsBatch_count[30s])",
+          "expr": "irate(moja_als_postParticipantsBatch_sum[$interval]) / irate(moja_als_postParticipantsBatch_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "postParticipantsBatch",
@@ -632,7 +887,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_deleteParticipants_sum[30s]) / irate(moja_als_deleteParticipants_count[30s])",
+          "expr": "irate(moja_als_deleteParticipants_sum[$interval]) / irate(moja_als_deleteParticipants_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "deleteParticipants",
@@ -704,13 +959,310 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 12
       },
       "id": 8,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "min",
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(moja_als_getParticipantsByTypeAndID_count[$interval])) by (success)",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "getParticipantsByTypeAndID success:{{success}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(moja_als_putParticipantsByTypeAndID_count[$interval])) by (success)",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "putParticipantsByTypeAndID success:{{success}}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(moja_als_putParticipantsErrorByTypeAndID_count[$interval])) by (success)",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "putParticipantsErrorByTypeAndID success:{{success}}",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(moja_als_postParticipants_count[$interval])) by (success)",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "postParticipants success:{{success}}",
+          "range": true,
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(moja_als_postParticipantsBatch_count[$interval])) by (success)",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "postParticipantsBatch success:{{success}}",
+          "range": true,
+          "refId": "E"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(moja_als_postParticipantsBatch_count[$interval])) by (success)",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "deleteParticipants success:{{success}}",
+          "range": true,
+          "refId": "F"
+        }
+      ],
+      "title": "Participants Domain - Processing Per Second",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "id": 29,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Max",
+          "sortDesc": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "irate(moja_als_egress_getParticipantEndpoint_sum[$interval]) / irate(moja_als_egress_getParticipantEndpoint_count[$interval])",
+          "instant": false,
+          "legendFormat": "getParticipantEndpoint {{endpointType}} success:{{success}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "irate(moja_als_egress_sendRequestToParticipant_sum[$interval]) / irate(moja_als_egress_sendRequestToParticipant_count[$interval])",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "sendRequestToParticipant {{endpointType}} success:{{success}}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "irate(moja_als_egress_validateParticipant_sum[$interval]) / irate(moja_als_egress_validateParticipant_count[$interval])",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "validateParticipant success:{{success}}",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "Participant Egress - Processing Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "id": 30,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
@@ -726,10 +1278,10 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_getParticipantsByTypeAndID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_egress_getParticipantEndpoint_count[$interval])) by (success, endpointType)",
           "instant": false,
           "interval": "",
-          "legendFormat": "getParticipantsByTypeAndID success:{{success}}",
+          "legendFormat": "getParticipantEndpoint {{endpointType}} success:{{success}}",
           "range": true,
           "refId": "A"
         },
@@ -739,23 +1291,10 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_putParticipantsByTypeAndID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_egress_sendRequestToParticipant_count[$interval])) by (success, endpointType)",
           "hide": false,
           "instant": false,
-          "legendFormat": "putParticipantsByTypeAndID success:{{success}}",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(moja_als_putParticipantsErrorByTypeAndID_count[30s])) by (success)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "putParticipantsErrorByTypeAndID success:{{success}}",
+          "legendFormat": "sendRequestToParticipant {{endpointType}} success:{{success}}",
           "range": true,
           "refId": "C"
         },
@@ -765,53 +1304,735 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_postParticipants_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_egress_validateParticipant_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
-          "legendFormat": "postParticipants success:{{success}}",
+          "legendFormat": "validateParticipant {{endpointType}} success:{{success}}",
           "range": true,
           "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(moja_als_postParticipantsBatch_count[30s])) by (success)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "postParticipantsBatch success:{{success}}",
-          "range": true,
-          "refId": "E"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(moja_als_postParticipantsBatch_count[30s])) by (success)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "deleteParticipants success:{{success}}",
-          "range": true,
-          "refId": "F"
         }
       ],
-      "title": "Participants Domain - Processing Per Second",
+      "title": "Participant Egress - Processing Per Second",
       "type": "timeseries"
     },
     {
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 34
       },
       "id": 9,
+      "panels": [],
       "title": "Party Resource",
       "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "index": 0,
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 9,
+        "x": 3,
+        "y": 35
+      },
+      "id": 17,
+      "interval": "1s",
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "max"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(moja_als_ing_getPartiesByTypeAndID_count)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(moja_als_ing_getPartiesByTypeIDAndSubID_count)",
+          "hide": false,
+          "instant": false,
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Total Count Incoming GET /parties requests",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "binary": {
+              "left": "sum(moja_als_ing_getPartiesByTypeAndID_count)",
+              "reducer": "sum",
+              "right": "sum(moja_als_ing_getPartiesByTypeIDAndSubID_count)"
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "index": 0,
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 9,
+        "x": 12,
+        "y": 35
+      },
+      "id": 26,
+      "interval": "1s",
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "max"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(moja_als_ing_putPartiesByTypeAndID_count)",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(moja_als_ing_putPartiesByTypeIDAndSubID_count)",
+          "hide": false,
+          "instant": false,
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Total Count Incoming PUT /parties requests",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "binary": {
+              "left": "sum(moja_als_ing_getPartiesByTypeAndID_count)",
+              "reducer": "sum",
+              "right": "sum(moja_als_ing_getPartiesByTypeIDAndSubID_count)"
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "index": 0,
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 0,
+        "y": 38
+      },
+      "id": 11,
+      "interval": "1s",
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(moja_als_getPartiesByTypeAndID_count{success=\"true\"})",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "GET /parties Domain Logic - Success Count",
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "max"
+            ]
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "index": 0,
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 4,
+        "y": 38
+      },
+      "id": 12,
+      "interval": "1s",
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(moja_als_getPartiesByTypeAndID_count{success=\"false\"})",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "GET /parties Domain Logic - Error Count",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "index": 0,
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 8,
+        "y": 38
+      },
+      "id": 13,
+      "interval": "1s",
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(moja_als_putPartiesByTypeAndID_count{success=\"true\"})",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "PUT /parties Domain Logic - Success Count",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "index": 0,
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 12,
+        "y": 38
+      },
+      "id": 14,
+      "interval": "1s",
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(moja_als_putPartiesByTypeAndID_count{success=\"false\"})",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "PUT /parties Domain Logic - Error Count",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "index": 0,
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 16,
+        "y": 38
+      },
+      "id": 15,
+      "interval": "1s",
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(moja_als_puttPartiesErrorByTypeAndID_count{success=\"true\"})",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "PUT /parties/{ID}/error Domain Logic - Success Count",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "index": 0,
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqs"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 20,
+        "y": 38
+      },
+      "id": 16,
+      "interval": "1s",
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(moja_als_puttPartiesErrorByTypeAndID_count{success=\"false\"})",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "PUT /parties/{ID}/error Domain Logic - Error Count",
+      "type": "stat"
     },
     {
       "datasource": {
@@ -874,14 +2095,19 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 18
+        "y": 43
       },
       "id": 1,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "min",
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -896,7 +2122,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_getPartiesByTypeAndID_sum[30s]) / irate(moja_als_ing_getPartiesByTypeAndID_count[30s])",
+          "expr": "irate(moja_als_ing_getPartiesByTypeAndID_sum[$interval]) / irate(moja_als_ing_getPartiesByTypeAndID_count[$interval])",
           "instant": false,
           "legendFormat": "getPartiesByTypeAndID",
           "range": true,
@@ -908,7 +2134,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_putPartiesByTypeAndID_sum[30s]) / irate(moja_als_ing_putPartiesByTypeAndID_count[30s])",
+          "expr": "irate(moja_als_ing_putPartiesByTypeAndID_sum[$interval]) / irate(moja_als_ing_putPartiesByTypeAndID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "putPartiesByTypeAndID",
@@ -921,7 +2147,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_getPartiesByTypeIDAndSubID_sum[30s]) / irate(moja_als_ing_getPartiesByTypeIDAndSubID_count[30s])",
+          "expr": "irate(moja_als_ing_getPartiesByTypeIDAndSubID_sum[$interval]) / irate(moja_als_ing_getPartiesByTypeIDAndSubID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "getPartiesByTypeIDAndSubID",
@@ -934,7 +2160,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_putPartiesByTypeIDAndSubID_sum[30s]) / irate(moja_als_ing_putPartiesByTypeIDAndSubID_count[30s])",
+          "expr": "irate(moja_als_ing_putPartiesByTypeIDAndSubID_sum[$interval]) / irate(moja_als_ing_putPartiesByTypeIDAndSubID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "putPartiesByTypeIDAndSubID",
@@ -947,7 +2173,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_putPartiesErrorByTypeAndID_sum[30s]) / irate(moja_als_ing_putPartiesErrorByTypeAndID_count[30s])",
+          "expr": "irate(moja_als_ing_putPartiesErrorByTypeAndID_sum[$interval]) / irate(moja_als_ing_putPartiesErrorByTypeAndID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "putPartiesErrorByTypeAndID",
@@ -960,7 +2186,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_ing_putPartiesErrorByTypeIDAndSubID_sum[30s]) / irate(moja_als_ing_putPartiesErrorByTypeIDAndSubID_count[30s])",
+          "expr": "irate(moja_als_ing_putPartiesErrorByTypeIDAndSubID_sum[$interval]) / irate(moja_als_ing_putPartiesErrorByTypeIDAndSubID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "putPartiesErrorByTypeIDAndSubID",
@@ -1032,14 +2258,19 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 18
+        "y": 43
       },
       "id": 2,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "min",
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -1054,7 +2285,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_getPartiesByTypeAndID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_getPartiesByTypeAndID_count[$interval])) by (success)",
           "instant": false,
           "interval": "",
           "legendFormat": "getPartiesByTypeAndID success:{{success}}",
@@ -1067,7 +2298,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_putPartiesByTypeAndID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_putPartiesByTypeAndID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "putPartiesByTypeAndID success:{{success}}",
@@ -1080,7 +2311,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_getPartiesByTypeIDAndSubID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_getPartiesByTypeIDAndSubID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "getPartiesByTypeIDAndSubID success:{{success}}",
@@ -1093,7 +2324,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_putPartiesByTypeIDAndSubID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_putPartiesByTypeIDAndSubID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "putPartiesByTypeIDAndSubID success:{{success}}",
@@ -1106,7 +2337,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_putPartiesErrorByTypeAndID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_putPartiesErrorByTypeAndID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": " putPartiesErrorByTypeAndID success:{{success}}",
@@ -1119,7 +2350,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_ing_putPartiesErrorByTypeIDAndSubID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_ing_putPartiesErrorByTypeIDAndSubID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "putPartiesErrorByTypeIDAndSubID success:{{success}}",
@@ -1191,14 +2422,19 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 26
+        "y": 51
       },
       "id": 5,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "min",
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -1213,7 +2449,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_getPartiesByTypeAndID_sum[30s]) / irate(moja_als_getPartiesByTypeAndID_count[30s])",
+          "expr": "irate(moja_als_getPartiesByTypeAndID_sum[$interval]) / irate(moja_als_getPartiesByTypeAndID_count[$interval])",
           "instant": false,
           "legendFormat": "getPartiesByTypeAndID",
           "range": true,
@@ -1225,7 +2461,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_putPartiesByTypeAndID_sum[30s]) / irate(moja_als_putPartiesByTypeAndID_count[30s])",
+          "expr": "irate(moja_als_putPartiesByTypeAndID_sum[$interval]) / irate(moja_als_putPartiesByTypeAndID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "putPartiesByTypeAndID",
@@ -1238,7 +2474,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "irate(moja_als_puttPartiesErrorByTypeAndID_sum[30s]) / irate(moja_als_ing_puttPartiesErrorByTypeAndID_count[30s])",
+          "expr": "irate(moja_als_puttPartiesErrorByTypeAndID_sum[$interval]) / irate(moja_als_ing_puttPartiesErrorByTypeAndID_count[$interval])",
           "hide": false,
           "instant": false,
           "legendFormat": "puttPartiesErrorByTypeAndID",
@@ -1310,14 +2546,19 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 26
+        "y": 51
       },
       "id": 6,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "min",
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -1332,7 +2573,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_getPartiesByTypeAndID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_getPartiesByTypeAndID_count[$interval])) by (success)",
           "instant": false,
           "interval": "",
           "legendFormat": "getPartiesByTypeAndID success:{{success}}",
@@ -1345,7 +2586,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_putPartiesByTypeAndID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_putPartiesByTypeAndID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "putPartiesByTypeAndID success:{{success}}",
@@ -1358,7 +2599,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_als_puttPartiesErrorByTypeAndID_count[30s])) by (success)",
+          "expr": "sum(rate(moja_als_puttPartiesErrorByTypeAndID_count[$interval])) by (success)",
           "hide": false,
           "instant": false,
           "legendFormat": "puttPartiesErrorByTypeAndID success:{{success}}",
@@ -1368,17 +2609,685 @@
       ],
       "title": "Party Domain - Processing Per Second",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 59
+      },
+      "id": 25,
+      "panels": [],
+      "title": "CPU Usage",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "ALS Total CPU Usage",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#299c46",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 50
+              },
+              {
+                "color": "#d44a3a",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 0,
+        "y": 60
+      },
+      "id": 24,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "10.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*account-lookup.*'}[2m])) * 100",
+          "format": "time_series",
+          "hide": true,
+          "instant": true,
+          "intervalFactor": 1,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(irate (container_cpu_usage_seconds_total{pod_name=~'.*account-lookup.*'}[2m]))",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "ALS Total CPU Usage",
+      "type": "gauge"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 63
+      },
+      "id": 21,
+      "panels": [],
+      "title": "Resource Usage by Pods",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 64
+      },
+      "hiddenSeries": false,
+      "id": 22,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "10.0.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "moja_nodejs_heap_size_total_bytes{serviceName=~\"account-lookup.*\"}",
+          "legendFormat": "heap_total-{{kubernetes_pod_name}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "moja_nodejs_heap_size_used_bytes{serviceName=~\"account-lookup.*\"}",
+          "legendFormat": "heap_used-{{kubernetes_pod_name}}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "moja_nodejs_external_memory_bytes{serviceName=~\"account-lookup.*\"}",
+          "legendFormat": "ext_memory-{{kubernetes_pod_name}}",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "ALS - Memoy Usage by Pod",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "decbytes",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "ALS  -  CPU Usage in Seconds by Pod",
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 72
+      },
+      "hiddenSeries": false,
+      "id": 23,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "max",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "10.0.2",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum (rate (moja_process_cpu_seconds_total{serviceName=~\"account-lookup.*\"}[2m])) by (kubernetes_pod_name)",
+          "format": "time_series",
+          "hide": true,
+          "intervalFactor": 1,
+          "legendFormat": "{{kubernetes_pod_name}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(\n    rate(container_cpu_usage_seconds_total{pod_name=~'.*account-lookup.*'}[2m]))\nby (pod_name)",
+          "format": "time_series",
+          "hide": true,
+          "intervalFactor": 1,
+          "legendFormat": "{{pod_name}}",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{pod_name=~'.*account-lookup.*'}[2m]))",
+          "format": "time_series",
+          "hide": true,
+          "intervalFactor": 1,
+          "legendFormat": "All Total",
+          "range": true,
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "rate(moja_process_cpu_seconds_total{serviceName=~\"account-lookup.*\"}[30s]) * 100",
+          "legendFormat": "{{kubernetes_pod_name}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "ALS  -  CPU Usage in Seconds by Pod",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "percent",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 79
+      },
+      "id": 18,
+      "panels": [],
+      "title": "Misc",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "decimals": 0,
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 80
+      },
+      "hiddenSeries": false,
+      "id": 19,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": true,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "10.0.2",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "kube_deployment_spec_replicas{deployment=~\".*account-lookup.*\"}",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "{{deployment}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "ALS - # Nodes for each Components",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": 0,
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 84
+      },
+      "hiddenSeries": false,
+      "id": 20,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "10.0.2",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "avg(moja_nodejs_eventloop_lag_seconds{serviceName=~\"account-lookup.*\"}) by (app)",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{app}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "ALS  - Event Loop Lag in Seconds",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "s",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
     }
   ],
-  "refresh": "",
+  "refresh": false,
   "schemaVersion": 38,
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "auto": false,
+        "auto_count": 30,
+        "auto_min": "10s",
+        "current": {
+          "selected": false,
+          "text": "30s",
+          "value": "30s"
+        },
+        "hide": 0,
+        "label": "interval",
+        "name": "interval",
+        "options": [
+          {
+            "selected": true,
+            "text": "30s",
+            "value": "30s"
+          },
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "12h",
+            "value": "12h"
+          },
+          {
+            "selected": false,
+            "text": "1d",
+            "value": "1d"
+          },
+          {
+            "selected": false,
+            "text": "7d",
+            "value": "7d"
+          },
+          {
+            "selected": false,
+            "text": "14d",
+            "value": "14d"
+          },
+          {
+            "selected": false,
+            "text": "30d",
+            "value": "30d"
+          }
+        ],
+        "query": "30s,1m,5m,10m,30m,1h,6h,12h,1d,7d,14d,30d",
+        "queryValue": "",
+        "refresh": 2,
+        "skipUrlSync": false,
+        "type": "interval"
+      }
+    ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {},
