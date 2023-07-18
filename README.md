@@ -303,7 +303,6 @@ e.g. `helm --namespace mojaloop del dev`
 # lint all parent charts and ensure they conform to Helm's standards
 ./lint-charts.sh
 
-
 # Update all charts, and their respective dependencies (requirements).
 ./update-charts-dep.sh
 
