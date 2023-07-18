@@ -31,6 +31,7 @@
 - [Documentation - Deploying Mojaloop](https://docs.mojaloop.io/legacy/deployment-guide)
 - [Helm v3 Docs](https://docs.helm.sh/)
 - Changelogs
+  - [release-v15.1.0.md](./.changelog/release-v15.1.0.md)
   - [release-v15.0.0.md](./.changelog/release-v15.0.0.md)
   - [release-v14.1.1.md](./.changelog/release-v14.1.1.md)
   - [release-v14.1.0.md](./.changelog/release-v14.1.0.md)
