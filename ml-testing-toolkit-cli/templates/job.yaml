@@ -14,18 +14,23 @@ spec:
       backoffLimit: {{ .Values.backoffLimit }}
       restartPolicy: {{ .Values.restartPolicy }}
       {{- include "ml-testing-toolkit-cli.jobtemplate" . | nindent 6 }}
-{{- else if not .Values.tests.enabled }}
+{{- end }}
+{{- if .Values.job.enabled }} // added job definition to values.yaml
 apiVersion: {{ template "ml-testing-toolkit-cli.apiVersion.Job" . }}
 kind: Job
 metadata:
   name: {{ template "ml-testing-toolkit-cli.fullname" . }}
-  {{- if .Values.postInstallHook.enabled }}
   annotations:
+    {{- if .Values.postInstallHook.enabled }}
     "helm.sh/hook": post-install
     "helm.sh/hook-weight": {{ .Values.postInstallHook.weight | quote }}
     "helm.sh/hook-delete-policy": {{ .Values.postInstallHook.deletePolicy }}
-  {{- end }}
+    {{- end }}
+    // Add custom annotations, and updated the values.yaml
 spec:
+  {{- if .Values.job.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }} // this would need to be added
+  {{- end }}
   backoffLimit: {{ .Values.backoffLimit }}
   restartPolicy: {{ .Values.restartPolicy }}
   {{- include "ml-testing-toolkit-cli.jobtemplate" . | indent 2 }}
