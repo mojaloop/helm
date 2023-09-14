@@ -19,7 +19,11 @@ spec:
 apiVersion: {{ template "ml-testing-toolkit-cli.apiVersion.Job" . }}
 kind: Job
 metadata:
+  {{- if .Values.job.generateName }} ## add support for random name generation
+  generateName: {{ template "ml-testing-toolkit-cli.fullname" . }}-
+  {{- else }}
   name: {{ template "ml-testing-toolkit-cli.fullname" . }}
+  {{- end }}
   annotations:
     {{- if .Values.postInstallHook.enabled }}
     "helm.sh/hook": post-install
@@ -29,7 +33,6 @@ metadata:
     ## Add custom annotations, and updated the values.yaml
     ## Example ArgoCD annotations that would be injected via the custom annotations (ref: https://argo-cd.readthedocs.io/en/stable/user-guide/resource_hooks/#hook-deletion-policies):
     # argocd.argoproj.io/hook: PostSync
-    # argocd.argoproj.io/hook-delete-policy: HookSucceeded
 spec:
   {{- if .Values.job.ttlSecondsAfterFinished }}
   ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }} ## this would need to be added
