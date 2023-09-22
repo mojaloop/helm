@@ -14,18 +14,32 @@ spec:
       backoffLimit: {{ .Values.backoffLimit }}
       restartPolicy: {{ .Values.restartPolicy }}
       {{- include "ml-testing-toolkit-cli.jobtemplate" . | nindent 6 }}
-{{- else if not .Values.tests.enabled }}
+{{- end }}
+{{- if .Values.job.enabled }} ## added job definition to values.yaml
 apiVersion: {{ template "ml-testing-toolkit-cli.apiVersion.Job" . }}
 kind: Job
 metadata:
+  {{- if .Values.job.generateNameEnabled }} ## add support for random name generation, value: true/false
+  generateName: {{ template "ml-testing-toolkit-cli.fullname" . }}-
+  {{- else }}
   name: {{ template "ml-testing-toolkit-cli.fullname" . }}
-  {{- if .Values.postInstallHook.enabled }}
-  annotations:
+  {{- end }}
+  annotations: 
+   ## If the postInstallHook is enabled without custom annotations use the helm default hook 
+  {{- if ( and .Values.postInstallHook.enabled (not .Values.job.annotations)) }}
     "helm.sh/hook": post-install
     "helm.sh/hook-weight": {{ .Values.postInstallHook.weight | quote }}
     "helm.sh/hook-delete-policy": {{ .Values.postInstallHook.deletePolicy }}
   {{- end }}
+    ## Adding custom annotations, if update the values.yaml in 'job.annotations'
+  {{- with .Values.job.annotations }}
+    {{ toYaml .| indent 4 | trim }}
+  {{- end }}
+
 spec:
+  {{- if .Values.job.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }} ## this would need to be added
+  {{- end }}
   backoffLimit: {{ .Values.backoffLimit }}
   restartPolicy: {{ .Values.restartPolicy }}
   {{- include "ml-testing-toolkit-cli.jobtemplate" . | indent 2 }}
