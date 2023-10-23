@@ -141,8 +141,21 @@ spec:
               value: {{ printf "%s-backend:3000" (include "common.names.fullname" . ) }}
             {{- end }}
             {{- range $k, $v := .Values.env }}
+            {{- if (hasKey $.Values.env "OAUTH_CLIENT_SECRET_NAME") }}
+            {{- if and (ne "OAUTH_CLIENT_SECRET_NAME" $k) (ne "OAUTH_CLIENT_SECRET_KEY" $k) (ne "OAUTH_CLIENT_SECRET" $k) }}
             - name: {{ $k }}
               value: {{ include "common.tplvalues.render" (dict "value" $v "context" $) | quote }}
+            {{- else if eq "OAUTH_CLIENT_SECRET_NAME" $k}}
+            - name: OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "common.tplvalues.render" (dict "value" $.Values.env.OAUTH_CLIENT_SECRET_NAME "context" $) | quote }}
+                  key: {{ include "common.tplvalues.render" (dict "value" $.Values.env.OAUTH_CLIENT_SECRET_KEY "context" $) | quote }}
+            {{- end }}
+            {{- else }}
+            - name: {{ $k }}
+              value: {{ include "common.tplvalues.render" (dict "value" $v "context" $) | quote }}
+            {{- end }}  
             {{- end }}
           volumeMounts:
           {{- if .Values.env.JWS_SIGN }}
