@@ -32,6 +32,14 @@ spec:
         checksum/config-rules: {{ $checksumConfigRules }}
         checksum/config-jws-public-keys: {{ $checksumConfigJWSPublicKeys }}
         checksum/secrets: {{ $checksumConfigSecrets }}
+        # Custom Pod annotations
+        {{- if $config.podAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .podAnnotations "context" $config ) | nindent 4 }}
+        {{- end }}
+        # Common annotations
+        {{- if .Values.commonAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+        {{- end }}
     spec:
       volumes:
       {{- if $config.config.schemeAdapter.env.JWS_SIGN }}

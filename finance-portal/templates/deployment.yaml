@@ -23,6 +23,14 @@ spec:
         checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/config-auth-init: {{ include (print $.Template.BasePath "/configmap-auth-init.yaml") . | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        # Custom Pod annotations
+        {{- if .Values.podAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $ ) | nindent 4 }}
+        {{- end }}
+        # Common annotations
+        {{- if .Values.commonAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+        {{- end }}
     spec:
       initContainers:
         {{- if .Values.backend.init.enabled }}
