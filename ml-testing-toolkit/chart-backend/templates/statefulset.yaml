@@ -23,6 +23,14 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+        # Custom Pod annotations
+        {{- if .Values.pod.annotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.pod.annotations "context" $ ) | nindent 4 }}
+        {{- end }}
+        # Common annotations
+        {{- if .Values.commonAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+        {{- end }}
       labels:
         app.kubernetes.io/name: {{ include "ml-testing-toolkit-backend.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
