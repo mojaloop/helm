@@ -27,9 +27,10 @@ spec:
         {{- if .Values.config.endpointSecurity.jwsSign }}
         checksum/secret-jws: {{ include (print $.Template.BasePath "/secret-jws.yaml") . | sha256sum }}
         {{- end }}
-      {{- if .Values.metrics.enabled }}
+        {{- if .Values.metrics.enabled }}
         prometheus.io/port: "{{ .Values.service.internalPort }}"
         prometheus.io/scrape: "true"
+        {{- end }}
         # Custom Pod annotations
         {{- if .Values.podAnnotations }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $ ) | nindent 4 }}
@@ -38,7 +39,6 @@ spec:
         {{- if .Values.commonAnnotations }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
         {{- end }}
-      {{- end }}
     spec:
       initContainers:
         {{- if .Values.initContainers }}
