@@ -30,6 +30,14 @@ spec:
       {{- if .Values.metrics.enabled }}
         prometheus.io/port: "{{ .Values.service.internalPort }}"
         prometheus.io/scrape: "true"
+        # Custom Pod annotations
+        {{- if .Values.podAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $ ) | nindent 4 }}
+        {{- end }}
+        # Common annotations
+        {{- if .Values.commonAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+        {{- end }}
       {{- end }}
     spec:
       initContainers:
