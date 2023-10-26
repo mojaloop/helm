@@ -22,13 +22,13 @@ spec:
         checksum/config: {{ .Values.env | toString | sha256sum }}
         checksum/secret-jws-signing-key: {{ .Values.config.jwsSigningKey | sha256sum }}
         checksum/secret-jws-verification-keys: {{ .Values.config.jwsVerificationKeys | toString | sha256sum }}
-      {{- if .Values.podAnnotations }}
-      {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" $) | nindent 8 }}
-      {{- end }}
-      {{- if .Values.metrics.enabled }}
+        {{- if .Values.podAnnotations }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" $) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.metrics.enabled }}
         prometheus.io/port: {{ include "common.tplvalues.render" (dict "value" .Values.metrics.config.port "context" $) | quote }}
         prometheus.io/scrape: "true"
-      {{- end }}
+        {{- end }}
       labels: {{- include "common.labels.standard" . | nindent 8 }}
         app.kubernetes.io/component: {{ .Chart.Name }}
         app.kubernetes.io/version: {{ .Chart.Version }}
