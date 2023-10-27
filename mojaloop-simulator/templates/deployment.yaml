@@ -20,6 +20,11 @@ metadata:
   labels:
     app.kubernetes.io/name: sim-{{ $name }}-scheme-adapter
     {{- include "mojaloop-simulator.common-labels" $ | nindent 4 }}
+  annotations:
+    # Common annotations
+    {{- if $.Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" $.Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
 spec:
   replicas: {{ $config.replicaCount }}
   selector:
@@ -36,12 +41,10 @@ spec:
         checksum/config-jws-public-keys: {{ $checksumConfigJWSPublicKeys }}
         checksum/secrets: {{ $checksumConfigSecrets }}
         # Custom Pod annotations
-        {{- if $config.podAnnotations }}
-        {{- include "common.tplvalues.render" ( dict "value" .podAnnotations "context" $config ) | nindent 8 }}
+        {{- if $config.config.podAnnotations }}
+        {{- range $key, $value := $config.config.podAnnotations }}
+        {{ $key }}: {{ tpl $value $ | quote }}
         {{- end }}
-        # Common annotations
-        {{- if $.Values.commonAnnotations }}
-        {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
     spec:
       volumes:
