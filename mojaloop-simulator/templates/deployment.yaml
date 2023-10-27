@@ -13,7 +13,7 @@
 {{- $cacheHost := default (printf "%s-cache" $fullName) $config.config.schemeAdapter.env.CACHE_HOST -}}
 {{- $cachePort := default "6379" $config.config.schemeAdapter.env.CACHE_PORT -}}
 {{- $cacheURL := (printf "redis://%s:%s" $cacheHost ($cachePort | toString)) -}}
-apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" $ }}
 kind: Deployment
 metadata:
   name: {{ $fullName }}-scheme-adapter
@@ -154,7 +154,7 @@ spec:
     {{- end }}
 
 ---
-apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" $ }}
 kind: Deployment
 metadata:
   name: {{ $fullName }}-backend
@@ -251,7 +251,7 @@ spec:
     {{- end }}
 ---
 {{- if $config.config.cache.enabled }}
-apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" $ }}
 kind: Deployment
 metadata:
   name: {{ $fullName }}-cache

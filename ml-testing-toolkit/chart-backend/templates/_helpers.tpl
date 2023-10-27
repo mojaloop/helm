@@ -31,10 +31,13 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
   {{- end -}}
 {{- end -}}
 
+{{/*
+Return the appropriate apiVersion for statefulset.
+*/}}
 {{- define "ml-testing-toolkit-backend.apiVersion.StatefulSet" -}}
-  {{- if .Capabilities.APIVersions.Has "apps/v1/StatefulSet" -}}
-    {{- print "apps/v1" -}}
-  {{- else -}}
-    {{- print "apps/v1beta2" -}}
-  {{- end -}}
+{{- if semverCompare "<1.14-0" (include "common.capabilities.kubeVersion" .) -}}
+{{- print "apps/v1beta1" -}}
+{{- else -}}
+{{- print "apps/v1" -}}
+{{- end -}}
 {{- end -}}
