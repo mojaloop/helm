@@ -1,4 +1,4 @@
-apiVersion: {{ template "account-lookup-service-api.apiVersion.Deployment" . }}
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
   name: {{ include "account-lookup-service-api.fullname" . }}
@@ -27,11 +27,11 @@ spec:
         checksum/secret-jws: {{ include (print $.Template.BasePath "/secret-jws.yaml") . | sha256sum }}
         # Custom Pod annotations
         {{- if .Values.podAnnotations }}
-        {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $ ) | nindent 4 }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
         # Common annotations
         {{- if .Values.commonAnnotations }}
-        {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
         ## Currently not supported
         # {{- if .Values.metrics.enabled }}
