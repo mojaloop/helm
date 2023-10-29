@@ -27,6 +27,10 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "simulator.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        # Custom Pod Labels
+        {{- if .Values.podLabels }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.podLabels "context" $ ) | nindent 8 }}
+        {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
         # Custom Pod annotations
