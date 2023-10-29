@@ -24,6 +24,10 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "finance-portal-settlement-management.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        # Custom Pod Labels
+        {{- if .Values.podLabels }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.podLabels "context" $ ) | nindent 8 }}
+        {{- end }}
       annotations:
         checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}

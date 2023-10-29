@@ -31,6 +31,10 @@ spec:
       labels:
         app.kubernetes.io/name: sim-{{ $name }}-scheme-adapter
         {{- include "mojaloop-simulator.common-labels" $ | nindent 8 }}
+        # Custom Pod Labels
+        {{- if $config.podLabels }}
+        {{- include "common.tplvalues.render" ( dict "value" .podLabels "context" $config ) | nindent 8 }}
+        {{- end }}
       annotations:
         checksum/config-rules: {{ $checksumConfigRules }}
         checksum/config-jws-public-keys: {{ $checksumConfigJWSPublicKeys }}
