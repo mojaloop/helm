@@ -59,8 +59,8 @@ Minor enhancements for [v15.1.0 Release](https://github.com/mojaloop/helm/blob/m
 ## 3. Application versions
 
 1. ml-api-adapter: v14.0.0 -> [v14.0.4](https://github.com/mojaloop/ml-api-adapter/releases/tag/v14.0.4) ([Compare](https://github.com/mojaloop/ml-api-adapter/compare/v14.0.0...v14.0.4))
-2. central-ledger: v17.0.3 -> [v17.0.7]((https://github.com/mojaloop/central-ledger/releases/tag/v17.0.7)) ([Compare](https://github.com/mojaloop/central-ledger/compare/v17.0.3...v17.0.7))
-3. account-lookup-service: 14.0.0 -> [v14.1.0](https://github.com/mojaloop/account-lookup-service/releases/tag/v14.0.0) ([Compare](https://github.com/mojaloop/account-lookup-service/compare/v14.0.0...v14.1.0))
+2. central-ledger: v17.0.3 -> [v17.3.0]((https://github.com/mojaloop/central-ledger/releases/tag/v17.3.0)) ([Compare](https://github.com/mojaloop/central-ledger/compare/v17.0.3...v17.3.0))
+3. account-lookup-service: 14.1.0 -> [v14.2.5](https://github.com/mojaloop/account-lookup-service/releases/tag/v14.2.5) ([Compare](https://github.com/mojaloop/account-lookup-service/compare/v14.1.0...v14.2.5))
 4. quoting-service: v15.0.2 -> [v15.4.0](https://github.com/mojaloop/quoting-service/releases/tag/v15.4.0) ([Compare](https://github.com/mojaloop/quoting-service/compare/v15.0.2...v15.4.0))
 5. central-settlement: v15.0.0 -> [v15.0.4](https://github.com/mojaloop/central-settlement/releases/tag/v15.0.4) ([Compare](https://github.com/mojaloop/central-settlement/compare/v15.0.0...v15.0.4))
 6. bulk-api-adapter: v15.0.3 -> [v16.0.1](https://github.com/mojaloop/bulk-api-adapter/releases/tag/v16.0.1) ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v15.0.3...v16.0.1))
