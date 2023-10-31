@@ -9,7 +9,7 @@ global: {}
 image:
   registry: "docker.io"
   repository: mojaloop/central-ledger
-  tag: v17.3.0-snapshot.6
+  tag: v17.3.0
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -90,7 +90,7 @@ sidecar:
   enabled: true
   image:
     repository: mojaloop/event-sidecar
-    tag: v13.0.0
+    tag: v13.0.1
     pullPolicy: IfNotPresent
     command: '["npm", "run", "start"]'
   service:
@@ -284,6 +284,16 @@ initContainers: |
         {{- end }}
       - name: DB_DATABASE
         value: '{{ .Values.config.db_database }}'
+
+## @param master.podLabels Extra labels for pod(s)
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+##
+podLabels: {}
+
+## @param podAnnotations Additional custom annotations for pod(s)
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+##
+podAnnotations: {}
 
 service:
   internalPort: 3001

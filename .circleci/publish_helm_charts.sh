@@ -3,7 +3,7 @@
 LOCAL_HELM_MOJALOOP_REPO_URI=${HELM_MOJALOOP_REPO_URI:-'https://mojaloop.github.io/charts/repo'}
 REVISION=${GITHUB_TAG:-$GIT_SHA1}
 WORKING_RELEASE_DIRECTORY=/tmp/release
-if [ -n ${GITHUB_TAG} ]; then
+if [ -n ${GITHUB_TAG} ] || [[ $GITHUB_TAG == *"snapshot"* ]]; then
   COMMIT_MESSAGE="Updating development release to $REVISION"
 else
   COMMIT_MESSAGE="Updating release to $REVISION"

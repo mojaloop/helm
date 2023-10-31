@@ -1,6 +1,6 @@
 {{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
-apiVersion: {{ template "centralsettlement-service.apiVersion.Deployment" . }}
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
   name: {{ template "centralsettlement-service.fullname" . }}
@@ -24,13 +24,25 @@ spec:
         app.kubernetes.io/version: {{ .Chart.Version }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        # Custom Pod Labels
+        {{- if .Values.podLabels }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.podLabels "context" $ ) | nindent 8 }}
+        {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
-      {{- if .Values.metrics.enabled }}
+        # Custom Pod annotations
+        {{- if .Values.podAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $ ) | nindent 8 }}
+        {{- end }}
+        # Common annotations
+        {{- if .Values.commonAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.metrics.enabled }}
         prometheus.io/port: "{{ .Values.service.internalPort }}"
         prometheus.io/scrape: "true"
-      {{- end }}
+        {{- end }}
     spec:
 {{- if .Values.affinity }}
       affinity:

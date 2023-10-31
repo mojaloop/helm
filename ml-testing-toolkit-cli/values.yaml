@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit-client-lib
-  tag: v1.2.0
+  tag: v1.2.1
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -18,6 +18,8 @@ image:
 ## Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/#handling-pod-and-container-failures
 backoffLimit: 0
 restartPolicy: Never
+
+
 
 ## Bash script for TTK CLI
 script: |
@@ -93,6 +95,21 @@ postInstallHook:
   weight: -5
   deletePolicy: before-hook-creation
 
+job:
+  enabled: false
+  ## Set the TTL for Job Cleanup - ref: https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/
+  # ttlSecondsAfterFinished: 50
+  generateNameEnabled: true
+
+  annotations: {}
+  # Add custom annotations here. Use the following line as examples, it will overrride the default helm hook.
+  #   argocd.argoproj.io/hook: PostSync
+  #   argocd.argoproj.io/sync-wave: "-5"
+  #### If passing the arguments using commad line, may be necessary scape the "." character -> i.e: "argocd\.argoproj\.io/hook": PostSync
+  
+  # Add custom labels of job template here.
+  templateLabels: {}
+  
 config:
   ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
   testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/v<TAG_VERSION>.zip

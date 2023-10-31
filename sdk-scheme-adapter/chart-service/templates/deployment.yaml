@@ -8,9 +8,11 @@ metadata:
     {{- if .Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
-  {{- if .Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
-  {{- end }}
+  annotations:
+    # Common annotations
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" $.Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -22,13 +24,13 @@ spec:
         checksum/config: {{ .Values.env | toString | sha256sum }}
         checksum/secret-jws-signing-key: {{ .Values.config.jwsSigningKey | sha256sum }}
         checksum/secret-jws-verification-keys: {{ .Values.config.jwsVerificationKeys | toString | sha256sum }}
-      {{- if .Values.podAnnotations }}
-      {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" $) | nindent 8 }}
-      {{- end }}
-      {{- if .Values.metrics.enabled }}
+        {{- if .Values.podAnnotations }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" $) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.metrics.enabled }}
         prometheus.io/port: {{ include "common.tplvalues.render" (dict "value" .Values.metrics.config.port "context" $) | quote }}
         prometheus.io/scrape: "true"
-      {{- end }}
+        {{- end }}
       labels: {{- include "common.labels.standard" . | nindent 8 }}
         app.kubernetes.io/component: {{ .Chart.Name }}
         app.kubernetes.io/version: {{ .Chart.Version }}
@@ -141,8 +143,21 @@ spec:
               value: {{ printf "%s-backend:3000" (include "common.names.fullname" . ) }}
             {{- end }}
             {{- range $k, $v := .Values.env }}
+            {{- if (hasKey $.Values.env "OAUTH_CLIENT_SECRET_NAME") }}
+            {{- if and (ne "OAUTH_CLIENT_SECRET_NAME" $k) (ne "OAUTH_CLIENT_SECRET_KEY" $k) (ne "OAUTH_CLIENT_SECRET" $k) }}
             - name: {{ $k }}
               value: {{ include "common.tplvalues.render" (dict "value" $v "context" $) | quote }}
+            {{- else if eq "OAUTH_CLIENT_SECRET_NAME" $k}}
+            - name: OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "common.tplvalues.render" (dict "value" $.Values.env.OAUTH_CLIENT_SECRET_NAME "context" $) | quote }}
+                  key: {{ include "common.tplvalues.render" (dict "value" $.Values.env.OAUTH_CLIENT_SECRET_KEY "context" $) | quote }}
+            {{- end }}
+            {{- else }}
+            - name: {{ $k }}
+              value: {{ include "common.tplvalues.render" (dict "value" $v "context" $) | quote }}
+            {{- end }}  
             {{- end }}
           volumeMounts:
           {{- if .Values.env.JWS_SIGN }}

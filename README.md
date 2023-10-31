@@ -340,3 +340,8 @@ To enable batch processing in your system, please follow the steps below:
     _It's essential to consider the context of your deployment. If you have the entire Helm values file as an override, this configuration change will work seamlessly._
     
     _However, if you are using a Helm override file with only a subset of values overridden, ensure that you include all the configuration parameters associated with the CL_BATCH_PROCESSING_ENABLED anchor. Failing to include these parameters might result in unexpected behavior._
+    _However, if you are using a Helm override file with only a subset of values overridden, ensure that you include all the configuration parameters associated with the CL_BATCH_PROCESSING_ENABLED anchor. Failing to include these parameters might result in unexpected behavior._
+
+## Known Issues
+
+1. Snapshot releases will fail if the commit SHA starts with a 0 - https://github.com/helm/helm/issues/7064
