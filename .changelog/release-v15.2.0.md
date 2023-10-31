@@ -3,7 +3,7 @@
 Date | Revision | Description
 ---------|----------|---------
  2023-10-23 | 0 | Initial draft
- 2023-10-xx | 1 | Initial release
+ 2023-10-31 | 1 | RC.1
 
 - For *BREAKING CHANGES*, please review the section `#5` "Breaking Changes" below.
 - For *KNOWN ISSUES*, please review the section `#8` "Known Issues" below.
