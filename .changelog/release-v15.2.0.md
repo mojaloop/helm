@@ -117,7 +117,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 
         Pre-requisites:
 
-        - The `email-notifier` has a dependency on a `Kafka`.
+        - The `email-notifier` has a dependency on `Kafka`.
         - Refer to [example-mojaloop-backend](https://github.com/mojaloop/helm/blob/v15.0.0/example-mojaloop-backend/README.md) for an example on how to deploy this dependency. This can be enabled in the [example-mojaloop-backend/values.yaml](https://github.com/mojaloop/helm/blob/v15.0.0/example-mojaloop-backend/values.yaml)  by setting `kafka.enabled` to `true`.
 
         Use the following command to deploy `email-notifier`:
@@ -130,7 +130,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
     - `centralledger`
     - `centralsettlements`
 4. Charts have been re-factored for consistency, which will impact the following value configs. These are not necessarily breaking changes, but you will need to ensure any customized values files are updated to reflect these changes:
-    - Image, Command definitions have been made consistent, with added "debug" added.
+    - Image, Command definitions have been made consistent, with "debug" added.
     - InitContainers definitions have been made consistent.
     - Service definitions have been made consistent.
     - "config" and "config_files" are being used for consistency. This mainly impacts ML-Testing-Toolkit-Backend and ThirdParty Services.
