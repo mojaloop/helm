@@ -313,3 +313,7 @@ e.g. `helm --namespace mojaloop del dev`
 ## Monitoring Mojaloop
 
 Refer to [Monitoring Documentation](./monitoring/README.md)
+
+## Known Issues
+
+1. Snapshot releases will fail if the commit SHA starts with a 0 - https://github.com/helm/helm/issues/7064
