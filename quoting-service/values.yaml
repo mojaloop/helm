@@ -7,7 +7,7 @@ global: {}
 image:
   registry: "docker.io"
   repository: mojaloop/quoting-service
-  tag: v15.0.2
+  tag: v15.4.0
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -23,7 +23,7 @@ image:
   pullSecrets: []
 
 replicaCount: 1
-command: '["node", "src/index.js"]' 
+command: '["node", "src/index.js"]'
 
 ## Enable diagnostic mode in the deployment
 ##
@@ -33,14 +33,14 @@ diagnosticMode:
   enabled: false
   ## @param diagnosticMode.command Command to override all containers in the deployment
   ##
-  command: 
+  command:
     - node
     - src/index.js
   ## @param diagnosticMode.args Args to override all containers in the deployment
   ##
   args:
     - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-  
+
   ## @param diagnosticMode.debug config to override all debug information
   ##
   debug:
@@ -86,7 +86,7 @@ sidecar:
   enabled: true
   image:
     repository: mojaloop/event-sidecar
-    tag: v12.0.0
+    tag: v13.0.1
     pullPolicy: IfNotPresent
     command: '["npm", "run", "start"]'
   service:
@@ -110,6 +110,16 @@ sidecar:
     event_log_metadata_only: true
     log_level: info
     log_filter: 'error, warn, info'
+
+## metric configuration for prometheus instrumentation
+metrics:
+  ## flag to enable/disable the metrics end-points
+  enabled: true
+  config:
+    timeout: 5000
+    prefix: moja_
+    defaultLabels:
+      serviceName: quoting-service
 
 config:
 
@@ -203,6 +213,13 @@ config:
     include_cause_extension: false
     truncate_extensions: true
 
+  cache:
+    enum_data_expires_in_ms: 4170000
+    # Setting this any higher will most likely cause GP tests to fail
+    # Best to only set this higher if you are not running GP tests
+    # Not specifying or setting to 0 will default the cache to 60 seconds
+    participant_data_expires_in_ms: 10
+
 rules: []
 
 ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
@@ -227,9 +244,9 @@ initContainers: |
         do
           echo --------------------;
           echo Waiting for MySQL...;
-          sleep 2; 
+          sleep 2;
         done;
-        echo ====================; 
+        echo ====================;
         echo MySQL ok!;
     env:
       - name: DB_HOST
@@ -249,6 +266,16 @@ initContainers: |
         {{- end }}
       - name: DB_DATABASE
         value: '{{ .Values.config.db_database }}'
+
+## @param master.podLabels Extra labels for pod(s)
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+##
+podLabels: {}
+
+## @param podAnnotations Additional custom annotations for pod(s)
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+##
+podAnnotations: {}
 
 service:
   internalPort: 3002

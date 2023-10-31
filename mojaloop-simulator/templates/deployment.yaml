@@ -3,6 +3,7 @@
 {{- $checksumConfigSecrets := include (print $.Template.BasePath "/secret.yaml") . | sha256sum -}}
 {{- $prefix := include "mojaloop-simulator.prefix" . -}}
 {{- $releaseName := .Release.Name -}}
+
 {{- range $name, $customConfig := .Values.simulators }}
 {{- $fullName := printf "%s%s" $prefix $name }}
 {{- $config := merge $customConfig $.Values.defaults }}
@@ -10,13 +11,18 @@
 {{- $cacheHost := default (printf "%s-cache" $fullName) $config.config.schemeAdapter.env.CACHE_HOST -}}
 {{- $cachePort := default "6379" $config.config.schemeAdapter.env.CACHE_PORT -}}
 {{- $cacheURL := (printf "redis://%s:%s" $cacheHost ($cachePort | toString)) -}}
-apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" $ }}
 kind: Deployment
 metadata:
   name: {{ $fullName }}-scheme-adapter
   labels:
     app.kubernetes.io/name: sim-{{ $name }}-scheme-adapter
     {{- include "mojaloop-simulator.common-labels" $ | nindent 4 }}
+  annotations:
+    # Common annotations
+    {{- if $.Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" $.Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
 spec:
   replicas: {{ $config.replicaCount }}
   selector:
@@ -28,10 +34,22 @@ spec:
       labels:
         app.kubernetes.io/name: sim-{{ $name }}-scheme-adapter
         {{- include "mojaloop-simulator.common-labels" $ | nindent 8 }}
+        # Custom Pod Labels
+        {{- if $config.config.podLabels }}
+        {{- range $key, $value := $config.config.podLabels }}
+        {{ $key }}: {{ tpl $value $ | quote }}
+        {{- end }}
+        {{- end }}
       annotations:
         checksum/config-rules: {{ $checksumConfigRules }}
         checksum/config-jws-public-keys: {{ $checksumConfigJWSPublicKeys }}
         checksum/secrets: {{ $checksumConfigSecrets }}
+        # Custom Pod annotations
+        {{- if $config.config.podAnnotations }}
+        {{- range $key, $value := $config.config.podAnnotations }}
+        {{ $key }}: {{ tpl $value $ | quote }}
+        {{- end }}
+        {{- end }}
     spec:
       volumes:
       {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
@@ -143,7 +161,7 @@ spec:
     {{- end }}
 
 ---
-apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" $ }}
 kind: Deployment
 metadata:
   name: {{ $fullName }}-backend
@@ -240,7 +258,7 @@ spec:
     {{- end }}
 ---
 {{- if $config.config.cache.enabled }}
-apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" $ }}
 kind: Deployment
 metadata:
   name: {{ $fullName }}-cache
@@ -302,7 +320,7 @@ spec:
 ---
 {{- end }}
 {{- if $config.config.thirdpartysdk.enabled }}
-apiVersion: {{ template "mojaloop-simulator.apiVersion.Deployment" $ }}
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" $ }}
 kind: Deployment
 metadata:
   name: {{ $fullName }}-thirdparty-sdk
@@ -405,4 +423,8 @@ spec:
     {{- end }}
 ---
 {{- end }}
+##
+### End loop through simulators
+##
 {{ end }}
+##
