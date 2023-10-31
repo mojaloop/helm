@@ -89,7 +89,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 | Settlements | [v2.0](https://docs.mojaloop.io/api/settlement)                                                                                            |       |
 | Admin       | [v1.0](https://docs.mojaloop.io/api/administration/central-ledger-api.html)                                                                |       |
 | Oracle      | [v1.0](https://docs.mojaloop.io/legacy/api/als-oracle-api-specification.html)                                                              |       |
-| Thirdparty  | [v1.0](https://docs.mojaloop.io/api/thirdparty)                                                                                           |       |
+| Thirdparty  | [v1.0](https://docs.mojaloop.io/api/thirdparty)                                                                                            |       |
 
 ## 5. Testing notes
 
