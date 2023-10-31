@@ -13,7 +13,7 @@ Date | Revision | Description
 Enhancements and non-breaking changes to the [v15.1.0 Release](https://github.com/mojaloop/helm/blob/master/.changelog/release-v15.1.0.md), which includes:
 
 1. Nodejs version of core and supporting services upgraded to v18.17.1 LTS
-2. Performance improvements and metrics around some core services: ALS, Central Ledger, Quoting Service based on characterisation and fixes, enhancements done
+2. Performance improvements and metrics around core services: ALS, Central Ledger, Quoting Service based on characterisation and fixes, enhancements done
 3. General maintenance and bug fixes
 
 ## 1. New Features
