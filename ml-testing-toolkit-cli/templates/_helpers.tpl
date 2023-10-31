@@ -67,10 +67,10 @@ template:
       app.kubernetes.io/version: {{ .Chart.Version }}
       app.kubernetes.io/managed-by: {{ .Release.Service }}
       helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-      ## Adding custom labels, if update the values.yaml in 'job.labels'
-      {{- with .Values.job.templateLabels }}
-        {{ toYaml .| indent 6 | trim }}
-      {{- end }}
+    ## Adding custom labels, if update the values.yaml in 'job.labels'
+    {{- with .Values.job.templateLabels }}
+      {{ toYaml .| indent 6 | trim }}
+    {{- end }}
   spec:
     restartPolicy: Never
     {{- include "ml-testing-toolkit-cli.template.containers" . | nindent 4 -}}
