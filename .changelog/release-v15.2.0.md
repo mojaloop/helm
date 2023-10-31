@@ -12,11 +12,9 @@ Date | Revision | Description
 
 Minor enhancements for [v15.1.0 Release](https://github.com/mojaloop/helm/blob/master/.changelog/release-v15.1.0.md), which includes the following changes:
 
-
-1. Nodejs version of core and supporting services upgraded to v18 and v16 (please put specific versions here)
+1. Nodejs version of core and supporting services upgraded to v18.17.1 LTS
 2. Performance improvements and metrics around some core services: ALS, Central Ledger, Quoting Service based on characterisation and fixes, enhancements done
 3. General maintenance and bug fixes
-
 
 ## 1. New Features
 
@@ -79,9 +77,10 @@ Minor enhancements for [v15.1.0 Release](https://github.com/mojaloop/helm/blob/m
 20. ml-testing-toolkit: v16.1.1 -> [v17.0.0](https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v17.0.0) ([Compare](https://github.com/mojaloop/sml-testing-toolkit/compare/v16.1.1...v17.0.0))
 21. ml-testing-toolkit-ui: [v15.4.0](https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.3.0)22. ml-testing-toolkit-client-lib: [v1.2.0](https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.2.0)
 23. ml-testing-toolkit-client-lib: v1.2.0 -> [v1.2.1](https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.2.1)  ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v1.2.0...v1.2.1))
-24. als-consent-oracle: v0.2.0 -> [v0.2.1](https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.1) ([Compare](https://github.com/mojaloop/als-consent-oracle/compare/v0.2.0...v0.2.1))
-25. thirdparty-api-svc: v13.0.2 -> [v13.0.4](https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v13.0.4) ([Compare](https://github.com/mojaloop/thirdparty-api-svc/compare/v13.0.2...v13.0.4))
-26. thirdparty-sdk: v15.1.0 -> [v15.1.1](https://github.com/mojaloop/thirdparty-sdk/releases/tag/v15.1.1) ([Compare](https://github.com/mojaloop/thirdparty-sdk/compare/v15.1.0...v15.1.1))
+24. auth-service: v14.0.0 -> [v14.0.1](https://github.com/mojaloop/auth-service/releases/tag/v14.0.1) ([Compare](https://github.com/mojaloop/auth-service/compare/v14.0.0...v14.0.1))
+25. als-consent-oracle: v0.2.0 -> [v0.2.1](https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.1) ([Compare](https://github.com/mojaloop/als-consent-oracle/compare/v0.2.0...v0.2.1))
+26. thirdparty-api-svc: v13.0.2 -> [v13.0.4](https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v13.0.4) ([Compare](https://github.com/mojaloop/thirdparty-api-svc/compare/v13.0.2...v13.0.4))
+27. thirdparty-sdk: v15.1.0 -> [v15.1.1](https://github.com/mojaloop/thirdparty-sdk/releases/tag/v15.1.1) ([Compare](https://github.com/mojaloop/thirdparty-sdk/compare/v15.1.0...v15.1.1))
 
 
 ## 4. API Versions
