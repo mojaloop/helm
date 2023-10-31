@@ -13,14 +13,25 @@ Date | Revision | Description
 Minor enhancements for [v15.1.0 Release](https://github.com/mojaloop/helm/blob/master/.changelog/release-v15.1.0.md), which includes the following changes:
 
 
-1. Performance & instrumentation improvements for the following core services: Account-Lookup-Service, Quoting-Service, ML-API-Adapter & Central Ledger.
-2. Maintenance upgrades for all packaged services, this includes NodeJS & dependencies.
-3. Several bug-fixes mainly due to the maintenance upgrades, and a result of the Performance Characterisation work to improve stability of Mojaloop core services under load
+1. Nodejs version of core and supporting services upgraded to v18 and v16 (please put specific versions here)
+2. Performance improvements and metrics around some core services: ALS, Central Ledger, Quoting Service based on characterisation and fixes, enhancements done
+3. General maintenance and bug fixes
 
 
 ## 1. New Features
 
-1. **NodeJS upgrades:**  
+1. **Performance fixes, enhancements and maintenance:**  
+   * **mojaloop/#3396**  Performance Maintenance characterisation for ALS - Add instrumentation ([account-lookup-service/pull/457](https://github.com/mojaloop/account-lookup-service/pull/457)), closes [mojaloop/#3396](https://github.com/mojaloop/project/issues/3396)  
+   * **mojaloop/#3432** Adds quoting service Performance characterization upgrades and dashboards([quoting-service/pull/#311](https://github.com/mojaloop/quoting-service/pull/311), [quoting-service/pull/313](https://github.com/mojaloop/quoting-service/pull/313), [quoting-service/pull/31]), closes [mojaloop/#3432](https://github.com/mojaloop/project/issues/3432)
+   * **mojaloop/#3537** Performance Characterise Quotes ([quoting-service/pull/#313](https://github.com/mojaloop/quoting-service/pull/313), [quoting-service/pull/#315](https://github.com/mojaloop/quoting-service/pull/315)), closes [mojaloop/#3537](https://github.com/mojaloop/project/issues/3537)  
+   * **mojaloop/#3470** Profile ML-API-Adapter Notification Handler ([ml-api-adapter/pull/510](https://github.com/mojaloop/ml-api-adapter/pull/510), [ml-api-adapter/pull/512](https://github.com/mojaloop/ml-api-adapter/pull/512), ), closes [mojaloop/#3470](https://github.com/mojaloop/project/issues/3470)
+   * **mojaloop/#3419** Perform benchmark tests ([central-ledger/pull/961](https://github.com/mojaloop/central-ledger/pull/961), )
+   * **mojaloop/3565** Re-enable caching on ([quoting-service/#318](https://github.com/mojaloop/quoting-service/pull/318)), closes [mojaloop/#3565](https://github.com/mojaloop/project/issues/3565)
+   * **mojaloop/#3564** Quoting Service stalls on large concurrent requests/loads ([quoting-service/319](https://github.com/mojaloop/quoting-service/pull/319)), closes [mojaloop/#3564](https://github.com/mojaloop/project/issues/3564)
+   * **mojaloop/3264** SDK - Implement restart functionality for Bulk related outbound requests after PM4ML onboarding ([sdk-scheme-adapter](https://github.com/mojaloop/sdk-scheme-adapter/pull/454)), closes [mojaloop/3264](https://github.com/mojaloop/project/issues/3264)
+   * **mojaloop/2928** Upgrade Mojaloop Simulator Logging ([mojaloop-simulator/#2928](https://github.com/mojaloop/mojaloop-simulator/pull/148)), closes [mojaloop/#3564](https://github.com/mojaloop/project/issues/3564)
+
+2. **NodeJS upgrades:**  
    * **mojaloop/#3435** Account Lookup Service NodeJs Upgrade ([account-lookup-service/pull/462](https://github.com/mojaloop/quoting-service/pull/309)), closes [mojaloop/#3435](https://github.com/mojaloop/project/issues/3432)  
    * **mojaloop/#3438** Quoting Service NodeJS Upgrade ([quoting-service/pull/309](https://github.com/mojaloop/quoting-service/pull/309)), closes [mojaloop/#3438](https://github.com/mojaloop/project/issues/3438)  
    * **mojaloop/#3425** ML-API-Adapter NodeJS Upgrade ([ml-api-adapter/pull/513](https://github.com/mojaloop/ml-api-adapter/pull/513), [ml-api-adapter/pull/514](https://github.com/mojaloop/ml-api-adapter/pull/514)), closes [mojaloop/#3425](https://github.com/mojaloop/project/issues/3425)
@@ -34,18 +45,6 @@ Minor enhancements for [v15.1.0 Release](https://github.com/mojaloop/helm/blob/m
    * **mojaloop/3386** SDK-Scheme-Adapter NodeJS Upgrade ([sdk-scheme-adapter/pull/453](https://github.com/mojaloop/sdk-scheme-adapter/pull/453), [sdk-scheme-adapter/pull/454](https://github.com/mojaloop/sdk-scheme-adapter/pull/454), [sdk-scheme-adapter/pull/455](https://github.com/mojaloop/sdk-scheme-adapter/pull/455))
    * **mojaloop/3444** Mojaloop-Simulator NodeJS Upgrade ([mojaloop-simulator/pull/168](https://github.com/mojaloop/mojaloop-simulator/pull/168)), closes [mojaloop/#3444](https://github.com/mojaloop/project/issues/3444)
    * **mojaloop/3447** Bulk-Api-Adapter NodeJS Upgrade ([bulk-api-adapter/pull/99](https://github.com/mojaloop/bulk-api-adapter/pull/99), [bulk-api-adapter/pull/100](https://github.com/mojaloop/bulk-api-adapter/pull/100))
-
-
-2. **Performance Characterization:**  
-   * **mojaloop/#3396**  Performance Maintenance characterisation for ALS - Add instrumentation ([account-lookup-service/pull/457](https://github.com/mojaloop/account-lookup-service/pull/457)), closes [mojaloop/#3396](https://github.com/mojaloop/project/issues/3396)  
-   * **mojaloop/#3432** Adds quoting service Performance characterization upgrades and dashboards([quoting-service/pull/#311](https://github.com/mojaloop/quoting-service/pull/311), [quoting-service/pull/313](https://github.com/mojaloop/quoting-service/pull/313), [quoting-service/pull/31]), closes [mojaloop/#3432](https://github.com/mojaloop/project/issues/3432)
-   * **mojaloop/#3537** Performance Characterise Quotes ([quoting-service/pull/#313](https://github.com/mojaloop/quoting-service/pull/313), [quoting-service/pull/#315](https://github.com/mojaloop/quoting-service/pull/315)), closes [mojaloop/#3537](https://github.com/mojaloop/project/issues/3537)  
-   * **mojaloop/#3470** Profile ML-API-Adapter Notification Handler ([ml-api-adapter/pull/510](https://github.com/mojaloop/ml-api-adapter/pull/510), [ml-api-adapter/pull/512](https://github.com/mojaloop/ml-api-adapter/pull/512), ), closes [mojaloop/#3470](https://github.com/mojaloop/project/issues/3470)
-   * **mojaloop/#3419** Perform benchmark tests ([central-ledger/pull/961](https://github.com/mojaloop/central-ledger/pull/961), )
-   * **mojaloop/3565** Re-enable caching on ([quoting-service/#318](https://github.com/mojaloop/quoting-service/pull/318)), closes [mojaloop/#3565](https://github.com/mojaloop/project/issues/3565)
-   * **mojaloop/#3564** Quoting Service stalls on large concurrent requests/loads ([quoting-service/319](https://github.com/mojaloop/quoting-service/pull/319)), closes [mojaloop/#3564](https://github.com/mojaloop/project/issues/3564)
-   * **mojaloop/3264** SDK - Implement restart functionality for Bulk related outbound requests after PM4ML onboarding ([sdk-scheme-adapter](https://github.com/mojaloop/sdk-scheme-adapter/pull/454)), closes [mojaloop/3264](https://github.com/mojaloop/project/issues/3264)
-   * **mojaloop/2928** Upgrade Mojaloop Simulator Logging ([mojaloop-simulator/#2928](https://github.com/mojaloop/mojaloop-simulator/pull/148)), closes [mojaloop/#3564](https://github.com/mojaloop/project/issues/3564)
 
 ## 2. Bug Fixes
 
