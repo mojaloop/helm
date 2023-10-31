@@ -198,30 +198,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
     echo $K8_DESCRIPTOR | kubectl create --save-config -f -;
     ```
 
-## 6. Deprecations
-
-The following components have been deprecated from the packaged Mojaloop Helm chart release and have been with [Business Operation Framework (BOF)](https://github.com/mojaloop/business-operations-framework-docs), which can be deployed by the official [BoF Helm Chart](https://github.com/mojaloop/charts/tree/master/mojaloop/bof):
-
-- [finance-portal](https://github.com/mojaloop/helm/tree/master/finance-portal) Helm Chart
-  - [finance-portal-ui](https://github.com/mojaloop/finance-portal-ui/releases/tag/v10.4.3)
-  - [finance-portal-backend-service](https://github.com/mojaloop/finance-portal-backend-service/releases/tag/v15.0.2)
-- [finance-portal-settlement-management](https://github.com/mojaloop/helm/tree/master/finance-portal-settlement-management) Helm Chart
-  - [settlement-management](https://github.com/mojaloop/settlement-management/releases/tag/v11.0.0)
-  - [operator-settlement](https://github.com/mojaloop/operator-settlement/releases/tag/v11.0.0)
-
-> *Note these Helm Chart are still available for deployment in the [Mojaloop Helm Repo (http://mojaloop.io/helm/repo/)](http://mojaloop.io/helm/repo/index.yaml).*
-
-This is due to the underlying services having been deprecated by the Micro-Services provided by the [Business Operation Framework (BOF)](https://github.com/mojaloop/business-operations-framework-docs) for Financial Management and Reporting.
-
-More information can be found here:
-
-- https://github.com/mojaloop/business-operations-framework-docs.
-
-[BOF Helm charts](https://github.com/mojaloop/charts/tree/master/mojaloop/bof) to deploy the [Business Operation Framework](https://github.com/mojaloop/business-operations-framework-docs) can be found here:
-
-- https://github.com/mojaloop/charts/tree/master/mojaloop/bof
-
-## 7. Testing notes
+## 6. Testing notes
 
 1. This release has been validated against the following Dependency Test Matrix:
 
@@ -267,7 +244,7 @@ More information can be found here:
 
     For details regarding deployment and validation of simulators needed for bulk (for adoption provided in sdk-scheme-adapter) refer to [deploying Mojaloop TTK simulators](https://github.com/mojaloop/helm/blob/master/mojaloop-ttk-simulators/README.md).
 
-## 8. Known Issues
+## 7. Known Issues
 
 1. [#2119 - Idempotency for duplicate quote request](https://github.com/mojaloop/project/issues/2119)
 2. [#2322 - Helm install failing with with "medium to large" release names](https://github.com/mojaloop/project/issues/2322)
