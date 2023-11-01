@@ -31,7 +31,10 @@ Enhancements and non-breaking changes to the [v15.1.0 Release](https://github.co
    * **mojaloop/2928** Upgrade Mojaloop Simulator Logging ([mojaloop-simulator/#2928](https://github.com/mojaloop/mojaloop-simulator/pull/148)), closes [mojaloop/#3564](https://github.com/mojaloop/project/issues/3564)
    * **mojaloop/3264** SDK - Implement restart functionality for Bulk related outbound requests after PM4ML onboarding ([sdk-scheme-adapter](https://github.com/mojaloop/sdk-scheme-adapter/pull/454)), closes [mojaloop/3264](https://github.com/mojaloop/project/issues/3264)
    * **mojaloop/3565** Re-enable caching on ([quoting-service/#318](https://github.com/mojaloop/quoting-service/pull/318)), closes [mojaloop/#3565](https://github.com/mojaloop/project/issues/3565)
-* **mojaloop/#3396**  Performance Maintenance characterisation for ALS - Add instrumentation ([account-lookup-service/pull/457](https://github.com/mojaloop/account-lookup-service/pull/457)), closes [mojaloop/#3396](https://github.com/mojaloop/project/issues/3396)  
+   * **mojaloop/#3396**  Performance Maintenance characterisation for ALS - Add instrumentation ([account-lookup-service/pull/457](https://github.com/mojaloop/account-lookup-service/pull/457)), closes [mojaloop/#3396](https://github.com/mojaloop/project/issues/3396)  
+   * **mojaloop/#3489**  Implement the batching design for position prepare messages ([central-ledger/pull/970](https://github.com/mojaloop/central-ledger/pull/970), [central-ledger/pull/972](https://github.com/mojaloop/central-ledger/pull/972), [central-ledger/pull/975](https://github.com/mojaloop/central-ledger/pull/975)), closes [mojaloop/#3489](https://github.com/mojaloop/project/issues/3489)  
+   * **mojaloop/#3480**  JSON.stringify degrades performance on high call count function in default LOG_LEVEL=info ([central-services-shared/pull/343](https://github.com/mojaloop/central-services-shared/pull/343)), closes [mojaloop/#3480](https://github.com/mojaloop/project/issues/3480)  
+   * **mojaloop/#3472**  Enhance Kafka lib (vNow) to 3452 performance stream recommendations([central-services-stream/pull/129](https://github.com/mojaloop/central-services-stream/pull/129)), closes [mojaloop/#3472](https://github.com/mojaloop/project/issues/3472) 
 
 2. **NodeJS upgrades:**  
    * **mojaloop/#3425** ML-API-Adapter NodeJS Upgrade ([ml-api-adapter/pull/513](https://github.com/mojaloop/ml-api-adapter/pull/513), [ml-api-adapter/pull/514](https://github.com/mojaloop/ml-api-adapter/pull/514)), closes [mojaloop/#3425](https://github.com/mojaloop/project/issues/3425)
@@ -46,7 +49,23 @@ Enhancements and non-breaking changes to the [v15.1.0 Release](https://github.co
    * **mojaloop/3444** Mojaloop-Simulator NodeJS Upgrade ([mojaloop-simulator/pull/168](https://github.com/mojaloop/mojaloop-simulator/pull/168)), closes [mojaloop/#3444](https://github.com/mojaloop/project/issues/3444)
    * **mojaloop/3447** Bulk-Api-Adapter NodeJS Upgrade ([bulk-api-adapter/pull/99](https://github.com/mojaloop/bulk-api-adapter/pull/99), [bulk-api-adapter/pull/100](https://github.com/mojaloop/bulk-api-adapter/pull/100))
    * **mojaloop/3521** Thirdparty-API-Service NodeJS Upgrade ([thirdparty-api-service/pull/91](https://github.com/mojaloop/thirdparty-api-svc/pull/91), [third-party-api-svc/pull/92](https://github.com/mojaloop/thirdparty-api-svc/pull/92)), closes [mojaloop/#3521](https://github.com/mojaloop/project/issues/3521)
-* **mojaloop/#3435** Account Lookup Service NodeJs Upgrade ([account-lookup-service/pull/462](https://github.com/mojaloop/quoting-service/pull/309)), closes [mojaloop/#3435](https://github.com/mojaloop/project/issues/3432)  
+   * **mojaloop/#3435** Account Lookup Service NodeJs Upgrade ([account-lookup-service/pull/462](https://github.com/mojaloop/quoting-service/pull/309)), closes [mojaloop/#3435](https://github.com/mojaloop/project/issues/3435)  
+   * **mojaloop/#3518** Acentral-services-database NodeJs Upgrade ([database-lib/pull/154](https://github.com/mojaloop/database-lib/pull/154)), closes [mojaloop/#3518](https://github.com/mojaloop/project/issues/3518)  
+   * **mojaloop/#3476** Upgrade Node JS version for the core libraries - ml-number ([ml-number/pull/26](https://github.com/mojaloop/ml-number/pull/26)), closes [mojaloop/#3476](https://github.com/mojaloop/project/issues/3476)  
+   * **mojaloop/#3475** Upgrade Node JS version for the core libraries - api-snippets ([api-snippets/pull/164](https://github.com/mojaloop/api-snippets/pull/164)), closes [mojaloop/#3475](https://github.com/mojaloop/project/issues/3475)  
+   * **mojaloop/#3461** ML-API-Adapter NodeJS Upgrade ([ml-testing-toolkit-client-lib/pull/8](https://github.com/mojaloop/ml-testing-toolkit-client-lib/pull/8)), closes [mojaloop/#3461](https://github.com/mojaloop/project/issues/3461)
+   * **mojaloop/#3460** Update Node JS version for the ttk shared lib([ml-testing-toolkit-shared-lib/pull/13](https://github.com/mojaloop/ml-testing-toolkit-shared-lib/pull/13)), closes [mojaloop/#3460](https://github.com/mojaloop/project/issues/3460)  
+   * **mojaloop/#3458** Update Node JS version for the ttk toolkit([thirdparty-sdk/pull/167](https://github.com/mojaloop/thirdparty-sdk/pull/167)), closes [mojaloop/#3458](https://github.com/mojaloop/project/issues/3458)
+   * **mojaloop/#3450** Update Node JS version for the core libraries - central-services-health ([central-services-metrics/pull/161](https://github.com/mojaloop/central-services-metrics/pull/161)), closes [mojaloop/#3450](https://github.com/mojaloop/project/issues/3450)  
+   * **mojaloop/#3451** Update Node JS version for the core libraries - central-services-health ([central-services-health/pull/256](https://github.com/mojaloop/central-services-health/pull/256)), closes [mojaloop/#3451](https://github.com/mojaloop/project/issues/3451)
+   * **mojaloop/#3453** Update Node JS version for the core libraries - central-services-error-handling ([central-services-error-handling/pull/184](https://github.com/mojaloop/central-services-error-handling/pull/184)), closes [mojaloop/#3453](https://github.com/mojaloop/project/issues/3453)
+   * **mojaloop/#3454** Update Node JS version for the core libraries - sdk-standard-components ([event-sdk/pull/73](https://github.com/mojaloop/event-sdk/pull/73)), closes [mojaloop/#3454](https://github.com/mojaloop/project/issues/3454)
+   * **mojaloop/#3455** Update Node JS version for the core libraries - event-sdk([sdk-standard-components/pull/186](https://github.com/mojaloop/sdk-standard-components/pull/186)), closes [mojaloop/#3455](https://github.com/mojaloop/project/issues/3455)  
+   * **mojaloop/#3455** Update Node JS version for the core-lib central-services-logger ([central-services-logger/pull/44](https://github.com/mojaloop/central-services-logger/pull/44)), closes [mojaloop/#3455](https://github.com/mojaloop/project/issues/3455)  
+   * **mojaloop/#3448** Update Node JS version for the core libraries - central-services-stream ([central-services-stream/pull/130](https://github.com/mojaloop/central-services-stream/pull/130)), closes [mojaloop/#3448](https://github.com/mojaloop/project/issues/3448)  
+   * **mojaloop/#3446** Update Node JS version for the email-notifier ([email-notifier/pull/209](https://github.com/mojaloop/email-notifier/pull/209)), closes [mojaloop/#3446](https://github.com/mojaloop/project/issues/3446)
+
+3. **mojaloop/3599** Add Support for custom annotation to helm chart deployments/statefulsets ([helm](https://github.com/mojaloop/helm/pull/581)), closes [mojaloop/#3599](https://github.com/mojaloop/project/issues/3599) 
 
 ## 2. Bug Fixes
 
@@ -56,6 +75,8 @@ Enhancements and non-breaking changes to the [v15.1.0 Release](https://github.co
 4. **mojaloop/3579** Provisioning and GP test failing because of Funds In timing problems ([testing-toolkit-test-cases/pull/129](https://github.com/mojaloop/testing-toolkit-test-cases/pull/129))
 5. **mojaloop/3580** fix missing toDestination on handling the fspiop source/destination ([central-ledger/pull/982](https://github.com/mojaloop/central-ledger/pull/982)), closes [mojaloop/3580](https://github.com/mojaloop/project/issues/3580)
 6. **mojaloop/3589** Bulk API Adapter failing due to object-lib-store bug ([bulk-api-adapter/pull/102](https://github.com/mojaloop/bulk-api-adapter/pull/102))
+7. **mojaloop/4597** Setup and GP failures when upgrading Mojaloop from v15.1.0 to v15.2.0-rc ([testing-toolkit-test-cases](https://github.com/mojaloop/testing-toolkit-test-cases/pull/129)), closes [mojaloop/3597](https://github.com/mojaloop/project/issues/3597)
+8. **mojaloop/3527** CL v17.2.0 might have issues on payee notifications, Duplicate transfer ID check as well ([object-store-lib](https://github.com/mojaloop/object-store-lib/pull/47)), closes [mojaloop/3527](https://github.com/mojaloop/project/issues/3527)
 
 ## 3. Application versions
 
