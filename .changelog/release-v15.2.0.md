@@ -62,7 +62,7 @@ Enhancements and non-breaking changes to the [v15.1.0 Release](https://github.co
 5. central-settlement: v15.0.0 -> [v15.0.4](https://github.com/mojaloop/central-settlement/releases/tag/v15.0.4) ([Compare](https://github.com/mojaloop/central-settlement/compare/v15.0.0...v15.0.4))
 6. bulk-api-adapter: v15.0.3 -> [v16.0.1](https://github.com/mojaloop/bulk-api-adapter/releases/tag/v16.0.1) ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v15.0.3...v16.0.1))
 7. central-event-processor: [v12.0.0](https://github.com/mojaloop/central-event-processor/releases/tag/v12.0.0)
-8. email-notifier: [v12.0.0](https://github.com/mojaloop/email-notifier/releases/tag/v12.0.0)
+8. email-notifier: v12.0.0 -> [v13.0.1](https://github.com/mojaloop/email-notifier/releases/tag/v13.0.1) ([Compare](https://github.com/mojaloop/email-notifier/compare/v12.0.0...v13.0.1))
 9. als-oracle-pathfinder: [v12.0.0](https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v12.0.0)
 10. transaction-requests-service: v14.1.0 -> [v14.1.1](https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.1.1) ([Compare](https://github.com/mojaloop/transaction-requests-service/compare/v14.1.0...v14.1.1))
 11. event-sidecar: v12.0.0 -> [v13.0.1](https://github.com/mojaloop/event-sidecar/releases/tag/v13.0.1) ([Compare](https://github.com/mojaloop/event-sidecar/compare/v12.0.0...v13.0.1))
@@ -150,7 +150,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 ## 9. Contributors
 
 - Organizations: BMGF, InFiTX
-- Individuals: @chris-me-law , @dfry , @elnyry-sam-k , @PaulGregoryBaker , @mdebarros , @vijayg10 , @aaronreynoza , @oderayi, 
+- Individuals: @chris-me-law , @dfry , @elnyry-sam-k , @PaulGregoryBaker , @mdebarros , @vijayg10 , @aaronreynoza , @oderayi, @elijah0kello
 
 *Note: companies are in alphabetical order, individuals are in no particular order.*
 
