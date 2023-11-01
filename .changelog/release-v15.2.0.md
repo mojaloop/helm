@@ -151,7 +151,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
     1. [#2717 - Thirdparty TTK Test-Collection is not repeatable](https://github.com/mojaloop/project/issues/2717)
     2. [#2925 - Helm Test Intermittent failure with 'Generic ID not found](https://github.com/mojaloop/project/issues/2925)
 
-## 9. Contributors
+## 7. Contributors
 
 - Organizations: BMGF, InFiTX
 - Individuals: @chris-me-law , @dfry , @elnyry-sam-k , @PaulGregoryBaker , @mdebarros , @vijayg10 , @aaronreynoza , @oderayi, @elijah0kello
