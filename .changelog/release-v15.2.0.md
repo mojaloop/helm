@@ -170,6 +170,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 5. Test issues causing instability/intermitant failures on Test Case Results
     1. [#2717 - Thirdparty TTK Test-Collection is not repeatable](https://github.com/mojaloop/project/issues/2717)
     2. [#2925 - Helm Test Intermittent failure with 'Generic ID not found](https://github.com/mojaloop/project/issues/2925)
+6. [#3604 - Quoting Service - throwing errors while processing quotes when LOG_LEVEL set to debug](https://github.com/mojaloop/project/issues/3604)
 
 ## 7. Contributors
 
