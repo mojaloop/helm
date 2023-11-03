@@ -38,5 +38,26 @@
       "JWS_SIGNING_KEY_PATH": "secrets/jwsSigningKey.key"
     }
   },
-  "API_DOCUMENTATION_ENDPOINTS": true
+  "API_DOCUMENTATION_ENDPOINTS": true,
+  "INSTRUMENTATION": {
+    "METRICS": {
+      "DISABLED": {{ not .Values.metrics.enabled }},
+      "labels": {
+        "fspId": "*"
+      },
+      "config": {
+        "timeout": {{ .Values.metrics.config.timeout }},
+        "prefix": {{ .Values.metrics.config.prefix | quote }},
+        "defaultLabels": {
+          {{- range $key, $value := .Values.metrics.config.defaultLabels }}
+              {{ $key  | quote }}: {{ $value | quote }}
+          {{- end }}
+          }
+      }
+    }
+  },
+  "CACHE": {
+    "ENUM_DATA_EXPIRES_IN_MS": {{ .Values.config.cache.enum_data_expires_in_ms }},
+    "PARTICIPANT_DATA_EXPIRES_IN_MS": {{ .Values.config.cache.participant_data_expires_in_ms }}
+  }
 }

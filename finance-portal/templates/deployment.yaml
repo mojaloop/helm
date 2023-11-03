@@ -1,5 +1,5 @@
 {{- $dbHost := ( .Values.config.db_host | replace "$release_name" .Release.Name ) -}}
-apiVersion: {{ template "finance-portal.apiVersion.Deployment" . }}
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
   name: {{ template "finance-portal.fullname" . }}
@@ -9,6 +9,11 @@ metadata:
     app.kubernetes.io/version: {{ .Chart.Version }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+  annotations:
+    # Common annotations
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" $.Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
 spec:
   selector:
     matchLabels:
@@ -19,10 +24,18 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "finance-portal.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        # Custom Pod Labels
+        {{- if .Values.podLabels }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.podLabels "context" $ ) | nindent 8 }}
+        {{- end }}
       annotations:
         checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/config-auth-init: {{ include (print $.Template.BasePath "/configmap-auth-init.yaml") . | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        # Custom Pod annotations
+        {{- if .Values.podAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $ ) | nindent 8 }}
+        {{- end }}
     spec:
       initContainers:
         {{- if .Values.backend.init.enabled }}
