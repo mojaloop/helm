@@ -80,17 +80,17 @@ Enhancements and non-breaking changes to the [v15.1.0 Release](https://github.co
 
 ## 3. Application versions
 
-1. ml-api-adapter: v14.0.0 -> [v14.0.4](https://github.com/mojaloop/ml-api-adapter/releases/tag/v14.0.4) ([Compare](https://github.com/mojaloop/ml-api-adapter/compare/v14.0.0...v14.0.4))
-2. central-ledger: v17.0.3 -> [v17.3.0]((https://github.com/mojaloop/central-ledger/releases/tag/v17.3.0)) ([Compare](https://github.com/mojaloop/central-ledger/compare/v17.0.3...v17.3.0))
-3. account-lookup-service: 14.1.0 -> [v14.2.5](https://github.com/mojaloop/account-lookup-service/releases/tag/v14.2.5) ([Compare](https://github.com/mojaloop/account-lookup-service/compare/v14.1.0...v14.2.5))
+1. ml-api-adapter: v14.0.0 -> [v14.0.5](https://github.com/mojaloop/ml-api-adapter/releases/tag/v14.0.5) ([Compare](https://github.com/mojaloop/ml-api-adapter/compare/v14.0.0...v14.0.5))
+2. central-ledger: v17.0.3 -> [v17.3.2]((https://github.com/mojaloop/central-ledger/releases/tag/v17.3.2)) ([Compare](https://github.com/mojaloop/central-ledger/compare/v17.0.3...v17.3.2))
+3. account-lookup-service: 14.1.0 -> [v15.0.0](https://github.com/mojaloop/account-lookup-service/releases/tag/v15.0.0) ([Compare](https://github.com/mojaloop/account-lookup-service/compare/v14.1.0...v15.0.0))
 4. quoting-service: v15.0.2 -> [v15.5.0](https://github.com/mojaloop/quoting-service/releases/tag/v15.5.0) ([Compare](https://github.com/mojaloop/quoting-service/compare/v15.0.2...v15.5.0))
-5. central-settlement: v15.0.0 -> [v15.0.4](https://github.com/mojaloop/central-settlement/releases/tag/v15.0.4) ([Compare](https://github.com/mojaloop/central-settlement/compare/v15.0.0...v15.0.4))
+5. central-settlement: v15.0.0 -> [v16.0.0](https://github.com/mojaloop/central-settlement/releases/tag/v16.0.0) ([Compare](https://github.com/mojaloop/central-settlement/compare/v15.0.0...v16.0.0))
 6. bulk-api-adapter: v15.0.3 -> [v16.0.1](https://github.com/mojaloop/bulk-api-adapter/releases/tag/v16.0.1) ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v15.0.3...v16.0.1))
 7. central-event-processor: [v12.0.0](https://github.com/mojaloop/central-event-processor/releases/tag/v12.0.0)
-8. email-notifier: v12.0.0 -> [v13.0.1](https://github.com/mojaloop/email-notifier/releases/tag/v13.0.1) ([Compare](https://github.com/mojaloop/email-notifier/compare/v12.0.0...v13.0.1))
+8. email-notifier: v12.0.0 -> [v14.0.0](https://github.com/mojaloop/email-notifier/releases/tag/v14.0.0) ([Compare](https://github.com/mojaloop/email-notifier/compare/v12.0.0...v14.0.0))
 9. als-oracle-pathfinder: [v12.0.0](https://github.com/mojaloop/als-oracle-pathfinder/releases/tag/v12.0.0)
-10. transaction-requests-service: v14.1.0 -> [v14.1.1](https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.1.1) ([Compare](https://github.com/mojaloop/transaction-requests-service/compare/v14.1.0...v14.1.1))
-11. event-sidecar: v12.0.0 -> [v13.0.1](https://github.com/mojaloop/event-sidecar/releases/tag/v13.0.1) ([Compare](https://github.com/mojaloop/event-sidecar/compare/v12.0.0...v13.0.1))
+10. transaction-requests-service: v14.1.0 -> [v14.1.2](https://github.com/mojaloop/transaction-requests-service/releases/tag/v14.1.2) ([Compare](https://github.com/mojaloop/transaction-requests-service/compare/v14.1.0...v14.1.2))
+11. event-sidecar: v12.0.0 -> [v14.0.0](https://github.com/mojaloop/event-sidecar/releases/tag/v14.0.0) ([Compare](https://github.com/mojaloop/event-sidecar/compare/v12.0.0...v14.0.0))
 12. event-stream-processor: [v12.0.0-snapshot.7](https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.7)
 13. simulator: [12.0.0](https://github.com/mojaloop/simulator/releases/tag/v12.0.0)
 14. mojaloop-simulator: v14.0.1 -> [v15.0.0](https://github.com/mojaloop/mojaloop-simulator/releases/tag/v15.0.0) ([Compare](https://github.com/mojaloop/event-sidecar/compare/v14.0.1...v15.0.0))
@@ -98,9 +98,9 @@ Enhancements and non-breaking changes to the [v15.1.0 Release](https://github.co
 16. ml-testing-toolkit: v16.1.1 -> [v17.0.0](https://github.com/mojaloop/ml-testing-toolkit/releases/tag/v17.0.0) ([Compare](https://github.com/mojaloop/sml-testing-toolkit/compare/v16.1.1...v17.0.0))
 17. ml-testing-toolkit-ui: [v15.4.0](https://github.com/mojaloop/ml-testing-toolkit-ui/releases/tag/v15.3.0)22. ml-testing-toolkit-client-lib: [v1.2.0](https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.2.0)
 18. ml-testing-toolkit-client-lib: v1.2.0 -> [v1.2.1](https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/tag/v1.2.1)  ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v1.2.0...v1.2.1))
-19. auth-service: v14.0.0 -> [v14.0.1](https://github.com/mojaloop/auth-service/releases/tag/v14.0.1) ([Compare](https://github.com/mojaloop/auth-service/compare/v14.0.0...v14.0.1))
-20. als-consent-oracle: v0.2.0 -> [v0.2.1](https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.1) ([Compare](https://github.com/mojaloop/als-consent-oracle/compare/v0.2.0...v0.2.1))
-21. thirdparty-api-svc: v13.0.2 -> [v13.0.4](https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v13.0.4) ([Compare](https://github.com/mojaloop/thirdparty-api-svc/compare/v13.0.2...v13.0.4))
+19. auth-service: v14.0.0 -> [v15.0.0](https://github.com/mojaloop/auth-service/releases/tag/v15.0.0) ([Compare](https://github.com/mojaloop/auth-service/compare/v14.0.0...v15.0.0))
+20. als-consent-oracle: v0.2.0 -> [v0.2.2](https://github.com/mojaloop/als-consent-oracle/releases/tag/v0.2.2) ([Compare](https://github.com/mojaloop/als-consent-oracle/compare/v0.2.0...v0.2.2))
+21. thirdparty-api-svc: v13.0.2 -> [v14.0.0](https://github.com/mojaloop/thirdparty-api-svc/releases/tag/v14.0.0) ([Compare](https://github.com/mojaloop/thirdparty-api-svc/compare/v13.0.2...v14.0.0))
 22. thirdparty-sdk: v15.1.0 -> [v15.1.1](https://github.com/mojaloop/thirdparty-sdk/releases/tag/v15.1.1) ([Compare](https://github.com/mojaloop/thirdparty-sdk/compare/v15.1.0...v15.1.1))
 
 
