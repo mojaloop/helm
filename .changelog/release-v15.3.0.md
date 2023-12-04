@@ -55,7 +55,7 @@ Enhancements and non-breaking changes to the [v15.2.0 Release](https://github.co
 
 This release supports the following versions of the [Mojaloop family of APIs](https://docs.mojaloop.io/api):
 
-| API         | Supported Versions                                                                                                                                    | Notes |
+| API         | Supported Versions                                                                                                                         | Notes |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
 | FSPIOP      | [v1.1](https://docs.mojaloop.io/api/fspiop/v1.1/api-definition.html), [v1.0](https://docs.mojaloop.io/api/fspiop/v1.0/api-definition.html) |       |
 | Settlements | [v2.0](https://docs.mojaloop.io/api/settlement)                                                                                            |       |
