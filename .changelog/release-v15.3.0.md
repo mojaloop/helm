@@ -10,12 +10,11 @@ Date | Revision | Description
 
 Enhancements and non-breaking changes to the [v15.2.0 Release](https://github.com/mojaloop/helm/blob/master/.changelog/release-v15.2.0.md), which includes:
 
-1. Performance improvement with the inclusion of _Batch Prepare Handler_ for _Position Prepare_ messages in Central Ledger based on performance characterisation done
-2. Nodejs version of ML Testing Toolkit upgraded to v18.17.1 LTS
+Performance improvement with the inclusion of _Batch Prepare Handler_ for _Position Prepare_ messages in Central Ledger based on performance characterisation done
 
 ## 1. New Features
 
-1. **Performance fixes, enhancements and maintenance:**  
+1. **Performance improvement with batching (position prepare):**  
       * **mojaloop/#3488** Fix the transfer batching design for the position handler [documentation](https://github.com/mojaloop/documentation/pull/415)
       * **mojaloop/#3489** Implement the batching design for position prepare messages [central-ledger](https://github.com/mojaloop/central-ledger/pull/454), closes [mojaloop/3489](https://github.com/mojaloop/project/issues/3489)
       * **mojaloop/#3577** Add batch handler [helm](https://github.com/mojaloop/helm/pull/582), closes [mojaloop/3577](https://github.com/mojaloop/project/issues/3577)
