@@ -317,8 +317,6 @@ Refer to [Monitoring Documentation](./monitoring/README.md)
 
 ## Batch Processing
 
-***Note: that Batch processing support is currently experimental, and is disabled by default.***
-
 To enable batch processing in your system, please follow the steps below:
 
 - **1. Add a New Kafka Topic:**
