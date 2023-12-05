@@ -24,6 +24,7 @@
   - [Debugging Charts](#debugging-charts)
   - [Helper scripts](#helper-scripts)
   - [Monitoring Mojaloop](#monitoring-mojaloop)
+  - [Batch Processing](#batch-processing)
 
 ## Quick Links
 
@@ -313,6 +314,34 @@ e.g. `helm --namespace mojaloop del dev`
 ## Monitoring Mojaloop
 
 Refer to [Monitoring Documentation](./monitoring/README.md)
+
+## Batch Processing
+
+To enable batch processing in your system, please follow the steps below:
+
+- **1. Add a New Kafka Topic:**
+    Add a new topic named `topic-transfer-position-batch` to your Kafka configuration. If you are using the example-mojaloop-backend for your backend dependencies, this topic is already added to the Kafka provisioning section by default.
+- **2. Update Mojaloop Values File:**
+    In the Mojaloop values file, make sure to enable the batch_processing_enabled flag in the global configuration.
+
+    ```yaml
+    global:
+        batch_processing_enabled: &CL_BATCH_PROCESSING_ENABLED true
+    ```
+
+    Enabling this variable does the following
+
+    **a. Activates Batch Position Handler:** Triggers the activation of the Batch Position Handler.
+
+    **b. Configures Prepare Handler for Kafka Events:** The configuration change also sets up the Prepare Handler to publish Kafka events to the newly designated batch topic.
+
+    ***Note:***
+
+    ***Please note that this configuration change relies on the use of the YAML anchor CL_BATCH_PROCESSING_ENABLED._***
+
+    ***It's essential to consider the context of your deployment. If you have the entire Helm values file as an override, this configuration change will work seamlessly.***
+
+    ***However, if you are using a Helm override file with only a subset of values overridden, ensure that you include all the configuration parameters associated with the CL_BATCH_PROCESSING_ENABLED anchor. Failing to include these parameters might result in unexpected behavior.***
 
 ## Known Issues
 

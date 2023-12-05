@@ -90,7 +90,6 @@
         ]
     },
     "INTERNAL_TRANSFER_VALIDITY_SECONDS": "432000",
-    "ENABLE_ON_US_TRANSFERS": {{ .Values.config.enable_on_us_transfers }},
     "CACHE": {
         "CACHE_ENABLED": {{ .Values.config.cache_enabled }},
         "MAX_BYTE_SIZE": {{ .Values.config.cache_max_byte_size }},
@@ -98,14 +97,11 @@
     },
     "API_DOC_ENDPOINTS_ENABLED": true,
     "KAFKA": {
-        {{ if $.Values.config.batch_processing_enabled }}
         "EVENT_TYPE_ACTION_TOPIC_MAP" : {
             "POSITION":{
-              "PREPARE": "topic-transfer-position-batch",
-              "BULK_PREPARE": "topic-transfer-position"
+              "PREPARE": "topic-transfer-position-batch"
             }
         },
-        {{ end }}
         "TOPIC_TEMPLATES": {
             "PARTICIPANT_TOPIC_TEMPLATE": {
                 "TEMPLATE": "topic-{{"{{"}}participantName{{"}}"}}-{{"{{"}}functionality{{"}}"}}-{{"{{"}}action{{"}}"}}",
@@ -262,6 +258,32 @@
                         "topicConf": {
                             "auto.offset.reset": "earliest"
                         }
+                    }
+                },
+                "POSITION_BATCH": {
+                    "config": {
+                      "options": {
+                        "mode": 2,
+                        "batchSize": {{ .Values.config.batch_size }},
+                        "pollFrequency": 10,
+                        "recursiveTimeout": 100,
+                        "messageCharset": "utf8",
+                        "messageAsJSON": true,
+                        "sync": true,
+                        "consumeTimeout": {{ .Values.config.batch_consume_timeout_in_ms }}
+                      },
+                      "rdkafkaConf": {
+                        "client.id": "cl-con-transfer-position-batch",
+                        "group.id": "cl-group-transfer-position-batch",
+                        "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+                        "socket.keepalive.enable": true,
+                        "allow.auto.create.topics": true,
+                        "partition.assignment.strategy": "{{ .Values.config.kafka_partition_assignment_strategy }}",
+                        "enable.auto.commit": false
+                      },
+                      "topicConf": {
+                        "auto.offset.reset": "earliest"
+                      }
                     }
                 },
                 "FULFIL": {
