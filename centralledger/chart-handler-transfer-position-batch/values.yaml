@@ -6,6 +6,8 @@ global: {}
 
 # Declare variables to be passed into your templates.
 
+nameOverride: "handler-pos-batch"
+
 image:
   registry: "docker.io"
   repository: mojaloop/central-ledger
@@ -25,7 +27,7 @@ image:
   pullSecrets: []
 
 replicaCount: 1
-command: '["node", "src/api/index.js"]' 
+command: '["node", "src/handlers/index.js", "handler", "--positionbatch"]'
 
 ## Enable diagnostic mode in the deployment
 ##
@@ -37,7 +39,9 @@ diagnosticMode:
   ##
   command: 
     - node
-    - src/api/index.js
+    - src/handlers/index.js
+    - handler
+    - '--positionbatch'
   ## @param diagnosticMode.args Args to override all containers in the deployment
   ##
   args:
@@ -85,10 +89,10 @@ containerSecurityContext:
   runAsUser: 1001
 
 sidecar:
-  enabled: false
+  enabled: true
   image:
     repository: mojaloop/event-sidecar
-    tag: v14.0.0
+    tag: v13.0.0
     pullPolicy: IfNotPresent
     command: '["npm", "run", "start"]'
   service:
@@ -121,7 +125,7 @@ metrics:
     timeout: 5000
     prefix: moja_
     defaultLabels:
-      serviceName: central-service
+      serviceName: central-handler-position
 
 config:
   ## Forensic Logging sidecar
@@ -146,8 +150,8 @@ config:
   ## Secret-Management
   ### Set this if you are using a clear password configured in the config section
   db_password: ''
-  ### Configure this if you want to use a secret. Note, this will override the secret,
-  ### Use the next line if you do wish to use the secret value instead.
+  ### Configure this if you want to use a secret. Note, this will override the db_password,
+  ### Use the next line if you do wish to use the db_password value instead.
   # db_secret:
   ### Example config for an existing secret
   # db_secret:
@@ -191,18 +195,12 @@ config:
   kafka_host: kafka
   kafka_port: 9092
   kafka_partitioner: 'murmur2_random'
+  kafka_partition_assignment_strategy: 'cooperative-sticky'
 
-  ## Log Configuration
-  log_level: info
+  ## Node Configuration
+  log_level: 'info'
   log_filter: 'error, warn, info'
   log_transport: file
-  ## Enable local logging of events being recorded
-  log_events_locally_enabled: false
-
-  ## Cache configuration
-  cache_enabled: false
-  cache_max_byte_size: 10000000
-  cache_expires_in_ms: 1000
 
   ## Tracing Configuration
   event_trace_vendor: mojaloop
@@ -215,6 +213,17 @@ config:
   event_trace_state_enabled: true
   event_traceid_per_vendor: false
 
+  ## Cache configuration
+  cache_enabled: false
+  cache_max_byte_size: 10000000
+  cache_expires_in_ms: 1000
+
+  ## Batch configuration
+  # The batch size to be requested by the Kafka consumer.
+  batch_size: 100
+  # Maximum amount of time to wait for a messages to be received by consumer.
+  batch_consume_timeout_in_ms: 10
+
 ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
 ## e.g:
@@ -226,6 +235,25 @@ config:
 ##
 # initContainers: []
 initContainers: |
+  - name: wait-for-kafka
+    image: solsson/kafka:2.8.1
+    imagePullPolicy: IfNotPresent
+    command:
+      - sh
+      - -c
+      - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+        do
+          echo --------------------;
+          echo Waiting for Kafka...;
+          sleep 2; 
+        done;
+        echo ====================; 
+        echo Kafka ok!;
+    env:
+      - name: KAFKA_HOST
+        value: '{{ .Values.config.kafka_host }}'
+      - name: KAFKA_PORT
+        value: '{{ .Values.config.kafka_port }}'
   - name: wait-for-mysql
     image: mysql:5.7
     imagePullPolicy: IfNotPresent
@@ -233,7 +261,7 @@ initContainers: |
       - sh
       - -c
       - |
-        until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+        until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
         do
           echo --------------------;
           echo Waiting for MySQL...;
@@ -259,28 +287,6 @@ initContainers: |
         {{- end }}
       - name: DB_DATABASE
         value: '{{ .Values.config.db_database }}'
-  - name: run-migration
-    image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
-    imagePullPolicy: IfNotPresent
-    command:
-      - sh
-      - -c
-      - npm run migrate
-    env:
-      - name: CLEDG_MIGRATIONS__RUN_DATA_MIGRATIONS
-        value: 'true'
-      - name: CLEDG_DATABASE__PASSWORD
-        {{- if .Values.config.db_secret }}
-        valueFrom:
-            secretKeyRef:
-              name: '{{ .Values.config.db_secret.name }}'
-              key: '{{ .Values.config.db_secret.key }}'
-        {{- else }}
-        value: {{ .Values.config.db_password }}
-        {{- end }}
-    volumeMounts:
-      - name: '{{ template "account-lookup-service-admin.fullname" . }}-config-volume'
-        mountPath: /opt/app/config
 
 ## @param master.podLabels Extra labels for pod(s)
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
@@ -345,7 +351,7 @@ ingress:
   apiVersion:
   ## @param ingress.hostname Default host for the ingress record
   ##
-  hostname: central-ledger.local
+  hostname: central-ledger-transfer-position.local
   ## @param servicePort : port for the service
   ##
   servicePort: 80

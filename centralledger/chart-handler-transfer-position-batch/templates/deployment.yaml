@@ -1,9 +1,9 @@
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
-  name: {{ template "centralledger-handler-transfer-position.fullname" . }}
+  name: {{ template "centralledger-handler-transfer-position-batch.fullname" . }}
   labels:
-    app.kubernetes.io/name: {{ include "centralledger-handler-transfer-position.name" . }}
+    app.kubernetes.io/name: {{ include "centralledger-handler-transfer-position-batch.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.Version }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -17,12 +17,12 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "centralledger-handler-transfer-position.name" . }}
+      app.kubernetes.io/name: {{ include "centralledger-handler-transfer-position-batch.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "centralledger-handler-transfer-position.name" . }}
+        app.kubernetes.io/name: {{ include "centralledger-handler-transfer-position-batch.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/version: {{ .Chart.Version }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -38,10 +38,10 @@ spec:
         {{- if .Values.podAnnotations }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
-        {{- if .Values.metrics.enabled }}
+      {{- if .Values.metrics.enabled }}
         prometheus.io/port: "{{ .Values.service.internalPort }}"
         prometheus.io/scrape: "true"
-        {{- end }}
+      {{- end }}
     spec:
 {{- if .Values.affinity }}
       affinity:
@@ -63,7 +63,7 @@ spec:
       {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" $) | nindent 6 }}
       {{- end }}
       containers:
-        - name: {{ template "centralledger-handler-transfer-position.name" . }}
+        - name: {{ template "centralledger-handler-transfer-position-batch.name" . }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.containerSecurityContext.enabled }}
@@ -149,7 +149,7 @@ spec:
             - name: EVENT_SDK_TRACEID_PER_VENDOR
               value: {{ .Values.config.event_traceid_per_vendor | quote }}
           volumeMounts:
-          - name: {{ template "centralledger-handler-transfer-position.fullname" . }}-config-volume
+          - name: {{ template "centralledger-handler-transfer-position-batch.fullname" . }}-config-volume
             mountPath: /opt/app/config
         {{- if .Values.sidecar.enabled }}
         - name: {{ .Chart.Name }}-sidecar
@@ -179,7 +179,7 @@ spec:
             periodSeconds: {{ .Values.sidecar.livenessProbe.periodSeconds }}
           {{- end }}
           volumeMounts:
-            - name: {{ template "centralledger-handler-transfer-position.fullname" . }}-sidecar-volume
+            - name: {{ template "centralledger-handler-transfer-position-batch.fullname" . }}-sidecar-volume
               mountPath: /opt/app/config
           env:
             - name: LOG_LEVEL
@@ -192,18 +192,18 @@ spec:
               value: {{ .Values.sidecar.config.event_log_metadata_only | quote }}
         {{- end }}
       volumes:
-        - name: {{ template "centralledger-handler-transfer-position.fullname" . }}-config-volume
+        - name: {{ template "centralledger-handler-transfer-position-batch.fullname" . }}-config-volume
           configMap:
-            name: {{ template "centralledger-handler-transfer-position.fullname" . }}-config
+            name: {{ template "centralledger-handler-transfer-position-batch.fullname" . }}-config
             items:
             - key: default.json
               path: default.json
             - key: knexfile.js
               path: knexfile.js
         {{- if .Values.sidecar.enabled }}
-        - name: {{ template "centralledger-handler-transfer-position.fullname" . }}-sidecar-volume
+        - name: {{ template "centralledger-handler-transfer-position-batch.fullname" . }}-sidecar-volume
           configMap:
-            name: {{ template "centralledger-handler-transfer-position.fullname" . }}-sidecar
+            name: {{ template "centralledger-handler-transfer-position-batch.fullname" . }}-sidecar
             items:
             - key: default.json
               path: default.json
