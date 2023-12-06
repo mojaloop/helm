@@ -26,7 +26,7 @@ Performance improvement with the inclusion of _Batch Prepare Handler_ for _Posit
 
 ## 3. Application versions
 
-1. central-ledger: v17.3.2 -> [v17.3.3]((https://github.com/mojaloop/central-ledger/releases/tag/v17.3.3)) ([Compare](https://github.com/mojaloop/central-ledger/compare/v17.3.2...v17.3.3))
+1. central-ledger: v17.3.2 -> [v17.4.0]((https://github.com/mojaloop/central-ledger/releases/tag/v17.4.0)) ([Compare](https://github.com/mojaloop/central-ledger/compare/v17.3.2...v17.4.0))
 2. ml-api-adapter: [v14.0.5](https://github.com/mojaloop/ml-api-adapter/releases/tag/v14.0.5)
 3. account-lookup-service: [v15.0.0](https://github.com/mojaloop/account-lookup-service/releases/tag/v15.0.0)
 4. quoting-service: [v15.5.0](https://github.com/mojaloop/quoting-service/releases/tag/v15.5.0)
