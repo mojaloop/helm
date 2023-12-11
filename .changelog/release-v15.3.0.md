@@ -120,7 +120,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 ## 7. Contributors
 
 - Organizations: BMGF, InFiTX
-- Individuals: @vijayg10, @oderayi, @elnyry-sam-k, @aaronreynoza
+- Individuals: @vijayg10, @oderayi, @elnyry-sam-k
 
 *Note: companies are in alphabetical order, individuals are in no particular order.*
 
