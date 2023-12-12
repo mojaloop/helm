@@ -1,0 +1,62 @@
+name: create-release-pr
+
+# action is triggered manually in the GitHub Actions tab
+on: workflow_dispatch
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    # steps:
+    # - grab package versions in the last helm release
+    # - grab latest github release versions of the packages
+    # - determine which packages have been updated
+    # - compare versions to determine next version number based on semver
+    # - create a snapshot release for testing-toolkit-testcases matching the new version
+    # - update helm chart values.yaml with latest versions of the packages that have been updated
+    # - update appVersion in Chart.yaml based on semver
+    # - update values.yaml with the new snapshot version of testing-toolkit-testcases
+    # - generate release note
+    # - add a label to the pull request
+    # - add a comment to the pull request with the release notes
+    # - lint the helm chart
+    # - update the helm chart index
+    # - commit changes to a new branch
+    # - create a pull request with the new branch
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.7.2
+ 
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+      - name: install pyaml
+        run: |
+            pip3 install pyaml==21.10.1
+
+      - name: install updateCli
+        run: |
+          curl -sL -o /tmp/updatecli_amd64.deb https://github.com/updatecli/updatecli/releases/download/v0.68.0/updatecli_amd64.deb
+          sudo apt install /tmp/updatecli_amd64.deb
+ 
+      - name: Run chart bumper script
+        run: |
+         python scripts/chart-updater.py
+         rm -f manifest.yaml
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+         commit-message: "feat: upgrade helm charts"
+         title: "chore: upgrade helm charts minor versions"
+         body: |
+           Automatic upgrade of helm chart minor versions using https://github.com/updatecli/updatecli
+         branch: upgrade-helm-charts-minors
+         base: main
