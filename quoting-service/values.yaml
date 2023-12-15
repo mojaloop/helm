@@ -163,11 +163,9 @@ quoting-service-api:
     db_password: ''
     ### Configure this if you want to use a secret. Note, this will override the db_password,
     ### Use the next line if you do wish to use the db_password value instead.
-    # db_secret:
-    ### Example config for an existing secret
-    # db_secret:
-    #   name: mysqldb
-    #   key: mysql-password
+    db_secret:
+      name: mysqldb
+      key: mysql-password
     db_database: central_ledger
     db_connection_pool_min: 10
     db_connection_pool_max: 30
@@ -230,39 +228,6 @@ quoting-service-api:
 
   # think, iof we need this initContainer for quoting-service API
   initContainers: |
-    - name: wait-for-mysql
-      image: mysql:5.7
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - |
-          until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-          do
-            echo --------------------;
-            echo Waiting for MySQL...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo MySQL ok!;
-      env:
-        - name: DB_HOST
-          value: '{{ .Values.config.db_host }}'
-        - name: DB_PORT
-          value: '{{ .Values.config.db_port }}'
-        - name: DB_USER
-          value: '{{ .Values.config.db_user }}'
-        - name: DB_PASSWORD
-          {{- if .Values.config.db_secret }}
-          valueFrom:
-              secretKeyRef:
-                name: '{{ .Values.config.db_secret.name }}'
-                key: '{{ .Values.config.db_secret.key }}'
-          {{- else }}
-          value: {{ .Values.config.db_password }}
-          {{- end }}
-        - name: DB_DATABASE
-          value: '{{ .Values.config.db_database }}'
     - name: wait-for-kafka
       image: solsson/kafka:2.8.1
       imagePullPolicy: IfNotPresent
@@ -420,7 +385,7 @@ quoting-service-handler:
     pullSecrets: []
 
   replicaCount: 1
-  command: '["node", "src/handlers/index.js h --quotes --bulk_quotes"]'
+  command: '["node", "src/handlers/index.js", "handler", "--quotes", "--bulk_quotes"]'
 
   ## Enable diagnostic mode in the deployment
   ##
@@ -444,20 +409,19 @@ quoting-service-handler:
       internalPort: 9229
       port: 9229
 
-#  todo: uncomment it after adding healthcheck to the handler
-#  readinessProbe:
-#    enabled: true
-#    httpGet:
-#      path: /health
-#    initialDelaySeconds: 60
-#    periodSeconds: 15
-#
-#  livenessProbe:
-#    enabled: true
-#    httpGet:
-#      path: /health
-#    initialDelaySeconds: 60
-#    periodSeconds: 15
+  readinessProbe:
+    enabled: false # todo: enable it after adding healthcheck to the handler
+    httpGet:
+      path: /health
+    initialDelaySeconds: 60
+    periodSeconds: 15
+
+  livenessProbe:
+    enabled: false # todo: enable it after adding healthcheck to the handler
+    httpGet:
+      path: /health
+    initialDelaySeconds: 60
+    periodSeconds: 15
 
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -557,9 +521,9 @@ quoting-service-handler:
     ### Use the next line if you do wish to use the db_password value instead.
     # db_secret:
     ### Example config for an existing secret
-    # db_secret:
-    #   name: mysqldb
-    #   key: mysql-password
+    db_secret:
+      name: mysqldb
+      key: mysql-password
     db_database: central_ledger
     db_connection_pool_min: 10
     db_connection_pool_max: 30
@@ -622,6 +586,26 @@ quoting-service-handler:
 
   # think, iof we need this initContainer for quoting-service API
   initContainers: |
+    - name: wait-for-kafka
+      image: solsson/kafka:2.8.1
+      imagePullPolicy: IfNotPresent
+      command:
+        - sh
+        - -c
+        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
+          do
+          echo --------------------;
+          echo Waiting for Kafka...;
+          sleep 2;
+          done;
+          echo ====================;
+          echo Kafka ok!;
+      env:
+        - name: KAFKA_HOST
+          value: '{{ .Values.config.kafka_host }}'
+        - name: KAFKA_PORT
+          value: '{{ .Values.config.kafka_port }}'
+    
     - name: wait-for-mysql
       image: mysql:5.7
       imagePullPolicy: IfNotPresent
@@ -647,33 +631,14 @@ quoting-service-handler:
         - name: DB_PASSWORD
           {{- if .Values.config.db_secret }}
           valueFrom:
-            secretKeyRef:
-              name: '{{ .Values.config.db_secret.name }}'
-              key: '{{ .Values.config.db_secret.key }}'
+              secretKeyRef:
+                name: '{{ .Values.config.db_secret.name }}'
+                key: '{{ .Values.config.db_secret.key }}'
           {{- else }}
           value: {{ .Values.config.db_password }}
           {{- end }}
         - name: DB_DATABASE
-          value: '{{ .Values.config.db_database }}'
-    - name: wait-for-kafka
-      image: solsson/kafka:2.8.1
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-          do
-          echo --------------------;
-          echo Waiting for Kafka...;
-          sleep 2;
-          done;
-          echo ====================;
-          echo Kafka ok!;
-      env:
-        - name: KAFKA_HOST
-          value: '{{ .Values.config.kafka_host }}'
-        - name: KAFKA_PORT
-          value: '{{ .Values.config.kafka_port }}'
+          value: '{{ .Values.config.db_database }}'    
 
   ## @param master.podLabels Extra labels for pod(s)
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
@@ -691,54 +656,6 @@ quoting-service-handler:
     externalPort: 80
     internalPort: 3002
 
-  # todo: think, if we need "ingress" for consumer
-  ingress:
-    enabled: true
-      ## @param ingress.pathType Ingress path type
-    ##
-    pathType: ImplementationSpecific
-      ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
-    ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
-    ##
-    hostname: quoting-service-handler.local
-      ## @param servicePort : port for the service
-    ##
-    servicePort: 80
-      ## @param ingress.path Default path for the ingress record
-    ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
-    path: /
-      ## @param ingress.annotations Additional custom annotations for the ingress record
-      ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
-    ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
-    ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
-    ## You can:
-    ##   - Use the `ingress.secrets` parameter to create this TLS secret
-    ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
-    ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
-    ##
-    tls: false
-      ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
-    ##
-    certManager: false
-      ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
-    ##
-    selfSigned: false
-      ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
-      ## e.g:
-      ## extraHosts:
-      ##   - name: transfer-api-svc.local
-      ##     path: /
-    ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
-    className: "nginx"
-    ##
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little

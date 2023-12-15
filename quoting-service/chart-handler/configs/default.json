@@ -1,8 +1,8 @@
-//{{- $dbDeployHost := (.Values.config.db_host | replace "$release_name" .Release.Name) }}
+{{- $dbDeployHost := (.Values.config.db_host | replace "$release_name" .Release.Name) }}
 {
   "HOSTNAME": "http://quoting-service-handler.local",
   "LISTEN_ADDRESS": "0.0.0.0",
-  "PORT": {{ .Values.service.internalPort }},
+  "PORT": "{{ .Values.service.internalPort }}",
   "PROTOCOL_VERSIONS": {{ .Values.config.protocol_versions | toPrettyJson }},
   "SWITCH_ENDPOINT": "http://{{ .Release.Name }}-centralledger-service:80",
   "AMOUNT": {
@@ -79,7 +79,7 @@
             "rdkafkaConf":{
               "client.id":"quotes-handler-post_c",
               "group.id":"group-quotes-handler-post",
-              "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
               "socket.keepalive.enable":true,
               "allow.auto.create.topics":true
             },
@@ -104,7 +104,7 @@
             "rdkafkaConf":{
               "client.id":"quotes-handler-put_c",
               "group.id":"group-quotes-handler-put",
-              "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
               "socket.keepalive.enable":true,
               "allow.auto.create.topics":true
             },
@@ -129,7 +129,7 @@
             "rdkafkaConf":{
               "client.id":"quotes-handler-get_c",
               "group.id":"group-quotes-handler-get",
-              "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
               "socket.keepalive.enable":true,
               "allow.auto.create.topics":true
             },
@@ -156,7 +156,7 @@
             "rdkafkaConf":{
               "client.id":"bulk-quotes-handler-post_c",
               "group.id":"group-bulk-quotes-handler-post",
-              "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
               "socket.keepalive.enable":true,
               "allow.auto.create.topics":true
             },
@@ -181,7 +181,7 @@
             "rdkafkaConf":{
               "client.id":"bulk-quotes-handler-put_c",
               "group.id":"group-bulk-quotes-handler-put",
-              "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
               "socket.keepalive.enable":true,
               "allow.auto.create.topics":true
             },
@@ -206,7 +206,7 @@
             "rdkafkaConf":{
               "client.id":"bulk-quotes-handler-get_c",
               "group.id":"group-bulk-quotes-handler-get",
-              "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
               "socket.keepalive.enable":true,
               "allow.auto.create.topics":true
             },
@@ -226,7 +226,7 @@
               "messageCharset":"utf8"
             },
             "rdkafkaConf":{
-              "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
               "client.id":"quotes-handler-post_p",
               "event_cb":true,
               "dr_cb":true,
@@ -246,7 +246,7 @@
               "messageCharset":"utf8"
             },
             "rdkafkaConf":{
-              "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
               "client.id":"quotes-handler-put_p",
               "event_cb":true,
               "dr_cb":true,
@@ -266,7 +266,7 @@
               "messageCharset":"utf8"
             },
             "rdkafkaConf":{
-              "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
               "client.id":"quotes-handler-get_p",
               "event_cb":true,
               "dr_cb":true,
@@ -288,7 +288,7 @@
               "messageCharset":"utf8"
             },
             "rdkafkaConf":{
-              "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
               "client.id":"bulkquotes-handler-post_p",
               "event_cb":true,
               "dr_cb":true,
@@ -308,7 +308,7 @@
               "messageCharset":"utf8"
             },
             "rdkafkaConf":{
-              "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
               "client.id":"bulkquotes-handler-put_p",
               "event_cb":true,
               "dr_cb":true,
@@ -328,7 +328,7 @@
               "messageCharset":"utf8"
             },
             "rdkafkaConf":{
-              "metadata.broker.list": "{{ $kafkaHost }}:{{ .Values.config.kafka_port }}",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
               "client.id":"bulkquotes-handler-get_p",
               "event_cb":true,
               "dr_cb":true,
