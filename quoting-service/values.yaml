@@ -4,7 +4,7 @@
 # Declare global configurations
 global: {}
 
-quoting-service-api:
+quoting-service: # API
   enabled: true
   # Default values for ml-api-adapter.
   # This is a YAML-formatted file.
@@ -125,7 +125,7 @@ quoting-service-api:
       timeout: 5000
       prefix: moja_
       defaultLabels:
-        serviceName: quoting-service-api
+        serviceName: quoting-service
 
   config:
 
@@ -184,6 +184,7 @@ quoting-service-api:
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: kafka
     kafka_port: 9092
+    kafka_partitioner: 'murmur2_random'
 
     ## Tracing Configuration
     event_trace_vendor: mojaloop
@@ -311,7 +312,7 @@ quoting-service-api:
     apiVersion:
       ## @param ingress.hostname Default host for the ingress record
       ##
-    hostname: quoting-service-api.local
+    hostname: quoting-service.local
       ## @param servicePort : port for the service
       ##
     servicePort: 80
@@ -481,7 +482,7 @@ quoting-service-handler:
       timeout: 5000
       prefix: moja_
       defaultLabels:
-        serviceName: quoting-service-api
+        serviceName: quoting-service-handler
 
   config:
 
@@ -584,7 +585,6 @@ quoting-service-handler:
 
   rules: []
 
-  # think, iof we need this initContainer for quoting-service API
   initContainers: |
     - name: wait-for-kafka
       image: solsson/kafka:2.8.1
@@ -667,3 +667,10 @@ quoting-service-handler:
     # requests:
     #  cpu: 100m
   #  memory: 128Mi
+
+
+#  sidecar
+#  metrics
+#  endpointSecurity
+#  DB config
+#  Kafka config
