@@ -10,6 +10,8 @@ kafka:
   ##
   fullnameOverride: "kafka"
 
+  commonLabels: {}
+
   ## @section Persistence parameters
   ## Enable persistence using Persistent Volume Claims
   ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
@@ -23,19 +25,17 @@ kafka:
   ## https://github.com/bitnami/charts/blob/main/bitnami/zookeeper/values.yaml
   ##
   zookeeper:
-    ## ZooKeeper Persistence parameters
-    ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-    ## @param zookeeper.persistence.enabled Enable persistence on ZooKeeper using PVC(s)
-    ## @param zookeeper.persistence.storageClass Persistent Volume storage class
-    ## @param zookeeper.persistence.accessModes Persistent Volume access modes
-    ## @param zookeeper.persistence.size Persistent Volume size
+    ## @param zookeeper.enabled Switch to enable or disable the ZooKeeper helm chart. Must be false if you use KRaft mode.
     ##
-    persistence:
-      enabled: false
+    enabled: false
 
-    ## @param fullnameOverride String to fully override  template
+  ## KRaft configuration
+  ## Kafka mode without Zookeeper. Kafka nodes can work as controllers in this mode.
+  ##
+  kraft:
+    ## @param kraft.enabled Switch to enable or disable the KRaft mode for Kafka
     ##
-    fullnameOverride: "zookeeper"
+    enabled: true
 
   ## Kafka provisioning
   ##
@@ -85,6 +85,18 @@ kafka:
       - name: topic-admin-transfer
         partitions: 1
         replicationFactor: 1
+      - name: topic-bulk-prepare
+        partitions: 1
+        replicationFactor: 1
+      - name: topic-bulk-fulfil
+        partitions: 1
+        replicationFactor: 1
+      - name: topic-bulk-processing
+        partitions: 1
+        replicationFactor: 1
+      - name: topic-bulk-get
+        partitions: 1
+        replicationFactor: 1
 
     ## @param provisioning.nodeSelector Node labels for pod assignment
     ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -115,6 +127,28 @@ kafka:
     ## @param provisioning.waitForKafka If true use an init container to wait until kafka is ready before starting provisioning
     ##
     waitForKafka: true
+
+  listeners:
+    client:
+      protocol: PLAINTEXT
+
+  extraConfig: |-
+    offsets.topic.replication.factor: 1
+    default.replication.factor: 1
+    transaction.state.log.replication.factor: 1
+
+
+  ## @section Controller-eligible statefulset parameters
+  ##
+  controller:
+    ## @param controller.replicaCount Number of Kafka controller-eligible nodes
+    ## Ignore this section if running in Zookeeper mode.
+    ##
+    replicaCount: 1
+
+  ## Commands
+  # /opt/bitnami/kafka/bin/kafka-metadata-quorum.sh --bootstrap-server kafka-controller-0.kafka-controller-headless.demo.svc.cluster.local:9092 describe --status
+
 
 ## Reference: https://github.com/bitnami/charts/blob/main/bitnami/mysql/values.yaml
 mysql:
