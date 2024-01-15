@@ -9,7 +9,13 @@
 name: Create release PR
 
 on: 
-    workflow_dispatch:
+  workflow_dispatch:
+    inputs:
+      branch:
+        type: string
+        description: 'Branch to create release PR from (e.g. master, empty for PR branch)'
+        required: true
+        default: 'master'
 
 jobs:
   create_release_pr:
@@ -20,7 +26,7 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
         with:
-          # ref: master
+          ref: master
           fetch-depth: 1
 
       - name: Set up Helm
