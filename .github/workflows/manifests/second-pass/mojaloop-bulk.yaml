@@ -1,0 +1,38 @@
+name: mojaloop-bulk
+
+sources:
+  bulk-api-adapter:
+    kind: helmchart
+    spec:
+      url: file://./mojaloop-bulk
+      name: bulk-api-adapter
+  bulk-centralledger:
+    kind: helmchart
+    spec:
+      url: file://./mojaloop-bulk
+      name: bulk-centralledger
+
+conditions: {}
+
+targets:
+  bulk-api-adapter:
+    sourceid: bulk-api-adapter
+    kind: helmchart
+    spec:
+      name: mojaloop-bulk
+      file: Chart.yaml
+      key: $.dependencies[0].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'  
+  bulk-centralledger:
+    sourceid: bulk-centralledger
+    kind: helmchart
+    spec:
+      name: mojaloop-bulk
+      file: Chart.yaml
+      key: $.dependencies[1].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  

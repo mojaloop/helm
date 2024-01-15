@@ -1,0 +1,75 @@
+name: bulk-api-adapter
+
+sources:
+  bulk-api-adapter:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: bulk-api-adapter
+  common:
+    kind: helmchart
+    spec: 
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+  
+conditions:
+  docker-bulk-api-adapter:
+    sourceid: bulk-api-adapter
+    kind: dockerimage
+    spec:
+      image: mojaloop/bulk-api-adapter
+
+targets:
+  bulk-api-adapter-service:
+    sourceid: bulk-api-adapter
+    kind: helmchart
+    spec:
+      name: bulk-api-adapter
+      file: values.yaml
+      key: $.bulk-api-adapter-service.image.tag
+      appversion: true
+  bulk-api-adapter-handler-notification:
+    sourceid: bulk-api-adapter
+    kind: yaml
+    spec:
+      file: bulk-api-adapter/values.yaml
+      key: $.bulk-api-adapter-handler-notification.image.tag
+      appversion: true
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: bulk-api-adapter
+      file: Chart.yaml
+      key: $.dependencies[2].version
+  chart-adapter-notification:
+    sourceid: bulk-api-adapter
+    kind: helmchart
+    spec:
+      name: bulk-api-adapter/chart-handler-notification
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-adapter-notification--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: bulk-api-adapter/chart-handler-notification
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  chart-service:
+    sourceid: bulk-api-adapter
+    kind: helmchart
+    spec:
+      name: bulk-api-adapter/chart-service
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-service--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: bulk-api-adapter/chart-service
+      file: Chart.yaml
+      key: $.dependencies[0].version
