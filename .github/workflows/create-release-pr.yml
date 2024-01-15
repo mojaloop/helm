@@ -41,31 +41,12 @@ jobs:
           curl -sL -o /tmp/updatecli_amd64.deb https://github.com/updatecli/updatecli/releases/download/v0.68.0/updatecli_amd64.deb
           sudo apt install /tmp/updatecli_amd64.deb
       
-      # first pass - update with github releases and published helm charts
-      - name: Upgrade chart dependencies (first pass)
-        id: upgrade-chart-dependencies-first-pass
+      # # update chart dependencies
+      - name: Update chart dependencies
+        id: update-chart-dependencies
         env:
           AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
-        run: updatecli apply --config .github/workflows/manifests/first-pass
-      
-      # second pass - update with locally referenced charts
-      # runs the second-pass manifests repeatedly until no changes are detected
-      - name: Update locally referenced charts (second pass)
-        id: update-locally-referenced-charts-second-pass
-        env:
-          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
-        run: |
-            # create the log file, overwrite/empty it if it already exists
-            > output.log 
-            pass_count=0
-            # repeatedly run the second-pass manifests until no changes are detected
-            while ! (grep -q "* Changed:	0" output.log); do
-                echo -e "\nUpdating charts ... pass: $((++pass_count))\n"
-                ./update-charts-dep.sh 
-                find . -maxdepth 1 -type d -not -path '*/\.*' | sed 's/^\.\///g' | xargs -I {} helm repo index {} 
-                updatecli apply --config .github/workflows/manifests/second-pass |& tee output.log
-                sleep 5
-            done
+        run: ./.github/workflows/scripts/update-charts.shß
 
       # step: detect breaking changes (default.json changes, migration scripts changes, 
       #       presence of phrase "BREAKING CHANGE" in changelogs, etc.)
