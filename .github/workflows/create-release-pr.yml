@@ -10,9 +10,6 @@ name: Create release PR
 
 on: 
     workflow_dispatch:
-    # Disable the following line to enable the workflow on every push to a pull request
-    # This is useful for testing the workflow before merging to master
-    # pull_request 
 
 jobs:
   create_release_pr:
@@ -23,7 +20,7 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
         with:
-          ref: master
+          # ref: master
           fetch-depth: 1
 
       - name: Set up Helm
@@ -41,12 +38,16 @@ jobs:
       # first pass - update with github releases and published helm charts
       - name: Upgrade chart dependencies (first pass)
         id: upgrade-chart-dependencies-first-pass
+        env:
+          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
         run: updatecli apply --config .github/workflows/manifests/first-pass
       
       # second pass - update with locally referenced charts
       # runs the second-pass manifests repeatedly until no changes are detected
       - name: Update locally referenced charts (second pass)
         id: update-locally-referenced-charts-second-pass
+        env:
+          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
         run: |
             # create the log file, overwrite/empty it if it already exists
             > output.log 
