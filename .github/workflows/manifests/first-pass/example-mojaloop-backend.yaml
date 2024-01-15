@@ -1,0 +1,104 @@
+name: example-mojaloop-backend
+
+sources:
+  kafka:
+    kind: helmchart
+    spec:
+      url: https://charts.bitnami.com/bitnami
+      name: kafka
+  mysql:
+    kind: helmchart
+    spec:
+      url: https://charts.bitnami.com/bitnami
+      name: mysql
+  mongodb:
+    kind: helmchart
+    spec:
+      url: https://charts.bitnami.com/bitnami
+      name: mongodb
+  redis:
+    kind: helmchart
+    spec:
+      url: https://charts.bitnami.com/bitnami
+      name: redis
+
+conditions: {}
+
+targets:
+  appVersion-mysql:
+    sourceid: mysql
+    kind: file
+    spec:
+      file: example-mojaloop-backend/Chart.yaml
+      matchpattern: '(mysql:) ([\d\.]+)'
+      replacepattern: '$1 {{ source "mysql" }}'
+  appVersion-kafka:
+    sourceid: kafka
+    kind: file
+    spec:
+      file: example-mojaloop-backend/Chart.yaml
+      matchpattern: '(kafka:) ([\d\.]+)'
+      replacepattern: '$1 {{ source "kafka" }}'
+  appVersion-mongodb:
+    sourceid: mongodb
+    kind: file
+    spec:
+      file: example-mojaloop-backend/Chart.yaml
+      matchpattern: '(mongodb:) ([\d\.]+)'
+      replacepattern: '$1 {{ source "mongodb" }}'
+  appVersion-redis:
+    sourceid: redis
+    kind: file
+    spec:
+      file: example-mojaloop-backend/Chart.yaml
+      matchpattern: '(redis:) ([\d\.]+)'
+      replacepattern: '$1 {{ source "redis" }}'
+  kafka:
+    sourceid: kafka
+    kind: helmchart
+    spec:
+      name: example-mojaloop-backend
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  mysql:
+    sourceid: mysql
+    kind: helmchart
+    spec:
+      name: example-mojaloop-backend
+      file: Chart.yaml
+      key: $.dependencies[1].version
+  cl-mongodb:
+    sourceid: mongodb
+    kind: helmchart
+    spec:
+      name: example-mojaloop-backend
+      file: Chart.yaml
+      key: $.dependencies[2].version
+  cep-mongodb:
+    sourceid: mongodb
+    kind: helmchart
+    spec:
+      name: example-mojaloop-backend
+      file: Chart.yaml
+      key: $.dependencies[3].version
+  ttk-mongodb:
+    sourceid: mongodb
+    kind: helmchart
+    spec:
+      name: example-mojaloop-backend
+      file: Chart.yaml
+      key: $.dependencies[4].version
+  ttksims-redis:
+    sourceid: redis
+    kind: helmchart
+    spec:
+      name: example-mojaloop-backend
+      file: Chart.yaml
+      key: $.dependencies[5].version
+  auth-svc-redis:
+    sourceid: redis
+    kind: helmchart
+    spec:
+      name: example-mojaloop-backend
+      file: Chart.yaml
+      key: $.dependencies[6].version

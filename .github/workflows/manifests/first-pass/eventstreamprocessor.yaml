@@ -1,0 +1,39 @@
+name: eventstreamprocessor
+
+sources:
+  event-stream-processor:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: event-stream-processor
+  common:
+    kind: helmchart
+    spec:
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+
+
+conditions:
+  docker-event-stream-processor:
+    sourceid: event-stream-processor
+    kind: dockerimage
+    spec:
+      image: mojaloop/event-stream-processor
+
+targets:
+  event-stream-processor:
+    sourceid: event-stream-processor
+    kind: helmchart
+    spec:
+      name: eventstreamprocessor
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: eventstreamprocessor
+      file: Chart.yaml
+      key: $.dependencies[0].version

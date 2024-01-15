@@ -1,0 +1,241 @@
+name: centralledger
+
+sources:
+  central-ledger:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: central-ledger
+  event-sidecar:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: event-sidecar
+
+conditions:
+  docker-central-ledger:
+    sourceid: central-ledger
+    kind: dockerimage
+    spec:
+      image: mojaloop/central-ledger
+  docker-event-sidecar:
+    sourceid: event-sidecar
+    kind: dockerimage
+    spec:
+      image: mojaloop/event-sidecar
+
+targets:
+  centralledger-service:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: centralledger
+      file: values.yaml
+      key: $.centralledger-service.image.tag
+      appversion: true
+  centralledger-service--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralledger
+      file: values.yaml
+      key: $.centralledger-service.sidecar.image.tag
+  centralledger-handler-transfer-prepare:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: centralledger
+      file: values.yaml
+      key: $.centralledger-handler-transfer-prepare.image.tag
+      appversion: true
+  centralledger-handler-transfer-prepare--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralledger
+      file: values.yaml
+      key: $.centralledger-handler-transfer-prepare.sidecar.image.tag
+      appversion: true
+  centralledger-handler-transfer-position:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: centralledger
+      file: values.yaml
+      key: $.centralledger-handler-transfer-position.image.tag
+      appversion: true
+  centralledger-handler-transfer-position--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralledger
+      file: values.yaml
+      key: $.centralledger-handler-transfer-position.sidecar.image.tag
+  centralledger-handler-transfer-get:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: centralledger
+      file: values.yaml
+      key: $.centralledger-handler-transfer-get.image.tag
+      appversion: true
+  centralledger-handler-transfer-get--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralledger
+      file: values.yaml
+      key: $.centralledger-handler-transfer-get.sidecar.image.tag
+  centralledger-handler-transfer-fulfil:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: centralledger
+      file: values.yaml
+      key: $.centralledger-handler-transfer-fulfil.image.tag
+      appversion: true
+  centralledger-handler-transfer-fulfil--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralledger
+      file: values.yaml
+      key: $.centralledger-handler-transfer-fulfil.sidecar.image.tag
+  centralledger-handler-timeout:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: centralledger
+      file: values.yaml
+      key: $.centralledger-handler-timeout.image.tag
+      appversion: true
+  centralledger-handler-timeout--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralledger
+      file: values.yaml
+      key: $.centralledger-handler-timeout.sidecar.image.tag
+  centralledger-handler-admin-transfer:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: centralledger
+      file: values.yaml
+      key: $.centralledger-handler-admin-transfer.image.tag
+      appversion: true
+  centralledger-handler-admin-transfer--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralledger
+      file: values.yaml
+      key: $.centralledger-handler-admin-transfer.sidecar.image.tag
+  chart-handler-admin-transfer:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: centralledger/chart-handler-admin-transfer
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-handler-admin-transfer--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralledger/chart-handler-admin-transfer
+      file: values.yaml
+      key: $.sidecar.image.tag
+  chart-handler-timeout:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: centralledger/chart-handler-timeout
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-handler-timeout--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralledger/chart-handler-timeout
+      file: values.yaml
+      key: $.sidecar.image.tag
+  chart-handler-transfer-fulfil:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: centralledger/chart-handler-transfer-fulfil
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-handler-transfer-fulfil--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralledger/chart-handler-transfer-fulfil
+      file: values.yaml
+      key: $.sidecar.image.tag
+  chart-handler-transfer-get:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: centralledger/chart-handler-transfer-get
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-handler-transfer-get--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralledger/chart-handler-transfer-get
+      file: values.yaml
+      key: $.sidecar.image.tag
+  chart-handler-transfer-position:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: centralledger/chart-handler-transfer-position
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-handler-transfer-position--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralledger/chart-handler-transfer-position
+      file: values.yaml
+      key: $.sidecar.image.tag
+  chart-handler-transfer-prepare:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: centralledger/chart-handler-transfer-prepare
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-handler-transfer-prepare--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralledger/chart-handler-transfer-prepare
+      file: values.yaml
+      key: $.sidecar.image.tag
+  chart-service:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: centralledger/chart-service
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-service--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralledger/chart-service
+      file: values.yaml
+      key: $.sidecar.image.tag
+      

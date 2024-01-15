@@ -1,0 +1,70 @@
+name: sdk-scheme-adapter
+
+sources:
+  sdk-scheme-adapter:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: sdk-scheme-adapter
+  common:
+    kind: helmchart
+    spec: 
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+  
+conditions:
+  docker-sdk-scheme-adapter:
+    sourceid: sdk-scheme-adapter
+    kind: dockerimage
+    spec:
+      image: mojaloop/sdk-scheme-adapter
+
+targets:
+  sdk-scheme-adapter-api-svc:
+    sourceid: sdk-scheme-adapter
+    kind: helmchart
+    spec:
+      name: sdk-scheme-adapter
+      file: values.yaml
+      key: $.sdk-scheme-adapter-api-svc.image.tag
+      appversion: true
+  sdk-scheme-adapter-dom-evt-handler:
+    sourceid: sdk-scheme-adapter
+    kind: helmchart
+    spec:
+      name: sdk-scheme-adapter
+      file: values.yaml
+      key: $.sdk-scheme-adapter-dom-evt-handler.image.tag
+      appversion: true
+  sdk-scheme-adapter-cmd-evt-handler:
+    sourceid: sdk-scheme-adapter
+    kind: helmchart
+    spec:
+      name: sdk-scheme-adapter
+      file: values.yaml
+      key: $.sdk-scheme-adapter-cmd-evt-handler.image.tag
+      appversion: true
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: sdk-scheme-adapter
+      file: Chart.yaml
+      key: $.dependencies[3].version
+  chart-service--sdk-scheme-adapter:
+    sourceid: sdk-scheme-adapter
+    kind: helmchart
+    spec:
+      name: sdk-scheme-adapter/chart-service
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-service--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: sdk-scheme-adapter/chart-service
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  

@@ -1,0 +1,37 @@
+name: bulk-api-adapter
+
+sources:
+  bulk-api-adapter-service:
+    kind: helmchart
+    spec: 
+      url: file://./bulk-api-adapter
+      name: bulk-api-adapter-service
+  bulk-api-adapter-handler-notification:
+    kind: helmchart
+    spec: 
+      url: file://./bulk-api-adapter
+      name: bulk-api-adapter-handler-notification
+  
+conditions: {}
+
+targets:
+  bulk-api-adapter-service:
+    sourceid: bulk-api-adapter-service
+    kind: helmchart
+    spec:
+      name: bulk-api-adapter
+      file: Chart.yaml
+      key: $.dependencies[0].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  bulk-api-adapter-handler-notification:
+    sourceid: bulk-api-adapter-handler-notification
+    kind: helmchart
+    spec:
+      name: bulk-api-adapter
+      file: Chart.yaml
+      key: $.dependencies[1].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'

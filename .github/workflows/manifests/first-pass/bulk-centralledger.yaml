@@ -1,0 +1,122 @@
+name: bulk-centralledger
+
+sources:
+  central-ledger:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: central-ledger
+  common:
+    kind: helmchart
+    spec: 
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+
+conditions:
+  docker-central-ledger:
+    sourceid: central-ledger
+    kind: dockerimage
+    spec:
+      image: mojaloop/central-ledger
+
+targets:
+  cl-handler-bulk-transfer-prepare:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: bulk-centralledger
+      file: values.yaml
+      key: $.cl-handler-bulk-transfer-prepare.image.tag
+      appversion: true
+  cl-handler-bulk-transfer-fulfil:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: bulk-centralledger
+      file: values.yaml
+      key: $.cl-handler-bulk-transfer-fulfil.image.tag
+      appversion: true
+  cl-handler-bulk-transfer-processing:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: bulk-centralledger
+      file: values.yaml
+      key: $.cl-handler-bulk-transfer-processing.image.tag
+      appversion: true
+  cl-handler-bulk-transfer-get:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: bulk-centralledger
+      file: values.yaml
+      key: $.cl-handler-bulk-transfer-get.image.tag
+      appversion: true
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: bulk-centralledger
+      file: Chart.yaml
+      key: $.dependencies[4].version
+  chart-handler-bulk-transfer-fulfil:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: bulk-centralledger/chart-handler-bulk-transfer-fulfil
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-handler-bulk-transfer-fulfil--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: bulk-centralledger/chart-handler-bulk-transfer-fulfil
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  chart-handler-bulk-transfer-get:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: bulk-centralledger/chart-handler-bulk-transfer-get
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-handler-bulk-transfer-get--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: bulk-centralledger/chart-handler-bulk-transfer-get
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  chart-handler-bulk-transfer-prepare:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: bulk-centralledger/chart-handler-bulk-transfer-prepare
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-handler-bulk-transfer-prepare--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: bulk-centralledger/chart-handler-bulk-transfer-prepare
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  chart-handler-bulk-transfer-processing:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: bulk-centralledger/chart-handler-bulk-transfer-processing
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-handler-bulk-transfer-processing--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: bulk-centralledger/chart-handler-bulk-transfer-processing
+      file: Chart.yaml
+      key: $.dependencies[0].version

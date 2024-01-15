@@ -1,0 +1,37 @@
+name: ml-api-adapter
+
+sources:
+  ml-api-adapter-service:
+    kind: helmchart
+    spec: 
+      url: file://./ml-api-adapter
+      name: ml-api-adapter-service
+  ml-api-adapter-handler-notification:
+    kind: helmchart
+    spec: 
+      url: file://./ml-api-adapter
+      name: ml-api-adapter-handler-notification
+  
+conditions: {}
+
+targets:
+  ml-api-adapter-service:
+    sourceid: ml-api-adapter-service
+    kind: helmchart
+    spec:
+      name: ml-api-adapter
+      file: Chart.yaml
+      key: $.dependencies[0].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  ml-api-adapter-handler-notification:
+    sourceid: ml-api-adapter-handler-notification
+    kind: helmchart
+    spec:
+      name: ml-api-adapter
+      file: Chart.yaml
+      key: $.dependencies[1].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'

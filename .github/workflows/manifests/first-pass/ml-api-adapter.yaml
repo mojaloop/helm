@@ -1,0 +1,116 @@
+name: ml-api-adapter
+
+sources:
+  ml-api-adapter:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: ml-api-adapter
+  event-sidecar:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: event-sidecar
+  common:
+    kind: helmchart
+    spec: 
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+  
+conditions:
+  docker-ml-api-adapter:
+    sourceid: ml-api-adapter
+    kind: dockerimage
+    spec:
+      image: mojaloop/ml-api-adapter
+  docker-event-sidecar:
+    sourceid: event-sidecar
+    kind: dockerimage
+    spec:
+      image: mojaloop/event-sidecar
+
+targets:
+  ml-api-adapter-service:
+    sourceid: ml-api-adapter
+    kind: helmchart
+    spec:
+      name: ml-api-adapter
+      file: values.yaml
+      key: $.ml-api-adapter-service.image.tag
+      appversion: true
+  ml-api-adapter-service--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: ml-api-adapter
+      file: values.yaml
+      key: $.ml-api-adapter-service.sidecar.image.tag
+  ml-api-adapter-handler-notification:
+    sourceid: ml-api-adapter
+    kind: helmchart
+    spec:
+      name: ml-api-adapter
+      file: values.yaml
+      key: $.ml-api-adapter-handler-notification.image.tag
+      appversion: true
+  ml-api-adapter-handler-notification--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: ml-api-adapter
+      file: values.yaml
+      key: $.ml-api-adapter-handler-notification.sidecar.image.tag
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: ml-api-adapter
+      file: Chart.yaml
+      key: $.dependencies[2].version
+  chart-handler-notification:
+    sourceid: ml-api-adapter
+    kind: helmchart
+    spec:
+      name: ml-api-adapter/chart-handler-notification
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-handler-notification--sidecar:
+    sourceid: ml-api-adapter
+    kind: helmchart
+    spec:
+      name: ml-api-adapter/chart-handler-notification
+      file: values.yaml
+      key: $.sidecar.image.tag
+      appversion: true
+  chart-handler-notification--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: ml-api-adapter/chart-handler-notification
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  chart-service:
+    sourceid: ml-api-adapter
+    kind: helmchart
+    spec:
+      name: ml-api-adapter/chart-service
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-service--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: ml-api-adapter/chart-service
+      file: values.yaml
+      key: $.sidecar.image.tag
+  chart-service--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: ml-api-adapter/chart-service
+      file: Chart.yaml
+      key: $.dependencies[0].version

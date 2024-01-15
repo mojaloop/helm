@@ -1,0 +1,105 @@
+name: centralsettlement
+
+sources:
+  central-settlement:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: central-settlement
+  event-sidecar:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: event-sidecar
+
+conditions:
+  docker-central-settlement:
+    sourceid: central-settlement
+    kind: dockerimage
+    spec:
+      image: mojaloop/central-settlement
+  docker-event-sidecar:
+    sourceid: event-sidecar
+    kind: dockerimage
+    spec:
+      image: mojaloop/event-sidecar
+
+targets:
+  centralsettlement-service:
+    sourceid: central-settlement
+    kind: helmchart
+    spec:
+      name: centralsettlement
+      file: values.yaml
+      key: $.centralsettlement-service.image.tag
+      appversion: true
+  centralsettlement-service--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralsettlement
+      file: values.yaml
+      key: $.centralsettlement-service.sidecar.image.tag
+  centralsettlement-handler-deferredsettlement:
+    sourceid: central-settlement
+    kind: helmchart
+    spec:
+      name: centralsettlement
+      file: values.yaml
+      key: $.centralsettlement-handler-deferredsettlement.image.tag
+      appversion: true
+  centralsettlement-handler-deferredsettlement--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralsettlement
+      file: values.yaml
+      key: $.centralsettlement-handler-deferredsettlement.sidecar.image.tag
+  centralsettlement-handler-grosssettlement:
+    sourceid: central-settlement
+    kind: helmchart
+    spec:
+      name: centralsettlement
+      file: values.yaml
+      key: $.centralsettlement-handler-grosssettlement.image.tag
+      appversion: true
+  centralsettlement-handler-grosssettlement--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralsettlement
+      file: values.yaml
+      key: $.centralsettlement-handler-grosssettlement.sidecar.image.tag
+  centralsettlement-handler-rules:
+    sourceid: central-settlement
+    kind: helmchart
+    spec:
+      name: centralsettlement
+      file: values.yaml
+      key: $.centralsettlement-handler-rules.image.tag
+      appversion: true
+  centralsettlement-handler-rules--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralsettlement
+      file: values.yaml
+      key: $.centralsettlement-handler-rules.sidecar.image.tag
+  chart-service:
+    sourceid: central-settlement
+    kind: helmchart
+    spec:
+      name: centralsettlement/chart-service
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-service--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: centralsettlement/chart-service
+      file: values.yaml
+      key: $.sidecar.image.tag
+  

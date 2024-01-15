@@ -1,0 +1,42 @@
+name: sdk-scheme-adapter
+
+sources:
+  sdk-scheme-adapter-svc:
+    kind: helmchart
+    spec:
+      url: file://./sdk-scheme-adapter
+      name: sdk-scheme-adapter-svc
+
+conditions: {}
+
+targets:
+  sdk-scheme-adapter-api-svc:
+    source: sdk-scheme-adapter-svc
+    kind: helmchart
+    spec:
+      name: sdk-scheme-adapter
+      file: Chart.yaml
+      key: $.dependencies[0].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  sdk-scheme-adapter-dom-evt-handler:
+    source: sdk-scheme-adapter-svc
+    kind: helmchart
+    spec:
+      name: sdk-scheme-adapter
+      file: Chart.yaml
+      key: $.dependencies[1].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  sdk-scheme-adapter-cmd-evt-handler:
+    source: sdk-scheme-adapter-svc
+    kind: helmchart
+    spec:
+      name: sdk-scheme-adapter
+      file: Chart.yaml
+      key: $.dependencies[2].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'

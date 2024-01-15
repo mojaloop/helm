@@ -1,0 +1,39 @@
+name: centraleventprocessor
+
+sources:
+  central-event-processor:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: central-event-processor
+  common:
+    kind: helmchart
+    spec: 
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+
+conditions:
+  docker-central-event-processor:
+    sourceid: central-event-processor
+    kind: dockerimage
+    spec:
+      image: mojaloop/central-event-processor
+
+targets:
+  central-event-processor:
+    sourceid: central-event-processor
+    kind: helmchart
+    spec:
+      name: centraleventprocessor
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: centraleventprocessor
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  

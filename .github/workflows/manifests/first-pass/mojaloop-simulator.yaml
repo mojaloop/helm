@@ -1,0 +1,100 @@
+name: mojaloop-simulator
+
+sources:
+  # NOTE: redis update will be added in the future
+  # redis:
+  #   kind: dockerimage
+  #   spec:
+  #     image: redis
+  sdk-scheme-adapter:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: sdk-scheme-adapter
+  mojaloop-simulator:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: mojaloop-simulator
+  thirdparty-sdk:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: thirdparty-sdk
+  common:
+    kind: helmchart
+    spec: 
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+
+conditions:
+  docker-sdk-scheme-adapter:
+    sourceid: sdk-scheme-adapter
+    kind: dockerimage
+    spec:
+      image: mojaloop/sdk-scheme-adapter
+  docker-mojaloop-simulator:
+    sourceid: mojaloop-simulator
+    kind: dockerimage
+    spec:
+      image: mojaloop/mojaloop-simulator
+  docker-thirdparty-sdk:
+    sourceid: thirdparty-sdk
+    kind: dockerimage
+    spec:
+      image: mojaloop/thirdparty-sdk
+
+targets:
+  appVersion-sdk-scheme-adapter:
+    sourceid: sdk-scheme-adapter
+    kind: file
+    spec:
+      file: mojaloop-simulator/Chart.yaml
+      matchpattern: '(sdk-scheme-adapter:) (v[\d\.]+)'
+      replacepattern: '$1 {{ source "sdk-scheme-adapter" }}'
+  appVersion-mojaloop-simulator:
+    sourceid: mojaloop-simulator
+    kind: file
+    spec:
+      file: mojaloop-simulator/Chart.yaml
+      matchpattern: '(mojaloop-simulator:) (v[\d\.]+)'
+      replacepattern: '$1 {{ source "mojaloop-simulator" }}'
+  appVersion-thirdparty-sdk:
+    sourceid: thirdparty-sdk
+    kind: file
+    spec:
+      file: mojaloop-simulator/Chart.yaml
+      matchpattern: '(thirdparty-sdk:) (v[\d\.]+)'
+      replacepattern: '$1 {{ source "thirdparty-sdk" }}'
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: mojaloop-simulator
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  sdk-scheme-adapter:
+    sourceid: sdk-scheme-adapter
+    kind: helmchart
+    spec:
+      name: mojaloop-simulator
+      file: values.yaml
+      key: $.defaults.config.schemeAdapter.image.tag
+  mojaloop-simulator:
+    sourceid: mojaloop-simulator
+    kind: helmchart
+    spec:
+      name: mojaloop-simulator
+      file: values.yaml
+      key: $.defaults.config.backend.image.tag
+  thirdparty-sdk:
+    sourceid: thirdparty-sdk
+    kind: helmchart
+    spec:
+      name: mojaloop-simulator
+      file: values.yaml
+      key: $.defaults.config.thirdpartysdk.image.tag
+  

@@ -1,0 +1,74 @@
+# NOTES:
+# - GitHub Actions must be explicitly allowed to create pull requests in this repository. 
+#   This setting can be found in the repository's settings under Actions > General > Workflow permissions. 
+# - A repository secret `AUTO_RELEASE_TOKEN` (permissions: `contents: write`, `pull-requests: write`, `repositories: read`) needs to be created. 
+#   The secret should contain a github access token with the permissions specified above.
+#   The secret is used by the `create-pull-request` action to create the pull request and `updatecli` to access all updateable repositories.
+#   The secret can be created at https://github.com/mojaloop/helm/settings/secrets/actions
+
+name: Create release PR
+
+on: 
+    workflow_dispatch:
+      inputs:
+        branch:
+          type: string
+          description: 'Branch to create release PR from (e.g. master, empty for PR branch)'
+          required: false
+          default: 'master'
+
+jobs:
+  create_release_pr:
+    if: '!github.event.pull_request.draft'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 1
+
+      - name: Set up Helm
+        id: setup-helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.13.3
+
+      - name: Install UpdateCLI
+        id: install-updatecli
+        run: |
+          curl -sL -o /tmp/updatecli_amd64.deb https://github.com/updatecli/updatecli/releases/download/v0.68.0/updatecli_amd64.deb
+          sudo apt install /tmp/updatecli_amd64.deb
+      
+      # # update chart dependencies
+      - name: Update chart dependencies
+        id: update-chart-dependencies
+        env:
+          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+        run: ./.github/workflows/scripts/update-charts.sh
+
+      # step: detect breaking changes (default.json changes, migration scripts changes, 
+      #       presence of phrase "BREAKING CHANGE" in changelogs, etc.)
+
+      # step: gather changelogs and generate release note
+
+      # step: try linting and updating charts
+
+      # step: deploy charts to staging environment
+
+        # NOTE: For this action to work GitHub Actions must be explicitly allowed to create pull requests.
+        # This setting can be found in a repository's settings under Actions > General > Workflow permissions.
+      - name: Create Pull Request
+        id: create_pr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          # NOTE: This token should have permissions (`contents: write` and `pull-requests: write`)
+          token: ${{ secrets.AUTO_RELEASE_TOKEN }} 
+          commit-message: "chore: upgrade helm chart depdenencies"
+          title: "[auto] feat: release candidate"
+          body: |
+            Release candidate for the next version of the helm charts.
+          branch: release/release-candidate-${{ github.run_id }}
+          base: master
+          draft: true

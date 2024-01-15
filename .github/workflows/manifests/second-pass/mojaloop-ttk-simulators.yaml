@@ -1,0 +1,53 @@
+name: mojaloop-ttk-simulators
+
+sources:
+  mojaloop-ttk-sim1-svc:
+    kind: helmchart
+    spec:
+      url: file://./mojaloop-ttk-simulators
+      name: mojaloop-ttk-sim1-svc
+  mojaloop-ttk-sim2-svc:
+    kind: helmchart
+    spec:
+      url: file://./mojaloop-ttk-simulators
+      name: mojaloop-ttk-sim2-svc
+  mojaloop-ttk-sim3-svc:
+    kind: helmchart
+    spec:
+      url: file://./mojaloop-ttk-simulators
+      name: mojaloop-ttk-sim3-svc
+
+
+conditions: {}
+
+targets:
+  mojaloop-ttk-sim1-svc:
+    sourceid: mojaloop-ttk-sim1-svc
+    kind: helmchart
+    spec:
+      name: mojaloop-ttk-simulators
+      file: Chart.yaml
+      key: $.dependencies[0].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  mojaloop-ttk-sim2-svc:
+    sourceid: mojaloop-ttk-sim2-svc
+    kind: helmchart
+    spec:
+      name: mojaloop-ttk-simulators
+      file: Chart.yaml
+      key: $.dependencies[1].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  mojaloop-ttk-sim3-svc:
+    sourceid: mojaloop-ttk-sim3-svc
+    kind: helmchart
+    spec:
+      name: mojaloop-ttk-simulators
+      file: Chart.yaml
+      key: $.dependencies[2].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'

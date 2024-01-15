@@ -1,0 +1,97 @@
+name: mojaloop-bulk
+
+sources:
+  bulk-api-adapter:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: bulk-api-adapter
+  central-ledger:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: central-ledger
+  common:
+    kind: helmchart
+    spec: 
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+
+conditions:
+  docker-bulk-api-adapter:
+    sourceid: bulk-api-adapter
+    kind: dockerimage
+    spec:
+      image: mojaloop/bulk-api-adapter
+  docker-central-ledger:
+    sourceid: central-ledger
+    kind: dockerimage
+    spec:
+      image: mojaloop/central-ledger
+
+targets:
+  appVersion-bulk-api-adapter:
+    sourceid: bulk-api-adapter
+    kind: file
+    spec:
+      file: mojaloop-bulk/Chart.yaml
+      matchpattern: '(bulk-api-adapter:) (v[\d\.]+)'
+      replacepattern: '$1 {{ source "bulk-api-adapter" }}'
+  appVersion-central-ledger:
+    sourceid: central-ledger
+    kind: file
+    spec:
+      file: mojaloop-bulk/Chart.yaml
+      matchpattern: '(central-ledger:) (v[\d\.]+)'
+      replacepattern: '$1 {{ source "central-ledger" }}'
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: mojaloop-bulk
+      file: Chart.yaml
+      key: $.dependencies[2].version
+  bulk-api-adapter--bulk-api-adapter-service:
+    sourceid: bulk-api-adapter
+    kind: helmchart
+    spec:
+      name: mojaloop-bulk
+      file: values.yaml
+      key: $.bulk-api-adapter.bulk-api-adapter-service.image.tag
+  bulk-api-adapter--bulk-api-adapter-handler-notification:
+    sourceid: bulk-api-adapter
+    kind: helmchart
+    spec:
+      name: mojaloop-bulk
+      file: values.yaml
+      key: $.bulk-api-adapter.bulk-api-adapter-handler-notification.image.tag
+  bulk-centralledger--cl-handler-bulk-transfer-prepare:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: mojaloop-bulk
+      file: values.yaml
+      key: $.bulk-centralledger.cl-handler-bulk-transfer-prepare.image.tag
+  bulk-centralledger--cl-handler-bulk-transfer-fulfil:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: mojaloop-bulk
+      file: values.yaml
+      key: $.bulk-centralledger.cl-handler-bulk-transfer-fulfil.image.tag
+  bulk-centralledger--cl-handler-bulk-transfer-processing:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: mojaloop-bulk
+      file: values.yaml
+      key: $.bulk-centralledger.cl-handler-bulk-transfer-processing.image.tag
+  bulk-centralledger--cl-handler-bulk-transfer-get:
+    sourceid: central-ledger
+    kind: helmchart
+    spec:
+      name: mojaloop-bulk
+      file: values.yaml
+      key: $.bulk-centralledger.cl-handler-bulk-transfer-get.image.tag

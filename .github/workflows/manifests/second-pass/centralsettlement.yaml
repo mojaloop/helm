@@ -1,0 +1,52 @@
+name: centralsettlement
+
+sources:
+  centralsettlement-service:
+    kind: helmchart
+    spec: 
+      url: file://./centralsettlement
+      name: centralsettlement-service
+  
+conditions: {}
+
+targets:
+  centralsettlement-service:
+    sourceid: centralsettlement-service
+    kind: helmchart
+    spec:
+      name: centralsettlement
+      file: Chart.yaml
+      key: $.dependencies[0].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  centralsettlement-handler-deferredsettlement:
+    sourceid: centralsettlement-service
+    kind: helmchart
+    spec:
+      name: centralsettlement
+      file: Chart.yaml
+      key: $.dependencies[1].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  centralsettlement-handler-grosssettlement:
+    sourceid: centralsettlement-service
+    kind: helmchart
+    spec:
+      name: centralsettlement
+      file: Chart.yaml
+      key: $.dependencies[2].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  centralsettlement-handler-rules:
+    sourceid: centralsettlement-service
+    kind: helmchart
+    spec:
+      name: centralsettlement
+      file: Chart.yaml
+      key: $.dependencies[3].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'

@@ -1,0 +1,56 @@
+name: transaction-requests-service
+
+sources:
+  transaction-requests-service:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: transaction-requests-service
+  event-sidecar:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: event-sidecar
+  common:
+    kind: helmchart
+    spec: 
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+  
+conditions:
+  docker-transactions-service:
+    sourceid: transaction-requests-service
+    kind: dockerimage
+    spec:
+      image: mojaloop/transaction-requests-service
+  docker-event-sidecar:
+    sourceid: event-sidecar
+    kind: dockerimage
+    spec:
+      image: mojaloop/event-sidecar
+  
+targets:
+  transaction-requests-service:
+    sourceid: transaction-requests-service
+    kind: helmchart
+    spec:
+      name: transaction-requests-service
+      file: values.yaml
+      key: $.image.tag
+  sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: transaction-requests-service
+      file: values.yaml
+      key: $.sidecar.image.tag
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: transaction-requests-service
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  

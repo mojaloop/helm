@@ -1,0 +1,33 @@
+name: ml-testing-toolkit-cli
+
+sources:
+  ml-testing-toolkit-client-lib:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: ml-testing-toolkit-client-lib
+  common:
+    kind: helmchart
+    spec: 
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+  
+conditions: {}
+
+targets:
+  ml-testing-toolkit-client-lib:
+    sourceid: ml-testing-toolkit-client-lib
+    kind: helmchart
+    spec:
+      name: ml-testing-toolkit-cli
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: ml-testing-toolkit-cli
+      file: Chart.yaml
+      key: $.dependencies[0].version
