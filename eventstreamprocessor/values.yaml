@@ -1,15 +1,12 @@
 # Default values for central-kms.
 # This is a YAML-formatted file.
-
 # Declare global configurations
 global: {}
-
 # Declare variables to be passed into your templates.
-
 image:
   registry: docker.io
   repository: mojaloop/event-stream-processor
-  tag: v12.0.0-snapshot.7
+  tag: v12.0.0-snapshot.9
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -23,10 +20,8 @@ image:
   ##   - myRegistryKeySecretName
   ##
   pullSecrets: []
-
 replicaCount: 1
 command: '["node", "src/index.js"]'
-
 ## Enable diagnostic mode in the deployment
 ##
 diagnosticMode:
@@ -35,46 +30,39 @@ diagnosticMode:
   enabled: false
   ## @param diagnosticMode.command Command to override all containers in the deployment
   ##
-  command: 
+  command:
     - node
     - src/index.js
   ## @param diagnosticMode.args Args to override all containers in the deployment
   ##
   args:
     - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-  
   ## @param diagnosticMode.debug config to override all debug information
   ##
   debug:
     internalPort: 9229
     port: 9229
-
 readinessProbe:
   enabled: true
   httpGet:
     path: /health
   initialDelaySeconds: 30
   periodSeconds: 15
-
 livenessProbe:
   enabled: true
   httpGet:
     path: /health
   initialDelaySeconds: 30
   periodSeconds: 15
-
 ## Pod scheduling preferences.
 ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 affinity: {}
-
 ## Node labels for pod assignment
 ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
 nodeSelector: {}
-
 ## Set toleration for scheduler
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
-
 ## Configure Container Security Context
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
@@ -83,7 +71,6 @@ tolerations: []
 containerSecurityContext:
   enabled: true
   runAsUser: 1001
-
 config:
   ## Kafka Configuration
   # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
@@ -112,34 +99,32 @@ config:
       partition: trace-cache
       maxByteSize: 524288000
       minCleanupIntervalMsec: 100000
-
   # master span criteria config
   span:
     START_CRITERIA:
       transfer:
-        -   prepare:
-              service: ml_transfer_prepare
-        -   fulfil:
-              service: ml_transfer_fulfil
-        -   abort:
-              service: ml_transfer_abort
-        -   timeout-received:
-              service: cl_transfer_timeout
+        - prepare:
+            service: ml_transfer_prepare
+        - fulfil:
+            service: ml_transfer_fulfil
+        - abort:
+            service: ml_transfer_abort
+        - timeout-received:
+            service: cl_transfer_timeout
     END_CRITERIA:
       transfer:
-        -   fulfil:
-              service: ml_notification_event
-        -   abort:
-              service: ml_notification_event
-        -   prepare:
-              service: ml_notification_event
-              isError: true
-        -   timeout-received:
-              service: ml_notification_event
+        - fulfil:
+            service: ml_notification_event
+        - abort:
+            service: ml_notification_event
+        - prepare:
+            service: ml_notification_event
+            isError: true
+        - timeout-received:
+            service: ml_notification_event
       exceptionList: []
   # log level config
   log_level: info
-
 ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
 ## e.g:
@@ -170,17 +155,14 @@ initContainers: |
         value: '{{ .Values.config.kafka_host }}'
       - name: KAFKA_PORT
         value: '{{ .Values.config.kafka_port }}'
-
 ## @param master.podLabels Extra labels for pod(s)
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 ##
 podLabels: {}
-
 ## @param podAnnotations Additional custom annotations for pod(s)
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 ##
 podAnnotations: {}
-
 service:
   internalPort: 3082
   ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -193,17 +175,15 @@ service:
   ## e.g.:
   ## clusterIP: None
   ##
-  clusterIP:
-  ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
-  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
-  ##
-  loadBalancerIP:
-  ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
-  ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
-  ## e.g:
-  ## loadBalancerSourceRanges:
-  ##   - 10.10.10.0/24
-  ##
+  clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+##
+  loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+## e.g:
+## loadBalancerSourceRanges:
+##   - 10.10.10.0/24
+##
   loadBalancerSourceRanges: []
   ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
   ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
@@ -223,7 +203,6 @@ service:
   ##     timeoutSeconds: 300
   ##
   sessionAffinityConfig: {}
-
 ingress:
   enabled: false
   ## @param ingress.pathType Ingress path type
@@ -231,9 +210,8 @@ ingress:
   pathType: ImplementationSpecific
   ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
   ##
-  apiVersion:
-  ## @param ingress.hostname Default host for the ingress record
-  ##
+  apiVersion: null ## @param ingress.hostname Default host for the ingress record
+##
   hostname: event-stream-processor.local
   ## @param servicePort : port for the service
   ##
@@ -244,14 +222,13 @@ ingress:
   ## @param ingress.annotations Additional custom annotations for the ingress record
   ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
   ##
-  annotations:
-  ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
-  ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
-  ## You can:
-  ##   - Use the `ingress.secrets` parameter to create this TLS secret
-  ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
-  ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
-  ##
+  annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+## You can:
+##   - Use the `ingress.secrets` parameter to create this TLS secret
+##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+##
   tls: false
   ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
   ##
@@ -265,12 +242,11 @@ ingress:
   ##   - name: transfer-api-svc.local
   ##     path: /
   ##
-  extraHosts:
-  extraPaths:
-  extraTls:
-  secrets:
+  extraHosts: null
+  extraPaths: null
+  extraTls: null
+  secrets: null
   className: "nginx"
-
 # We usually recommend not to specify default resources and to leave this as a conscious
 # choice for the user. This also increases chances charts run on environments with little
 # resources, such as Minikube. If you do want to specify resources, uncomment the following

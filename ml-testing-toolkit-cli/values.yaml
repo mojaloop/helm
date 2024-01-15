@@ -14,13 +14,9 @@ image:
   ##   - myRegistryKeySecretName
   ##
   pullSecrets: []
-
 ## Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/#handling-pod-and-container-failures
 backoffLimit: 0
 restartPolicy: Never
-
-
-
 ## Bash script for TTK CLI
 script: |
     echo "Downloading the test collection...";
@@ -60,7 +56,6 @@ script: |
     echo "Test Runner finished with exit code: $TEST_RUNNER_EXIT_CODE";
     exit $TEST_RUNNER_EXIT_CODE;
     {{- end }}
-
 scheduling:
   enabled: false
   ## Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#schedule-suspension
@@ -84,32 +79,26 @@ scheduling:
   ## │ │ │ │ │
   ## * * * * *
   cronSchedule: '0 8 * * *'
-
 tests:
   enabled: false
   weight: -5
   deletePolicy: before-hook-creation
-
 postInstallHook:
   enabled: false
   weight: -5
   deletePolicy: before-hook-creation
-
 job:
   enabled: false
   ## Set the TTL for Job Cleanup - ref: https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/
   # ttlSecondsAfterFinished: 50
   generateNameEnabled: true
-
   annotations: {}
   # Add custom annotations here. Use the following line as examples, it will overrride the default helm hook.
   #   argocd.argoproj.io/hook: PostSync
   #   argocd.argoproj.io/sync-wave: "-5"
   #### If passing the arguments using commad line, may be necessary scape the "." character -> i.e: "argocd\.argoproj\.io/hook": PostSync
-  
   # Add custom labels of job template here.
   templateLabels: {}
-  
 config:
   ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
   testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/v<TAG_VERSION>.zip
@@ -128,7 +117,6 @@ config:
   ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
   ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
   allowFailures: false
-
 ## Optionally you can specify some parameters here and the references in the environment file like the format '$param_<Param Name>' will be replaced with their values specified here
 parameters: {}
 configCreds:
@@ -138,7 +126,6 @@ configCreds:
   AWS_REGION: 'us-west-2'
   ## Define Slack Webhook URL for announcements
   # SLACK_WEBHOOK_URL: 'slack_inbound_webhook'
-
 ## Optionally specify the config file defaults for TTK CLI
 ## You should specify at least mode here
 # configFileDefaults: {
@@ -152,7 +139,6 @@ configCreds:
 #   "slackFailedImage": ""
 # }
 configFileDefaults: {"mode": "outbound", "logLevel": "2"}
-
 testCaseEnvironmentFile:
   ## inputValues are Key-value pairs in the following format: <filename.json>: { <JSON> }
   #  inputValues:
@@ -162,16 +148,14 @@ testCaseEnvironmentFile:
   #       }
   #     }
   inputValues: {}
-
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
-
+# We usually recommend not to specify default resources and to leave this as a conscious
+# choice for the user. This also increases chances charts run on environments with little
+# resources, such as Minikube. If you do want to specify resources, uncomment the following
+# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+# limits:
+#  cpu: 100m
+#  memory: 128Mi
+# requests:
+#  cpu: 100m
+#  memory: 128Mi

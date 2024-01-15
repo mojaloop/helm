@@ -1,10 +1,9 @@
 # Default values for ml-api-adapter.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
 image:
   repository: mojaloop/ml-testing-toolkit-ui
-  tag: v15.4.0
+  tag: v15.4.2
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -18,22 +17,17 @@ image:
   ##   - myRegistryKeySecretName
   ##
   pullSecrets: []
-
 replicaCount: 1
 command: '["sh", "/usr/share/nginx/start.sh"]'
-
 ## Pod scheduling preferences.
 ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 affinity: {}
-
 ## Node labels for pod assignment
 ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
 nodeSelector: {}
-
 ## Set toleration for scheduler
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
-
 ## Configure Container Security Context
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
@@ -42,7 +36,6 @@ tolerations: []
 containerSecurityContext:
   enabled: false
   runAsUser: 1001
-
 readinessProbe:
   enabled: false
   httpGet:
@@ -55,11 +48,9 @@ livenessProbe:
     path: /health
   initialDelaySeconds: 90
   periodSeconds: 15
-
 config:
   API_BASE_URL: http://testing-toolkit.local
   AUTH_ENABLED: "FALSE"
-
 ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
 ## e.g:
@@ -69,18 +60,16 @@ config:
 ##    imagePullPolicy: Always
 ##    command: ['sh', '-c', 'echo "hello world"']
 ##
-initContainers: [] # We want to disable init-containers as there is no need
-
+initContainers: []
+# We want to disable init-containers as there is no need
 ## @param master.podLabels Extra labels for pod(s)
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 ##
 podLabels: {}
-
 ## @param podAnnotations Additional custom annotations for pod(s)
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 ##
 podAnnotations: {}
-
 service:
   internalPort: 6060
   ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -93,17 +82,15 @@ service:
   ## e.g.:
   ## clusterIP: None
   ##
-  clusterIP:
-  ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
-  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
-  ##
-  loadBalancerIP:
-  ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
-  ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
-  ## e.g:
-  ## loadBalancerSourceRanges:
-  ##   - 10.10.10.0/24
-  ##
+  clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+##
+  loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+## e.g:
+## loadBalancerSourceRanges:
+##   - 10.10.10.0/24
+##
   loadBalancerSourceRanges: []
   ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
   ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
@@ -123,7 +110,6 @@ service:
   ##     timeoutSeconds: 300
   ##
   sessionAffinityConfig: {}
-
 ingress:
   enabled: true
   # Used to create an Ingress record.
@@ -133,29 +119,27 @@ ingress:
       port: 6060
       paths: ['/']
   annotations: {}
-    ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
-    # nginx.ingress.kubernetes.io/rewrite-target: '/'
-    # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
-    ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
-    # kubernetes.io/ingress.class: nginx
-    ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
-    # kubernetes.io/tls-acme: "true"
+  ## https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+  # nginx.ingress.kubernetes.io/rewrite-target: '/'
+  # nginx.ingress.kubernetes.io/rewrite-target: '/$2'
+  ## https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+  # kubernetes.io/ingress.class: nginx
+  ## https://kubernetes.github.io/ingress-nginx/user-guide/tls/#automated-certificate-management-with-kube-lego
+  # kubernetes.io/tls-acme: "true"
   tls: []
-    # Secrets must be manually created in the namespace.
-    # - secretName: chart-example-tls
-    #   hosts:
-    #     - chart-example.local
+  # Secrets must be manually created in the namespace.
+  # - secretName: chart-example-tls
+  #   hosts:
+  #     - chart-example.local
   className: "nginx"
-
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
-
+# We usually recommend not to specify default resources and to leave this as a conscious
+# choice for the user. This also increases chances charts run on environments with little
+# resources, such as Minikube. If you do want to specify resources, uncomment the following
+# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+# limits:
+#  cpu: 100m
+#  memory: 128Mi
+# requests:
+#  cpu: 100m
+#  memory: 128Mi

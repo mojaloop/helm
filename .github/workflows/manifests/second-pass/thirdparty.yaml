@@ -1,0 +1,67 @@
+name: thirdparty
+
+sources:
+  auth-svc:
+    kind: helmchart
+    spec:
+      url: file://./thirdparty
+      name: auth-svc
+  consent-oracle:
+    kind: helmchart
+    spec:
+      url: file://./thirdparty
+      name: consent-oracle
+  tp-api-svc:
+    kind: helmchart
+    spec:
+      url: file://./thirdparty
+      name: tp-api-svc
+  mojaloop-simulator:
+    kind: helmchart
+    spec:
+      url: file://./thirdparty
+      name: mojaloop-simulator
+
+conditions: {}
+
+targets:
+  auth-svc:
+    sourceid: auth-svc
+    kind: helmchart
+    spec:
+      name: thirdparty
+      file: Chart.yaml
+      key: $.dependencies[0].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  consent-oracle:
+    sourceid: consent-oracle
+    kind: helmchart
+    spec:
+      name: thirdparty
+      file: Chart.yaml
+      key: $.dependencies[1].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  tp-api-svc:
+    sourceid: tp-api-svc
+    kind: helmchart
+    spec:
+      name: thirdparty
+      file: Chart.yaml
+      key: $.dependencies[2].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  mojaloop-simulator:
+    sourceid: mojaloop-simulator
+    kind: helmchart
+    spec:
+      name: thirdparty
+      file: Chart.yaml
+      key: $.dependencies[3].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'

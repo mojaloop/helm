@@ -1,22 +1,17 @@
 # Default values for central-ledger.
 # This is a YAML-formatted file.
-
 # Declare global configurations
 global: {}
-
 # Declare variables to be passed into your templates.
-
 centralledger-service:
   # Default values for central-ledger.
   # This is a YAML-formatted file.
-
   # Declare variables to be passed into your templates.
   enabled: true
-
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.4.0
+    tag: v17.6.0
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -30,10 +25,8 @@ centralledger-service:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-
   replicaCount: 1
-  command: '["node", "src/api/index.js"]' 
-
+  command: '["node", "src/api/index.js"]'
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -42,46 +35,39 @@ centralledger-service:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - src/api/index.js
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
       internalPort: 9229
       port: 9229
-
   readinessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   livenessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
-
   ## Node labels for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   nodeSelector: {}
-
   ## Set toleration for scheduler
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
-
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
@@ -90,7 +76,6 @@ centralledger-service:
   containerSecurityContext:
     enabled: true
     runAsUser: 1001
-
   sidecar:
     enabled: false
     image:
@@ -119,7 +104,6 @@ centralledger-service:
       event_log_metadata_only: true
       log_level: info
       log_filter: 'error, warn, info'
-
   ## metric configuration for prometheus instrumentation
   metrics:
     ## flag to enable/disable the metrics end-points
@@ -129,19 +113,16 @@ centralledger-service:
       prefix: moja_
       defaultLabels:
         serviceName: central-service
-
   config:
     ## Forensic Logging sidecar
     # this is for Forensic Logging Sidecar
     forensicloggingsidecar_disabled: true
     forensicloggingsidecar_host: forensicloggingsidecar-ledger
     forensicloggingsidecar_port: 5678
-
     ## Error handling Configuration
     error_handling:
       include_cause_extension: false
       truncate_extensions: true
-
     ## DB Configuration
     # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
     db_type: 'mysql'
@@ -170,12 +151,10 @@ centralledger-service:
     db_reap_interval_millis: 1000
     db_create_retry_interval_millis: 200
     db_debug: false
-
     ## Hub Configuration
     hub_participant:
       id: 1
       name: Hub
-
     ## MongoDB Configuration for Object Store
     objstore_disabled: true
     mongo_host: 'cep-mongodb'
@@ -192,25 +171,21 @@ centralledger-service:
     #   name: cep-mongodb
     #   key: mongodb-passwords
     mongo_database: mlos
-
     ## Kafka Configuration
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: kafka
     kafka_port: 9092
     kafka_partitioner: 'murmur2_random'
-
     ## Log Configuration
     log_level: info
     log_filter: 'error, warn, info'
     log_transport: file
     ## Enable local logging of events being recorded
     log_events_locally_enabled: false
-
     ## Cache configuration
     cache_enabled: false
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
-
     ## Tracing Configuration
     event_trace_vendor: mojaloop
     event_log_filter: 'audit:*, log:warn, log:error'
@@ -221,7 +196,6 @@ centralledger-service:
     event_async_override: 'log,trace'
     event_trace_state_enabled: true
     event_traceid_per_vendor: false
-
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -288,7 +262,6 @@ centralledger-service:
       volumeMounts:
         - name: '{{ template "account-lookup-service-admin.fullname" . }}-config-volume'
           mountPath: /opt/app/config
-
   service:
     internalPort: 3001
     ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -306,18 +279,15 @@ centralledger-service:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
-    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      http: null
+      https: null ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
-    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
-    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
     ## loadBalancerSourceRanges:
@@ -342,7 +312,6 @@ centralledger-service:
     ##     timeoutSeconds: 300
     ##
     sessionAffinityConfig: {}
-
   ingress:
     enabled: true
     ## @param ingress.pathType Ingress path type
@@ -350,8 +319,7 @@ centralledger-service:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
+    apiVersion: null ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: central-ledger.local
     ## @param servicePort : port for the service
@@ -363,8 +331,7 @@ centralledger-service:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
     ##   - Use the `ingress.secrets` parameter to create this TLS secret
@@ -384,12 +351,11 @@ centralledger-service:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
-
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -401,18 +367,15 @@ centralledger-service:
   #  cpu: 100m
   #  memory: 128Mi
   resources: {}
-
 centralledger-handler-transfer-prepare:
   # Default values for central-ledger.
   # This is a YAML-formatted file.
-
   # Declare variables to be passed into your templates.
   enabled: true
-
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.4.0
+    tag: v17.6.0
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -426,10 +389,8 @@ centralledger-handler-transfer-prepare:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
-
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -438,7 +399,7 @@ centralledger-handler-transfer-prepare:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - src/handlers/index.js
       - handler
@@ -447,39 +408,32 @@ centralledger-handler-transfer-prepare:
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
       internalPort: 9229
       port: 9229
-
   readinessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   livenessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
-
   ## Node labels for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   nodeSelector: {}
-
   ## Set toleration for scheduler
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
-
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
@@ -488,7 +442,6 @@ centralledger-handler-transfer-prepare:
   containerSecurityContext:
     enabled: true
     runAsUser: 1001
-
   sidecar:
     enabled: true
     image:
@@ -517,7 +470,6 @@ centralledger-handler-transfer-prepare:
       event_log_metadata_only: true
       log_level: info
       log_filter: 'error, warn, info'
-
   ## metric configuration for prometheus instrumentation
   metrics:
     ## flag to enable/disable the metrics end-points
@@ -527,19 +479,16 @@ centralledger-handler-transfer-prepare:
       prefix: moja_
       defaultLabels:
         serviceName: central-handler-prepare
-
   config:
     ## Forensic Logging sidecar
     # this is for Forensic Logging Sidecar
     forensicloggingsidecar_disabled: true
     forensicloggingsidecar_host: forensicloggingsidecar-ledger
     forensicloggingsidecar_port: 5678
-
     ## Error handling Configuration
     error_handling:
       include_cause_extension: false
       truncate_extensions: true
-
     ## DB Configuration
     # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
     db_type: 'mysql'
@@ -568,12 +517,10 @@ centralledger-handler-transfer-prepare:
     db_reap_interval_millis: 1000
     db_create_retry_interval_millis: 200
     db_debug: false
-
     ## Hub Configuration
     hub_participant:
       id: 1
       name: Hub
-
     ## MongoDB Configuration for Object Store
     objstore_disabled: true
     mongo_host: 'cep-mongodb'
@@ -590,18 +537,15 @@ centralledger-handler-transfer-prepare:
     #   name: cep-mongodb
     #   key: mongodb-passwords
     mongo_database: mlos
-
     ## Kafka Configuration
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: kafka
     kafka_port: 9092
     kafka_partitioner: 'murmur2_random'
-
     ## Node Configuration
     log_level: 'info'
     log_filter: 'error, warn, info'
     log_transport: file
-
     ## Tracing Configuration
     event_trace_vendor: mojaloop
     event_log_filter: 'audit:*, log:warn, log:error'
@@ -612,18 +556,14 @@ centralledger-handler-transfer-prepare:
     event_async_override: 'log,trace'
     event_trace_state_enabled: true
     event_traceid_per_vendor: false
-
     ## Cache configuration
     cache_enabled: false
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
-
     ## Enable On-Us transfers
     enable_on_us_transfers: false
-
     ## Enable Batch Processing
     batch_processing_enabled: false
-
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -687,7 +627,6 @@ centralledger-handler-transfer-prepare:
           {{- end }}
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
-
   service:
     internalPort: 3001
     ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -705,18 +644,15 @@ centralledger-handler-transfer-prepare:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
-    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      http: null
+      https: null ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
-    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
-    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
     ## loadBalancerSourceRanges:
@@ -741,7 +677,6 @@ centralledger-handler-transfer-prepare:
     ##     timeoutSeconds: 300
     ##
     sessionAffinityConfig: {}
-
   ingress:
     enabled: true
     ## @param ingress.pathType Ingress path type
@@ -749,8 +684,7 @@ centralledger-handler-transfer-prepare:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
+    apiVersion: null ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: central-ledger-transfer-prepare.local
     ## @param servicePort : port for the service
@@ -762,8 +696,7 @@ centralledger-handler-transfer-prepare:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
     ##   - Use the `ingress.secrets` parameter to create this TLS secret
@@ -783,12 +716,11 @@ centralledger-handler-transfer-prepare:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
-
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -800,18 +732,15 @@ centralledger-handler-transfer-prepare:
   #  cpu: 100m
   #  memory: 128Mi
   resources: {}
-
 centralledger-handler-transfer-position:
   # Default values for central-ledger.
   # This is a YAML-formatted file.
-
   # Declare variables to be passed into your templates.
   enabled: true
-
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.4.0
+    tag: v17.6.0
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -825,10 +754,8 @@ centralledger-handler-transfer-position:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--position"]'
-
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -837,7 +764,7 @@ centralledger-handler-transfer-position:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - src/handlers/index.js
       - handler
@@ -846,39 +773,32 @@ centralledger-handler-transfer-position:
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
       internalPort: 9229
       port: 9229
-
   readinessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   livenessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
-
   ## Node labels for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   nodeSelector: {}
-
   ## Set toleration for scheduler
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
-
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
@@ -887,7 +807,6 @@ centralledger-handler-transfer-position:
   containerSecurityContext:
     enabled: true
     runAsUser: 1001
-
   sidecar:
     enabled: true
     image:
@@ -916,7 +835,6 @@ centralledger-handler-transfer-position:
       event_log_metadata_only: true
       log_level: info
       log_filter: 'error, warn, info'
-
   ## metric configuration for prometheus instrumentation
   metrics:
     ## flag to enable/disable the metrics end-points
@@ -926,19 +844,16 @@ centralledger-handler-transfer-position:
       prefix: moja_
       defaultLabels:
         serviceName: central-handler-position
-
   config:
     ## Forensic Logging sidecar
     # this is for Forensic Logging Sidecar
     forensicloggingsidecar_disabled: true
     forensicloggingsidecar_host: forensicloggingsidecar-ledger
     forensicloggingsidecar_port: 5678
-
     ## Error handling Configuration
     error_handling:
       include_cause_extension: false
       truncate_extensions: true
-
     ## DB Configuration
     # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
     db_type: 'mysql'
@@ -967,12 +882,10 @@ centralledger-handler-transfer-position:
     db_reap_interval_millis: 1000
     db_create_retry_interval_millis: 200
     db_debug: false
-
     ## Hub Configuration
     hub_participant:
       id: 1
       name: Hub
-
     ## MongoDB Configuration for Object Store
     objstore_disabled: true
     mongo_host: 'cep-mongodb'
@@ -989,18 +902,15 @@ centralledger-handler-transfer-position:
     #   name: cep-mongodb
     #   key: mongodb-passwords
     mongo_database: mlos
-
     ## Kafka Configuration
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: kafka
     kafka_port: 9092
     kafka_partitioner: 'murmur2_random'
-
     ## Node Configuration
     log_level: 'info'
     log_filter: 'error, warn, info'
     log_transport: file
-
     ## Tracing Configuration
     event_trace_vendor: mojaloop
     event_log_filter: 'audit:*, log:warn, log:error'
@@ -1011,12 +921,10 @@ centralledger-handler-transfer-position:
     event_async_override: 'log,trace'
     event_trace_state_enabled: true
     event_traceid_per_vendor: false
-
     ## Cache configuration
     cache_enabled: false
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
-
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -1080,7 +988,6 @@ centralledger-handler-transfer-position:
           {{- end }}
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
-
   service:
     internalPort: 3001
     ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -1098,18 +1005,15 @@ centralledger-handler-transfer-position:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
-    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      http: null
+      https: null ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
-    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
-    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
     ## loadBalancerSourceRanges:
@@ -1134,7 +1038,6 @@ centralledger-handler-transfer-position:
     ##     timeoutSeconds: 300
     ##
     sessionAffinityConfig: {}
-
   ingress:
     enabled: true
     ## @param ingress.pathType Ingress path type
@@ -1142,8 +1045,7 @@ centralledger-handler-transfer-position:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
+    apiVersion: null ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: central-ledger-transfer-position.local
     ## @param servicePort : port for the service
@@ -1155,8 +1057,7 @@ centralledger-handler-transfer-position:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
     ##   - Use the `ingress.secrets` parameter to create this TLS secret
@@ -1176,12 +1077,11 @@ centralledger-handler-transfer-position:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
-
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -1193,14 +1093,11 @@ centralledger-handler-transfer-position:
   #  cpu: 100m
   #  memory: 128Mi
   resources: {}
-
 centralledger-handler-transfer-position-batch:
   # Default values for central-ledger.
   # This is a YAML-formatted file.
-
   # Declare variables to be passed into your templates.
   enabled: false
-
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
@@ -1218,10 +1115,8 @@ centralledger-handler-transfer-position-batch:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--positionbatch"]'
-
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -1230,7 +1125,7 @@ centralledger-handler-transfer-position-batch:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - src/handlers/index.js
       - handler
@@ -1239,39 +1134,32 @@ centralledger-handler-transfer-position-batch:
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
       internalPort: 9229
       port: 9229
-
   readinessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   livenessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
-
   ## Node labels for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   nodeSelector: {}
-
   ## Set toleration for scheduler
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
-
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
@@ -1280,7 +1168,6 @@ centralledger-handler-transfer-position-batch:
   containerSecurityContext:
     enabled: true
     runAsUser: 1001
-
   sidecar:
     enabled: true
     image:
@@ -1309,7 +1196,6 @@ centralledger-handler-transfer-position-batch:
       event_log_metadata_only: true
       log_level: info
       log_filter: 'error, warn, info'
-
   ## metric configuration for prometheus instrumentation
   metrics:
     ## flag to enable/disable the metrics end-points
@@ -1319,19 +1205,16 @@ centralledger-handler-transfer-position-batch:
       prefix: moja_
       defaultLabels:
         serviceName: central-handler-position
-
   config:
     ## Forensic Logging sidecar
     # this is for Forensic Logging Sidecar
     forensicloggingsidecar_disabled: true
     forensicloggingsidecar_host: forensicloggingsidecar-ledger
     forensicloggingsidecar_port: 5678
-
     ## Error handling Configuration
     error_handling:
       include_cause_extension: false
       truncate_extensions: true
-
     ## DB Configuration
     # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
     db_type: 'mysql'
@@ -1360,12 +1243,10 @@ centralledger-handler-transfer-position-batch:
     db_reap_interval_millis: 1000
     db_create_retry_interval_millis: 200
     db_debug: false
-
     ## Hub Configuration
     hub_participant:
       id: 1
       name: Hub
-
     ## MongoDB Configuration for Object Store
     objstore_disabled: true
     mongo_host: 'cep-mongodb'
@@ -1382,19 +1263,16 @@ centralledger-handler-transfer-position-batch:
     #   name: cep-mongodb
     #   key: mongodb-passwords
     mongo_database: mlos
-
     ## Kafka Configuration
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: kafka
     kafka_port: 9092
     kafka_partitioner: 'murmur2_random'
     kafka_partition_assignment_strategy: 'cooperative-sticky'
-
     ## Node Configuration
     log_level: 'info'
     log_filter: 'error, warn, info'
     log_transport: file
-
     ## Tracing Configuration
     event_trace_vendor: mojaloop
     event_log_filter: 'audit:*, log:warn, log:error'
@@ -1405,18 +1283,15 @@ centralledger-handler-transfer-position-batch:
     event_async_override: 'log,trace'
     event_trace_state_enabled: true
     event_traceid_per_vendor: false
-
     ## Cache configuration
     cache_enabled: false
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
-
     ## Batch configuration
     # The batch size to be requested by the Kafka consumer.
     batch_size: 100
     # Maximum amount of time to wait for a messages to be received by consumer.
     batch_consume_timeout_in_ms: 10
-
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -1480,7 +1355,6 @@ centralledger-handler-transfer-position-batch:
           {{- end }}
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
-
   service:
     internalPort: 3001
     ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -1498,18 +1372,15 @@ centralledger-handler-transfer-position-batch:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
-    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      http: null
+      https: null ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
-    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
-    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
     ## loadBalancerSourceRanges:
@@ -1534,7 +1405,6 @@ centralledger-handler-transfer-position-batch:
     ##     timeoutSeconds: 300
     ##
     sessionAffinityConfig: {}
-
   ingress:
     enabled: true
     ## @param ingress.pathType Ingress path type
@@ -1542,8 +1412,7 @@ centralledger-handler-transfer-position-batch:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
+    apiVersion: null ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: central-ledger-transfer-position.local
     ## @param servicePort : port for the service
@@ -1555,8 +1424,7 @@ centralledger-handler-transfer-position-batch:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
     ##   - Use the `ingress.secrets` parameter to create this TLS secret
@@ -1576,12 +1444,11 @@ centralledger-handler-transfer-position-batch:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
-
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -1593,18 +1460,15 @@ centralledger-handler-transfer-position-batch:
   #  cpu: 100m
   #  memory: 128Mi
   resources: {}
-
 centralledger-handler-transfer-get:
   # Default values for central-ledger.
   # This is a YAML-formatted file.
-
   # Declare variables to be passed into your templates.
   enabled: true
-
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.4.0
+    tag: v17.6.0
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -1618,10 +1482,8 @@ centralledger-handler-transfer-get:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--get"]'
-
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -1630,7 +1492,7 @@ centralledger-handler-transfer-get:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - src/handlers/index.js
       - handler
@@ -1639,39 +1501,32 @@ centralledger-handler-transfer-get:
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
       internalPort: 9229
       port: 9229
-
   readinessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   livenessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
-
   ## Node labels for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   nodeSelector: {}
-
   ## Set toleration for scheduler
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
-
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
@@ -1680,7 +1535,6 @@ centralledger-handler-transfer-get:
   containerSecurityContext:
     enabled: true
     runAsUser: 1001
-
   sidecar:
     enabled: true
     image:
@@ -1709,7 +1563,6 @@ centralledger-handler-transfer-get:
       event_log_metadata_only: true
       log_level: info
       log_filter: 'error, warn, info'
-
   ## metric configuration for prometheus instrumentation
   metrics:
     ## flag to enable/disable the metrics end-points
@@ -1719,19 +1572,16 @@ centralledger-handler-transfer-get:
       prefix: moja_
       defaultLabels:
         serviceName: central-handler-get
-
   config:
     ## Forensic Logging sidecar
     # this is for Forensic Logging Sidecar
     forensicloggingsidecar_disabled: true
     forensicloggingsidecar_host: forensicloggingsidecar-ledger
     forensicloggingsidecar_port: 5678
-
     ## Error handling Configuration
     error_handling:
       include_cause_extension: false
       truncate_extensions: true
-
     ## DB Configuration
     # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
     db_type: 'mysql'
@@ -1760,12 +1610,10 @@ centralledger-handler-transfer-get:
     db_reap_interval_millis: 1000
     db_create_retry_interval_millis: 200
     db_debug: false
-
     ## Hub Configuration
     hub_participant:
       id: 1
       name: Hub
-
     ## MongoDB Configuration for Object Store
     objstore_disabled: true
     mongo_host: 'cep-mongodb'
@@ -1782,18 +1630,15 @@ centralledger-handler-transfer-get:
     #   name: cep-mongodb
     #   key: mongodb-passwords
     mongo_database: mlos
-
     ## Kafka Configuration
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: kafka
     kafka_port: 9092
     kafka_partitioner: 'murmur2_random'
-
     ## Node Configuration
     log_level: 'info'
     log_filter: 'error, warn, info'
     log_transport: file
-
     ## Condig for tracing
     event_trace_vendor: mojaloop
     event_log_filter: 'audit:*, log:warn, log:error'
@@ -1804,12 +1649,10 @@ centralledger-handler-transfer-get:
     event_async_override: 'log,trace'
     event_trace_state_enabled: true
     event_traceid_per_vendor: false
-
     ## Cache configuration
     cache_enabled: false
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
-
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -1873,7 +1716,6 @@ centralledger-handler-transfer-get:
           {{- end }}
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
-
   service:
     internalPort: 3001
     ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -1891,18 +1733,15 @@ centralledger-handler-transfer-get:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
-    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      http: null
+      https: null ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
-    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
-    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
     ## loadBalancerSourceRanges:
@@ -1927,7 +1766,6 @@ centralledger-handler-transfer-get:
     ##     timeoutSeconds: 300
     ##
     sessionAffinityConfig: {}
-
   ingress:
     enabled: true
     ## @param ingress.pathType Ingress path type
@@ -1935,8 +1773,7 @@ centralledger-handler-transfer-get:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
+    apiVersion: null ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: central-ledger-transfer-get.local
     ## @param servicePort : port for the service
@@ -1948,8 +1785,7 @@ centralledger-handler-transfer-get:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
     ##   - Use the `ingress.secrets` parameter to create this TLS secret
@@ -1969,12 +1805,11 @@ centralledger-handler-transfer-get:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
-
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -1986,18 +1821,15 @@ centralledger-handler-transfer-get:
   #  cpu: 100m
   #  memory: 128Mi
   resources: {}
-
 centralledger-handler-transfer-fulfil:
   # Default values for central-ledger.
   # This is a YAML-formatted file.
-
   # Declare variables to be passed into your templates.
   enabled: true
-
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.4.0
+    tag: v17.6.0
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2011,10 +1843,8 @@ centralledger-handler-transfer-fulfil:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
-
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -2023,7 +1853,7 @@ centralledger-handler-transfer-fulfil:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - src/handlers/index.js
       - handler
@@ -2032,39 +1862,32 @@ centralledger-handler-transfer-fulfil:
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
       internalPort: 9229
       port: 9229
-
   readinessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   livenessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
-
   ## Node labels for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   nodeSelector: {}
-
   ## Set toleration for scheduler
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
-
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
@@ -2073,7 +1896,6 @@ centralledger-handler-transfer-fulfil:
   containerSecurityContext:
     enabled: true
     runAsUser: 1001
-
   sidecar:
     enabled: false
     image:
@@ -2102,7 +1924,6 @@ centralledger-handler-transfer-fulfil:
       event_log_metadata_only: true
       log_level: info
       log_filter: 'error, warn, info'
-
   ## metric configuration for prometheus instrumentation
   metrics:
     ## flag to enable/disable the metrics end-points
@@ -2112,19 +1933,16 @@ centralledger-handler-transfer-fulfil:
       prefix: moja_
       defaultLabels:
         serviceName: central-handler-fulfil
-
   config:
     ## Forensic Logging sidecar
     # this is for Forensic Logging Sidecar
     forensicloggingsidecar_disabled: true
     forensicloggingsidecar_host: forensicloggingsidecar-ledger
     forensicloggingsidecar_port: 5678
-
     ## Error handling Configuration
     error_handling:
       include_cause_extension: false
       truncate_extensions: true
-
     ## DB Configuration
     # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
     db_type: 'mysql'
@@ -2153,12 +1971,10 @@ centralledger-handler-transfer-fulfil:
     db_reap_interval_millis: 1000
     db_create_retry_interval_millis: 200
     db_debug: false
-
     ## Hub Configuration
     hub_participant:
       id: 1
       name: Hub
-
     ## MongoDB Configuration for Object Store
     objstore_disabled: true
     mongo_host: 'cep-mongodb'
@@ -2175,18 +1991,15 @@ centralledger-handler-transfer-fulfil:
     #   name: cep-mongodb
     #   key: mongodb-passwords
     mongo_database: mlos
-
     ## Kafka Configuration
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: kafka
     kafka_port: 9092
     kafka_partitioner: 'murmur2_random'
-
     ## Node Configuration
     log_level: 'info'
     log_filter: 'error, warn, info'
     log_transport: file
-
     ## Tracing Configuration
     event_trace_vendor: mojaloop
     event_log_filter: 'audit:*, log:warn, log:error'
@@ -2197,12 +2010,10 @@ centralledger-handler-transfer-fulfil:
     event_async_override: 'log,trace'
     event_trace_state_enabled: true
     event_traceid_per_vendor: false
-
     ## Cache configuration
     cache_enabled: false
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
-
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -2266,7 +2077,6 @@ centralledger-handler-transfer-fulfil:
           {{- end }}
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
-
   service:
     internalPort: 3001
     ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -2284,18 +2094,15 @@ centralledger-handler-transfer-fulfil:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
-    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      http: null
+      https: null ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
-    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
-    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
     ## loadBalancerSourceRanges:
@@ -2320,7 +2127,6 @@ centralledger-handler-transfer-fulfil:
     ##     timeoutSeconds: 300
     ##
     sessionAffinityConfig: {}
-
   ingress:
     enabled: true
     ## @param ingress.pathType Ingress path type
@@ -2328,8 +2134,7 @@ centralledger-handler-transfer-fulfil:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
+    apiVersion: null ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: central-ledger-transfer-fulfil.local
     ## @param servicePort : port for the service
@@ -2341,8 +2146,7 @@ centralledger-handler-transfer-fulfil:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
     ##   - Use the `ingress.secrets` parameter to create this TLS secret
@@ -2362,12 +2166,11 @@ centralledger-handler-transfer-fulfil:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
-
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -2379,18 +2182,15 @@ centralledger-handler-transfer-fulfil:
   #  cpu: 100m
   #  memory: 128Mi
   resources: {}
-
 centralledger-handler-timeout:
   # Default values for central-ledger.
   # This is a YAML-formatted file.
-
   # Declare variables to be passed into your templates.
   enabled: true
-
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.4.0
+    tag: v17.6.0
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2404,10 +2204,8 @@ centralledger-handler-timeout:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
-
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -2416,7 +2214,7 @@ centralledger-handler-timeout:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - src/handlers/index.js
       - handler
@@ -2425,39 +2223,32 @@ centralledger-handler-timeout:
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
       internalPort: 9229
       port: 9229
-
   readinessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   livenessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
-
   ## Node labels for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   nodeSelector: {}
-
   ## Set toleration for scheduler
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
-
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
@@ -2466,7 +2257,6 @@ centralledger-handler-timeout:
   containerSecurityContext:
     enabled: true
     runAsUser: 1001
-
   sidecar:
     enabled: true
     image:
@@ -2495,7 +2285,6 @@ centralledger-handler-timeout:
       event_log_metadata_only: true
       log_level: info
       log_filter: 'error, warn, info'
-
   ## metric configuration for prometheus instrumentation
   metrics:
     ## flag to enable/disable the metrics end-points
@@ -2505,20 +2294,17 @@ centralledger-handler-timeout:
       prefix: moja_
       defaultLabels:
         serviceName: central-handler-timeout
-
   config:
     ## Forensic Logging sidecar
     # this is for Forensic Logging Sidecar
     forensicloggingsidecar_disabled: true
     forensicloggingsidecar_host: forensicloggingsidecar-ledger
     forensicloggingsidecar_port: 5678
-
     ## Error handling Configuration
     error_handling:
       include_cause_extension: false
       truncate_extensions: true
-
-        ## DB Configuration
+      ## DB Configuration
     # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
     db_type: 'mysql'
     # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
@@ -2546,17 +2332,14 @@ centralledger-handler-timeout:
     db_reap_interval_millis: 1000
     db_create_retry_interval_millis: 200
     db_debug: false
-
     ## Hub Configuration
     hub_participant:
       id: 1
       name: Hub
-
     ## Timeout Configuration
     timeout:
       expiration: '*/15 * * * * *'
       timezone: UTC
-
     ## MongoDB Configuration for Object Store
     objstore_disabled: true
     mongo_host: 'cep-mongodb'
@@ -2573,18 +2356,15 @@ centralledger-handler-timeout:
     #   name: cep-mongodb
     #   key: mongodb-passwords
     mongo_database: mlos
-
     ## Kafka Configuration
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: kafka
     kafka_port: 9092
     kafka_partitioner: 'murmur2_random'
-
     ## Log Configuration
     log_level: info
     log_filter: 'error, warn, info'
     log_transport: file
-
     ## Tracing Configuration
     event_trace_vendor: mojaloop
     event_log_filter: 'audit:*, log:warn, log:error'
@@ -2595,12 +2375,10 @@ centralledger-handler-timeout:
     event_async_override: 'log,trace'
     event_trace_state_enabled: true
     event_traceid_per_vendor: false
-
     ## Cache configuration
     cache_enabled: false
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
-
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -2664,7 +2442,6 @@ centralledger-handler-timeout:
           {{- end }}
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
-
   service:
     internalPort: 3001
     ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -2682,18 +2459,15 @@ centralledger-handler-timeout:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
-    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      http: null
+      https: null ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
-    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
-    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
     ## loadBalancerSourceRanges:
@@ -2718,7 +2492,6 @@ centralledger-handler-timeout:
     ##     timeoutSeconds: 300
     ##
     sessionAffinityConfig: {}
-
   ingress:
     enabled: true
     ## @param ingress.pathType Ingress path type
@@ -2726,8 +2499,7 @@ centralledger-handler-timeout:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
+    apiVersion: null ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: central-ledger-timeout.local
     ## @param servicePort : port for the service
@@ -2739,8 +2511,7 @@ centralledger-handler-timeout:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
     ##   - Use the `ingress.secrets` parameter to create this TLS secret
@@ -2760,12 +2531,11 @@ centralledger-handler-timeout:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
-
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -2777,18 +2547,15 @@ centralledger-handler-timeout:
   #  cpu: 100m
   #  memory: 128Mi
   resources: {}
-
 centralledger-handler-admin-transfer:
   # Default values for central-ledger.
   # This is a YAML-formatted file.
-
   # Declare variables to be passed into your templates.
   enabled: true
-
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.4.0
+    tag: v17.6.0
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2802,10 +2569,8 @@ centralledger-handler-admin-transfer:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--admin"]'
-
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -2814,7 +2579,7 @@ centralledger-handler-admin-transfer:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - src/handlers/index.js
       - handler
@@ -2823,39 +2588,32 @@ centralledger-handler-admin-transfer:
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
       internalPort: 9229
       port: 9229
-
   readinessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   livenessProbe:
     enabled: true
     httpGet:
       path: /health
     initialDelaySeconds: 60
     periodSeconds: 15
-
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
-
   ## Node labels for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   nodeSelector: {}
-
   ## Set toleration for scheduler
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
-
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
@@ -2864,7 +2622,6 @@ centralledger-handler-admin-transfer:
   containerSecurityContext:
     enabled: true
     runAsUser: 1001
-
   sidecar:
     enabled: false
     image:
@@ -2893,7 +2650,6 @@ centralledger-handler-admin-transfer:
       event_log_metadata_only: true
       log_level: info
       log_filter: 'error, warn, info'
-
   ## metric configuration for prometheus instrumentation
   metrics:
     ## flag to enable/disable the metrics end-points
@@ -2903,19 +2659,16 @@ centralledger-handler-admin-transfer:
       prefix: moja_
       defaultLabels:
         serviceName: central-handler-admin-transfer
-
   config:
     ## Forensic Logging sidecar
     # this is for Forensic Logging Sidecar
     forensicloggingsidecar_disabled: true
     forensicloggingsidecar_host: forensicloggingsidecar-ledger
     forensicloggingsidecar_port: 5678
-
     ## Error handling Configuration
     error_handling:
       include_cause_extension: false
       truncate_extensions: true
-
     ## DB Configuration
     # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
     db_type: 'mysql'
@@ -2944,12 +2697,10 @@ centralledger-handler-admin-transfer:
     db_reap_interval_millis: 1000
     db_create_retry_interval_millis: 200
     db_debug: false
-
     ## Hub Configuration
     hub_participant:
       id: 1
       name: Hub
-
     ## MongoDB Configuration for Object Store
     objstore_disabled: true
     mongo_host: 'cep-mongodb'
@@ -2966,18 +2717,15 @@ centralledger-handler-admin-transfer:
     #   name: cep-mongodb
     #   key: mongodb-passwords
     mongo_database: mlos
-
     ## Kafka Configuration
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: kafka
     kafka_port: 9092
     kafka_partitioner: 'murmur2_random'
-
     ## Log Configuration
     log_level: info
     log_filter: 'error, warn, info'
     log_transport: file
-
     ## Tracing Configuration
     event_trace_vendor: mojaloop
     event_log_filter: 'audit:*, log:warn, log:error'
@@ -2988,12 +2736,10 @@ centralledger-handler-admin-transfer:
     event_async_override: 'log,trace'
     event_trace_state_enabled: true
     event_traceid_per_vendor: false
-
     ## Cache configuration
     cache_enabled: false
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
-
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -3057,7 +2803,6 @@ centralledger-handler-admin-transfer:
           {{- end }}
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
-
   service:
     internalPort: 3001
     ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -3075,18 +2820,15 @@ centralledger-handler-admin-transfer:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
-    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      http: null
+      https: null ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
-    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
-    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
     ## loadBalancerSourceRanges:
@@ -3111,7 +2853,6 @@ centralledger-handler-admin-transfer:
     ##     timeoutSeconds: 300
     ##
     sessionAffinityConfig: {}
-
   ingress:
     enabled: true
     ## @param ingress.pathType Ingress path type
@@ -3119,8 +2860,7 @@ centralledger-handler-admin-transfer:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
+    apiVersion: null ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: central-ledger-transfer-prepare.local
     ## @param servicePort : port for the service
@@ -3132,8 +2872,7 @@ centralledger-handler-admin-transfer:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
     ##   - Use the `ingress.secrets` parameter to create this TLS secret
@@ -3153,12 +2892,11 @@ centralledger-handler-admin-transfer:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
-
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following

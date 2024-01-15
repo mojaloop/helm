@@ -3,11 +3,10 @@ account-lookup-service:
   # Default values for account-lookup-service.
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
-
   image:
     registry: docker.io
     repository: mojaloop/account-lookup-service
-    tag: v15.0.0
+    tag: v15.2.1
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -21,25 +20,19 @@ account-lookup-service:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-
   replicaCount: 1
   command: '["node", "src/index.js", "server", "--api"]'
-
   nameOverride: ""
   fullnameOverride: ""
-
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
-
   ## Node labels for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   nodeSelector: {}
-
   ## Set toleration for scheduler
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
-
   ## metric configuration for prometheus instrumentation
   metrics:
     ## flag to enable/disable the metrics end-points
@@ -49,7 +42,6 @@ account-lookup-service:
       prefix: moja_
       defaultLabels:
         serviceName: account-lookup-service
-
   config:
     ## Central-Ledger config
     central_services_host: '$release_name-centralledger-service'
@@ -57,15 +49,21 @@ account-lookup-service:
     # Log config
     log_level: info
     log_transport: file
-
     error_handling:
       include_cause_extension: false
       truncate_extensions: true
-
-    end_point_cache:
+    central_shared_end_point_cache:
       expiresIn: 180000
       generateTimeout: 30000
-
+      getDecoratedValue: true
+    central_shared_participant_cache:
+      expiresIn: 61000
+      generateTimeout: 30000
+      getDecoratedValue: true
+    general_cache:
+      enabled: false
+      maxByteSize: 10000000
+      expiresIn: 61000
     ## DB Configuration
     db_type: mysql
     db_driver: mysql
@@ -92,7 +90,6 @@ account-lookup-service:
     db_reap_interval_millis: 1000
     db_create_retry_interval_millis: 200
     db_debug: false
-
     # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
     # and for generating requests/callbacks from the Switch itself (DEFAULT value)
     protocol_versions: |
@@ -114,30 +111,25 @@ account-lookup-service:
               ]
           }
       }
-
     display_routes: true
     run_migrations: false
-
     endpointSecurity:
       jwsSign: false
       fspiopSourceSigningName: switch
-      jwsSigningKey:
-        # To generate this key:
-        # Private:
-        # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
-        # Public:
-        # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-        # Should look like:
-        # -----BEGIN RSA PRIVATE KEY-----
-        # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
-        # ..
-        # ..
-        # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
-        # -----END RSA PRIVATE KEY-----
-
+      jwsSigningKey: null # To generate this key:
+    # Private:
+    # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+    # Public:
+    # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+    # Should look like:
+    # -----BEGIN RSA PRIVATE KEY-----
+    # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+    # ..
+    # ..
+    # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+    # -----END RSA PRIVATE KEY-----
     # Thirdparty API Config
     featureEnableExtendedPartyIdType: false
-
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -182,7 +174,6 @@ account-lookup-service:
           {{- end }}
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
-
   service:
     internalPort: 4002
     ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -200,18 +191,15 @@ account-lookup-service:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
-    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      http: null
+      https: null ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
-    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
-    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
     ## loadBalancerSourceRanges:
@@ -236,7 +224,6 @@ account-lookup-service:
     ##     timeoutSeconds: 300
     ##
     sessionAffinityConfig: {}
-
   ingress:
     enabled: true
     ## @param ingress.pathType Ingress path type
@@ -244,8 +231,7 @@ account-lookup-service:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
+    apiVersion: null ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: account-lookup-service.local
     ## @param servicePort : port for the service
@@ -257,8 +243,7 @@ account-lookup-service:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
     ##   - Use the `ingress.secrets` parameter to create this TLS secret
@@ -278,39 +263,35 @@ account-lookup-service:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
   ##
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
-
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
-    #  memory: 128Mi
-
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
 account-lookup-service-admin:
   enabled: true
-
   # Default values for account-lookup-service.
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
-
   image:
     registry: docker.io
     repository: mojaloop/account-lookup-service
-    tag: v15.0.0
+    tag: v15.2.1
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -324,25 +305,19 @@ account-lookup-service-admin:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-
   replicaCount: 1
   command: '["node", "src/index.js", "server", "--admin"]'
-
   nameOverride: ""
   fullnameOverride: ""
-
   ## Pod scheduling preferences.
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
-
   ## Node labels for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   nodeSelector: {}
-
   ## Set toleration for scheduler
   ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
-
   ## metric configuration for prometheus instrumentation
   metrics:
     ## flag to enable/disable the metrics end-points
@@ -352,22 +327,27 @@ account-lookup-service-admin:
       prefix: moja_
       defaultLabels:
         serviceName: account-lookup-service-admin
-
   config:
     ## Central-Ledger config
     central_services_host: '$release_name-centralledger-service'
     central_services_port: 80
-
     error_handling:
       include_cause_extension: false
       truncate_extensions: true
-
-    end_point_cache:
+    central_shared_end_point_cache:
       expiresIn: 180000
       generateTimeout: 30000
-
+      getDecoratedValue: true
+    central_shared_participant_cache:
+      expiresIn: 61000
+      generateTimeout: 30000
+      getDecoratedValue: true
+    general_cache:
+      enabled: false
+      maxByteSize: 10000000
+      expiresIn: 61000
     ## DB Configuration
-    db_type: mysql    
+    db_type: mysql
     db_driver: mysql
     db_host: mysqldb
     db_port: 3306
@@ -392,7 +372,6 @@ account-lookup-service-admin:
     db_reap_interval_millis: 1000
     db_create_retry_interval_millis: 200
     db_debug: false
-
     # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
     # and for generating requests/callbacks from the Switch itself (DEFAULT value)
     protocol_versions: |
@@ -414,34 +393,28 @@ account-lookup-service-admin:
               ]
           }
       }
-
     display_routes: true
     run_migrations: false
-
     endpointSecurity:
       jwsSign: false
       fspiopSourceSigningName: switch
-      jwsSigningKey:
-        # To generate this key:
-        # Private:
-        # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
-        # Public:
-        # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-        # Should look like:
-        # -----BEGIN RSA PRIVATE KEY-----
-        # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
-        # ..
-        # ..
-        # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
-        # -----END RSA PRIVATE KEY-----
-
+      jwsSigningKey: null # To generate this key:
+    # Private:
+    # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+    # Public:
+    # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+    # Should look like:
+    # -----BEGIN RSA PRIVATE KEY-----
+    # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+    # ..
+    # ..
+    # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+    # -----END RSA PRIVATE KEY-----
     # Log config
     log_level: info
     log_transport: file
-
     # Thirdparty API Config
     featureEnableExtendedPartyIdType: false
-
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -508,7 +481,6 @@ account-lookup-service-admin:
       volumeMounts:
         - name: '{{ template "account-lookup-service-admin.fullname" . }}-config-volume'
           mountPath: /opt/app/config
-
   service:
     internalPort: 4001
     ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -526,18 +498,15 @@ account-lookup-service-admin:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
-    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      http: null
+      https: null ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
-    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
-    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
     ## loadBalancerSourceRanges:
@@ -562,7 +531,6 @@ account-lookup-service-admin:
     ##     timeoutSeconds: 300
     ##
     sessionAffinityConfig: {}
-
   ingress:
     enabled: true
     ## @param ingress.pathType Ingress path type
@@ -570,8 +538,7 @@ account-lookup-service-admin:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
+    apiVersion: null ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: account-lookup-service-admin.local
     ## @param servicePort : port for the service
@@ -583,8 +550,7 @@ account-lookup-service-admin:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
     ##   - Use the `ingress.secrets` parameter to create this TLS secret
@@ -604,34 +570,32 @@ account-lookup-service-admin:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
   ##
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
-
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
-    #  memory: 128Mi
-
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
 als-oracle-pathfinder:
   enabled: false
   # Declare variables to be passed into your templates.
   image:
     repository: mojaloop/als-oracle-pathfinder
-    tag: v12.0.0
+    tag: v12.1.0
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -645,10 +609,8 @@ als-oracle-pathfinder:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-
   replicaCount: 1
   command: '["node", "/opt/app/src/index.js"]'
-
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -657,34 +619,30 @@ als-oracle-pathfinder:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - /opt/app/src/index.js
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
       internalPort: 9229
       port: 9229
-
   readinessProbe:
     enabled: true
     httpGet:
       path: /
     initialDelaySeconds: 45
     periodSeconds: 15
-
   livenessProbe:
     enabled: true
     httpGet:
       path: /
     initialDelaySeconds: 45
     periodSeconds: 15
-
   config:
     db:
       type: 'mysql'
@@ -720,7 +678,6 @@ als-oracle-pathfinder:
         #   name: mysqldb
         #   key: mysql-password
     log_level: 'info'
-
     pathfinder:
       # Example host IP to be replaced by valid IP
       host: 'localhost'
@@ -834,7 +791,6 @@ als-oracle-pathfinder:
         # rejectUnauthorized is true, as Neustar's certificate doesn't seem to have been signed by any
         # certs in the Mozilla bundle, which is used by Node as default.
         intermediate_cert_path: '/opt/app/secrets/pathfinder_intermediate_cert.pem'
-
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -974,14 +930,11 @@ als-oracle-pathfinder:
           value: '{{ .Values.config.db.account_lookup.database }}'
         - name: SERVICE_NAME
           value: '{{ include "als-oracle-pathfinder.name" . }}'
-
   service:
     type: ClusterIP
     name: http-api
     port: 80
-
     annotations: {}
-
     # This allows one to point the service to an external backend.
     # This is useful for local development where one wishes to hijack
     # the communication from the service to the node layer and point
@@ -994,7 +947,6 @@ als-oracle-pathfinder:
         provisioning:
           name: http-api
           externalPort: 3000
-
   ingress:
     enabled: true
     ## @param ingress.pathType Ingress path type
@@ -1002,8 +954,7 @@ als-oracle-pathfinder:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
+    apiVersion: null ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: als-oracle-pathfinder.local
     ## @param servicePort : port for the service
@@ -1015,8 +966,7 @@ als-oracle-pathfinder:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
     ##   - Use the `ingress.secrets` parameter to create this TLS secret
@@ -1036,22 +986,20 @@ als-oracle-pathfinder:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
   ##
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
   #  memory: 128Mi
-
-  
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
