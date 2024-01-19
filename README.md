@@ -55,7 +55,7 @@
     helm repo add codecentric https://codecentric.github.io/helm-charts
     helm repo add bitnami https://charts.bitnami.com/bitnami
     helm repo add mojaloop-charts https://mojaloop.github.io/charts/repo 
-    helm repo add redpanda-console https://packages.vectorized.io/public/console/helm/charts/
+    helm repo add redpanda https://charts.redpanda.com
     ```
 
 ### Configure remote Mojaloop Helm repo on your Helm Client
