@@ -1,0 +1,38 @@
+name: als-oracle-pathfinder
+
+sources:
+  als-oracle-pathfinder:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: als-oracle-pathfinder
+  common:
+    kind: helmchart
+    spec: 
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+  
+conditions:
+  docker-als-oracle-pathfinder:
+    sourceid: als-oracle-pathfinder
+    kind: dockerimage
+    spec:
+      image: mojaloop/als-oracle-pathfinder
+
+targets:
+  als-oracle-pathfinder:
+    sourceid: als-oracle-pathfinder
+    kind: helmchart
+    spec:
+      name: als-oracle-pathfinder
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: als-oracle-pathfinder
+      file: Chart.yaml
+      key: $.dependencies[0].version

@@ -1,0 +1,46 @@
+name: mojaloop
+
+sources:
+  ml-testing-toolkit-test-cases:
+    kind: githubrelease
+    spec:
+    #   owner: mojaloop
+      owner: oderayi
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: testing-toolkit-test-cases
+  ml-testing-toolkit-test-cases-trimmed:
+    kind: githubrelease
+    spec:
+      #   owner: mojaloop
+      owner: oderayi
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: testing-toolkit-test-cases
+    transformers:
+      - trimprefix: v
+
+targets:
+  ml-testing-toolkit--ml-testing-toolkit-backend--config_files:
+    sourceid: ml-testing-toolkit-test-cases
+    kind: file
+    spec:
+      file: mojaloop/values.yaml
+      # matches e.g. https://github.com/mojaloop/testing-toolkit-test-cases/raw/v15.3.0-snapshot.1 (with or without the snapshot version)
+      matchpattern: '(https://github.com/mojaloop/testing-toolkit-test-cases/raw)/(v[\d\.]+)(-snapshot(\.\d+)?)?'
+      replacepattern: '$1/{{ source "ml-testing-toolkit-test-cases" }}'
+  ml-testing-toolkit--ml-ttk-posthook-setup--config-zip:
+    sourceid: ml-testing-toolkit-test-cases
+    kind: file
+    spec:
+      file: mojaloop/values.yaml
+      # matches e.g. https://github.com/mojaloop/testing-toolkit-test-cases/archive/v15.3.0-snapshot.1.zip (with or without the snapshot version)
+      matchpattern: '(https://github.com/mojaloop/testing-toolkit-test-cases/archive)/(v[\d\.]+)(-snapshot(\.\d+)?)?(\.zip)'
+      replacepattern: '$1/{{ source "ml-testing-toolkit-test-cases" }}$5'
+  ml-testing-toolkit--config-collections:
+    name: bump test-cases version
+    sourceid: ml-testing-toolkit-test-cases-trimmed
+    kind: file
+    spec:
+      file: mojaloop/values.yaml
+      matchpattern: '(testing-toolkit-test-cases)-([\d\.]+)(-snapshot(\.\d+)?)?'
+      replacepattern: '$1-{{ source "ml-testing-toolkit-test-cases-trimmed" }}'
+ 
