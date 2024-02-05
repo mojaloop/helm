@@ -1242,177 +1242,90 @@ account-lookup-service:
       # requests:
 
 quoting-service:
-  enabled: true
-
-  # Declare variables to be passed into your templates.
-  image:
-    registry: docker.io
-    repository: mojaloop/quoting-service
-    tag: v15.5.0
-    ## Specify a imagePullPolicy
-    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    ##
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    ##
-    pullSecrets: []
-
-  replicaCount: 1
-  command: '["node", "src/index.js"]'
-
-  readinessProbe:
+  quoting-service:
     enabled: true
-    httpGet:
-      path: /health
-    initialDelaySeconds: 60
-    periodSeconds: 15
 
-  livenessProbe:
-    enabled: true
-    httpGet:
-      path: /health
-    initialDelaySeconds: 60
-    periodSeconds: 15
-
-  config:
-
-    # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
-    # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-    protocol_versions: | 
-      {
-        "CONTENT": {
-          "DEFAULT": "1.1",
-          "VALIDATELIST": [
-            "1",
-            "1.0",
-            "1.1"
-          ]
-        },
-        "ACCEPT": {
-          "DEFAULT": "1",
-          "VALIDATELIST": [
-            "1",
-            "1.0",
-            "1.1"
-          ]
-        }
-      }
-
-    ## DB Configuration
-    # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
-    db_type: 'mysql'
-    # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-    db_driver: 'mysql'
-    db_host: *CL_DB_HOST
-    db_port: *CL_DB_PORT
-    db_user: *CL_DB_USER
-    ## Secret-Management
-    ### Set this if you are using a clear password configured in the config section
-    # db_password: *CL_DB_PASSWORD
-    ### Configure this if you want to use a secret. Note, this will override the db_password,
-    ### Use the next line if you do wish to use the db_password value instead.
-    # db_secret:
-    ### Example config for an existing secret
-    db_secret:
-      name: *CL_DB_SECRET_NAME
-      key: *CL_DB_SECRET_KEY
-    db_database: *CL_DB_NAME
-    db_connection_pool_min: 10
-    db_connection_pool_max: 30
-    db_acquire_timeout_millis: 30000
-    db_create_timeout_millis: 30000
-    db_destroy_timeout_millis: 5000
-    db_idle_timeout_millis: 30000
-    db_reap_interval_millis: 1000
-    db_create_retry_interval_millis: 200
-    db_debug: false
-    simple_routing_mode_enabled: true
-    log_level: info
-    log_transport: file
-
-    # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
-    # Any combination of: `log,audit,trace`
-    event_async_override: 'log,trace'
-
-    ## Kafka Configuration (used for sidecar)
-    # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-    kafka_host: '$release_name-kafka'
-    kafka_port: 9092
-
-    error_handling:
-      include_cause_extension: false
-      truncate_extensions: true
-
-    endpointSecurity:
-      jwsSign: true
-      fspiopSourceSigningName: 'switch'
-      # jwsSigningKey:
-        # To generate this key:
-        # Private:
-        # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
-        # Public:
-        # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-        # Should look like:
-        # -----BEGIN RSA PRIVATE KEY-----
-        # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
-        # ..
-        # ..
-        # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
-        # -----END RSA PRIVATE KEY-----
-      # The following is an example key and shouldn't be used in production
-      jwsSigningKey: |-
-        -----BEGIN PRIVATE KEY-----
-        MIIEugIBADANBgkqhkiG9w0BAQEFAASCBKQwggSgAgEAAoIBAQDuB5HuHRH5BqI/
-          VAC/ixm6lz8kJmigIB5jMxLrhB9cgqM+pb0O+is88VRHdxtw8eKG3nvrZYy/4nsJ
-          z32qo4sOIMqHWTlZgbURVK4FAUEZ/qn63UnXJ1YVqT4UGg31BBj2c1JdlxG2t4JV
-          DvzGrI2/ia/t4gYZCWrQz6a8OClBIaXu2t6EGFnysyS+1YDWtNIHO+z0lvAY9oad
-          5MZPHN51o04eIoLO0tPfkz0+NDs4ECwUWuFAg8yo1hxnvSoERiCAwEbFgq2wDe1+
-          oBhOpusd4VastD/TEqO8RhrwTodddOMKzapJPrQJuvTkrpkmkPOGE8DgIVHsULLR
-          UYEMKvTVAgMBAAECgf94Meq77xrcFg8sSqe5eNHYP39tvaWyqE7mY/slvpNDH5Pl
-          D/p21akS156E32BEJuYPk/TLiI2kMWjnvbHvNgr9tq8x3ToyTjtrg5clq8Hr1Ozo
-          FnFiqkVHMFPFPQZEVU64CQPA33DixuWjMWS3YINfCAinErBry0PiNZGmuFi1K/wy
-          e1z2F9WfG3IEBEe3NaeXwN55ZPJve0LtneJy3YqNwMg2FpPKBRHFV4lKTaU/hqhC
-          NK6HQoEXN4Y9AQHn53Fl8n0iNO3qx0Tb7EuGNFmZ2xTlpDKAp8M+BA5Qm5YDkbd6
-          OoxbGj2YxZncbG+RsvICtVMLqIytubvYREY9WGkCgYEA+K64xhJzWV3cGc8/90ko
-          TryGMBj1ly5TNa1YyOQxl5z4Glc0aI8a+1vJGEAA+c/OEhMR8MRn3+QfV2LJOI5X
-          V8Zo2Ger6Ln99LBddTh2HXL3M60cMgs8MYGuJ75g5R/UHnJBLo7NFyVddCOMT3hc
-          AYSDN3XCw9ycqTw2/mJHB9kCgYEA9QiaCfTtnXdjMqLeYbp2uQEyyO6IZs956ym7
-          sEQMwx/3wnlE9eiJ6iQxZfddkfOCyV/4MMAlYfpTBQFg7Cwb32Xrv3Ezy0HfZrnt
-          5Nj4SVQWuOXJhdfC9dmTF+cvBeP+vC6PyDbikxdCo9+05chxS7I3MLxCue4qxy0C
-          QfQIE10CgYA+kHacHng2u45sT9/f7t/dL0DzSNRAvL7iekIkCIURh8RDnDzrMVWw
-          d18YYsHcF5PYqEOTN1aK1XGtIoVNXUJMKvaluy9c1a42qUhZ/WJ59jqLHbpCPOFf
-          8yhFh3gJLQDIyCXt+K9Qa24fkfHy7Gz5VMVOZqohbJddXHDZfxAvwQKBgAdU947+
-          tjF1BhHYz8Cq3KySfZuHj6tL4AEKYaRXlO4twbMe/9I/4AiShqvfZ/xbBfnSllGX
-          Hkc9P0iyDt1iQH9BxHkZAQy+7tlbDORBHcTL8FYeAhawKxRCK2WWtFB/zvqAhire
-          gY8XLhZLNlV91u4F6iLaL0DzAHKvRRcGH0u9AoGATNigZgbRRHJC21JucHeE0tP7
-          HjGALvb4qn1o0oDHsxNY8i6vVNw9YeQpZaJhceuRHJTGcsq2dJSXpYwIhIVs/8RK
-          bKbkEndra96L6FRZN8LYBl8zbRUPx39ojGeSbFliQv1eaoA/1DDhCiC2NlcSmbJl
-          ecaG/Oyo/S+eM8nR7mc=
-        -----END PRIVATE KEY-----
-
-  sidecar:
-    enabled: true
-    image:
-      repository: mojaloop/event-sidecar
-      tag: v14.0.0
-      pullPolicy: IfNotPresent
-    readinessProbe:
-      enabled: true
-      initialDelaySeconds: 120
-      periodSeconds: 15
-    livenessProbe:
-      enabled: true
-      initialDelaySeconds: 90
-      periodSeconds: 15
     config:
-      event_log_grpc_host: localhost
-      event_log_grpc_port: 50051
+      log_level: info
+      log_transport: file
+
+      # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+      # Any combination of: `log,audit,trace`
+      event_async_override: 'log,trace'
+
+      ## Kafka Configuration (used for sidecar)
+      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+      kafka_host: *KAFKA_HOST
+      kafka_port: *KAFKA_PORT
+
+      kafka_producer_quote_post_topic: 'topic-quotes-post'
+
+      error_handling:
+        include_cause_extension: false
+        truncate_extensions: true
+
+    sidecar:
+      enabled: true
+      image:
+        repository: mojaloop/event-sidecar
+        tag: v14.0.0
+        pullPolicy: IfNotPresent
+      readinessProbe:
+        enabled: true
+        initialDelaySeconds: 120
+        periodSeconds: 15
+      livenessProbe:
+        enabled: true
+        initialDelaySeconds: 90
+        periodSeconds: 15
+      config:
+        event_log_grpc_host: localhost
+        event_log_grpc_port: 50051
+        log_level: info
+
+    ## metric configuration for prometheus instrumentation
+    metrics:
+      ## flag to enable/disable the metrics end-points
+      enabled: true
+      config:
+        timeout: 5000
+        prefix: moja_
+        defaultLabels:
+          serviceName: quoting-service
+
+  quoting-service-handler:
+    enabled: true
+
+    config:
+      ## DB Configuration
+      # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+      db_type: 'mysql'
+      # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+      db_driver: 'mysql'
+      db_host: *CL_DB_HOST
+      db_port: *CL_DB_PORT
+      db_user: *CL_DB_USER
+      ## Secret-Management
+      ### Set this if you are using a clear password configured in the config section
+      # db_password: *CL_DB_PASSWORD
+      ### Configure this if you want to use a secret. Note, this will override the db_password,
+      ### Use the next line if you do wish to use the db_password value instead.
+      # db_secret:
+      ### Example config for an existing secret
+      db_secret:
+        name: *CL_DB_SECRET_NAME
+        key: *CL_DB_SECRET_KEY
+      db_database: *CL_DB_NAME
+      db_connection_pool_min: 10
+      db_connection_pool_max: 30
+      db_acquire_timeout_millis: 30000
+      db_create_timeout_millis: 30000
+      db_destroy_timeout_millis: 5000
+      db_idle_timeout_millis: 30000
+      db_reap_interval_millis: 1000
+      db_create_retry_interval_millis: 200
+      db_debug: false
+      simple_routing_mode_enabled: true
       log_level: info
 
   ## metric configuration for prometheus instrumentation
@@ -1425,163 +1338,94 @@ quoting-service:
       defaultLabels:
         serviceName: quoting-service
 
-  ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  # initContainers: []
-  initContainers: |
-    - name: wait-for-mysql
-      image: mysql:5.7
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - |
-          until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-          do
-            echo --------------------;
-            echo Waiting for MySQL...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo MySQL ok!;
-      env:
-        - name: DB_HOST
-          value: '{{ .Values.config.db_host }}'
-        - name: DB_PORT
-          value: '{{ .Values.config.db_port }}'
-        - name: DB_USER
-          value: '{{ .Values.config.db_user }}'
-        - name: DB_PASSWORD
-          {{- if .Values.config.db_secret }}
-          valueFrom:
-              secretKeyRef:
-                name: '{{ .Values.config.db_secret.name }}'
-                key: '{{ .Values.config.db_secret.key }}'
-          {{- else }}
-          value: {{ .Values.config.db_password }}
-          {{- end }}
-        - name: DB_DATABASE
-          value: '{{ .Values.config.db_database }}'
+      # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+      # Any combination of: `log,audit,trace`
+      event_async_override: 'log,trace'
 
-  service:
-    internalPort: 3002
-    ## @param service.type %%MAIN_CONTAINER_NAME%% service type
-    ##
-    type: ClusterIP
-    ## @param service.port %%MAIN_CONTAINER_NAME%% service HTTP port
-    ##
-    port: 80
-    ## @param service.httpsPort %%MAIN_CONTAINER_NAME%% service HTTPS port
-    ##
-    httpsPort: 443
-    ## Node ports to expose
-    ## @param service.nodePorts.http Node port for HTTP
-    ## @param service.nodePorts.https Node port for HTTPS
-    ## NOTE: choose port between <30000-32767>
-    ##
-    nodePorts:
-      http:
-      https:
-    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
-    ## e.g.:
-    ## clusterIP: None
-    ##
-    clusterIP:
-    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
-    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
-    ##
-    loadBalancerIP:
-    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
-    ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
-    ## e.g:
-    ## loadBalancerSourceRanges:
-    ##   - 10.10.10.0/24
-    ##
-    loadBalancerSourceRanges: []
-    ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
-    ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
-    ##
-    externalTrafficPolicy: Cluster
-    ## @param service.annotations Additional custom annotations for %%MAIN_CONTAINER_NAME%% service
-    ##
-    annotations: {}
-    ## @param master.service.sessionAffinity Session Affinity for Kubernetes service, can be "None" or "ClientIP"
-    ## If "ClientIP", consecutive client requests will be directed to the same Pod
-    ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
-    ##
-    sessionAffinity: None
-    ## @param master.service.sessionAffinityConfig Additional settings for the sessionAffinity
-    ## sessionAffinityConfig:
-    ##   clientIP:
-    ##     timeoutSeconds: 300
-    ##
-    sessionAffinityConfig: {}
+      ## Kafka Configuration (used for sidecar)
+      # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+      kafka_host: *KAFKA_HOST
+      kafka_port: *KAFKA_PORT
 
-  ingress:
-    enabled: true
-    ## @param ingress.pathType Ingress path type
-    ##
-    pathType: ImplementationSpecific
-    ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
-    ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
-    ##
-    hostname: quoting-service.local
-    ## @param servicePort : port for the service
-    ##
-    servicePort: 80
-    ## @param ingress.path Default path for the ingress record
-    ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
-    path: /
-    ## @param ingress.annotations Additional custom annotations for the ingress record
-    ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
-    ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
-    ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
-    ## You can:
-    ##   - Use the `ingress.secrets` parameter to create this TLS secret
-    ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
-    ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
-    ##
-    tls: false
-    ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
-    ##
-    certManager: false
-    ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
-    ##
-    selfSigned: false
-    ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
-    ## e.g:
-    ## extraHosts:
-    ##   - name: transfer-api-svc.local
-    ##     path: /
-    ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
-    className: "nginx"
+      error_handling:
+        include_cause_extension: false
+        truncate_extensions: true
 
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
-  resources: {}
+      endpointSecurity:
+        jwsSign: true
+        fspiopSourceSigningName: 'switch'
+          # jwsSigningKey:
+          # To generate this key:
+          # Private:
+          # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+          # Public:
+          # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+          # Should look like:
+          # -----BEGIN RSA PRIVATE KEY-----
+          # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+          # ..
+          # ..
+        # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+        # -----END RSA PRIVATE KEY-----
+        # The following is an example key and shouldn't be used in production
+        jwsSigningKey: |-
+          -----BEGIN PRIVATE KEY-----
+          MIIEugIBADANBgkqhkiG9w0BAQEFAASCBKQwggSgAgEAAoIBAQDuB5HuHRH5BqI/
+            VAC/ixm6lz8kJmigIB5jMxLrhB9cgqM+pb0O+is88VRHdxtw8eKG3nvrZYy/4nsJ
+            z32qo4sOIMqHWTlZgbURVK4FAUEZ/qn63UnXJ1YVqT4UGg31BBj2c1JdlxG2t4JV
+            DvzGrI2/ia/t4gYZCWrQz6a8OClBIaXu2t6EGFnysyS+1YDWtNIHO+z0lvAY9oad
+            5MZPHN51o04eIoLO0tPfkz0+NDs4ECwUWuFAg8yo1hxnvSoERiCAwEbFgq2wDe1+
+            oBhOpusd4VastD/TEqO8RhrwTodddOMKzapJPrQJuvTkrpkmkPOGE8DgIVHsULLR
+            UYEMKvTVAgMBAAECgf94Meq77xrcFg8sSqe5eNHYP39tvaWyqE7mY/slvpNDH5Pl
+            D/p21akS156E32BEJuYPk/TLiI2kMWjnvbHvNgr9tq8x3ToyTjtrg5clq8Hr1Ozo
+            FnFiqkVHMFPFPQZEVU64CQPA33DixuWjMWS3YINfCAinErBry0PiNZGmuFi1K/wy
+            e1z2F9WfG3IEBEe3NaeXwN55ZPJve0LtneJy3YqNwMg2FpPKBRHFV4lKTaU/hqhC
+            NK6HQoEXN4Y9AQHn53Fl8n0iNO3qx0Tb7EuGNFmZ2xTlpDKAp8M+BA5Qm5YDkbd6
+            OoxbGj2YxZncbG+RsvICtVMLqIytubvYREY9WGkCgYEA+K64xhJzWV3cGc8/90ko
+            TryGMBj1ly5TNa1YyOQxl5z4Glc0aI8a+1vJGEAA+c/OEhMR8MRn3+QfV2LJOI5X
+            V8Zo2Ger6Ln99LBddTh2HXL3M60cMgs8MYGuJ75g5R/UHnJBLo7NFyVddCOMT3hc
+            AYSDN3XCw9ycqTw2/mJHB9kCgYEA9QiaCfTtnXdjMqLeYbp2uQEyyO6IZs956ym7
+            sEQMwx/3wnlE9eiJ6iQxZfddkfOCyV/4MMAlYfpTBQFg7Cwb32Xrv3Ezy0HfZrnt
+            5Nj4SVQWuOXJhdfC9dmTF+cvBeP+vC6PyDbikxdCo9+05chxS7I3MLxCue4qxy0C
+            QfQIE10CgYA+kHacHng2u45sT9/f7t/dL0DzSNRAvL7iekIkCIURh8RDnDzrMVWw
+            d18YYsHcF5PYqEOTN1aK1XGtIoVNXUJMKvaluy9c1a42qUhZ/WJ59jqLHbpCPOFf
+            8yhFh3gJLQDIyCXt+K9Qa24fkfHy7Gz5VMVOZqohbJddXHDZfxAvwQKBgAdU947+
+            tjF1BhHYz8Cq3KySfZuHj6tL4AEKYaRXlO4twbMe/9I/4AiShqvfZ/xbBfnSllGX
+            Hkc9P0iyDt1iQH9BxHkZAQy+7tlbDORBHcTL8FYeAhawKxRCK2WWtFB/zvqAhire
+            gY8XLhZLNlV91u4F6iLaL0DzAHKvRRcGH0u9AoGATNigZgbRRHJC21JucHeE0tP7
+            HjGALvb4qn1o0oDHsxNY8i6vVNw9YeQpZaJhceuRHJTGcsq2dJSXpYwIhIVs/8RK
+            bKbkEndra96L6FRZN8LYBl8zbRUPx39ojGeSbFliQv1eaoA/1DDhCiC2NlcSmbJl
+            ecaG/Oyo/S+eM8nR7mc=
+          -----END PRIVATE KEY-----
+
+    sidecar:
+      enabled: true
+      image:
+        repository: mojaloop/event-sidecar
+        tag: v14.0.0
+        pullPolicy: IfNotPresent
+      readinessProbe:
+        enabled: true
+        initialDelaySeconds: 120
+        periodSeconds: 15
+      livenessProbe:
+        enabled: true
+        initialDelaySeconds: 90
+        periodSeconds: 15
+      config:
+        event_log_grpc_host: localhost
+        event_log_grpc_port: 50051
+        log_level: info
+
+    ## metric configuration for prometheus instrumentation
+    metrics:
+      ## flag to enable/disable the metrics end-points
+      enabled: true
+      config:
+        timeout: 5000
+        prefix: moja_
+        defaultLabels:
+          serviceName: quoting-service-handler
 
 ml-api-adapter:
   enabled: true
