@@ -32,7 +32,6 @@ while ! (grep -q "* Changed:	0" $dir/output.log); do
     updatecli apply --config .github/workflows/manifests/second-pass |& tee $dir/output.log
 done
 
-
 # Revert newline changes in charts
 # Updatecli currently does not preserve line breaks in yaml files - issue https://github.com/goccy/go-yaml/pull/412
 # This is a temporary workaround to revert the changes
