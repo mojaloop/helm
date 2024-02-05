@@ -1,0 +1,347 @@
+{{- $dbDeployHost := (.Values.config.db_host | replace "$release_name" .Release.Name) }}
+{
+  "HOSTNAME": "http://quoting-service-handler.local",
+  "LISTEN_ADDRESS": "0.0.0.0",
+  "PORT": "{{ .Values.service.internalPort }}",
+  "PROTOCOL_VERSIONS": {{ .Values.config.protocol_versions | toPrettyJson }},
+  "SWITCH_ENDPOINT": "http://{{ .Release.Name }}-centralledger-service:80",
+  "AMOUNT": {
+    "PRECISION": 18,
+    "SCALE": 4
+  },
+  "ERROR_HANDLING": {
+    "includeCauseExtension": {{ .Values.config.error_handling.include_cause_extension }},
+    "truncateExtensions": {{ .Values.config.error_handling.truncate_extensions }}
+  },
+  "DATABASE": {
+    "DIALECT": "{{ .Values.config.db_driver }}",
+    "HOST": "{{ $dbDeployHost }}",
+    "PORT": {{ .Values.config.db_port }},
+    "USER": "{{ .Values.config.db_user }}",
+    "PASSWORD": "{{ .Values.config.db_password }}",
+    "SCHEMA": "{{ .Values.config.db_database }}",
+    "POOL_MIN_SIZE": {{ .Values.config.db_connection_pool_min }},
+    "POOL_MAX_SIZE": {{ .Values.config.db_connection_pool_max }},
+    "ACQUIRE_TIMEOUT_MILLIS": {{ .Values.config.db_acquire_timeout_millis }},
+    "CREATE_TIMEOUT_MILLIS": {{ .Values.config.db_create_timeout_millis }},
+    "DESTROY_TIMEOUT_MILLIS": {{ .Values.config.db_destroy_timeout_millis }},
+    "IDLE_TIMEOUT_MILLIS": {{ .Values.config.db_idle_timeout_millis }},
+    "REAP_INTERVAL_MILLIS": {{ .Values.config.db_reap_interval_millis }},
+    "CREATE_RETRY_INTERVAL_MILLIS": {{ .Values.config.db_create_retry_interval_millis }},
+    "DEBUG": {{ .Values.config.db_debug }}
+  },
+  "SIMPLE_ROUTING_MODE": {{ .Values.config.simple_routing_mode_enabled }},
+  "ENDPOINT_SECURITY": {
+    "JWS": {
+      "JWS_SIGN": {{ .Values.config.endpointSecurity.jwsSign }},
+      "FSPIOP_SOURCE_TO_SIGN": {{ .Values.config.endpointSecurity.fspiopSourceSigningName | quote }},
+      "JWS_SIGNING_KEY_PATH": "secrets/jwsSigningKey.key"
+    }
+  },
+  "API_DOCUMENTATION_ENDPOINTS": true,
+  "INSTRUMENTATION": {
+    "METRICS": {
+      "DISABLED": {{ not .Values.metrics.enabled }},
+      "labels": {
+        "fspId": "*"
+      },
+      "config": {
+        "timeout": {{ .Values.metrics.config.timeout }},
+        "prefix": {{ .Values.metrics.config.prefix | quote }},
+        "defaultLabels": {
+          {{- range $key, $value := .Values.metrics.config.defaultLabels }}
+              {{ $key  | quote }}: {{ $value | quote }}
+          {{- end }}
+          }
+      }
+    }
+  },
+  "CACHE": {
+    "ENUM_DATA_EXPIRES_IN_MS": {{ .Values.config.cache.enum_data_expires_in_ms }},
+    "PARTICIPANT_DATA_EXPIRES_IN_MS": {{ .Values.config.cache.participant_data_expires_in_ms }}
+  },
+  "KAFKA": {
+    "CONSUMER":{
+      "QUOTE":{
+        "POST":{
+          "topic":"topic-quotes-post",
+          "config":{
+            "options":{
+              "mode":2,
+              "batchSize":1,
+              "pollFrequency":10,
+              "recursiveTimeout":100,
+              "messageCharset":"utf8",
+              "messageAsJSON":true,
+              "sync":true,
+              "consumeTimeout":1000
+            },
+            "rdkafkaConf":{
+              "client.id":"quotes-handler-post_c",
+              "group.id":"group-quotes-handler-post",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "socket.keepalive.enable":true,
+              "allow.auto.create.topics":true
+            },
+            "topicConf":{
+              "auto.offset.reset":"earliest"
+            }
+          }
+        },
+        "PUT":{
+          "topic":"topic-quotes-put",
+          "config":{
+            "options":{
+              "mode":2,
+              "batchSize":1,
+              "pollFrequency":10,
+              "recursiveTimeout":100,
+              "messageCharset":"utf8",
+              "messageAsJSON":true,
+              "sync":true,
+              "consumeTimeout":1000
+            },
+            "rdkafkaConf":{
+              "client.id":"quotes-handler-put_c",
+              "group.id":"group-quotes-handler-put",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "socket.keepalive.enable":true,
+              "allow.auto.create.topics":true
+            },
+            "topicConf":{
+              "auto.offset.reset":"earliest"
+            }
+          }
+        },
+        "GET":{
+          "topic":"topic-quotes-get",
+          "config":{
+            "options":{
+              "mode":2,
+              "batchSize":1,
+              "pollFrequency":10,
+              "recursiveTimeout":100,
+              "messageCharset":"utf8",
+              "messageAsJSON":true,
+              "sync":true,
+              "consumeTimeout":1000
+            },
+            "rdkafkaConf":{
+              "client.id":"quotes-handler-get_c",
+              "group.id":"group-quotes-handler-get",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "socket.keepalive.enable":true,
+              "allow.auto.create.topics":true
+            },
+            "topicConf":{
+              "auto.offset.reset":"earliest"
+            }
+          }
+        }
+      },
+      "BULK_QUOTE":{
+        "POST":{
+          "topic":"topic-bulkquotes-post",
+          "config":{
+            "options":{
+              "mode":2,
+              "batchSize":1,
+              "pollFrequency":10,
+              "recursiveTimeout":100,
+              "messageCharset":"utf8",
+              "messageAsJSON":true,
+              "sync":true,
+              "consumeTimeout":1000
+            },
+            "rdkafkaConf":{
+              "client.id":"bulk-quotes-handler-post_c",
+              "group.id":"group-bulk-quotes-handler-post",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "socket.keepalive.enable":true,
+              "allow.auto.create.topics":true
+            },
+            "topicConf":{
+              "auto.offset.reset":"earliest"
+            }
+          }
+        },
+        "PUT":{
+          "topic":"topic-bulkquotes-put",
+          "config":{
+            "options":{
+              "mode":2,
+              "batchSize":1,
+              "pollFrequency":10,
+              "recursiveTimeout":100,
+              "messageCharset":"utf8",
+              "messageAsJSON":true,
+              "sync":true,
+              "consumeTimeout":1000
+            },
+            "rdkafkaConf":{
+              "client.id":"bulk-quotes-handler-put_c",
+              "group.id":"group-bulk-quotes-handler-put",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "socket.keepalive.enable":true,
+              "allow.auto.create.topics":true
+            },
+            "topicConf":{
+              "auto.offset.reset":"earliest"
+            }
+          }
+        },
+        "GET":{
+          "topic":"topic-bulkquotes-get",
+          "config":{
+            "options":{
+              "mode":2,
+              "batchSize":1,
+              "pollFrequency":10,
+              "recursiveTimeout":100,
+              "messageCharset":"utf8",
+              "messageAsJSON":true,
+              "sync":true,
+              "consumeTimeout":1000
+            },
+            "rdkafkaConf":{
+              "client.id":"bulk-quotes-handler-get_c",
+              "group.id":"group-bulk-quotes-handler-get",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "socket.keepalive.enable":true,
+              "allow.auto.create.topics":true
+            },
+            "topicConf":{
+              "auto.offset.reset":"earliest"
+            }
+          }
+        }
+      }
+    },
+    "PRODUCER":{
+      "QUOTE":{
+        "POST":{
+          "topic":"topic-quotes-post",
+          "config":{
+            "options":{
+              "messageCharset":"utf8"
+            },
+            "rdkafkaConf":{
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "client.id":"quotes-handler-post_p",
+              "event_cb":true,
+              "dr_cb":true,
+              "socket.keepalive.enable":true,
+              "queue.buffering.max.messages":10000000
+            },
+            "topicConf":{
+              "request.required.acks":"all",
+              "partitioner": "{{ .Values.config.kafka_partitioner }}"
+            }
+          }
+        },
+        "PUT":{
+          "topic":"topic-quotes-put",
+          "config":{
+            "options":{
+              "messageCharset":"utf8"
+            },
+            "rdkafkaConf":{
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "client.id":"quotes-handler-put_p",
+              "event_cb":true,
+              "dr_cb":true,
+              "socket.keepalive.enable":true,
+              "queue.buffering.max.messages":10000000
+            },
+            "topicConf":{
+              "request.required.acks":"all",
+              "partitioner": "{{ .Values.config.kafka_partitioner }}"
+            }
+          }
+        },
+        "GET":{
+          "topic":"topic-quotes-get",
+          "config":{
+            "options":{
+              "messageCharset":"utf8"
+            },
+            "rdkafkaConf":{
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "client.id":"quotes-handler-get_p",
+              "event_cb":true,
+              "dr_cb":true,
+              "socket.keepalive.enable":true,
+              "queue.buffering.max.messages":10000000
+            },
+            "topicConf":{
+              "request.required.acks":"all",
+              "partitioner": "{{ .Values.config.kafka_partitioner }}"
+            }
+          }
+        }
+      },
+      "BULK_QUOTE":{
+        "POST":{
+          "topic":"topic-bulkquotes-post",
+          "config":{
+            "options":{
+              "messageCharset":"utf8"
+            },
+            "rdkafkaConf":{
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "client.id":"bulkquotes-handler-post_p",
+              "event_cb":true,
+              "dr_cb":true,
+              "socket.keepalive.enable":true,
+              "queue.buffering.max.messages":10000000
+            },
+            "topicConf":{
+              "request.required.acks":"all",
+              "partitioner": "{{ .Values.config.kafka_partitioner }}"
+            }
+          }
+        },
+        "PUT":{
+          "topic":"topic-bulkquotes-put",
+          "config":{
+            "options":{
+              "messageCharset":"utf8"
+            },
+            "rdkafkaConf":{
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "client.id":"bulkquotes-handler-put_p",
+              "event_cb":true,
+              "dr_cb":true,
+              "socket.keepalive.enable":true,
+              "queue.buffering.max.messages":10000000
+            },
+            "topicConf":{
+              "request.required.acks":"all",
+              "partitioner": "{{ .Values.config.kafka_partitioner }}"
+            }
+          }
+        },
+        "GET":{
+          "topic":"topic-bulkquotes-get",
+          "config":{
+            "options":{
+              "messageCharset":"utf8"
+            },
+            "rdkafkaConf":{
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "client.id":"bulkquotes-handler-get_p",
+              "event_cb":true,
+              "dr_cb":true,
+              "socket.keepalive.enable":true,
+              "queue.buffering.max.messages":10000000
+            },
+            "topicConf":{
+              "request.required.acks":"all",
+              "partitioner": "{{ .Values.config.kafka_partitioner }}"
+            }
+          }
+        }
+      }
+    }
+  }
+}

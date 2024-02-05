@@ -1,15 +1,13 @@
-# Default values for centralledger-handler-bulk-transfer-fulfil.
+# Default values for quoting-service Handler.
 # This is a YAML-formatted file.
 
 # Declare global configurations
 global: {}
 
-# Declare variables to be passed into your templates.
-
 image:
-  registry: "docker.io"
-  repository: mojaloop/central-ledger
-  tag: v17.6.0
+  registry: docker.io
+  repository: mojaloop/quoting-service
+  tag: v15.6.0-snapshot.5
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -25,7 +23,7 @@ image:
   pullSecrets: []
 
 replicaCount: 1
-command: '["node", "src/handlers/index.js", "handler", "--bulkfulfil"]'
+command: '["node", "src/handlers/index.js", "handler", "--quotes --bulk_quotes"]'
 
 ## Enable diagnostic mode in the deployment
 ##
@@ -37,9 +35,7 @@ diagnosticMode:
   ##
   command:
     - node
-    - src/handlers/index.js
-    - handler
-    - '--bulkfulfil'
+    - src/handlers/index.js h --quotes --bulk_quotes
   ## @param diagnosticMode.args Args to override all containers in the deployment
   ##
   args:
@@ -50,6 +46,7 @@ diagnosticMode:
   debug:
     internalPort: 9229
     port: 9229
+
 
 readinessProbe:
   enabled: true
@@ -86,6 +83,35 @@ containerSecurityContext:
   enabled: true
   runAsUser: 1001
 
+sidecar:
+  enabled: true
+  image:
+    repository: mojaloop/event-sidecar
+    tag: v14.0.0
+    pullPolicy: IfNotPresent
+    command: '["npm", "run", "start"]'
+  service:
+    internalPort: 4001
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 120
+    periodSeconds: 15
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+    initialDelaySeconds: 90
+    periodSeconds: 15
+  config:
+    event_log_grpc_host: localhost
+    event_log_grpc_port: 50051
+    event_log_filter: 'audit:*, log:info, log:warn, log:error'
+    event_log_metadata_only: true
+    log_level: info
+    log_filter: 'error, warn, info'
+
 ## metric configuration for prometheus instrumentation
 metrics:
   ## flag to enable/disable the metrics end-points
@@ -94,18 +120,31 @@ metrics:
     timeout: 5000
     prefix: moja_
     defaultLabels:
-      serviceName: central-handler-bulkfulfil
+      serviceName: quoting-service-handler
 
 config:
-  ## Forensic Logging sidecar
-  # this is for Forensic Logging Sidecar
-  forensicloggingsidecar_disabled: true
-  forensicloggingsidecar_host: forensicloggingsidecar-ledger
-  forensicloggingsidecar_port: 5678
 
-  error_handling:
-    include_cause_extension: false
-    truncate_extensions: true
+  # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+  # and for generating requests/callbacks from the Switch itself (DEFAULT value)
+  protocol_versions: |-
+    {
+        "CONTENT": {
+            "DEFAULT": "1.1",
+            "VALIDATELIST": [
+                "1",
+                "1.0",
+                "1.1"
+            ]
+        },
+        "ACCEPT": {
+            "DEFAULT": "1",
+            "VALIDATELIST": [
+                "1",
+                "1.0",
+                "1.1"
+            ]
+        }
+    }
 
   ## DB Configuration
   # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
@@ -135,40 +174,55 @@ config:
   db_reap_interval_millis: 1000
   db_create_retry_interval_millis: 200
   db_debug: false
+  simple_routing_mode_enabled: true
+  log_level: info
+  log_transport: file
 
-  ## Hub Configuration
-  hub_participant:
-    id: 1
-    name: Hub
-
-  ## MongoDB Configuration for Object Store
-  objstore_disabled: false
-  mongo_host: 'cep-mongodb'
-  mongo_port: 27017
-  mongo_user: mojaloop
-  ## Secret-Management
-  ### Set this if you are using a clear password configured in the config section
-  mongo_password: ''
-  ### Configure this if you want to use a secret. Note, this will override the secret,
-  ### Use the next line if you do wish to use the secret value instead.
-  # mongo_secret:
-  ### Example config for an existing secret
-  # mongo_secret:
-  #   name: cep-mongodb
-  #   key: mongodb-passwords
-  mongo_database: mlos
-
-  ## Kafka Configuration
+  ## Kafka Configuration (used for sidecar)
   # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
   kafka_host: kafka
   kafka_port: 9092
 
-  ## Node Configuration
-  log_level: 'info'
-  log_transport: file
+  ## Tracing Configuration
+  event_trace_vendor: mojaloop
+  event_log_filter: 'audit:*, log:warn, log:error'
+  # If set to true, only the metadata object from the event will be printed.
+  event_log_metadata_only: false
+  # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+  # Any combination of: `log,audit,trace`
+  event_async_override: 'log,trace'
+  event_trace_state_enabled: true
+  event_traceid_per_vendor: false
 
-  ## Cache configuration
-  cache_max_byte_size: 10000000
+  endpointSecurity:
+    jwsSign: false
+    fspiopSourceSigningName: 'switch'
+    jwsSigningKey:
+      # To generate this key:
+      # Private:
+      # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+      # Public:
+      # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+      # Should look like:
+      # -----BEGIN RSA PRIVATE KEY-----
+      # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+      # ..
+      # ..
+      # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+      # -----END RSA PRIVATE KEY-----
+
+  error_handling:
+    include_cause_extension: false
+    truncate_extensions: true
+
+  cache:
+    enum_data_expires_in_ms: 4170000
+    # Setting this any higher will most likely cause GP tests to fail
+    # Best to only set this higher if you are not running GP tests
+    # Not specifying or setting to 0 will default the cache to 60 seconds
+    participant_data_expires_in_ms: 10
+
+rules: []
 
 ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -180,26 +234,8 @@ config:
 ##    command: ['sh', '-c', 'echo "hello world"']
 ##
 # initContainers: []
+
 initContainers: |
-  - name: wait-for-kafka
-    image: solsson/kafka:2.8.1
-    imagePullPolicy: IfNotPresent
-    command:
-      - sh
-      - -c
-      - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-        do
-          echo --------------------;
-          echo Waiting for Kafka...;
-          sleep 2;
-        done;
-        echo ====================;
-        echo Kafka ok!;
-    env:
-      - name: KAFKA_HOST
-        value: '{{ .Values.config.kafka_host }}'
-      - name: KAFKA_PORT
-        value: '{{ .Values.config.kafka_port }}'
   - name: wait-for-mysql
     image: mysql:5.7
     imagePullPolicy: IfNotPresent
@@ -233,39 +269,25 @@ initContainers: |
         {{- end }}
       - name: DB_DATABASE
         value: '{{ .Values.config.db_database }}'
-  - name: wait-for-mongodb
-    image: bitnami/mongodb:6.0.1
+  - name: wait-for-kafka
+    image: solsson/kafka:2.8.1
     imagePullPolicy: IfNotPresent
     command:
       - sh
       - -c
-      - |
-        until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
+      - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
         do
-          echo --------------------;
-          echo Waiting for MongoDB...;
-          sleep 2;
+        echo --------------------;
+        echo Waiting for Kafka...;
+        sleep 2;
         done;
         echo ====================;
-        echo MongoDB ok!;
+        echo Kafka ok!;
     env:
-      - name: DB_HOST
-        value: '{{ .Values.config.mongo_host }}'
-      - name: DB_PORT
-        value: '{{ .Values.config.mongo_port }}'
-      - name: DB_USER
-        value: '{{ .Values.config.mongo_user }}'
-      - name: DB_PASS
-        {{- if .Values.config.mongo_secret }}
-        valueFrom:
-            secretKeyRef:
-              name: '{{ .Values.config.mongo_secret.name }}'
-              key: '{{ .Values.config.mongo_secret.key }}'
-        {{- else }}
-        value: {{ .Values.config.mongo_password }}
-        {{- end }}
-      - name: DB_DATABASE
-        value: '{{ .Values.config.mongo_database }}'
+      - name: KAFKA_HOST
+        value: '{{ .Values.config.kafka_host }}'
+      - name: KAFKA_PORT
+        value: '{{ .Values.config.kafka_port }}'
 
 ## @param master.podLabels Extra labels for pod(s)
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
@@ -277,8 +299,9 @@ podLabels: {}
 ##
 podAnnotations: {}
 
+# think, if we need "service" for consumer?
 service:
-  internalPort: 3001
+  internalPort: 3002
   ## @param service.type %%MAIN_CONTAINER_NAME%% service type
   ##
   type: ClusterIP
@@ -320,61 +343,14 @@ service:
   ##
   sessionAffinityConfig: {}
 
-ingress:
-  enabled: false
-  ## @param ingress.pathType Ingress path type
-  ##
-  pathType: ImplementationSpecific
-  ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
-  ##
-  apiVersion:
-  ## @param ingress.hostname Default host for the ingress record
-  ##
-  hostname: central-ledger-transfer-bulkfulfil.local
-  ## @param servicePort : port for the service
-  ##
-  servicePort: 80
-  ## @param ingress.path Default path for the ingress record
-  ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
-  path: /
-  ## @param ingress.annotations Additional custom annotations for the ingress record
-  ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
-  ##
-  annotations:
-  ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
-  ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
-  ## You can:
-  ##   - Use the `ingress.secrets` parameter to create this TLS secret
-  ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
-  ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
-  ##
-  tls: false
-  ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
-  ##
-  certManager: false
-  ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
-  ##
-  selfSigned: false
-  ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
-  ## e.g:
-  ## extraHosts:
-  ##   - name: transfer-api-svc.local
-  ##     path: /
-  ##
-  extraHosts:
-  extraPaths:
-  extraTls:
-  secrets:
-  className: "nginx"
-
-# We usually recommend not to specify default resources and to leave this as a conscious
-# choice for the user. This also increases chances charts run on environments with little
-# resources, such as Minikube. If you do want to specify resources, uncomment the following
-# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-# limits:
-#  cpu: 100m
-#  memory: 128Mi
-# requests:
-#  cpu: 100m
-#  memory: 128Mi
 resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
