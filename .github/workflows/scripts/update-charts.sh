@@ -35,4 +35,4 @@ done
 # Revert newline changes in charts
 # Updatecli currently does not preserve line breaks in yaml files - issue https://github.com/goccy/go-yaml/pull/412
 # This is a temporary workaround to revert the changes
-git diff --ignore-blank-lines --no-color | git apply --cached --ignore-whitespace && git checkout -- . && git reset && git add .
+git diff --ignore-blank-lines --no-color | git apply --cached --ignore-whitespace && git checkout -- . && git reset
