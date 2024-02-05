@@ -34,6 +34,55 @@ helm dep up ./
 helm install merchant ./ --namespace mojaloop
 ```
 
+### Registering Merchant Oracle in Account Lookup Service
+
+1. Make sure the `account-lookup-service-admin` is running and accessible.
+2. Make sure the `merchant-registry-oracle-clusterip-service` is accessible from the `account-lookup-service-admin` pod.
+3. Run the following command to register the merchant oracle with `ALIAS` type:
+
+Replace `<account-lookup-service-admin-ip>` and `<merchant-registry-oracle-clusterip-service>`  with the Cluster IP Addresses.
+`kubectl get svc -n mojaloop` can be used to get the Cluster IP Addresses.
+
+
+```bash
+curl -X POST "http://<account-lookup-service-admin-ip>/oracles" \
+    -H "accept: application/json" -H "Content-Type: application/json" \
+    -d '{
+        "oracleIdType": "ALIAS",
+        "endpoint": {
+          "value": "<merchant-registry-oracle-clusterip-service>:8888",
+          "endpointType": "URL"
+        },
+        "currency": "USD",
+        "isDefault": true
+      }'
+```
+
+4. Verify the registration by running the following command:
+
+```bash
+curl -X GET "http://<account-lookup-service-admin-ip>/oracles" \
+    -H "accept: application/json" \
+    -H "Content-Type: application/json" \
+    -H "date: $(date -Ru)"
+```
+
+should return the registered oracle.
+```json
+[
+    {
+        "oracleId":1,
+        "oracleIdType":"ALIAS",
+        "endpoint":{
+            "value":"10.43.83.251:8888",
+            "endpointType":"URL"
+        },
+        "currency":"USD",
+        "isDefault":1
+    }
+]
+```
+
 ### IMPORTANT NOTES:
 
 When updating ingress's host make sure to update the `apiUrl` of `./chart-acquirer-frontend/values.yaml` file too.
