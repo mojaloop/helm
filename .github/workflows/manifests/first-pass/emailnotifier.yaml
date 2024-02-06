@@ -1,0 +1,38 @@
+name: emailnotifier
+
+sources:
+  email-notifier:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: email-notifier
+  common:
+    kind: helmchart
+    spec:
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+
+conditions:
+  docker-email-notifier:
+    sourceid: email-notifier
+    kind: dockerimage
+    spec:
+      image: mojaloop/email-notifier
+
+targets:
+  email-notifier:
+    sourceid: email-notifier
+    kind: helmchart
+    spec:
+      name: emailnotifier
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: emailnotifier
+      file: Chart.yaml
+      key: $.dependencies[0].version

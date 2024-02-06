@@ -1,0 +1,249 @@
+# NOTES:
+# - GitHub Actions must be explicitly allowed to create pull requests in this repository.
+#   This setting can be found in the repository's settings under Actions > General > Workflow permissions.
+# - A repository secret `AUTO_RELEASE_TOKEN` (permissions: `contents: write`, `pull-requests: write`, `repositories: read`) needs to be created.
+#   The secret should contain a github access token with the permissions specified above.
+#   The secret is used by the `create-pull-request` action to create the pull request and `updatecli` to access all updateable repositories.
+#   The secret can be created at https://github.com/mojaloop/helm/settings/secrets/actions
+
+name: Create Release PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        type: string
+        description: "Branch to create release PR from (e.g. master)"
+        required: false
+        default: "master"
+      release_name:
+        type: string
+        description: "Release name (e.g. Acacia)"
+        required: false
+      release_version:
+        type: string
+        description: "Release version (e.g. v1.0.0)"
+        required: false
+      last_release_tag:
+        type: string
+        description: "Last release tag (e.g. v1.0.0)"
+        required: false
+      example_backend_version:
+        type: string
+        description: "Example backend version (e.g. v1.0.0)"
+        required: true
+        default: "v15.0.0"
+      deployment_release_name:
+        type: string
+        description: "Deployment release name (e.g. moja1)"
+        required: true
+        default: "moja2"
+      deployment_namespace:
+        type: string
+        description: "Deployment namespace (e.g. moja1)"
+        required: true
+        default: "moja2"
+      deployment_values_file:
+        type: string
+        description: "Deployment values file in oss-core-env repo"
+        required: true
+        default: "helm-values-moja2-mojaloop-v15.3.0.yaml"
+
+jobs:
+  create_release_pr:
+    name: Create Release PR
+    runs-on: ubuntu-latest
+    env:
+      AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+      AWS_DEFAULT_OUTPUT: ${{ vars.AWS_DEFAULT_OUTPUT }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.13.3
+
+      - name: Install dependencies
+        run: |
+          # Install mo
+          curl -sL https://raw.githubusercontent.com/tests-always-included/mo/master/mo -o /usr/local/bin/mo
+          chmod +x /usr/local/bin/mo
+
+          # Install updatecli
+          curl -sL https://github.com/updatecli/updatecli/releases/download/v0.71.0/updatecli_amd64.deb -o /tmp/updatecli_amd64.deb
+          sudo apt install /tmp/updatecli_amd64.deb
+
+          # Install jq
+          sudo apt-get install jq
+
+      - name: Setup Helm repositories
+        run: |
+          helm repo add stable https://charts.helm.sh/stable
+          helm repo add incubator https://charts.helm.sh/incubator
+          helm repo add kiwigrid https://kiwigrid.github.io
+          helm repo add kokuwa https://kokuwaio.github.io/helm-charts
+          helm repo add elastic https://helm.elastic.co
+          helm repo add codecentric https://codecentric.github.io/helm-charts
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add mojaloop-charts https://mojaloop.github.io/charts/repo 
+          helm repo add redpanda https://charts.redpanda.com
+          helm repo add mojaloop https://mojaloop.io/helm/repo/
+          helm repo update
+
+      - name: Update chart dependencies
+        env:
+          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+        run: .github/workflows/scripts/update-charts.sh
+
+      - name: Generate changelog
+        env:
+          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+        run: .github/workflows/scripts/generate-changelog.sh ${{ inputs.last_release_tag }}
+
+      - name: Determine release version number
+        id: determine-release-version
+        env:
+          _RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          if [[ -z $_RELEASE_VERSION ]]; then
+            release_version=$(.github/workflows/scripts/determine-release-version.sh '${{ inputs.last_release_tag }}')
+            echo "release_version=$release_version"
+            echo "RELEASE_VERSION=$(echo $release_version)" >> "$GITHUB_OUTPUT"
+          else
+            echo "RELEASE_VERSION=$(echo $_RELEASE_VERSION)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Next release version
+        run: |
+          release_version='${{ steps.determine-release-version.outputs.RELEASE_VERSION }}'
+          if [[ -z "$release_version" || ! "$release_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "RELEASE_VERSION is not set or is not a valid semver version"
+            exit 1
+          fi
+
+      - name: Prepare TTK test cases release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.AUTO_RELEASE_TOKEN }}
+          repo: testing-toolkit-test-cases
+          makeLatest: true
+          allowUpdates: false
+          generateReleaseNotes: true
+          skipIfReleaseExists: true
+          tag: ${{ steps.determine-release-version.outputs.RELEASE_VERSION }}
+          commit: master
+
+      - name: Update TTK test cases version
+        env:
+          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+        run: updatecli apply --config .github/workflows/manifests/third-pass/mojaloop.yaml
+      
+      - name: Syncronize release version with mojaloop chart version
+        env:
+          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+        run: |
+          release_version='${{ steps.determine-release-version.outputs.RELEASE_VERSION }}'
+          if [[ -z "$release_version" || ! "$release_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "RELEASE_VERSION is not set or is not a valid semver version"
+            exit 1
+          fi
+          release_version="${release_version:1}"
+          sed -i "s/^version:.*/version: $release_version/" mojaloop/Chart.yaml
+          awk -v release_version="$release_version" '/^version:/ {print "version: " release_version; next} 1' mojaloop/Chart.yaml > mojaloop/Chart.yaml.tmp && mv mojaloop/Chart.yaml.tmp mojaloop/Chart.yaml
+
+      - name: Generate release note
+        id: generate-release-note
+        env:
+          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+        run: |
+          .github/workflows/scripts/generate-release-note.sh '${{ inputs.release_name }}' '${{ steps.determine-release-version.outputs.RELEASE_VERSION }}' '${{ inputs.last_release_tag }}' '${{ steps.determine-release-version.outputs.RELEASE_VERSION }}' '${{ inputs.example_backend_version }}'
+          echo "RELEASE_NOTE_FILE=.changelog/release-${{ steps.determine-release-version.outputs.RELEASE_VERSION }}.md" >> "$GITHUB_OUTPUT"
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.AUTO_RELEASE_TOKEN }}
+          commit-message: "chore: upgrade helm chart depdenencies"
+          title: "[auto] feat: release candidate for ${{ inputs.release_name }} ${{ steps.determine-release-version.outputs.RELEASE_VERSION }}"
+          body-path: ${{ steps.generate-release-note.outputs.RELEASE_NOTE_FILE }}
+          branch: release/release-candidate-${{ inputs.release_name }}-${{ steps.determine-release-version.outputs.RELEASE_VERSION }}-${{ github.run_id }}
+          base: master
+          draft: true
+
+      - name: Clone oss-core-env repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.AUTO_RELEASE_TOKEN }}
+          repository: mojaloop/oss-core-env
+          ref: main
+          path: .tmp/oss-core-env
+      
+      - name: Prepare deployment values file
+        run: |
+          set -a && . .tmp/oss-core-env/config/test-mojaloop-live/.env && set +a
+          sed -i "s/{{CI_ENV_NAME}}/$ENV_NAME/" .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }}
+          sed -i "s/{{CI_HELM_NAMESPACE}}/${{ inputs.deployment_namespace }}/" .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }}
+          sed -i "s/{{CI_ENV_VERSION}}/${{ steps.determine-release-version.outputs.RELEASE_VERSION }}/" .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }}
+      
+      - name: Set KUBECONFIG
+        run: |
+          echo "${{ secrets.AUTO_RELEASE_KUBECONFIG }}" > .tmp/test.mojaloop.live.conf
+          chmod 600 .tmp/test.mojaloop.live.conf
+          
+      - name: Cluster Info
+        env:
+          KUBECONFIG: .tmp/test.mojaloop.live.conf
+        run: kubectl cluster-info
+      
+      - name: Delete existing deployments
+        env:
+          KUBECONFIG: .tmp/test.mojaloop.live.conf
+        run: helm ls -n ${{ inputs.deployment_namespace }} --short | xargs -L1 sh -c 'if [ -n "$1" ]; then helm uninstall -n ${{ inputs.deployment_namespace }} "$1"; fi' _
+
+      - name: Deploy backend
+        env:
+          KUBECONFIG: .tmp/test.mojaloop.live.conf
+        run: helm install backend mojaloop/example-mojaloop-backend --namespace ${{ inputs.deployment_namespace }}
+
+      - name: Build charts
+        run: |
+          ./update-charts-dep.sh
+          
+      - name: Deploy charts
+        env:
+          KUBECONFIG: .tmp/test.mojaloop.live.conf
+        run: |
+          # Install Mojaloop
+          helm install ${{ inputs.deployment_release_name }} ./mojaloop -f .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }} --namespace ${{ inputs.deployment_namespace }}
+      
+      - name: Wait for deployment to be ready
+        env:
+          KUBECONFIG: .tmp/test.mojaloop.live.conf
+        timeout-minutes: 15
+        run: |
+          while [[ $(kubectl get pods -n ${{ inputs.deployment_namespace }} -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}' | grep False) ]]; do 
+            echo "Waiting for pods to be ready..."
+            sleep 10
+          done
+          echo "All pods are ready!"
+        continue-on-error: true
+      
+      - name: Run TTK tests
+        env:
+          KUBECONFIG: .tmp/test.mojaloop.live.conf
+        timeout-minutes: 15
+        run: |
+          helm test ${{ inputs.deployment_release_name }} --namespace ${{ inputs.deployment_namespace }}
+        continue-on-error: true
+      
+      - name: Clean up
+        run: |
+            rm -rf .tmp
