@@ -87,3 +87,7 @@ should return the registered oracle.
 
 When updating ingress's host make sure to update the `apiUrl` of `./chart-acquirer-frontend/values.yaml` file too.
 Otherwise frontend will not be able to communicate with backend.
+
+The system utilize RabbitMQ for message queuing between services and SendGrid for email verification. 
+Adopters can substitute these services with their preferred choices for a customized integration.
+
