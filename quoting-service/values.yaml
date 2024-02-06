@@ -489,102 +489,105 @@ quoting-service-handler:
 
   config:
 
-    # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
-    # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-    protocol_versions: {
-      "CONTENT": {
-        "DEFAULT": "1.1",
-        "VALIDATELIST": [
-          "1",
-          "1.0",
-          "1.1"
-        ]
-      },
-      "ACCEPT": {
-        "DEFAULT": "1",
-        "VALIDATELIST": [
-          "1",
-          "1.0",
-          "1.1"
-        ]
-      }
+config:
+
+  # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+  # and for generating requests/callbacks from the Switch itself (DEFAULT value)
+  protocol_versions: |
+    {
+        "CONTENT": {
+            "DEFAULT": "1.1",
+            "VALIDATELIST": [
+                "1",
+                "1.0",
+                "1.1"
+            ]
+        },
+        "ACCEPT": {
+            "DEFAULT": "1",
+            "VALIDATELIST": [
+                "1",
+                "1.0",
+                "1.1"
+            ]
+        }
     }
 
-    ## DB Configuration
-    # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
-    db_type: 'mysql'
-    # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-    db_driver: 'mysql'
-    db_host: mysqldb
-    db_port: 3306
-    db_user: central_ledger
-    ## Secret-Management
-    ### Set this if you are using a clear password configured in the config section
-    db_password: ''
-    ### Configure this if you want to use a secret. Note, this will override the db_password,
-    ### Use the next line if you do wish to use the db_password value instead.
-    # db_secret:
-    ### Example config for an existing secret
-    db_secret:
-      name: mysqldb
-      key: mysql-password
-    db_database: central_ledger
-    db_connection_pool_min: 10
-    db_connection_pool_max: 30
-    db_acquire_timeout_millis: 30000
-    db_create_timeout_millis: 30000
-    db_destroy_timeout_millis: 5000
-    db_idle_timeout_millis: 30000
-    db_reap_interval_millis: 1000
-    db_create_retry_interval_millis: 200
-    db_debug: false
-    simple_routing_mode_enabled: true
-    log_level: info
-    log_transport: file
+  ## DB Configuration
+  # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+  db_type: 'mysql'
+  # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+  db_driver: 'mysql'
+  db_host: mysqldb
+  db_port: 3306
+  db_user: central_ledger
+  ## Secret-Management
+  ### Set this if you are using a clear password configured in the config section
+  db_password: ''
+  ### Configure this if you want to use a secret. Note, this will override the db_password,
+  ### Use the next line if you do wish to use the db_password value instead.
+  # db_secret:
+  ### Example config for an existing secret
+  db_secret:
+    name: mysqldb
+    key: mysql-password
+  db_database: central_ledger
+  db_connection_pool_min: 10
+  db_connection_pool_max: 30
+  db_acquire_timeout_millis: 30000
+  db_create_timeout_millis: 30000
+  db_destroy_timeout_millis: 5000
+  db_idle_timeout_millis: 30000
+  db_reap_interval_millis: 1000
+  db_create_retry_interval_millis: 200
+  db_debug: false
+  simple_routing_mode_enabled: true
+  log_level: info
+  log_transport: file
 
-    ## Kafka Configuration (used for sidecar)
-    # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-    kafka_host: kafka
-    kafka_port: 9092
+  ## Kafka Configuration (used for sidecar)
+  # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+  kafka_host: kafka
+  kafka_port: 9092
 
-    ## Tracing Configuration
-    event_trace_vendor: mojaloop
-    event_log_filter: 'audit:*, log:warn, log:error'
-    # If set to true, only the metadata object from the event will be printed.
-    event_log_metadata_only: false
-    # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
-    # Any combination of: `log,audit,trace`
-    event_async_override: 'log,trace'
-    event_trace_state_enabled: true
-    event_traceid_per_vendor: false
+  ## Tracing Configuration
+  event_trace_vendor: mojaloop
+  event_log_filter: 'audit:*, log:warn, log:error'
+  # If set to true, only the metadata object from the event will be printed.
+  event_log_metadata_only: false
+  # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+  # Any combination of: `log,audit,trace`
+  event_async_override: 'log,trace'
+  event_trace_state_enabled: true
+  event_traceid_per_vendor: false
 
-    endpointSecurity:
-      jwsSign: false
-      fspiopSourceSigningName: 'switch'
-      jwsSigningKey:
-      # To generate this key:
-      # Private:
-      # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
-      # Public:
-      # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-      # Should look like:
-      # -----BEGIN RSA PRIVATE KEY-----
-      # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
-      # ..
-      # ..
-      # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
-      # -----END RSA PRIVATE KEY-----
+  endpointSecurity:
+    jwsSign: false
+    fspiopSourceSigningName: 'switch'
+    jwsSigningKey:
+    # To generate this key:
+    # Private:
+    # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+    # Public:
+    # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+    # Should look like:
+    # -----BEGIN RSA PRIVATE KEY-----
+    # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+    # ..
+    # ..
+    # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+    # -----END RSA PRIVATE KEY-----
 
-    error_handling:
-      include_cause_extension: false
-      truncate_extensions: true
+  error_handling:
+    include_cause_extension: false
+    truncate_extensions: true
 
-    cache:
-      enum_data_expires_in_ms: 4170000
-      # Setting this any higher will most likely cause GP tests to fail
-      # Best to only set this higher if you are not running GP tests
-      # Not specifying or setting to 0 will default the cache to 60 seconds
-      participant_data_expires_in_ms: 10
+  cache:
+    enum_data_expires_in_ms: 4170000
+    # Setting this any higher will most likely cause GP tests to fail
+    # Best to only set this higher if you are not running GP tests
+    # Not specifying or setting to 0 will default the cache to 60 seconds
+    participant_data_expires_in_ms: 10
 
   rules: []
 

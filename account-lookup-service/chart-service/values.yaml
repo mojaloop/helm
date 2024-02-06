@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 image:
-  registry: "docker.io"
+  registry: docker.io
   repository: mojaloop/account-lookup-service
   tag: v15.0.0
   ## Specify a imagePullPolicy
@@ -143,13 +143,23 @@ config:
   kafka_port: 9092
   kafka_partitioner: 'murmur2_random'
 
-  end_point_cache:
+  central_shared_end_point_cache:
     expiresIn: 180000
     generateTimeout: 30000
+    getDecoratedValue: true
+  central_shared_participant_cache:
+    expiresIn: 61000
+    generateTimeout: 30000
+    getDecoratedValue: true
+  general_cache:
+    enabled: false
+    maxByteSize: 10000000
+    expiresIn: 61000
 
   # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
   # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-  protocol_versions: {
+  protocol_versions: |
+    {
         "CONTENT": {
             "DEFAULT": "1.1",
             "VALIDATELIST": [
