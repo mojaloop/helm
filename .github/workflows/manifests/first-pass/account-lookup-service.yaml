@@ -1,0 +1,131 @@
+name: account-lookup-service
+
+sources:
+  account-lookup-service:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: account-lookup-service
+  als-oracle-pathfinder:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: als-oracle-pathfinder
+  event-sidecar:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: event-sidecar
+  common:
+    kind: helmchart
+    spec: 
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+  
+conditions:
+  docker-account-lookup-service:
+    sourceid: account-lookup-service
+    kind: dockerimage
+    spec:
+      image: mojaloop/account-lookup-service
+  docker-als-oracle-pathfinder:
+    sourceid: als-oracle-pathfinder
+    kind: dockerimage
+    spec:
+      image: mojaloop/als-oracle-pathfinder
+  docker-event-sidecar:
+    sourceid: event-sidecar
+    kind: dockerimage
+    spec:
+      image: mojaloop/event-sidecar
+
+targets:
+  appVersion-account-lookup-service:
+    sourceid: account-lookup-service
+    kind: file
+    spec:
+      file: account-lookup-service/Chart.yaml
+      matchpattern: '(account-lookup-service:) (v[\d\.]+)(-snapshot(\.\d+)?)?'
+      replacepattern: '$1 {{ source "account-lookup-service" }}'
+  appVersion-als-oracle-pathfinder:
+    sourceid: als-oracle-pathfinder
+    kind: file
+    spec:
+      file: account-lookup-service/Chart.yaml
+      matchpattern: '(als-oracle-pathfinder:) (v[\d\.]+)(-snapshot(\.\d+)?)?'
+      replacepattern: '$1 {{ source "als-oracle-pathfinder" }}'
+  account-lookup-service:
+    sourceid: account-lookup-service
+    kind: helmchart
+    spec:
+      name: account-lookup-service
+      file: values.yaml
+      key: $.account-lookup-service.image.tag
+  account-lookup-service-admin:
+    sourceid: account-lookup-service
+    kind: helmchart
+    spec:
+      name: account-lookup-service
+      file: values.yaml
+      key: $.account-lookup-service-admin.image.tag
+  als-oracle-pathfinder:
+    sourceid: als-oracle-pathfinder
+    kind: helmchart
+    spec:
+      name: account-lookup-service
+      file: values.yaml
+      key: $.als-oracle-pathfinder.image.tag
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: account-lookup-service
+      file: Chart.yaml
+      key: $.dependencies[3].version
+  chart-admin:
+    sourceid: account-lookup-service
+    kind: helmchart
+    spec:
+      name: account-lookup-service/chart-admin
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-admin--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: account-lookup-service/chart-admin
+      file: values.yaml
+      key: $.sidecar.image.tag
+  chart-admin--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: account-lookup-service/chart-admin
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  chart-service:
+    sourceid: account-lookup-service
+    kind: helmchart
+    spec:
+      name: account-lookup-service/chart-service
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-service--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: account-lookup-service/chart-service
+      file: values.yaml
+      key: $.sidecar.image.tag
+  chart-service--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: account-lookup-service/chart-service
+      file: Chart.yaml
+      key: $.dependencies[0].version

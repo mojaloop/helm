@@ -1,0 +1,85 @@
+name: ml-testing-toolkit
+
+sources:
+  ml-testing-toolkit:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: ml-testing-toolkit
+  ml-testing-toolkit-ui:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: ml-testing-toolkit-ui
+  common:
+    kind: helmchart
+    spec: 
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+  
+conditions:
+  docker-ml-testing-toolkit:
+    sourceid: ml-testing-toolkit
+    kind: dockerimage
+    spec:
+      image: mojaloop/ml-testing-toolkit
+  docker-ml-testing-toolkit-ui:
+    sourceid: ml-testing-toolkit-ui
+    kind: dockerimage
+    spec:
+      image: mojaloop/ml-testing-toolkit-ui
+
+targets:
+  appVersion-ml-testing-toolkit:
+    sourceid: ml-testing-toolkit
+    kind: file
+    spec:
+      file: ml-testing-toolkit/Chart.yaml
+      matchpattern: '(ml-testing-toolkit:) (v[\d\.]+)'
+      replacepattern: '$1 {{ source "ml-testing-toolkit" }}'
+  appVersion-ml-testing-toolkit-ui:
+    sourceid: ml-testing-toolkit-ui
+    kind: file
+    spec:
+      file: ml-testing-toolkit/Chart.yaml
+      matchpattern: '(ml-testing-toolkit-ui:) (v[\d\.]+)'
+      replacepattern: '$1 {{ source "ml-testing-toolkit" }}'
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: ml-testing-toolkit
+      file: Chart.yaml
+      key: $.dependencies[2].version
+  chart-backend:
+    sourceid: ml-testing-toolkit
+    kind: helmchart
+    spec:
+      name: ml-testing-toolkit/chart-backend
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-backend--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: ml-testing-toolkit/chart-backend
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  chart-frontend:
+    sourceid: ml-testing-toolkit-ui
+    kind: helmchart
+    spec:
+      name: ml-testing-toolkit/chart-frontend
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-frontend--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: ml-testing-toolkit/chart-frontend
+      file: Chart.yaml
+      key: $.dependencies[0].version
