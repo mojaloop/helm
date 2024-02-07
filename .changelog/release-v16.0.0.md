@@ -25,13 +25,14 @@ _Release summary points go here..._
 
 ## 2. Bug Fixes
 * **mojaloop/#3682** fix cache implementation ([mojaloop/#468](https://github.com/mojaloop/account-lookup-service/pull/468)), closes [mojaloop/#3682](https://github.com/mojaloop/project/issues/3682)
+* **mojaloop/#3603** fix container permission issues ([mojaloop/#9](https://github.com/mojaloop/ml-testing-toolkit-client-lib/pull/9)), closes [mojaloop/#3603](https://github.com/mojaloop/project/issues/3603)
 
 ## 3. Application Versions
 
 1. central-event-processor: v12.0.0 ->                     [v12.1.0](https://github.com/mojaloop/central-event-processor/releases/v12.1.0)                     ([Compare](https://github.com/mojaloop/central-event-processor/compare/v12.0.0...v12.1.0))
 2. ml-testing-toolkit-ui: v15.4.0 ->                     [v15.4.2](https://github.com/mojaloop/ml-testing-toolkit-ui/releases/v15.4.2)                     ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v15.4.0...v15.4.2))
 3. als-oracle-pathfinder: v12.0.0 ->                     [v12.1.0](https://github.com/mojaloop/als-oracle-pathfinder/releases/v12.1.0)                     ([Compare](https://github.com/mojaloop/als-oracle-pathfinder/compare/v12.0.0...v12.1.0))
-4. ml-testing-toolkit-client-lib: v1.2.0 ->                     [v1.2.1](https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/v1.2.1)                     ([Compare](https://github.com/mojaloop/ml-testing-toolkit-client-lib/compare/v1.2.0...v1.2.1))
+4. ml-testing-toolkit-client-lib: v1.2.0 ->                     [v1.2.2](https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/v1.2.2)                     ([Compare](https://github.com/mojaloop/ml-testing-toolkit-client-lib/compare/v1.2.0...v1.2.2))
 5. account-lookup-service: v15.0.0 ->                     [v15.2.1](https://github.com/mojaloop/account-lookup-service/releases/v15.2.1)                     ([Compare](https://github.com/mojaloop/account-lookup-service/compare/v15.0.0...v15.2.1))
 6. simulator: v12.0.0 ->                     [v12.1.0](https://github.com/mojaloop/simulator/releases/v12.1.0)                     ([Compare](https://github.com/mojaloop/simulator/compare/v12.0.0...v12.1.0))
 7. quoting-service: v15.5.0 ->                     [v15.6.0](https://github.com/mojaloop/quoting-service/releases/v15.6.0)                     ([Compare](https://github.com/mojaloop/quoting-service/compare/v15.5.0...v15.6.0))
@@ -133,8 +134,8 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 ## 8. Contributors
 
 - Organizations: BMGF, InFiTX
-- Individuals: @aaronreynoza, @geka-evk, @kleyow, @vijayg10
+- Individuals: @aaronreynoza, @geka-evk, @kleyow, @oderayi, @vijayg10
 
-*Note: companies are in alphabetical order, individuals are in no particular order.*
+*Note: companies and individuals are in alphabetical order*
 
 **Full Changelog**: https://github.com/mojaloop/helm/compare/v15.2.0...v16.0.0
