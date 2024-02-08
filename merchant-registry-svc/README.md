@@ -22,6 +22,9 @@
 
 ### Deploying the Helm Charts
 
+Note For Production: Recommended to use external Third Party S3 Services (like Amazon S3, Digital Ocean Space etc.) for storing the documents and QR Images instead of the MinIO S3 instance service.
+See the [`./chart-acquirer-backend/values.yaml`](./chart-acquirer-backend/values.yaml) for the configuration.
+
 1. Build Dependency Chart
 
 ```bash
