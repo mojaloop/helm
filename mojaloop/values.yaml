@@ -1306,12 +1306,14 @@ quoting-service:
         prefix: moja_
         defaultLabels:
           serviceName: quoting-service
+  
   quoting-service-handler:
     enabled: true
     image:
       registry: docker.io
       repository: mojaloop/quoting-service
       tag: v15.6.0
+    
     config:
       ## DB Configuration
       # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
@@ -1343,33 +1345,6 @@ quoting-service:
       db_debug: false
       simple_routing_mode_enabled: true
       log_level: info
-    sidecar:
-      enabled: true
-      image:
-        repository: mojaloop/event-sidecar
-        tag: v14.0.0
-        pullPolicy: IfNotPresent
-      readinessProbe:
-        enabled: true
-        initialDelaySeconds: 120
-        periodSeconds: 15
-      livenessProbe:
-        enabled: true
-        initialDelaySeconds: 90
-        periodSeconds: 15
-      config:
-        event_log_grpc_host: localhost
-        event_log_grpc_port: 50051
-        log_level: info
-  ## metric configuration for prometheus instrumentation
-  metrics:
-    ## flag to enable/disable the metrics end-points
-    enabled: true
-    config:
-      timeout: 5000
-      prefix: moja_
-      defaultLabels:
-        serviceName: quoting-service
 
       # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
       # Any combination of: `log,audit,trace`
@@ -1430,6 +1405,36 @@ quoting-service:
             bKbkEndra96L6FRZN8LYBl8zbRUPx39ojGeSbFliQv1eaoA/1DDhCiC2NlcSmbJl
             ecaG/Oyo/S+eM8nR7mc=
           -----END PRIVATE KEY-----
+
+    ## metric configuration for prometheus instrumentation
+    metrics:
+      ## flag to enable/disable the metrics end-points
+      enabled: true
+      config:
+        timeout: 5000
+        prefix: moja_
+        defaultLabels:
+          serviceName: quoting-service
+    
+    # Sidecar configuration
+    sidecar:
+      enabled: true
+      image:
+        repository: mojaloop/event-sidecar
+        tag: v14.0.0
+        pullPolicy: IfNotPresent
+      readinessProbe:
+        enabled: true
+        initialDelaySeconds: 120
+        periodSeconds: 15
+      livenessProbe:
+        enabled: true
+        initialDelaySeconds: 90
+        periodSeconds: 15
+      config:
+        event_log_grpc_host: localhost
+        event_log_grpc_port: 50051
+        log_level: info
 
 ml-api-adapter:
   enabled: true
