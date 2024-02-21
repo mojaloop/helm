@@ -1,0 +1,57 @@
+name: quoting-service
+
+sources:
+  quoting-service:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: quoting-service
+  event-sidecar:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: event-sidecar
+  common:
+    kind: helmchart
+    spec: 
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+  
+conditions:
+  docker-quoting-service:
+    sourceid: quoting-service
+    kind: dockerimage
+    spec:
+      image: mojaloop/quoting-service
+  docker-event-sidecar:
+    sourceid: event-sidecar
+    kind: dockerimage
+    spec:
+      image: mojaloop/event-sidecar
+
+targets:
+  quoting-service:
+    sourceid: quoting-service
+    kind: helmchart
+    spec:
+      name: quoting-service
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  quoting-service--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: quoting-service
+      file: values.yaml
+      key: $.sidecar.image.tag
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: quoting-service
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  

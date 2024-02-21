@@ -1,0 +1,194 @@
+name: thirdparty
+
+sources:
+  auth-service:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: auth-service
+  als-consent-oracle:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: als-consent-oracle
+  thirdparty-api-svc:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: thirdparty-api-svc
+  sdk-scheme-adapter:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: sdk-scheme-adapter
+  mojaloop-simulator:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: mojaloop-simulator
+  thirdparty-sdk:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: thirdparty-sdk
+  common:
+    kind: helmchart
+    spec: 
+      url: https://mojaloop.github.io/charts/repo
+      name: common
+  
+conditions:
+  docker-auth-service:
+    sourceid: auth-service
+    kind: dockerimage
+    spec:
+      image: mojaloop/auth-service
+  docker-als-consent-oracle:
+    sourceid: als-consent-oracle
+    kind: dockerimage
+    spec:
+      image: mojaloop/als-consent-oracle
+  docker-thirdparty-api-svc:
+    sourceid: thirdparty-api-svc
+    kind: dockerimage
+    spec:
+      image: mojaloop/thirdparty-api-svc
+  docker-sdk-scheme-adapter:
+    sourceid: sdk-scheme-adapter
+    kind: dockerimage
+    spec:
+      image: mojaloop/sdk-scheme-adapter
+  docker-mojaloop-simulator:
+    sourceid: mojaloop-simulator
+    kind: dockerimage
+    spec:
+      image: mojaloop/mojaloop-simulator
+  docker-thirdparty-sdk:
+    sourceid: thirdparty-sdk
+    kind: dockerimage
+    spec:
+      image: mojaloop/thirdparty-sdk
+  
+targets:
+  appVersion-auth-service:
+    sourceid: auth-service
+    kind: file
+    spec:
+      file: thirdparty/Chart.yaml
+      matchpattern: '(auth-service:) (v[\d\.]+)(-snapshot(\.\d+)?)?'
+      replacepattern: '$1 {{ source "auth-service" }}'
+  appVersion-consent-oracle:
+    sourceid: als-consent-oracle
+    kind: file
+    spec:
+      file: thirdparty/Chart.yaml
+      matchpattern: '(consent-oracle:) (v[\d\.]+)(-snapshot(\.\d+)?)?'
+      replacepattern: '$1 {{ source "als-consent-oracle" }}'
+  appVersion-thirdparty-api:
+    sourceid: thirdparty-sdk
+    kind: file
+    spec:
+      file: thirdparty/Chart.yaml
+      matchpattern: '(thirdparty-sdk:) (v[\d\.]+)(-snapshot(\.\d+)?)?'
+      replacepattern: '$1 {{ source "thirdparty-sdk" }}'
+  auth-service:
+    sourceid: auth-service
+    kind: helmchart
+    spec:
+      name: thirdparty
+      file: values.yaml
+      key: $.auth-svc.image.tag
+  consent-oracle:
+    sourceid: als-consent-oracle
+    kind: helmchart
+    spec:
+      name: thirdparty
+      file: values.yaml
+      key: $.consent-oracle.image.tag
+  tp-api-svc:
+    sourceid: thirdparty-api-svc
+    kind: helmchart
+    spec:
+      name: thirdparty
+      file: values.yaml
+      key: $.tp-api-svc.image.tag
+  sdk-scheme-adapter:
+    sourceid: sdk-scheme-adapter
+    kind: helmchart
+    spec:
+      name: thirdparty
+      file: values.yaml
+      key: $.thirdparty-simulator.defaults.config.schemeAdapter.image.tag
+  mojaloop-simulator:
+    sourceid: mojaloop-simulator
+    kind: helmchart
+    spec:
+      name: thirdparty
+      file: values.yaml
+      key: $.thirdparty-simulator.defaults.config.backend.image.tag
+  thirdparty-sdk:
+    sourceid: thirdparty-sdk
+    kind: helmchart
+    spec:
+      name: thirdparty
+      file: values.yaml
+      key: $.thirdparty-simulator.defaults.config.thirdpartysdk.image.tag
+  common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: thirdparty
+      file: Chart.yaml
+      key: $.dependencies[4].version
+  chart-auth-svc--auth-service:
+    sourceid: auth-service
+    kind: helmchart
+    spec:
+      name: thirdparty/chart-auth-svc
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-auth-svc--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: thirdparty/chart-auth-svc
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  chart-consent-oracle--als-consent-oracle:
+    sourceid: als-consent-oracle
+    kind: helmchart
+    spec:
+      name: thirdparty/chart-consent-oracle
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-consent-oracle--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: thirdparty/chart-consent-oracle
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  chart-tp-api-svc--thirdparty-api-svc:
+    sourceid: thirdparty-api-svc
+    kind: helmchart
+    spec:
+      name: thirdparty/chart-tp-api-svc
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-tp-api-svc--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: thirdparty/chart-tp-api-svc
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  
