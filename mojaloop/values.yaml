@@ -1273,6 +1273,7 @@ quoting-service:
       registry: docker.io
       repository: mojaloop/quoting-service
       tag: v15.6.0
+    
     config:
       log_level: info
       log_transport: file
@@ -1291,6 +1292,23 @@ quoting-service:
       error_handling:
         include_cause_extension: false
         truncate_extensions: true
+      
+      endpointSecurity:
+        jwsSign: false
+        fspiopSourceSigningName: 'switch'
+        jwsSigningKey: null 
+      # To generate this key:
+      # Private:
+      # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+      # Public:
+      # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+      # Should look like:
+      # -----BEGIN RSA PRIVATE KEY-----
+      # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+      # ..
+      # ..
+      # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+      # -----END RSA PRIVATE KEY-----
 
     sidecar:
       enabled: true
@@ -11168,6 +11186,29 @@ mojaloop-bulk:
               ]
             }
           }
+        
+        # Parameters for JWS signing requests
+        endpointSecurity:
+          jwsSign: false
+          fspiopSourceSigningName: 'switch'
+          # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
+          # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
+          # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
+          jwsSigningKeySecret: null
+          jwsSigningKey: null
+            # To generate this key:
+            # Private:
+            # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+            # Public:
+            # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+            # Should look like:
+            # -----BEGIN RSA PRIVATE KEY-----
+            # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+            # ..
+            # ..
+            # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+            # -----END RSA PRIVATE KEY-----
+
 
       ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
       ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
