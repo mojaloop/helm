@@ -55,8 +55,11 @@ spec:
       {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
       - name: jws-private-key
         secret:
-          {{- if $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
-          secretName: {{ $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
+          {{- if $config.config.schemeAdapter.secrets.jws.privateKeySecret }}
+          secretName: {{ $config.config.schemeAdapter.secrets.jws.privateKeySecret.name }}
+          items:
+            - key: {{ $config.config.schemeAdapter.secrets.jws.privateKeySecret.key }}
+              path: private.key
           {{- else }}
           secretName: {{ $fullName }}-jws-priv-key
           {{- end }}
