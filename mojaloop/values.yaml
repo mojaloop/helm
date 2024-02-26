@@ -240,6 +240,10 @@ account-lookup-service:
       endpointSecurity:
         jwsSign: true
         fspiopSourceSigningName: switch
+        # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
+        # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
+        # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
+        jwsSigningKeySecret: null
         # jwsSigningKey:
         # To generate this key:
         # Private:
@@ -604,6 +608,10 @@ account-lookup-service:
       endpointSecurity:
         jwsSign: false
         fspiopSourceSigningName: switch
+        # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
+        # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
+        # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
+        jwsSigningKeySecret: null
         # jwsSigningKey:
         # To generate this key:
         # Private:
@@ -1265,6 +1273,7 @@ quoting-service:
       registry: docker.io
       repository: mojaloop/quoting-service
       tag: v15.6.0
+    
     config:
       log_level: info
       log_transport: file
@@ -1283,6 +1292,23 @@ quoting-service:
       error_handling:
         include_cause_extension: false
         truncate_extensions: true
+      
+      endpointSecurity:
+        jwsSign: false
+        fspiopSourceSigningName: 'switch'
+        jwsSigningKey: null 
+      # To generate this key:
+      # Private:
+      # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+      # Public:
+      # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+      # Should look like:
+      # -----BEGIN RSA PRIVATE KEY-----
+      # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+      # ..
+      # ..
+      # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+      # -----END RSA PRIVATE KEY-----
 
     sidecar:
       enabled: true
@@ -1368,6 +1394,10 @@ quoting-service:
       endpointSecurity:
         jwsSign: true
         fspiopSourceSigningName: 'switch'
+        # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
+        # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
+        # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
+        jwsSigningKeySecret: null
         # jwsSigningKey:
         # To generate this key:
         # Private:
@@ -1895,6 +1925,10 @@ ml-api-adapter:
       endpointSecurity:
         jwsSign: true
         fspiopSourceSigningName: 'switch'
+        # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
+        # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
+        # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
+        jwsSigningKeySecret: null
         # jwsSigningKey:
         # To generate this key:
         # Private:
@@ -7912,13 +7946,10 @@ thirdparty:
           schemeAdapter:
             secrets:
               jws:
-<<<<<<< Updated upstream
-=======
                 # `privateKeySecret` is used to specify the secret that contains the JWS signing key.
                 # If `privateKeySecret` is not null, then the `privateKey` value will be ignored.
                 # Expected properties of `privateKeySecret` are `name` and `key`.
                 privateKeySecret: {}
->>>>>>> Stashed changes
                 # The following is an example key and shouldn't be used in production
                 privateKey: |-
                   -----BEGIN PRIVATE KEY-----
@@ -8478,13 +8509,10 @@ thirdparty:
           schemeAdapter:
             secrets:
               jws:
-<<<<<<< Updated upstream
-=======
                 # `privateKeySecret` is used to specify the secret that contains the JWS signing key.
                 # If `privateKeySecret` is not null, then the `privateKey` value will be ignored.
                 # Expected properties of `privateKeySecret` are `name` and `key`.
                 privateKeySecret: {}
->>>>>>> Stashed changes
                 # The following is an example key and shouldn't be used in production
                 privateKey: |-
                   -----BEGIN PRIVATE KEY-----
@@ -8535,13 +8563,10 @@ thirdparty:
           schemeAdapter:
             secrets:
               jws:
-<<<<<<< Updated upstream
-=======
                 # `privateKeySecret` is used to specify the secret that contains the JWS signing key.
                 # If `privateKeySecret` is not null, then the `privateKey` value will be ignored.
                 # Expected properties of `privateKeySecret` are `name` and `key`.
                 privateKeySecret: {}
->>>>>>> Stashed changes
                 # The following is an example key and shouldn't be used in production
                 privateKey: |-
                   -----BEGIN PRIVATE KEY-----
@@ -8678,20 +8703,18 @@ thirdparty:
         schemeAdapter:
           secrets:
             jws:
-              # Use the privKeySecretName field if you would like to supply a JWS private key external
+              # Use the privateKeySecret field if you would like to supply a JWS private key external
               # to this chart.
-              # For example, if you create a private key called `sim-payerfsp-jws-signing-key` external
-              # to this chart, you would supply `privKeySecretName: sim-payerfsp-jws-signing-key` here.
+              # For example, if you create a private key called `sim-payerfsp-jws-signing-key` with data property `private.key` 
+              # external to this chart, you would supply 
+              # `privateKeySecret: 
+              #   name: sim-payerfsp-jws-signing-key` 
+              #   key: private.key
+              # here.
               # These fields will take precedence over `privateKey` and `publicKey` below.
               # This field is best supplied per-simulator, however it's here for documentation
               # purposes.
-              privKeySecretName: {}
-              # TODO: update `privKeySecretName` above to contain both a name and a key in the secret.
-              #       Add documentation on usage.
-              # privKeySecret: {}
-              #   name:
-              #   key:
-              #
+              privateKeySecret: {}
               # The `publicKeyConfigMapName` field allows you to supply a ConfigMap containing JWS public
               # keys external to this release, and have this release reference that ConfigMap to
               # populate JWS public keys. The format of this ConfigMap must be as described for
@@ -8975,20 +8998,18 @@ thirdparty:
               # DO NOT REMOVE COMMENT
               outbound: *inbound
             jws:
-              # Use the privKeySecretName field if you would like to supply a JWS private key external
+              # Use the privateKeySecret field if you would like to supply a JWS private key external
               # to this chart.
-              # For example, if you create a private key called `sim-payerfsp-jws-signing-key` external
-              # to this chart, you would supply `privKeySecretName: sim-payerfsp-jws-signing-key` here.
+              # For example, if you create a private key called `sim-payerfsp-jws-signing-key` with data property `private.key` 
+              # external to this chart, you would supply 
+              # `privateKeySecret: 
+              #   name: sim-payerfsp-jws-signing-key` 
+              #   key: private.key
+              # here.
               # These fields will take precedence over `privateKey` and `publicKey` below.
               # This field is best supplied per-simulator, however it's here for documentation
               # purposes.
-              privKeySecretName: {}
-              # TODO: update `privKeySecretName` above to contain both a name and a key in the secret.
-              #       Add documentation on usage.
-              # privKeySecret: {}
-              #   name:
-              #   key:
-              #
+              privateKeySecret: {}
               # The `publicKeyConfigMapName` field allows you to supply a ConfigMap containing JWS public
               # keys external to this release, and have this release reference that ConfigMap to
               # populate JWS public keys. The format of this ConfigMap must be as described for
@@ -9396,13 +9417,10 @@ mojaloop-simulator:
         schemeAdapter:
           secrets:
             jws:
-<<<<<<< Updated upstream
-=======
               # `privateKeySecret` is used to specify the secret that contains the JWS signing key.
               # If `privateKeySecret` is not null, then the `privateKey` value will be ignored.
               # Expected properties of `privateKeySecret` are `name` and `key`.
               privateKeySecret: {}
->>>>>>> Stashed changes
               # The following is an example key and shouldn't be used in production
               privateKey: |-
                 -----BEGIN PRIVATE KEY-----
@@ -9452,13 +9470,10 @@ mojaloop-simulator:
         schemeAdapter:
           secrets:
             jws:
-<<<<<<< Updated upstream
-=======
               # `privateKeySecret` is used to specify the secret that contains the JWS signing key.
               # If `privateKeySecret` is not null, then the `privateKey` value will be ignored.
               # Expected properties of `privateKeySecret` are `name` and `key`.
               privateKeySecret: {}
->>>>>>> Stashed changes
               # The following is an example key and shouldn't be used in production
               privateKey: |-
                 -----BEGIN PRIVATE KEY-----
@@ -9508,13 +9523,10 @@ mojaloop-simulator:
         schemeAdapter:
           secrets:
             jws:
-<<<<<<< Updated upstream
-=======
               # `privateKeySecret` is used to specify the secret that contains the JWS signing key.
               # If `privateKeySecret` is not null, then the `privateKey` value will be ignored.
               # Expected properties of `privateKeySecret` are `name` and `key`.
               privateKeySecret: {}
->>>>>>> Stashed changes
               # The following is an example key and shouldn't be used in production
               privateKey: |-
                 -----BEGIN PRIVATE KEY-----
@@ -9564,13 +9576,10 @@ mojaloop-simulator:
         schemeAdapter:
           secrets:
             jws:
-<<<<<<< Updated upstream
-=======
               # `privateKeySecret` is used to specify the secret that contains the JWS signing key.
               # If `privateKeySecret` is not null, then the `privateKey` value will be ignored.
               # Expected properties of `privateKeySecret` are `name` and `key`.
               privateKeySecret: {}
->>>>>>> Stashed changes
               # The following is an example key and shouldn't be used in production
               privateKey: |-
                 -----BEGIN PRIVATE KEY-----
@@ -9620,13 +9629,10 @@ mojaloop-simulator:
         schemeAdapter:
           secrets:
             jws:
-<<<<<<< Updated upstream
-=======
               # `privateKeySecret` is used to specify the secret that contains the JWS signing key.
               # If `privateKeySecret` is not null, then the `privateKey` value will be ignored.
               # Expected properties of `privateKeySecret` are `name` and `key`.
               privateKeySecret: {}
->>>>>>> Stashed changes
               # The following is an example key and shouldn't be used in production
               privateKey: |-
                 -----BEGIN PRIVATE KEY-----
@@ -9676,13 +9682,10 @@ mojaloop-simulator:
         schemeAdapter:
           secrets:
             jws:
-<<<<<<< Updated upstream
-=======
               # `privateKeySecret` is used to specify the secret that contains the JWS signing key.
               # If `privateKeySecret` is not null, then the `privateKey` value will be ignored.
               # Expected properties of `privateKeySecret` are `name` and `key`.
               privateKeySecret: {}
->>>>>>> Stashed changes
               # The following is an example key and shouldn't be used in production
               privateKey: |-
                 -----BEGIN PRIVATE KEY-----
@@ -9817,20 +9820,18 @@ mojaloop-simulator:
       schemeAdapter:
         secrets:
           jws:
-            # Use the privKeySecretName field if you would like to supply a JWS private key external
+            # Use the privateKeySecret field if you would like to supply a JWS private key external
             # to this chart.
-            # For example, if you create a private key called `sim-payerfsp-jws-signing-key` external
-            # to this chart, you would supply `privKeySecretName: sim-payerfsp-jws-signing-key` here.
+            # For example, if you create a private key called `sim-payerfsp-jws-signing-key` with data property `private.key` 
+            # external to this chart, you would supply 
+            # `privateKeySecret: 
+            #   name: sim-payerfsp-jws-signing-key` 
+            #   key: private.key
+            # here.
             # These fields will take precedence over `privateKey` and `publicKey` below.
             # This field is best supplied per-simulator, however it's here for documentation
             # purposes.
-            privKeySecretName: {}
-            # TODO: update `privKeySecretName` above to contain both a name and a key in the secret.
-            #       Add documentation on usage.
-            # privKeySecret: {}
-            #   name:
-            #   key:
-            #
+            privateKeySecret: {}
             # The `publicKeyConfigMapName` field allows you to supply a ConfigMap containing JWS public
             # keys external to this release, and have this release reference that ConfigMap to
             # populate JWS public keys. The format of this ConfigMap must be as described for
@@ -10112,20 +10113,18 @@ mojaloop-simulator:
             inbound: null
             outbound: null
           jws:
-            # Use the privKeySecretName field if you would like to supply a JWS private key external
+            # Use the privateKeySecret field if you would like to supply a JWS private key external
             # to this chart.
-            # For example, if you create a private key called `sim-payerfsp-jws-signing-key` external
-            # to this chart, you would supply `privKeySecretName: sim-payerfsp-jws-signing-key` here.
+            # For example, if you create a private key called `sim-payerfsp-jws-signing-key` with data property `private.key` 
+            # external to this chart, you would supply 
+            # `privateKeySecret: 
+            #   name: sim-payerfsp-jws-signing-key` 
+            #   key: private.key
+            # here.
             # These fields will take precedence over `privateKey` and `publicKey` below.
             # This field is best supplied per-simulator, however it's here for documentation
             # purposes.
-            privKeySecretName: {}
-            # TODO: update `privKeySecretName` above to contain both a name and a key in the secret.
-            #       Add documentation on usage.
-            # privKeySecret: {}
-            #   name:
-            #   key:
-            #
+            privateKeySecret: {}
             # The `publicKeyConfigMapName` field allows you to supply a ConfigMap containing JWS public
             # keys external to this release, and have this release reference that ConfigMap to
             # populate JWS public keys. The format of this ConfigMap must be as described for
@@ -11187,6 +11186,29 @@ mojaloop-bulk:
               ]
             }
           }
+        
+        # Parameters for JWS signing requests
+        endpointSecurity:
+          jwsSign: false
+          fspiopSourceSigningName: 'switch'
+          # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
+          # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
+          # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
+          jwsSigningKeySecret: null
+          jwsSigningKey: null
+            # To generate this key:
+            # Private:
+            # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+            # Public:
+            # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+            # Should look like:
+            # -----BEGIN RSA PRIVATE KEY-----
+            # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+            # ..
+            # ..
+            # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+            # -----END RSA PRIVATE KEY-----
+
 
       ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
       ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
