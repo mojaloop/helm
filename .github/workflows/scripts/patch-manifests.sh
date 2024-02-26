@@ -1,6 +1,6 @@
 # Applies package versions override to manifests using versions from the package.yaml file 
 # Usage: patch-manifests.sh <package.yaml> <manifests-dir>
-# Example: patch-manifests.sh ../manifests/package.yaml ../manifests
+# Example: patch-manifests.sh patch-manifests.sh .github/workflows/manifests/package.yaml .github/workflows/manifests/first-pass
 
 set -e
 
