@@ -156,9 +156,9 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(irate(node_cpu_seconds_total{mode!=\"idle\"}[1m])) by (instance) /\nsum(irate(node_cpu_seconds_total[1m])) by (instance)",
+          "expr": "sum(irate(node_cpu_seconds_total{mode!=\"idle\"}[1m])) by (instance) /\nsum(irate(node_cpu_seconds_total[1m])) by (instance)\n* on(instance) group_left (nodename) node_uname_info{nodename=~\".+\"}",
           "instant": false,
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{nodename}}",
           "range": true,
           "refId": "A"
         }
@@ -253,9 +253,9 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "1- (node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes)",
+          "expr": "(\n    1- (node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes)\n) * on(instance) group_left (nodename) node_uname_info{nodename=~\".+\"}",
           "instant": false,
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{nodename}}",
           "range": true,
           "refId": "A"
         }
@@ -350,9 +350,9 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "1-(node_filesystem_avail_bytes{device=\"/dev/root\"}/node_filesystem_size_bytes{device=\"/dev/root\"})",
+          "expr": "(\n    1-(node_filesystem_avail_bytes{device=\"/dev/root\"}/node_filesystem_size_bytes{device=\"/dev/root\"})\n) * on(instance) group_left (nodename) node_uname_info{nodename=~\".+\"}",
           "instant": false,
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{nodename}}",
           "range": true,
           "refId": "A"
         }
@@ -1029,8 +1029,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1126,8 +1125,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1559,7 +1557,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "Performance Troubleshooting",
-  "uid": "f1068daf-16a2-4e52-9a57-1a6620925837",
+  "uid": "f1068daf-16a2-4e52-9a57-1a6620925838",
   "version": 1,
   "weekStart": ""
 }
