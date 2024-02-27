@@ -1275,6 +1275,35 @@ quoting-service:
       tag: v15.6.0
     
     config:
+      ## DB Configuration
+      # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+      db_type: 'mysql'
+      # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+      db_driver: 'mysql'
+      db_host: *CL_DB_HOST
+      db_port: *CL_DB_PORT
+      db_user: *CL_DB_USER
+      ## Secret-Management
+      ### Set this if you are using a clear password configured in the config section
+      # db_password: *CL_DB_PASSWORD
+      ### Configure this if you want to use a secret. Note, this will override the db_password,
+      ### Use the next line if you do wish to use the db_password value instead.
+      # db_secret:
+      ### Example config for an existing secret
+      db_secret:
+        name: *CL_DB_SECRET_NAME
+        key: *CL_DB_SECRET_KEY
+      db_database: *CL_DB_NAME
+      db_connection_pool_min: 10
+      db_connection_pool_max: 30
+      db_acquire_timeout_millis: 30000
+      db_create_timeout_millis: 30000
+      db_destroy_timeout_millis: 5000
+      db_idle_timeout_millis: 30000
+      db_reap_interval_millis: 1000
+      db_create_retry_interval_millis: 200
+      db_debug: false
+      simple_routing_mode_enabled: true
       log_level: info
       log_transport: file
 
@@ -1377,6 +1406,7 @@ quoting-service:
       db_debug: false
       simple_routing_mode_enabled: true
       log_level: info
+      log_transport: file
 
       # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
       # Any combination of: `log,audit,trace`
