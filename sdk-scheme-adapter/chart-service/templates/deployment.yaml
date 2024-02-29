@@ -71,7 +71,14 @@ spec:
       {{- if .Values.env.JWS_SIGN }}
       - name: jws-private-key
         secret:
+        {{- if .Values.config.jwsSigningKeySecret }}
+          secretName: {{ .Values.config.jwsSigningKeySecret.name }}
+          items:
+          - key: {{ .Values.config.jwsSigningKeySecret.key }}
+            path: private.key
+        {{ else }}
           secretName: {{ template "common.names.fullname" . }}-jws-priv-key
+        {{- end }}
       {{- end }}
       {{- if .Values.env.VALIDATE_INBOUND_JWS }}
       - name: jws-public-keys
