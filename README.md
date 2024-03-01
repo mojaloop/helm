@@ -231,8 +231,8 @@ Mojaloop Helm deployments currently include the following provisioning (`setup`)
     - `ml-ttk-test-setup-sdk-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true`, `mojaloop-ttk-simulators.enabled=true` is set_)
     - `ml-ttk-test-val-sdk-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true`, `mojaloop-ttk-simulators.enabled=true` is set_)
     - `ml-ttk-test-val-sdk-r2p.tests.enabled=true` (_Note: only applicable if `mojaloop-ttk-simulators.enabled=true` is set_)
-    - `ml-ttk-test-setup-tp.test.enabled=true` (_Note: only applicable if `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` is set_)
-    - `ml-ttk-test-val-tp.test,enabled=true` (_Note: only applicable if `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` is set_)
+    - `ml-ttk-test-setup-tp.tests.enabled=true` (_Note: only applicable if `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` is set_)
+    - `ml-ttk-test-val-tp.tests.enabled=true` (_Note: only applicable if `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` is set_)
     - `ml-ttk-test-cleanup.test.enabled=true`
 
     Or alternatively add `--set` for each of the above parameters on the install command:
