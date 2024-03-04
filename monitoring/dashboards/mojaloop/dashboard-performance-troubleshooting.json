@@ -471,6 +471,10 @@
         "type": "prometheus",
         "uid": "Prometheus"
       },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -551,9 +555,9 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (serviceName)({error=~\"Error: read ECONNRESET\"})",
+          "expr": "sum by (serviceName, container)({error=~\"Error: read ECONNRESET\"})",
           "instant": false,
-          "legendFormat": "ECONNRESET - {{serviceName}}",
+          "legendFormat": "ECONNRESET - {{serviceName}} - {{container}}",
           "range": true,
           "refId": "A"
         },
@@ -563,10 +567,10 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (serviceName)({error=~\"Error: socket hang up\"})",
+          "expr": "sum by (serviceName, container)({error=~\"Error: socket hang up\"})",
           "hide": false,
           "instant": false,
-          "legendFormat": "Socker hang up - {{serviceName}}",
+          "legendFormat": "Socker hang up - {{serviceName}} - {{container}}",
           "range": true,
           "refId": "B"
         }
@@ -1029,8 +1033,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1126,8 +1129,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2026,7 +2028,7 @@
     "list": []
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {},
