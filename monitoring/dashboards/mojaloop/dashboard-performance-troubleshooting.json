@@ -1695,39 +1695,14 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
             },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "inspect": false
           },
           "mappings": [],
           "thresholds": {
@@ -1754,17 +1729,18 @@
       },
       "id": 17,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "showHeader": true
       },
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
@@ -1772,15 +1748,30 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "kube_deployment_status_replicas_available{namespace=\"mojaloop\",deployment=~\".*(account-lookup-service|account-lookup-service-admin|centralledger-handler-admin-transfer|centralledger-handler-timeout|centralledger-handler-transfer-fulfil|centralledger-handler-transfer-get|centralledger-handler-transfer-position|centralledger-service).*\"}\t",
-          "instant": false,
+          "exemplar": false,
+          "expr": "sum(kube_deployment_status_replicas_available{namespace=\"mojaloop\",deployment=~\".*(account-lookup-service|account-lookup-service-admin|centralledger-handler-admin-transfer|centralledger-handler-timeout|centralledger-handler-transfer-fulfil|centralledger-handler-transfer-get|centralledger-handler-transfer-position|centralledger-service).*\"}) by (deployment)",
+          "format": "table",
+          "instant": true,
           "legendFormat": "{{deployment}}",
-          "range": true,
+          "range": false,
           "refId": "A"
         }
       ],
       "title": "Mojaloop replicaset count",
-      "type": "timeseries"
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
     },
     {
       "datasource": {
@@ -1790,39 +1781,14 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
             },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "inspect": false
           },
           "mappings": [],
           "thresholds": {
@@ -1849,17 +1815,18 @@
       },
       "id": 18,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "showHeader": true
       },
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
@@ -1867,15 +1834,30 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "kube_statefulset_status_replicas_available{namespace=\"mojaloop-db\", statefulset=~\".*(mysql).*\"}",
-          "instant": false,
+          "exemplar": false,
+          "expr": "sum(kube_statefulset_status_replicas_available{namespace=\"mojaloop-db\", statefulset=~\".*(mysql).*\"}) by (statefulset)",
+          "format": "table",
+          "instant": true,
           "legendFormat": "{{statefulset}}",
-          "range": true,
+          "range": false,
           "refId": "A"
         }
       ],
       "title": "MySQL statefulset count",
-      "type": "timeseries"
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
     },
     {
       "datasource": {
@@ -1885,39 +1867,14 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
             },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "inspect": false
           },
           "mappings": [],
           "thresholds": {
@@ -1944,17 +1901,18 @@
       },
       "id": 19,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "showHeader": true
       },
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
@@ -1962,22 +1920,49 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "kube_statefulset_status_replicas_available{namespace=\"mojaloop\", statefulset=~\".*(kafka).*\"}",
-          "instant": false,
+          "exemplar": false,
+          "expr": "sum(kube_statefulset_status_replicas_available{namespace=\"mojaloop\", statefulset=~\".*(kafka).*\"}) by (statefulset)",
+          "format": "table",
+          "instant": true,
           "legendFormat": "{{statefulset}}",
-          "range": true,
+          "range": false,
           "refId": "A"
         }
       ],
       "title": "Kafka statefulset count",
-      "type": "timeseries"
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
     }
   ],
   "refresh": "",
   "schemaVersion": 39,
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "dd328bf5-4f0c-49cc-af57-e6081911fc48"
+        },
+        "filters": [],
+        "hide": 0,
+        "name": "Filters",
+        "skipUrlSync": false,
+        "type": "adhoc"
+      }
+    ]
   },
   "time": {
     "from": "now-5m",
@@ -1986,7 +1971,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "Performance Troubleshooting",
-  "uid": "f1068daf-16a2-4e52-9a57-1a6620925844",
+  "uid": "f1068daf-16a2-4e52-9a57-1a6620925845",
   "version": 1,
   "weekStart": ""
 }
