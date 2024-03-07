@@ -350,7 +350,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "(\n    1-(node_filesystem_avail_bytes{device=\"/dev/root\"}/node_filesystem_size_bytes{device=\"/dev/root\"})\n) * on(instance) group_left (nodename) node_uname_info{nodename=~\".+\"}",
+          "expr": "(\n    1-(node_filesystem_avail_bytes{device=\"/dev/mapper/ubuntu--vg-ubuntu--lv\"}/node_filesystem_size_bytes{device=\"/dev/mapper/ubuntu--vg-ubuntu--lv\"})\n) * on(instance) group_left (nodename) node_uname_info{nodename=~\".+\"}",
           "instant": false,
           "legendFormat": "{{nodename}}",
           "range": true,
@@ -471,6 +471,10 @@
         "type": "prometheus",
         "uid": "Prometheus"
       },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -551,9 +555,9 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (serviceName)({error=~\"Error: read ECONNRESET\"})",
+          "expr": "sum by (serviceName, container)({error=~\"Error: read ECONNRESET\"})",
           "instant": false,
-          "legendFormat": "ECONNRESET - {{serviceName}}",
+          "legendFormat": "ECONNRESET - {{serviceName}} - {{container}}",
           "range": true,
           "refId": "A"
         },
@@ -563,10 +567,10 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (serviceName)({error=~\"Error: socket hang up\"})",
+          "expr": "sum by (serviceName, container)({error=~\"Error: socket hang up\"})",
           "hide": false,
           "instant": false,
-          "legendFormat": "Socker hang up - {{serviceName}}",
+          "legendFormat": "Socker hang up - {{serviceName}} - {{container}}",
           "range": true,
           "refId": "B"
         }
@@ -876,7 +880,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (container)(increase(kube_pod_container_status_restarts_total{container=\"mysql\",namespace=\"mojaloop-db\"}[5m]))",
+          "expr": "sum by (pod)(increase(kube_pod_container_status_restarts_total{container=\"mysql\",namespace=\"mojaloop-db\"}[5m]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -971,7 +975,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (container)(increase(kube_pod_container_status_restarts_total{container=\"kafka\",namespace=\"mojaloop\"}[5m]))",
+          "expr": "sum by (pod)(increase(kube_pod_container_status_restarts_total{container=\"kafka\",namespace=\"mojaloop\"}[5m]))",
           "hide": false,
           "instant": false,
           "legendFormat": "__auto",
@@ -1029,7 +1033,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1125,7 +1130,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1134,39 +1140,7 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "__systemRef": "hideSeriesFrom",
-            "matcher": {
-              "id": "byNames",
-              "options": {
-                "mode": "exclude",
-                "names": [
-                  "handler-pos-batch - /kubepods/besteffort/pod5197a350-07ce-4fc7-8ce4-bdd29d36805e/0de6c404b007e3fd92c4fa9e8a6a6c7c957e86f5faae27328693c108740ed747",
-                  "handler-pos-batch - /kubepods/besteffort/pod726f1fce-5ed2-487a-9b96-866ed69de209/a43dbca36a1d91b3fd8835f38c0705cd6233c4535605b7b0a06a74ba3ddeef11",
-                  "handler-pos-batch - /kubepods/besteffort/pod78afe6f6-f57d-4af6-bbde-c4a66671d378/47e9728a2ca66b8dfd5b22161fb3b3ba208d9f75c3751d6cae6cd378a678de78",
-                  "handler-pos-batch - /kubepods/besteffort/pod9efbf7ab-1467-437e-a499-03b4e51256b2/7532bb94a550c50505ac0ca1e22bb5d34aa6e4633be15d348c4efed1f3b438f2",
-                  "handler-pos-batch - /kubepods/besteffort/podb607f201-5377-42e1-8c0b-10505c3e69f2/f29a5161b93f738c07331de1a61ba78f515798603d818517d59b246f8e1fc3c1",
-                  "handler-pos-batch - /kubepods/besteffort/podfc874603-2a8f-40f5-a4f0-74a00ffd48f8/1580a26f5f6d70b476b5c71cfe873d27fd4de0838f37f7d7f3dbd142d0d6880f",
-                  "handler-pos-batch - /kubepods/besteffort/pod217ac51e-6033-4b4f-9729-84c15bf18635/fb88f67b8528ff693ca12d6af95df7c0ae1cc68211a5fb67edeef9da4ab844c7",
-                  "handler-pos-batch - /kubepods/besteffort/pod35a28e0b-f026-427e-8ad2-5f6e30117def/62e4c7b693f84f571f81eb5a38870d5c25999d93154a3320f5ac7828da398a7e"
-                ],
-                "prefix": "All except:",
-                "readOnly": true
-              }
-            },
-            "properties": [
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": true
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 7,
@@ -1252,7 +1226,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1349,7 +1324,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1443,7 +1419,106 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 30
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "container_memory_usage_bytes{namespace=~\"mojaloop-db\", container=\"mysql\"}",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "{{pod}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Database containers memory usage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1452,39 +1527,108 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "__systemRef": "hideSeriesFrom",
-            "matcher": {
-              "id": "byNames",
-              "options": {
-                "mode": "exclude",
-                "names": [
-                  "Max Connections mysql-central-ledger-db-0",
-                  "Max Use Connections mysql-central-ledger-db-0"
-                ],
-                "prefix": "All except:",
-                "readOnly": true
-              }
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 30
+      },
+      "id": 21,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "rate(container_cpu_usage_seconds_total{namespace=~\"mojaloop-db\", container=\"mysql\"}[5m])",
+          "instant": false,
+          "legendFormat": "{{pod}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Database container cpu usage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
             },
-            "properties": [
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "id": "custom.hideFrom",
-                "value": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": true
-                }
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           }
-        ]
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 37
       },
       "id": 8,
       "options": {
@@ -1542,13 +1686,283 @@
       ],
       "title": "MySQL Connections",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 41
+      },
+      "id": 17,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(kube_deployment_status_replicas_available{namespace=\"mojaloop\",deployment=~\".*(account-lookup-service|account-lookup-service-admin|centralledger-handler-admin-transfer|centralledger-handler-timeout|centralledger-handler-transfer-fulfil|centralledger-handler-transfer-get|centralledger-handler-transfer-position|centralledger-service).*\"}) by (deployment)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{deployment}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Mojaloop replicaset count",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 41
+      },
+      "id": 18,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(kube_statefulset_status_replicas_available{namespace=\"mojaloop-db\", statefulset=~\".*(mysql).*\"}) by (statefulset)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{statefulset}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "MySQL statefulset count",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 41
+      },
+      "id": 19,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(kube_statefulset_status_replicas_available{namespace=\"mojaloop\", statefulset=~\".*(kafka).*\"}) by (statefulset)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{statefulset}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Kafka statefulset count",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
     }
   ],
   "refresh": "",
   "schemaVersion": 39,
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "dd328bf5-4f0c-49cc-af57-e6081911fc48"
+        },
+        "filters": [],
+        "hide": 0,
+        "name": "Filters",
+        "skipUrlSync": false,
+        "type": "adhoc"
+      }
+    ]
   },
   "time": {
     "from": "now-5m",
@@ -1557,7 +1971,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "Performance Troubleshooting",
-  "uid": "f1068daf-16a2-4e52-9a57-1a6620925838",
+  "uid": "f1068daf-16a2-4e52-9a57-1a6620925845",
   "version": 1,
   "weekStart": ""
 }
