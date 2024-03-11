@@ -22,6 +22,8 @@ _Release summary points go here..._
 * **mojaloop/#3524** add reserve action to fulfil logic ([mojaloop/#992](https://github.com/mojaloop/central-ledger/pull/992)), closes [mojaloop/#3524](https://github.com/mojaloop/project/issues/3524)
 * **mojaloop/#321** refactor quoting service into an event driven solution to improve performance ([mojaloop/#321](https://github.com/mojaloop/quoting-service/pull/321)), closes [mojaloop/#321](https://github.com/mojaloop/project/issues/321)
 * **mojaloop/#3445** nodejs upgrade ([mojaloop/#252](https://github.com/mojaloop/simulator/pull/252)), closes [mojaloop/#3445](https://github.com/mojaloop/project/issues/3445)
+* **mojaloop/#3666** refactor quoting service into an event driven solution to improve performance ([mojaloop/#321](https://github.com/mojaloop/quoting-service/pull/321)), closes [mojaloop/#3666](https://github.com/mojaloop/project/issues/3666)
+* **iprod/#379** added integration tests; updated docker-compose ([mojaloop/#324](https://github.com/mojaloop/quoting-service/pull/324)), closes [iprod/#379](https://github.com/mojaloop/project/issues)
 
 ## 2. Bug Fixes
 * **mojaloop/#3682** fix cache implementation ([mojaloop/#468](https://github.com/mojaloop/account-lookup-service/pull/468)), closes [mojaloop/#3682](https://github.com/mojaloop/project/issues/3682)
