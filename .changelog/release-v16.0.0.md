@@ -4,9 +4,6 @@ Date | Revision | Description
 ---------|----------|---------
 2024-02-06 | 0 | Initial draft
 
-- For *BREAKING ISSUES*, please review the section `#6` ["Breaking Changes"](#6-breaking-changes) below.
-- For *KNOWN ISSUES*, please review the section `#7` ["Known Issues"](#7-known-issues) below.
-
 ## 0. Summary
 
 Enhancements and breaking changes to the [v15.2.0 Release](https://github.com/mojaloop/helm/blob/master/.changelog/release-v15.2.0.md), which includes:
