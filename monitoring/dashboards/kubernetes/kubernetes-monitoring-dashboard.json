@@ -24,12 +24,6 @@
       "version": "10.2.3"
     },
     {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph (old)",
-      "version": ""
-    },
-    {
       "type": "datasource",
       "id": "prometheus",
       "name": "Prometheus",
@@ -896,8 +890,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1018,8 +1011,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1166,8 +1158,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1385,64 +1376,91 @@
       "id": 43,
       "panels": [
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "decimals": 2,
-          "editable": true,
-          "error": false,
           "fieldConfig": {
             "defaults": {
-              "links": []
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "Bps"
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
-          "grid": {},
           "gridPos": {
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 43
+            "y": 16
           },
-          "hiddenSeries": false,
           "id": 16,
-          "legend": {
-            "alignAsTable": true,
-            "avg": true,
-            "current": true,
-            "max": false,
-            "min": false,
-            "rightSide": true,
-            "show": true,
-            "sideWidth": 200,
-            "sort": "current",
-            "sortDesc": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 2,
           "links": [],
-          "nullPointMode": "connected",
           "options": {
-            "alertThreshold": true
+            "legend": {
+              "calcs": [
+                "min",
+                "max",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
           },
-          "percentage": false,
           "pluginVersion": "10.2.3",
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
           "targets": [
             {
               "datasource": {
@@ -1450,10 +1468,10 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum (rate (container_network_receive_bytes_total{image!=\"\",kubernetes_io_hostname=~\"^$Node$\",namespace=~\"^$namespace$\"}[1m])) by (pod)",
+              "expr": "sum (rate (container_network_receive_bytes_total{image!=\"\",node=~\"^$Node$\",namespace=~\"^$namespace$\"}[1m])) by (pod)",
               "interval": "10s",
               "intervalFactor": 1,
-              "legendFormat": "-> {{ pod }}",
+              "legendFormat": "sent - {{ pod }}",
               "metric": "network",
               "range": true,
               "refId": "A",
@@ -1464,46 +1482,20 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "- sum (rate (container_network_transmit_bytes_total{image!=\"\",name=~\"^k8s_.*\",kubernetes_io_hostname=~\"^$Node$\",namespace=~\"^$namespace$\"}[1m])) by (pod)",
-              "hide": true,
+              "editorMode": "code",
+              "expr": "- sum (rate (container_network_transmit_bytes_total{image!=\"\",node=~\"^$Node$\",namespace=~\"^$namespace$\"}[1m])) by (pod)",
+              "hide": false,
               "interval": "10s",
               "intervalFactor": 1,
-              "legendFormat": "<- {{ pod }}",
+              "legendFormat": "received - {{ pod }}",
               "metric": "network",
+              "range": true,
               "refId": "B",
               "step": 10
             }
           ],
-          "thresholds": [],
-          "timeRegions": [],
           "title": "Pods network I/O (1m avg)",
-          "tooltip": {
-            "msResolution": false,
-            "shared": true,
-            "sort": 2,
-            "value_type": "cumulative"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "Bps",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
+          "type": "timeseries"
         }
       ],
       "targets": [
@@ -1866,6 +1858,6 @@
   "timezone": "browser",
   "title": "Kubernetes Monitoring Dashboard",
   "uid": "msqzbWjWkr-08",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
