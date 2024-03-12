@@ -11,7 +11,7 @@ Enhancements and breaking changes to the [v15.2.0 Release](https://github.com/mo
 1. Performance improvement in Central Ledger via batching of position prepare and position filfill messages
 2. Performance improvement in ALS with the addition of participant requests caching, and logging fixes
 3. Refactoring of Quoting Service into an event-driven service to improve performance
-4. General maintenance and bug fixes
+4. General maintenance, bug fixes, and nodejs upgrades.
 
 ## 1. New Features
 * **mojaloop/#3426** add participant req caching, enable cache metrics, log fixes ([mojaloop/#465](https://github.com/mojaloop/account-lookup-service/pull/465)), closes [mojaloop/#3426](https://github.com/mojaloop/project/issues/3426)
