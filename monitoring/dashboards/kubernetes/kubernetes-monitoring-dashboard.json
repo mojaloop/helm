@@ -178,7 +178,7 @@
       "type": "timeseries"
     },
     {
-      "collapsed": false,
+      "collapsed": true,
       "datasource": {
         "type": "prometheus",
         "uid": "e8b0578a-b992-495d-b51d-ea527c0c118b"
@@ -190,7 +190,131 @@
         "y": 10
       },
       "id": 33,
-      "panels": [],
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "decimals": 2,
+          "editable": true,
+          "error": false,
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "grid": {},
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 11
+          },
+          "height": "200px",
+          "hiddenSeries": false,
+          "id": 32,
+          "legend": {
+            "alignAsTable": false,
+            "avg": true,
+            "current": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": false,
+            "sideWidth": 200,
+            "sort": "current",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 2,
+          "links": [],
+          "nullPointMode": "connected",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "10.2.3",
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum (rate(container_network_receive_bytes_total{node=~\"^$Node$\",namespace=~\"^$namespace$\"}[1m]))",
+              "interval": "10s",
+              "intervalFactor": 1,
+              "legendFormat": "Received",
+              "metric": "network",
+              "range": true,
+              "refId": "A",
+              "step": 10
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "- sum (rate (container_network_transmit_bytes_total{node=~\"^$Node$\",namespace=~\"^$namespace$\"}[1m]))",
+              "interval": "10s",
+              "intervalFactor": 1,
+              "legendFormat": "Sent",
+              "metric": "network",
+              "range": true,
+              "refId": "B",
+              "step": 10
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "Network I/O pressure",
+          "tooltip": {
+            "msResolution": false,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "Bps",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "Bps",
+              "logBase": 1,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        }
+      ],
       "targets": [
         {
           "datasource": {
@@ -204,125 +328,6 @@
       "type": "row"
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "decimals": 2,
-      "editable": true,
-      "error": false,
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "grid": {},
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 11
-      },
-      "height": "200px",
-      "hiddenSeries": false,
-      "id": 32,
-      "legend": {
-        "alignAsTable": false,
-        "avg": true,
-        "current": true,
-        "max": false,
-        "min": false,
-        "rightSide": false,
-        "show": false,
-        "sideWidth": 200,
-        "sort": "current",
-        "sortDesc": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 2,
-      "links": [],
-      "nullPointMode": "connected",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "10.2.3",
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "sum (rate (container_network_receive_bytes_total{kubernetes_io_hostname=~\"^$Node$\"}[1m]))",
-          "interval": "10s",
-          "intervalFactor": 1,
-          "legendFormat": "Received",
-          "metric": "network",
-          "refId": "A",
-          "step": 10
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "- sum (rate (container_network_transmit_bytes_total{kubernetes_io_hostname=~\"^$Node$\"}[1m]))",
-          "interval": "10s",
-          "intervalFactor": 1,
-          "legendFormat": "Sent",
-          "metric": "network",
-          "refId": "B",
-          "step": 10
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "Network I/O pressure",
-      "tooltip": {
-        "msResolution": false,
-        "shared": true,
-        "sort": 0,
-        "value_type": "cumulative"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "Bps",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "format": "Bps",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
@@ -332,7 +337,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 11
       },
       "id": 34,
       "panels": [],
@@ -393,10 +398,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 7,
         "w": 8,
         "x": 0,
-        "y": 18
+        "y": 12
       },
       "id": 4,
       "links": [],
@@ -479,10 +484,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 7,
         "w": 8,
         "x": 8,
-        "y": 18
+        "y": 12
       },
       "id": 6,
       "links": [],
@@ -565,10 +570,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 7,
         "w": 8,
         "x": 16,
-        "y": 18
+        "y": 12
       },
       "id": 7,
       "links": [],
@@ -650,7 +655,7 @@
         "h": 3,
         "w": 4,
         "x": 0,
-        "y": 23
+        "y": 19
       },
       "id": 9,
       "links": [],
@@ -730,7 +735,7 @@
         "h": 3,
         "w": 4,
         "x": 4,
-        "y": 23
+        "y": 19
       },
       "id": 10,
       "links": [],
@@ -810,7 +815,7 @@
         "h": 3,
         "w": 4,
         "x": 8,
-        "y": 23
+        "y": 19
       },
       "id": 11,
       "links": [],
@@ -890,7 +895,7 @@
         "h": 3,
         "w": 4,
         "x": 12,
-        "y": 23
+        "y": 19
       },
       "id": 12,
       "links": [],
@@ -970,7 +975,7 @@
         "h": 3,
         "w": 4,
         "x": 16,
-        "y": 23
+        "y": 19
       },
       "id": 13,
       "links": [],
@@ -1050,7 +1055,7 @@
         "h": 3,
         "w": 4,
         "x": 20,
-        "y": 23
+        "y": 19
       },
       "id": 14,
       "links": [],
@@ -1097,7 +1102,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 22
       },
       "id": 35,
       "panels": [
@@ -1234,7 +1239,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 23
       },
       "id": 39,
       "panels": [
@@ -1370,7 +1375,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 24
       },
       "id": 43,
       "panels": [
@@ -1518,7 +1523,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 25
       },
       "id": 37,
       "panels": [
@@ -1677,7 +1682,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 26
       },
       "id": 41,
       "panels": [
@@ -1908,7 +1913,7 @@
   },
   "timezone": "browser",
   "title": "Kubernetes Monitoring Dashboard",
-  "uid": "msqzbWjWkr-02",
+  "uid": "msqzbWjWkr-03",
   "version": 1,
   "weekStart": ""
 }
