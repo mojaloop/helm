@@ -108,7 +108,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 
     Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](https://github.com/mojaloop/helm/blob/master/thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
 
-8. Testing the new Bulk functionality (sdk-scheme-adapter)
+8. Testing the Bulk functionality including "sdk-scheme-adapter"
 
     For details regarding deployment and validation of simulators needed for bulk (for adoption provided in sdk-scheme-adapter) refer to [deploying Mojaloop TTK simulators](https://github.com/mojaloop/helm/blob/master/mojaloop-ttk-simulators/README.md).
 
