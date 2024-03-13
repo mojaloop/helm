@@ -25,11 +25,17 @@ Enhancements and breaking changes to the [v15.2.0 Release](https://github.com/mo
 * **mojaloop/#3445** nodejs upgrade ([mojaloop/#252](https://github.com/mojaloop/simulator/pull/252)), closes [mojaloop/#3445](https://github.com/mojaloop/project/issues/3445)
 * **mojaloop/#3666** refactor quoting service into an event driven solution to improve performance ([mojaloop/#321](https://github.com/mojaloop/quoting-service/pull/321)), closes [mojaloop/#3666](https://github.com/mojaloop/project/issues/3666)
 * **mojaloop/#3666** add external k8s secret for jws signing keys ([mojaloop/#600](https://github.com/mojaloop/helm/pull/600)), closes [mojaloop/#3760](https://github.com/mojaloop/project/issues/3760)
+* **mojaloop/#3768** create dashboard-performance-troubleshooting.json ([mojaloop/#601](https://github.com/mojaloop/helm/pull/601)), closes [mojaloop/#3768](https://github.com/mojaloop/project/issues/3768)
+* **mojaloop/#3768** node list regexp shows all the nodes in dashboard-performance-troubleshooting.json ([mojaloop/#604](https://github.com/mojaloop/helm/pull/604)), closes [mojaloop/#3768](https://github.com/mojaloop/project/issues/3768)
+* **mojaloop/#3768** add replicaset count to performance-troubleshooting dashboard ([mojaloop/#606](https://github.com/mojaloop/helm/pull/606)), closes [mojaloop/#3768](https://github.com/mojaloop/project/issues/3768)
 * **iprod/#379** added integration tests; updated docker-compose ([mojaloop/#324](https://github.com/mojaloop/quoting-service/pull/324)), closes [iprod/#379](https://github.com/mojaloop/project/issues)
 
 ## 2. Bug Fixes
 * **mojaloop/#3682** fix cache implementation ([mojaloop/#468](https://github.com/mojaloop/account-lookup-service/pull/468)), closes [mojaloop/#3682](https://github.com/mojaloop/project/issues/3682)
 * **mojaloop/#3603** fix container permission issues ([mojaloop/#9](https://github.com/mojaloop/ml-testing-toolkit-client-lib/pull/9)), closes [mojaloop/#3603](https://github.com/mojaloop/project/issues/3603)
+ * **mojaloop/3806** fix: update k8s monitoring dashboard ([mojaloop/#597](https://github.com/mojaloop/helm/pull/597)), closes [mojaloop/#3806](https://github.com/mojaloop/project/issues/3806)
+ * **mojaloop/#3768** fix container cpu and memory utilization charts in k8s monitoring dashboard ([mojaloop/#610](https://github.com/mojaloop/helm/pull/610)), closes [mojaloop/#3768](https://github.com/mojaloop/project/issues/3768)
+ * **mojaloop/#3768** node list regexp shows all the nodes in dashboard-performance-troubleshooting.json ([mojaloop/#604](https://github.com/mojaloop/helm/pull/604)), closes [mojaloop/#3768](https://github.com/mojaloop/project/issues/3768)
 
 ## 3. Application Versions
 
@@ -144,7 +150,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 ## 8. Contributors
 
 - Organizations: BMGF, InFiTX, MLF
-- Individuals: @aaronreynoza, @elnyry-sam-k, @geka-evk, @kleyow, @oderayi, @vijayg10
+- Individuals: @aaronreynoza, @elnyry-sam-k, @geka-evk, @kleyow, @muzammil360, @oderayi, @vijayg10
 
 *Note: companies and individuals are in alphabetical order*
 
