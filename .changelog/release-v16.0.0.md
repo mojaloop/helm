@@ -144,7 +144,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 ## 8. Contributors
 
 - Organizations: BMGF, InFiTX, MLF
-- Individuals: @aaronreynoza, @geka-evk, @kleyow, @oderayi, @vijayg10, @elnyry-sam-k
+- Individuals: @aaronreynoza, @elnyry-sam-k, @geka-evk, @kleyow, @oderayi, @vijayg10
 
 *Note: companies and individuals are in alphabetical order*
 
