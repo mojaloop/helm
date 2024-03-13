@@ -4,9 +4,6 @@ Date | Revision | Description
 ---------|----------|---------
 {{RELEASE_DATE}} | 0 | Initial draft
 
-- For *BREAKING ISSUES*, please review the section `#6` ["Breaking Changes"](#6-breaking-changes) below.
-- For *KNOWN ISSUES*, please review the section `#7` ["Known Issues"](#7-known-issues) below.
-
 ## 0. Summary
 
 Enhancements and {{BREAKING_CHANGES_STATUS_TEXT}} changes to the [{{LAST_RELEASE_VERSION}} Release](https://github.com/mojaloop/helm/blob/master/.changelog/release-{{LAST_RELEASE_VERSION}}.md), which includes:
@@ -40,7 +37,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 
     | Dependency | Version |  Notes   |
     | ---------- | ------- | --- |
-    | Kubernetes | v1.28 | [AWS EKS](https://aws.amazon.com/eks/), [AWS EKS Supported Version Notes](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html)  |
+    | Kubernetes | v1.29 | [AWS EKS](https://aws.amazon.com/eks/), [AWS EKS Supported Version Notes](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html)  |
     | containerd  |  v1.6.19  |  |
     | Nginx Ingress Controller | [helm-ingress-nginx-4.7.0](https://github.com/kubernetes/ingress-nginx/releases/tag/helm-chart-4.7.0) / [ingress-controller-v1.8.0](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v1.8.0) |     |
     |  Amazon Linux   |  v2   |     |
@@ -76,7 +73,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 
     Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](https://github.com/mojaloop/helm/blob/master/thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
 
-8. Testing the new Bulk functionality (sdk-scheme-adapter)
+8. Testing the Bulk functionality including "sdk-scheme-adapter"
 
     For details regarding deployment and validation of simulators needed for bulk (for adoption provided in sdk-scheme-adapter) refer to [deploying Mojaloop TTK simulators](https://github.com/mojaloop/helm/blob/master/mojaloop-ttk-simulators/README.md).
 
@@ -96,7 +93,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 
 ## 8. Contributors
 
-- Organizations: BMGF, InFiTX
+- Organizations: BMGF, InFiTX, MLF
 - Individuals: {{INDIVIDUAL_CONTRIBUTORS}}
 
 *Note: companies are in alphabetical order, individuals are in no particular order.*

@@ -38,7 +38,7 @@ targets:
     spec:
       name: quoting-service
       file: values.yaml
-      key: $.image.tag
+      key: $.quoting-service.image.tag
       appversion: true
   quoting-service--sidecar:
     sourceid: event-sidecar
@@ -46,12 +46,70 @@ targets:
     spec:
       name: quoting-service
       file: values.yaml
-      key: $.sidecar.image.tag
+      key: $.quoting-service.sidecar.image.tag
+  quoting-service-handler:
+    sourceid: quoting-service
+    kind: helmchart
+    spec:
+      name: quoting-service
+      file: values.yaml
+      key: $.quoting-service-handler.image.tag
+  quoting-service-handler--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: quoting-service
+      file: values.yaml
+      key: $.quoting-service-handler.sidecar.image.tag  
   common:
     sourceid: common
     kind: helmchart
     spec:
       name: quoting-service
+      file: Chart.yaml
+      key: $.dependencies[2].version 
+  chart-handler--quoting-service:
+    sourceid: quoting-service
+    kind: helmchart
+    spec:
+      name: quoting-service/chart-handler
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-handler--quoting-service--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: quoting-service/chart-handler
+      file: values.yaml
+      key: $.sidecar.image.tag
+  chart-handler--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: quoting-service/chart-handler
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  chart-service--quoting-service:
+    sourceid: quoting-service
+    kind: helmchart
+    spec:
+      name: quoting-service/chart-service
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-service--quoting-service--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: quoting-service/chart-service
+      file: values.yaml
+      key: $.sidecar.image.tag
+  chart-service--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: quoting-service/chart-service
       file: Chart.yaml
       key: $.dependencies[0].version
   
