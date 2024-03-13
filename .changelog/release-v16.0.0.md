@@ -11,7 +11,8 @@ Enhancements and breaking changes to the [v15.2.0 Release](https://github.com/mo
 1. Performance improvement in Central Ledger via batching of position prepare and position filfill messages
 2. Performance improvement in ALS with the addition of participant requests caching, and logging fixes
 3. Refactoring of Quoting Service into an event-driven service to improve performance
-4. General maintenance, bug fixes, and Nodejs upgrades
+4. Helm chart: external K8s secret are now used for JWS signing key source if present 
+5. General maintenance, bug fixes, and Nodejs upgrades
 
 ## 1. New Features
 * **mojaloop/#3426** add participant req caching, enable cache metrics, log fixes ([mojaloop/#465](https://github.com/mojaloop/account-lookup-service/pull/465)), closes [mojaloop/#3426](https://github.com/mojaloop/project/issues/3426)
@@ -23,6 +24,7 @@ Enhancements and breaking changes to the [v15.2.0 Release](https://github.com/mo
 * **mojaloop/#321** refactor quoting service into an event driven solution to improve performance ([mojaloop/#321](https://github.com/mojaloop/quoting-service/pull/321)), closes [mojaloop/#321](https://github.com/mojaloop/project/issues/321)
 * **mojaloop/#3445** nodejs upgrade ([mojaloop/#252](https://github.com/mojaloop/simulator/pull/252)), closes [mojaloop/#3445](https://github.com/mojaloop/project/issues/3445)
 * **mojaloop/#3666** refactor quoting service into an event driven solution to improve performance ([mojaloop/#321](https://github.com/mojaloop/quoting-service/pull/321)), closes [mojaloop/#3666](https://github.com/mojaloop/project/issues/3666)
+* **mojaloop/#3666** add external k8s secret for jws signing keys ([mojaloop/#600](https://github.com/mojaloop/helm/pull/600)), closes [mojaloop/#3760](https://github.com/mojaloop/project/issues/3760)
 * **iprod/#379** added integration tests; updated docker-compose ([mojaloop/#324](https://github.com/mojaloop/quoting-service/pull/324)), closes [iprod/#379](https://github.com/mojaloop/project/issues)
 
 ## 2. Bug Fixes
