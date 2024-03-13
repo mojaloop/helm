@@ -219,11 +219,11 @@ conditions:
     kind: dockerimage
     spec:
       image: mojaloop/ml-testing-toolkit
-  # docker-ml-testing-toolkit-ui:
-  #   sourceid: ml-testing-toolkit-ui
-  #   kind: dockerimage
-  #   spec:
-  #     image: mojaloop/ml-testing-toolkit-ui
+  docker-ml-testing-toolkit-ui:
+    sourceid: ml-testing-toolkit-ui
+    kind: dockerimage
+    spec:
+      image: mojaloop/ml-testing-toolkit-ui
 
 targets:
   appVersion-ml-api-adapter:
@@ -280,7 +280,7 @@ targets:
     kind: file
     spec:
       file: mojaloop/Chart.yaml
-      matchpattern: '(simulator:) (v[\d\.]+)'
+      matchpattern: '(; simulator:) (v[\d\.]+)'
       replacepattern: '$1 {{ source "simulator" }}'
   appVersion-mojaloop-simulator:
     sourceid: mojaloop-simulator
@@ -379,14 +379,28 @@ targets:
     spec:
       name: mojaloop
       file: values.yaml
-      key: $.quoting-service.image.tag
+      key: $.quoting-service.quoting-service.image.tag
   quoting-service--sidecar:
     sourceid: event-sidecar
     kind: helmchart
     spec:
       name: mojaloop
       file: values.yaml
-      key: $.quoting-service.sidecar.image.tag
+      key: $.quoting-service.quoting-service.sidecar.image.tag
+  quoting-service-handler:
+    sourceid: quoting-service
+    kind: helmchart
+    spec:
+      name: mojaloop
+      file: values.yaml
+      key: $.quoting-service.quoting-service-handler.image.tag
+  quoting-service-handler--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: mojaloop
+      file: values.yaml
+      key: $.quoting-service.quoting-service-handler.sidecar.image.tag
   ml-api-adapter:
     sourceid: ml-api-adapter
     kind: helmchart

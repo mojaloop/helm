@@ -1,0 +1,37 @@
+name: quoting-service
+
+sources:
+  quoting-service:
+    kind: helmchart
+    spec: 
+      url: file://./quoting-service
+      name: quoting-service
+  quoting-service-handler:
+    kind: helmchart
+    spec: 
+      url: file://./quoting-service
+      name: quoting-service-handler
+  
+conditions: {}
+
+targets:
+  quoting-service:
+    sourceid: quoting-service
+    kind: helmchart
+    spec:
+      name: quoting-service
+      file: Chart.yaml
+      key: $.dependencies[0].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  quoting-service-handler:
+    sourceid: quoting-service-handler
+    kind: helmchart
+    spec:
+      name: quoting-service
+      file: Chart.yaml
+      key: $.dependencies[1].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'

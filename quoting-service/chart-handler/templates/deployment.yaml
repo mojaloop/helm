@@ -183,7 +183,14 @@ spec:
         {{- if .Values.config.endpointSecurity.jwsSign }}
         - name: jws-signing-key
           secret:
+          {{- if .Values.config.endpointSecurity.jwsSigningKeySecret }}
+            secretName: {{ .Values.config.endpointSecurity.jwsSigningKeySecret.name }}
+            items:
+            - key: {{ .Values.config.endpointSecurity.jwsSigningKeySecret.key }}
+              path: jwsSigningKey.key
+          {{ else }}
             secretName: {{ template "quotingservice-handler.fullname" . }}-jws-signing-key
+          {{- end }}
         {{- end }}
         - name: {{ template "quotingservice-handler.fullname" . }}-config-volume
           configMap:

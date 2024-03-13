@@ -7,7 +7,7 @@ account-lookup-service:
   image:
     registry: docker.io
     repository: mojaloop/account-lookup-service
-    tag: v15.0.0
+    tag: v15.2.3
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -130,23 +130,25 @@ account-lookup-service:
     endpointSecurity:
       jwsSign: false
       fspiopSourceSigningName: switch
-      jwsSigningKey:
-        # To generate this key:
-        # Private:
-        # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
-        # Public:
-        # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-        # Should look like:
-        # -----BEGIN RSA PRIVATE KEY-----
-        # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
-        # ..
-        # ..
-        # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
-        # -----END RSA PRIVATE KEY-----
-
+      # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
+      # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
+      # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
+      jwsSigningKeySecret: null
+      jwsSigningKey: null
+    # To generate this key:
+    # Private:
+    # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+    # Public:
+    # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+    # Should look like:
+    # -----BEGIN RSA PRIVATE KEY-----
+    # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+    # ..
+    # ..
+    # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+    # -----END RSA PRIVATE KEY-----
     # Thirdparty API Config
     featureEnableExtendedPartyIdType: false
-
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -169,9 +171,9 @@ account-lookup-service:
           do
             echo --------------------;
             echo Waiting for MySQL...;
-            sleep 2; 
+            sleep 2;
           done;
-          echo ====================; 
+          echo ====================;
           echo MySQL ok!;
       env:
         - name: DB_HOST
@@ -209,17 +211,17 @@ account-lookup-service:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
+      http: null
+      https: null
     ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
+    clusterIP: null
     ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
+    loadBalancerIP: null
     ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
@@ -253,7 +255,7 @@ account-lookup-service:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
+    apiVersion: null
     ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: account-lookup-service.local
@@ -266,7 +268,7 @@ account-lookup-service:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
+    annotations: null
     ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
@@ -287,31 +289,28 @@ account-lookup-service:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
   ##
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
-
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
-    #  memory: 128Mi
-
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
 account-lookup-service-admin:
   enabled: true
-
   # Default values for account-lookup-service.
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
@@ -319,7 +318,7 @@ account-lookup-service-admin:
   image:
     registry: docker.io
     repository: mojaloop/account-lookup-service
-    tag: v15.0.0
+    tag: v15.2.3
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -383,9 +382,8 @@ account-lookup-service-admin:
       enabled: false
       maxByteSize: 10000000
       expiresIn: 61000
-
     ## DB Configuration
-    db_type: mysql    
+    db_type: mysql
     db_driver: mysql
     db_host: mysqldb
     db_port: 3306
@@ -439,20 +437,23 @@ account-lookup-service-admin:
     endpointSecurity:
       jwsSign: false
       fspiopSourceSigningName: switch
-      jwsSigningKey:
-        # To generate this key:
-        # Private:
-        # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
-        # Public:
-        # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-        # Should look like:
-        # -----BEGIN RSA PRIVATE KEY-----
-        # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
-        # ..
-        # ..
-        # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
-        # -----END RSA PRIVATE KEY-----
-
+      # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
+      # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
+      # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
+      jwsSigningKeySecret: null
+      jwsSigningKey: null
+    # To generate this key:
+    # Private:
+    # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+    # Public:
+    # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+    # Should look like:
+    # -----BEGIN RSA PRIVATE KEY-----
+    # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+    # ..
+    # ..
+    # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+    # -----END RSA PRIVATE KEY-----
     # Log config
     log_level: info
     log_transport: file
@@ -478,13 +479,13 @@ account-lookup-service-admin:
         - sh
         - -c
         - |
-          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ;
           do
             echo --------------------;
             echo Waiting for MySQL...;
-            sleep 2; 
+            sleep 2;
           done;
-          echo ====================; 
+          echo ====================;
           echo MySQL ok!;
       env:
         - name: DB_HOST
@@ -544,17 +545,17 @@ account-lookup-service-admin:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
-    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      http: null
+      https: null
+      ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
+    clusterIP: null
     ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
+    loadBalancerIP: null
     ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
@@ -588,7 +589,7 @@ account-lookup-service-admin:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
+    apiVersion: null
     ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: account-lookup-service-admin.local
@@ -601,7 +602,7 @@ account-lookup-service-admin:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
+    annotations: null
     ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
@@ -622,34 +623,32 @@ account-lookup-service-admin:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
   ##
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
-
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
-    #  memory: 128Mi
-
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
 als-oracle-pathfinder:
   enabled: false
   # Declare variables to be passed into your templates.
   image:
     repository: mojaloop/als-oracle-pathfinder
-    tag: v12.0.0
+    tag: v12.1.0
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -675,14 +674,13 @@ als-oracle-pathfinder:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - /opt/app/src/index.js
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
@@ -871,13 +869,13 @@ als-oracle-pathfinder:
         - sh
         - -c
         - |
-          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ;
           do
             echo --------------------;
             echo Waiting for MySQL...;
-            sleep 2; 
+            sleep 2;
           done;
-          echo ====================; 
+          echo ====================;
           echo MySQL ok!;
       env:
         - name: DB_HOST
@@ -906,7 +904,7 @@ als-oracle-pathfinder:
         - |
           echo Running MySQL init scripts;
           mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -e "SET @service_name='${SERVICE_NAME}'; source /opt/app/init-central-ledger.sql;";
-          echo ====================; 
+          echo ====================;
           echo MySQL ok!;
       env:
         - name: DB_HOST
@@ -935,13 +933,13 @@ als-oracle-pathfinder:
         - sh
         - -c
         - |
-          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ;
           do
             echo --------------------;
             echo Waiting for MySQL...;
-            sleep 2; 
+            sleep 2;
           done;
-          echo ====================; 
+          echo ====================;
           echo MySQL ok!;
       env:
         - name: DB_HOST
@@ -970,7 +968,7 @@ als-oracle-pathfinder:
         - |
           echo Running MySQL init scripts;
           mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -e "SET @service_name='${SERVICE_NAME}'; source /opt/app/init-account-lookup.sql;";
-          echo ====================; 
+          echo ====================;
           echo MySQL ok!;
       env:
         - name: DB_HOST
@@ -1020,7 +1018,7 @@ als-oracle-pathfinder:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
+    apiVersion: null
     ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: als-oracle-pathfinder.local
@@ -1033,7 +1031,7 @@ als-oracle-pathfinder:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
+    annotations: null
     ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
@@ -1054,22 +1052,20 @@ als-oracle-pathfinder:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
   ##
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
   #  memory: 128Mi
-
-  
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
