@@ -1,0 +1,28 @@
+registryOracle:
+  replicaCount: 1
+  image:
+    repository: mojaloop/merchant-registry-oracle
+    tag: 1.0.1
+  service:
+    type: ClusterIP
+    port: 8888
+  env:
+    dbHost: merchant-db-clusterip-service
+    dbPort: "3306"
+    database: registry_db
+    dbUsername: root
+    dbPasswordSecret:
+      name: merchant-db-secret
+      key: mysql-root-password
+    rabbitmqHost: rabbitmq-clusterip-service
+    rabbitmqPort: "5672"
+    rabbitmqUsername: guest
+    rabbitmqPassword: guest
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "512Mi"

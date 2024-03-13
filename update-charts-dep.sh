@@ -49,6 +49,7 @@ declare -a charts=(
     thirdparty/chart-consent-oracle
     thirdparty/chart-tp-api-svc
     thirdparty
+    merchant-registry-svc
     mojaloop
 )
 
