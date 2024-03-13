@@ -1,5 +1,4 @@
 # Helm Release Notes
-
 Date | Revision | Description
 ---------|----------|---------
 2024-02-06 | 0 | Initial draft
@@ -12,7 +11,7 @@ Enhancements and breaking changes to the [v15.2.0 Release](https://github.com/mo
 1. Performance improvement in Central Ledger via batching of position prepare and position filfill messages
 2. Performance improvement in ALS with the addition of participant requests caching, and logging fixes
 3. Refactoring of Quoting Service into an event-driven service to improve performance
-4. General maintenance, bug fixes, and nodejs upgrades.
+4. General maintenance, bug fixes, and Nodejs upgrades
 
 ## 1. New Features
 * **mojaloop/#3426** add participant req caching, enable cache metrics, log fixes ([mojaloop/#465](https://github.com/mojaloop/account-lookup-service/pull/465)), closes [mojaloop/#3426](https://github.com/mojaloop/project/issues/3426)
@@ -115,14 +114,20 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 
 ## 6. Breaking Changes
 
-
 ### central-ledger
-  * config/default.json: (https://github.com/mojaloop/central-ledger/blob/42238ff293bb27f1947831de1ef574ebd5bdb6fc/config%2Fdefault.json)
+  * config/default.json: <br>
+    The Kafka configuration has been expanded to include additional topics, batch size, consume timeout and `EVENT_TYPE_ACTION_TOPIC_MAP` configurations for the batching feature.
+    See [README](https://github.com/mojaloop/central-ledger/compare/v17.3.2...v17.6.0#diff-b335630551682c19a781afebcf4d07bf978fb1f8ac04c6bf87428ed5106870f5) for more details. <br>
+    (https://github.com/mojaloop/central-ledger/blob/42238ff293bb27f1947831de1ef574ebd5bdb6fc/config%2Fdefault.json)
 ### quoting-service
-  * config/default.json: (https://github.com/mojaloop/quoting-service/blob/0a68f45602d9180429537315f6c44f30b8ba99e5/config%2Fdefault.json)
+  * config/default.json: <br>
+    Quoting Service has now been split into API service and Handler service. As a result, Kafka configuration has been added to allow for publishing and consuming of messages between the API service and the Handler service. See [diff](https://github.com/mojaloop/quoting-service/compare/v15.5.0...v15.7.0#diff-f07c42814e0913799fda32ac14d063f1ef8a04e24fb6febd873a5f161e58a8d4) for details. <br>
+    (https://github.com/mojaloop/quoting-service/blob/0a68f45602d9180429537315f6c44f30b8ba99e5/config%2Fdefault.json)
 ### account-lookup-service
   * config/default.json: (https://github.com/mojaloop/account-lookup-service/blob/283ef2140c166029255a4ddc9548eb3ffb4eaf17/config%2Fdefault.json)
-  * docker/account-lookup-service/default.json: (https://github.com/mojaloop/account-lookup-service/blob/283ef2140c166029255a4ddc9548eb3ffb4eaf17/docker%2Faccount-lookup-service%2Fdefault.json)
+  * docker/account-lookup-service/default.json: (https://github.com/mojaloop/account-lookup-service/blob/283ef2140c166029255a4ddc9548eb3ffb4eaf17/docker%2Faccount-lookup-service%2Fdefault.json)<br>
+  The `ENPOINT_CACHE_CONFIG` has been replaced with three (3) separate cache configurations (`CENTRAL_SHARED_ENDPOINT_CACHE_CONFIG`, `CENTRAL_SHARED_PARTICIPANT_CACHE_CONFIG`, and `GENERAL_CACHE_CONFIG`) to cater for the additional caching features in the service.
+  See [diff](https://github.com/mojaloop/account-lookup-service/compare/v15.0.0...v15.2.3#diff-f07c42814e0913799fda32ac14d063f1ef8a04e24fb6febd873a5f161e58a8d4) for details.
 
 ## 7. Known Issues
 
