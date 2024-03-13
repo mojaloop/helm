@@ -2,7 +2,7 @@
 Date | Revision | Description
 ---------|----------|---------
 2024-02-06 | 0 | Initial draft
-2024-03-12 | 0 | Initial release
+2024-03-13 | 0 | Initial release
 
 ## 0. Summary
 
