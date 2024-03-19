@@ -6,7 +6,7 @@ Date | Revision | Description
 
 ## 0. Summary
 
-Enhancements and {{BREAKING_CHANGES_STATUS_TEXT}} changes to the [{{LAST_RELEASE_VERSION}} Release](https://github.com/mojaloop/helm/blob/master/.changelog/release-{{LAST_RELEASE_VERSION}}.md), which includes:
+Enhancements and {{BREAKING_CHANGES_STATUS_TEXT}} changes to the [{{LAST_RELEASE_VERSION}} Release](https://github.com/mojaloop/helm/blob/main/.changelog/release-{{LAST_RELEASE_VERSION}}.md), which includes:
 
 {{RELEASE_SUMMARY_POINTS}}
 
@@ -46,7 +46,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
     |  Redis   |  bitnami/redis:7.0.5-debian-11-r7   |     |
     |  MongoDB   |  bitnami/mongodb:6.0.2-debian-11-r11   |     |
     |  Testing Toolkit Test Cases   |  [{{TTK_TEST_CASES_VERSION}}](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/{{TTK_TEST_CASES_VERSION}})   |     |
-    |  example-mojaloop-backend   |  {{EXAMPLE_MOJALOOP_BACKEND_VERSION}}   |  [README](https://github.com/mojaloop/helm/blob/master/example-mojaloop-backend/README.md)   |
+    |  example-mojaloop-backend   |  {{EXAMPLE_MOJALOOP_BACKEND_VERSION}}   |  [README](https://github.com/mojaloop/helm/blob/main/example-mojaloop-backend/README.md)   |
 
 2. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
 
@@ -67,15 +67,15 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 
 6. Bulk API Helm Tests
 
-    Refer to the [Testing Deployments](https://github.com/mojaloop/helm/blob/master/README.md#testing-deployments) section in the main README for detailed information on how to enable bulk-api-adapter tests.
+    Refer to the [Testing Deployments](https://github.com/mojaloop/helm/blob/main/README.md#testing-deployments) section in the main README for detailed information on how to enable bulk-api-adapter tests.
 
 7. Thirdparty API Helm Tests
 
-    Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](https://github.com/mojaloop/helm/blob/master/thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
+    Refer to [thirdparty/README.md#validating-and-testing-the-3p-api](https://github.com/mojaloop/helm/blob/main/thirdparty/README.md#validating-and-testing-the-3p-api) on how to enabled and execute Thirdparty verification tests.
 
 8. Testing the Bulk functionality including "sdk-scheme-adapter"
 
-    For details regarding deployment and validation of simulators needed for bulk (for adoption provided in sdk-scheme-adapter) refer to [deploying Mojaloop TTK simulators](https://github.com/mojaloop/helm/blob/master/mojaloop-ttk-simulators/README.md).
+    For details regarding deployment and validation of simulators needed for bulk (for adoption provided in sdk-scheme-adapter) refer to [deploying Mojaloop TTK simulators](https://github.com/mojaloop/helm/blob/main/mojaloop-ttk-simulators/README.md).
 
 ## 6. Breaking Changes
 
