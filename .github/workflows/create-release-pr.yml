@@ -20,9 +20,9 @@ on:
     inputs:
       branch:
         type: string
-        description: "Branch to create release PR from (e.g. master)"
+        description: "Branch to create release PR from (e.g. main)"
         required: false
-        default: "master"
+        default: "main"
       release_name:
         type: string
         description: "Release name (e.g. Acacia)"
@@ -81,7 +81,7 @@ jobs:
       - name: Install dependencies
         run: |
           # Install mo
-          curl -sL https://raw.githubusercontent.com/tests-always-included/mo/master/mo -o /usr/local/bin/mo
+          curl -sL https://raw.githubusercontent.com/tests-always-included/mo/main/mo -o /usr/local/bin/mo
           chmod +x /usr/local/bin/mo
 
           # Install updatecli
@@ -146,7 +146,7 @@ jobs:
           generateReleaseNotes: true
           skipIfReleaseExists: true
           tag: ${{ steps.determine-release-version.outputs.RELEASE_VERSION }}
-          commit: master
+          commit: main
 
       - name: Update TTK test cases version
         env:
@@ -182,7 +182,7 @@ jobs:
           title: "[auto] feat: release candidate for ${{ inputs.release_name }} ${{ steps.determine-release-version.outputs.RELEASE_VERSION }}"
           body-path: ${{ steps.generate-release-note.outputs.RELEASE_NOTE_FILE }}
           branch: release/release-candidate-${{ inputs.release_name }}-${{ steps.determine-release-version.outputs.RELEASE_VERSION }}-${{ github.run_id }}
-          base: master
+          base: main
           draft: true
 
       - name: Clone oss-core-env repository
