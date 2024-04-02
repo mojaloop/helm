@@ -523,7 +523,9 @@
       "id": 22,
       "options": {
         "legend": {
-          "calcs": [],
+          "calcs": [
+            "mean"
+          ],
           "displayMode": "table",
           "placement": "right",
           "showLegend": true
@@ -540,7 +542,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "(sum(rate(namedprocess_namegroup_cpu_seconds_total[1m])) by (groupname,nodename)\n/ on (nodename) group_left\ninstance_nodename:node_cpu_seconds:rate1m ) > 0.7",
+          "expr": "(\n    sum(rate(namedprocess_namegroup_cpu_seconds_total[1m])) by (groupname,nodename)\n    / on (nodename) group_left\n    instance_nodename:node_cpu_seconds:rate1m \n) > 0.7",
           "hide": false,
           "instant": false,
           "legendFormat": "{{nodename}}:{{groupname}}",
@@ -548,7 +550,7 @@
           "refId": "A"
         }
       ],
-      "title": "Offending processes - CPU utilisation ",
+      "title": "Offending processes - High node CPU utilisation ",
       "type": "timeseries"
     },
     {
@@ -556,6 +558,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
+      "description": "Shows processes which are consuming more than 70% of the node memory.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -606,7 +609,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "percentunit"
         },
         "overrides": []
       },
@@ -619,9 +623,11 @@
       "id": 23,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
+          "calcs": [
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "tooltip": {
@@ -636,14 +642,14 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "namedprocess_namegroup_memory_bytes{memtype=\"resident\"} / on (instance) group_left  node_memory_MemTotal_bytes\n",
+          "expr": "(\n    namedprocess_namegroup_memory_bytes{memtype=\"resident\"} \n    / on (nodename) group_left\n    instance_nodename:node_memory_MemTotal_bytes\n) > 0.7\n",
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "{{nodename}}:{{groupname}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Panel Title",
+      "title": "Offending processes - High node memory utilisation ",
       "type": "timeseries"
     },
     {
@@ -818,8 +824,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -940,8 +945,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1035,8 +1039,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1130,8 +1133,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1226,8 +1228,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1323,8 +1324,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1419,8 +1419,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1517,8 +1516,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1612,8 +1610,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1710,8 +1707,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1805,8 +1801,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1902,8 +1897,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1988,8 +1982,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2074,8 +2067,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2164,7 +2156,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "Performance Troubleshooting",
-  "uid": "f1068daf-16a2-4e52-9a57-1a6620925845-00",
+  "uid": "f1068daf-16a2-4e52-9a57-1a6620925845-01",
   "version": 1,
   "weekStart": ""
 }
