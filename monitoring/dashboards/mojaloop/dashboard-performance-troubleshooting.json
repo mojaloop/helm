@@ -454,12 +454,205 @@
       "type": "table"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Shows processes which are consuming more than 70% of the node CPU.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "id": 22,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "(sum(rate(namedprocess_namegroup_cpu_seconds_total[1m])) by (groupname,nodename)\n/ on (nodename) group_left\ninstance_nodename:node_cpu_seconds:rate1m ) > 0.7",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "{{nodename}}:{{groupname}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Offending processes - CPU utilisation ",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
+      "id": 23,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "namedprocess_namegroup_memory_bytes{memtype=\"resident\"} / on (instance) group_left  node_memory_MemTotal_bytes\n",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Panel Title",
+      "type": "timeseries"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 11
       },
       "id": 11,
       "panels": [],
@@ -533,7 +726,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 12
       },
       "id": 9,
       "options": {
@@ -641,7 +834,7 @@
         "h": 5,
         "w": 6,
         "x": 0,
-        "y": 11
+        "y": 16
       },
       "id": 1,
       "options": {
@@ -763,7 +956,7 @@
         "h": 5,
         "w": 6,
         "x": 6,
-        "y": 11
+        "y": 16
       },
       "id": 2,
       "options": {
@@ -858,7 +1051,7 @@
         "h": 5,
         "w": 6,
         "x": 12,
-        "y": 11
+        "y": 16
       },
       "id": 3,
       "options": {
@@ -953,7 +1146,7 @@
         "h": 5,
         "w": 6,
         "x": 18,
-        "y": 11
+        "y": 16
       },
       "id": 10,
       "options": {
@@ -1050,7 +1243,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 16
+        "y": 21
       },
       "id": 4,
       "options": {
@@ -1146,7 +1339,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 16
+        "y": 21
       },
       "id": 5,
       "options": {
@@ -1243,7 +1436,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 23
+        "y": 28
       },
       "id": 6,
       "options": {
@@ -1340,7 +1533,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 23
+        "y": 28
       },
       "id": 7,
       "options": {
@@ -1436,7 +1629,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 30
+        "y": 35
       },
       "id": 20,
       "options": {
@@ -1533,7 +1726,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 30
+        "y": 35
       },
       "id": 21,
       "options": {
@@ -1628,7 +1821,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 42
       },
       "id": 8,
       "options": {
@@ -1725,7 +1918,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 41
+        "y": 46
       },
       "id": 17,
       "options": {
@@ -1811,7 +2004,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 41
+        "y": 46
       },
       "id": 18,
       "options": {
@@ -1897,7 +2090,7 @@
         "h": 6,
         "w": 6,
         "x": 12,
-        "y": 41
+        "y": 46
       },
       "id": 19,
       "options": {
@@ -1971,7 +2164,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "Performance Troubleshooting",
-  "uid": "f1068daf-16a2-4e52-9a57-1a6620925845",
+  "uid": "f1068daf-16a2-4e52-9a57-1a6620925845-00",
   "version": 1,
   "weekStart": ""
 }
