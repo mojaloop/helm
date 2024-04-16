@@ -2,7 +2,7 @@
 # - GitHub Actions must be explicitly allowed to create pull requests in this repository.
 #   This setting can be found in the repository's settings under Actions > General > Workflow permissions.
 # - A repository secret `AUTO_RELEASE_TOKEN` (permissions: `contents: write`, `pull-requests: write`, `repositories: read`) needs to be created.
-#   The secret should contain a github access token with the permissions specified above.
+#   The secret should contain a github access token (classic token (scope: repo) works better) with the permissions specified above.
 #   The secret is used by the `create-pull-request` action to create the pull request and `updatecli` to access all updateable repositories.
 #   The secret can be created at https://github.com/mojaloop/helm/settings/secrets/actions
 #
@@ -60,8 +60,6 @@ jobs:
   create_release_pr:
     name: Create Release PR
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     env:
       AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
       AWS_DEFAULT_OUTPUT: ${{ vars.AWS_DEFAULT_OUTPUT }}
