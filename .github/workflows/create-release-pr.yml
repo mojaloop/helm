@@ -90,7 +90,19 @@ jobs:
 
           # Install jq
           sudo apt-get install jq
-
+      
+      - name: Test TTK test cases release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.AUTO_RELEASE_TOKEN }}
+          repo: testing-toolkit-test-cases
+          makeLatest: true
+          allowUpdates: false
+          generateReleaseNotes: true
+          skipIfReleaseExists: true
+          tag: v16.1.0-snapshot
+          commit: main
+  
       - name: Setup Helm repositories
         run: |
           helm repo add stable https://charts.helm.sh/stable
