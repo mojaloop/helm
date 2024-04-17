@@ -81,8 +81,8 @@ jobs:
       - name: Install dependencies
         run: |
           # Install mo
-          curl -sL https://raw.githubusercontent.com/tests-always-included/mo/main/mo -o /usr/local/bin/mo
-          chmod +x /usr/local/bin/mo
+            curl -sL https://raw.githubusercontent.com/tests-always-included/mo/main/mo -o /usr/local/bin/mo
+            sudo chmod +x /usr/local/bin/mo
 
           # Install updatecli
           curl -sL https://github.com/updatecli/updatecli/releases/download/v0.71.0/updatecli_amd64.deb -o /tmp/updatecli_amd64.deb
@@ -90,6 +90,12 @@ jobs:
 
           # Install jq
           sudo apt-get install jq
+      
+      - name: Check MO dependency
+        id: dependency-check
+        env:
+          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+        run: /usr/local/bin/mo --help
   
       - name: Setup Helm repositories
         run: |
