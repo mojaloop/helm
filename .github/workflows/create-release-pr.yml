@@ -81,8 +81,16 @@ jobs:
       - name: Install dependencies
         run: |
           # Install mo
-            curl -sL https://raw.githubusercontent.com/tests-always-included/mo/main/mo -o /usr/local/bin/mo
-            sudo chmod +x /usr/local/bin/mo
+          curl -sL https://raw.githubusercontent.com/tests-always-included/mo/main/mo -o /usr/local/bin/mo
+          if [ $? -ne 0 ]; then
+            echo "Failed to download mo"
+            exit 1
+          fi
+          sudo chmod +x /usr/local/bin/mo
+          if [ $? -ne 0 ]; then
+            echo "Failed to make mo executable"
+            exit 1
+          fi
 
           # Install updatecli
           curl -sL https://github.com/updatecli/updatecli/releases/download/v0.71.0/updatecli_amd64.deb -o /tmp/updatecli_amd64.deb
