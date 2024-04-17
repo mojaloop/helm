@@ -121,10 +121,10 @@ jobs:
       #     AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
       #   run: .github/workflows/scripts/update-charts.sh
 
-      - name: Generate changelog
-        env:
-          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
-        run: .github/workflows/scripts/generate-changelog.sh ${{ inputs.last_release_tag }}
+      # - name: Generate changelog
+      #   env:
+      #     AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+      #   run: .github/workflows/scripts/generate-changelog.sh ${{ inputs.last_release_tag }}
 
       - name: Determine release version number
         id: determine-release-version
@@ -147,54 +147,54 @@ jobs:
             exit 1
           fi
 
-      - name: Prepare TTK test cases release
-        uses: ncipollo/release-action@v1
-        with:
-          token: ${{ secrets.AUTO_RELEASE_TOKEN }}
-          repo: testing-toolkit-test-cases
-          makeLatest: true
-          allowUpdates: false
-          generateReleaseNotes: true
-          skipIfReleaseExists: true
-          tag: ${{ steps.determine-release-version.outputs.RELEASE_VERSION }}
-          commit: master
+      # - name: Prepare TTK test cases release
+      #   uses: ncipollo/release-action@v1
+      #   with:
+      #     token: ${{ secrets.AUTO_RELEASE_TOKEN }}
+      #     repo: testing-toolkit-test-cases
+      #     makeLatest: true
+      #     allowUpdates: false
+      #     generateReleaseNotes: true
+      #     skipIfReleaseExists: true
+      #     tag: ${{ steps.determine-release-version.outputs.RELEASE_VERSION }}
+      #     commit: master
 
-      - name: Update TTK test cases version
-        env:
-          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
-        run: updatecli apply --config .github/workflows/manifests/third-pass/mojaloop.yaml
+      # - name: Update TTK test cases version
+      #   env:
+      #     AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+      #   run: updatecli apply --config .github/workflows/manifests/third-pass/mojaloop.yaml
       
-      - name: Syncronize release version with mojaloop chart version
-        env:
-          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
-        run: |
-          release_version='${{ steps.determine-release-version.outputs.RELEASE_VERSION }}'
-          if [[ -z "$release_version" || ! "$release_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "RELEASE_VERSION is not set or is not a valid semver version"
-            exit 1
-          fi
-          release_version="${release_version:1}"
-          sed -i "s/^version:.*/version: $release_version/" mojaloop/Chart.yaml
-          awk -v release_version="$release_version" '/^version:/ {print "version: " release_version; next} 1' mojaloop/Chart.yaml > mojaloop/Chart.yaml.tmp && mv mojaloop/Chart.yaml.tmp mojaloop/Chart.yaml
+      # - name: Syncronize release version with mojaloop chart version
+      #   env:
+      #     AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+      #   run: |
+      #     release_version='${{ steps.determine-release-version.outputs.RELEASE_VERSION }}'
+      #     if [[ -z "$release_version" || ! "$release_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+      #       echo "RELEASE_VERSION is not set or is not a valid semver version"
+      #       exit 1
+      #     fi
+      #     release_version="${release_version:1}"
+      #     sed -i "s/^version:.*/version: $release_version/" mojaloop/Chart.yaml
+      #     awk -v release_version="$release_version" '/^version:/ {print "version: " release_version; next} 1' mojaloop/Chart.yaml > mojaloop/Chart.yaml.tmp && mv mojaloop/Chart.yaml.tmp mojaloop/Chart.yaml
 
-      - name: Generate release note
-        id: generate-release-note
-        env:
-          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
-        run: |
-          .github/workflows/scripts/generate-release-note.sh '${{ inputs.release_name }}' '${{ steps.determine-release-version.outputs.RELEASE_VERSION }}' '${{ inputs.last_release_tag }}' '${{ steps.determine-release-version.outputs.RELEASE_VERSION }}' '${{ inputs.example_backend_version }}'
-          echo "RELEASE_NOTE_FILE=.changelog/release-${{ steps.determine-release-version.outputs.RELEASE_VERSION }}.md" >> "$GITHUB_OUTPUT"
+      # - name: Generate release note
+      #   id: generate-release-note
+      #   env:
+      #     AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+      #   run: |
+      #     .github/workflows/scripts/generate-release-note.sh '${{ inputs.release_name }}' '${{ steps.determine-release-version.outputs.RELEASE_VERSION }}' '${{ inputs.last_release_tag }}' '${{ steps.determine-release-version.outputs.RELEASE_VERSION }}' '${{ inputs.example_backend_version }}'
+      #     echo "RELEASE_NOTE_FILE=.changelog/release-${{ steps.determine-release-version.outputs.RELEASE_VERSION }}.md" >> "$GITHUB_OUTPUT"
 
-      - name: Create pull request
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.AUTO_RELEASE_TOKEN }}
-          commit-message: "chore: upgrade helm chart depdenencies"
-          title: "[auto] feat: release candidate for ${{ inputs.release_name }} ${{ steps.determine-release-version.outputs.RELEASE_VERSION }}"
-          body-path: ${{ steps.generate-release-note.outputs.RELEASE_NOTE_FILE }}
-          branch: release/release-candidate-${{ inputs.release_name }}-${{ steps.determine-release-version.outputs.RELEASE_VERSION }}-${{ github.run_id }}
-          base: main
-          draft: true
+      # - name: Create pull request
+      #   uses: peter-evans/create-pull-request@v5
+      #   with:
+      #     token: ${{ secrets.AUTO_RELEASE_TOKEN }}
+      #     commit-message: "chore: upgrade helm chart depdenencies"
+      #     title: "[auto] feat: release candidate for ${{ inputs.release_name }} ${{ steps.determine-release-version.outputs.RELEASE_VERSION }}"
+      #     body-path: ${{ steps.generate-release-note.outputs.RELEASE_NOTE_FILE }}
+      #     branch: release/release-candidate-${{ inputs.release_name }}-${{ steps.determine-release-version.outputs.RELEASE_VERSION }}-${{ github.run_id }}
+      #     base: main
+      #     draft: true
 
       - name: Clone oss-core-env repository
         uses: actions/checkout@v4
