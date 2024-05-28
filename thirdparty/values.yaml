@@ -1081,7 +1081,6 @@ thirdparty-simulator:
   # * support arbitrary init containers + config (that might just be config that goes into defaults
   #   or something?). Supply all config and volumes to the init containers.
   # * create some test containers
-  # * parametrise imagePullSecretName (global? like https://github.com/bitnami/charts/tree/master/bitnami/redis#parameters)
   # * generate JWS private/public keys, so the user does not need to supply keys at all.
   # * generate public key from private, so the user only needs to supply private keys for each sim?
   #   (_might_ be possible with a job or init container or similar).
@@ -2002,8 +2001,14 @@ thirdparty-simulator:
       initContainers:
         waitForCache:
           enabled: true
-
-      imagePullSecretName: dock-casa-secret
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## e.g:
+      ## imagePullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      imagePullSecrets: []
 
       cache:
 
