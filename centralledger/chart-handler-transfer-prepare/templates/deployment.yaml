@@ -150,6 +150,11 @@ spec:
           volumeMounts:
           - name: {{ template "centralledger-handler-transfer-prepare.fullname" . }}-config-volume
             mountPath: /opt/app/config
+{{- range $fileName, $fileContents := .Values.configOverride }}
+          - name: config-override-volume
+            mountPath: /opt/app/{{ $fileName }}
+            subPath: {{ $fileName }}
+{{- end }}
         {{- if .Values.sidecar.enabled }}
         - name: {{ .Chart.Name }}-sidecar
           image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
@@ -191,6 +196,11 @@ spec:
               value: {{ .Values.sidecar.config.event_log_metadata_only | quote }}
         {{- end }}
       volumes:
+        {{- if .Values.configOverride }}
+        - name: config-override-volume
+          configMap:
+            name: {{ template "centralledger-handler-transfer-prepare.fullname" . }}-config-override
+        {{- end }}
         - name: {{ template "centralledger-handler-transfer-prepare.fullname" . }}-config-volume
           configMap:
             name: {{ template "centralledger-handler-transfer-prepare.fullname" . }}-config

@@ -124,6 +124,11 @@ spec:
             - name: EVENT_SDK_TRACEID_PER_VENDOR
               value: {{ .Values.config.event_traceid_per_vendor | quote }}
           volumeMounts:
+{{- range $fileName, $fileContents := .Values.configOverride }}
+            - name: config-override-volume
+              mountPath: /opt/app/{{ $fileName }}
+              subPath: {{ $fileName }}
+{{- end }}
             - name: {{ template "transaction-requests-service.fullname" . }}-config-volume
               mountPath: /opt/app/config
         {{- if .Values.sidecar.enabled }}
@@ -167,6 +172,11 @@ spec:
               value: {{ .Values.sidecar.config.event_log_metadata_only | quote }}
         {{- end }}
       volumes:
+        {{- if .Values.configOverride }}
+        - name: config-override-volume
+          configMap:
+            name: {{ template "transaction-requests-service.fullname" . }}-config-override
+        {{- end }}
         - name: {{ template "transaction-requests-service.fullname" . }}-config-volume
           configMap:
             name: {{ template "transaction-requests-service.fullname" . }}-config

@@ -141,6 +141,11 @@ spec:
           volumeMounts:
           - name: {{ template "quotingservice.fullname" . }}-config-volume
             mountPath: /opt/app/config
+{{- range $fileName, $fileContents := .Values.configOverride }}
+          - name: config-override-volume
+            mountPath: /opt/app/{{ $fileName }}
+            subPath: {{ $fileName }}
+{{- end }}
           {{- if .Values.config.endpointSecurity.jwsSign }}
           - name: jws-signing-key
             mountPath: /opt/app/secrets
@@ -180,6 +185,11 @@ spec:
               value: {{ .Values.sidecar.config.log_level }}
         {{- end }}
       volumes:
+        {{- if .Values.configOverride }}
+        - name: config-override-volume
+          configMap:
+            name: {{ template "quotingservice.fullname" . }}-config-override
+        {{- end }}
         {{- if .Values.config.endpointSecurity.jwsSign }}
         - name: jws-signing-key
           secret:

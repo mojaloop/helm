@@ -103,6 +103,11 @@ spec:
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
           volumeMounts:
+{{- range $fileName, $fileContents := .Values.configOverride }}
+            - name: config-override-volume
+              mountPath: /opt/app/{{ $fileName }}
+              subPath: {{ $fileName }}
+{{- end }}
             - name: {{ template "ml-api-adapter-handler-notification.fullname" . }}-config-volume
               mountPath: /opt/app/config
             {{- if .Values.config.endpointSecurity.jwsSign }}
@@ -177,6 +182,11 @@ spec:
               value: {{ .Values.sidecar.config.event_log_metadata_only | quote }}
         {{- end }}
       volumes:
+        {{- if .Values.configOverride }}
+        - name: config-override-volume
+          configMap:
+            name: {{ template "ml-api-adapter-handler-notification.fullname" . }}-config-override
+        {{- end }}
         {{- if .Values.config.endpointSecurity.jwsSign }}
         - name: jws-signing-key
           secret:
