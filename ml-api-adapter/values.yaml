@@ -10,7 +10,7 @@ ml-api-adapter-service:
   # Default values for ml-api-adapter.
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
-  
+
   image:
     registry: docker.io
     repository: mojaloop/ml-api-adapter
@@ -30,7 +30,17 @@ ml-api-adapter-service:
     pullSecrets: []
 
   replicaCount: 1
-  command: '["node", "src/api/index.js"]' 
+  command: '["node", "src/api/index.js"]'
+
+  # Mount configuration files in the app folder for overriding defaults
+  # configOverride:
+  #   # event sdk settings override
+  #   .EVENT_SDKrc:
+  #     AUDIT: kafka
+
+  #   # logging settings override
+  #   .CSLrc:
+  #     LOG_FILTER: ""
 
   ## Enable diagnostic mode in the deployment
   ##
@@ -40,14 +50,14 @@ ml-api-adapter-service:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - src/api/index.js
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
+
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
@@ -102,13 +112,13 @@ ml-api-adapter-service:
       command:
         - sh
         - -c
-        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
           do
             echo --------------------;
             echo Waiting for Kafka...;
-            sleep 2; 
+            sleep 2;
           done;
-          echo ====================; 
+          echo ====================;
           echo Kafka ok!;
       env:
         - name: KAFKA_HOST
@@ -310,7 +320,7 @@ ml-api-adapter-handler-notification:
   # Default values for ml-api-adapter.
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
-  
+
   image:
     registry: docker.io
     repository: mojaloop/ml-api-adapter
@@ -332,6 +342,16 @@ ml-api-adapter-handler-notification:
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--notification"]'
 
+  # Mount configuration files in the app folder for overriding defaults
+  # configOverride:
+  #   # event sdk settings override
+  #   .EVENT_SDKrc:
+  #     AUDIT: kafka
+
+  #   # logging settings override
+  #   .CSLrc:
+  #     LOG_FILTER: ""
+
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -340,7 +360,7 @@ ml-api-adapter-handler-notification:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - src/handlers/index.js
       - handler
@@ -349,7 +369,7 @@ ml-api-adapter-handler-notification:
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
+
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
@@ -406,13 +426,13 @@ ml-api-adapter-handler-notification:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
             do
               echo --------------------;
               echo Waiting for Kafka...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo Kafka ok!;
         env:
           - name: KAFKA_HOST

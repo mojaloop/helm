@@ -138,6 +138,11 @@ spec:
             - name: EVENT_SDK_TRACEID_PER_VENDOR
               value: {{ .Values.config.event_traceid_per_vendor | quote }}
           volumeMounts:
+{{- range $fileName, $fileContents := .Values.configOverride }}
+          - name: config-override-volume
+            mountPath: /opt/app/{{ $fileName }}
+            subPath: {{ $fileName }}
+{{- end }}
           - name: {{ template "centralsettlement-service.fullname" . }}-cfg-vol
             mountPath: /opt/app/config
           - name: {{ template "centralsettlement-service.fullname" . }}-rules-vol
@@ -183,6 +188,11 @@ spec:
               value: {{ .Values.sidecar.config.event_log_metadata_only | quote }}
         {{- end }}
       volumes:
+        {{- if .Values.configOverride }}
+        - name: config-override-volume
+          configMap:
+            name: {{ template "account-lookup-service-admin.fullname" . }}-config-override
+        {{- end }}
         - name: {{ template "centralsettlement-service.fullname" . }}-cfg-vol
           configMap:
             name: {{ template "centralsettlement-service.fullname" . }}-config
