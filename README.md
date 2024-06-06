@@ -1,6 +1,6 @@
 # Mojaloop Helm Charts
 
-[![Git Commit](https://img.shields.io/github/last-commit/mojaloop/helm.svg?style=flat)](https://github.com/mojaloop/helm/commits/main)
+[![Git Commit](https://img.shields.io/github/last-commit/mojaloop/helm.svg?style=flat)](https://github.com/mojaloop/helm/commits/master)
 [![Git Releases](https://img.shields.io/github/release/mojaloop/helm.svg?style=flat)](https://github.com/mojaloop/helm/releases)
 [![CircleCI](https://circleci.com/gh/mojaloop/helm.svg?style=svg)](https://circleci.com/gh/mojaloop/helm)
 
@@ -159,7 +159,7 @@ The following Helm Charts have the following external dependencies:
 
    - `helm --namespace <namespace> install <release_name> mojaloop/mojaloop --devel`
 
-       This is useful if you've had some work merged into main but it has not yet been released.
+       This is useful if you've had some work merged into master but it has not yet been released.
 
        The `--devel` flag can also be supplied to `helm search` and `helm upgrade` commands.
 
