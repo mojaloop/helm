@@ -1,5 +1,14 @@
 {
-  "__inputs": [],
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
   "__elements": {},
   "__requires": [
     {
@@ -3905,6 +3914,10 @@
     "list": [
       {
         "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
         "definition": "label_values(node_uname_info,cluster)",
         "hide": 0,
         "includeAll": false,
@@ -3944,13 +3957,17 @@
         "datasource": {
           "uid": "$datasource"
         },
-        "definition": "label_values(mysql_up, job)",
+        "definition": "label_values(mysql_up{cluster=\"$cluster\"},job)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "job",
         "options": [],
-        "query": "label_values(mysql_up, job)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(mysql_up{cluster=\"$cluster\"},job)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -3965,13 +3982,17 @@
         "datasource": {
           "uid": "$datasource"
         },
-        "definition": "label_values(mysql_up, instance)",
+        "definition": "label_values(mysql_up{job=~\"$job\"},instance)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "instance",
         "options": [],
-        "query": "label_values(mysql_up, instance)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(mysql_up{job=~\"$job\"},instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
