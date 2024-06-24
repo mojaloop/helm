@@ -21,7 +21,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "10.0.2"
+      "version": "10.2.3"
     },
     {
       "type": "datasource",
@@ -115,6 +115,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -128,6 +129,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -193,7 +195,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(increase(moja_ml_tx_transfer_bucket{le=\"+Inf\"}[${__range_s}s]))",
+          "expr": "sum(increase(moja_ml_tx_transfer_bucket{le=\"+Inf\",cluster=\"$cluster\"}[${__range_s}s]))",
           "hide": false,
           "instant": true,
           "legendFormat": "Total",
@@ -205,7 +207,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(increase(moja_ml_tx_transfer_bucket{le=\"1\"}[${__range_s}s]))",
+          "expr": "sum(increase(moja_ml_tx_transfer_bucket{le=\"1\",cluster=\"$cluster\"}[${__range_s}s]))",
           "hide": false,
           "legendFormat": "Less than 1 sec",
           "range": true,
@@ -217,7 +219,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(increase(moja_ml_tx_transfer_bucket{le=\"+Inf\"}[${__range_s}s])) - sum(increase(moja_ml_tx_transfer_prepare_bucket{le=\"1\"}[${__range_s}s]))",
+          "expr": "sum(increase(moja_ml_tx_transfer_bucket{le=\"+Inf\",cluster=\"$cluster\"}[${__range_s}s])) - sum(increase(moja_ml_tx_transfer_prepare_bucket{le=\"1\",cluster=\"$cluster\"}[${__range_s}s]))",
           "hide": false,
           "instant": true,
           "legendFormat": "More than 1 sec",
@@ -229,7 +231,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(increase(moja_ml_tx_transfer_bucket{le=\"+Inf\"}[${__range_s}s])) - sum(increase(moja_ml_tx_transfer_prepare_bucket{le=\"2\"}[${__range_s}s]))",
+          "expr": "sum(increase(moja_ml_tx_transfer_bucket{le=\"+Inf\",cluster=\"$cluster\"}[${__range_s}s])) - sum(increase(moja_ml_tx_transfer_prepare_bucket{le=\"2\",cluster=\"$cluster\"}[${__range_s}s]))",
           "hide": false,
           "legendFormat": "More than 2 sec",
           "range": true,
@@ -241,7 +243,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(increase(moja_ml_tx_transfer_bucket{le=\"+Inf\"}[${__range_s}s])) - sum(increase(moja_ml_tx_transfer_prepare_bucket{le=\"5\"}[${__range_s}s]))",
+          "expr": "sum(increase(moja_ml_tx_transfer_bucket{le=\"+Inf\",cluster=\"$cluster\"}[${__range_s}s])) - sum(increase(moja_ml_tx_transfer_prepare_bucket{le=\"5\",cluster=\"$cluster\"}[${__range_s}s]))",
           "hide": false,
           "legendFormat": "More than 5 sec",
           "range": true,
@@ -288,6 +290,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -301,6 +304,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -414,7 +418,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_tx_transfer_count[$__rate_interval])) by (success)",
+          "expr": "sum(rate(moja_ml_tx_transfer_count{cluster=\"$cluster\"}[$__rate_interval])) by (success)",
           "hide": true,
           "legendFormat": "moja_ml_tx_transfer - success:{{success}}",
           "refId": "I"
@@ -424,7 +428,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_tx_transfer_prepare_count[$__rate_interval])) by (success)",
+          "expr": "sum(rate(moja_ml_tx_transfer_prepare_count{cluster=\"$cluster\"}[$__rate_interval])) by (success)",
           "hide": true,
           "legendFormat": "moja_ml_tx_transfer_prepare - success:{{success}}",
           "refId": "J"
@@ -434,7 +438,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_tx_transfer_fulfil_count[$__rate_interval])) by (success)",
+          "expr": "sum(rate(moja_ml_tx_transfer_fulfil_count{cluster=\"$cluster\"}[$__rate_interval])) by (success)",
           "hide": true,
           "legendFormat": "moja_ml_tx_transfer_fulfil - success:{{success}}",
           "refId": "K"
@@ -444,7 +448,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_tx_transfer_count[$__rate_interval]))",
+          "expr": "sum(rate(moja_ml_tx_transfer_count{cluster=\"$cluster\"}[$__rate_interval]))",
           "hide": false,
           "legendFormat": "moja_ml_tx_transfer - avg",
           "refId": "L"
@@ -454,7 +458,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_tx_transfer_prepare_count[$__rate_interval]))",
+          "expr": "sum(rate(moja_ml_tx_transfer_prepare_count{cluster=\"$cluster\"}[$__rate_interval]))",
           "hide": false,
           "legendFormat": "moja_ml_tx_transfer_prepare - avg",
           "refId": "M"
@@ -464,7 +468,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_tx_transfer_fulfil_count[$__rate_interval]))",
+          "expr": "sum(rate(moja_ml_tx_transfer_fulfil_count{cluster=\"$cluster\"}[$__rate_interval]))",
           "hide": false,
           "legendFormat": "moja_ml_tx_transfer_fulfil - avg",
           "refId": "N"
@@ -474,7 +478,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_transfer_prepare_count{serviceName=\"ml-service\"}[$__rate_interval])) by (app, success)",
+          "expr": "sum(rate(moja_ml_transfer_prepare_count{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval])) by (app, success)",
           "hide": false,
           "legendFormat": "Transfers API Prepare - success:{{success}}",
           "refId": "A"
@@ -484,7 +488,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_transfer_fulfil_count{serviceName=\"ml-service\"}[$__rate_interval])) by (app, success)",
+          "expr": "sum(rate(moja_ml_transfer_fulfil_count{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval])) by (app, success)",
           "hide": false,
           "legendFormat": "Transfers API Fulfill - success:{{success}}",
           "refId": "B"
@@ -494,7 +498,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_notification_event_delivery_count{serviceName=\"ml-handler-notification\"}[$__rate_interval])) by (app, action, status, success)",
+          "expr": "sum(rate(moja_ml_notification_event_delivery_count{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval])) by (app, action, status, success)",
           "hide": false,
           "legendFormat": "Notification Delivery - {{action}} - {{status}} - success:{{success}}",
           "refId": "G"
@@ -514,6 +518,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -527,6 +532,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -619,7 +625,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_transfer_prepare_sum{serviceName=\"ml-service\"}[$__rate_interval]) / rate(moja_ml_transfer_prepare_count{serviceName=\"ml-service\"}[$__rate_interval]) >=0)",
+          "expr": "avg(rate(moja_ml_transfer_prepare_sum{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_transfer_prepare_count{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval]) >=0)",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -634,7 +640,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_transfer_fulfil_sum{serviceName=\"ml-service\"}[$__rate_interval]) / rate(moja_ml_transfer_fulfil_count{serviceName=\"ml-service\"}[$__rate_interval]) >=0)",
+          "expr": "avg(rate(moja_ml_transfer_fulfil_sum{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_transfer_fulfil_count{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval]) >=0)",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -649,7 +655,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_notification_event_delivery_sum{serviceName=\"ml-handler-notification\"}[$__rate_interval]) / rate(moja_ml_notification_event_delivery_count{serviceName=\"ml-handler-notification\"}[$__rate_interval]) >=0) by (action, status, success)",
+          "expr": "avg(rate(moja_ml_notification_event_delivery_sum{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_notification_event_delivery_count{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) >=0) by (action, status, success)",
           "hide": false,
           "interval": "",
           "legendFormat": "Notification Deliveries - {{action}} - {{status}} - success:{{success}}",
@@ -662,7 +668,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_notification_event_delivery_sum{serviceName=\"ml-handler-notification\"}[$__rate_interval]) / rate(moja_ml_notification_event_delivery_count{serviceName=\"ml-handler-notification\"}[$__rate_interval]) >=0) by (kubernetes_pod_name, action, status, success)",
+          "expr": "avg(rate(moja_ml_notification_event_delivery_sum{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_notification_event_delivery_count{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) >=0) by (kubernetes_pod_name, action, status, success)",
           "hide": true,
           "instant": false,
           "interval": "",
@@ -675,7 +681,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_tx_transfer_sum[$__rate_interval]) / rate(moja_ml_tx_transfer_count[$__rate_interval]) >=0) by (success)",
+          "expr": "avg(rate(moja_ml_tx_transfer_sum{cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_tx_transfer_count{cluster=\"$cluster\"}[$__rate_interval]) >=0) by (success)",
           "hide": true,
           "interval": "",
           "legendFormat": "moja_ml_tx_transfer - success:{{success}}",
@@ -688,7 +694,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_tx_transfer_prepare_sum[$__rate_interval]) / rate(moja_ml_tx_transfer_prepare_count[$__rate_interval]) >=0) by (success)",
+          "expr": "avg(rate(moja_ml_tx_transfer_prepare_sum{cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_tx_transfer_prepare_count{cluster=\"$cluster\"}[$__rate_interval]) >=0) by (success)",
           "hide": true,
           "interval": "",
           "legendFormat": "moja_ml_tx_transfer_prepare - success:{{success}}",
@@ -701,7 +707,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_tx_transfer_fulfil_sum[$__rate_interval]) / rate(moja_ml_tx_transfer_fulfil_count[$__rate_interval])>=0) by (success)",
+          "expr": "avg(rate(moja_ml_tx_transfer_fulfil_sum{cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_tx_transfer_fulfil_count{cluster=\"$cluster\"}[$__rate_interval])>=0) by (success)",
           "hide": true,
           "interval": "",
           "legendFormat": "moja_ml_tx_transfer_fulfil - success:{{success}}",
@@ -714,7 +720,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_tx_transfer_sum[$__rate_interval]) / irate(moja_ml_tx_transfer_count[$__rate_interval]) >=0)",
+          "expr": "avg(rate(moja_ml_tx_transfer_sum{cluster=\"$cluster\"}[$__rate_interval]) / irate(moja_ml_tx_transfer_count{cluster=\"$cluster\"}[$__rate_interval]) >=0)",
           "interval": "",
           "legendFormat": "moja_ml_tx_transfer - avg",
           "range": true,
@@ -726,7 +732,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_tx_transfer_prepare_sum[$__rate_interval]) / rate(moja_ml_tx_transfer_prepare_count[$__rate_interval]) >=0)",
+          "expr": "avg(rate(moja_ml_tx_transfer_prepare_sum{cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_tx_transfer_prepare_count{cluster=\"$cluster\"}[$__rate_interval]) >=0)",
           "interval": "",
           "legendFormat": "moja_ml_tx_transfer_prepare - avg",
           "range": true,
@@ -738,7 +744,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_tx_transfer_fulfil_sum[$__rate_interval]) / rate(moja_ml_tx_transfer_fulfil_count[$__rate_interval]) >=0)",
+          "expr": "avg(rate(moja_ml_tx_transfer_fulfil_sum{cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_tx_transfer_fulfil_count{cluster=\"$cluster\"}[$__rate_interval]) >=0)",
           "interval": "",
           "legendFormat": "moja_ml_tx_transfer_fulfil - avg",
           "range": true,
@@ -800,7 +806,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -833,9 +840,10 @@
           "fields": "/^Financial Transfers / sec$/",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.2",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
@@ -843,7 +851,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(irate(moja_ml_tx_transfer_count[$__rate_interval]))",
+          "expr": "sum(irate(moja_ml_tx_transfer_count{cluster=\"$cluster\"}[$__rate_interval]))",
           "instant": true,
           "legendFormat": "Financial Transfers / sec",
           "refId": "A"
@@ -878,7 +886,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -911,16 +920,17 @@
           "fields": "/^Transfers / Sec$/",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.2",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(irate(moja_ml_tx_transfer_prepare_count[$__rate_interval]))",
+          "expr": "sum(irate(moja_ml_tx_transfer_prepare_count{cluster=\"$cluster\"}[$__rate_interval]))",
           "instant": true,
           "legendFormat": "Transfers / Sec",
           "refId": "A"
@@ -955,7 +965,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -988,16 +999,17 @@
           "fields": "/^Financial Fulfils / sec$/",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.2",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(irate(moja_ml_tx_transfer_fulfil_count[$__rate_interval]))",
+          "expr": "sum(irate(moja_ml_tx_transfer_fulfil_count{cluster=\"$cluster\"}[$__rate_interval]))",
           "instant": true,
           "legendFormat": "Financial Fulfils / sec",
           "refId": "A"
@@ -1032,7 +1044,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1065,16 +1078,17 @@
           "fields": "/^Transfers Prepare / sec$/",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.2",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(irate(moja_ml_transfer_prepare_count{serviceName=\"ml-service\"}[$__rate_interval]))",
+          "expr": "sum(irate(moja_ml_transfer_prepare_count{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval]))",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -1112,7 +1126,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1145,16 +1160,17 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.2",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(irate(moja_ml_transfer_fulfil_count{serviceName=\"ml-service\"}[$__rate_interval]))",
+          "expr": "sum(irate(moja_ml_transfer_fulfil_count{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval]))",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -1190,7 +1206,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1223,9 +1240,10 @@
           "fields": "/^Notification Events / sec$/",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.2",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
@@ -1233,7 +1251,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(irate(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\"}[$__rate_interval]))",
+          "expr": "sum(irate(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\",cluster=\"$cluster\"}[$__rate_interval]))",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -1270,7 +1288,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1303,9 +1322,10 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.2",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
@@ -1313,7 +1333,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum(rate(moja_ml_tx_transfer_bucket[${__range_s}s])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(moja_ml_tx_transfer_bucket{cluster=\"$cluster\"}[${__range_s}s])) by (le))",
           "format": "time_series",
           "range": true,
           "refId": "A"
@@ -1348,7 +1368,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#299c46"
+                "color": "#299c46",
+                "value": null
               },
               {
                 "color": "rgba(237, 129, 40, 0.89)",
@@ -1385,9 +1406,10 @@
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.2",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
@@ -1395,7 +1417,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "(sum(increase(moja_ml_tx_transfer_bucket{le=\"+Inf\"}[${__range_s}s])) - sum(increase(moja_ml_tx_transfer_bucket{le=\"1\"}[${__range_s}s]))) / sum(increase(moja_ml_tx_transfer_bucket{le=\"+Inf\"}[${__range_s}s]))",
+          "expr": "(sum(increase(moja_ml_tx_transfer_bucket{le=\"+Inf\",cluster=\"$cluster\"}[${__range_s}s])) - sum(increase(moja_ml_tx_transfer_bucket{le=\"1\",cluster=\"$cluster\"}[${__range_s}s]))) / sum(increase(moja_ml_tx_transfer_bucket{le=\"+Inf\"}[${__range_s}s]))",
           "range": true,
           "refId": "A"
         }
@@ -1441,6 +1463,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -1454,6 +1477,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -1477,7 +1501,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1563,7 +1588,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(kafka_consumergroup_lag{topic=~\"topic-.*\", consumergroup=~\"ml-group.*\"}) by (consumergroup, topic)",
+          "expr": "sum(kafka_consumergroup_lag{topic=~\"topic-.*\", consumergroup=~\"ml-group.*\",cluster=\"$cluster\"}) by (consumergroup, topic)",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -1576,7 +1601,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(kafka_consumergroup_lag{topic=~\"topic-event\"}) by (consumergroup, topic)",
+          "expr": "sum(kafka_consumergroup_lag{topic=~\"topic-event\",cluster=\"$cluster\"}) by (consumergroup, topic)",
           "hide": true,
           "legendFormat": "{{topic}}",
           "refId": "B"
@@ -1586,7 +1611,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(kafka_consumergroup_lag{topic=~\"topic-.*\", consumergroup=~\"cl-group-.*\"}) by (consumergroup, topic)",
+          "expr": "sum(kafka_consumergroup_lag{topic=~\"topic-.*\", consumergroup=~\"cl-group-.*\",cluster=\"$cluster\"}) by (consumergroup, topic)",
           "hide": true,
           "legendFormat": "{{topic}}",
           "refId": "C"
@@ -1632,6 +1657,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -1645,6 +1671,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -1668,7 +1695,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1757,7 +1785,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_tx_transfer_count[$__rate_interval])) by (success)",
+          "expr": "sum(rate(moja_ml_tx_transfer_count{cluster=\"$cluster\"}[$__rate_interval])) by (success)",
           "hide": false,
           "legendFormat": "moja_ml_tx_transfer - success:{{success}}",
           "refId": "I"
@@ -1767,7 +1795,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_tx_transfer_prepare_count[$__rate_interval])) by (success)",
+          "expr": "sum(rate(moja_ml_tx_transfer_prepare_count{cluster=\"$cluster\"}[$__rate_interval])) by (success)",
           "hide": false,
           "legendFormat": "moja_ml_tx_transfer_prepare - success:{{success}}",
           "refId": "J"
@@ -1777,7 +1805,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_tx_transfer_fulfil_count[$__rate_interval])) by (success)",
+          "expr": "sum(rate(moja_ml_tx_transfer_fulfil_count{cluster=\"$cluster\"}[$__rate_interval])) by (success)",
           "hide": false,
           "legendFormat": "moja_ml_tx_transfer_fulfil - success:{{success}}",
           "refId": "K"
@@ -1788,7 +1816,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_ml_transfer_prepare_count{serviceName=\"ml-service\"}[$__rate_interval])) by (app, success)",
+          "expr": "sum(rate(moja_ml_transfer_prepare_count{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval])) by (app, success)",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -1802,7 +1830,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_transfer_fulfil_count{serviceName=\"ml-service\"}[$__rate_interval])) by (app, success)",
+          "expr": "sum(rate(moja_ml_transfer_fulfil_count{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval])) by (app, success)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1815,7 +1843,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\"}[$__rate_interval])) by (app, success)",
+          "expr": "sum(rate(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\",cluster=\"$cluster\"}[$__rate_interval])) by (app, success)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1829,7 +1857,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_ml_notification_event_process_msg_count{serviceName=~\"ml-handler-notification|ml-service\"}[$__rate_interval])) by (app, action, success)",
+          "expr": "sum(rate(moja_ml_notification_event_process_msg_count{serviceName=~\"ml-handler-notification|ml-service\",cluster=\"$cluster\"}[$__rate_interval])) by (app, action, success)",
           "hide": false,
           "legendFormat": "Notification Events - {{action}} - success:{{success}}",
           "range": true,
@@ -1841,7 +1869,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_ml_notification_event_delivery_count{serviceName=\"~ml-handler-notification|ml-service\"}[$__rate_interval])) by (app, action, status, success)",
+          "expr": "sum(rate(moja_ml_notification_event_delivery_count{serviceName=\"~ml-handler-notification|ml-service\",cluster=\"$cluster\"}[$__rate_interval])) by (app, action, status, success)",
           "hide": false,
           "legendFormat": "Notification Delivery - {{action}} - {{status}} - success:{{success}}",
           "range": true,
@@ -1853,7 +1881,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\"}[$__rate_interval])) by (instance, kubernetes_pod_name, success)",
+          "expr": "sum(rate(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\",cluster=\"$cluster\"}[$__rate_interval])) by (instance, kubernetes_pod_name, success)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1867,7 +1895,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_ml_transfer_prepare_count{serviceName=\"ml-service\"}[$__rate_interval])) by (app, kubernetes_pod_name, success)",
+          "expr": "sum(rate(moja_ml_transfer_prepare_count{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval])) by (app, kubernetes_pod_name, success)",
           "format": "time_series",
           "hide": true,
           "intervalFactor": 1,
@@ -1881,7 +1909,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_ml_notification_event_getEndpoint_count{serviceName=~\"ml-handler-notification|ml-service\"}[$__rate_interval])) by (success)",
+          "expr": "sum(rate(moja_ml_notification_event_getEndpoint_count{serviceName=~\"ml-handler-notification|ml-service\",cluster=\"$cluster\"}[$__rate_interval])) by (success)",
           "hide": false,
           "legendFormat": "Notification GetEndpoint - success:{{success}}",
           "range": true,
@@ -1892,7 +1920,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_tx_transfer_count[$__rate_interval]))",
+          "expr": "sum(rate(moja_ml_tx_transfer_count{cluster=\"$cluster\"}[$__rate_interval]))",
           "legendFormat": "moja_ml_tx_transfer - avg",
           "refId": "L"
         },
@@ -1901,7 +1929,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_tx_transfer_prepare_count[$__rate_interval]))",
+          "expr": "sum(rate(moja_ml_tx_transfer_prepare_count{cluster=\"$cluster\"}[$__rate_interval]))",
           "legendFormat": "moja_ml_tx_transfer_prepare - avg",
           "refId": "M"
         },
@@ -1910,7 +1938,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_tx_transfer_fulfil_count[$__rate_interval]))",
+          "expr": "sum(rate(moja_ml_tx_transfer_fulfil_count{cluster=\"$cluster\"}[$__rate_interval]))",
           "legendFormat": "moja_ml_tx_transfer_fulfil - avg",
           "refId": "N"
         }
@@ -1929,6 +1957,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -1942,6 +1971,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -1965,7 +1995,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "transparent"
+                "color": "transparent",
+                "value": null
               },
               {
                 "color": "red",
@@ -2033,7 +2064,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_transfer_prepare_sum{serviceName=\"ml-service\"}[$__rate_interval]) / rate(moja_ml_transfer_prepare_count{serviceName=\"ml-service\"}[$__rate_interval]) >=0)",
+          "expr": "avg(rate(moja_ml_transfer_prepare_sum{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_transfer_prepare_count{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval]) >=0)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -2047,7 +2078,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_transfer_fulfil_sum{serviceName=\"ml-service\"}[$__rate_interval]) / rate(moja_ml_transfer_fulfil_count{serviceName=\"ml-service\"}[$__rate_interval]) >=0)",
+          "expr": "avg(rate(moja_ml_transfer_fulfil_sum{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_transfer_fulfil_count{serviceName=\"ml-service\",cluster=\"$cluster\"}[$__rate_interval]) >=0)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -2061,7 +2092,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_notification_event_sum{serviceName=\"ml-handler-notification\"}[$__rate_interval]) / rate(moja_ml_notification_event_count{serviceName=\"ml-handler-notification\"}[$__rate_interval]) >=0)",
+          "expr": "avg(rate(moja_ml_notification_event_sum{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_notification_event_count{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) >=0)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -2075,7 +2106,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_notification_event_delivery_sum{serviceName=\"ml-handler-notification\"}[$__rate_interval]) / rate(moja_ml_notification_event_delivery_count{serviceName=\"ml-handler-notification\"}[$__rate_interval]) >=0) by (action, status, success)",
+          "expr": "avg(rate(moja_ml_notification_event_delivery_sum{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_notification_event_delivery_count{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) >=0) by (action, status, success)",
           "hide": false,
           "legendFormat": "Notification Deliveries - {{action}} - {{status}} - success:{{success}}",
           "range": true,
@@ -2087,7 +2118,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_notification_event_delivery_sum{serviceName=\"ml-handler-notification\"}[$__rate_interval]) / rate(moja_ml_notification_event_delivery_count{serviceName=\"ml-handler-notification\"}[$__rate_interval]) >=0) by (kubernetes_pod_name, action, status, success)",
+          "expr": "avg(rate(moja_ml_notification_event_delivery_sum{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_notification_event_delivery_count{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) >=0) by (kubernetes_pod_name, action, status, success)",
           "hide": true,
           "instant": false,
           "legendFormat": "Notification Deliveries - {{kubernetes_pod_name}} - {{action}} - {{status}} - success:{{success}}",
@@ -2099,7 +2130,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(moja_ml_notification_event_sum{serviceName=\"ml-handler-notification\"}[$__rate_interval]) / rate(moja_ml_notification_event_count{serviceName=\"ml-handler-notification\"}[$__rate_interval]) >=0",
+          "expr": "rate(moja_ml_notification_event_sum{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_notification_event_count{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) >=0",
           "hide": true,
           "legendFormat": "Notification Events  - {{kubernetes_pod_name}}",
           "range": true,
@@ -2111,7 +2142,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_notification_event_getEndpoint_sum{serviceName=\"ml-handler-notification\"}[$__rate_interval]) / rate(moja_ml_notification_event_getEndpoint_count{serviceName=\"ml-handler-notification\"}[$__rate_interval]) >=0) by (kubernetes_pod_name)",
+          "expr": "avg(rate(moja_ml_notification_event_getEndpoint_sum{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_notification_event_getEndpoint_count{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) >=0) by (kubernetes_pod_name)",
           "hide": true,
           "legendFormat": "Notification GetEndPoint - {{kubernetes_pod_name}}",
           "range": true,
@@ -2123,7 +2154,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_notification_event_getEndpoint_sum{serviceName=\"ml-handler-notification\"}[$__rate_interval]) / rate(moja_ml_notification_event_getEndpoint_count{serviceName=\"ml-handler-notification\"}[$__rate_interval]) >=0)",
+          "expr": "avg(rate(moja_ml_notification_event_getEndpoint_sum{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_notification_event_getEndpoint_count{serviceName=\"ml-handler-notification\",cluster=\"$cluster\"}[$__rate_interval]) >=0)",
           "hide": true,
           "legendFormat": "Notification GetEndPoint ",
           "range": true,
@@ -2135,7 +2166,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_tx_transfer_sum[$__rate_interval]) / rate(moja_ml_tx_transfer_count[$__rate_interval]) >=0) by (success)",
+          "expr": "avg(rate(moja_ml_tx_transfer_sum{cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_tx_transfer_count{cluster=\"$cluster\"}[$__rate_interval]) >=0) by (success)",
           "legendFormat": "moja_ml_tx_transfer - success:{{success}}",
           "range": true,
           "refId": "I"
@@ -2146,7 +2177,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_tx_transfer_prepare_sum[$__rate_interval]) / rate(moja_ml_tx_transfer_prepare_count[$__rate_interval]) >=0) by (success)",
+          "expr": "avg(rate(moja_ml_tx_transfer_prepare_sum{cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_tx_transfer_prepare_count{cluster=\"$cluster\"}[$__rate_interval]) >=0) by (success)",
           "legendFormat": "moja_ml_tx_transfer_prepare - success:{{success}}",
           "range": true,
           "refId": "J"
@@ -2157,7 +2188,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_tx_transfer_fulfil_sum[$__rate_interval]) / rate(moja_ml_tx_transfer_fulfil_count[$__rate_interval]) >=0) by (success)",
+          "expr": "avg(rate(moja_ml_tx_transfer_fulfil_sum{cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_tx_transfer_fulfil_count{cluster=\"$cluster\"}[$__rate_interval]) >=0) by (success)",
           "legendFormat": "moja_ml_tx_transfer_fulfil - success:{{success}}",
           "range": true,
           "refId": "K"
@@ -2168,7 +2199,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_tx_transfer_sum[$__rate_interval]) / irate(moja_ml_tx_transfer_count[$__rate_interval]) >=0)",
+          "expr": "avg(rate(moja_ml_tx_transfer_sum{cluster=\"$cluster\"}[$__rate_interval]) / irate(moja_ml_tx_transfer_count{cluster=\"$cluster\"}[$__rate_interval]) >=0)",
           "legendFormat": "moja_ml_tx_transfer - avg",
           "range": true,
           "refId": "L"
@@ -2179,7 +2210,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_tx_transfer_prepare_sum[$__rate_interval]) / rate(moja_ml_tx_transfer_prepare_count[$__rate_interval]) >=0)",
+          "expr": "avg(rate(moja_ml_tx_transfer_prepare_sum{cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_tx_transfer_prepare_count{cluster=\"$cluster\"}[$__rate_interval]) >=0)",
           "legendFormat": "moja_ml_tx_transfer_prepare - avg",
           "range": true,
           "refId": "M"
@@ -2190,7 +2221,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "avg(rate(moja_ml_tx_transfer_fulfil_sum[$__rate_interval]) / rate(moja_ml_tx_transfer_fulfil_count[$__rate_interval]) >=0)",
+          "expr": "avg(rate(moja_ml_tx_transfer_fulfil_sum{cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_tx_transfer_fulfil_count{cluster=\"$cluster\"}[$__rate_interval]) >=0)",
           "legendFormat": "moja_ml_tx_transfer_fulfil - avg",
           "range": true,
           "refId": "N"
@@ -2236,6 +2267,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -2249,6 +2281,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -2272,7 +2305,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -2360,7 +2394,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum_over_time(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\", success!='true'}[$__interval]) by (app, success, error)",
+          "expr": "sum_over_time(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\", success!='true',cluster=\"$cluster\"}[$__interval]) by (app, success, error)",
           "hide": true,
           "legendFormat": "{{error}}",
           "range": true,
@@ -2372,7 +2406,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\", success!='true'}[$__rate_interval])) by (app, success, error)",
+          "expr": "sum(rate(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\", success!='true',cluster=\"$cluster\"}[$__rate_interval])) by (app, success, error)",
           "hide": false,
           "legendFormat": "{{error}}",
           "range": true,
@@ -2384,7 +2418,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\", success!='true'}[$__rate_interval])) by (app, success, error, kubernetes_pod_name)",
+          "expr": "sum(rate(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\", success!='true',cluster=\"$cluster\"}[$__rate_interval])) by (app, success, error, kubernetes_pod_name)",
           "hide": false,
           "legendFormat": "{{kubernetes_pod_name}} - {{error}}",
           "range": true,
@@ -2396,7 +2430,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(moja_ml_notification_event_sum{serviceName=~\"ml-handler-notification|ml-service\", success!='true'}[$__rate_interval]) / rate(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\", success!='true'}[$__rate_interval]) >= 0",
+          "expr": "rate(moja_ml_notification_event_sum{serviceName=~\"ml-handler-notification|ml-service\", success!='true',cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\", success!='true'}[$__rate_interval]) >= 0",
           "hide": false,
           "range": true,
           "refId": "D"
@@ -2407,7 +2441,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(moja_ml_notification_event_sum{serviceName=~\"ml-handler-notification|ml-service\", success!='false'}[$__rate_interval]) / rate(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\", success!='false'}[$__rate_interval]) >= 0",
+          "expr": "rate(moja_ml_notification_event_sum{serviceName=~\"ml-handler-notification|ml-service\", success!='false',cluster=\"$cluster\"}[$__rate_interval]) / rate(moja_ml_notification_event_count{serviceName=~\"ml-handler-notification|ml-service\", success!='false'}[$__rate_interval]) >= 0",
           "hide": false,
           "range": true,
           "refId": "E"
@@ -2417,7 +2451,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(moja_ml_tx_transfer_bucket[$__rate_interval])) by (le)",
+          "expr": "sum(rate(moja_ml_tx_transfer_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le)",
           "hide": false,
           "refId": "F"
         }
@@ -2437,6 +2471,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -2450,6 +2485,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -2473,7 +2509,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -2556,7 +2593,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(increase(moja_ml_notification_event_bucket{le=\"+Inf\", serviceName=~\"ml-handler-notification|ml-service\", success!='true'}[${__range_s}s])) by (app, success, error)",
+          "expr": "sum(increase(moja_ml_notification_event_bucket{le=\"+Inf\", serviceName=~\"ml-handler-notification|ml-service\", success!='true',cluster=\"$cluster\"}[${__range_s}s])) by (app, success, error)",
           "format": "time_series",
           "instant": false,
           "legendFormat": "{{error}}",
@@ -2620,7 +2657,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#299c46"
+                "color": "#299c46",
+                "value": null
               },
               {
                 "color": "rgba(237, 129, 40, 0.89)",
@@ -2637,7 +2675,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
+        "h": 7,
         "w": 4,
         "x": 0,
         "y": 62
@@ -2646,6 +2684,8 @@
       "links": [],
       "maxDataPoints": 100,
       "options": {
+        "minVizHeight": 200,
+        "minVizWidth": 200,
         "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
@@ -2655,16 +2695,17 @@
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": true,
+        "sizing": "auto"
       },
-      "pluginVersion": "10.0.2",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api.*'}[2m])) * 100",
+          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api.*',cluster=\"$cluster\"}[2m])) * 100",
           "format": "time_series",
           "hide": true,
           "instant": true,
@@ -2676,7 +2717,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api.*'}[2m]))",
+          "expr": "sum(irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api.*',cluster=\"$cluster\"}[2m]))",
           "refId": "B"
         }
       ],
@@ -2711,7 +2752,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#299c46"
+                "color": "#299c46",
+                "value": null
               },
               {
                 "color": "rgba(237, 129, 40, 0.89)",
@@ -2728,7 +2770,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
+        "h": 7,
         "w": 4,
         "x": 4,
         "y": 62
@@ -2737,6 +2779,8 @@
       "links": [],
       "maxDataPoints": 100,
       "options": {
+        "minVizHeight": 200,
+        "minVizWidth": 200,
         "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
@@ -2746,16 +2790,17 @@
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": true,
+        "sizing": "auto"
       },
-      "pluginVersion": "10.0.2",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-service.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
+          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-service.*',cluster=\"$cluster\"}[2m])) / sum (machine_cpu_cores{cluster=\"$cluster\"}) * 100",
           "format": "time_series",
           "hide": true,
           "instant": true,
@@ -2767,7 +2812,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-service.*'}[2m]))",
+          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-service.*',cluster=\"$cluster\"}[2m]))",
           "refId": "B"
         }
       ],
@@ -2802,7 +2847,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#299c46"
+                "color": "#299c46",
+                "value": null
               },
               {
                 "color": "rgba(237, 129, 40, 0.89)",
@@ -2819,7 +2865,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 3,
+        "h": 7,
         "w": 4,
         "x": 8,
         "y": 62
@@ -2828,6 +2874,8 @@
       "links": [],
       "maxDataPoints": 100,
       "options": {
+        "minVizHeight": 200,
+        "minVizWidth": 200,
         "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
@@ -2837,16 +2885,17 @@
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": true,
+        "sizing": "auto"
       },
-      "pluginVersion": "10.0.2",
+      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-handler-notification.*'}[2m])) / sum (machine_cpu_cores{}) * 100",
+          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-handler-notification.*',cluster=\"$cluster\"}[2m])) / sum (machine_cpu_cores{cluster=\"$cluster\"}) * 100",
           "format": "time_series",
           "hide": true,
           "instant": true,
@@ -2858,7 +2907,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-handler-notification.*'}[2m]))",
+          "expr": "sum (irate (container_cpu_usage_seconds_total{pod_name=~'.*ml-api-adapter-handler-notification.*',cluster=\"$cluster\"}[2m]))",
           "refId": "B"
         }
       ],
@@ -2875,7 +2924,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 65
+        "y": 69
       },
       "id": 28,
       "panels": [],
@@ -2902,6 +2951,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -2915,6 +2965,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -2937,7 +2988,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -2953,7 +3005,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 66
+        "y": 70
       },
       "id": 46,
       "options": {
@@ -2982,7 +3034,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "moja_ml_nodejs_heap_size_total_bytes{serviceName=~\"ml-s.*\"}",
+          "expr": "moja_ml_nodejs_heap_size_total_bytes{serviceName=~\"ml-s.*\",cluster=\"$cluster\"}",
           "legendFormat": "heap_total-{{kubernetes_pod_name}}",
           "refId": "A"
         },
@@ -2991,7 +3043,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "moja_ml_nodejs_heap_size_used_bytes{serviceName=~\"ml-s.*\"}",
+          "expr": "moja_ml_nodejs_heap_size_used_bytes{serviceName=~\"ml-s.*\",cluster=\"$cluster\"}",
           "legendFormat": "heap_used-{{kubernetes_pod_name}}",
           "refId": "B"
         },
@@ -3000,7 +3052,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "moja_ml_nodejs_external_memory_bytes{serviceName=~\"ml-s.*\"}",
+          "expr": "moja_ml_nodejs_external_memory_bytes{serviceName=~\"ml-s.*\",cluster=\"$cluster\"}",
           "legendFormat": "ext_memory-{{kubernetes_pod_name}}",
           "refId": "C"
         }
@@ -3020,6 +3072,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -3033,6 +3086,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -3055,7 +3109,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -3071,7 +3126,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 74
+        "y": 78
       },
       "id": 2,
       "links": [],
@@ -3100,7 +3155,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum (rate (moja_ml_process_cpu_seconds_total{serviceName=~\"ml-.*\"}[2m])) by (kubernetes_pod_name)",
+          "expr": "sum (rate (moja_ml_process_cpu_seconds_total{serviceName=~\"ml-.*\",cluster=\"$cluster\"}[2m])) by (kubernetes_pod_name)",
           "format": "time_series",
           "hide": true,
           "intervalFactor": 1,
@@ -3112,7 +3167,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(\n    rate(container_cpu_usage_seconds_total{pod_name=~'.*ml.*'}[2m]))\nby (pod_name)",
+          "expr": "sum(\n    rate(container_cpu_usage_seconds_total{pod_name=~'.*ml.*',cluster=\"$cluster\"}[2m]))\nby (pod_name)",
           "format": "time_series",
           "hide": true,
           "intervalFactor": 1,
@@ -3124,7 +3179,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(rate(container_cpu_usage_seconds_total{pod_name=~'.*ml.*'}[2m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{pod_name=~'.*ml.*',cluster=\"$cluster\"}[2m]))",
           "format": "time_series",
           "hide": true,
           "intervalFactor": 1,
@@ -3136,7 +3191,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(moja_ml_process_cpu_seconds_total{serviceName=~\"ml-.*\"}[$__rate_interval]) * 100",
+          "expr": "rate(moja_ml_process_cpu_seconds_total{serviceName=~\"ml-.*\",cluster=\"$cluster\"}[$__rate_interval]) * 100",
           "legendFormat": "{{kubernetes_pod_name}}",
           "refId": "B"
         }
@@ -3154,7 +3209,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 81
+        "y": 85
       },
       "id": 34,
       "panels": [],
@@ -3181,6 +3236,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -3194,6 +3250,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -3217,7 +3274,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -3233,7 +3291,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 82
+        "y": 86
       },
       "id": 18,
       "links": [],
@@ -3258,7 +3316,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "kube_deployment_spec_replicas{deployment=~\".*ml-api-.*\"}",
+          "expr": "kube_deployment_spec_replicas{deployment=~\".*ml-api-.*\",cluster=\"$cluster\"}",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -3270,7 +3328,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "kube_deployment_spec_replicas{deployment=~\".*simnotifhandler.*\"}",
+          "expr": "kube_deployment_spec_replicas{deployment=~\".*simnotifhandler.*\",cluster=\"$cluster\"}",
           "legendFormat": "{{deployment}}",
           "refId": "B"
         }
@@ -3289,6 +3347,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -3302,6 +3361,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -3324,7 +3384,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -3340,7 +3401,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 86
+        "y": 90
       },
       "id": 10,
       "links": [],
@@ -3363,7 +3424,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "avg(moja_ml_nodejs_eventloop_lag_seconds{serviceName=~\"ml.*\"}) by (app)",
+          "expr": "avg(moja_ml_nodejs_eventloop_lag_seconds{serviceName=~\"ml.*\",cluster=\"$cluster\"}) by (app)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{app}}",
@@ -3375,11 +3436,30 @@
     }
   ],
   "refresh": "5s",
-  "schemaVersion": 38,
-  "style": "dark",
+  "schemaVersion": 39,
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {},
+        "definition": "label_values(node_uname_info,cluster)",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(node_uname_info,cluster)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-5m",
@@ -3412,7 +3492,7 @@
   },
   "timezone": "",
   "title": "Mojaloop - ML-API",
-  "uid": "5z9mkZ-msa",
+  "uid": "5z9mkZ-msa-v001",
   "version": 1,
   "weekStart": ""
 }
