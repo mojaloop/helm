@@ -93,6 +93,10 @@ spec:
       - name: scheme-adapter
         image: "{{ $config.config.schemeAdapter.image.repository }}:{{ $config.config.schemeAdapter.image.tag }}"
         imagePullPolicy: {{ $config.config.schemeAdapter.image.pullPolicy }}
+        {{- if $config.config.imagePullSecrets }}
+        imagePullSecrets:
+        {{ toYaml $config.config.imagePullSecrets | indent 10 }}
+        {{- end }}
         command: {{ $config.config.schemeAdapter.image.command }}
         ports:
           - name: inboundapi
@@ -148,8 +152,6 @@ spec:
         {{- end }}
         resources:
 {{ toYaml $config.config.schemeAdapter.resources | indent 10 }}
-      imagePullSecrets:
-        - name: {{ $config.config.imagePullSecretName }}
     {{- with $config.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
@@ -191,6 +193,10 @@ spec:
       - name: backend
         image: "{{ $config.config.backend.image.repository }}:{{ $config.config.backend.image.tag }}"
         imagePullPolicy: {{ $config.config.backend.image.pullPolicy }}
+        {{- if $config.config.imagePullSecrets }}
+        imagePullSecrets:
+        {{ toYaml $config.config.imagePullSecrets | indent 10 }}
+        {{- end }}
         ports:
           - name: simapi
             containerPort: 3000 # these are hard-coded in the service
@@ -245,8 +251,6 @@ spec:
       - name: {{ $prefix }}rules
         configMap:
           name: {{ $fullName }}-rules
-      imagePullSecrets:
-        - name: {{ $config.config.imagePullSecretName }}
     {{- with $config.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
@@ -369,6 +373,10 @@ spec:
       - name: thirdpartysdk
         image: "{{ $config.config.thirdpartysdk.image.repository }}:{{ $config.config.thirdpartysdk.image.tag }}"
         imagePullPolicy: {{ $config.config.thirdpartysdk.image.pullPolicy }}
+        {{- if $config.config.imagePullSecrets }}
+        imagePullSecrets:
+        {{ toYaml $config.config.imagePullSecrets | indent 8 }}
+        {{- end }}
         # TODO: make configurable
         command: {{ $config.config.thirdpartysdk.image.command }}
         ports:
@@ -409,9 +417,6 @@ spec:
         {{- end }}
         resources:
 {{ toYaml $config.config.thirdpartysdk.resources | indent 10 }}
-
-      imagePullSecrets:
-        - name: {{ $config.config.imagePullSecretName }}
     {{- with $config.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

@@ -129,6 +129,11 @@ spec:
           volumeMounts:
           - name: {{ template "account-lookup-service-api.fullname" . }}-config-volume
             mountPath: /opt/app/config
+{{- range $fileName, $fileContents := .Values.configOverride }}
+          - name: config-override-volume
+            mountPath: /opt/app/{{ $fileName }}
+            subPath: {{ $fileName | replace "/" "-" }}
+{{- end }}
           {{- if .Values.config.endpointSecurity.jwsSign }}
           - name: jws-signing-key
             mountPath: /opt/app/secrets
@@ -186,6 +191,11 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
       volumes:
+        {{- if .Values.configOverride }}
+        - name: config-override-volume
+          configMap:
+            name: {{ template "account-lookup-service-api.fullname" . }}-config-override
+        {{- end }}
         - name: {{ template "account-lookup-service-api.fullname" . }}-config-volume
           configMap:
             name: {{ template "account-lookup-service-api.fullname" . }}-config
