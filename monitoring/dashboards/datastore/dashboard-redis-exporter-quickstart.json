@@ -141,7 +141,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "avg(irate(redis_commands_total{instance=~\"$instance\"} [1m])) by (cmd)",
+          "expr": "avg(irate(redis_commands_total{instance=~\"$instance\",cluster=\"$cluster\"} [1m])) by (cmd)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -242,7 +242,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "avg(irate(redis_commands_duration_seconds_total{instance=~\"$instance\"}[1m])) by (cmd)\n  /\navg(irate(redis_commands_total{instance=~\"$instance\"}[1m])) by (cmd)\n",
+          "expr": "avg(irate(redis_commands_duration_seconds_total{instance=~\"$instance\",cluster=\"$cluster\"}[1m])) by (cmd)\n  /\navg(irate(redis_commands_total{instance=~\"$instance\",cluster=\"$cluster\"}[1m])) by (cmd)\n",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -353,7 +353,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "avg(irate(redis_keyspace_hits_total{instance=~\"$instance\"}[1m]) / (irate(redis_keyspace_misses_total{instance=~\"$instance\"}[1m]) + irate(redis_keyspace_hits_total{instance=~\"$instance\"}[1m]))) by (instance)",
+          "expr": "avg(irate(redis_keyspace_hits_total{instance=~\"$instance\",cluster=\"$cluster\"}[1m]) / (irate(redis_keyspace_misses_total{instance=~\"$instance\",cluster=\"$cluster\"}[1m]) + irate(redis_keyspace_hits_total{instance=~\"$instance\",cluster=\"$cluster\"}[1m]))) by (instance)",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -503,7 +503,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "sum(redis_memory_used_bytes{instance=~\"$instance\"})",
+          "expr": "sum(redis_memory_used_bytes{instance=~\"$instance\",cluster=\"$cluster\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -517,7 +517,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "sum(redis_memory_max_bytes{instance=~\"$instance\"})",
+          "expr": "sum(redis_memory_max_bytes{instance=~\"$instance\",cluster=\"$cluster\"})",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -530,7 +530,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "sum(redis_memory_used_rss_bytes{instance=~\"$instance\"})",
+          "expr": "sum(redis_memory_used_rss_bytes{instance=~\"$instance\",cluster=\"$cluster\"})",
           "interval": "",
           "legendFormat": "Used RSS memory",
           "refId": "C"
@@ -635,7 +635,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "redis_memory_fragmentation_ratio{instance=~\"$instance\"}",
+          "expr": "redis_memory_fragmentation_ratio{instance=~\"$instance\",cluster=\"$cluster\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "{{instance}}",
@@ -742,7 +742,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "irate(redis_evicted_keys_total{instance=~\"$instance\"}[1m])",
+          "expr": "irate(redis_evicted_keys_total{instance=~\"$instance\",cluster=\"$cluster\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -863,7 +863,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "sum(redis_connected_clients{instance=~\"$instance\"})",
+          "expr": "sum(redis_connected_clients{instance=~\"$instance\",cluster=\"$cluster\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -874,7 +874,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "sum(redis_blocked_clients{instance=~\"$instance\"})",
+          "expr": "sum(redis_blocked_clients{instance=~\"$instance\",cluster=\"$cluster\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -976,7 +976,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "sum (redis_db_keys{instance=~\"$instance\"}) by (db)",
+          "expr": "sum (redis_db_keys{instance=~\"$instance\",cluster=\"$cluster\"}) by (db)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1075,7 +1075,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "sum (redis_db_keys{instance=~\"$instance\"}) - sum (redis_db_keys_expiring{instance=~\"$instance\"})",
+          "expr": "sum (redis_db_keys{instance=~\"$instance\",cluster=\"$cluster\"}) - sum (redis_db_keys_expiring{instance=~\"$instance\",cluster=\"$cluster\"})",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -1089,7 +1089,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "sum(redis_db_keys_expiring{instance=~\"$instance\"})",
+          "expr": "sum(redis_db_keys_expiring{instance=~\"$instance\",cluster=\"$cluster\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1184,7 +1184,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "sum(redis_connected_slaves{instance=~\"$instance\"}) by (instance)",
+          "expr": "sum(redis_connected_slaves{instance=~\"$instance\",cluster=\"$cluster\"}) by (instance)",
           "interval": "",
           "legendFormat": "{{instance}}",
           "refId": "A"
@@ -1274,7 +1274,7 @@
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "redis_master_last_io_seconds_ago{instance=~\"$instance\"}",
+          "expr": "redis_master_last_io_seconds_ago{instance=~\"$instance\",cluster=\"$cluster\"}",
           "interval": "",
           "legendFormat": "{{instance}}",
           "refId": "A"
