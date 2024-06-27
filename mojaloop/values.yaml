@@ -2,7 +2,7 @@
 CONFIG:
   ## HUB CONFIGURATION
   hub_participant: &HUB_PARTICIPANT
-    id: 1
+    id: &HUB_ID 1
     name: &HUB_NAME Hub
 
   ## ACCOUNT-LOOKUP BACKEND
@@ -161,6 +161,7 @@ account-lookup-service:
           serviceName: account-lookup-service
 
     config:
+      hub_participant: *HUB_PARTICIPANT
       ## Central-Ledger config
       central_services_host: '$release_name-centralledger-service'
       central_services_port: 80
@@ -532,6 +533,7 @@ account-lookup-service:
           serviceName: account-lookup-service-admin
 
     config:
+      hub_participant: *HUB_PARTICIPANT
       ## Central-Ledger config
       central_services_host: '$release_name-centralledger-service'
       central_services_port: 80
@@ -1274,6 +1276,7 @@ quoting-service:
       tag: v15.7.0
 
     config:
+      hub_participant: *HUB_PARTICIPANT
       ## DB Configuration
       # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
       db_type: 'mysql'
@@ -1375,6 +1378,7 @@ quoting-service:
       tag: v15.7.0
 
     config:
+      hub_participant: *HUB_PARTICIPANT
       ## DB Configuration
       # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
       db_type: 'mysql'
@@ -1617,6 +1621,7 @@ ml-api-adapter:
       enabled: true
 
     config:
+      hub_participant: *HUB_PARTICIPANT
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: *KAFKA_HOST
       kafka_port: *KAFKA_PORT
@@ -1897,6 +1902,7 @@ ml-api-adapter:
       enabled: true
 
     config:
+      hub_participant: *HUB_PARTICIPANT
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: *KAFKA_HOST
       kafka_port: *KAFKA_PORT
@@ -2225,7 +2231,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -2564,7 +2569,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -2906,7 +2910,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -3243,7 +3246,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -3585,7 +3587,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -3921,7 +3922,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -4260,7 +4260,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -4601,7 +4600,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -4951,7 +4949,6 @@ centralsettlement:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Kafka Configuration
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: *KAFKA_HOST
@@ -5382,7 +5379,6 @@ centralsettlement:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Kafka Configuration
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: *KAFKA_HOST
@@ -5815,7 +5811,6 @@ centralsettlement:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Kafka Configuration
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: *KAFKA_HOST
@@ -6248,7 +6243,6 @@ centralsettlement:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Kafka Configuration
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: *KAFKA_HOST
@@ -6769,6 +6763,7 @@ transaction-requests-service:
         serviceName: transaction-requests
 
   config:
+    hub_participant: *HUB_PARTICIPANT
     central_services_host: '$release_name-centralledger-service'
     central_services_port: 80
 
@@ -7010,6 +7005,7 @@ thirdparty:
 
     ## Svc configs
     config:
+      hub_participant: *HUB_PARTICIPANT
       ## DB Configuration
       db_host: *TP_AUTH_SVC_DB_HOST
       db_port: *TP_AUTH_SVC_DB_PORT
@@ -7671,11 +7667,17 @@ thirdparty:
     # - name: LOG_LEVEL
     #   value: debug
     ## Svc configs
-    config: {}
+    config: 
+      hub_participant: *HUB_PARTICIPANT
+
     ## Svc config files
     config_files:
       default.json: |
         {
+            "HUB_PARTICIPANT": {
+              "ID": {{ .Values.config.hub_participant.id }},
+              "NAME": "{{ .Values.config.hub_participant.name }}",
+            }
             "PORT": {{ .Values.service.internalPort }},
             "HOST": "0.0.0.0",
             "INSPECT": {
@@ -9222,6 +9224,7 @@ simulator:
     LOG_LEVEL: 'info'
 
     ## Add '$release' into any of the *_SERVICE_ENDPOINT values to include the release name as part of the deployment
+    HUB_NAME: *HUB_NAME
     PARTIES_SERVICE_ENDPOINT: 'http://$release_name-account-lookup-service'
     QUOTES_SERVICE_ENDPOINT: 'http://$release_name-quoting-service'
     TRANSFERS_SERVICE_ENDPOINT: 'http://$release_name-ml-api-adapter-service'
@@ -10485,7 +10488,7 @@ mojaloop-ttk-simulators:
           api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v23.4.0/test/func/config/ttk-ttksim1/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/api_spec.yaml'
           api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__callback_map.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v23.4.0/test/func/config/ttk-ttksim1/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/callback_map.json'
         extraEnvironments:
-          hub-k8s-default-environment.json: &ttksim1InputValues {"inputValues": {"TTKSIM1_FSPID": "ttksim1", "TTKSIM1_MSISDN_1": "16135551212", "TTKSIM1_MSISDN_1_FIRST_NAME": "ReceiverFirst", "TTKSIM1_MSISDN_1_LAST_NAME": "ReceiverLast", "TTKSIM1_CURRENCY": "TZS", "TTKSIM2_FSPID": "ttksim2", "TTKSIM2_MSISDN_1": "4561000001", "TTKSIM2_MSISDN_1_FIRST_NAME": "ReceiverFirst", "TTKSIM2_MSISDN_1_LAST_NAME": "ReceiverLast", "TTKSIM2_MSISDN_2": "4561000002", "TTKSIM2_MSISDN_2_FIRST_NAME": "ReceiverFirst", "TTKSIM2_MSISDN_2_LAST_NAME": "ReceiverLast", "TTKSIM2_PARTY_NOT_FOUND": "partynotfound", "TTKSIM2_PARTY_TIMES_OUT": "partytimesout", "TTKSIM2_CURRENCY": "TZS", "TTKSIM3_FSPID": "ttksim3", "TTKSIM3_MSISDN_1": "5671000001", "TTKSIM3_MSISDN_1_FIRST_NAME": "ReceiverFirst", "TTKSIM3_MSISDN_1_LAST_NAME": "ReceiverLast", "TTKSIM3_MSISDN_2": "5671000002", "TTKSIM3_MSISDN_2_FIRST_NAME": "ReceiverFirst", "TTKSIM3_MSISDN_2_LAST_NAME": "ReceiverLast", "TTKSIM3_CURRENCY": "TZS", "TTKSIM2_MSISDN_PREFIX": "4561", "TTKSIM3_MSISDN_PREFIX": "5671", "HOST_CENTRAL_LEDGER": "http://$release_name-centralledger-service", "HOST_CENTRAL_SETTLEMENT": "http://$release_name-centralsettlement-service/v2"}}
+          hub-k8s-default-environment.json: &ttksim1InputValues {"inputValues": {"HUB_NAME": *HUB_NAME, "TTKSIM1_FSPID": "ttksim1", "TTKSIM1_MSISDN_1": "16135551212", "TTKSIM1_MSISDN_1_FIRST_NAME": "ReceiverFirst", "TTKSIM1_MSISDN_1_LAST_NAME": "ReceiverLast", "TTKSIM1_CURRENCY": "TZS", "TTKSIM2_FSPID": "ttksim2", "TTKSIM2_MSISDN_1": "4561000001", "TTKSIM2_MSISDN_1_FIRST_NAME": "ReceiverFirst", "TTKSIM2_MSISDN_1_LAST_NAME": "ReceiverLast", "TTKSIM2_MSISDN_2": "4561000002", "TTKSIM2_MSISDN_2_FIRST_NAME": "ReceiverFirst", "TTKSIM2_MSISDN_2_LAST_NAME": "ReceiverLast", "TTKSIM2_PARTY_NOT_FOUND": "partynotfound", "TTKSIM2_PARTY_TIMES_OUT": "partytimesout", "TTKSIM2_CURRENCY": "TZS", "TTKSIM3_FSPID": "ttksim3", "TTKSIM3_MSISDN_1": "5671000001", "TTKSIM3_MSISDN_1_FIRST_NAME": "ReceiverFirst", "TTKSIM3_MSISDN_1_LAST_NAME": "ReceiverLast", "TTKSIM3_MSISDN_2": "5671000002", "TTKSIM3_MSISDN_2_FIRST_NAME": "ReceiverFirst", "TTKSIM3_MSISDN_2_LAST_NAME": "ReceiverLast", "TTKSIM3_CURRENCY": "TZS", "TTKSIM2_MSISDN_PREFIX": "4561", "TTKSIM3_MSISDN_PREFIX": "5671", "HOST_CENTRAL_LEDGER": "http://$release_name-centralledger-service", "HOST_CENTRAL_SETTLEMENT": "http://$release_name-centralsettlement-service/v2"}}
       ml-testing-toolkit-frontend:
         ingress:
           enabled: true
@@ -10940,6 +10943,7 @@ mojaloop-bulk:
             serviceName: bulk-service
 
       config:
+        hub_participant: *HUB_PARTICIPANT
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
         kafka_host: *KAFKA_HOST
         kafka_port: *KAFKA_PORT
@@ -11188,6 +11192,7 @@ mojaloop-bulk:
             serviceName: bulk-handler-notification
 
       config:
+        hub_participant: *HUB_PARTICIPANT
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
         kafka_host: *KAFKA_HOST
         kafka_port: *KAFKA_PORT
@@ -11529,7 +11534,6 @@ mojaloop-bulk:
 
       config:
         hub_participant: *HUB_PARTICIPANT
-
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
@@ -11895,7 +11899,6 @@ mojaloop-bulk:
 
       config:
         hub_participant: *HUB_PARTICIPANT
-        
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
@@ -12258,7 +12261,6 @@ mojaloop-bulk:
 
       config:
         hub_participant: *HUB_PARTICIPANT
-
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
@@ -12621,7 +12623,6 @@ mojaloop-bulk:
 
       config:
         hub_participant: *HUB_PARTICIPANT
-        
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
