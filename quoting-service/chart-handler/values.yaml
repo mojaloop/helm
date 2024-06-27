@@ -7,7 +7,7 @@ global: {}
 image:
   registry: docker.io
   repository: mojaloop/quoting-service
-  tag: v15.7.0
+  tag: v15.8.0-snapshot.21
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -23,7 +23,7 @@ image:
   pullSecrets: []
 
 replicaCount: 1
-command: '["node", "src/handlers/index.js", "handler", "--quotes --bulk_quotes"]'
+command: '["node", "src/handlers/index.js", "handler", "--quotes", "--bulk_quotes", "--fx_quotes"]'
 
 ## Enable diagnostic mode in the deployment
 ##
@@ -35,7 +35,7 @@ diagnosticMode:
   ##
   command:
     - node
-    - src/handlers/index.js h --quotes --bulk_quotes
+    - src/handlers/index.js h --quotes --bulk_quotes --fx_quotes
   ## @param diagnosticMode.args Args to override all containers in the deployment
   ##
   args:
@@ -302,7 +302,7 @@ podAnnotations: {}
 
 # think, if we need "service" for consumer?
 service:
-  internalPort: 3002
+  internalPort: 3003
   ## @param service.type %%MAIN_CONTAINER_NAME%% service type
   ##
   type: ClusterIP
