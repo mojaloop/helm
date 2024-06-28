@@ -2,8 +2,8 @@
 CONFIG:
   ## HUB CONFIGURATION
   hub_participant: &HUB_PARTICIPANT
-    id: 1
-    name: Hub
+    id: &HUB_ID 1
+    name: &HUB_NAME Hub
 
   ## ACCOUNT-LOOKUP BACKEND
   als_db_name: &ALS_DB_NAME "account_lookup"
@@ -100,7 +100,7 @@ account-lookup-service:
     image:
       registry: docker.io
       repository: mojaloop/account-lookup-service
-      tag: v15.2.3
+      tag: v16.0.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -161,6 +161,7 @@ account-lookup-service:
           serviceName: account-lookup-service
 
     config:
+      hub_participant: *HUB_PARTICIPANT
       ## Central-Ledger config
       central_services_host: '$release_name-centralledger-service'
       central_services_port: 80
@@ -241,7 +242,6 @@ account-lookup-service:
 
       endpointSecurity:
         jwsSign: true
-        fspiopSourceSigningName: switch
         # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
         # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
         # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
@@ -471,7 +471,7 @@ account-lookup-service:
     image:
       registry: docker.io
       repository: mojaloop/account-lookup-service
-      tag: v15.2.3
+      tag: v16.0.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -532,6 +532,7 @@ account-lookup-service:
           serviceName: account-lookup-service-admin
 
     config:
+      hub_participant: *HUB_PARTICIPANT
       ## Central-Ledger config
       central_services_host: '$release_name-centralledger-service'
       central_services_port: 80
@@ -606,7 +607,6 @@ account-lookup-service:
 
       endpointSecurity:
         jwsSign: false
-        fspiopSourceSigningName: switch
         # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
         # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
         # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
@@ -1271,9 +1271,10 @@ quoting-service:
     image:
       registry: docker.io
       repository: mojaloop/quoting-service
-      tag: v15.8.0-snapshot.22
+      tag: v15.8.0-snapshot.24
 
     config:
+      hub_participant: *HUB_PARTICIPANT
       ## DB Configuration
       # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
       db_type: 'mysql'
@@ -1323,7 +1324,6 @@ quoting-service:
 
       endpointSecurity:
         jwsSign: false
-        fspiopSourceSigningName: 'switch'
         jwsSigningKey: null
       # To generate this key:
       # Private:
@@ -1372,9 +1372,10 @@ quoting-service:
     image:
       registry: docker.io
       repository: mojaloop/quoting-service
-      tag: v15.8.0-snapshot.22
+      tag: v15.8.0-snapshot.24
 
     config:
+      hub_participant: *HUB_PARTICIPANT
       ## DB Configuration
       # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
       db_type: 'mysql'
@@ -1422,7 +1423,6 @@ quoting-service:
 
       endpointSecurity:
         jwsSign: true
-        fspiopSourceSigningName: 'switch'
         # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
         # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
         # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
@@ -1511,7 +1511,7 @@ ml-api-adapter:
     image:
       registry: docker.io
       repository: mojaloop/ml-api-adapter
-      tag: v14.1.0-snapshot.9
+      tag: v14.1.0-snapshot.14
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -1617,6 +1617,7 @@ ml-api-adapter:
       enabled: true
 
     config:
+      hub_participant: *HUB_PARTICIPANT
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: *KAFKA_HOST
       kafka_port: *KAFKA_PORT
@@ -1789,7 +1790,7 @@ ml-api-adapter:
     image:
       registry: docker.io
       repository: mojaloop/ml-api-adapter
-      tag: v14.1.0-snapshot.9
+      tag: v14.1.0-snapshot.14
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -1897,6 +1898,7 @@ ml-api-adapter:
       enabled: true
 
     config:
+      hub_participant: *HUB_PARTICIPANT
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: *KAFKA_HOST
       kafka_port: *KAFKA_PORT
@@ -1953,7 +1955,6 @@ ml-api-adapter:
       # Parameters for JWS signing requests generated by ml-api-adapter
       endpointSecurity:
         jwsSign: true
-        fspiopSourceSigningName: 'switch'
         # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
         # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
         # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
@@ -2135,7 +2136,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.7.0-snapshot.18
+      tag: v17.7.0-snapshot.20
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2225,7 +2226,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -2472,7 +2472,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.7.0-snapshot.18
+      tag: v17.7.0-snapshot.20
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2564,7 +2564,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -2814,7 +2813,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.7.0-snapshot.18
+      tag: v17.7.0-snapshot.20
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2906,7 +2905,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -3151,7 +3149,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.7.0-snapshot.18
+      tag: v17.7.0-snapshot.20
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3243,7 +3241,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -3493,7 +3490,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.7.0-snapshot.18
+      tag: v17.7.0-snapshot.20
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3585,7 +3582,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -3829,7 +3825,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.7.0-snapshot.18
+      tag: v17.7.0-snapshot.20
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3921,7 +3917,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -4168,7 +4163,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.7.0-snapshot.18
+      tag: v17.7.0-snapshot.20
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -4260,7 +4255,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -4512,7 +4506,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.7.0-snapshot.18
+      tag: v17.7.0-snapshot.20
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -4604,7 +4598,6 @@ centralledger:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Forensic Logging sidecar
       # this is for Forensic Logging Sidecar
       forensicloggingsidecar_disabled: true
@@ -4847,7 +4840,7 @@ centralsettlement:
     image:
       registry: docker.io
       repository: mojaloop/central-settlement
-      tag: v16.0.0
+      tag: v17.0.0-snapshot.4
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -4954,7 +4947,6 @@ centralsettlement:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Kafka Configuration
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: *KAFKA_HOST
@@ -5276,7 +5268,7 @@ centralsettlement:
     image:
       registry: docker.io
       repository: mojaloop/central-settlement
-      tag: v16.0.0
+      tag: v17.0.0-snapshot.4
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -5385,7 +5377,6 @@ centralsettlement:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Kafka Configuration
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: *KAFKA_HOST
@@ -5709,7 +5700,7 @@ centralsettlement:
     image:
       registry: docker.io
       repository: mojaloop/central-settlement
-      tag: v16.0.0
+      tag: v17.0.0-snapshot.4
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -5818,7 +5809,6 @@ centralsettlement:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Kafka Configuration
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: *KAFKA_HOST
@@ -6142,7 +6132,7 @@ centralsettlement:
     image:
       registry: docker.io
       repository: mojaloop/central-settlement
-      tag: v16.0.0
+      tag: v17.0.0-snapshot.4
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -6251,7 +6241,6 @@ centralsettlement:
 
     config:
       hub_participant: *HUB_PARTICIPANT
-
       ## Kafka Configuration
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: *KAFKA_HOST
@@ -6664,7 +6653,7 @@ transaction-requests-service:
   image:
     registry: docker.io
     repository: mojaloop/transaction-requests-service
-    tag: v14.1.2
+    tag: v14.2.0-snapshot.0
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -6772,6 +6761,7 @@ transaction-requests-service:
         serviceName: transaction-requests
 
   config:
+    hub_participant: *HUB_PARTICIPANT
     central_services_host: '$release_name-centralledger-service'
     central_services_port: 80
 
@@ -6936,7 +6926,7 @@ thirdparty:
     image:
       registry: docker.io
       repository: mojaloop/auth-service
-      tag: v15.0.0
+      tag: v16.0.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -7013,6 +7003,7 @@ thirdparty:
 
     ## Svc configs
     config:
+      hub_participant: *HUB_PARTICIPANT
       ## DB Configuration
       db_host: *TP_AUTH_SVC_DB_HOST
       db_port: *TP_AUTH_SVC_DB_PORT
@@ -7602,7 +7593,7 @@ thirdparty:
     image:
       registry: docker.io
       repository: mojaloop/thirdparty-api-svc
-      tag: v14.0.0
+      tag: v15.0.0-snapshot.1
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -7674,11 +7665,17 @@ thirdparty:
     # - name: LOG_LEVEL
     #   value: debug
     ## Svc configs
-    config: {}
+    config: 
+      hub_participant: *HUB_PARTICIPANT
+
     ## Svc config files
     config_files:
       default.json: |
         {
+            "HUB_PARTICIPANT": {
+              "ID": {{ .Values.config.hub_participant.id }},
+              "NAME": "{{ .Values.config.hub_participant.name }}",
+            }
             "PORT": {{ .Values.service.internalPort }},
             "HOST": "0.0.0.0",
             "INSPECT": {
@@ -9147,7 +9144,7 @@ simulator:
   image:
     registry: docker.io
     repository: mojaloop/simulator
-    tag: v12.1.0
+    tag: v12.3.0-snapshot.3
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -9225,6 +9222,7 @@ simulator:
     LOG_LEVEL: 'info'
 
     ## Add '$release' into any of the *_SERVICE_ENDPOINT values to include the release name as part of the deployment
+    HUB_NAME: *HUB_NAME
     PARTIES_SERVICE_ENDPOINT: 'http://$release_name-account-lookup-service'
     QUOTES_SERVICE_ENDPOINT: 'http://$release_name-quoting-service'
     TRANSFERS_SERVICE_ENDPOINT: 'http://$release_name-ml-api-adapter-service'
@@ -10488,7 +10486,7 @@ mojaloop-ttk-simulators:
           api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v23.4.0/test/func/config/ttk-ttksim1/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/api_spec.yaml'
           api_definitions__mojaloop_sdk_outbound_scheme_adapter_1.0__callback_map.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v23.4.0/test/func/config/ttk-ttksim1/spec_files/api_definitions/mojaloop_sdk_outbound_scheme_adapter_1.0/callback_map.json'
         extraEnvironments:
-          hub-k8s-default-environment.json: &ttksim1InputValues {"inputValues": {"TTKSIM1_FSPID": "ttksim1", "TTKSIM1_MSISDN_1": "16135551212", "TTKSIM1_MSISDN_1_FIRST_NAME": "ReceiverFirst", "TTKSIM1_MSISDN_1_LAST_NAME": "ReceiverLast", "TTKSIM1_CURRENCY": "TZS", "TTKSIM2_FSPID": "ttksim2", "TTKSIM2_MSISDN_1": "4561000001", "TTKSIM2_MSISDN_1_FIRST_NAME": "ReceiverFirst", "TTKSIM2_MSISDN_1_LAST_NAME": "ReceiverLast", "TTKSIM2_MSISDN_2": "4561000002", "TTKSIM2_MSISDN_2_FIRST_NAME": "ReceiverFirst", "TTKSIM2_MSISDN_2_LAST_NAME": "ReceiverLast", "TTKSIM2_PARTY_NOT_FOUND": "partynotfound", "TTKSIM2_PARTY_TIMES_OUT": "partytimesout", "TTKSIM2_CURRENCY": "TZS", "TTKSIM3_FSPID": "ttksim3", "TTKSIM3_MSISDN_1": "5671000001", "TTKSIM3_MSISDN_1_FIRST_NAME": "ReceiverFirst", "TTKSIM3_MSISDN_1_LAST_NAME": "ReceiverLast", "TTKSIM3_MSISDN_2": "5671000002", "TTKSIM3_MSISDN_2_FIRST_NAME": "ReceiverFirst", "TTKSIM3_MSISDN_2_LAST_NAME": "ReceiverLast", "TTKSIM3_CURRENCY": "TZS", "TTKSIM2_MSISDN_PREFIX": "4561", "TTKSIM3_MSISDN_PREFIX": "5671", "HOST_CENTRAL_LEDGER": "http://$release_name-centralledger-service", "HOST_CENTRAL_SETTLEMENT": "http://$release_name-centralsettlement-service/v2"}}
+          hub-k8s-default-environment.json: &ttksim1InputValues {"inputValues": {"HUB_NAME": *HUB_NAME, "TTKSIM1_FSPID": "ttksim1", "TTKSIM1_MSISDN_1": "16135551212", "TTKSIM1_MSISDN_1_FIRST_NAME": "ReceiverFirst", "TTKSIM1_MSISDN_1_LAST_NAME": "ReceiverLast", "TTKSIM1_CURRENCY": "TZS", "TTKSIM2_FSPID": "ttksim2", "TTKSIM2_MSISDN_1": "4561000001", "TTKSIM2_MSISDN_1_FIRST_NAME": "ReceiverFirst", "TTKSIM2_MSISDN_1_LAST_NAME": "ReceiverLast", "TTKSIM2_MSISDN_2": "4561000002", "TTKSIM2_MSISDN_2_FIRST_NAME": "ReceiverFirst", "TTKSIM2_MSISDN_2_LAST_NAME": "ReceiverLast", "TTKSIM2_PARTY_NOT_FOUND": "partynotfound", "TTKSIM2_PARTY_TIMES_OUT": "partytimesout", "TTKSIM2_CURRENCY": "TZS", "TTKSIM3_FSPID": "ttksim3", "TTKSIM3_MSISDN_1": "5671000001", "TTKSIM3_MSISDN_1_FIRST_NAME": "ReceiverFirst", "TTKSIM3_MSISDN_1_LAST_NAME": "ReceiverLast", "TTKSIM3_MSISDN_2": "5671000002", "TTKSIM3_MSISDN_2_FIRST_NAME": "ReceiverFirst", "TTKSIM3_MSISDN_2_LAST_NAME": "ReceiverLast", "TTKSIM3_CURRENCY": "TZS", "TTKSIM2_MSISDN_PREFIX": "4561", "TTKSIM3_MSISDN_PREFIX": "5671", "HOST_CENTRAL_LEDGER": "http://$release_name-centralledger-service", "HOST_CENTRAL_SETTLEMENT": "http://$release_name-centralsettlement-service/v2"}}
       ml-testing-toolkit-frontend:
         ingress:
           enabled: true
@@ -10866,7 +10864,7 @@ mojaloop-bulk:
       image:
         registry: docker.io
         repository: mojaloop/bulk-api-adapter
-        tag: v17.0.0
+        tag: v18.0.0-snapshot.0
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -10943,6 +10941,7 @@ mojaloop-bulk:
             serviceName: bulk-service
 
       config:
+        hub_participant: *HUB_PARTICIPANT
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
         kafka_host: *KAFKA_HOST
         kafka_port: *KAFKA_PORT
@@ -11124,7 +11123,7 @@ mojaloop-bulk:
       image:
         registry: docker.io
         repository: mojaloop/bulk-api-adapter
-        tag: v17.0.0
+        tag: v18.0.0-snapshot.0
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -11191,6 +11190,7 @@ mojaloop-bulk:
             serviceName: bulk-handler-notification
 
       config:
+        hub_participant: *HUB_PARTICIPANT
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
         kafka_host: *KAFKA_HOST
         kafka_port: *KAFKA_PORT
@@ -11244,7 +11244,6 @@ mojaloop-bulk:
         # Parameters for JWS signing requests
         endpointSecurity:
           jwsSign: false
-          fspiopSourceSigningName: 'switch'
           # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
           # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
           # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
@@ -11452,7 +11451,7 @@ mojaloop-bulk:
       image:
         registry: docker.io
         repository: mojaloop/central-ledger
-        tag: v17.7.0-snapshot.18
+        tag: v17.7.0-snapshot.20
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -11532,7 +11531,6 @@ mojaloop-bulk:
 
       config:
         hub_participant: *HUB_PARTICIPANT
-
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
@@ -11818,7 +11816,7 @@ mojaloop-bulk:
       image:
         registry: docker.io
         repository: mojaloop/central-ledger
-        tag: v17.7.0-snapshot.18
+        tag: v17.7.0-snapshot.20
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -11898,7 +11896,6 @@ mojaloop-bulk:
 
       config:
         hub_participant: *HUB_PARTICIPANT
-        
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
@@ -12181,7 +12178,7 @@ mojaloop-bulk:
       image:
         registry: docker.io
         repository: mojaloop/central-ledger
-        tag: v17.7.0-snapshot.18
+        tag: v17.7.0-snapshot.20
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -12261,7 +12258,6 @@ mojaloop-bulk:
 
       config:
         hub_participant: *HUB_PARTICIPANT
-
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
@@ -12544,7 +12540,7 @@ mojaloop-bulk:
       image:
         registry: docker.io
         repository: mojaloop/central-ledger
-        tag: v17.7.0-snapshot.18
+        tag: v17.7.0-snapshot.20
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -12624,7 +12620,6 @@ mojaloop-bulk:
 
       config:
         hub_participant: *HUB_PARTICIPANT
-        
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
@@ -12987,9 +12982,9 @@ ml-testing-toolkit:
       ## We can pass the JSON content as the value for the parameters
       ## Or we can pass a http/https URL for the JSON file as the value for the parameters. Then the file will be downloaded and replaced in the corresponding location.
       ## Ex: rules_callback__default.json: "https://raw.githubusercontent.com/mojaloop/ml-testing-toolkit/master/spec_files/rules_callback/default.json"
-      rules_callback__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot/rules/mojaloop/ml-testing-toolkit/spec_files/rules_callback/default.json"
-      rules_response__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot/rules/mojaloop/ml-testing-toolkit/spec_files/rules_response/default.json"
-      rules_validation__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot/rules/mojaloop/ml-testing-toolkit/spec_files/rules_validation/default.json"
+      rules_callback__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.5/rules/mojaloop/ml-testing-toolkit/spec_files/rules_callback/default.json"
+      rules_response__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.5/rules/mojaloop/ml-testing-toolkit/spec_files/rules_response/default.json"
+      rules_validation__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.5/rules/mojaloop/ml-testing-toolkit/spec_files/rules_validation/default.json"
     # We can change the names of the simulators to configure the environment files for the testing toolkit.
     # If you change these values, you need to change the simulator names in the mojaloop-simulats->simulators section
     parameters: &simNames
@@ -13006,6 +13001,7 @@ ml-testing-toolkit:
     extraEnvironments:
       hub-k8s-default-environment.json: &ttkInputValues {
         "inputValues": {
+          "HUB_NAME": *HUB_NAME,
           "BASE_CENTRAL_LEDGER_ADMIN": "",
           "CALLBACK_ENDPOINT_BASE_URL": "http://$release_name-ml-testing-toolkit-backend:4040",
           "ENABLE_JWS_SIGNING": true,
@@ -13272,8 +13268,8 @@ ml-ttk-posthook-setup:
     weight: -5
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
-    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v16.1.0-fx-snapshot.zip
-    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-16.1.0-fx-snapshot/collections/hub/provisioning
+    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v16.1.0-fx-snapshot.5.zip
+    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-16.1.0-fx-snapshot.5/collections/hub/provisioning
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
   parameters:
     <<: *simNames
@@ -13286,7 +13282,7 @@ ml-ttk-posthook-tests:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-16.1.0-fx-snapshot/collections/hub/golden_path
+    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-16.1.0-fx-snapshot.5/collections/hub/golden_path
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
@@ -13387,7 +13383,7 @@ ml-ttk-cronjob-cleanup:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: &ttkGitPathCleanup testing-toolkit-test-cases-16.1.0-fx-snapshot/collections/hub/cleanup
+    testCasesPathInZip: &ttkGitPathCleanup testing-toolkit-test-cases-16.1.0-fx-snapshot.5/collections/hub/cleanup
     # testCasesPathInZip: *ttkGitPathGP
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -13496,7 +13492,7 @@ ml-ttk-test-val-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot/collections/hub/other_tests/bulk_transfers
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.5/collections/hub/other_tests/bulk_transfers
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -13541,7 +13537,7 @@ ml-ttk-test-setup-tp:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot/collections/hub/provisioning_thirdparty
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.5/collections/hub/provisioning_thirdparty
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -13586,7 +13582,7 @@ ml-ttk-test-val-tp:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot/collections/hub/thirdparty
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.5/collections/hub/thirdparty
     # awsS3FilePath: ttk-tests/reports
     testSuiteName: Thirdparty Tests
     environmentName: Development
@@ -13628,7 +13624,7 @@ ml-ttk-test-setup-sdk-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot/collections/hub/provisioning_sdkbulk
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.5/collections/hub/provisioning_sdkbulk
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -13673,7 +13669,7 @@ ml-ttk-test-val-sdk-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot/collections/hub/sdk_scheme_adapter/bulk/basic
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.5/collections/hub/sdk_scheme_adapter/bulk/basic
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -13718,7 +13714,7 @@ ml-ttk-test-val-sdk-r2p:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot/collections/hub/sdk_scheme_adapter/request-to-pay/basic
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.5/collections/hub/sdk_scheme_adapter/request-to-pay/basic
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports

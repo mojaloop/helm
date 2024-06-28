@@ -1,6 +1,10 @@
 {{- $kafkaHost := ( .Values.config.kafka_host | replace "$release_name" .Release.Name ) -}}
 {{- $centralServicesHost := ( .Values.config.central_services_host | replace "$release_name" .Release.Name ) -}}
 {
+    "HUB_PARTICIPANT": {
+        "ID": {{ .Values.config.hub_participant.id }},
+        "NAME": {{ .Values.config.hub_participant.name | quote }}
+    },
     "PORT": {{ .Values.service.internalPort }},
     "ENDPOINT_SOURCE_URL": "http://{{ $centralServicesHost }}:{{ .Values.config.central_services_port }}",
     "ENDPOINT_HEALTH_URL": "http://{{ $centralServicesHost }}:{{ .Values.config.central_services_port }}{{ .Values.config.central_services_health_endpoint_param }}",
@@ -11,7 +15,6 @@
     "ENDPOINT_SECURITY":{
         "JWS": {
             "JWS_SIGN": false,
-            "FSPIOP_SOURCE_TO_SIGN": "switch",
             "JWS_SIGNING_KEY_PATH": "secrets/jwsSigningKey.key"
           },
         "TLS": {
