@@ -96,6 +96,14 @@
         "EXPIRES_IN_MS": {{ .Values.config.cache_expires_in_ms }}
     },
     "API_DOC_ENDPOINTS_ENABLED": true,
+    {{ if $.Values.config.batch_processing_enabled }}
+    "EVENT_TYPE_ACTION_TOPIC_MAP" : {
+        "POSITION":{
+            "TIMEOUT_RESERVED": "topic-transfer-position-batch",
+            "FX_TIMEOUT_RESERVED": "topic-transfer-position-batch"
+        }
+    },
+    {{ end }}
     "KAFKA": {
         "TOPIC_TEMPLATES": {
             "PARTICIPANT_TOPIC_TEMPLATE": {

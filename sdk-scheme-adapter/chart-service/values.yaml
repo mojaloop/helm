@@ -114,6 +114,8 @@ env:
   TRANSACTION_REQUESTS_ENDPOINT: "{{ .Release.Name }}-transaction-requests-service"
   TRANSFERS_ENDPOINT: "{{ .Release.Name }}-api-adapter-service"
   BULK_TRANSFERS_ENDPOINT: "{{ .Release.Name }}-bulk-api-adapter-service"
+  FX_QUOTES_ENDPOINT: "{{ .Release.Name }}-quoting-service"
+  FX_TRANSFERS_ENDPOINT: "{{ .Release.Name }}-api-adapter-service"
 
   # BACKEND ENDPOINT
   BACKEND_ENDPOINT: localhost:4000
@@ -213,6 +215,12 @@ env:
   # when running the scheme-adapter as a mojaloop connector component within Payment Manager for Mojaloop.
   PM4ML_ENABLED: false
 
+  # Set FX Provider to use, this is temporary configuration until services component is implemented
+  GET_SERVICES_FXP_RESPONSE: testfxp
+
+  # Supported Currencies by this DFSP
+  SUPPORTED_CURRENCIES: "USD"
+
   ## API-SVC kafka config
   BACKEND_EVENT_CONSUMER_BROKER_LIST: '{{ include "common.tplvalues.render" (dict "value" .Values.kafka.host "context" $) | default (include "common.tplvalues.render" (dict "value" .Values.global.kafka.host "context" $)) }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
   BACKEND_EVENT_PRODUCER_BROKER_LIST: '{{ include "common.tplvalues.render" (dict "value" .Values.kafka.host "context" $) | default (include "common.tplvalues.render" (dict "value" .Values.global.kafka.host "context" $)) }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
@@ -308,7 +316,7 @@ containerSecurityContext:
 image:
   registry: docker.io
   repository: mojaloop/sdk-scheme-adapter
-  tag: v23.4.0
+  tag: v23.5.0-snapshot.4
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
