@@ -2992,7 +2992,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "Shows the consumer group lag averaged across different partitions",
+      "description": "Shows the maximum lag (in message count) faced by a consumer in given (consumergroup,topic). ",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -3074,14 +3074,14 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "avg(kafka_consumergroup_lag{cluster=\"$cluster\"}) by (consumergroup,topic)",
+          "expr": "max(clamp_min(kafka_consumergroup_lag{cluster=\"$cluster\"},0)) by (consumergroup,topic)",
           "instant": true,
           "legendFormat": "__auto",
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "Consumer group lag",
+      "title": "Max consumer group lag",
       "type": "barchart"
     }
   ],
