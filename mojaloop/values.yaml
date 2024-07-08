@@ -82,10 +82,14 @@ CONFIG:
   batch_processing_enabled: &CL_BATCH_PROCESSING_ENABLED false
 
   ## PROXY CACHE
-  proxy_cache_enabled: &PROXY_CACHE_ENABLED true
-  proxy_cache_redis_host: &PROXY_CACHE_REDIS_HOST "proxy-cache-redis-master"
-  proxy_cache_redis_port: &PROXY_CACHE_REDIS_PORT 6379
-  proxy_cache_redis_db: &PROXY_CACHE_REDIS_DB 0
+  proxy_cache: &PROXY_CACHE
+    enabled: false
+    type: redis
+    timeout: 5000
+    proxy_config:
+      host: proxy-cache-redis-master
+      port: 6379
+      db: 0
 
 # Default values for central.
 # This is a YAML-formatted file.
@@ -2017,6 +2021,9 @@ ml-api-adapter:
           bKbkEndra96L6FRZN8LYBl8zbRUPx39ojGeSbFliQv1eaoA/1DDhCiC2NlcSmbJl
           ecaG/Oyo/S+eM8nR7mc=
           -----END PRIVATE KEY-----
+
+      ## Proxy cache configuration
+      proxy_cache: *PROXY_CACHE
 
       ## Error handling Configuration
       error_handling:
@@ -7680,7 +7687,7 @@ thirdparty:
     # - name: LOG_LEVEL
     #   value: debug
     ## Svc configs
-    config: 
+    config:
       hub_participant: *HUB_PARTICIPANT
 
     ## Svc config files
