@@ -81,6 +81,15 @@ CONFIG:
   ## BATCH_PROCESSING: To enable batch processing set following to true
   batch_processing_enabled: &CL_BATCH_PROCESSING_ENABLED false
 
+  ## PROXY CACHE
+  proxy_cache: &PROXY_CACHE
+    enabled: false
+    type: redis
+    proxy_config:
+      host: proxy-cache-redis-master
+      port: 6379
+      db: 0
+
 # Default values for central.
 # This is a YAML-formatted file.
 # Declare global configurations
@@ -292,6 +301,9 @@ account-lookup-service:
 
       # Thirdparty API Config
       featureEnableExtendedPartyIdType: false
+
+      ## Proxy cache configuration
+      proxy_cache: *PROXY_CACHE
 
     # @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
     # ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -1271,7 +1283,7 @@ quoting-service:
     image:
       registry: docker.io
       repository: mojaloop/quoting-service
-      tag: v15.8.0-snapshot.24
+      tag: v15.8.0-snapshot.31
 
     config:
       hub_participant: *HUB_PARTICIPANT
@@ -1372,7 +1384,7 @@ quoting-service:
     image:
       registry: docker.io
       repository: mojaloop/quoting-service
-      tag: v15.8.0-snapshot.24
+      tag: v15.8.0-snapshot.31
 
     config:
       hub_participant: *HUB_PARTICIPANT
@@ -1416,6 +1428,9 @@ quoting-service:
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: *KAFKA_HOST
       kafka_port: *KAFKA_PORT
+
+      ## Proxy cache configuration
+      proxy_cache: *PROXY_CACHE
 
       error_handling:
         include_cause_extension: false
@@ -2002,6 +2017,9 @@ ml-api-adapter:
           bKbkEndra96L6FRZN8LYBl8zbRUPx39ojGeSbFliQv1eaoA/1DDhCiC2NlcSmbJl
           ecaG/Oyo/S+eM8nR7mc=
           -----END PRIVATE KEY-----
+
+      ## Proxy cache configuration
+      proxy_cache: *PROXY_CACHE
 
       ## Error handling Configuration
       error_handling:
@@ -7665,7 +7683,7 @@ thirdparty:
     # - name: LOG_LEVEL
     #   value: debug
     ## Svc configs
-    config: 
+    config:
       hub_participant: *HUB_PARTICIPANT
 
     ## Svc config files
