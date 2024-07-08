@@ -133,7 +133,7 @@
         },
         "id": 5,
         "panels": [],
-        "title": "Row title",
+        "title": "Goal 1.1: Remote write should not fall behind",
         "type": "row"
       },
       {
@@ -326,7 +326,7 @@
               "uid": "${DS_MIMIR}"
             },
             "editorMode": "code",
-            "expr": "-(prometheus_wal_watcher_current_segment{instance=\"10.1.51.180:9090\"}\n - ignoring(consumer) group_left\nprometheus_tsdb_wal_segment_current{instance=\"10.1.51.180:9090\"})\n",
+            "expr": "-(prometheus_wal_watcher_current_segment{cluster=~\"$cluster\", instance=~\"$instance\"}\n - ignoring(consumer) group_left\nprometheus_tsdb_wal_segment_current{cluster=~\"$cluster\", instance=~\"$instance\"})\n",
             "instant": false,
             "legendFormat": "{{consumer}}",
             "range": true,
@@ -335,9 +335,858 @@
         ],
         "title": "WAL watcher delay",
         "type": "timeseries"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 19
+        },
+        "id": 6,
+        "panels": [],
+        "title": "Goal 1.2: Remote write data rates",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_MIMIR}"
+        },
+        "description": "No. of samples/metadata sent per second. \nShould show steady activity. Reduced activity should be coupled with increase in error rate or less timeseries data being scrapped. ",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 10
+                }
+              ]
+            },
+            "unit": "samples/sec"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 20
+        },
+        "id": 7,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "mean"
+            ],
+            "displayMode": "table",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_MIMIR}"
+            },
+            "editorMode": "code",
+            "expr": "rate(prometheus_remote_storage_samples_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])",
+            "hide": false,
+            "instant": false,
+            "legendFormat": "{{remote_name}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Request rate",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_MIMIR}"
+        },
+        "description": "No. of samples/metadata retried per second. \n\nIdeally zero. It indicates problems with the network or remote storage endpoint if there is a steady high rate for this metric. That may mean we need to reduce throughput of remote write to reduce load on the other end.\n",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "dashed+area"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 10
+                }
+              ]
+            },
+            "unit": "samples/sec"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 20
+        },
+        "id": 8,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "mean"
+            ],
+            "displayMode": "table",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_MIMIR}"
+            },
+            "editorMode": "code",
+            "expr": "rate(prometheus_remote_storage_samples_retried_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])",
+            "hide": false,
+            "instant": false,
+            "legendFormat": "{{remote_name}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Retry rate",
+        "type": "timeseries"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 28
+        },
+        "id": 9,
+        "panels": [],
+        "title": "Remote write latencies",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_MIMIR}"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "dashed+area"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 10
+                }
+              ]
+            },
+            "unit": "s"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 8,
+          "x": 0,
+          "y": 29
+        },
+        "id": 10,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "mean"
+            ],
+            "displayMode": "table",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_MIMIR}"
+            },
+            "editorMode": "code",
+            "expr": "histogram_quantile(0.99, sum(rate(prometheus_remote_storage_sent_batch_duration_seconds_bucket{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])) by (le,remote_name))",
+            "instant": false,
+            "legendFormat": "{{remote_name}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Remote write request latency - p99",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_MIMIR}"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "dashed+area"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 10
+                }
+              ]
+            },
+            "unit": "s"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 8,
+          "x": 8,
+          "y": 29
+        },
+        "id": 11,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "mean"
+            ],
+            "displayMode": "table",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_MIMIR}"
+            },
+            "editorMode": "code",
+            "expr": "histogram_quantile(0.90, sum(rate(prometheus_remote_storage_sent_batch_duration_seconds_bucket{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])) by (le,remote_name))",
+            "instant": false,
+            "legendFormat": "{{remote_name}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Remote write request latency - p90",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_MIMIR}"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "dashed+area"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 10
+                }
+              ]
+            },
+            "unit": "s"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 8,
+          "x": 16,
+          "y": 29
+        },
+        "id": 12,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "mean"
+            ],
+            "displayMode": "table",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_MIMIR}"
+            },
+            "editorMode": "code",
+            "expr": "histogram_quantile(0.5, sum(rate(prometheus_remote_storage_sent_batch_duration_seconds_bucket{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])) by (le,remote_name))",
+            "instant": false,
+            "legendFormat": "{{remote_name}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Remote write request latency - p50",
+        "type": "timeseries"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 38
+        },
+        "id": 13,
+        "panels": [],
+        "title": "Goal 1.3: Remote write should not operate at max capacity",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_MIMIR}"
+        },
+        "description": "No. of shards currently being used to send data to remote write endpoinds. This number should be less than max shards. A number near max shards mean that we may be throttled in case of any data increase",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 39
+        },
+        "id": 14,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last"
+            ],
+            "displayMode": "table",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_MIMIR}"
+            },
+            "editorMode": "code",
+            "expr": "prometheus_remote_storage_shards{cluster=~\"$cluster\", instance=~\"$instance\"}",
+            "instant": false,
+            "legendFormat": "{{remote_name}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Remote write current shards",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_MIMIR}"
+        },
+        "description": "No. of shards estimated by algorithm to push data to remote endpoints ",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 39
+        },
+        "id": 16,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last",
+              "mean"
+            ],
+            "displayMode": "table",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_MIMIR}"
+            },
+            "editorMode": "code",
+            "expr": "prometheus_remote_storage_shards_desired{cluster=~\"$cluster\", instance=~\"$instance\"}",
+            "instant": false,
+            "legendFormat": "{{remote_name}}",
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "title": "Remote write desired shards",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_MIMIR}"
+        },
+        "description": "Prometheus remote write min and max shards as per configuration",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 39
+        },
+        "id": 15,
+        "options": {
+          "legend": {
+            "calcs": [
+              "last"
+            ],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_MIMIR}"
+            },
+            "editorMode": "code",
+            "expr": "prometheus_remote_storage_shards_min{cluster=~\"$cluster\", instance=~\"$instance\"}",
+            "instant": false,
+            "legendFormat": "{{remote_name}} - min shards",
+            "range": true,
+            "refId": "A"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_MIMIR}"
+            },
+            "editorMode": "code",
+            "expr": "prometheus_remote_storage_shards_max{cluster=~\"$cluster\", instance=~\"$instance\"}",
+            "hide": false,
+            "instant": false,
+            "legendFormat": "{{remote_name}} - max shards",
+            "range": true,
+            "refId": "B"
+          }
+        ],
+        "title": "Min - Max Shards",
+        "type": "timeseries"
       }
     ],
-    "refresh": "",
+    "refresh": false,
     "schemaVersion": 39,
     "tags": [],
     "templating": {
@@ -391,13 +1240,13 @@
       ]
     },
     "time": {
-      "from": "now-6h",
-      "to": "now"
+      "from": "2024-07-08T08:00:22.925Z",
+      "to": "2024-07-08T09:02:05.782Z"
     },
     "timepicker": {},
     "timezone": "",
     "title": "Mojaloop - Prometheus Remote write",
     "uid": "d2a65853-b3b1-47bf-b728-cc727b209e5b",
-    "version": 1,
+    "version": 2,
     "weekStart": ""
   }
