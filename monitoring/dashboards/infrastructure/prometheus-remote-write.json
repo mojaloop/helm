@@ -1,8 +1,8 @@
 {
     "__inputs": [
       {
-        "name": "DS_PROMETHEUS",
-        "label": "Prometheus",
+        "name": "DS_MIMIR",
+        "label": "Mimir",
         "description": "",
         "type": "datasource",
         "pluginId": "prometheus",
@@ -88,7 +88,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "${DS_MIMIR}"
         },
         "description": "",
         "gridPos": {
@@ -112,7 +112,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "${DS_PROMETHEUS}"
+              "uid": "${DS_MIMIR}"
             },
             "expr": "",
             "instant": false,
@@ -139,7 +139,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "${DS_MIMIR}"
         },
         "description": "Shows the amount of time after which samples are pushed to remote server after reading from WAL. \n- Expected range should be 3-10 seconds\n- increasing delay time means remote write is falling behind and will lead to data loss",
         "fieldConfig": {
@@ -223,7 +223,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "${DS_PROMETHEUS}"
+              "uid": "${DS_MIMIR}"
             },
             "editorMode": "code",
             "expr": "(\n  prometheus_remote_storage_highest_timestamp_in_seconds{cluster=~\"$cluster\", instance=~\"$instance\"} \n-  \n  ignoring(remote_name, url) group_right(instance) (prometheus_remote_storage_queue_highest_sent_timestamp_seconds{cluster=~\"$cluster\", instance=~\"$instance\"} != 0)\n)",
@@ -239,7 +239,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "${DS_MIMIR}"
         },
         "description": "Shows the amount of time after which samples are being read by TSDB WAL watcher. The delay may increase in case of prometheus restarts (WAL replay). Considerable increase (20sec +)  suggests an outage and possible data loss. \n\n- Expected delay should be less than 20 seconds\n- increasing delay time means remote write is falling behind and will lead to data loss",
         "fieldConfig": {
@@ -323,12 +323,12 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "${DS_PROMETHEUS}"
+              "uid": "${DS_MIMIR}"
             },
             "editorMode": "code",
-            "expr": "prometheus_tsdb_wal_segment_current{instance=\"10.1.51.180:9090\"} - ignoring(consumer) group_right(consumer)\nprometheus_wal_watcher_current_segment{instance=\"10.1.51.180:9090\"}",
+            "expr": "-(prometheus_wal_watcher_current_segment{instance=\"10.1.51.180:9090\"}\n - ignoring(consumer) group_left\nprometheus_tsdb_wal_segment_current{instance=\"10.1.51.180:9090\"})\n",
             "instant": false,
-            "legendFormat": "{{pod}}",
+            "legendFormat": "{{consumer}}",
             "range": true,
             "refId": "A"
           }
@@ -346,7 +346,7 @@
           "current": {},
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${DS_MIMIR}"
           },
           "definition": "label_values(prometheus_build_info,cluster)",
           "hide": 0,
@@ -369,7 +369,7 @@
           "current": {},
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "${DS_MIMIR}"
           },
           "definition": "label_values(prometheus_build_info{cluster=\"$cluster\"},instance)",
           "hide": 0,
@@ -398,6 +398,6 @@
     "timezone": "",
     "title": "Mojaloop - Prometheus Remote write",
     "uid": "d2a65853-b3b1-47bf-b728-cc727b209e5b",
-    "version": 4,
+    "version": 1,
     "weekStart": ""
   }
