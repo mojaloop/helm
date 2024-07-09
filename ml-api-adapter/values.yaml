@@ -14,7 +14,7 @@ ml-api-adapter-service:
   image:
     registry: docker.io
     repository: mojaloop/ml-api-adapter
-    tag: v14.0.5
+    tag: v14.0.7
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -80,7 +80,7 @@ ml-api-adapter-service:
     enabled: true
     image:
       repository: mojaloop/event-sidecar
-      tag: v14.0.0
+      tag: v14.0.1
       pullPolicy: IfNotPresent
     readinessProbe:
       enabled: true
@@ -112,14 +112,7 @@ ml-api-adapter-service:
       command:
         - sh
         - -c
-        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-          do
-            echo --------------------;
-            echo Waiting for Kafka...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo Kafka ok!;
+        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; do echo --------------------; echo Waiting for Kafka...; sleep 2; done; echo ====================; echo Kafka ok!;
       env:
         - name: KAFKA_HOST
           value: '{{ .Values.config.kafka_host }}'
@@ -219,18 +212,15 @@ ml-api-adapter-service:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
-    ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
+      http: null
+      https: null ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
-    ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+    clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
-    ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+    loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
     ## loadBalancerSourceRanges:
@@ -263,8 +253,7 @@ ml-api-adapter-service:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
+    apiVersion: null ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: ml-api-adapter.local
     ## @param servicePort : port for the service
@@ -276,8 +265,7 @@ ml-api-adapter-service:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
     ##   - Use the `ingress.secrets` parameter to create this TLS secret
@@ -297,24 +285,23 @@ ml-api-adapter-service:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
   ##
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
-    #  memory: 128Mi
-
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
 ml-api-adapter-handler-notification:
   enabled: true
   # Default values for ml-api-adapter.
@@ -324,7 +311,7 @@ ml-api-adapter-handler-notification:
   image:
     registry: docker.io
     repository: mojaloop/ml-api-adapter
-    tag: v14.0.5
+    tag: v14.0.7
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -392,7 +379,7 @@ ml-api-adapter-handler-notification:
     enabled: true
     image:
       repository: mojaloop/event-sidecar
-      tag: v14.0.0
+      tag: v14.0.1
       pullPolicy: IfNotPresent
     readinessProbe:
       enabled: true
@@ -426,14 +413,7 @@ ml-api-adapter-handler-notification:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-            do
-              echo --------------------;
-              echo Waiting for Kafka...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo Kafka ok!;
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; do echo --------------------; echo Waiting for Kafka...; sleep 2; done; echo ====================; echo Kafka ok!;
         env:
           - name: KAFKA_HOST
             value: '{{ .Values.config.kafka_host }}'
@@ -526,19 +506,18 @@ ml-api-adapter-handler-notification:
       # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
       jwsSigningKeySecret: null
       jwsSigningKey: null
-        # To generate this key:
-        # Private:
-        # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
-        # Public:
-        # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-        # Should look like:
-        # -----BEGIN RSA PRIVATE KEY-----
-        # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
-        # ..
-        # ..
-        # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
-        # -----END RSA PRIVATE KEY-----
-
+      # To generate this key:
+      # Private:
+      # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+      # Public:
+      # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+      # Should look like:
+      # -----BEGIN RSA PRIVATE KEY-----
+      # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+      # ..
+      # ..
+      # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+      # -----END RSA PRIVATE KEY-----
     ## Error handling Configuration
     error_handling:
       include_cause_extension: false
@@ -556,8 +535,7 @@ ml-api-adapter-handler-notification:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
+    apiVersion: null ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: ml-api-adapter-notification.local
     ## @param servicePort : port for the service
@@ -569,8 +547,7 @@ ml-api-adapter-handler-notification:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
     ##   - Use the `ingress.secrets` parameter to create this TLS secret
@@ -590,20 +567,20 @@ ml-api-adapter-handler-notification:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
   ##
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
-    #  memory: 128Mi
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
