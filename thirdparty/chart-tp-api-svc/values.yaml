@@ -3,7 +3,7 @@ enabled: true
 image:
   registry: docker.io
   repository: mojaloop/thirdparty-api-svc
-  tag: v14.0.0
+  tag: v15.0.0
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -29,7 +29,7 @@ diagnosticMode:
   enabled: false
   ## @param diagnosticMode.command Command to override all containers in the deployment
   ##
-  command: 
+  command:
     - node
     - ./dist/src/cli.js
     - all
@@ -37,7 +37,6 @@ diagnosticMode:
   ##
   args:
     - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-  
   ## @param diagnosticMode.debug config to override all debug information
   ##
   debug:
@@ -78,16 +77,13 @@ tolerations: []
 containerSecurityContext:
   enabled: true
   runAsUser: 1001
-
 # Add exta environment variables here
 env: []
-  # e.g. to change the Log Level:
-  # - name: LOG_LEVEL
-  #   value: debug
-
+# e.g. to change the Log Level:
+# - name: LOG_LEVEL
+#   value: debug
 ## Svc configs
 config: {}
-
 ## Svc config files
 config_files:
   default.json: |
@@ -169,17 +165,15 @@ service:
   ## e.g.:
   ## clusterIP: None
   ##
-  clusterIP:
-  ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
-  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
-  ##
-  loadBalancerIP:
-  ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
-  ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
-  ## e.g:
-  ## loadBalancerSourceRanges:
-  ##   - 10.10.10.0/24
-  ##
+  clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+##
+  loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+## e.g:
+## loadBalancerSourceRanges:
+##   - 10.10.10.0/24
+##
   loadBalancerSourceRanges: []
   ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
   ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
@@ -209,9 +203,8 @@ ingress:
   pathType: ImplementationSpecific
   ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
   ##
-  apiVersion:
-  ## @param ingress.hostname Default host for the ingress record
-  ##
+  apiVersion: null ## @param ingress.hostname Default host for the ingress record
+##
   hostname: tp-api-svc.local
   ## @param ingress.path Default path for the ingress record
   ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
