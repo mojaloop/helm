@@ -12,6 +12,12 @@
   "__elements": {},
   "__requires": [
     {
+      "type": "panel",
+      "id": "barchart",
+      "name": "Bar chart",
+      "version": ""
+    },
+    {
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
@@ -156,7 +162,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(irate(node_cpu_seconds_total{mode!=\"idle\"}[1m])) by (instance) /\nsum(irate(node_cpu_seconds_total[1m])) by (instance)\n* on(instance) group_left (nodename) node_uname_info{nodename=~\".+\"}",
+          "expr": "sum(irate(node_cpu_seconds_total{mode!=\"idle\", cluster=\"$cluster\"}[1m])) by (instance) /\nsum(irate(node_cpu_seconds_total{cluster=\"$cluster\"}[1m])) by (instance)\n* on(instance) group_left (nodename) node_uname_info{nodename=~\".+\", cluster=\"$cluster\"}",
           "instant": false,
           "legendFormat": "{{nodename}}",
           "range": true,
@@ -253,7 +259,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "(\n    1- (node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes)\n) * on(instance) group_left (nodename) node_uname_info{nodename=~\".+\"}",
+          "expr": "(\n    1- (node_memory_MemAvailable_bytes{cluster=\"$cluster\"}/node_memory_MemTotal_bytes{cluster=\"$cluster\"})\n) * on(instance) group_left (nodename) node_uname_info{nodename=~\".+\", cluster=\"$cluster\"}",
           "instant": false,
           "legendFormat": "{{nodename}}",
           "range": true,
@@ -350,7 +356,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "(\n    1-(node_filesystem_avail_bytes{device=\"/dev/mapper/ubuntu--vg-ubuntu--lv\"}/node_filesystem_size_bytes{device=\"/dev/mapper/ubuntu--vg-ubuntu--lv\"})\n) * on(instance) group_left (nodename) node_uname_info{nodename=~\".+\"}",
+          "expr": "(\n    1-(node_filesystem_avail_bytes{device=\"/dev/mapper/ubuntu--vg-ubuntu--lv\", cluster=\"$cluster\"}/node_filesystem_size_bytes{device=\"/dev/mapper/ubuntu--vg-ubuntu--lv\", cluster=\"$cluster\"})\n) * on(instance) group_left (nodename) node_uname_info{nodename=~\".+\", cluster=\"$cluster\"}",
           "instant": false,
           "legendFormat": "{{nodename}}",
           "range": true,
@@ -424,7 +430,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max(node_uname_info{job=\"node-exporter\", nodename=~\".+(moja|kafka|sts).+\"}) by (nodename)",
+          "expr": "max(node_uname_info{job=\"node-exporter\", nodename=~\".+(moja|kafka|sts).+\", cluster=\"$cluster\"}) by (nodename)",
           "format": "table",
           "instant": true,
           "legendFormat": "auto",
@@ -542,7 +548,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "(\n    sum(rate(namedprocess_namegroup_cpu_seconds_total[1m])) by (groupname,nodename)\n    / on (nodename) group_left\n    sum(rate(node_cpu_seconds_total[1m])) by (nodename)\n) > 0.7",
+          "expr": "(\n    sum(rate(namedprocess_namegroup_cpu_seconds_total{cluster=\"$cluster\"}[1m])) by (groupname,nodename)\n    / on (nodename) group_left\n    sum(rate(node_cpu_seconds_total{cluster=\"$cluster\"}[1m])) by (nodename)\n) > 0.7",
           "hide": false,
           "instant": false,
           "legendFormat": "{{nodename}}:{{groupname}}",
@@ -642,7 +648,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "(\n    namedprocess_namegroup_memory_bytes{memtype=\"resident\"} \n    / on (nodename) group_left\n    node_memory_MemTotal_bytes\n) > 0.7\n",
+          "expr": "(\n    namedprocess_namegroup_memory_bytes{memtype=\"resident\", cluster=\"$cluster\"} \n    / on (nodename) group_left\n    node_memory_MemTotal_bytes{cluster=\"$cluster\"}\n) > 0.7\n",
           "instant": false,
           "legendFormat": "{{nodename}}:{{groupname}}",
           "range": true,
@@ -653,12 +659,416 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Shows network interfaces on each node which are consuming more than 1 MiB/s bandwidth (download).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "binBps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 11
+      },
+      "id": 30,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Last",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(node_network_receive_bytes_total{device!~\"cali.*|lo\",cluster=\"$cluster\"}[1m])) by (nodename,instance,device) > 1024 * 1024",
+          "instant": false,
+          "legendFormat": "{{nodename}}/{{device}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Network I/O - Download",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Shows network interfaces on each node which are consuming more than 1 MiB/s bandwidth (upload)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "binBps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "id": 31,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Last",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(node_network_transmit_bytes_total{device!~\"cali.*|lo\",cluster=\"$cluster\"}[1m])) by (nodename,instance,device) > 1024 * 1024",
+          "instant": false,
+          "legendFormat": "{{nodename}}/{{device}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Network I/O - Upload",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Shows disks  on each node which are consuming more than 1 MiB/s disk read bandwidth ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "binBps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 32,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Last",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(node_disk_read_bytes_total{cluster=\"$cluster\"}[1m])) by (instance,nodename,device) > 1024 * 1024",
+          "instant": false,
+          "legendFormat": "{{nodename}}/{{device}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Disk I/O - Read",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Shows disks  on each node which are consuming more than 1 MiB/s disk write bandwidth ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "binBps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 33,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Last",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(node_disk_written_bytes_total{cluster=\"$cluster\"}[1m])) by (instance,nodename,device) > 1024 * 1024",
+          "instant": false,
+          "legendFormat": "{{nodename}}/{{device}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Disk I/O - Write",
+      "type": "timeseries"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 21
       },
       "id": 11,
       "panels": [],
@@ -732,7 +1142,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 22
       },
       "id": 9,
       "options": {
@@ -754,7 +1164,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (serviceName, container)({error=~\"Error: read ECONNRESET\"})",
+          "expr": "sum by (serviceName, container)({error=~\"Error: read ECONNRESET\", cluster=\"$cluster\"})",
           "instant": false,
           "legendFormat": "ECONNRESET - {{serviceName}} - {{container}}",
           "range": true,
@@ -766,7 +1176,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (serviceName, container)({error=~\"Error: socket hang up\"})",
+          "expr": "sum by (serviceName, container)({error=~\"Error: socket hang up\", cluster=\"$cluster\"})",
           "hide": false,
           "instant": false,
           "legendFormat": "Socker hang up - {{serviceName}} - {{container}}",
@@ -840,7 +1250,7 @@
         "h": 5,
         "w": 6,
         "x": 0,
-        "y": 16
+        "y": 26
       },
       "id": 1,
       "options": {
@@ -862,7 +1272,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (container)(increase(kube_pod_container_status_restarts_total{namespace=~\"mojaloop\",container=~\"account-lookup-service|account-lookup-service-admin|centralledger-handler-admin-transfer|centralledger-handler-timeout|centralledger-handler-transfer-fulfil|centralledger-handler-transfer-get|centralledger-handler-transfer-position|centralledger-service|kafka\"}[5m]))",
+          "expr": "sum by (container)(increase(kube_pod_container_status_restarts_total{namespace=~\"mojaloop\",container=~\"account-lookup-service|account-lookup-service-admin|centralledger-handler-admin-transfer|centralledger-handler-timeout|centralledger-handler-transfer-fulfil|centralledger-handler-transfer-get|centralledger-handler-transfer-position|centralledger-service|kafka\", cluster=\"$cluster\"}[5m]))",
           "hide": false,
           "instant": false,
           "legendFormat": "{{container}}",
@@ -875,7 +1285,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (container)(increase(kube_pod_container_status_restarts_total{namespace=~\"mojaloop\",container=~\"account-lookup-service-sidecar|account-lookup-service-admin-sidcar|centralledger-handler-admin-transfer-sidecar|centralledger-handler-timeout-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-get-sidecar|centralledger-handler-transfer-position-sidecar|centralledger-service-sidecar\"}[5m]))",
+          "expr": "sum by (container)(increase(kube_pod_container_status_restarts_total{namespace=~\"mojaloop\",container=~\"account-lookup-service-sidecar|account-lookup-service-admin-sidcar|centralledger-handler-admin-transfer-sidecar|centralledger-handler-timeout-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-get-sidecar|centralledger-handler-transfer-position-sidecar|centralledger-service-sidecar\", cluster=\"$cluster\"}[5m]))",
           "hide": true,
           "instant": false,
           "legendFormat": "__auto",
@@ -888,7 +1298,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (container)(increase(kube_pod_container_status_restarts_total{container=\"mysql\",namespace=\"mojaloop-db\"}[5m]))",
+          "expr": "sum by (container)(increase(kube_pod_container_status_restarts_total{container=\"mysql\",namespace=\"mojaloop-db\", cluster=\"$cluster\"}[5m]))",
           "hide": true,
           "instant": false,
           "legendFormat": "{{instance}}",
@@ -962,7 +1372,7 @@
         "h": 5,
         "w": 6,
         "x": 6,
-        "y": 16
+        "y": 26
       },
       "id": 2,
       "options": {
@@ -984,7 +1394,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (container)(increase(kube_pod_container_status_restarts_total{namespace=~\"mojaloop\",container=~\"account-lookup-service-sidecar|account-lookup-service-admin-sidcar|centralledger-handler-admin-transfer-sidecar|centralledger-handler-timeout-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-get-sidecar|centralledger-handler-transfer-position-sidecar|centralledger-service-sidecar\"}[5m]))",
+          "expr": "sum by (container)(increase(kube_pod_container_status_restarts_total{namespace=~\"mojaloop\",container=~\"account-lookup-service-sidecar|account-lookup-service-admin-sidcar|centralledger-handler-admin-transfer-sidecar|centralledger-handler-timeout-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-get-sidecar|centralledger-handler-transfer-position-sidecar|centralledger-service-sidecar\", cluster=\"$cluster\"}[5m]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1057,7 +1467,7 @@
         "h": 5,
         "w": 6,
         "x": 12,
-        "y": 16
+        "y": 26
       },
       "id": 3,
       "options": {
@@ -1079,7 +1489,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (pod)(increase(kube_pod_container_status_restarts_total{container=\"mysql\",namespace=\"mojaloop-db\"}[5m]))",
+          "expr": "sum by (pod)(increase(kube_pod_container_status_restarts_total{container=\"mysql\",namespace=\"mojaloop-db\", cluster=\"$cluster\"}[5m]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1152,7 +1562,7 @@
         "h": 5,
         "w": 6,
         "x": 18,
-        "y": 16
+        "y": 26
       },
       "id": 10,
       "options": {
@@ -1174,7 +1584,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (pod)(increase(kube_pod_container_status_restarts_total{container=\"kafka\",namespace=\"mojaloop\"}[5m]))",
+          "expr": "sum by (pod)(increase(kube_pod_container_status_restarts_total{container=\"kafka\",namespace=\"mojaloop\", cluster=\"$cluster\"}[5m]))",
           "hide": false,
           "instant": false,
           "legendFormat": "__auto",
@@ -1249,7 +1659,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 21
+        "y": 31
       },
       "id": 4,
       "options": {
@@ -1272,7 +1682,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "container_memory_usage_bytes{namespace=~\"mojaloop\",container=~\"account-lookup-service|account-lookup-service-admin|centralledger-handler-admin-transfer|centralledger-handler-timeout|centralledger-handler-transfer-fulfil|centralledger-handler-transfer-get|centralledger-handler-transfer-position|centralledger-service|handler-pos-batch|kafka\"}",
+          "expr": "container_memory_usage_bytes{namespace=~\"mojaloop\",container=~\"account-lookup-service|account-lookup-service-admin|centralledger-handler-admin-transfer|centralledger-handler-timeout|centralledger-handler-transfer-fulfil|centralledger-handler-transfer-get|centralledger-handler-transfer-position|centralledger-service|handler-pos-batch|kafka\", cluster=\"$cluster\"}",
           "instant": false,
           "legendFormat": "{{container}}-{{id}}",
           "range": true,
@@ -1345,7 +1755,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 21
+        "y": 31
       },
       "id": 5,
       "options": {
@@ -1367,7 +1777,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(container_cpu_usage_seconds_total{namespace=~\"mojaloop\",container=~\"account-lookup-service|account-lookup-service-admin|centralledger-handler-admin-transfer|centralledger-handler-timeout|centralledger-handler-transfer-fulfil|centralledger-handler-transfer-get|centralledger-handler-transfer-position|centralledger-service|kafka|handler-pos-batch\"}[5m])",
+          "expr": "rate(container_cpu_usage_seconds_total{namespace=~\"mojaloop\",container=~\"account-lookup-service|account-lookup-service-admin|centralledger-handler-admin-transfer|centralledger-handler-timeout|centralledger-handler-transfer-fulfil|centralledger-handler-transfer-get|centralledger-handler-transfer-position|centralledger-service|kafka|handler-pos-batch\", cluster=\"$cluster\"}[5m])",
           "hide": false,
           "instant": false,
           "legendFormat": "{{container}} - {{id}}",
@@ -1376,6 +1786,206 @@
         }
       ],
       "title": "Mojaloop container cpu usage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Shows mojaloop pods which are consuming more than 1 MiB/s network download bandwidth ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "binBps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 38
+      },
+      "id": 34,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "rate(container_network_receive_bytes_total{namespace=~\"mojaloop\", pod=~\".*(account-lookup-service|account-lookup-service-admin|centralledger-handler-admin-transfer|centralledger-handler-timeout|centralledger-handler-transfer-fulfil|centralledger-handler-transfer-get|centralledger-handler-transfer-position|centralledger-service|handler-pos-batch|kafka).*\", cluster=\"$cluster\"}[5m]) > 1024 * 1024",
+          "instant": false,
+          "legendFormat": "{{pod}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Mojaloop pods Network I/O - Download",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Shows mojaloop pods which are consuming more than 1 MiB/s network upload bandwidth ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "binBps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 38
+      },
+      "id": 35,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "rate(container_network_transmit_bytes_total{namespace=~\"mojaloop\", pod=~\".*(account-lookup-service|account-lookup-service-admin|centralledger-handler-admin-transfer|centralledger-handler-timeout|centralledger-handler-transfer-fulfil|centralledger-handler-transfer-get|centralledger-handler-transfer-position|centralledger-service|handler-pos-batch|kafka).*\", cluster=\"$cluster\"}[5m]) > 1024 * 1024 ",
+          "instant": false,
+          "legendFormat": "{{pod}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Mojaloop pods Network I/O - Upload",
       "type": "timeseries"
     },
     {
@@ -1442,7 +2052,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 28
+        "y": 45
       },
       "id": 6,
       "options": {
@@ -1465,7 +2075,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "container_memory_usage_bytes{namespace=~\"mojaloop\",container=~\"account-lookup-service-sidecar|account-lookup-service-admin-sidcar|centralledger-handler-admin-transfer-sidecar|centralledger-handler-timeout-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-get-sidecar|centralledger-handler-transfer-position-sidecar|centralledger-service-sidecar\"}",
+          "expr": "container_memory_usage_bytes{namespace=~\"mojaloop\",container=~\"account-lookup-service-sidecar|account-lookup-service-admin-sidcar|centralledger-handler-admin-transfer-sidecar|centralledger-handler-timeout-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-get-sidecar|centralledger-handler-transfer-position-sidecar|centralledger-service-sidecar\", cluster=\"$cluster\"}",
           "hide": false,
           "instant": false,
           "legendFormat": "{{container}}-{{id}}",
@@ -1539,7 +2149,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 28
+        "y": 45
       },
       "id": 7,
       "options": {
@@ -1561,7 +2171,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(container_cpu_usage_seconds_total{namespace=~\"mojaloop\",container=~\"account-lookup-service-sidecar|account-lookup-service-admin-sidcar|centralledger-handler-admin-transfer-sidecar|centralledger-handler-timeout-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-get-sidecar|centralledger-handler-transfer-position-sidecar|centralledger-service-sidecar\"}[5m])",
+          "expr": "rate(container_cpu_usage_seconds_total{namespace=~\"mojaloop\",container=~\"account-lookup-service-sidecar|account-lookup-service-admin-sidcar|centralledger-handler-admin-transfer-sidecar|centralledger-handler-timeout-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-fulfil-sidecar|centralledger-handler-transfer-get-sidecar|centralledger-handler-transfer-position-sidecar|centralledger-service-sidecar\", cluster=\"$cluster\"}[5m])",
           "instant": false,
           "legendFormat": "{{container}}-{{id}}",
           "range": true,
@@ -1635,7 +2245,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 35
+        "y": 52
       },
       "id": 20,
       "options": {
@@ -1658,7 +2268,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "container_memory_usage_bytes{namespace=~\"mojaloop-db\", container=\"mysql\"}",
+          "expr": "container_memory_usage_bytes{namespace=~\"mojaloop-db\", container=\"mysql\", cluster=\"$cluster\"}",
           "hide": false,
           "instant": false,
           "legendFormat": "{{pod}}",
@@ -1732,7 +2342,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 35
+        "y": 52
       },
       "id": 21,
       "options": {
@@ -1754,7 +2364,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(container_cpu_usage_seconds_total{namespace=~\"mojaloop-db\", container=\"mysql\"}[5m])",
+          "expr": "rate(container_cpu_usage_seconds_total{namespace=~\"mojaloop-db\", container=\"mysql\", cluster=\"$cluster\"}[5m])",
           "instant": false,
           "legendFormat": "{{pod}}",
           "range": true,
@@ -1763,6 +2373,290 @@
       ],
       "title": "Database container cpu usage",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 59
+      },
+      "id": 25,
+      "panels": [],
+      "title": "Mojaloop",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 60
+      },
+      "id": 17,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(kube_deployment_status_replicas_available{namespace=\"mojaloop\",deployment=~\".*(account-lookup-service|account-lookup-service-admin|centralledger-handler-admin-transfer|centralledger-handler-timeout|centralledger-handler-transfer-fulfil|centralledger-handler-transfer-get|centralledger-handler-transfer-position|centralledger-service).*\", cluster=\"$cluster\"}) by (deployment)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{deployment}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Mojaloop replicaset count",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 60
+      },
+      "id": 18,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(kube_statefulset_status_replicas_available{namespace=\"mojaloop-db\", statefulset=~\".*(mysql).*\", cluster=\"$cluster\"}) by (statefulset)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{statefulset}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "MySQL statefulset count",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 60
+      },
+      "id": 19,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.2.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(kube_statefulset_status_replicas_available{namespace=\"mojaloop\", statefulset=~\".*(kafka).*\", cluster=\"$cluster\"}) by (statefulset)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{statefulset}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Kafka statefulset count",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 66
+      },
+      "id": 24,
+      "panels": [],
+      "title": "My SQL",
+      "type": "row"
     },
     {
       "datasource": {
@@ -1827,7 +2721,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 42
+        "y": 67
       },
       "id": 8,
       "options": {
@@ -1849,7 +2743,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (pod)(max_over_time(mysql_global_status_threads_connected{namespace=\"mojaloop-db\"}[5m]))",
+          "expr": "sum by (pod)(max_over_time(mysql_global_status_threads_connected{namespace=\"mojaloop-db\", cluster=\"$cluster\"}[5m]))",
           "hide": true,
           "instant": false,
           "legendFormat": "Connections {{pod}} last 5m",
@@ -1862,7 +2756,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (pod)(mysql_global_status_max_used_connections{namespace=\"mojaloop-db\"})",
+          "expr": "sum by (pod)(mysql_global_status_max_used_connections{namespace=\"mojaloop-db\", cluster=\"$cluster\"})",
           "hide": false,
           "instant": false,
           "legendFormat": "Max Use Connections {{pod}}",
@@ -1875,7 +2769,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (pod)(mysql_global_variables_max_connections{namespace=\"mojaloop-db\"})",
+          "expr": "sum by (pod)(mysql_global_variables_max_connections{namespace=\"mojaloop-db\", cluster=\"$cluster\"})",
           "hide": false,
           "instant": false,
           "legendFormat": "Max Connections {{pod}}",
@@ -1887,107 +2781,49 @@
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
+      "collapsed": false,
       "gridPos": {
-        "h": 6,
-        "w": 6,
+        "h": 1,
+        "w": 24,
         "x": 0,
-        "y": 46
+        "y": 71
       },
-      "id": 17,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": true
-        },
-        "showHeader": true
-      },
-      "pluginVersion": "10.2.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "sum(kube_deployment_status_replicas_available{namespace=\"mojaloop\",deployment=~\".*(account-lookup-service|account-lookup-service-admin|centralledger-handler-admin-transfer|centralledger-handler-timeout|centralledger-handler-transfer-fulfil|centralledger-handler-transfer-get|centralledger-handler-transfer-position|centralledger-service).*\"}) by (deployment)",
-          "format": "table",
-          "instant": true,
-          "legendFormat": "{{deployment}}",
-          "range": false,
-          "refId": "A"
-        }
-      ],
-      "title": "Mojaloop replicaset count",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true
-            },
-            "includeByName": {},
-            "indexByName": {},
-            "renameByName": {}
-          }
-        }
-      ],
-      "type": "table"
+      "id": 26,
+      "panels": [],
+      "title": "Kafka",
+      "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
+      "description": "Shows the no. of partitions for each topic",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
             },
-            "inspect": false
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "thresholds": {
@@ -2007,25 +2843,35 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 6,
-        "y": 46
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 72
       },
-      "id": 18,
+      "id": 27,
       "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [
+            "last"
           ],
-          "show": true
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
         },
-        "showHeader": true
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
       },
-      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
@@ -2034,46 +2880,47 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(kube_statefulset_status_replicas_available{namespace=\"mojaloop-db\", statefulset=~\".*(mysql).*\"}) by (statefulset)",
-          "format": "table",
+          "expr": "sum(kafka_topic_partitions{cluster=\"$cluster\"}) by (topic)",
           "instant": true,
-          "legendFormat": "{{statefulset}}",
+          "legendFormat": "__auto",
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "MySQL statefulset count",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true
-            },
-            "includeByName": {},
-            "indexByName": {},
-            "renameByName": {}
-          }
-        }
-      ],
-      "type": "table"
+      "title": "Partition count w-r-t topic",
+      "type": "barchart"
     },
     {
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
+      "description": "Shows the no. of consumers in each consumer group",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
             },
-            "inspect": false
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "thresholds": {
@@ -2093,25 +2940,35 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 12,
-        "y": 46
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 72
       },
-      "id": 19,
+      "id": 29,
       "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [
+            "last"
           ],
-          "show": true
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
         },
-        "showHeader": true
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
       },
-      "pluginVersion": "10.2.3",
       "targets": [
         {
           "datasource": {
@@ -2120,29 +2977,112 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(kube_statefulset_status_replicas_available{namespace=\"mojaloop\", statefulset=~\".*(kafka).*\"}) by (statefulset)",
-          "format": "table",
+          "expr": "sum(kafka_consumergroup_members{cluster=\"$cluster\"}) by (consumergroup)",
           "instant": true,
-          "legendFormat": "{{statefulset}}",
+          "legendFormat": "__auto",
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "Kafka statefulset count",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true
+      "title": "Consumers count  w-r-t consumer group",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "Shows the maximum lag (in message count) faced by a consumer in given (consumergroup,topic). ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
             },
-            "includeByName": {},
-            "indexByName": {},
-            "renameByName": {}
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
           }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 72
+      },
+      "id": 28,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max(clamp_min(kafka_consumergroup_lag{cluster=\"$cluster\"},0)) by (consumergroup,topic)",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A"
         }
       ],
-      "type": "table"
+      "title": "Max consumer group lag",
+      "type": "barchart"
     }
   ],
   "refresh": "",
@@ -2160,6 +3100,29 @@
         "name": "Filters",
         "skipUrlSync": false,
         "type": "adhoc"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(node_uname_info,cluster)",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(node_uname_info,cluster)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
       }
     ]
   },
@@ -2170,7 +3133,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "Performance Troubleshooting",
-  "uid": "f1068daf-16a2-4e52-9a57-1a6620925845-02",
+  "uid": "f1068daf-16a2-4e52-9a57-1a662092584-v005",
   "version": 1,
   "weekStart": ""
 }
