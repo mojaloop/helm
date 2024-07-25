@@ -6,64 +6,27 @@ global: {}
 ## Reference: https://github.com/bitnami/charts/blob/main/bitnami/kafka/values.yaml
 kafka:
   enabled: true
-  ## @param fullnameOverride String to fully override  template
-  ##
+
   fullnameOverride: "kafka"
 
-  ## @section Persistence parameters
-  ## Enable persistence using Persistent Volume Claims
-  ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-  ##
-  persistence:
-    ## @param persistence.enabled Enable Kafka data persistence using PVC, note that ZooKeeper persistence is unaffected
-    ##
-    enabled: false
-
-  ## ZooKeeper chart configuration
-  ## https://github.com/bitnami/charts/blob/main/bitnami/zookeeper/values.yaml
-  ##
-  zookeeper:
-    ## ZooKeeper Persistence parameters
-    ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-    ## @param zookeeper.persistence.enabled Enable persistence on ZooKeeper using PVC(s)
-    ## @param zookeeper.persistence.storageClass Persistent Volume storage class
-    ## @param zookeeper.persistence.accessModes Persistent Volume access modes
-    ## @param zookeeper.persistence.size Persistent Volume size
-    ##
+  controller:
+    replicaCount: 1
+    persistence:
+      enabled: false
+    logPersistence:
+      enabled: false
+  broker:
     persistence:
       enabled: false
 
-    ## @param fullnameOverride String to fully override  template
-    ##
-    fullnameOverride: "zookeeper"
+  zookeeper:
+    enabled: false
+    persistence:
+      enabled: false
 
-  ## Kafka provisioning
-  ##
   provisioning:
-    ## @param provisioning.enabled Enable kafka provisioning Job
-    ##
     enabled: true
-
-    ## @param provisioning.numPartitions Default number of partitions for topics when unspecified
-    ##
-    numPartitions: 1
-
-    ## @param provisioning.replicationFactor Default replication factor for topics when unspecified
-    ##
-    replicationFactor: 1
-
-    ## @param provisioning.topics Kafka topics to provision
-    ## - name: topic-name
-    ##   partitions: 1
-    ##   replicationFactor: 1
-    ##   ## https://kafka.apache.org/documentation/#topicconfigs
-    ##   config:
-    ##     max.message.bytes: 64000
-    ##     flush.messages: 1
-    ##
-    # topics: []
     topics:
-      ## Mojaloop Topics
       - name: topic-transfer-prepare
         partitions: 1
         replicationFactor: 1
@@ -112,35 +75,9 @@ kafka:
       - name: topic-fx-quotes-get
         partitions: 1
         replicationFactor: 1
+    persistence:
+      enabled: false
 
-    ## @param provisioning.nodeSelector Node labels for pod assignment
-    ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
-    ##
-    nodeSelector: {}
-
-    ## @param provisioning.tolerations Tolerations for pod assignment
-    ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-    ##
-    tolerations: []
-
-    ## @param provisioning.extraProvisioningCommands Extra commands to run to provision cluster resources
-    ## - echo "Allow user to consume from any topic"
-    ## - >-
-    ##   /opt/bitnami/kafka/bin/kafka-acls.sh
-    ##   --bootstrap-server $KAFKA_SERVICE
-    ##   --command-config $CLIENT_CONF
-    ##   --add
-    ##   --allow-principal User:user
-    ##   --consumer --topic '*'
-    ## - "/opt/bitnami/kafka/bin/kafka-acls.sh
-    ##      --bootstrap-server $KAFKA_SERVICE
-    ##      --command-config $CLIENT_CONF
-    ##      --list"
-    ##
-    # extraProvisioningCommands: []
-
-    ## @param provisioning.waitForKafka If true use an init container to wait until kafka is ready before starting provisioning
-    ##
     waitForKafka: true
 
 ## Reference: https://github.com/bitnami/charts/blob/main/bitnami/mysql/values.yaml
@@ -527,28 +464,49 @@ auth-svc-redis:
 proxy-cache-redis:
   enabled: true
 
-  ## @param architecture Redis&reg; architecture. Allowed values: `standalone` or `replication`
-  ##
-  architecture: standalone
-
   ## @param fullnameOverride String to fully override  template
   ##
   fullnameOverride: proxy-cache-redis
 
-  ## Redis&reg; Authentication parameters
-  ## ref: https://github.com/bitnami/containers/tree/main/bitnami/redis#setting-the-server-password-on-first-run
+  ## @param clusterDomain Kubernetes Cluster Domain
   ##
-  auth:
-    ## @param auth.enabled Enable password authentication
-    ##
+  clusterDomain: cluster.local
+
+  persistence:
     enabled: false
 
-  ## @section Persistence parameters
-  ##
-  master:
-    ## Enable persistence using Persistent Volume Claims
-    ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-    persistence:
-      ## @param master.persistence.enabled Enable persistence on Redis&reg; master nodes using Persistent Volume Claims
+  cluster:
+    ## @param cluster.init Enable the initialization of the Redis&reg; Cluster
+    ##
+    init: true
+    ## Number of Redis&reg; nodes to be deployed
+    ##
+    ## Note:
+    ## This is total number of nodes including the replicas. Meaning there will be 3 master and 3 replica
+    ## nodes (as replica count is set to 1 by default, there will be 1 replica per master node).
+    ## Hence, nodes = numberOfMasterNodes + numberOfMasterNodes * replicas
+    ##
+    ## @param cluster.nodes The number of master nodes should always be >= 3, otherwise cluster creation will fail
+    ##
+    nodes: 3
+    ## @param cluster.replicas Number of replicas for every master in the cluster
+    ## Parameter to be passed as --cluster-replicas to the redis-cli --cluster create
+    ## 1 means that we want a replica for every master created
+    ##
+    replicas: 0
+    ## This section allows to update the Redis&reg; cluster nodes.
+    ##
+    update:
+      ## @param cluster.update.addNodes Boolean to specify if you want to add nodes after the upgrade
+      ## Setting this to true a hook will add nodes to the Redis&reg; cluster after the upgrade. currentNumberOfNodes and currentNumberOfReplicas is required
       ##
-      enabled: false
+      addNodes: false
+      ## @param cluster.update.currentNumberOfNodes Number of currently deployed Redis&reg; nodes
+      ##
+      currentNumberOfNodes: 3
+      ## @param cluster.update.currentNumberOfReplicas Number of currently deployed Redis&reg; replicas
+      ##
+      currentNumberOfReplicas: 0
+      ## @param cluster.update.newExternalIPs External IPs obtained from the services for the new nodes to add to the cluster
+      ##
+      newExternalIPs: []
