@@ -122,6 +122,9 @@ metrics:
       serviceName: account-lookup-service-admin
 
 config:
+  hub_participant:
+    id: 1
+    name: Hub
   ## Central-Ledger config
   central_services_host: '$release_name-centralledger-service'
   central_services_port: 80
@@ -206,7 +209,6 @@ config:
 
   endpointSecurity:
     jwsSign: false
-    fspiopSourceSigningName: switch
     # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
     # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
     # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
@@ -237,6 +239,15 @@ config:
 
   # Thirdparty API Config
   featureEnableExtendedPartyIdType: false
+
+  ## Proxy cache configuration
+  proxy_cache:
+    enabled: false
+    type: redis
+    proxyConfig:
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
 
 ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
