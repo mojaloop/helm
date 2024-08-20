@@ -203,7 +203,6 @@ config:
   db_create_retry_interval_millis: 200
   db_debug: false
 
-
   display_routes: true
   run_migrations: false
 
@@ -243,11 +242,21 @@ config:
   ## Proxy cache configuration
   proxy_cache:
     enabled: false
-    type: redis
+    type: redis-cluster
     proxyConfig:
       cluster:
         - host: proxy-cache-redis
           port: 6379
+  
+  ## Handlers configuration
+  handlers:
+    DISABLED: true
+    MONITORING_PORT: 4003
+    TIMEOUT:
+      DISABLED: true
+      TIMEXP: "*/30 * * * * *"
+      TIMEZONE: "UTC"
+      BATCH_SIZE: 100
 
 ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
