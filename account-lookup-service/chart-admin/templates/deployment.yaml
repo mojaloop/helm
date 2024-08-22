@@ -50,6 +50,7 @@ spec:
       {{- if .Values.image.pullSecrets }}
       {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" $) | nindent 6 }}
       {{- end }}
+      serviceAccountName: {{ include "account-lookup-service-admin.fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
