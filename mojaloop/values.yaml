@@ -8105,50 +8105,50 @@ thirdparty:
     config_files:
       default.json: |
         {
-            "HUB_PARTICIPANT": {
-              "ID": {{ .Values.config.hub_participant.id }},
-              "NAME": "{{ .Values.config.hub_participant.name }}"
-            }
-            "PORT": {{ .Values.service.internalPort }},
-            "HOST": "0.0.0.0",
-            "INSPECT": {
-              "DEPTH": 4,
-              "SHOW_HIDDEN": false,
-              "COLOR": true
-            },
-            "ENDPOINT_CACHE_CONFIG": {
-              "expiresIn": 180000,
-              "generateTimeout": 30000
-            },
-            "ENDPOINT_SERVICE_URL": "http://{{ .Release.Name }}-centralledger-service",
-            "PARTICIPANT_LIST_LOCAL": [
-              "dfspa",
-              "dfspb"
-            ],
-            "ERROR_HANDLING": {
-              "includeCauseExtension": true,
-              "truncateExtensions": true
-            },
-            "INSTRUMENTATION": {
-              "METRICS": {
-                "DISABLED": false,
-                "labels": {
-                  "eventId": "*"
-                },
-                "config": {
-                  "timeout": 5000,
-                  "prefix": "moja_3p_api",
-                  "defaultLabels": {
-                    "serviceName": "thirdparty-api-svc"
-                  }
+          "HUB_PARTICIPANT": {
+            "ID": {{ .Values.config.hub_participant.id }},
+            "NAME": "{{ .Values.config.hub_participant.name }}"
+          },
+          "PORT": {{ .Values.service.internalPort }},
+          "HOST": "0.0.0.0",
+          "INSPECT": {
+            "DEPTH": 4,
+            "SHOW_HIDDEN": false,
+            "COLOR": true
+          },
+          "ENDPOINT_CACHE_CONFIG": {
+            "expiresIn": 180000,
+            "generateTimeout": 30000
+          },
+          "ENDPOINT_SERVICE_URL": "http://{{ .Release.Name }}-centralledger-service",
+          "PARTICIPANT_LIST_LOCAL": [
+            "dfspa",
+            "dfspb"
+          ],
+          "ERROR_HANDLING": {
+            "includeCauseExtension": true,
+            "truncateExtensions": true
+          },
+          "INSTRUMENTATION": {
+            "METRICS": {
+              "DISABLED": false,
+              "labels": {
+                "eventId": "*"
+              },
+              "config": {
+                "timeout": 5000,
+                "prefix": "moja_3p_api",
+                "defaultLabels": {
+                  "serviceName": "thirdparty-api-svc"
                 }
               }
-            },
-            "MOCK_CALLBACK": {
-              "transactionRequestId": "abc-12345",
-              "pispId": "pisp"
             }
+          },
+          "MOCK_CALLBACK": {
+            "transactionRequestId": "abc-12345",
+            "pispId": "pisp"
           }
+        }
 
     ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -10842,7 +10842,8 @@ mojaloop-ttk-simulators:
           host: *MOJA_TTK_SIM_REDIS_HOST
           port: *MOJA_TTK_SIM_REDIS_PORT
     ml-testing-toolkit:
-      ml-testing-toolkit-backend: ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+      ml-testing-toolkit-backend:
+        ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
         ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
         ## e.g:
         ## initContainers:
@@ -11375,6 +11376,7 @@ mojaloop-bulk:
 
       config:
         hub_participant: *HUB_PARTICIPANT
+
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
         kafka_host: *KAFKA_HOST
         kafka_port: *KAFKA_PORT
@@ -11624,6 +11626,7 @@ mojaloop-bulk:
 
       config:
         hub_participant: *HUB_PARTICIPANT
+
         # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
         kafka_host: *KAFKA_HOST
         kafka_port: *KAFKA_PORT
@@ -11964,6 +11967,10 @@ mojaloop-bulk:
 
       config:
         hub_participant: *HUB_PARTICIPANT
+
+        ## Proxy cache configuration
+        proxy_cache: *PROXY_CACHE
+
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
@@ -12329,6 +12336,10 @@ mojaloop-bulk:
 
       config:
         hub_participant: *HUB_PARTICIPANT
+
+        ## Proxy cache configuration
+        proxy_cache: *PROXY_CACHE
+
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
@@ -12691,6 +12702,10 @@ mojaloop-bulk:
 
       config:
         hub_participant: *HUB_PARTICIPANT
+
+        ## Proxy cache configuration
+        proxy_cache: *PROXY_CACHE
+
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
@@ -13053,6 +13068,10 @@ mojaloop-bulk:
 
       config:
         hub_participant: *HUB_PARTICIPANT
+
+        ## Proxy cache configuration
+        proxy_cache: *PROXY_CACHE
+
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
@@ -13819,7 +13838,6 @@ ml-ttk-cronjob-cleanup:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
     testCasesPathInZip: &ttkGitPathCleanup testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/cleanup
-    # testCasesPathInZip: *ttkGitPathGP
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
