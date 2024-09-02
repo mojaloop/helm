@@ -13434,11 +13434,9 @@ ml-testing-toolkit:
       ## We can pass the JSON content as the value for the parameters
       ## Or we can pass a http/https URL for the JSON file as the value for the parameters. Then the file will be downloaded and replaced in the corresponding location.
       ## Ex: rules_callback__default.json: "https://raw.githubusercontent.com/mojaloop/ml-testing-toolkit/master/spec_files/rules_callback/default.json"
-      rules_callback__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.20/rules/hub/p2p/ml-testing-toolkit/spec_files/rules_callback/default.json"
-      rules_response__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.20/rules/hub/p2p/ml-testing-toolkit/spec_files/rules_response/default.json"
-      rules_validation__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.20/rules/hub/p2p/ml-testing-toolkit/spec_files/rules_validation/default.json"
-      # Proxy rules
-      rules_callback__proxy_rules_callback.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.20/rules/hub/proxy/rules_callback/proxy_rules_callback.json"
+      rules_callback__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.17/rules/ml-testing-toolkit/spec_files/rules_callback/default.json"
+      rules_response__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.17/rules/ml-testing-toolkit/spec_files/rules_response/default.json"
+      rules_validation__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.17/rules/ml-testing-toolkit/spec_files/rules_validation/default.json"
     # We can change the names of the simulators to configure the environment files for the testing toolkit.
     # If you change these values, you need to change the simulator names in the mojaloop-simulats->simulators section
     parameters: &simNames
@@ -13722,8 +13720,8 @@ ml-ttk-posthook-setup:
     weight: -5
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
-    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v16.1.0-fx-snapshot.20.zip
-    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/provisioning/mojaloop
+    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v16.1.0-fx-snapshot.17.zip
+    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-16.1.0-fx-snapshot.17/collections/hub/provisioning/mojaloop
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
   parameters:
     <<: *simNames
@@ -13736,7 +13734,7 @@ ml-ttk-posthook-tests:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/golden_path/p2p
+    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-16.1.0-fx-snapshot.17/collections/hub/golden_path/p2p
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
@@ -13837,7 +13835,7 @@ ml-ttk-cronjob-cleanup:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: &ttkGitPathCleanup testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/cleanup
+    testCasesPathInZip: &ttkGitPathCleanup testing-toolkit-test-cases-16.1.0-fx-snapshot.17/collections/hub/cleanup
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
@@ -13913,7 +13911,7 @@ ml-ttk-test-val-gp:
     ## `allowFailures` configures this TTK CLI Test Runner to return failure exit-codes to the terminal,
     ## By default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
     ## If this is set to `true` - it will allow the next consecutive Helm test to be executed regardless of any failures.
-    allowFailures: true
+    allowFailures: false
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -13945,7 +13943,7 @@ ml-ttk-test-val-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/other_tests/bulk_transfers
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.17/collections/hub/other_tests/bulk_transfers
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -13958,7 +13956,7 @@ ml-ttk-test-val-bulk:
     ## `allowFailures` configures this TTK CLI Test Runner to return failure exit-codes to the terminal,
     ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
     ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
-    allowFailures: true
+    allowFailures: false
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -13990,7 +13988,7 @@ ml-ttk-test-setup-tp:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/provisioning/provisioning_thirdparty
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.17/collections/hub/provisioning/provisioning_thirdparty
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14003,7 +14001,7 @@ ml-ttk-test-setup-tp:
     ## `allowFailures` configures this TTK CLI Test Runner to return failure exit-codes to the terminal,
     ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
     ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
-    allowFailures: true
+    allowFailures: false
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -14035,7 +14033,7 @@ ml-ttk-test-val-tp:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/provisioning/provisioning_thirdparty
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.17/collections/hub/provisioning/provisioning_thirdparty
     # awsS3FilePath: ttk-tests/reports
     testSuiteName: Thirdparty Tests
     environmentName: Development
@@ -14045,7 +14043,7 @@ ml-ttk-test-val-tp:
     ## `allowFailures` configures this TTK CLI Test Runner to return failure exit-codes to the terminal,
     ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
     ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
-    allowFailures: true
+    allowFailures: false
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -14077,7 +14075,7 @@ ml-ttk-test-setup-sdk-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/provisioning/provisioning_sdkbulk
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.17/collections/hub/provisioning/provisioning_sdkbulk
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14090,7 +14088,7 @@ ml-ttk-test-setup-sdk-bulk:
     ## `allowFailures` configures this TTK CLI Test Runner to return failure exit-codes to the terminal,
     ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
     ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
-    allowFailures: true
+    allowFailures: false
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -14122,7 +14120,7 @@ ml-ttk-test-val-sdk-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/sdk_scheme_adapter/bulk/basic
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.17/collections/hub/sdk_scheme_adapter/bulk/basic
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14135,7 +14133,7 @@ ml-ttk-test-val-sdk-bulk:
     ## `allowFailures` configures this TTK CLI Test Runner to return failure exit-codes to the terminal,
     ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
     ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
-    allowFailures: true
+    allowFailures: false
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -14167,7 +14165,7 @@ ml-ttk-test-val-sdk-r2p:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/sdk_scheme_adapter/request-to-pay/basic
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.17/collections/hub/sdk_scheme_adapter/request-to-pay/basic
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14180,7 +14178,7 @@ ml-ttk-test-val-sdk-r2p:
     ## `allowFailures` configures this TTK CLI Test Runner to return failure exit-codes to the terminal,
     ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
     ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
-    allowFailures: true
+    allowFailures: false
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
@@ -14212,7 +14210,7 @@ ml-ttk-test-setup-fx:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/provisioning/provisioning_fxp
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.17/collections/hub/provisioning/provisioning_fxp
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14225,7 +14223,7 @@ ml-ttk-test-setup-fx:
     ## `allowFailures` configures this TTK CLI Test Runner to return failure exit-codes to the terminal,
     ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
     ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
-    allowFailures: true
+    allowFailures: false
   parameters:
     <<: *simNames
   testCaseEnvironmentFile: &ttkInputValuesForFx
@@ -14266,7 +14264,7 @@ ml-ttk-test-val-fx:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/golden_path/forex
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.17/collections/hub/golden_path/forex
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14279,7 +14277,7 @@ ml-ttk-test-val-fx:
     ## `allowFailures` configures this TTK CLI Test Runner to return failure exit-codes to the terminal,
     ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
     ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
-    allowFailures: true
+    allowFailures: false
   parameters:
     <<: *simNames
   testCaseEnvironmentFile: *ttkInputValuesForFx
@@ -14291,7 +14289,7 @@ ml-ttk-test-setup-proxy:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/provisioning/provisioning_dfsp
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.17/collections/hub/provisioning/provisioning_dfsp
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14304,7 +14302,7 @@ ml-ttk-test-setup-proxy:
     ## `allowFailures` configures this TTK CLI Test Runner to return failure exit-codes to the terminal,
     ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
     ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
-    allowFailures: true
+    allowFailures: false
   parameters:
     <<: *simNames
   testCaseEnvironmentFile: &ttkInputValuesForProxy
@@ -14335,7 +14333,7 @@ ml-ttk-test-val-payer-proxy:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/golden_path/proxy/as_payer
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.17/collections/hub/golden_path/proxy/as_payer
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14348,7 +14346,7 @@ ml-ttk-test-val-payer-proxy:
     ## `allowFailures` configures this TTK CLI Test Runner to return failure exit-codes to the terminal,
     ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
     ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
-    allowFailures: true
+    allowFailures: false
   parameters:
     <<: *simNames
   testCaseEnvironmentFile: &ttkInputValuesForProxyAsPayer
@@ -14429,7 +14427,7 @@ ml-ttk-test-val-payee-proxy:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.20/collections/hub/golden_path/proxy/as_payee
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.17/collections/hub/golden_path/proxy/as_payee
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14442,7 +14440,7 @@ ml-ttk-test-val-payee-proxy:
     ## `allowFailures` configures this TTK CLI Test Runner to return failure exit-codes to the terminal,
     ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
     ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
-    allowFailures: true
+    allowFailures: false
   parameters:
     <<: *simNames
   testCaseEnvironmentFile: &ttkInputValuesForProxyAsPayee
@@ -14533,7 +14531,7 @@ ml-ttk-test-cleanup:
     ## `allowFailures` configures this TTK CLI Test Runner to return failure exit-codes to the terminal,
     ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
     ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
-    allowFailures: true
+    allowFailures: false
 
   # configCreds:
   #   AWS_ACCESS_KEY_ID: 'some_aws_access_key'
