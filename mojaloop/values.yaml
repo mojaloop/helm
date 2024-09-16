@@ -83,7 +83,7 @@ CONFIG:
   batch_processing_enabled: &CL_BATCH_PROCESSING_ENABLED true
 
   ## INTERSCHEME: To enable interscheme components and tests set following to true
-  interscheme_enabled: &INTERSCHEME_ENABLED false  
+  interscheme_enabled: &INTERSCHEME_ENABLED true  
 
   ## PROXY CACHE
   proxy_cache: &PROXY_CACHE
@@ -5282,7 +5282,7 @@ centralsettlement:
     image:
       registry: docker.io
       repository: mojaloop/central-settlement
-      tag: v17.0.0-snapshot.4
+      tag: v17.0.0-snapshot.12
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -5710,7 +5710,7 @@ centralsettlement:
     image:
       registry: docker.io
       repository: mojaloop/central-settlement
-      tag: v17.0.0-snapshot.4
+      tag: v17.0.0-snapshot.12
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -6142,7 +6142,7 @@ centralsettlement:
     image:
       registry: docker.io
       repository: mojaloop/central-settlement
-      tag: v17.0.0-snapshot.4
+      tag: v17.0.0-snapshot.12
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -6574,7 +6574,7 @@ centralsettlement:
     image:
       registry: docker.io
       repository: mojaloop/central-settlement
-      tag: v17.0.0-snapshot.4
+      tag: v17.0.0-snapshot.12
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -13443,9 +13443,9 @@ ml-testing-toolkit:
       ## We can pass the JSON content as the value for the parameters
       ## Or we can pass a http/https URL for the JSON file as the value for the parameters. Then the file will be downloaded and replaced in the corresponding location.
       ## Ex: rules_callback__default.json: "https://raw.githubusercontent.com/mojaloop/ml-testing-toolkit/master/spec_files/rules_callback/default.json"
-      rules_callback__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.27/rules/rules_callback/default.json"
-      rules_response__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.27/rules/rules_response/default.json"
-      rules_validation__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.27/rules/rules_validation/default.json"
+      rules_callback__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.29/rules/hub/rules_callback/default.json"
+      rules_response__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.29/rules/hub/rules_response/default.json"
+      rules_validation__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.29/rules/hub/rules_validation/default.json"
     # We can change the names of the simulators to configure the environment files for the testing toolkit.
     # If you change these values, you need to change the simulator names in the mojaloop-simulats->simulators section
     parameters: &simNames
@@ -13732,7 +13732,10 @@ ml-testing-toolkit:
           "HOST_ORACLE": "http://$release_name-moja-simulator/oracle",
           "dfspEmail": "test@mojaloop.com",
           "fulfillment": "UNlJ98hZTY_dsw0cAqw4i_UN3v4utt7CZFB4yfLbVFA",
-          "expiration": "2024-07-26T11:12:15.158Z"
+          "expiration": "2024-07-26T11:12:15.158Z",
+          "ttkpayeefspIdentifier1": "7891234",
+          "ttkpayeefspIdentifier2": "5201",
+          "ttkpayeefspName": "ttkpayeefsp"
         }
       }
   ml-testing-toolkit-frontend:
@@ -13750,8 +13753,8 @@ ml-ttk-posthook-setup:
     weight: -5
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
-    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v16.1.0-fx-snapshot.27.zip
-    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-16.1.0-fx-snapshot.27/collections/hub/provisioning/for_golden_path
+    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v16.1.0-fx-snapshot.29.zip
+    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-16.1.0-fx-snapshot.29/collections/hub/provisioning/for_golden_path
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
   parameters:
     <<: *simNames
@@ -13764,7 +13767,7 @@ ml-ttk-posthook-tests:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-16.1.0-fx-snapshot.27/collections/hub/golden_path
+    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-16.1.0-fx-snapshot.29/collections/hub/golden_path
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
@@ -13865,7 +13868,7 @@ ml-ttk-cronjob-cleanup:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: &ttkGitPathCleanup testing-toolkit-test-cases-16.1.0-fx-snapshot.27/collections/hub/cleanup
+    testCasesPathInZip: &ttkGitPathCleanup testing-toolkit-test-cases-16.1.0-fx-snapshot.29/collections/hub/cleanup
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
@@ -13973,7 +13976,7 @@ ml-ttk-test-val-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.27/collections/hub/other_tests/bulk_transfers
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.29/collections/hub/other_tests/bulk_transfers
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14018,7 +14021,7 @@ ml-ttk-test-setup-tp:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.27/collections/hub/provisioning/for_thirdparty
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.29/collections/hub/provisioning/for_thirdparty
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14063,7 +14066,7 @@ ml-ttk-test-val-tp:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.27/collections/hub/thirdparty
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.29/collections/hub/thirdparty
     # awsS3FilePath: ttk-tests/reports
     testSuiteName: Thirdparty Tests
     environmentName: Development
@@ -14105,7 +14108,7 @@ ml-ttk-test-setup-sdk-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.27/collections/hub/provisioning/for_sdk_bulk
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.29/collections/hub/provisioning/for_sdk_bulk
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14150,7 +14153,7 @@ ml-ttk-test-val-sdk-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.27/collections/hub/sdk_scheme_adapter/bulk/basic
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.29/collections/hub/sdk_scheme_adapter/bulk/basic
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14195,7 +14198,7 @@ ml-ttk-test-val-sdk-r2p:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.27/collections/hub/sdk_scheme_adapter/request-to-pay/basic
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.29/collections/hub/sdk_scheme_adapter/request-to-pay/basic
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14240,7 +14243,7 @@ ml-ttk-test-setup-proxy:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.27/collections/hub/provisioning/new_participants
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.29/collections/hub/provisioning/new_participants
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14284,7 +14287,7 @@ ml-ttk-test-val-payer-proxy:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.27/collections/hub/inter_scheme/as_payer
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.29/collections/hub/inter_scheme/as_payer_scheme
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14378,7 +14381,7 @@ ml-ttk-test-val-payee-proxy:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.27/collections/hub/inter_scheme/as_payee
+    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.29/collections/hub/inter_scheme/as_payee_scheme
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
