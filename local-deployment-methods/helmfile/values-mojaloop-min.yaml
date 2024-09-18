@@ -1,3 +1,15 @@
+global:
+  CL_IMAGE: &CL_IMAGE
+    image:
+      registry: docker.io
+      repository: localhost:32000/mojaloop/central-ledger
+      tag: v17.8.0-vijay.31
+  ML_IMAGE: &ML_IMAGE
+    image:
+      registry: docker.io
+      repository: localhost:32000/mojaloop/ml-api-adapter
+      tag: v14.1.1-vijay.1
+
 mojaloop-simulator:
   enabled: false
 centralsettlement:
@@ -12,3 +24,32 @@ ml-testing-toolkit:
         password: ''
         secret: null
 
+centralledger:
+  centralledger-service:
+    <<: *CL_IMAGE
+  centralledger-handler-transfer-prepare:
+    <<: *CL_IMAGE
+    diagnosticMode:
+      enabled: true
+  centralledger-handler-transfer-position:
+    <<: *CL_IMAGE
+  centralledger-handler-transfer-position-batch:
+    <<: *CL_IMAGE
+    diagnosticMode:
+      enabled: true
+  centralledger-handler-transfer-get:
+    <<: *CL_IMAGE
+  centralledger-handler-transfer-fulfil:
+    <<: *CL_IMAGE
+  centralledger-handler-timeout:
+    <<: *CL_IMAGE
+  centralledger-handler-admin-transfer:
+    <<: *CL_IMAGE
+
+ml-api-adapter:
+  ml-api-adapter-service:
+    <<: *ML_IMAGE
+  ml-api-adapter-handler-notification:
+    <<: *ML_IMAGE
+    diagnosticMode:
+      enabled: true
