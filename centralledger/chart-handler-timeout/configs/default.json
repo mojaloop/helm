@@ -98,15 +98,15 @@
     },
     "PROXY_CACHE": {{ .Values.config.proxy_cache | toPrettyJson | nindent 2 }},
     "API_DOC_ENDPOINTS_ENABLED": true,
-    {{ if $.Values.config.batch_processing_enabled }}
-    "EVENT_TYPE_ACTION_TOPIC_MAP" : {
-        "POSITION":{
-            "TIMEOUT_RESERVED": "topic-transfer-position-batch",
-            "FX_TIMEOUT_RESERVED": "topic-transfer-position-batch"
-        }
-    },
-    {{ end }}
     "KAFKA": {
+        {{ if $.Values.config.batch_processing_enabled }}
+        "EVENT_TYPE_ACTION_TOPIC_MAP" : {
+            "POSITION":{
+                "TIMEOUT_RESERVED": "topic-transfer-position-batch",
+                "FX_TIMEOUT_RESERVED": "topic-transfer-position-batch"
+            }
+        },
+        {{ end }}
         "TOPIC_TEMPLATES": {
             "PARTICIPANT_TOPIC_TEMPLATE": {
                 "TEMPLATE": "topic-{{"{{"}}participantName{{"}}"}}-{{"{{"}}functionality{{"}}"}}-{{"{{"}}action{{"}}"}}",

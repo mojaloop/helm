@@ -5,7 +5,7 @@
 image:
   registry: docker.io
   repository: mojaloop/ml-api-adapter
-  tag: v14.1.0-snapshot.18
+  tag: v14.1.0.643-snapshot.0
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -33,13 +33,14 @@ diagnosticMode:
   ##
   command:
     - node
-    - src/handlers/index.js
-    - handler
-    - '--notification'
+
   ## @param diagnosticMode.args Args to override all containers in the deployment
   ##
   args:
     - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+    - src/handlers/index.js
+    - handler
+    - '--notification'
   ## @param diagnosticMode.debug config to override all debug information
   ##
   debug:
@@ -71,7 +72,7 @@ sidecar:
   enabled: true
   image:
     repository: mojaloop/event-sidecar
-    tag: v14.1.0-snapshot.18
+    tag: v14.0.0
     pullPolicy: IfNotPresent
     command: '["npm", "run", "start"]'
   service:
@@ -161,22 +162,24 @@ config:
 
   # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
   # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-  protocol_versions: |
+  protocol_versions:
     {
         "CONTENT": {
-            "DEFAULT": "1.1",
+            "DEFAULT": "2.0",
             "VALIDATELIST": [
                 "1",
                 "1.0",
-                "1.1"
+                "1.1",
+                "2.0"
             ]
         },
         "ACCEPT": {
-            "DEFAULT": "1",
+            "DEFAULT": "2",
             "VALIDATELIST": [
                 "1",
                 "1.0",
-                "1.1"
+                "1.1",
+                "2.0"
             ]
         }
     }
