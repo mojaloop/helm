@@ -34,8 +34,44 @@ kafka:
     persistence:
       enabled: false
 
+  listeners:
+    client:
+      protocol: PLAINTEXT
+    controller:
+      protocol: PLAINTEXT
+    interbroker:
+      protocol: PLAINTEXT
+    external:
+      protocol: PLAINTEXT
+
+  extraConfig: |-
+    offsets.topic.replication.factor=1
+    default.replication.factor=1
+    transaction.state.log.replication.factor=1
+  
+  controller:
+    replicaCount: 1
+    persistence:
+      enabled: false
+    logPersistence:
+      enabled: false
+  broker:
+    persistence:
+      enabled: false
+  
+  ## ZooKeeper chart configuration
+  ## https://github.com/bitnami/charts/blob/main/bitnami/zookeeper/values.yaml
+  ##
   zookeeper:
+    ## ZooKeeper Persistence parameters
+    ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    ## @param zookeeper.persistence.enabled Enable persistence on ZooKeeper using PVC(s)
+    ## @param zookeeper.persistence.storageClass Persistent Volume storage class
+    ## @param zookeeper.persistence.accessModes Persistent Volume access modes
+    ## @param zookeeper.persistence.size Persistent Volume size
+    ##
     enabled: false
+    
     persistence:
       enabled: false
 
