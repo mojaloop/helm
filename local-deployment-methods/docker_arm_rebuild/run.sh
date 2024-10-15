@@ -35,10 +35,6 @@ IMAGES=$(helm template "$HELM_RELEASE" "$HELM_CHART" | grep "image:" | awk '{pri
 # 2. Create a temporary file to track unique image repo + tag combinations
 touch processed_images.txt
 
-# 3. Prepare the parallel job list
-job_list="jobs.txt"
-rm -f "$job_list"
-
 for IMAGE in $IMAGES
 do
   # Remove any quotes around the image string

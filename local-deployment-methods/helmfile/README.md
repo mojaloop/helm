@@ -23,6 +23,12 @@ k3d cluster create --k3s-arg "--no-deploy=traefik@server:*" mycluster
 kubectl get nodes
 ```
 
+```
+k3d cluster create --api-port 6550 -p "80:80@loadbalancer" --agents 2
+export KUBECONFIG="$(k3d kubeconfig write k3s-default)"
+
+```
+
 ### Deploy ingress controller
 
 https://kubernetes.github.io/ingress-nginx/deploy/#using-helm
@@ -58,3 +64,10 @@ brew tap hashicorp/tap
 brew install hashicorp/tap/hashicorp-vagrant
 
 brew cask install virtualbox
+
+## Docker desktop MacOS
+
+helm upgrade --install ingress-nginx ingress-nginx \
+--repo https://kubernetes.github.io/ingress-nginx \
+--namespace ingress-nginx --create-namespace
+
