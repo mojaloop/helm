@@ -1,73 +1,31 @@
 
-## Helmfile
+# Helmfile-based Mojaloop Installation
 
-### Install helmfile
+This guide covers the steps to install and manage Mojaloop using **Helmfile**. Helmfile simplifies deploying and managing Helm charts, especially in complex environments with multiple services like Mojaloop.
 
-https://github.com/helmfile/helmfile#installation
+---
 
-### Install Mojaloop
+## Prerequisites
+
+- **Kubernetes cluster** (local or cloud-based)
+- **Helm** (v3+): [Install Helm](https://helm.sh/docs/intro/install/)
+- **kubectl**: [Install kubectl](https://kubernetes.io/docs/tasks/tools/)
+- **Docker**: Required for building and managing images
+- **Helmfile**: Installation instructions below
+
+
+## Mojaloop Deployment with Helmfile
+
+Follow the below steps assume that you have a Kubernetes cluster up and running.
 
 ```
-cd local-deployment-methods/helmfile
 sh update-charts-dep.sh
+cd local-deployment-methods/helmfile
 helmfile apply
 ```
 
-## K3D
-
-### Install and create K3D cluster
-
+## Uninstalling Mojaloop
+To remove the Mojaloop deployment, use:
 ```
-wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
-k3d cluster create --k3s-arg "--no-deploy=traefik@server:*" mycluster
-kubectl get nodes
+helmfile delete
 ```
-
-```
-k3d cluster create --api-port 6550 -p "80:80@loadbalancer" --agents 2
-export KUBECONFIG="$(k3d kubeconfig write k3s-default)"
-
-```
-
-### Deploy ingress controller
-
-https://kubernetes.github.io/ingress-nginx/deploy/#using-helm
-
-```
-helm upgrade --install ingress-nginx ingress-nginx \
-  --repo https://kubernetes.github.io/ingress-nginx \
-  --namespace ingress-nginx --create-namespace
-```
-Or
-```
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.43.0/deploy/static/provider/baremetal/deploy.yaml
-```
-
-## Microk8s
-
-brew install ubuntu/microk8s/microk8s
-
-microk8s install --channel=1.29/edge
-
-microk8s enable ingress
-
-
-## Minikube
-
-curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-darwin-arm64
-sudo install minikube-darwin-arm64 /usr/local/bin/minikube
-minikube start
-minikube addons enable ingress
-
-## Vagrant
-brew tap hashicorp/tap
-brew install hashicorp/tap/hashicorp-vagrant
-
-brew cask install virtualbox
-
-## Docker desktop MacOS
-
-helm upgrade --install ingress-nginx ingress-nginx \
---repo https://kubernetes.github.io/ingress-nginx \
---namespace ingress-nginx --create-namespace
-

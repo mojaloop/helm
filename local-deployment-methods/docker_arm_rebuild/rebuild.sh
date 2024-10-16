@@ -1,5 +1,8 @@
 #!/bin/bash
 
+HELM_CHART="../../mojaloop/"
+HELM_RELEASE="moja"
+
 # Function to clone repo, checkout specific tag, and build docker image
 build_docker_image_from_repo() {
   IMAGE=$1
@@ -27,8 +30,6 @@ build_docker_image_from_repo() {
 }
 
 # 1. Render the Helm chart template and extract image lines
-HELM_RELEASE="moja"
-HELM_CHART="../../mojaloop/"
 
 IMAGES=$(helm template "$HELM_RELEASE" "$HELM_CHART" | grep "image:" | awk '{print $2}')
 
