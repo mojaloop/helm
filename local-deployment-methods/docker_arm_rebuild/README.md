@@ -111,6 +111,5 @@ Change to the local-deployment-methods/helmfile directory, where the Helmfile co
 
 ```
 cd local-deployment-methods/helmfile
-sh update-charts-dep.sh
 helmfile apply
 ```
