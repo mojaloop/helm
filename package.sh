@@ -65,7 +65,7 @@ do
     if [ -z $BUILD_NUM ] || [ -z $GIT_SHA1 ]; then # we're most likely not running in CI
         # Probably running on someone's machine
         helm package -u -d ./repo "$chart"
-    elif [[ -z $GITHUB_TAG && $CIRCLE_BRANCH =~ ^(major|minor|patch)/(.*)$ &&  ]]; then
+    elif [[ -z $GITHUB_TAG && $CIRCLE_BRANCH =~ ^(major|minor|patch)/(.*)$ ]]; then
         set -u
         # Build a pre-relase version from pre-relase branches major/name, minor/name, patch/name
         # Can be used with helm upgrade --version '>=x.x.x-name.0 <x.x.x-name.999999' to avoid picking
