@@ -208,6 +208,20 @@ jobs:
       - run:
           name: Publish Helm Charts
           command: .circleci/publish_helm_charts.sh
+      - run:
+          name: Trigger downstream workflows
+          # DOWNSTREAM_IMAGE_ variables contain downstream repository:token pairs
+          command: |
+            for var in $(compgen -A variable | grep "^DOWNSTREAM_IMAGE_"); do
+                REPO_NAME=$(echo ${!var} | cut -d: -f1)
+                echo "Triggering downstream workflow for $REPO_NAME"
+                curl -L \
+                    -X POST \
+                    -H "Accept: application/vnd.github+json" \
+                    -H "Authorization: Bearer $(echo ${!var} | cut -d: -f2)" \
+                    https://api.github.com/repos/$REPO_NAME/actions/workflows/docker-image.yaml/dispatches \
+                    -d '{"ref":"main","inputs":{"upstream":"'$CIRCLE_BUILD_URL'","chart":"mojaloop","tag":"'$GIT_RELEASE_TAG'"}}'
+            done
       - slack/notify:
           event: pass
           template: SLACK_TEMP_RELEASE_SUCCESS
