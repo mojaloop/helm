@@ -11,23 +11,37 @@ CONFIG:
         - host: proxy-cache-redis
           port: 6379
 
+x-disable-probes: &DISABLE_PROBES
+  metrics:
+    enabled: false
+  readinessProbe:
+    enabled: false
+  livenessProbe:
+    enabled: false
+
 account-lookup-service:
   account-lookup-service:
+    <<: *DISABLE_PROBES
     config:
       api_type: *API_TYPE
       original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
       payload_cache: *PAYLOAD_CACHE
+      log_level: debug
 quoting-service:
   quoting-service:
+    <<: *DISABLE_PROBES
     config:
       api_type: *API_TYPE
       original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
       payload_cache: *PAYLOAD_CACHE
+      log_level: debug
   quoting-service-handler:
+    <<: *DISABLE_PROBES
     config:
       api_type: *API_TYPE
       original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
       payload_cache: *PAYLOAD_CACHE
+      log_level: debug
 
 ml-api-adapter:
   ml-api-adapter-service:
