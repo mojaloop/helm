@@ -83,7 +83,7 @@ CONFIG:
   batch_processing_enabled: &CL_BATCH_PROCESSING_ENABLED true
 
   ## INTERSCHEME: To enable interscheme components and tests set following to true
-  interscheme_enabled: &INTERSCHEME_ENABLED true  
+  interscheme_enabled: &INTERSCHEME_ENABLED true
 
   ## PROXY CACHE
   proxy_cache: &PROXY_CACHE
@@ -94,6 +94,20 @@ CONFIG:
         - host: proxy-cache-redis
           port: 6379
 
+  ## ISO20022
+  api_type: &API_TYPE "fspiop"
+  ttk_transformer_name: &TTK_TRANSFORMER_NAME "none"
+  # api_type: &API_TYPE "iso20022"
+  # ttk_transformer_name: &TTK_TRANSFORMER_NAME "fspiopToISO20022"
+  ## kafka | redis
+  original_payload_storage: &ORIGINAL_PAYLOAD_STORAGE "kafka"
+  payload_cache: &PAYLOAD_CACHE
+    enabled: false
+    type: redis-cluster
+    connectionConfig:
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
 # Default values for central.
 # This is a YAML-formatted file.
 # Declare global configurations
@@ -113,7 +127,7 @@ account-lookup-service:
     image:
       registry: docker.io
       repository: mojaloop/account-lookup-service
-      tag: v15.4.0-snapshot.33
+      tag: v15.6.0-iso.6
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -313,6 +327,9 @@ account-lookup-service:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
+      ## ISO20022 configuration
+      api_type: *API_TYPE
+
     # @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
     # ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     # e.g:
@@ -491,7 +508,7 @@ account-lookup-service:
     image:
       registry: docker.io
       repository: mojaloop/account-lookup-service
-      tag: v15.3.4
+      tag: v15.6.0-iso.6
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -1681,7 +1698,7 @@ quoting-service:
     image:
       registry: docker.io
       repository: mojaloop/quoting-service
-      tag: v15.8.0-snapshot.43
+      tag: v15.9.0-iso.3
 
     config:
       hub_participant: *HUB_PARTICIPANT
@@ -1754,6 +1771,11 @@ quoting-service:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
+      ## ISO20022 configuration
+      api_type: *API_TYPE
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
+      payload_cache: *PAYLOAD_CACHE
+
       error_handling:
         include_cause_extension: false
         truncate_extensions: true
@@ -1808,7 +1830,7 @@ quoting-service:
     image:
       registry: docker.io
       repository: mojaloop/quoting-service
-      tag: v15.8.0-snapshot.43
+      tag: v15.9.0-iso.3
 
     config:
       hub_participant: *HUB_PARTICIPANT
@@ -1878,6 +1900,11 @@ quoting-service:
 
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
+
+      ## ISO20022 configuration
+      api_type: *API_TYPE
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
+      payload_cache: *PAYLOAD_CACHE
 
       error_handling:
         include_cause_extension: false
@@ -1973,7 +2000,7 @@ ml-api-adapter:
     image:
       registry: docker.io
       repository: mojaloop/ml-api-adapter
-      tag: v14.1.0-snapshot.25
+      tag: v14.1.0-snapshot.31
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2133,6 +2160,11 @@ ml-api-adapter:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
+      ## ISO20022 configuration
+      api_type: *API_TYPE
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
+      payload_cache: *PAYLOAD_CACHE
+
       ## Error handling Configuration
       error_handling:
         include_cause_extension: false
@@ -2259,7 +2291,7 @@ ml-api-adapter:
     image:
       registry: docker.io
       repository: mojaloop/ml-api-adapter
-      tag: v14.1.0-snapshot.25
+      tag: v14.1.0-snapshot.31
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2479,6 +2511,11 @@ ml-api-adapter:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
+      ## ISO20022 configuration
+      api_type: *API_TYPE
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
+      payload_cache: *PAYLOAD_CACHE
+
       ## Error handling Configuration
       error_handling:
         include_cause_extension: false
@@ -2612,7 +2649,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.8.0-snapshot.34
+      tag: v17.9.0-snapshot.1
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2952,7 +2989,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.8.0-snapshot.34
+      tag: v17.9.0-snapshot.1
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3297,7 +3334,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.8.0-snapshot.34
+      tag: v17.9.0-snapshot.1
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3637,7 +3674,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.8.0-snapshot.34
+      tag: v17.9.0-snapshot.1
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3982,7 +4019,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.8.0-snapshot.34
+      tag: v17.9.0-snapshot.1
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -4321,7 +4358,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.8.0-snapshot.34
+      tag: v17.9.0-snapshot.1
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -4663,7 +4700,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.8.0-snapshot.34
+      tag: v17.9.0-snapshot.1
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -5010,7 +5047,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.8.0-snapshot.34
+      tag: v17.9.0-snapshot.1
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -11970,7 +12007,7 @@ mojaloop-bulk:
       image:
         registry: docker.io
         repository: mojaloop/central-ledger
-        tag: v17.8.0-snapshot.34
+        tag: v17.9.0-snapshot.1
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -12339,7 +12376,7 @@ mojaloop-bulk:
       image:
         registry: docker.io
         repository: mojaloop/central-ledger
-        tag: v17.8.0-snapshot.34
+        tag: v17.9.0-snapshot.1
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -12705,7 +12742,7 @@ mojaloop-bulk:
       image:
         registry: docker.io
         repository: mojaloop/central-ledger
-        tag: v17.8.0-snapshot.34
+        tag: v17.9.0-snapshot.1
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -13071,7 +13108,7 @@ mojaloop-bulk:
       image:
         registry: docker.io
         repository: mojaloop/central-ledger
-        tag: v17.8.0-snapshot.34
+        tag: v17.9.0-snapshot.1
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -13522,9 +13559,9 @@ ml-testing-toolkit:
       ## We can pass the JSON content as the value for the parameters
       ## Or we can pass a http/https URL for the JSON file as the value for the parameters. Then the file will be downloaded and replaced in the corresponding location.
       ## Ex: rules_callback__default.json: "https://raw.githubusercontent.com/mojaloop/ml-testing-toolkit/master/spec_files/rules_callback/default.json"
-      rules_callback__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.45/rules/hub/rules_callback/default.json"
-      rules_response__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.45/rules/hub/rules_response/default.json"
-      rules_validation__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v16.1.0-fx-snapshot.45/rules/hub/rules_validation/default.json"
+      rules_callback__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.4/rules/hub/rules_callback/default.json"
+      rules_response__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.4/rules/hub/rules_response/default.json"
+      rules_validation__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.4/rules/hub/rules_validation/default.json"
     # We can change the names of the simulators to configure the environment files for the testing toolkit.
     # If you change these values, you need to change the simulator names in the mojaloop-simulats->simulators section
     parameters: &simNames
@@ -13540,8 +13577,12 @@ ml-testing-toolkit:
       simNameTTKSim3: 'ttksim3'
     extraEnvironments:
       hub-k8s-default-environment.json: &ttkInputValues {
+        "options": {
+          "breakOnError": false,
+          "transformerName": *TTK_TRANSFORMER_NAME,
+          "generateIDType": "ulid"
+        },
         "inputValues": {
-          "generateID": "ulid",
           "HUB_NAME": *HUB_NAME,
           "BASE_CENTRAL_LEDGER_ADMIN": "",
           "CALLBACK_ENDPOINT_BASE_URL": "http://$release_name-ml-testing-toolkit-backend:4040",
@@ -13900,8 +13941,8 @@ ml-ttk-posthook-setup:
     weight: -5
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
-    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v16.1.0-fx-snapshot.45.zip
-    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-16.1.0-fx-snapshot.45/collections/hub/provisioning/for_golden_path
+    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v17.0.0-iso.4.zip
+    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-17.0.0-iso.4/collections/hub/provisioning/for_golden_path
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
   parameters:
     <<: *simNames
@@ -13914,7 +13955,7 @@ ml-ttk-posthook-tests:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-16.1.0-fx-snapshot.45/collections/hub/golden_path
+    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-17.0.0-iso.4/collections/hub/golden_path
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
@@ -14015,7 +14056,7 @@ ml-ttk-cronjob-cleanup:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: &ttkGitPathCleanup testing-toolkit-test-cases-16.1.0-fx-snapshot.45/collections/hub/cleanup
+    testCasesPathInZip: &ttkGitPathCleanup testing-toolkit-test-cases-17.0.0-iso.4/collections/hub/cleanup
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
@@ -14123,7 +14164,7 @@ ml-ttk-test-val-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.45/collections/hub/other_tests/bulk_transfers
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.4/collections/hub/other_tests/bulk_transfers
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14168,7 +14209,7 @@ ml-ttk-test-setup-tp:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.45/collections/hub/provisioning/for_thirdparty
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.4/collections/hub/provisioning/for_thirdparty
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14213,7 +14254,7 @@ ml-ttk-test-val-tp:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.45/collections/hub/provisioning/for_thirdparty
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.4/collections/hub/provisioning/for_thirdparty
     # awsS3FilePath: ttk-tests/reports
     testSuiteName: Thirdparty Tests
     environmentName: Development
@@ -14255,7 +14296,7 @@ ml-ttk-test-setup-sdk-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.45/collections/hub/provisioning/for_sdk_bulk
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.4/collections/hub/provisioning/for_sdk_bulk
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14300,7 +14341,7 @@ ml-ttk-test-val-sdk-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.45/collections/hub/sdk_scheme_adapter/bulk/basic
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.4/collections/hub/sdk_scheme_adapter/bulk/basic
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14345,7 +14386,7 @@ ml-ttk-test-val-sdk-r2p:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.45/collections/hub/sdk_scheme_adapter/request-to-pay/basic
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.4/collections/hub/sdk_scheme_adapter/request-to-pay/basic
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14390,7 +14431,7 @@ ml-ttk-test-setup-interscheme:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.45/collections/hub/provisioning/for_inter_scheme
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.4/collections/hub/provisioning/for_inter_scheme
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14415,7 +14456,7 @@ ml-ttk-test-val-interscheme:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-16.1.0-fx-snapshot.45/collections/hub/inter_scheme
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.4/collections/hub/inter_scheme
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports

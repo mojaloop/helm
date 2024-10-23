@@ -14,7 +14,7 @@ ml-api-adapter-service:
   image:
     registry: docker.io
     repository: mojaloop/ml-api-adapter
-    tag: v14.1.0-snapshot.25
+    tag: v14.1.0-snapshot.31
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -145,6 +145,17 @@ ml-api-adapter-service:
     enabled: true
 
   config:
+    ## fspiop | iso20022
+    api_type: fspiop
+    ## kafka | redis | ""
+    original_payload_storage: ""
+    payload_cache:
+      enabled: false
+      type: redis-cluster
+      connectionConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
     hub_participant:
       id: 1
       name: Hub
@@ -340,7 +351,7 @@ ml-api-adapter-handler-notification:
   image:
     registry: docker.io
     repository: mojaloop/ml-api-adapter
-    tag: v14.1.0-snapshot.25
+    tag: v14.1.0-snapshot.31
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -475,6 +486,17 @@ ml-api-adapter-handler-notification:
     enabled: true
 
   config:
+    ## fspiop | iso20022
+    api_type: fspiop
+    ## kafka | redis | ""
+    original_payload_storage: ""
+    payload_cache:
+      enabled: false
+      type: redis-cluster
+      connectionConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
     hub_participant:
       id: 1
       name: Hub
