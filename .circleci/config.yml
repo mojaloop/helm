@@ -47,7 +47,7 @@ defaults_Environment: &defaults_environment
     helm repo add elastic https://helm.elastic.co
     helm repo add codecentric https://codecentric.github.io/helm-charts
     helm repo add bitnami https://charts.bitnami.com/bitnami
-    helm repo add mojaloop-charts https://mojaloop.github.io/charts/repo 
+    helm repo add mojaloop-charts https://mojaloop.github.io/charts/repo
     helm repo add redpanda https://charts.redpanda.com
     helm repo update
 
@@ -173,6 +173,11 @@ jobs:
               echo "export GIT_RELEASE_URL=${GIT_PROJECT_URL}/releases/tag/${CIRCLE_TAG}" >> $BASH_ENV
               echo "export GIT_RELEASE_TAG='${CIRCLE_TAG}@${CIRCLE_SHA1:0:7}'" >> $BASH_ENV
               echo "export GIT_RELEASE_TYPE='Helm Snapshot'" >> $BASH_ENV
+            elif [[ $CIRCLE_BRANCH =~ ^(major|minor|patch)/(.*)$ ]]; then
+              echo "Setting env configs for Helm Pre-Release"
+              echo "export GIT_RELEASE_URL=${GIT_PROJECT_URL}/commit/${CIRCLE_SHA1}" >> $BASH_ENV
+              echo "export GIT_RELEASE_TAG=${BASH_REMATCH[2]}.${CIRCLE_BUILD_NUM}" >> $BASH_ENV
+              echo "export GIT_RELEASE_TYPE='Helm Pre-Release'" >> $BASH_ENV
             else
               echo "CIRCLE_SHA1=${CIRCLE_SHA1} exists setting env configs for Helm Snapshot"
               echo "export GIT_RELEASE_URL=${GIT_PROJECT_URL}/commit/${CIRCLE_SHA1}" >> $BASH_ENV
@@ -203,6 +208,20 @@ jobs:
       - run:
           name: Publish Helm Charts
           command: .circleci/publish_helm_charts.sh
+      - run:
+          name: Trigger downstream workflows
+          # DOWNSTREAM_IMAGE_ variables contain downstream repository:token pairs
+          command: |
+            for var in $(compgen -A variable | grep "^DOWNSTREAM_IMAGE_"); do
+                REPO_NAME=$(echo ${!var} | cut -d: -f1)
+                echo "Triggering downstream workflow for $REPO_NAME"
+                curl -L \
+                    -X POST \
+                    -H "Accept: application/vnd.github+json" \
+                    -H "Authorization: Bearer $(echo ${!var} | cut -d: -f2)" \
+                    https://api.github.com/repos/$REPO_NAME/actions/workflows/docker-image.yaml/dispatches \
+                    -d '{"ref":"main","inputs":{"upstream":"'$CIRCLE_BUILD_URL'","chart":"mojaloop","tag":"'$GIT_RELEASE_TAG'"}}'
+            done
       - slack/notify:
           event: pass
           template: SLACK_TEMP_RELEASE_SUCCESS
@@ -249,4 +268,4 @@ workflows:
             tags:
               only: /v[0-9]+(\.[0-9]+)*(\-snapshot+((\.[0-9]+)?))?/
             branches:
-              only: main
+              only: /main|(major|minor|patch)/.*/

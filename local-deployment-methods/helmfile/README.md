@@ -12,6 +12,7 @@ This guide covers the steps to install and manage Mojaloop using **Helmfile**. H
 - **kubectl**: [Install kubectl](https://kubernetes.io/docs/tasks/tools/)
 - **Docker**: Required for building and managing images
 - **Helmfile**: Installation instructions below
+- **helm-diff** plugin: [Install helm-diff](https://github.com/databus23/helm-diff?tab=readme-ov-file#using-helm-plugin-manager--23x)
 
 
 ## Mojaloop Deployment with Helmfile

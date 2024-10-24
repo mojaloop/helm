@@ -106,6 +106,12 @@ spec:
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
           env:
+            {{- if .Values.env }}
+            {{- range $key, $val := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+            {{- end }}
             - name: QUOTE_DATABASE__PASSWORD
             {{- if .Values.config.db_secret }}
               valueFrom:
