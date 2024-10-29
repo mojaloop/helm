@@ -2,6 +2,10 @@ CONFIG:
   ## ISO20022
   api_type: &API_TYPE "iso20022"
   ttk_transformer_name: &TTK_TRANSFORMER_NAME "fspiopToISO20022"
+  ttk_input_values_override: &TTK_INPUT_VALUES_OVERRIDE
+    ilpPacket: "$param_validIlpPacketV4"
+    validCondition: "$param_validConditionV4"
+    validFulfillment: "$param_validFulfillmentV4"
   original_payload_storage: &ORIGINAL_PAYLOAD_STORAGE "kafka"
   payload_cache: &PAYLOAD_CACHE
     enabled: false
@@ -61,6 +65,8 @@ ml-testing-toolkit:
       hub-k8s-default-environment.json:
         options:
           transformerName: *TTK_TRANSFORMER_NAME
+        inputValues:
+          <<: *TTK_INPUT_VALUES_OVERRIDE
 
 ml-ttk-test-setup:
   testCaseEnvironmentFile:
@@ -83,9 +89,10 @@ ml-ttk-test-cleanup:
     options:
       transformerName: *TTK_TRANSFORMER_NAME
 
-centralledger:
-  centralledger-service:
-    image:
-      repository: mojaloop/central-ledger
-      ## TODO: Observed an issue with using same snapshot of CL for this. So downgraded temporarily
-      tag: v17.8.0-snapshot.34
+sdk-scheme-adapter:
+  sdk-scheme-adapter-api-svc:
+    env:
+      API_TYPE: iso20022
+      ILP_VERSION: "4"
+
+
