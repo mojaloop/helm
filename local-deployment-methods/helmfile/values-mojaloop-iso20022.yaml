@@ -6,9 +6,9 @@ CONFIG:
     ilpPacket: "$param_validIlpPacketV4"
     validCondition: "$param_validConditionV4"
     validFulfillment: "$param_validFulfillmentV4"
-  original_payload_storage: &ORIGINAL_PAYLOAD_STORAGE "kafka"
+  original_payload_storage: &ORIGINAL_PAYLOAD_STORAGE "redis"
   payload_cache: &PAYLOAD_CACHE
-    enabled: false
+    enabled: true
     type: redis-cluster
     connectionConfig:
       cluster:
@@ -42,6 +42,7 @@ quoting-service:
   quoting-service-handler:
     <<: *DISABLE_PROBES
     config:
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
       payload_cache: *PAYLOAD_CACHE
       log_level: debug
 
