@@ -6,9 +6,9 @@ CONFIG:
     ilpPacket: "$param_validIlpPacketV4"
     validCondition: "$param_validConditionV4"
     validFulfillment: "$param_validFulfillmentV4"
-  original_payload_storage: &ORIGINAL_PAYLOAD_STORAGE "kafka"
+  original_payload_storage: &ORIGINAL_PAYLOAD_STORAGE "redis"
   payload_cache: &PAYLOAD_CACHE
-    enabled: false
+    enabled: true
     type: redis-cluster
     connectionConfig:
       cluster:
@@ -31,6 +31,7 @@ account-lookup-service:
       original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
       payload_cache: *PAYLOAD_CACHE
       log_level: debug
+
 quoting-service:
   quoting-service:
     <<: *DISABLE_PROBES
@@ -42,6 +43,7 @@ quoting-service:
   quoting-service-handler:
     <<: *DISABLE_PROBES
     config:
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
       payload_cache: *PAYLOAD_CACHE
       log_level: debug
 
@@ -89,10 +91,16 @@ ml-ttk-test-cleanup:
     options:
       transformerName: *TTK_TRANSFORMER_NAME
 
-sdk-scheme-adapter:
-  sdk-scheme-adapter-api-svc:
-    env:
-      API_TYPE: iso20022
-      ILP_VERSION: "4"
-
+mojaloop-simulator:
+  defaults:
+    config:
+      schemeAdapter:
+        env:
+          API_TYPE: iso20022
+          ILP_VERSION: "4"
+    # Disabling probes doesn't work
+    readinessProbe: null
+    livenessProbe: null
+    metrics:
+      enabled: false
 
