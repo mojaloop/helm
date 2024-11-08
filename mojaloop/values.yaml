@@ -15,6 +15,16 @@ CONFIG:
   als_db_port: &ALS_DB_PORT 3306
   als_db_user: &ALS_DB_USER "account_lookup"
 
+  ## ALS MSISDN Oracle
+  als_msisdn_oracle_db_name: &ALS_ORACLE_DB_NAME "oracle_msisdn"
+  als_msisdn_oracle_db_password: &ALS_ORACLE_DB_PASSWORD ''
+  als_msisdn_oracle_db_secret: &ALS_ORACLE_DB_SECRET
+    name: &ALS_ORACLE_DB_SECRET_NAME mysqldb
+    key: &ALS_ORACLE_DB_SECRET_KEY mysql-password
+  als_msisdn_oracle_db_host: &ALS_ORACLE_DB_HOST 'mysqldb'
+  als_msisdn_oracle_db_port: &ALS_ORACLE_DB_PORT 3306
+  als_msisdn_oracle_db_user: &ALS_ORACLE_DB_USER "oracle_msisdn"
+
   ## CENTRAL-LEDGER BACKEND
   cl_db_name: &CL_DB_NAME "central_ledger"
   cl_db_password: &CL_DB_PASSWORD ''
@@ -13469,6 +13479,19 @@ mojaloop-bulk:
       #  memory: 128Mi
       resources: {}
 
+als-msisdn-oracle:
+  enabled: true
+  config:
+    db_host: *ALS_ORACLE_DB_HOST
+    db_port: *ALS_ORACLE_DB_PORT
+    db_user: *ALS_ORACLE_DB_USER
+    db_secret:
+      name: *ALS_ORACLE_DB_SECRET_NAME
+      key: *ALS_ORACLE_DB_SECRET_KEY
+    db_database: *ALS_ORACLE_DB_NAME
+    # db_password: ''
+
+
 ml-testing-toolkit:
   enabled: true
   ml-testing-toolkit-backend: ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
@@ -13563,9 +13586,9 @@ ml-testing-toolkit:
       ## We can pass the JSON content as the value for the parameters
       ## Or we can pass a http/https URL for the JSON file as the value for the parameters. Then the file will be downloaded and replaced in the corresponding location.
       ## Ex: rules_callback__default.json: "https://raw.githubusercontent.com/mojaloop/ml-testing-toolkit/master/spec_files/rules_callback/default.json"
-      rules_callback__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.30/rules/hub/rules_callback/default.json"
-      rules_response__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.30/rules/hub/rules_response/default.json"
-      rules_validation__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.30/rules/hub/rules_validation/default.json"
+      rules_callback__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.31/rules/hub/rules_callback/default.json"
+      rules_response__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.31/rules/hub/rules_response/default.json"
+      rules_validation__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.31/rules/hub/rules_validation/default.json"
     # We can change the names of the simulators to configure the environment files for the testing toolkit.
     # If you change these values, you need to change the simulator names in the mojaloop-simulats->simulators section
     parameters: &simNames
@@ -13866,6 +13889,8 @@ ml-testing-toolkit:
           "contentTypeFxTransfers": "application/vnd.interoperability.fxTransfers+json;version=2.0",
           "fxpCurrency": "XXX",
           "HOST_ORACLE": "http://$release_name-simulator/oracle",
+          "HOST_ORACLE_MSISDN": "http://$release_name-simulator/oracle",
+          "HOST_ORACLE_MSISDN_bkp": "http://$release_name-als-msisdn-oracle",
           "dfspEmail": "test@mojaloop.com",
           "fulfillment": "UNlJ98hZTY_dsw0cAqw4i_UN3v4utt7CZFB4yfLbVFA",
           "expiration": "2024-07-26T11:12:15.158Z",
@@ -13955,8 +13980,8 @@ ml-ttk-posthook-setup:
     weight: -5
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
-    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v17.0.0-iso.30.zip
-    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-17.0.0-iso.30/collections/hub/provisioning/for_golden_path
+    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v17.0.0-iso.31.zip
+    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-17.0.0-iso.31/collections/hub/provisioning/for_golden_path
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
   parameters:
     <<: *simNames
@@ -13969,7 +13994,7 @@ ml-ttk-posthook-tests:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-17.0.0-iso.30/collections/hub/golden_path
+    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-17.0.0-iso.31/collections/hub/golden_path
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
@@ -14070,7 +14095,7 @@ ml-ttk-cronjob-cleanup:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: &ttkGitPathCleanup testing-toolkit-test-cases-17.0.0-iso.30/collections/hub/cleanup
+    testCasesPathInZip: &ttkGitPathCleanup testing-toolkit-test-cases-17.0.0-iso.31/collections/hub/cleanup
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
@@ -14178,7 +14203,7 @@ ml-ttk-test-val-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.30/collections/hub/other_tests/bulk_transfers
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.31/collections/hub/other_tests/bulk_transfers
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14223,7 +14248,7 @@ ml-ttk-test-setup-tp:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.30/collections/hub/provisioning/for_thirdparty
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.31/collections/hub/provisioning/for_thirdparty
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14268,7 +14293,7 @@ ml-ttk-test-val-tp:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.30/collections/hub/provisioning/for_thirdparty
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.31/collections/hub/provisioning/for_thirdparty
     # awsS3FilePath: ttk-tests/reports
     testSuiteName: Thirdparty Tests
     environmentName: Development
@@ -14310,7 +14335,7 @@ ml-ttk-test-setup-sdk-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.30/collections/hub/provisioning/for_sdk_bulk
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.31/collections/hub/provisioning/for_sdk_bulk
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14355,7 +14380,7 @@ ml-ttk-test-val-sdk-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.30/collections/hub/sdk_scheme_adapter/bulk/basic
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.31/collections/hub/sdk_scheme_adapter/bulk/basic
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14400,7 +14425,7 @@ ml-ttk-test-val-sdk-r2p:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.30/collections/hub/sdk_scheme_adapter/request-to-pay/basic
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.31/collections/hub/sdk_scheme_adapter/request-to-pay/basic
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14445,7 +14470,7 @@ ml-ttk-test-setup-interscheme:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.30/collections/hub/provisioning/for_inter_scheme
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.31/collections/hub/provisioning/for_inter_scheme
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -14470,7 +14495,7 @@ ml-ttk-test-val-interscheme:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.30/collections/hub/inter_scheme
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.0-iso.31/collections/hub/inter_scheme
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
