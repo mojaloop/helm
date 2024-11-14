@@ -32,6 +32,10 @@ spec:
         {{- if .Values.podAnnotations }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
+        {{- if .Values.metrics.enabled }}
+        prometheus.io/port: "{{ .Values.service.ports.adminApi.port }}"
+        prometheus.io/scrape: "true"
+        {{- end }}
       labels:
         app.kubernetes.io/name: {{ include "ml-testing-toolkit-backend.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
@@ -118,7 +122,7 @@ spec:
       volumes:
       {{- if .Values.persistence.enabled }}
         - name: ttk-data
-          emptyDir: {}  
+          emptyDir: {}
       {{- end }}
         - name: {{ template "ml-testing-toolkit-backend.fullname" . }}-volume-config-default
           configMap:
