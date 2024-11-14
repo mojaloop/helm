@@ -11,6 +11,6 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
 {{- range $fileName, $fileContents := .Values.configOverride }}
-  {{ $fileName | replace "/" "-" }}: | {{ $fileContents | toPrettyJson | nindent 4 }}
+  {{ $fileName | replace "/" "-" }}: | {{ ternary (eq (type $fileContents) "string") $fileContents (toPrettyJson $fileContents) | nindent 4 }}
 {{- end }}
 {{- end }}
