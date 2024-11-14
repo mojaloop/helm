@@ -105,8 +105,10 @@ spec:
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
           volumeMounts:
+{{ $volumeIndex := 0 }}
 {{- range $fileName, $fileContents := .Values.configOverride }}
-            - name: config-override-volume-{{ $fileName | replace "/" "-" }}
+{{- $volumeIndex = add $volumeIndex 1 }}
+            - name: config-override-volume-{{ $volumeIndex }}
               mountPath: /opt/app/{{ $fileName }}
               subPath: {{ $fileName | replace "/" "-" }}
 {{- end }}
