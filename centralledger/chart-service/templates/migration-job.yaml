@@ -11,13 +11,13 @@ metadata:
 {{- end }}
 spec:
   backoffLimit: {{ .Values.migration.backoffLimit }}
-  restartPolicy: {{ .Values.migration.restartPolicy }}
   template:
     metadata:
       labels:
         batch.kubernetes.io/job-name: {{ template "centralledger-service.fullname" . }}-migration
         job-name: {{ template "centralledger-service.fullname" . }}-migration
     spec:
+      restartPolicy: {{ .Values.migration.restartPolicy }}
       initContainers:
         - name: wait-for-mysql
           image: mysql:9.0.1
@@ -80,17 +80,17 @@ spec:
               mountPath: /opt/app/{{ $fileName }}
               subPath: {{ $fileName | replace "/" "-" }}
 {{- end }}
-          volumes:
+      volumes:
 {{- if .Values.configOverride }}
-            - name: config-override-volume
-              configMap:
-                name: {{ template "centralledger-service.fullname" . }}-config-override
+        - name: config-override-volume
+          configMap:
+            name: {{ template "centralledger-service.fullname" . }}-config-override
 {{- end }}
-            - name: {{ template "centralledger-service.fullname" . }}-config-volume
-              configMap:
-                name: {{ template "centralledger-service.fullname" . }}-config
-                items:
-                - key: default.json
-                  path: default.json
-                - key: knexfile.js
-                  path: knexfile.js
+        - name: {{ template "centralledger-service.fullname" . }}-config-volume
+          configMap:
+            name: {{ template "centralledger-service.fullname" . }}-config
+            items:
+            - key: default.json
+              path: default.json
+            - key: knexfile.js
+              path: knexfile.js
