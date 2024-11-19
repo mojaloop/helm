@@ -1,10 +1,10 @@
-apiVersion:  batch/v1
+apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "centralledger-service.fullname" . }}-migrate
+  name: {{ template "centralledger-service.fullname" . }}-migration
   labels:
-    batch.kubernetes.io/job-name: {{ template "centralledger-service.fullname" . }}-migrate
-    job-name: {{ template "centralledger-service.fullname" . }}-migrate
+    batch.kubernetes.io/job-name: {{ template "centralledger-service.fullname" . }}-migration
+    job-name: {{ template "centralledger-service.fullname" . }}-migration
   annotations:
 {{- with .Values.migration.annotations }}
     {{ toYaml .| indent 4 | trim }}
@@ -15,8 +15,8 @@ spec:
   template:
     metadata:
       labels:
-        batch.kubernetes.io/job-name: {{ template "centralledger-service.fullname" . }}-migrate
-        job-name: {{ template "centralledger-service.fullname" . }}-migrate
+        batch.kubernetes.io/job-name: {{ template "centralledger-service.fullname" . }}-migration
+        job-name: {{ template "centralledger-service.fullname" . }}-migration
     spec:
       initContainers:
         - name: wait-for-mysql
@@ -75,3 +75,22 @@ spec:
           volumeMounts:
             - name: '{{ template "centralledger-service.fullname" . }}-config-volume'
               mountPath: /opt/app/config
+{{- range $fileName, $fileContents := .Values.configOverride }}
+            - name: config-override-volume
+              mountPath: /opt/app/{{ $fileName }}
+              subPath: {{ $fileName | replace "/" "-" }}
+{{- end }}
+          volumes:
+{{- if .Values.configOverride }}
+            - name: config-override-volume
+              configMap:
+                name: {{ template "centralledger-service.fullname" . }}-config-override
+{{- end }}
+            - name: {{ template "centralledger-service.fullname" . }}-config-volume
+              configMap:
+                name: {{ template "centralledger-service.fullname" . }}-config
+                items:
+                - key: default.json
+                  path: default.json
+                - key: knexfile.js
+                  path: knexfile.js
