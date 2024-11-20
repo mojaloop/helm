@@ -28,5 +28,5 @@ helmfile apply
 ## Uninstalling Mojaloop
 To remove the Mojaloop deployment, use:
 ```
-helmfile delete
+helmfile destroy
 ```
