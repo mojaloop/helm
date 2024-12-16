@@ -46,6 +46,7 @@ spec:
         {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
     spec:
+      {{- include "common.topologySpread" . | nindent 6 }}
 {{- if .Values.affinity }}
       affinity:
 {{ toYaml .Values.affinity | indent 8 }}
@@ -151,7 +152,11 @@ spec:
               value: {{ .Values.config.uv_threadpool_size | quote }}
           volumeMounts:
           - name: {{ template "quotingservice-handler.fullname" . }}-config-volume
-            mountPath: /opt/app/config
+            mountPath: /opt/app/config/default.json
+            subPath: default.json
+          - name: {{ template "quotingservice-handler.fullname" . }}-config-volume
+            mountPath: /opt/app/config/rules.json
+            subPath: rules.json
 {{- range $fileName, $fileContents := .Values.configOverride }}
           - name: config-override-volume
             mountPath: /opt/app/{{ $fileName }}
