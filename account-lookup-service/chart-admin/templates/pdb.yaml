@@ -1,0 +1,18 @@
+{{- if .Values.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Chart.Name }}-pdb
+  namespace: {{ .Release.Namespace }}
+spec:
+{{- if .Values.pdb.minAvailable }}
+  minAvailable: {{ .Values.pdb.minAvailable }}
+{{- else if .Values.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+{{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "account-lookup-service-admin.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  unhealthyPodEvictionPolicy: AlwaysAllow
+{{- end -}}
