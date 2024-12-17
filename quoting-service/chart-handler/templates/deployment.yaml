@@ -36,6 +36,9 @@ spec:
         {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+        {{- if .Values.configOverride }}
+        checksum/config-override: {{ include (print $.Template.BasePath "/config-override.yaml") . | sha256sum }}
+        {{- end }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         checksum/secret-jws: {{ include (print $.Template.BasePath "/secret-jws.yaml") . | sha256sum }}
         # Custom Pod annotations
@@ -103,6 +106,12 @@ spec:
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
           env:
+            {{- if .Values.env }}
+            {{- range $key, $val := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+            {{- end }}
             - name: QUOTE_DATABASE__PASSWORD
             {{- if .Values.config.db_secret }}
               valueFrom:
@@ -138,6 +147,8 @@ spec:
               value: {{ .Values.config.event_async_override | quote }}
             - name: EVENT_SDK_TRACEID_PER_VENDOR
               value: {{ .Values.config.event_traceid_per_vendor | quote }}
+            - name: UV_THREADPOOL_SIZE
+              value: {{ .Values.config.uv_threadpool_size | quote }}
           volumeMounts:
           - name: {{ template "quotingservice-handler.fullname" . }}-config-volume
             mountPath: /opt/app/config

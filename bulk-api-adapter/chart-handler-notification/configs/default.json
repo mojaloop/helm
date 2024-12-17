@@ -2,6 +2,10 @@
 {{- $centralServicesHost := ( .Values.config.central_services_host | replace "$release_name" .Release.Name ) -}}
 {{- $mongoHost := ( .Values.config.mongo_host | replace "$release_name" .Release.Name ) -}}
 {
+  "HUB_PARTICIPANT": {
+    "ID": {{ .Values.config.hub_participant.id }},
+    "NAME": {{ .Values.config.hub_participant.name | quote }}
+  },
   "PORT": {{ .Values.service.internalPort }},
   "HOSTNAME": "{{ .Values.ingress.hostname }}",
   "PROTOCOL_VERSIONS": {{ .Values.config.protocol_versions | toPrettyJson }},
@@ -24,7 +28,6 @@
     },
     "JWS": {
       "JWS_SIGN": {{ .Values.config.endpointSecurity.jwsSign }},
-      "FSPIOP_SOURCE_TO_SIGN": {{ .Values.config.endpointSecurity.fspiopSourceSigningName | quote }},
       "JWS_SIGNING_KEY_PATH": "secrets/jwsSigningKey.key"
     }
   },
