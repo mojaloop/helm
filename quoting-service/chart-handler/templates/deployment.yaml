@@ -22,6 +22,9 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "quotingservice-handler.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+{{- if (.Values.rollingUpdate).override }}
+  {{- include "common.rollingUpdateStrategy" . | nindent 2 }}
+{{- end }}
   template:
     metadata:
       labels:

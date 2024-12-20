@@ -23,6 +23,11 @@ image:
 replicaCount: 1
 command: '["node", "src/handlers/index.js", "handler", "--notification"]'
 
+rollingUpdate:
+  override: true
+  maxUnavailable: 20%
+  maxSurge: 20%
+
 ## Enable diagnostic mode in the deployment
 ##
 diagnosticMode:
@@ -31,7 +36,7 @@ diagnosticMode:
   enabled: false
   ## @param diagnosticMode.command Command to override all containers in the deployment
   ##
-  command: 
+  command:
     - node
     - src/handlers/index.js
     - handler
@@ -40,7 +45,7 @@ diagnosticMode:
   ##
   args:
     - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-  
+
   ## @param diagnosticMode.debug config to override all debug information
   ##
   debug:
