@@ -56,14 +56,14 @@ env:
 
   # OAuth2 data used to obtain bearer token
   # Use envFromSecrets instead when secret is stored as k8s secret
-  OAUTH_TOKEN_ENDPOINT_A:
-  OAUTH_CLIENT_KEY_A:
-  OAUTH_CLIENT_SECRET_A:
+  OAUTH_TOKEN_ENDPOINT_A: http://localhost:8080/openid-connect/token
+  OAUTH_CLIENT_KEY_A: dfsp-jwt
+  OAUTH_CLIENT_SECRET_A: secretA
   OAUTH_REFRESH_SECONDS_A: 3600
 
-  OAUTH_TOKEN_ENDPOINT_B:
-  OAUTH_CLIENT_KEY_B:
-  OAUTH_CLIENT_SECRET_B:
+  OAUTH_TOKEN_ENDPOINT_B: http://localhost:8080/openid-connect/token
+  OAUTH_CLIENT_KEY_B: dfsp-jwt
+  OAUTH_CLIENT_SECRET_B: secretB
   OAUTH_REFRESH_SECONDS_B: 3600
 
   # Management API websocket connection settings.
@@ -140,7 +140,7 @@ containerSecurityContext:
 image:
   registry: docker.io
   repository: mojaloop/inter-scheme-proxy-adapter
-  tag: 1.3.3
+  tag: v1.3.3
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -194,22 +194,22 @@ diagnosticMode:
 ##
 initContainers: []
 
-readinessProbe: |
+readinessProbe:
+  enabled: true
   httpGet:
-    path: /
-    port: {{ .Values.env.INBOUND_LISTEN_PORT_A }}
+    path: /health
+    port: "{{ .Values.env.INBOUND_LISTEN_PORT_A }}"
   initialDelaySeconds: 15
   periodSeconds: 15
-livenessProbe: |
+livenessProbe:
+  enabled: true
   httpGet:
-    path: /
-    port: {{ .Values.env.INBOUND_LISTEN_PORT_A }}
+    path: /health
+    port: "{{ .Values.env.INBOUND_LISTEN_PORT_A }}"
   initialDelaySeconds: 15
   periodSeconds: 15
 
-## metric configuration for prometheus instrumentation
 metrics:
-  ## flag to enable/disable the metrics end-points
   enabled: false
   config:
     timeout: 5000
