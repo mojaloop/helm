@@ -13,44 +13,12 @@ data:
       server {
         listen 0.0.0.0:{{ .Values.service.port }};
         
-        location /parties {
-          proxy_pass http://{{ .Release.Name }}-account-lookup-service:80;
+        location / {
+          proxy_pass http://{{ .Release.Name }}-ml-testing-toolkit-backend:4040;
           proxy_set_header Host $host;
           proxy_set_header X-Real-IP $remote_addr;
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
-        location /quotes {
-            proxy_pass http://{{ .Release.Name }}-quoting-service:80;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
-        location /transfers {
-            proxy_pass http://{{ .Release.Name }}-ml-api-adapter-service:80;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
-        location /fxQuotes {
-            proxy_pass http://{{ .Release.Name }}-quoting-service:80;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
-        location /fxTransfers {
-            proxy_pass http://{{ .Release.Name }}-ml-api-adapter-service:80;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
         }
       }
     }
