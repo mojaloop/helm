@@ -51,6 +51,7 @@ declare -a charts=(
     thirdparty/chart-tp-api-svc
     thirdparty
     inter-scheme-proxy-adapter
+    inter-scheme-gateway
     mojaloop
 )
 

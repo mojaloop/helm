@@ -59,6 +59,7 @@ else
         kube-system/ntpd/
         ml-operator
         inter-scheme-proxy-adapter
+        inter-scheme-gateway
     )
 fi
 
