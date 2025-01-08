@@ -112,7 +112,7 @@ spec:
           env:
             {{- range $k, $v := .Values.env }}
             - name: {{ $k }}
-              value: {{ $v | quote }}
+              value: {{ if eq (typeOf $v) "string" }}{{ $v | replace "$release_name" $.Release.Name | quote }}{{ else }}{{ $v | quote }}{{ end }}
             {{- end }}
             {{- range $k, $v := .Values.envFromSecrets }}
             - name: {{ $k }}
