@@ -56,7 +56,6 @@ else
         thirdparty/chart-consent-oracle
         thirdparty/chart-tp-api-svc
         inter-scheme-proxy-adapter
-        inter-scheme-gateway
     )
 fi
 
