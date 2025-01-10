@@ -7307,7 +7307,7 @@ transaction-requests-service:
 
     # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
     # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-    protocol_versions:
+    protocol_versions: |
       {
         "CONTENT": {
           "DEFAULT": "1.1",
@@ -11517,7 +11517,7 @@ mojaloop-bulk:
 
         # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
         # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-        protocol_versions:
+        protocol_versions: |
           {
             "CONTENT": {
               "DEFAULT": "2.0",
@@ -11771,7 +11771,7 @@ mojaloop-bulk:
 
         # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
         # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-        protocol_versions:
+        protocol_versions: |
           {
             "CONTENT": {
               "DEFAULT": "2.0",
@@ -13475,6 +13475,22 @@ als-msisdn-oracle:
     db_database: *ALS_ORACLE_DB_NAME
     # db_password: ''
 
+inter-scheme-proxy-adapter:
+  enabled: *INTERSCHEME_ENABLED
+  image:
+      registry: docker.io
+      repository: mojaloop/inter-scheme-proxy-adapter
+      tag: v1.3.3
+  config: {}
+  env: {}
+  metrics:
+    enabled: true
+    config:
+      timeout: 5000
+      prefix: moja_
+      defaultLabels:
+        serviceName: inter-schememojaloop/inter-scheme-proxy-adapter
+
 ml-testing-toolkit:
   enabled: true
   ml-testing-toolkit-backend: ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
@@ -13569,9 +13585,9 @@ ml-testing-toolkit:
       ## We can pass the JSON content as the value for the parameters
       ## Or we can pass a http/https URL for the JSON file as the value for the parameters. Then the file will be downloaded and replaced in the corresponding location.
       ## Ex: rules_callback__default.json: "https://raw.githubusercontent.com/mojaloop/ml-testing-toolkit/master/spec_files/rules_callback/default.json"
-      rules_callback__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.39/rules/hub/rules_callback/default.json"
-      rules_response__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.39/rules/hub/rules_response/default.json"
-      rules_validation__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.39/rules/hub/rules_validation/default.json"
+      rules_callback__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.40/rules/hub/rules_callback/default.json"
+      rules_response__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.40/rules/hub/rules_response/default.json"
+      rules_validation__default.json: "https://github.com/mojaloop/testing-toolkit-test-cases/raw/v17.0.0-iso.40/rules/hub/rules_validation/default.json"
     # We can change the names of the simulators to configure the environment files for the testing toolkit.
     # If you change these values, you need to change the simulator names in the mojaloop-simulats->simulators section
     parameters: &simNames
@@ -13631,6 +13647,8 @@ ml-testing-toolkit:
           "PAYERFSP_CALLBACK_URL": "http://$release_name-sim-$param_simNamePayerfsp-scheme-adapter:4000",
           "PAYERFSP_SDK_TESTAPI_URL": "http://$release_name-sim-$param_simNamePayerfsp-scheme-adapter:4002",
           "PAYERFSP_SDK_TESTAPI_WS_URL": "ws://$release_name-sim-$param_simNamePayerfsp-scheme-adapter:4002",
+          "PROXY2_NAME": "proxyispa",
+          "PROXY2_CALLBACK_ENDPOINT_BASE_URL": "http://$release_name-inter-scheme-proxy-adapter:4000",
           "SIMPAYEE_CURRENCY": "XXX",
           "SIMPAYEE_JWS_PUB_KEY": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzLtduponsAlAk+3+PQdE\nsgjxRs5qhkrPa0z25NbHvgQYan4bH5GY+nEUX65YN65nusHtCG9gBeU0C56EgZQw\nIpkHDTh166qQGPwdJf5oMlMJn79DSd1I2bghbsNx0a1P6ElH16AyEwvgYtdtMOBW\nNgf7z5/tYgv7bGgmsp3qGlf0nnaux/frJhJ0Hxpd6eUCafwdlrNwc9R6iCKMSxGj\nvVTHgx0D7zSZ/+4PXq6gObyIZoC0uOsKKzlY3USx9khAh+96qfFoNKyfGHltpEPJ\nLmOLh3BtzDuna2KwtNdVNGcjPdCle3b9mNIdhR5aZ/bP6Zm+t9JuRC6ZwU/6WEy3\nFwIDAQAB\n-----END PUBLIC KEY-----\n",
           "SIMPAYEE_MSISDN": "17039811902",
@@ -13962,7 +13980,7 @@ ml-ttk-posthook-setup:
     weight: -5
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
-    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v17.0.0-iso.39.zip
+    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v17.0.0-iso.40.zip
     testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-17.0.0-iso.39/collections/hub/provisioning/for_golden_path
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
   parameters:

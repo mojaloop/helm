@@ -58,6 +58,7 @@ else
         mojaloop
         kube-system/ntpd/
         ml-operator
+        inter-scheme-proxy-adapter
     )
 fi
 

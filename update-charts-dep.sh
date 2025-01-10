@@ -50,6 +50,7 @@ declare -a charts=(
     thirdparty/chart-consent-oracle
     thirdparty/chart-tp-api-svc
     thirdparty
+    inter-scheme-proxy-adapter
     mojaloop
 )
 
