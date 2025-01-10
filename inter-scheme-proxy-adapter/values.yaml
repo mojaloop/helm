@@ -27,9 +27,9 @@ envFromSecrets:
 
 env:
   LOG_LEVEL: info
-  
+
   METRICS_SERVER_LISTEN_PORT: 4004
-  
+
   # Port number that the inbound (FSPIOP API) HTTP servers A & B will listen on
   INBOUND_LISTEN_PORT_A: 4000
   INBOUND_LISTEN_PORT_B: 4100
@@ -198,14 +198,14 @@ readinessProbe:
   enabled: true
   httpGet:
     path: /health
-    port: "{{ .Values.env.INBOUND_LISTEN_PORT_A }}"
+    port: {{ .Values.env.INBOUND_LISTEN_PORT_A }}
   initialDelaySeconds: 15
   periodSeconds: 15
 livenessProbe:
   enabled: true
   httpGet:
     path: /health
-    port: "{{ .Values.env.INBOUND_LISTEN_PORT_A }}"
+    port: {{ .Values.env.INBOUND_LISTEN_PORT_A }}
   initialDelaySeconds: 15
   periodSeconds: 15
 
@@ -213,7 +213,7 @@ metrics:
   enabled: false
   config:
     timeout: 5000
-    port: "{{ .Values.env.METRICS_SERVER_LISTEN_PORT }}"
+    port: {{ .Values.env.METRICS_SERVER_LISTEN_PORT }}
     prefix: moja_
     defaultLabels:
       serviceName: inter-scheme-proxy-adapter
