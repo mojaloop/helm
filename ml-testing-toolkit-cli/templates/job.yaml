@@ -15,6 +15,7 @@ spec:
       restartPolicy: {{ .Values.restartPolicy }}
       {{- include "ml-testing-toolkit-cli.jobtemplate" . | nindent 6 }}
 {{- end }}
+
 {{- if .Values.job.enabled }} ## added job definition to values.yaml
 apiVersion: {{ template "ml-testing-toolkit-cli.apiVersion.Job" . }}
 kind: Job
@@ -24,8 +25,8 @@ metadata:
   {{- else }}
   name: {{ template "ml-testing-toolkit-cli.fullname" . }}
   {{- end }}
-  annotations: 
-   ## If the postInstallHook is enabled without custom annotations use the helm default hook 
+  annotations:
+   ## If the postInstallHook is enabled without custom annotations use the helm default hook
   {{- if ( .Values.postInstallHook.enabled) }}
     "helm.sh/hook": post-install
     "helm.sh/hook-weight": {{ .Values.postInstallHook.weight | quote }}
