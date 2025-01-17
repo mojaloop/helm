@@ -88,6 +88,15 @@ spec:
             {{- else }}
               value: {{ .Values.config.mongodb.password }}
             {{- end }}
+            - name: REPORTING_DB_CONNECTION_STRING
+            {{- if .Values.config.mongodb.connectionStringSecret.name }}
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ .Values.config.mongodb.connectionStringSecret.name }}'
+                  key: '{{ .Values.config.mongodb.connectionStringSecret.key }}'
+            {{- else }}
+              value: {{ .Values.config.mongodb.connectionString }}
+            {{- end }}
           ports:
             - containerPort: {{ .Values.service.ports.specApi.port }}
             - containerPort: {{ .Values.service.ports.adminApi.port }}
