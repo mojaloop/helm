@@ -9,7 +9,7 @@ enabled: true
 
 image:
   repository: mojaloop/ml-testing-toolkit
-  tag: v18.5.1
+  tag: v18.6.1
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -81,6 +81,10 @@ config:
     #   name: ttk-mongodb
     #   key: mongodb-passwords
     database: "ttk"
+    connectionString: null
+    connectionStringSecret:
+      name: null
+      key: null
 
 ## Svc config files
 ## $snake_case values are dynamic
@@ -231,7 +235,8 @@ config_files:
         "PORT": "{{ .Values.config.mongodb.port }}",
         "USER": "{{ .Values.config.mongodb.user }}",
         "PASSWORD": "{{ .Values.config.mongodb.password }}",
-        "DATABASE": "{{ .Values.config.mongodb.database }}"
+        "DATABASE": "{{ .Values.config.mongodb.database }}",
+        "CONNECTION_STRING": "{{ .Values.config.mongodb.connectionString }}"
       },
       "OAUTH": {
         "AUTH_ENABLED": false,
