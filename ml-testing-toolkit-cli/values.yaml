@@ -39,7 +39,6 @@ script: |
       {{- if .Values.configCreds.SLACK_WEBHOOK_URL }}
       --slack-webhook-url $SLACK_WEBHOOK_URL \
       {{- end }}
-      --extra-summary-information="Test Suite:{{ .Values.config.testSuiteName }},Environment:{{ .Values.config.environmentName }}" \
       {{- if .Values.config.saveReport }}
       --save-report true \
       {{- end }}
@@ -50,8 +49,9 @@ script: |
       --save-report-base-url {{ .Values.config.saveReportBaseUrl }} \
       {{- end }}
       {{- if .Values.config.batchSize }}
-      --batch-size {{ .Values.config.batchSize }}
-      {{- end }};
+      --batch-size {{ .Values.config.batchSize }} \
+      {{- end }}
+      --extra-summary-information="Test Suite:{{ .Values.config.testSuiteName }},Environment:{{ .Values.config.environmentName }}";
     {{- if .Values.config.allowFailures }}
     export TEST_RUNNER_EXIT_CODE="$?"
     echo "Test Runner finished with exit code: $TEST_RUNNER_EXIT_CODE"
