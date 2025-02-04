@@ -11,7 +11,7 @@ Enhancements and breaking changes to the [v15.2.0 Release](https://github.com/mo
 1. Performance improvement in Central Ledger via batching of position prepare and position filfill messages
 2. Performance improvement in ALS with the addition of participant requests caching, and logging fixes
 3. Refactoring of Quoting Service into an event-driven service to improve performance
-4. Helm chart: external K8s secret are now used for JWS signing key source if present 
+4. Helm chart: external K8s secret are now used for JWS signing key source if present
 5. General maintenance, bug fixes, and Nodejs upgrades
 
 ## 1. New Features
@@ -55,7 +55,7 @@ Enhancements and breaking changes to the [v15.2.0 Release](https://github.com/mo
 14. ml-testing-toolkit: [v17.0.0](https://github.com/mojaloop/ml-testing-toolkit/releases/v17.0.0)
 15. transaction-requests-service: [v14.1.2](https://github.com/mojaloop/transaction-requests-service/releases/v14.1.2)
 16. ml-api-adapter: [v14.0.5](https://github.com/mojaloop/ml-api-adapter/releases/v14.0.5)
-17. mojaloop-simulator: [v15.1.1](https://github.com/mojaloop/mojaloop-simulator/releases/v15.0.0)
+17. mojaloop-simulator: [v15.0.0](https://github.com/mojaloop/mojaloop-simulator/releases/v15.0.0)
 18. thirdparty-api-svc: [v14.0.0](https://github.com/mojaloop/thirdparty-api-svc/releases/v14.0.0)
 19. als-consent-oracle: [v0.2.2](https://github.com/mojaloop/als-consent-oracle/releases/v0.2.2)
 20. thirdparty-sdk: [v15.1.1](https://github.com/mojaloop/thirdparty-sdk/releases/v15.1.1)
