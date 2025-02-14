@@ -17,8 +17,11 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "centralledger-handler-admin-transfer.name" . }}
+      app.kubernetes.io/name: {{ include "centralledger-handler-bulk-transfer-get.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+{{- if (.Values.rollingUpdate).override }}
+  {{- include "common.rollingUpdateStrategy" . | nindent 2 }}
+{{- end }}
   template:
     metadata:
       labels:
@@ -33,6 +36,9 @@ spec:
         {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+        {{- if .Values.configOverride }}
+        checksum/config-override: {{ include (print $.Template.BasePath "/config-override.yaml") . | sha256sum }}
+        {{- end }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         {{- if .Values.metrics.enabled }}
         prometheus.io/port: "{{ .Values.service.internalPort }}"

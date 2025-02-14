@@ -2,7 +2,7 @@ apiVersion: v2
 description: Mojaloop Helm chart for Kubernetes
 name: mojaloop
 version: 16.0.4
-appVersion: "ml-api-adapter: v14.0.5; central-ledger: v17.6.1; account-lookup-service: v15.2.3; quoting-service: v15.7.0; central-settlement: v16.0.0; bulk-api-adapter: v17.0.0; transaction-requests-service: v14.1.2; simulator: v12.1.0; mojaloop-simulator: v15.0.0; sdk-scheme-adapter: v23.4.0; auth-service: v15.0.0; als-consent-oracle: v0.2.2; thirdparty-sdk: v15.1.1; ml-testing-toolkit: v17.0.0; ml-testing-toolkit-ui: v15.4.2;"
+appVersion: "ml-api-adapter: v14.0.5; central-ledger: v17.6.0; account-lookup-service: v15.6.0; quoting-service: v15.9.0; central-settlement: v16.0.0; bulk-api-adapter: v17.0.0; transaction-requests-service: v14.1.2; simulator: v12.1.0; mojaloop-simulator: v15.0.0; sdk-scheme-adapter: v23.4.0; auth-service: v15.0.0; als-consent-oracle: v0.2.2; thirdparty-sdk: v15.1.1; ml-testing-toolkit: v17.0.0; ml-testing-toolkit-ui: v15.4.2;"
 home: http://mojaloop.io
 icon: http://mojaloop.io/images/logo.png
 sources:
@@ -38,6 +38,10 @@ dependencies:
     version: ">= 13.3.0"
     repository: "file://../simulator"
     condition: simulator.enabled
+  - name: als-msisdn-oracle
+    version: ">= 0.0.1"
+    repository: "file://../als-msisdn-oracle"
+    condition: als-msisdn-oracle.enabled
   - name: mojaloop-simulator
     version: ">= 15.2.1"
     repository: "file://../mojaloop-simulator"
@@ -60,11 +64,11 @@ dependencies:
     condition: mojaloop-ttk-simulators.enabled
   - name: common
     repository: https://mojaloop.github.io/charts/repo
-    version: 3.0.0
+    version: ">= 3.1.3"
     tags:
       - moja-common
   - name: ml-testing-toolkit
-    version: ">= 17.4.0"
+    version: ">= 17.0.0"
     repository: "file://../ml-testing-toolkit"
     condition: ml-testing-toolkit.enabled
   - name: ml-testing-toolkit-cli
@@ -128,7 +132,22 @@ dependencies:
     repository: "file://../ml-testing-toolkit-cli"
     condition: ml-ttk-test-val-sdk-r2p.tests.enabled
   - name: ml-testing-toolkit-cli
+    alias: ml-ttk-test-setup-interscheme
+    version: ">= 15.6.0"
+    repository: "file://../ml-testing-toolkit-cli"
+    condition: ml-ttk-test-setup-interscheme.tests.enabled
+  - name: ml-testing-toolkit-cli
+    alias: ml-ttk-test-val-interscheme
+    version: ">= 15.6.0"
+    repository: "file://../ml-testing-toolkit-cli"
+    condition: ml-ttk-test-val-interscheme.tests.enabled
+  - name: ml-testing-toolkit-cli
     alias: ml-ttk-test-cleanup
     version: ">= 15.6.0"
     repository: "file://../ml-testing-toolkit-cli"
     condition: ml-ttk-test-cleanup.tests.enabled
+  - name: inter-scheme-proxy-adapter
+    alias: inter-scheme-proxy-adapter
+    version: ">= 1.0.0"
+    repository: "file://../inter-scheme-proxy-adapter"
+    condition: inter-scheme-proxy-adapter.enabled

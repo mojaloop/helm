@@ -1,8 +1,15 @@
 {{- $dbDeployHost := (.Values.config.db_host | replace "$release_name" .Release.Name) }}
 {
+  "ORIGINAL_PAYLOAD_STORAGE": {{ .Values.config.original_payload_storage | quote }},
+  "PAYLOAD_CACHE": {{ .Values.config.payload_cache | toPrettyJson | nindent 2}},
+  "HUB_PARTICIPANT": {
+    "ID": {{ .Values.config.hub_participant.id }},
+    "NAME": {{ .Values.config.hub_participant.name | quote }}
+  },
   "HOSTNAME": "http://quoting-service-handler.local",
   "LISTEN_ADDRESS": "0.0.0.0",
   "PORT": {{ .Values.service.internalPort }},
+  "MONITORING_PORT": {{ .Values.service.internalPort }},
   "PROTOCOL_VERSIONS": {{ .Values.config.protocol_versions | toPrettyJson }},
   "SWITCH_ENDPOINT": "http://{{ .Release.Name }}-centralledger-service:80",
   "AMOUNT": {
@@ -34,7 +41,6 @@
   "ENDPOINT_SECURITY": {
     "JWS": {
       "JWS_SIGN": {{ .Values.config.endpointSecurity.jwsSign }},
-      "FSPIOP_SOURCE_TO_SIGN": {{ .Values.config.endpointSecurity.fspiopSourceSigningName | quote }},
       "JWS_SIGNING_KEY_PATH": "secrets/jwsSigningKey.key"
     }
   },
@@ -60,6 +66,7 @@
     "ENUM_DATA_EXPIRES_IN_MS": {{ .Values.config.cache.enum_data_expires_in_ms }},
     "PARTICIPANT_DATA_EXPIRES_IN_MS": {{ .Values.config.cache.participant_data_expires_in_ms }}
   },
+  "PROXY_CACHE": {{ .Values.config.proxy_cache | toPrettyJson | nindent 2}},
   "KAFKA": {
     "CONSUMER":{
       "QUOTE":{
@@ -215,6 +222,83 @@
             }
           }
         }
+      },
+      "FX_QUOTE":{
+        "POST":{
+          "topic":"topic-fx-quotes-post",
+          "config":{
+            "options":{
+              "mode":2,
+              "batchSize":1,
+              "pollFrequency":10,
+              "recursiveTimeout":100,
+              "messageCharset":"utf8",
+              "messageAsJSON":true,
+              "sync":true,
+              "consumeTimeout":1000
+            },
+            "rdkafkaConf":{
+              "client.id":"fx-quotes-handler-post_c",
+              "group.id":"group-fx-quotes-handler-post",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "socket.keepalive.enable":true,
+              "allow.auto.create.topics":true
+            },
+            "topicConf":{
+              "auto.offset.reset":"earliest"
+            }
+          }
+        },
+        "PUT":{
+          "topic":"topic-fx-quotes-put",
+          "config":{
+            "options":{
+              "mode":2,
+              "batchSize":1,
+              "pollFrequency":10,
+              "recursiveTimeout":100,
+              "messageCharset":"utf8",
+              "messageAsJSON":true,
+              "sync":true,
+              "consumeTimeout":1000
+            },
+            "rdkafkaConf":{
+              "client.id":"fx-quotes-handler-put_c",
+              "group.id":"group-fx-quotes-handler-put",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "socket.keepalive.enable":true,
+              "allow.auto.create.topics":true
+            },
+            "topicConf":{
+              "auto.offset.reset":"earliest"
+            }
+          }
+        },
+        "GET":{
+          "topic":"topic-fx-quotes-get",
+          "config":{
+            "options":{
+              "mode":2,
+              "batchSize":1,
+              "pollFrequency":10,
+              "recursiveTimeout":100,
+              "messageCharset":"utf8",
+              "messageAsJSON":true,
+              "sync":true,
+              "consumeTimeout":1000
+            },
+            "rdkafkaConf":{
+              "client.id":"fx-quotes-handler-get_c",
+              "group.id":"group-fx-quotes-handler-get",
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "socket.keepalive.enable":true,
+              "allow.auto.create.topics":true
+            },
+            "topicConf":{
+              "auto.offset.reset":"earliest"
+            }
+          }
+        }
       }
     },
     "PRODUCER":{
@@ -330,6 +414,68 @@
             "rdkafkaConf":{
               "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
               "client.id":"bulkquotes-handler-get_p",
+              "event_cb":true,
+              "dr_cb":true,
+              "socket.keepalive.enable":true,
+              "queue.buffering.max.messages":10000000
+            },
+            "topicConf":{
+              "request.required.acks":"all",
+              "partitioner": "{{ .Values.config.kafka_partitioner }}"
+            }
+          }
+        }
+      },
+      "FX_QUOTE":{
+        "POST":{
+          "topic":"topic-fx-quotes-post",
+          "config":{
+            "options":{
+              "messageCharset":"utf8"
+            },
+            "rdkafkaConf":{
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "client.id":"fx-quotes-handler-post_p",
+              "event_cb":true,
+              "dr_cb":true,
+              "socket.keepalive.enable":true,
+              "queue.buffering.max.messages":10000000
+            },
+            "topicConf":{
+              "request.required.acks":"all",
+              "partitioner": "{{ .Values.config.kafka_partitioner }}"
+            }
+          }
+        },
+        "PUT":{
+          "topic":"topic-fx-quotes-put",
+          "config":{
+            "options":{
+              "messageCharset":"utf8"
+            },
+            "rdkafkaConf":{
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "client.id":"fx-quotes-handler-put_p",
+              "event_cb":true,
+              "dr_cb":true,
+              "socket.keepalive.enable":true,
+              "queue.buffering.max.messages":10000000
+            },
+            "topicConf":{
+              "request.required.acks":"all",
+              "partitioner": "{{ .Values.config.kafka_partitioner }}"
+            }
+          }
+        },
+        "GET":{
+          "topic":"topic-fx-quotes-get",
+          "config":{
+            "options":{
+              "messageCharset":"utf8"
+            },
+            "rdkafkaConf":{
+              "metadata.broker.list": "{{ .Values.config.kafka_host }}:{{ .Values.config.kafka_port }}",
+              "client.id":"fx-quotes-handler-get_p",
               "event_cb":true,
               "dr_cb":true,
               "socket.keepalive.enable":true,

@@ -9,7 +9,7 @@ global: {}
 image:
   registry: docker.io
   repository: mojaloop/central-ledger
-  tag: v17.6.1
+  tag: v19.0.6
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -27,6 +27,11 @@ image:
 replicaCount: 1
 command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
 
+rollingUpdate:
+  override: true
+  maxUnavailable: 20%
+  maxSurge: 20%
+
 ## Enable diagnostic mode in the deployment
 ##
 diagnosticMode:
@@ -37,13 +42,13 @@ diagnosticMode:
   ##
   command:
     - node
-    - src/handlers/index.js
-    - handler
-    - '--fulfil'
   ## @param diagnosticMode.args Args to override all containers in the deployment
   ##
   args:
     - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+    - src/handlers/index.js
+    - handler
+    - '--fulfil'
 
   ## @param diagnosticMode.debug config to override all debug information
   ##
@@ -215,6 +220,18 @@ config:
   cache_max_byte_size: 10000000
   cache_expires_in_ms: 1000
 
+  ## Proxy cache configuration
+  proxy_cache:
+    enabled: false
+    type: redis-cluster
+    proxyConfig:
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
+
+  ## Enable Batch Processing
+  batch_processing_enabled: false
+
 ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
 ## e.g:
@@ -246,7 +263,7 @@ initContainers: |
       - name: KAFKA_PORT
         value: '{{ .Values.config.kafka_port }}'
   - name: wait-for-mysql
-    image: mysql:5.7
+    image: mysql:9.0.1
     imagePullPolicy: IfNotPresent
     command:
       - sh
@@ -390,3 +407,5 @@ ingress:
 #  cpu: 100m
 #  memory: 128Mi
 resources: {}
+
+usePdb: false

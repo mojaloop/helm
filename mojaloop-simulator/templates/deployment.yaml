@@ -114,6 +114,8 @@ spec:
             path: /
             port: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
             scheme: HTTP
+          timeoutSeconds: 5
+          failureThreshold: 6
         {{- end }}
         {{- if $config.config.schemeAdapter.livenessProbe.enabled }}
         livenessProbe:
@@ -121,6 +123,8 @@ spec:
             path: /
             port: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
             scheme: HTTP
+          timeoutSeconds: 5
+          failureThreshold: 6
         {{- end }}
         volumeMounts:
         - name: jws-public-keys
@@ -186,6 +190,12 @@ spec:
         {{- include "mojaloop-simulator.common-labels" $ | nindent 8 }}
       annotations:
         checksum/config-rules: {{ $checksumConfigRules }}
+        # Custom Pod annotations
+        {{- if $config.config.podAnnotations }}
+        {{- range $key, $value := $config.config.podAnnotations }}
+        {{ $key }}: {{ tpl $value $ | quote }}
+        {{- end }}
+        {{- end }}
     spec:
       initContainers:
 {{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.backend.initContainers "dict" (merge $config.config.backend.env $initContainerEnv)) | indent 6 }}
@@ -349,6 +359,12 @@ spec:
         checksum/config-rules: {{ $checksumConfigRules }}
         checksum/config-jws-public-keys: {{ $checksumConfigJWSPublicKeys }}
         checksum/secrets: {{ $checksumConfigSecrets }}
+        # Custom Pod annotations
+        {{- if $config.config.podAnnotations }}
+        {{- range $key, $value := $config.config.podAnnotations }}
+        {{ $key }}: {{ tpl $value $ | quote }}
+        {{- end }}
+        {{- end }}
     spec:
       volumes:
         - name: {{ $fullName }}-thirdparty-sdk-config-volume

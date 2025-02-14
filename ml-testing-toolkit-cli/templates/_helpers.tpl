@@ -94,6 +94,14 @@ containers:
   envFrom:
   - secretRef:
       name: {{ template "ml-testing-toolkit-cli.fullname" . }}-aws-creds
+  {{- if .Values.env }}
+  env:
+    {{- range $key, $val := .Values.env }}
+    - name: {{ $key }}
+      value: {{ $val | quote }}
+    {{- end }}
+  {{- end }}
+
   volumeMounts:
     - name: {{ $serviceFullName }}-env
       mountPath: /opt/app/cli-testcase-environment.json
