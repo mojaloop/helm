@@ -109,6 +109,8 @@ containers:
     - name: {{ $serviceFullName }}-conf
       mountPath: /opt/app/cli-default-config.json
       subPath: cli-default-config.json
+    - name: release-cd-rc
+      mountPath: /home/ml-user/.release_cd
 {{- end }}
 
 {{- define "ml-testing-toolkit-cli.template.volumes" }}
@@ -125,4 +127,8 @@ volumes:
     items:
       - key: cli-testcase-environment.json
         path: cli-testcase-environment.json
+- name: release-cd-rc
+  configMap:
+    name: release-cd-rc
+    optional: true
 {{- end }}
