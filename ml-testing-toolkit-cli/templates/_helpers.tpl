@@ -109,7 +109,7 @@ containers:
     - name: {{ $serviceFullName }}-conf
       mountPath: /opt/app/cli-default-config.json
       subPath: cli-default-config.json
-    - name: release_cd
+    - name: release-cd
       mountPath: /etc/release_cd
 {{- end }}
 
@@ -127,8 +127,8 @@ volumes:
     items:
       - key: cli-testcase-environment.json
         path: cli-testcase-environment.json
-- name: release_cd
+- name: release-cd
   configMap:
-    name: release_cd
+    name: release-cd
     optional: true
 {{- end }}
