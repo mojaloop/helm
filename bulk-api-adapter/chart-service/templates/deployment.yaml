@@ -33,6 +33,9 @@ spec:
         {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+        {{- if .Values.configOverride }}
+        checksum/config-override: {{ include (print $.Template.BasePath "/config-override.yaml") . | sha256sum }}
+        {{- end }}
         {{- if .Values.metrics.enabled }}
         prometheus.io/port: "{{ .Values.service.internalPort }}"
         prometheus.io/scrape: "true"
@@ -106,6 +109,11 @@ spec:
           volumeMounts:
             - name: {{ template "bulk-api-adapter-service.fullname" . }}-config-volume
               mountPath: /opt/app/config
+{{- range $fileName, $fileContents := .Values.configOverride }}
+            - name: config-override-volume
+              mountPath: /opt/app/{{ $fileName }}
+              subPath: {{ $fileName | replace "/" "-" }}
+{{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
@@ -119,6 +127,11 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
       volumes:
+        {{- if .Values.configOverride }}
+        - name: config-override-volume
+          configMap:
+            name: {{ template "account-lookup-service-admin.fullname" . }}-config-override
+        {{- end }}
         - name: {{ template "bulk-api-adapter-service.fullname" . }}-config-volume
           configMap:
             name: {{ template "bulk-api-adapter-service.fullname" . }}-config

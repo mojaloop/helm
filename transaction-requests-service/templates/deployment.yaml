@@ -33,12 +33,16 @@ spec:
         {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+        {{- if .Values.configOverride }}
+        checksum/config-override: {{ include (print $.Template.BasePath "/config-override.yaml") . | sha256sum }}
+        {{- end }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         # Custom Pod annotations
         {{- if .Values.podAnnotations }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
     spec:
+      {{- include "common.topologySpread" . | nindent 6 }}
 {{- if .Values.affinity }}
       affinity:
 {{ toYaml .Values.affinity | indent 8 }}
@@ -124,6 +128,11 @@ spec:
             - name: EVENT_SDK_TRACEID_PER_VENDOR
               value: {{ .Values.config.event_traceid_per_vendor | quote }}
           volumeMounts:
+{{- range $fileName, $fileContents := .Values.configOverride }}
+            - name: config-override-volume
+              mountPath: /opt/app/{{ $fileName }}
+              subPath: {{ $fileName | replace "/" "-" }}
+{{- end }}
             - name: {{ template "transaction-requests-service.fullname" . }}-config-volume
               mountPath: /opt/app/config
         {{- if .Values.sidecar.enabled }}
@@ -167,6 +176,11 @@ spec:
               value: {{ .Values.sidecar.config.event_log_metadata_only | quote }}
         {{- end }}
       volumes:
+        {{- if .Values.configOverride }}
+        - name: config-override-volume
+          configMap:
+            name: {{ template "transaction-requests-service.fullname" . }}-config-override
+        {{- end }}
         - name: {{ template "transaction-requests-service.fullname" . }}-config-volume
           configMap:
             name: {{ template "transaction-requests-service.fullname" . }}-config

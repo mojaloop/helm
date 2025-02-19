@@ -20,6 +20,9 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "ml-api-adapter-handler-notification.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+{{- if (.Values.rollingUpdate).override }}
+  {{- include "common.rollingUpdateStrategy" . | nindent 2 }}
+{{- end }}
   template:
     metadata:
       labels:
@@ -32,8 +35,14 @@ spec:
         {{- if .Values.podLabels }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.podLabels "context" $ ) | nindent 8 }}
         {{- end }}
+        {{- if .Values.usePdb }}
+        {{- include "common.pdb.matchLabels" . | nindent 8 }}
+        {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+        {{- if .Values.configOverride }}
+        checksum/config-override: {{ include (print $.Template.BasePath "/config-override.yaml") . | sha256sum }}
+        {{- end }}
         checksum/secret-jws: {{ include (print $.Template.BasePath "/secret-jws.yaml") . | sha256sum }}
         # Custom Pod annotations
         {{- if .Values.podAnnotations }}
@@ -44,6 +53,7 @@ spec:
         prometheus.io/scrape: "true"
         {{- end }}
     spec:
+      {{- include "common.topologySpread" . | nindent 6 }}
 {{- if .Values.affinity }}
       affinity:
 {{ toYaml .Values.affinity | indent 8 }}
@@ -103,6 +113,11 @@ spec:
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
           volumeMounts:
+{{- range $fileName, $fileContents := .Values.configOverride }}
+            - name: config-override-volume
+              mountPath: /opt/app/{{ $fileName }}
+              subPath: {{ $fileName | replace "/" "-" }}
+{{- end }}
             - name: {{ template "ml-api-adapter-handler-notification.fullname" . }}-config-volume
               mountPath: /opt/app/config
             {{- if .Values.config.endpointSecurity.jwsSign }}
@@ -177,10 +192,22 @@ spec:
               value: {{ .Values.sidecar.config.event_log_metadata_only | quote }}
         {{- end }}
       volumes:
+        {{- if .Values.configOverride }}
+        - name: config-override-volume
+          configMap:
+            name: {{ template "ml-api-adapter-handler-notification.fullname" . }}-config-override
+        {{- end }}
         {{- if .Values.config.endpointSecurity.jwsSign }}
         - name: jws-signing-key
           secret:
+          {{- if .Values.config.endpointSecurity.jwsSigningKeySecret }}
+            secretName: {{ .Values.config.endpointSecurity.jwsSigningKeySecret.name }}
+            items:
+            - key: {{ .Values.config.endpointSecurity.jwsSigningKeySecret.key }}
+              path: jwsSigningKey.key
+          {{ else }}
             secretName: {{ template "ml-api-adapter-handler-notification.fullname" . }}-jws-signing-key
+          {{- end }}
         {{- end }}
         - name: {{ template "ml-api-adapter-handler-notification.fullname" . }}-config-volume
           configMap:

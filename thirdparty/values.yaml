@@ -30,7 +30,7 @@ auth-svc:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - ./dist/src/cli.js
       - all
@@ -38,7 +38,7 @@ auth-svc:
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
+
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
@@ -112,7 +112,7 @@ auth-svc:
 
   ## Svc config files
   config_files:
-    production.json: | 
+    production.json: |
       {
         "PORT": {{ .Values.service.internalPort }},
         "HOST": "0.0.0.0",
@@ -222,19 +222,19 @@ auth-svc:
         - name: REDIS_PORT
           value: {{ .Values.config.redis_port | quote }}
     - name: wait-for-mysql
-      image: mysql:5.7
+      image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
       command:
         - sh
         - -c
         - |
-          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ;
           do
             echo --------------------;
             echo Waiting for MySQL...;
-            sleep 2; 
+            sleep 2;
           done;
-          echo ====================; 
+          echo ====================;
           echo MySQL ok!;
       env:
         - name: DB_HOST
@@ -420,7 +420,7 @@ consent-oracle:
   image:
     registry: docker.io
     repository: mojaloop/als-consent-oracle
-    tag: v0.2.2
+    tag: v0.2.3
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -446,14 +446,14 @@ consent-oracle:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - ./dist/src/cli.js
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
+
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
@@ -563,19 +563,19 @@ consent-oracle:
   # initContainers: []
   initContainers: |
     - name: wait-for-mysql
-      image: mysql:5.7
+      image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
       command:
         - sh
         - -c
         - |
-          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ; 
+          until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ;
           do
             echo --------------------;
             echo Waiting for MySQL...;
-            sleep 2; 
+            sleep 2;
           done;
-          echo ====================; 
+          echo ====================;
           echo MySQL ok!;
       env:
         - name: DB_HOST
@@ -761,7 +761,7 @@ tp-api-svc:
   image:
     registry: docker.io
     repository: mojaloop/thirdparty-api-svc
-    tag: v14.0.0
+    tag: v15.0.1
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -787,7 +787,7 @@ tp-api-svc:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
       - ./dist/src/cli.js
       - all
@@ -795,7 +795,7 @@ tp-api-svc:
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
+
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
@@ -844,52 +844,59 @@ tp-api-svc:
     #   value: debug
 
   ## Svc configs
-  config: {}
+  config:
+    hub_participant:
+      id: 1
+      name: Hub
 
   ## Svc config files
   config_files:
     default.json: |
       {
-          "PORT": {{ .Values.service.internalPort }},
-          "HOST": "0.0.0.0",
-          "INSPECT": {
-            "DEPTH": 4,
-            "SHOW_HIDDEN": false,
-            "COLOR": true
-          },
-          "ENDPOINT_CACHE_CONFIG": {
-            "expiresIn": 180000,
-            "generateTimeout": 30000
-          },
-          "ENDPOINT_SERVICE_URL": "http://{{ .Release.Name }}-centralledger-service",
-          "PARTICIPANT_LIST_LOCAL": [
-            "dfspa",
-            "dfspb"
-          ],
-          "ERROR_HANDLING": {
-            "includeCauseExtension": true,
-            "truncateExtensions": true
-          },
-          "INSTRUMENTATION": {
-            "METRICS": {
-              "DISABLED": false,
-              "labels": {
-                "eventId": "*"
-              },
-              "config": {
-                "timeout": 5000,
-                "prefix": "moja_3p_api",
-                "defaultLabels": {
-                  "serviceName": "thirdparty-api-svc"
-                }
+        "HUB_PARTICIPANT": {
+          "ID": {{ .Values.config.hub_participant.id }},
+          "NAME": "{{ .Values.config.hub_participant.name }}"
+        },
+        "PORT": {{ .Values.service.internalPort }},
+        "HOST": "0.0.0.0",
+        "INSPECT": {
+          "DEPTH": 4,
+          "SHOW_HIDDEN": false,
+          "COLOR": true
+        },
+        "ENDPOINT_CACHE_CONFIG": {
+          "expiresIn": 180000,
+          "generateTimeout": 30000
+        },
+        "ENDPOINT_SERVICE_URL": "http://{{ .Release.Name }}-centralledger-service",
+        "PARTICIPANT_LIST_LOCAL": [
+          "dfspa",
+          "dfspb"
+        ],
+        "ERROR_HANDLING": {
+          "includeCauseExtension": true,
+          "truncateExtensions": true
+        },
+        "INSTRUMENTATION": {
+          "METRICS": {
+            "DISABLED": false,
+            "labels": {
+              "eventId": "*"
+            },
+            "config": {
+              "timeout": 5000,
+              "prefix": "moja_3p_api",
+              "defaultLabels": {
+                "serviceName": "thirdparty-api-svc"
               }
             }
-          },
-          "MOCK_CALLBACK": {
-            "transactionRequestId": "abc-12345",
-            "pispId": "pisp"
           }
+        },
+        "MOCK_CALLBACK": {
+          "transactionRequestId": "abc-12345",
+          "pispId": "pisp"
         }
+      }
 
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -1081,7 +1088,6 @@ thirdparty-simulator:
   # * support arbitrary init containers + config (that might just be config that goes into defaults
   #   or something?). Supply all config and volumes to the init containers.
   # * create some test containers
-  # * parametrise imagePullSecretName (global? like https://github.com/bitnami/charts/tree/master/bitnami/redis#parameters)
   # * generate JWS private/public keys, so the user does not need to supply keys at all.
   # * generate public key from private, so the user only needs to supply private keys for each sim?
   #   (_might_ be possible with a job or init container or similar).
@@ -1249,6 +1255,18 @@ thirdparty-simulator:
         schemeAdapter:
           secrets:
             jws:
+              # Use the privateKeySecret field if you would like to supply a JWS private key external
+              # to this chart.
+              # For example, if you create a private key called `sim-payerfsp-jws-signing-key` with data property `private.key`
+              # external to this chart, you would supply
+              # `privateKeySecret:
+              #   name: sim-payerfsp-jws-signing-key`
+              #   key: private.key
+              # here.
+              # These fields will take precedence over `privateKey` and `publicKey` below.
+              # This field is best supplied per-simulator, however it's here for documentation
+              # purposes.
+              privateKeySecret: {}
               # The following is an example key and shouldn't be used in production
               privateKey: |-
                 -----BEGIN PRIVATE KEY-----
@@ -1808,6 +1826,18 @@ thirdparty-simulator:
         schemeAdapter:
           secrets:
             jws:
+              # Use the privateKeySecret field if you would like to supply a JWS private key external
+              # to this chart.
+              # For example, if you create a private key called `sim-payerfsp-jws-signing-key` with data property `private.key`
+              # external to this chart, you would supply
+              # `privateKeySecret:
+              #   name: sim-payerfsp-jws-signing-key`
+              #   key: private.key
+              # here.
+              # These fields will take precedence over `privateKey` and `publicKey` below.
+              # This field is best supplied per-simulator, however it's here for documentation
+              # purposes.
+              privateKeySecret: {}
               # The following is an example key and shouldn't be used in production
               privateKey: |-
                 -----BEGIN PRIVATE KEY-----
@@ -1858,6 +1888,18 @@ thirdparty-simulator:
         schemeAdapter:
           secrets:
             jws:
+              # Use the privateKeySecret field if you would like to supply a JWS private key external
+              # to this chart.
+              # For example, if you create a private key called `sim-payerfsp-jws-signing-key` with data property `private.key`
+              # external to this chart, you would supply
+              # `privateKeySecret:
+              #   name: sim-payerfsp-jws-signing-key`
+              #   key: private.key
+              # here.
+              # These fields will take precedence over `privateKey` and `publicKey` below.
+              # This field is best supplied per-simulator, however it's here for documentation
+              # purposes.
+              privateKeySecret: {}
               # The following is an example key and shouldn't be used in production
               privateKey: |-
                 -----BEGIN PRIVATE KEY-----
@@ -1966,8 +2008,14 @@ thirdparty-simulator:
       initContainers:
         waitForCache:
           enabled: true
-
-      imagePullSecretName: dock-casa-secret
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## e.g:
+      ## imagePullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      imagePullSecrets: []
 
       cache:
 
@@ -1998,19 +2046,18 @@ thirdparty-simulator:
       schemeAdapter:
         secrets:
           jws:
-            # Use the privKeySecretName field if you would like to supply a JWS private key external
+            # Use the privateKeySecret field if you would like to supply a JWS private key external
             # to this chart.
-            # For example, if you create a private key called `sim-payerfsp-jws-signing-key` external
-            # to this chart, you would supply `privKeySecretName: sim-payerfsp-jws-signing-key` here.
+            # For example, if you create a private key called `sim-payerfsp-jws-signing-key` with data property `private.key`
+            # external to this chart, you would supply
+            # `privateKeySecret:
+            #   name: sim-payerfsp-jws-signing-key`
+            #   key: private.key
+            # here.
             # These fields will take precedence over `privateKey` and `publicKey` below.
             # This field is best supplied per-simulator, however it's here for documentation
             # purposes.
-            privKeySecretName: {}
-            # TODO: update `privKeySecretName` above to contain both a name and a key in the secret.
-            #       Add documentation on usage.
-            # privKeySecret: {}
-            #   name:
-            #   key:
+            privateKeySecret: {}
             #
             # The `publicKeyConfigMapName` field allows you to supply a ConfigMap containing JWS public
             # keys external to this release, and have this release reference that ConfigMap to
@@ -2023,7 +2070,7 @@ thirdparty-simulator:
             publicKey: ''
         image:
           repository: mojaloop/sdk-scheme-adapter
-          tag: v23.1.1
+          tag: v24.0.8
           pullPolicy: IfNotPresent
           command: '[ "yarn", "start:api-svc" ]'
         <<: *defaultProbes
@@ -2168,14 +2215,14 @@ thirdparty-simulator:
           ALLOW_TRANSFER_WITHOUT_QUOTE: false
           ALLOW_DIFFERENT_TRANSFER_TRANSACTION_ID: true
           RESERVE_NOTIFICATION: false
-          RESOURCE_VERSIONS: transfers=1.1,quotes=1.1,participants=1.1,parties=1.1,transactionRequests=1.1
+          RESOURCE_VERSIONS: transfers=2.0,quotes=2.0,participants=1.1,parties=2.0,transactionRequests=1.1
 
           ENABLE_FSPIOP_EVENT_HANDLER: false
           ENABLE_BACKEND_EVENT_HANDLER: false
       backend:
         image:
           repository: mojaloop/mojaloop-simulator
-          tag: v15.0.0
+          tag: v15.1.5
           pullPolicy: IfNotPresent
         <<: *defaultProbes
 
@@ -2295,19 +2342,18 @@ thirdparty-simulator:
             # DO NOT REMOVE COMMENT
             outbound: *inbound
           jws:
-            # Use the privKeySecretName field if you would like to supply a JWS private key external
+            # Use the privateKeySecret field if you would like to supply a JWS private key external
             # to this chart.
-            # For example, if you create a private key called `sim-payerfsp-jws-signing-key` external
-            # to this chart, you would supply `privKeySecretName: sim-payerfsp-jws-signing-key` here.
+            # For example, if you create a private key called `sim-payerfsp-jws-signing-key` with data property `private.key`
+            # external to this chart, you would supply
+            # `privateKeySecret:
+            #   name: sim-payerfsp-jws-signing-key`
+            #   key: private.key
+            # here.
             # These fields will take precedence over `privateKey` and `publicKey` below.
             # This field is best supplied per-simulator, however it's here for documentation
             # purposes.
-            privKeySecretName: {}
-            # TODO: update `privKeySecretName` above to contain both a name and a key in the secret.
-            #       Add documentation on usage.
-            # privKeySecret: {}
-            #   name:
-            #   key:
+            privateKeySecret: {}
             #
             # The `publicKeyConfigMapName` field allows you to supply a ConfigMap containing JWS public
             # keys external to this release, and have this release reference that ConfigMap to
@@ -2347,7 +2393,7 @@ thirdparty-simulator:
                 target:
                   type: Utilization
                   averageUtilization: 80
-        config: 
+        config:
             production.json: {
                 "control": {
                   "mgmtAPIWsUrl": "127.0.0.1",

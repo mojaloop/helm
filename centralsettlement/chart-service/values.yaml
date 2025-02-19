@@ -8,7 +8,7 @@ global: {}
 image:
   registry: docker.io
   repository: mojaloop/central-settlement
-  tag: v16.0.0
+  tag: v17.0.1
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -34,16 +34,17 @@ diagnosticMode:
   enabled: false
   ## @param diagnosticMode.command Command to override all containers in the deployment
   ##
-  command: 
+  command:
     - node
-    - src/handlers/index.js
-    - h
-    - '--grossSettlement'
+
   ## @param diagnosticMode.args Args to override all containers in the deployment
   ##
   args:
     - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-  
+    - src/handlers/index.js
+    - h
+    - '--grossSettlement'
+
   ## @param diagnosticMode.debug config to override all debug information
   ##
   debug:
@@ -343,13 +344,13 @@ initContainers: |
     command:
       - sh
       - -c
-      - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+      - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
         do
           echo --------------------;
           echo Waiting for Kafka...;
-          sleep 2; 
+          sleep 2;
         done;
-        echo ====================; 
+        echo ====================;
         echo Kafka ok!;
     env:
       - name: KAFKA_HOST
@@ -357,7 +358,7 @@ initContainers: |
       - name: KAFKA_PORT
         value: '{{ .Values.config.kafka_port }}'
   - name: wait-for-mysql
-    image: mysql:5.7
+    image: mysql:9.0.1
     imagePullPolicy: IfNotPresent
     command:
       - sh
@@ -367,9 +368,9 @@ initContainers: |
         do
           echo --------------------;
           echo Waiting for MySQL...;
-          sleep 2; 
+          sleep 2;
         done;
-        echo ====================; 
+        echo ====================;
         echo MySQL ok!;
     env:
       - name: DB_HOST

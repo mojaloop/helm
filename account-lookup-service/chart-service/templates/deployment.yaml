@@ -33,6 +33,9 @@ spec:
         {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+        {{- if .Values.configOverride }}
+        checksum/config-override: {{ include (print $.Template.BasePath "/config-override.yaml") . | sha256sum }}
+        {{- end }}
         checksum/secret-jws: {{ include (print $.Template.BasePath "/secret-jws.yaml") . | sha256sum }}
         # Custom Pod annotations
         {{- if .Values.podAnnotations }}
@@ -43,6 +46,7 @@ spec:
         prometheus.io/scrape: "true"
         {{- end }}
     spec:
+      {{- include "common.topologySpread" . | nindent 6 }}
       initContainers:
         {{- if .Values.initContainers }}
           {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
@@ -68,6 +72,12 @@ spec:
           args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
           {{- end }}
           env:
+            {{- if .Values.env }}
+            {{- range $key, $val := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+            {{- end }}
             - name: ALS_DATABASE__PASSWORD
             {{- if .Values.config.db_secret }}
               valueFrom:
@@ -129,6 +139,11 @@ spec:
           volumeMounts:
           - name: {{ template "account-lookup-service-api.fullname" . }}-config-volume
             mountPath: /opt/app/config
+{{- range $fileName, $fileContents := .Values.configOverride }}
+          - name: config-override-volume
+            mountPath: /opt/app/{{ $fileName }}
+            subPath: {{ $fileName | replace "/" "-" }}
+{{- end }}
           {{- if .Values.config.endpointSecurity.jwsSign }}
           - name: jws-signing-key
             mountPath: /opt/app/secrets
@@ -186,6 +201,11 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
       volumes:
+        {{- if .Values.configOverride }}
+        - name: config-override-volume
+          configMap:
+            name: {{ template "account-lookup-service-api.fullname" . }}-config-override
+        {{- end }}
         - name: {{ template "account-lookup-service-api.fullname" . }}-config-volume
           configMap:
             name: {{ template "account-lookup-service-api.fullname" . }}-config
@@ -197,7 +217,14 @@ spec:
         {{- if .Values.config.endpointSecurity.jwsSign }}
         - name: jws-signing-key
           secret:
+          {{- if .Values.config.endpointSecurity.jwsSigningKeySecret }}
+            secretName: {{ .Values.config.endpointSecurity.jwsSigningKeySecret.name }}
+            items:
+            - key: {{ .Values.config.endpointSecurity.jwsSigningKeySecret.key }}
+              path: jwsSigningKey.key
+          {{ else }}
             secretName: {{ template "account-lookup-service-api.fullname" . }}-jws-signing-key
+          {{- end }}
         {{- end }}
         {{- if .Values.sidecar.enabled }}
         - name: {{ template "account-lookup-service-api.fullname" . }}-sidecar-volume

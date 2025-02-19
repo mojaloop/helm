@@ -9,7 +9,7 @@ enabled: true
 
 image:
   repository: mojaloop/ml-testing-toolkit
-  tag: v17.0.0
+  tag: v18.7.3
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -81,6 +81,10 @@ config:
     #   name: ttk-mongodb
     #   key: mongodb-passwords
     database: "ttk"
+    connectionString: null
+    connectionStringSecret:
+      name: null
+      key: null
 
 ## Svc config files
 ## $snake_case values are dynamic
@@ -112,6 +116,16 @@ config_files:
           {
             "method": "put",
             "path": "/transfers/{ID}",
+            "endpoint": "http://$release_name-ml-api-adapter-service"
+          },
+          {
+            "method": "put",
+            "path": "/fxQuotes/{ID}",
+            "endpoint": "http://$release_name-quoting-service"
+          },
+          {
+            "method": "put",
+            "path": "/fxTransfers/{ID}",
             "endpoint": "http://$release_name-ml-api-adapter-service"
           }
         ]
@@ -173,17 +187,32 @@ config_files:
         {
           "name": "p2p",
           "description": "Tests related to p2p transfer",
-          "color": "red"
+          "color": "gold"
         },
         {
           "name": "settlements",
           "description": "Tests related to settlements",
-          "color": "green"
+          "color": "lime"
         },
         {
           "name": "quotes",
           "description": "Tests related to quoting service",
-          "color": "blue"
+          "color": "cyan"
+        },
+        {
+          "name": "min-func-tests",
+          "description": "Minimal functional tests",
+          "color": "green"
+        },
+        {
+          "name": "basic-func-tests",
+          "description": "Basic functional tests",
+          "color": "orange"
+        },
+        {
+          "name": "prod-tests",
+          "description": "Production Tests",
+          "color": "red"
         }
       ]
     }
@@ -191,6 +220,7 @@ config_files:
   system_config.json:
     {
       "API_PORT": 4040,
+      "PARALLEL_RUN_ENABLED": true,
       "HOSTING_ENABLED": false,
       "INBOUND_MUTUAL_TLS_ENABLED": false,
       "OUTBOUND_MUTUAL_TLS_ENABLED": false,
@@ -206,7 +236,8 @@ config_files:
         "PORT": "{{ .Values.config.mongodb.port }}",
         "USER": "{{ .Values.config.mongodb.user }}",
         "PASSWORD": "{{ .Values.config.mongodb.password }}",
-        "DATABASE": "{{ .Values.config.mongodb.database }}"
+        "DATABASE": "{{ .Values.config.mongodb.database }}",
+        "CONNECTION_STRING": "{{ .Values.config.mongodb.connectionString }}"
       },
       "OAUTH": {
         "AUTH_ENABLED": false,
@@ -261,6 +292,18 @@ config_files:
           "type": "fspiop",
           "version": "1.1",
           "folderPath": "fspiop_1.1",
+          "asynchronous": true
+        },
+        {
+          "type": "fspiop",
+          "version": "2.0",
+          "folderPath": "fspiop_2.0",
+          "asynchronous": true
+        },
+        {
+          "type": "iso20022",
+          "version": "2.0",
+          "folderPath": "fspiop_2.0_iso20022",
           "asynchronous": true
         },
         {
@@ -474,3 +517,8 @@ persistence:
   # storageClass: "-"
   accessMode: ReadWriteOnce
   size: 1Gi
+
+## metric configuration for prometheus instrumentation
+metrics:
+  ## flag to enable/disable the metrics end-points
+  enabled: true

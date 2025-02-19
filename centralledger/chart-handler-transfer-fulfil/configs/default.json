@@ -90,11 +90,13 @@
         ]
     },
     "INTERNAL_TRANSFER_VALIDITY_SECONDS": "432000",
+    "PAYEE_PARTICIPANT_CURRENCY_VALIDATION_ENABLED": {{ .Values.config.payee_participant_currency_validation_enabled }},
     "CACHE": {
         "CACHE_ENABLED": {{ .Values.config.cache_enabled }},
         "MAX_BYTE_SIZE": {{ .Values.config.cache_max_byte_size }},
         "EXPIRES_IN_MS": {{ .Values.config.cache_expires_in_ms }}
     },
+    "PROXY_CACHE": {{ .Values.config.proxy_cache | toPrettyJson | nindent 2 }},
     "API_DOC_ENDPOINTS_ENABLED": true,
     "KAFKA": {
         {{ if $.Values.config.batch_processing_enabled }}
@@ -102,7 +104,10 @@
             "POSITION":{
                 "COMMIT": "topic-transfer-position-batch",
                 "BULK_COMMIT": "topic-transfer-position",
-                "RESERVE": "topic-transfer-position-batch"
+                "RESERVE": "topic-transfer-position-batch",
+                "FX_RESERVE": "topic-transfer-position-batch",
+                "ABORT": "topic-transfer-position-batch",
+                "FX_ABORT": "topic-transfer-position-batch"
             }
         },
         {{ end }}

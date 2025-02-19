@@ -13,7 +13,7 @@ quoting-service: # API
   image:
     registry: docker.io
     repository: mojaloop/quoting-service
-    tag: v15.6.0-snapshot.5
+    tag: v17.1.1
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -30,6 +30,16 @@ quoting-service: # API
 
   replicaCount: 1
   command: '["node", "src/index.js"]'
+
+  # Mount configuration files in the app folder for overriding defaults
+  # configOverride:
+  #   # event sdk settings override
+  #   .EVENT_SDKrc:
+  #     AUDIT: kafka
+
+  #   # logging settings override
+  #   .CSLrc:
+  #     LOG_FILTER: ""
 
   ## Enable diagnostic mode in the deployment
   ##
@@ -128,25 +138,42 @@ quoting-service: # API
         serviceName: quoting-service
 
   config:
-
+    ## fspiop | iso20022
+    api_type: fspiop
+    ## kafka | redis | ""
+    original_payload_storage: ""
+    payload_cache:
+      enabled: false
+      type: redis-cluster
+      connectionConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
+    hub_participant:
+      id: 1
+      name: Hub
     # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
     # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-    protocol_versions: |-
+    protocol_versions:
       {
           "CONTENT": {
-              "DEFAULT": "1.1",
+              "DEFAULT": "2.0",
               "VALIDATELIST": [
                   "1",
                   "1.0",
-                  "1.1"
+                  "1.1",
+                  "2",
+                  "2.0"
               ]
           },
           "ACCEPT": {
-              "DEFAULT": "1",
+              "DEFAULT": "2",
               "VALIDATELIST": [
                   "1",
                   "1.0",
-                  "1.1"
+                  "1.1",
+                  "2",
+                  "2.0"
               ]
           }
       }
@@ -202,21 +229,19 @@ quoting-service: # API
 
     endpointSecurity:
       jwsSign: false
-      fspiopSourceSigningName: 'switch'
-      jwsSigningKey:
-        # To generate this key:
-        # Private:
-        # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
-        # Public:
-        # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-        # Should look like:
-        # -----BEGIN RSA PRIVATE KEY-----
-        # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
-        # ..
-        # ..
-        # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
-        # -----END RSA PRIVATE KEY-----
-
+      jwsSigningKey: null
+    # To generate this key:
+    # Private:
+    # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+    # Public:
+    # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+    # Should look like:
+    # -----BEGIN RSA PRIVATE KEY-----
+    # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+    # ..
+    # ..
+    # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+    # -----END RSA PRIVATE KEY-----
     error_handling:
       include_cause_extension: false
       truncate_extensions: true
@@ -227,6 +252,15 @@ quoting-service: # API
       # Best to only set this higher if you are not running GP tests
       # Not specifying or setting to 0 will default the cache to 60 seconds
       participant_data_expires_in_ms: 10
+
+    ## Proxy cache configuration
+    proxy_cache:
+      enabled: false
+      type: redis-cluster
+      proxyConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
 
   rules: []
 
@@ -274,11 +308,11 @@ quoting-service: # API
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
+    clusterIP: null
     ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
+    loadBalancerIP: null
     ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
@@ -304,66 +338,64 @@ quoting-service: # API
     ##     timeoutSeconds: 300
     ##
     sessionAffinityConfig: {}
-
   ingress:
     enabled: true
-      ## @param ingress.pathType Ingress path type
-      ##
+    ## @param ingress.pathType Ingress path type
+    ##
     pathType: ImplementationSpecific
-      ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
-      ##
-    apiVersion:
-      ## @param ingress.hostname Default host for the ingress record
-      ##
+    ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+    ##
+    apiVersion: null
+    ## @param ingress.hostname Default host for the ingress record
+    ##
     hostname: quoting-service.local
-      ## @param servicePort : port for the service
-      ##
+    ## @param servicePort : port for the service
+    ##
     servicePort: 80
-      ## @param ingress.path Default path for the ingress record
-      ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+    ## @param ingress.path Default path for the ingress record
+    ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
     path: /
-      ## @param ingress.annotations Additional custom annotations for the ingress record
-      ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
-      ##
-    annotations:
-      ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
-      ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
-      ## You can:
-      ##   - Use the `ingress.secrets` parameter to create this TLS secret
-      ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
-      ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
-      ##
+    ## @param ingress.annotations Additional custom annotations for the ingress record
+    ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+    ##
+    annotations: null
+    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+    ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+    ## You can:
+    ##   - Use the `ingress.secrets` parameter to create this TLS secret
+    ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+    ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+    ##
     tls: false
-      ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
-      ##
+    ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+    ##
     certManager: false
-      ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
-      ##
+    ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+    ##
     selfSigned: false
-      ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
-      ## e.g:
-      ## extraHosts:
-      ##   - name: transfer-api-svc.local
-      ##     path: /
-      ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+    ## e.g:
+    ## extraHosts:
+    ##   - name: transfer-api-svc.local
+    ##     path: /
+    ##
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
     ##
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
-    #  memory: 128Mi
-
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
 quoting-service-handler:
   enabled: true
   # Default values for ml-api-adapter.
@@ -373,7 +405,7 @@ quoting-service-handler:
   image:
     registry: docker.io
     repository: mojaloop/quoting-service
-    tag: v15.6.0-snapshot.5
+    tag: v17.1.1
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -389,7 +421,17 @@ quoting-service-handler:
     pullSecrets: []
 
   replicaCount: 1
-  command: '["node", "src/handlers/index.js", "handler", "--quotes", "--bulk_quotes"]'
+  command: '["node", "src/handlers/index.js", "handler", "--quotes", "--bulk_quotes", "--fx_quotes"]'
+
+  # Mount configuration files in the app folder for overriding defaults
+  # configOverride:
+  #   # event sdk settings override
+  #   .EVENT_SDKrc:
+  #     AUDIT: kafka
+
+  #   # logging settings override
+  #   .CSLrc:
+  #     LOG_FILTER: ""
 
   ## Enable diagnostic mode in the deployment
   ##
@@ -401,7 +443,7 @@ quoting-service-handler:
     ##
     command:
       - node
-      - src/handlers/index.js h --quotes --bulk_quotes
+      - src/handlers/index.js h --quotes --bulk_quotes --fx_quotes
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
@@ -488,83 +530,102 @@ quoting-service-handler:
         serviceName: quoting-service-handler
 
   config:
+    payload_cache:
+      enabled: false
+      type: redis-cluster
+      connectionConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
+    hub_participant:
+      id: 1
+      name: Hub
+    # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
+    # and for generating requests/callbacks from the Switch itself (DEFAULT value)
+    protocol_versions:
+      {
+          "CONTENT": {
+              "DEFAULT": "2.0",
+              "VALIDATELIST": [
+                  "1",
+                  "1.0",
+                  "1.1",
+                  "2",
+                  "2.0"
+              ]
+          },
+          "ACCEPT": {
+              "DEFAULT": "2",
+              "VALIDATELIST": [
+                  "1",
+                  "1.0",
+                  "1.1",
+                  "2",
+                  "2.0"
+              ]
+          }
+      }
 
-config:
+    ## DB Configuration
+    # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
+    db_type: 'mysql'
+    # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+    db_driver: 'mysql'
+    db_host: mysqldb
+    db_port: 3306
+    db_user: central_ledger
+    ## Secret-Management
+    ### Set this if you are using a clear password configured in the config section
+    db_password: ''
+    ### Configure this if you want to use a secret. Note, this will override the db_password,
+    ### Use the next line if you do wish to use the db_password value instead.
+    # db_secret:
+    ### Example config for an existing secret
+    db_secret:
+      name: mysqldb
+      key: mysql-password
+    db_database: central_ledger
+    db_connection_pool_min: 10
+    db_connection_pool_max: 30
+    db_acquire_timeout_millis: 30000
+    db_create_timeout_millis: 30000
+    db_destroy_timeout_millis: 5000
+    db_idle_timeout_millis: 30000
+    db_reap_interval_millis: 1000
+    db_create_retry_interval_millis: 200
+    db_debug: false
+    simple_routing_mode_enabled: true
+    log_level: info
+    log_transport: file
 
-  # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
-  # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-  protocol_versions: |
-    {
-        "CONTENT": {
-            "DEFAULT": "1.1",
-            "VALIDATELIST": [
-                "1",
-                "1.0",
-                "1.1"
-            ]
-        },
-        "ACCEPT": {
-            "DEFAULT": "1",
-            "VALIDATELIST": [
-                "1",
-                "1.0",
-                "1.1"
-            ]
-        }
-    }
+    ## Kafka Configuration (used for sidecar)
+    # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
+    kafka_host: kafka
+    kafka_port: 9092
 
-  ## DB Configuration
-  # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
-  db_type: 'mysql'
-  # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-  db_driver: 'mysql'
-  db_host: mysqldb
-  db_port: 3306
-  db_user: central_ledger
-  ## Secret-Management
-  ### Set this if you are using a clear password configured in the config section
-  db_password: ''
-  ### Configure this if you want to use a secret. Note, this will override the db_password,
-  ### Use the next line if you do wish to use the db_password value instead.
-  # db_secret:
-  ### Example config for an existing secret
-  db_secret:
-    name: mysqldb
-    key: mysql-password
-  db_database: central_ledger
-  db_connection_pool_min: 10
-  db_connection_pool_max: 30
-  db_acquire_timeout_millis: 30000
-  db_create_timeout_millis: 30000
-  db_destroy_timeout_millis: 5000
-  db_idle_timeout_millis: 30000
-  db_reap_interval_millis: 1000
-  db_create_retry_interval_millis: 200
-  db_debug: false
-  simple_routing_mode_enabled: true
-  log_level: info
-  log_transport: file
+    ## Proxy cache configuration
+    proxy_cache:
+      enabled: false
+      type: redis-cluster
+      proxyConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
 
-  ## Kafka Configuration (used for sidecar)
-  # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
-  kafka_host: kafka
-  kafka_port: 9092
+    ## Tracing Configuration
+    event_trace_vendor: mojaloop
+    event_log_filter: 'audit:*, log:warn, log:error'
+    # If set to true, only the metadata object from the event will be printed.
+    event_log_metadata_only: false
+    # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
+    # Any combination of: `log,audit,trace`
+    event_async_override: 'log,trace'
+    event_trace_state_enabled: true
+    event_traceid_per_vendor: false
 
-  ## Tracing Configuration
-  event_trace_vendor: mojaloop
-  event_log_filter: 'audit:*, log:warn, log:error'
-  # If set to true, only the metadata object from the event will be printed.
-  event_log_metadata_only: false
-  # A comma-separated list of events that should return immediately instead of waiting for the event promises to resolve
-  # Any combination of: `log,audit,trace`
-  event_async_override: 'log,trace'
-  event_trace_state_enabled: true
-  event_traceid_per_vendor: false
-
-  endpointSecurity:
-    jwsSign: false
-    fspiopSourceSigningName: 'switch'
-    jwsSigningKey:
+    endpointSecurity:
+      jwsSign: false
+      jwsSigningKey: null
     # To generate this key:
     # Private:
     # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
@@ -577,17 +638,16 @@ config:
     # ..
     # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
     # -----END RSA PRIVATE KEY-----
+    error_handling:
+      include_cause_extension: false
+      truncate_extensions: true
 
-  error_handling:
-    include_cause_extension: false
-    truncate_extensions: true
-
-  cache:
-    enum_data_expires_in_ms: 4170000
-    # Setting this any higher will most likely cause GP tests to fail
-    # Best to only set this higher if you are not running GP tests
-    # Not specifying or setting to 0 will default the cache to 60 seconds
-    participant_data_expires_in_ms: 10
+    cache:
+      enum_data_expires_in_ms: 4170000
+      # Setting this any higher will most likely cause GP tests to fail
+      # Best to only set this higher if you are not running GP tests
+      # Not specifying or setting to 0 will default the cache to 60 seconds
+      participant_data_expires_in_ms: 10
 
   rules: []
 
@@ -611,9 +671,9 @@ config:
           value: '{{ .Values.config.kafka_host }}'
         - name: KAFKA_PORT
           value: '{{ .Values.config.kafka_port }}'
-    
+
     - name: wait-for-mysql
-      image: mysql:5.7
+      image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
       command:
         - sh
@@ -644,7 +704,7 @@ config:
           value: {{ .Values.config.db_password }}
           {{- end }}
         - name: DB_DATABASE
-          value: '{{ .Values.config.db_database }}'    
+          value: '{{ .Values.config.db_database }}'
 
   ## @param master.podLabels Extra labels for pod(s)
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
@@ -660,16 +720,15 @@ config:
   service:
     type: ClusterIP
     externalPort: 80
-    internalPort: 3002
-
+    internalPort: 3003
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
   #  memory: 128Mi

@@ -5,7 +5,7 @@
 image:
   registry: docker.io
   repository: mojaloop/account-lookup-service
-  tag: v15.0.0
+  tag: v17.0.3
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -31,7 +31,7 @@ diagnosticMode:
   enabled: false
   ## @param diagnosticMode.command Command to override all containers in the deployment
   ##
-  command: 
+  command:
     - node
     - src/index.js
     - server
@@ -40,7 +40,6 @@ diagnosticMode:
   ##
   args:
     - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-  
   ## @param diagnosticMode.debug config to override all debug information
   ##
   debug:
@@ -125,6 +124,11 @@ metrics:
       serviceName: account-lookup-service
 
 config:
+  ## fspiop | iso20022
+  api_type: fspiop
+  hub_participant:
+    id: 1
+    name: Hub
   ## Central-Ledger config
   central_services_host: '$release_name-centralledger-service'
   central_services_port: 80
@@ -158,28 +162,31 @@ config:
 
   # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
   # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-  protocol_versions: |
+  protocol_versions:
     {
         "CONTENT": {
-            "DEFAULT": "1.1",
+            "DEFAULT": "2.0",
             "VALIDATELIST": [
                 "1",
                 "1.0",
-                "1.1"
+                "1.1",
+                "2",
+                "2.0"
             ]
         },
         "ACCEPT": {
-            "DEFAULT": "1",
+            "DEFAULT": "2",
             "VALIDATELIST": [
                 "1",
                 "1.0",
-                "1.1"
+                "1.1",
+                "2",
+                "2.0"
             ]
         }
     }
-
   ## DB Configuration
-  db_type: mysql  
+  db_type: mysql
   db_driver: mysql
   db_host: mysqldb
   db_port: 3306
@@ -210,23 +217,25 @@ config:
 
   endpointSecurity:
     jwsSign: false
-    fspiopSourceSigningName: switch
-    jwsSigningKey:
-      # To generate this key:
-      # Private:
-      # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
-      # Public:
-      # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-      # Should look like:
-      # -----BEGIN RSA PRIVATE KEY-----
-      # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
-      # ..
-      # ..
-      # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
-      # -----END RSA PRIVATE KEY-----
-  # Thirdparty API Config
+    # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
+    # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
+    # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
+    jwsSigningKeySecret: null
+    jwsSigningKey: null
+# To generate this key:
+# Private:
+# ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+# Public:
+# openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+# Should look like:
+# -----BEGIN RSA PRIVATE KEY-----
+# MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+# ..
+# ..
+# mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+# -----END RSA PRIVATE KEY-----
+# Thirdparty API Config
   featureEnableExtendedPartyIdType: false
-
   ## Tracing Configuration
   event_trace_vendor: mojaloop
   event_log_filter: 'audit:*, log:warn, log:error'
@@ -237,6 +246,29 @@ config:
   event_async_override: 'log,trace'
   event_trace_state_enabled: true
   event_traceid_per_vendor: false
+
+  ## Proxy cache configuration
+  proxy_cache:
+    enabled: false
+    type: redis-cluster
+    proxyConfig:
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
+
+  ## Handlers configuration
+  handlers:
+    DISABLED: true
+    MONITORING_PORT: 4003
+    TIMEOUT:
+      DISABLED: true
+      TIMEXP: "*/30 * * * * *"
+      TIMEZONE: "UTC"
+      BATCH_SIZE: 100
+
+## To pass arbitrary environment variables to the deployment
+#env:
+#  KEY: value
 
 ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -250,7 +282,7 @@ config:
 # initContainers: []
 initContainers: |
   - name: wait-for-mysql
-    image: mysql:5.7
+    image: mysql:9.0.1
     imagePullPolicy: IfNotPresent
     command:
       - sh
@@ -260,9 +292,9 @@ initContainers: |
         do
           echo --------------------;
           echo Waiting for MySQL...;
-          sleep 2; 
+          sleep 2;
         done;
-        echo ====================; 
+        echo ====================;
         echo MySQL ok!;
     env:
       - name: DB_HOST
@@ -305,17 +337,15 @@ service:
   ## e.g.:
   ## clusterIP: None
   ##
-  clusterIP:
-  ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
-  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
-  ##
-  loadBalancerIP:
-  ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
-  ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
-  ## e.g:
-  ## loadBalancerSourceRanges:
-  ##   - 10.10.10.0/24
-  ##
+  clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
+## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+##
+  loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
+## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+## e.g:
+## loadBalancerSourceRanges:
+##   - 10.10.10.0/24
+##
   loadBalancerSourceRanges: []
   ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
   ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
@@ -335,66 +365,62 @@ service:
   ##     timeoutSeconds: 300
   ##
   sessionAffinityConfig: {}
-
 ingress:
   enabled: true
-    ## @param ingress.pathType Ingress path type
-    ##
+  ## @param ingress.pathType Ingress path type
+  ##
   pathType: ImplementationSpecific
-    ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
-    ##
-  apiVersion:
-    ## @param ingress.hostname Default host for the ingress record
-    ##
+  ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+  ##
+  apiVersion: null ## @param ingress.hostname Default host for the ingress record
+##
   hostname: account-lookup-service.local
-    ## @param servicePort : port for the service
-    ##
+  ## @param servicePort : port for the service
+  ##
   servicePort: 80
-    ## @param ingress.path Default path for the ingress record
-    ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+  ## @param ingress.path Default path for the ingress record
+  ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
   path: /
-    ## @param ingress.annotations Additional custom annotations for the ingress record
-    ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
-    ##
-  annotations:
-    ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
-    ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
-    ## You can:
-    ##   - Use the `ingress.secrets` parameter to create this TLS secret
-    ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
-    ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
-    ##
+  ## @param ingress.annotations Additional custom annotations for the ingress record
+  ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
+  ##
+  annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
+## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+## You can:
+##   - Use the `ingress.secrets` parameter to create this TLS secret
+##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+##
   tls: false
-    ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
-    ##
+  ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
+  ##
   certManager: false
-    ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
-    ##
+  ## @param ingress.selfSigned Create a TLS secret for this ingress record using self-signed certificates generated by Helm
+  ##
   selfSigned: false
-    ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
-    ## e.g:
-    ## extraHosts:
-    ##   - name: transfer-api-svc.local
-    ##     path: /
-    ##
-  extraHosts:
-  extraPaths:
-  extraTls:
-  secrets:
+  ## @param ingress.extraHosts An array with additional hostname(s) to be covered with the ingress record
+  ## e.g:
+  ## extraHosts:
+  ##   - name: transfer-api-svc.local
+  ##     path: /
+  ##
+  extraHosts: null
+  extraPaths: null
+  extraTls: null
+  secrets: null
   className: "nginx"
   ##
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
-
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
+# We usually recommend not to specify default resources and to leave this as a conscious
+# choice for the user. This also increases chances charts run on environments with little
+# resources, such as Minikube. If you do want to specify resources, uncomment the following
+# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+# limits:
+#  cpu: 100m
+#  memory: 128Mi
+# requests:
+#  cpu: 100m
+#  memory: 128Mi

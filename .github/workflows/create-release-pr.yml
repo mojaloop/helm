@@ -2,9 +2,16 @@
 # - GitHub Actions must be explicitly allowed to create pull requests in this repository.
 #   This setting can be found in the repository's settings under Actions > General > Workflow permissions.
 # - A repository secret `AUTO_RELEASE_TOKEN` (permissions: `contents: write`, `pull-requests: write`, `repositories: read`) needs to be created.
-#   The secret should contain a github access token with the permissions specified above.
+#   The secret should contain a github access token (classic token (scope: repo (Full control of private repositories)) works better) with the permissions specified above.
 #   The secret is used by the `create-pull-request` action to create the pull request and `updatecli` to access all updateable repositories.
 #   The secret can be created at https://github.com/mojaloop/helm/settings/secrets/actions
+#
+# KNOWN ISSUES:
+#  - https://github.com/updatecli/updatecli/issues/1332
+#  - https://github.com/goccy/go-yaml/issues/298
+#  The underlying libraries used by updatecli for parsing yaml files have issues with maintaining multiline strings format and nodes with anchor.
+#  These issues are being worked on by the maintainers of the libraries and will be resolved in future releases.
+#  In the meantime, the workaround is to manually fix the affected files after the updatecli run.
 
 name: Create Release PR
 
@@ -13,9 +20,9 @@ on:
     inputs:
       branch:
         type: string
-        description: "Branch to create release PR from (e.g. master)"
+        description: "Branch to create release PR from (e.g. main)"
         required: false
-        default: "master"
+        default: "main"
       release_name:
         type: string
         description: "Release name (e.g. Acacia)"
@@ -47,7 +54,7 @@ on:
         type: string
         description: "Deployment values file in oss-core-env repo"
         required: true
-        default: "helm-values-moja2-mojaloop-v15.3.0.yaml"
+        default: "helm-values-moja2-mojaloop-v16.0.0.yaml"
 
 jobs:
   create_release_pr:
@@ -74,8 +81,19 @@ jobs:
       - name: Install dependencies
         run: |
           # Install mo
-          curl -sL https://raw.githubusercontent.com/tests-always-included/mo/master/mo -o /usr/local/bin/mo
-          chmod +x /usr/local/bin/mo
+          curl -sSL https://raw.githubusercontent.com/tests-always-included/mo/master/mo -o mo
+          if [ $? -ne 0 ]; then
+            echo "Failed to download mo"
+            exit 1
+          fi
+          sudo chmod +x mo
+          if [ $? -ne 0 ]; then
+            echo "Failed to make mo executable"
+            exit 1
+          fi
+          sudo mv mo /usr/local/bin/
+
+          mo --help
 
           # Install updatecli
           curl -sL https://github.com/updatecli/updatecli/releases/download/v0.71.0/updatecli_amd64.deb -o /tmp/updatecli_amd64.deb
@@ -83,7 +101,7 @@ jobs:
 
           # Install jq
           sudo apt-get install jq
-
+  
       - name: Setup Helm repositories
         run: |
           helm repo add stable https://charts.helm.sh/stable
@@ -175,7 +193,7 @@ jobs:
           title: "[auto] feat: release candidate for ${{ inputs.release_name }} ${{ steps.determine-release-version.outputs.RELEASE_VERSION }}"
           body-path: ${{ steps.generate-release-note.outputs.RELEASE_NOTE_FILE }}
           branch: release/release-candidate-${{ inputs.release_name }}-${{ steps.determine-release-version.outputs.RELEASE_VERSION }}-${{ github.run_id }}
-          base: master
+          base: main
           draft: true
 
       - name: Clone oss-core-env repository

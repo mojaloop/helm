@@ -41,10 +41,17 @@ redis: {}
 config:
   simName: testFsp
   ## JWS configuration
+  # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
+  # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
+  # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
+  jwsSigningKeySecret: null
   jwsSigningKey: ""
   jwsVerificationKeys: {}
 
 env:
+  API_TYPE: fspiop
+  ILP_VERSION: "1"
+
   ## API-SVC general config
   # Port number that the inbound (Mojaloop API) HTTP server will listen on
   INBOUND_LISTEN_PORT: 4000
@@ -110,6 +117,8 @@ env:
   TRANSACTION_REQUESTS_ENDPOINT: "{{ .Release.Name }}-transaction-requests-service"
   TRANSFERS_ENDPOINT: "{{ .Release.Name }}-api-adapter-service"
   BULK_TRANSFERS_ENDPOINT: "{{ .Release.Name }}-bulk-api-adapter-service"
+  FX_QUOTES_ENDPOINT: "{{ .Release.Name }}-quoting-service"
+  FX_TRANSFERS_ENDPOINT: "{{ .Release.Name }}-api-adapter-service"
 
   # BACKEND ENDPOINT
   BACKEND_ENDPOINT: localhost:4000
@@ -198,7 +207,7 @@ env:
   # To enable request for notification on fulfiled transfer
   RESERVE_NOTIFICATION: true
   # resources API versions should be string in format: "resourceOneName=1.0,resourceTwoName=1.1"
-  RESOURCE_VERSIONS: transfers=1.1,participants=1.1
+  RESOURCE_VERSIONS: transfers=2.0,quotes=2.0,participants=2.0,parties=2.0,transactionRequests=1.1
 
   # Management API websocket connection settings.
   # The Management API uses this for exchanging connector management messages.
@@ -208,6 +217,12 @@ env:
   # Set to true to enable the use of PM4ML-related services e.g MCM, Management API service
   # when running the scheme-adapter as a mojaloop connector component within Payment Manager for Mojaloop.
   PM4ML_ENABLED: false
+
+  # Set FX Provider to use, this is temporary configuration until services component is implemented
+  GET_SERVICES_FXP_RESPONSE: testfxp
+
+  # Supported Currencies by this DFSP
+  SUPPORTED_CURRENCIES: "USD"
 
   ## API-SVC kafka config
   BACKEND_EVENT_CONSUMER_BROKER_LIST: '{{ include "common.tplvalues.render" (dict "value" .Values.kafka.host "context" $) | default (include "common.tplvalues.render" (dict "value" .Values.global.kafka.host "context" $)) }}:{{ .Values.kafka.port | default .Values.global.kafka.port }}'
@@ -304,7 +319,7 @@ containerSecurityContext:
 image:
   registry: docker.io
   repository: mojaloop/sdk-scheme-adapter
-  tag: v23.1.1
+  tag: v24.0.8
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images

@@ -9,7 +9,7 @@ global: {}
 image:
   registry: docker.io
   repository: mojaloop/central-ledger
-  tag: v17.6.0
+  tag: v19.0.6
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -37,11 +37,11 @@ diagnosticMode:
   ##
   command:
     - node
-    - src/api/index.js
   ## @param diagnosticMode.args Args to override all containers in the deployment
   ##
   args:
     - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+    - src/api/index.js
 
   ## @param diagnosticMode.debug config to override all debug information
   ##
@@ -204,6 +204,15 @@ config:
   cache_max_byte_size: 10000000
   cache_expires_in_ms: 1000
 
+  ## Proxy cache configuration
+  proxy_cache:
+    enabled: false
+    type: redis-cluster
+    proxyConfig:
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
+
   ## Tracing Configuration
   event_trace_vendor: mojaloop
   event_log_filter: 'audit:*, log:warn, log:error'
@@ -227,7 +236,7 @@ config:
 # initContainers: []
 initContainers: |
   - name: wait-for-mysql
-    image: mysql:5.7
+    image: mysql:9.0.1
     imagePullPolicy: IfNotPresent
     command:
       - sh
@@ -259,29 +268,6 @@ initContainers: |
         {{- end }}
       - name: DB_DATABASE
         value: '{{ .Values.config.db_database }}'
-  - name: run-migration
-    image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
-    imagePullPolicy: IfNotPresent
-    command:
-      - sh
-      - -c
-      - npm run migrate
-    env:
-      - name: CLEDG_MIGRATIONS__RUN_DATA_MIGRATIONS
-        value: 'true'
-      - name: CLEDG_DATABASE__PASSWORD
-        {{- if .Values.config.db_secret }}
-        valueFrom:
-            secretKeyRef:
-              name: '{{ .Values.config.db_secret.name }}'
-              key: '{{ .Values.config.db_secret.key }}'
-        {{- else }}
-        value: {{ .Values.config.db_password }}
-        {{- end }}
-    volumeMounts:
-      - name: '{{ template "account-lookup-service-admin.fullname" . }}-config-volume'
-        mountPath: /opt/app/config
-
 ## @param master.podLabels Extra labels for pod(s)
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 ##
@@ -393,3 +379,9 @@ ingress:
 #  cpu: 100m
 #  memory: 128Mi
 resources: {}
+
+migration:
+  restartPolicy: OnFailure
+  backoffLimit: 1
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade

@@ -10,11 +10,11 @@ ml-api-adapter-service:
   # Default values for ml-api-adapter.
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
-  
+
   image:
     registry: docker.io
     repository: mojaloop/ml-api-adapter
-    tag: v14.0.5
+    tag: v16.0.2
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -30,7 +30,17 @@ ml-api-adapter-service:
     pullSecrets: []
 
   replicaCount: 1
-  command: '["node", "src/api/index.js"]' 
+  command: '["node", "src/api/index.js"]'
+
+  # Mount configuration files in the app folder for overriding defaults
+  # configOverride:
+  #   # event sdk settings override
+  #   .EVENT_SDKrc:
+  #     AUDIT: kafka
+
+  #   # logging settings override
+  #   .CSLrc:
+  #     LOG_FILTER: ""
 
   ## Enable diagnostic mode in the deployment
   ##
@@ -40,14 +50,14 @@ ml-api-adapter-service:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
-      - src/api/index.js
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
+      - src/api/index.js
+
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
@@ -102,13 +112,13 @@ ml-api-adapter-service:
       command:
         - sh
         - -c
-        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
           do
             echo --------------------;
             echo Waiting for Kafka...;
-            sleep 2; 
+            sleep 2;
           done;
-          echo ====================; 
+          echo ====================;
           echo Kafka ok!;
       env:
         - name: KAFKA_HOST
@@ -135,6 +145,20 @@ ml-api-adapter-service:
     enabled: true
 
   config:
+    ## fspiop | iso20022
+    api_type: fspiop
+    ## kafka | redis | ""
+    original_payload_storage: ""
+    payload_cache:
+      enabled: false
+      type: redis-cluster
+      connectionConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
+    hub_participant:
+      id: 1
+      name: Hub
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: kafka
     kafka_port: 9092
@@ -149,22 +173,26 @@ ml-api-adapter-service:
 
     # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
     # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-    protocol_versions: |
+    protocol_versions:
       {
           "CONTENT": {
-              "DEFAULT": "1.1",
+              "DEFAULT": "2.0",
               "VALIDATELIST": [
                   "1",
                   "1.0",
-                  "1.1"
+                  "1.1",
+                  "2",
+                  "2.0"
               ]
           },
           "ACCEPT": {
-              "DEFAULT": "1",
+              "DEFAULT": "2",
               "VALIDATELIST": [
                   "1",
                   "1.0",
-                  "1.1"
+                  "1.1",
+                  "2",
+                  "2.0"
               ]
           }
       }
@@ -186,6 +214,15 @@ ml-api-adapter-service:
     # Any combination of: `log,audit,trace`
     event_async_override: 'log,trace'
     event_traceid_per_vendor: false
+
+    ## Proxy cache configuration
+    proxy_cache:
+      enabled: false
+      type: redis-cluster
+      proxyConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
 
     ## Error handling Configuration
     error_handling:
@@ -310,11 +347,11 @@ ml-api-adapter-handler-notification:
   # Default values for ml-api-adapter.
   # This is a YAML-formatted file.
   # Declare variables to be passed into your templates.
-  
+
   image:
     registry: docker.io
     repository: mojaloop/ml-api-adapter
-    tag: v14.0.5
+    tag: v16.0.2
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -332,6 +369,16 @@ ml-api-adapter-handler-notification:
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--notification"]'
 
+  # Mount configuration files in the app folder for overriding defaults
+  # configOverride:
+  #   # event sdk settings override
+  #   .EVENT_SDKrc:
+  #     AUDIT: kafka
+
+  #   # logging settings override
+  #   .CSLrc:
+  #     LOG_FILTER: ""
+
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -340,16 +387,16 @@ ml-api-adapter-handler-notification:
     enabled: false
     ## @param diagnosticMode.command Command to override all containers in the deployment
     ##
-    command: 
+    command:
       - node
-      - src/handlers/index.js
-      - handler
-      - '--notification'
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    
+      - src/handlers/index.js
+      - handler
+      - '--notification'
+
     ## @param diagnosticMode.debug config to override all debug information
     ##
     debug:
@@ -406,13 +453,13 @@ ml-api-adapter-handler-notification:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; 
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
             do
               echo --------------------;
               echo Waiting for Kafka...;
-              sleep 2; 
+              sleep 2;
             done;
-            echo ====================; 
+            echo ====================;
             echo Kafka ok!;
         env:
           - name: KAFKA_HOST
@@ -439,6 +486,20 @@ ml-api-adapter-handler-notification:
     enabled: true
 
   config:
+    ## fspiop | iso20022
+    api_type: fspiop
+    ## kafka | redis | ""
+    original_payload_storage: ""
+    payload_cache:
+      enabled: false
+      type: redis-cluster
+      connectionConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
+    hub_participant:
+      id: 1
+      name: Hub
     # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
     kafka_host: kafka
     kafka_port: 9092
@@ -453,22 +514,26 @@ ml-api-adapter-handler-notification:
 
     # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
     # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-    protocol_versions: |
+    protocol_versions:
       {
           "CONTENT": {
-              "DEFAULT": "1.1",
+              "DEFAULT": "2.0",
               "VALIDATELIST": [
                   "1",
                   "1.0",
-                  "1.1"
+                  "1.1",
+                  "2",
+                  "2.0"
               ]
           },
           "ACCEPT": {
-              "DEFAULT": "1",
+              "DEFAULT": "2",
               "VALIDATELIST": [
                   "1",
                   "1.0",
-                  "1.1"
+                  "1.1",
+                  "2",
+                  "2.0"
               ]
           }
       }
@@ -500,8 +565,11 @@ ml-api-adapter-handler-notification:
     # Parameters for JWS signing requests generated by ml-api-adapter
     endpointSecurity:
       jwsSign: false
-      fspiopSourceSigningName: 'switch'
-      jwsSigningKey:
+      # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
+      # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
+      # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
+      jwsSigningKeySecret: null
+      jwsSigningKey: null
         # To generate this key:
         # Private:
         # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
@@ -519,6 +587,15 @@ ml-api-adapter-handler-notification:
     error_handling:
       include_cause_extension: false
       truncate_extensions: true
+
+    ## Proxy cache configuration
+    proxy_cache:
+      enabled: false
+      type: redis-cluster
+      proxyConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
 
   service:
     type: ClusterIP

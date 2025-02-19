@@ -32,6 +32,7 @@ else
         monitoring/efk
         account-lookup-service
         als-oracle-pathfinder
+        als-msisdn-oracle
         # centralkms # Deprecated - No longer supported
         # forensicloggingsidecar # Deprecated - No longer supported
         centralledger
@@ -55,6 +56,7 @@ else
         thirdparty/chart-auth-svc
         thirdparty/chart-consent-oracle
         thirdparty/chart-tp-api-svc
+        inter-scheme-proxy-adapter
     )
 fi
 

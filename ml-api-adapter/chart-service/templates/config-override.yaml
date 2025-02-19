@@ -1,0 +1,16 @@
+{{- if .Values.configOverride }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ml-api-adapter-service.fullname" . }}-config-override
+  labels:
+    app.kubernetes.io/name: {{ include "ml-api-adapter-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.Version }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+data:
+{{- range $fileName, $fileContents := .Values.configOverride }}
+  {{ $fileName | replace "/" "-" }}: | {{ ternary $fileContents (toPrettyJson $fileContents) (eq (typeOf $fileContents) "string") | nindent 4 }}
+{{- end }}
+{{- end }}

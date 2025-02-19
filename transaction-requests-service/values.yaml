@@ -9,7 +9,7 @@ global: {}
 image:
   registry: docker.io
   repository: mojaloop/transaction-requests-service
-  tag: v14.1.2
+  tag: v14.3.6
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -27,6 +27,16 @@ image:
 replicaCount: 1
 command: '["node", "src/index.js", "api"]'
 
+# Mount configuration files in the app folder for overriding defaults
+# configOverride:
+#   # event sdk settings override
+#   .EVENT_SDKrc:
+#     AUDIT: kafka
+
+#   # logging settings override
+#   .CSLrc:
+#     LOG_FILTER: ""
+
 ## Enable diagnostic mode in the deployment
 ##
 diagnosticMode:
@@ -35,7 +45,7 @@ diagnosticMode:
   enabled: false
   ## @param diagnosticMode.command Command to override all containers in the deployment
   ##
-  command: 
+  command:
     - node
     - src/index.js
     - api
@@ -43,7 +53,7 @@ diagnosticMode:
   ##
   args:
     - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-  
+
   ## @param diagnosticMode.debug config to override all debug information
   ##
   debug:
@@ -126,6 +136,9 @@ metrics:
       serviceName: transaction-requests
 
 config:
+  hub_participant:
+    id: 1
+    name: Hub
   central_services_host: '$release_name-centralledger-service'
   central_services_port: 80
 

@@ -33,6 +33,9 @@ spec:
         {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+        {{- if .Values.configOverride }}
+        checksum/config-override: {{ include (print $.Template.BasePath "/config-override.yaml") . | sha256sum }}
+        {{- end }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         {{- if .Values.metrics.enabled }}
         prometheus.io/port: "{{ .Values.service.internalPort }}"
@@ -128,7 +131,17 @@ spec:
           volumeMounts:
           - name: {{ template "centralledger-handler-bulk-transfer-processing.fullname" . }}-config-volume
             mountPath: /opt/app/config
+{{- range $fileName, $fileContents := .Values.configOverride }}
+          - name: config-override-volume
+            mountPath: /opt/app/{{ $fileName }}
+            subPath: {{ $fileName | replace "/" "-" }}
+{{- end }}
       volumes:
+        {{- if .Values.configOverride }}
+        - name: config-override-volume
+          configMap:
+            name: {{ template "centralledger-handler-bulk-transfer-processing.fullname" . }}-config-override
+        {{- end }}
         - name: {{ template "centralledger-handler-bulk-transfer-processing.fullname" . }}-config-volume
           configMap:
             name: {{ template "centralledger-handler-bulk-transfer-processing.fullname" . }}-config

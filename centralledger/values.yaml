@@ -16,7 +16,7 @@ centralledger-service:
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.6.0
+    tag: v19.0.6
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -34,6 +34,16 @@ centralledger-service:
   replicaCount: 1
   command: '["node", "src/api/index.js"]'
 
+  # Mount configuration files in the app folder for overriding defaults
+  # configOverride:
+  #   # event sdk settings override
+  #   .EVENT_SDKrc:
+  #     AUDIT: kafka
+
+  #   # logging settings override
+  #   .CSLrc:
+  #     LOG_FILTER: ""
+
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -44,11 +54,11 @@ centralledger-service:
     ##
     command:
       - node
-      - src/api/index.js
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      - src/api/index.js
 
     ## @param diagnosticMode.debug config to override all debug information
     ##
@@ -211,6 +221,15 @@ centralledger-service:
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
 
+    ## Proxy cache configuration
+    proxy_cache:
+      enabled: false
+      type: redis-cluster
+      proxyConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
+
     ## Tracing Configuration
     event_trace_vendor: mojaloop
     event_log_filter: 'audit:*, log:warn, log:error'
@@ -234,7 +253,7 @@ centralledger-service:
   # initContainers: []
   initContainers: |
     - name: wait-for-mysql
-      image: mysql:5.7
+      image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
       command:
         - sh
@@ -266,28 +285,6 @@ centralledger-service:
           {{- end }}
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
-    - name: run-migration
-      image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - npm run migrate
-      env:
-        - name: CLEDG_MIGRATIONS__RUN_DATA_MIGRATIONS
-          value: 'true'
-        - name: CLEDG_DATABASE__PASSWORD
-          {{- if .Values.config.db_secret }}
-          valueFrom:
-              secretKeyRef:
-                name: '{{ .Values.config.db_secret.name }}'
-                key: '{{ .Values.config.db_secret.key }}'
-          {{- else }}
-          value: {{ .Values.config.db_password }}
-          {{- end }}
-      volumeMounts:
-        - name: '{{ template "account-lookup-service-admin.fullname" . }}-config-volume'
-          mountPath: /opt/app/config
 
   service:
     internalPort: 3001
@@ -412,7 +409,7 @@ centralledger-handler-transfer-prepare:
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.6.0
+    tag: v19.0.6
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -430,6 +427,16 @@ centralledger-handler-transfer-prepare:
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
 
+  # Mount configuration files in the app folder for overriding defaults
+  # configOverride:
+  #   # event sdk settings override
+  #   .EVENT_SDKrc:
+  #     AUDIT: kafka
+
+  #   # logging settings override
+  #   .CSLrc:
+  #     LOG_FILTER: ""
+
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -440,13 +447,13 @@ centralledger-handler-transfer-prepare:
     ##
     command:
       - node
-      - src/handlers/index.js
-      - handler
-      - '--prepare'
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      - src/handlers/index.js
+      - handler
+      - '--prepare'
 
     ## @param diagnosticMode.debug config to override all debug information
     ##
@@ -618,6 +625,15 @@ centralledger-handler-transfer-prepare:
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
 
+    ## Proxy cache configuration
+    proxy_cache:
+      enabled: false
+      type: redis-cluster
+      proxyConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
+
     ## Enable On-Us transfers
     enable_on_us_transfers: false
 
@@ -655,7 +671,7 @@ centralledger-handler-transfer-prepare:
         - name: KAFKA_PORT
           value: '{{ .Values.config.kafka_port }}'
     - name: wait-for-mysql
-      image: mysql:5.7
+      image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
       command:
         - sh
@@ -811,7 +827,7 @@ centralledger-handler-transfer-position:
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.6.0
+    tag: v19.0.6
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -829,6 +845,16 @@ centralledger-handler-transfer-position:
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--position"]'
 
+  # Mount configuration files in the app folder for overriding defaults
+  # configOverride:
+  #   # event sdk settings override
+  #   .EVENT_SDKrc:
+  #     AUDIT: kafka
+
+  #   # logging settings override
+  #   .CSLrc:
+  #     LOG_FILTER: ""
+
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -839,13 +865,13 @@ centralledger-handler-transfer-position:
     ##
     command:
       - node
-      - src/handlers/index.js
-      - handler
-      - '--position'
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      - src/handlers/index.js
+      - handler
+      - '--position'
 
     ## @param diagnosticMode.debug config to override all debug information
     ##
@@ -1017,6 +1043,15 @@ centralledger-handler-transfer-position:
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
 
+    ## Proxy cache configuration
+    proxy_cache:
+      enabled: false
+      type: redis-cluster
+      proxyConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
+
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -1048,7 +1083,7 @@ centralledger-handler-transfer-position:
         - name: KAFKA_PORT
           value: '{{ .Values.config.kafka_port }}'
     - name: wait-for-mysql
-      image: mysql:5.7
+      image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
       command:
         - sh
@@ -1204,7 +1239,7 @@ centralledger-handler-transfer-position-batch:
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.6.0
+    tag: v19.0.6
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -1222,6 +1257,16 @@ centralledger-handler-transfer-position-batch:
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--positionbatch"]'
 
+  # Mount configuration files in the app folder for overriding defaults
+  # configOverride:
+  #   # event sdk settings override
+  #   .EVENT_SDKrc:
+  #     AUDIT: kafka
+
+  #   # logging settings override
+  #   .CSLrc:
+  #     LOG_FILTER: ""
+
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -1232,13 +1277,13 @@ centralledger-handler-transfer-position-batch:
     ##
     command:
       - node
-      - src/handlers/index.js
-      - handler
-      - '--positionbatch'
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      - src/handlers/index.js
+      - handler
+      - '--positionbatch'
 
     ## @param diagnosticMode.debug config to override all debug information
     ##
@@ -1285,7 +1330,7 @@ centralledger-handler-transfer-position-batch:
     enabled: true
     image:
       repository: mojaloop/event-sidecar
-      tag: v13.0.0
+      tag: v14.0.0
       pullPolicy: IfNotPresent
       command: '["npm", "run", "start"]'
     service:
@@ -1388,7 +1433,6 @@ centralledger-handler-transfer-position-batch:
     kafka_host: kafka
     kafka_port: 9092
     kafka_partitioner: 'murmur2_random'
-    kafka_partition_assignment_strategy: 'cooperative-sticky'
 
     ## Node Configuration
     log_level: 'info'
@@ -1410,6 +1454,15 @@ centralledger-handler-transfer-position-batch:
     cache_enabled: false
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
+
+    ## Proxy cache configuration
+    proxy_cache:
+      enabled: false
+      type: redis-cluster
+      proxyConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
 
     ## Batch configuration
     # The batch size to be requested by the Kafka consumer.
@@ -1448,7 +1501,7 @@ centralledger-handler-transfer-position-batch:
         - name: KAFKA_PORT
           value: '{{ .Values.config.kafka_port }}'
     - name: wait-for-mysql
-      image: mysql:5.7
+      image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
       command:
         - sh
@@ -1604,7 +1657,7 @@ centralledger-handler-transfer-get:
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.6.0
+    tag: v19.0.6
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -1622,6 +1675,16 @@ centralledger-handler-transfer-get:
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--get"]'
 
+  # Mount configuration files in the app folder for overriding defaults
+  # configOverride:
+  #   # event sdk settings override
+  #   .EVENT_SDKrc:
+  #     AUDIT: kafka
+
+  #   # logging settings override
+  #   .CSLrc:
+  #     LOG_FILTER: ""
+
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -1632,13 +1695,13 @@ centralledger-handler-transfer-get:
     ##
     command:
       - node
-      - src/handlers/index.js
-      - handler
-      - '--get'
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      - src/handlers/index.js
+      - handler
+      - '--get'
 
     ## @param diagnosticMode.debug config to override all debug information
     ##
@@ -1810,6 +1873,15 @@ centralledger-handler-transfer-get:
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
 
+    ## Proxy cache configuration
+    proxy_cache:
+      enabled: false
+      type: redis-cluster
+      proxyConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
+
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -1841,7 +1913,7 @@ centralledger-handler-transfer-get:
         - name: KAFKA_PORT
           value: '{{ .Values.config.kafka_port }}'
     - name: wait-for-mysql
-      image: mysql:5.7
+      image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
       command:
         - sh
@@ -1997,7 +2069,7 @@ centralledger-handler-transfer-fulfil:
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.6.0
+    tag: v19.0.6
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2015,6 +2087,16 @@ centralledger-handler-transfer-fulfil:
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
 
+  # Mount configuration files in the app folder for overriding defaults
+  # configOverride:
+  #   # event sdk settings override
+  #   .EVENT_SDKrc:
+  #     AUDIT: kafka
+
+  #   # logging settings override
+  #   .CSLrc:
+  #     LOG_FILTER: ""
+
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -2025,13 +2107,13 @@ centralledger-handler-transfer-fulfil:
     ##
     command:
       - node
-      - src/handlers/index.js
-      - handler
-      - '--fulfil'
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      - src/handlers/index.js
+      - handler
+      - '--fulfil'
 
     ## @param diagnosticMode.debug config to override all debug information
     ##
@@ -2203,6 +2285,18 @@ centralledger-handler-transfer-fulfil:
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
 
+    ## Proxy cache configuration
+    proxy_cache:
+      enabled: false
+      type: redis-cluster
+      proxyConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
+
+    ## Enable Batch Processing
+    batch_processing_enabled: false
+
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -2234,7 +2328,7 @@ centralledger-handler-transfer-fulfil:
         - name: KAFKA_PORT
           value: '{{ .Values.config.kafka_port }}'
     - name: wait-for-mysql
-      image: mysql:5.7
+      image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
       command:
         - sh
@@ -2390,7 +2484,7 @@ centralledger-handler-timeout:
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.6.0
+    tag: v19.0.6
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2408,6 +2502,16 @@ centralledger-handler-timeout:
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
 
+  # Mount configuration files in the app folder for overriding defaults
+  # configOverride:
+  #   # event sdk settings override
+  #   .EVENT_SDKrc:
+  #     AUDIT: kafka
+
+  #   # logging settings override
+  #   .CSLrc:
+  #     LOG_FILTER: ""
+
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -2418,13 +2522,13 @@ centralledger-handler-timeout:
     ##
     command:
       - node
-      - src/handlers/index.js
-      - handler
-      - '--timeout'
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      - src/handlers/index.js
+      - handler
+      - '--timeout'
 
     ## @param diagnosticMode.debug config to override all debug information
     ##
@@ -2601,6 +2705,18 @@ centralledger-handler-timeout:
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
 
+    ## Proxy cache configuration
+    proxy_cache:
+      enabled: false
+      type: redis-cluster
+      proxyConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
+
+    ## Enable Batch Processing
+    batch_processing_enabled: false
+
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -2632,7 +2748,7 @@ centralledger-handler-timeout:
         - name: KAFKA_PORT
           value: '{{ .Values.config.kafka_port }}'
     - name: wait-for-mysql
-      image: mysql:5.7
+      image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
       command:
         - sh
@@ -2788,7 +2904,7 @@ centralledger-handler-admin-transfer:
   image:
     registry: docker.io
     repository: mojaloop/central-ledger
-    tag: v17.6.0
+    tag: v19.0.6
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2806,6 +2922,16 @@ centralledger-handler-admin-transfer:
   replicaCount: 1
   command: '["node", "src/handlers/index.js", "handler", "--admin"]'
 
+  # Mount configuration files in the app folder for overriding defaults
+  # configOverride:
+  #   # event sdk settings override
+  #   .EVENT_SDKrc:
+  #     AUDIT: kafka
+
+  #   # logging settings override
+  #   .CSLrc:
+  #     LOG_FILTER: ""
+
   ## Enable diagnostic mode in the deployment
   ##
   diagnosticMode:
@@ -2816,13 +2942,13 @@ centralledger-handler-admin-transfer:
     ##
     command:
       - node
-      - src/handlers/index.js
-      - handler
-      - '--admin'
     ## @param diagnosticMode.args Args to override all containers in the deployment
     ##
     args:
       - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      - src/handlers/index.js
+      - handler
+      - '--admin'
 
     ## @param diagnosticMode.debug config to override all debug information
     ##
@@ -2994,6 +3120,15 @@ centralledger-handler-admin-transfer:
     cache_max_byte_size: 10000000
     cache_expires_in_ms: 1000
 
+    ## Proxy cache configuration
+    proxy_cache:
+      enabled: false
+      type: redis-cluster
+      proxyConfig:
+        cluster:
+          - host: proxy-cache-redis
+            port: 6379
+
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -3025,7 +3160,7 @@ centralledger-handler-admin-transfer:
         - name: KAFKA_PORT
           value: '{{ .Values.config.kafka_port }}'
     - name: wait-for-mysql
-      image: mysql:5.7
+      image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
       command:
         - sh

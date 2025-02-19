@@ -55,8 +55,11 @@ spec:
       {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
       - name: jws-private-key
         secret:
-          {{- if $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
-          secretName: {{ $config.config.schemeAdapter.secrets.jws.privKeySecretName }}
+          {{- if $config.config.schemeAdapter.secrets.jws.privateKeySecret }}
+          secretName: {{ $config.config.schemeAdapter.secrets.jws.privateKeySecret.name }}
+          items:
+            - key: {{ $config.config.schemeAdapter.secrets.jws.privateKeySecret.key }}
+              path: private.key
           {{- else }}
           secretName: {{ $fullName }}-jws-priv-key
           {{- end }}
@@ -90,6 +93,10 @@ spec:
       - name: scheme-adapter
         image: "{{ $config.config.schemeAdapter.image.repository }}:{{ $config.config.schemeAdapter.image.tag }}"
         imagePullPolicy: {{ $config.config.schemeAdapter.image.pullPolicy }}
+        {{- if $config.config.imagePullSecrets }}
+        imagePullSecrets:
+        {{ toYaml $config.config.imagePullSecrets | indent 10 }}
+        {{- end }}
         command: {{ $config.config.schemeAdapter.image.command }}
         ports:
           - name: inboundapi
@@ -107,6 +114,8 @@ spec:
             path: /
             port: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
             scheme: HTTP
+          timeoutSeconds: 5
+          failureThreshold: 6
         {{- end }}
         {{- if $config.config.schemeAdapter.livenessProbe.enabled }}
         livenessProbe:
@@ -114,6 +123,8 @@ spec:
             path: /
             port: {{ $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT }}
             scheme: HTTP
+          timeoutSeconds: 5
+          failureThreshold: 6
         {{- end }}
         volumeMounts:
         - name: jws-public-keys
@@ -145,8 +156,6 @@ spec:
         {{- end }}
         resources:
 {{ toYaml $config.config.schemeAdapter.resources | indent 10 }}
-      imagePullSecrets:
-        - name: {{ $config.config.imagePullSecretName }}
     {{- with $config.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
@@ -181,6 +190,12 @@ spec:
         {{- include "mojaloop-simulator.common-labels" $ | nindent 8 }}
       annotations:
         checksum/config-rules: {{ $checksumConfigRules }}
+        # Custom Pod annotations
+        {{- if $config.config.podAnnotations }}
+        {{- range $key, $value := $config.config.podAnnotations }}
+        {{ $key }}: {{ tpl $value $ | quote }}
+        {{- end }}
+        {{- end }}
     spec:
       initContainers:
 {{ include "mojaloop-simulator.prependDictToContainerEnv" (dict "containers" $config.config.backend.initContainers "dict" (merge $config.config.backend.env $initContainerEnv)) | indent 6 }}
@@ -188,6 +203,10 @@ spec:
       - name: backend
         image: "{{ $config.config.backend.image.repository }}:{{ $config.config.backend.image.tag }}"
         imagePullPolicy: {{ $config.config.backend.image.pullPolicy }}
+        {{- if $config.config.imagePullSecrets }}
+        imagePullSecrets:
+        {{ toYaml $config.config.imagePullSecrets | indent 10 }}
+        {{- end }}
         ports:
           - name: simapi
             containerPort: 3000 # these are hard-coded in the service
@@ -242,8 +261,6 @@ spec:
       - name: {{ $prefix }}rules
         configMap:
           name: {{ $fullName }}-rules
-      imagePullSecrets:
-        - name: {{ $config.config.imagePullSecretName }}
     {{- with $config.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
@@ -342,6 +359,12 @@ spec:
         checksum/config-rules: {{ $checksumConfigRules }}
         checksum/config-jws-public-keys: {{ $checksumConfigJWSPublicKeys }}
         checksum/secrets: {{ $checksumConfigSecrets }}
+        # Custom Pod annotations
+        {{- if $config.config.podAnnotations }}
+        {{- range $key, $value := $config.config.podAnnotations }}
+        {{ $key }}: {{ tpl $value $ | quote }}
+        {{- end }}
+        {{- end }}
     spec:
       volumes:
         - name: {{ $fullName }}-thirdparty-sdk-config-volume
@@ -366,6 +389,10 @@ spec:
       - name: thirdpartysdk
         image: "{{ $config.config.thirdpartysdk.image.repository }}:{{ $config.config.thirdpartysdk.image.tag }}"
         imagePullPolicy: {{ $config.config.thirdpartysdk.image.pullPolicy }}
+        {{- if $config.config.imagePullSecrets }}
+        imagePullSecrets:
+        {{ toYaml $config.config.imagePullSecrets | indent 8 }}
+        {{- end }}
         # TODO: make configurable
         command: {{ $config.config.thirdpartysdk.image.command }}
         ports:
@@ -406,9 +433,6 @@ spec:
         {{- end }}
         resources:
 {{ toYaml $config.config.thirdpartysdk.resources | indent 10 }}
-
-      imagePullSecrets:
-        - name: {{ $config.config.imagePullSecretName }}
     {{- with $config.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

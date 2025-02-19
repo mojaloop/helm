@@ -20,7 +20,8 @@ spec:
       app.kubernetes.io/component: {{ .Chart.Name }}
   template:
     metadata:
-      annotations: 
+      annotations:
+        reloader.stakater.com/auto: 'true'
         checksum/config: {{ .Values.env | toString | sha256sum }}
         checksum/secret-jws-signing-key: {{ .Values.config.jwsSigningKey | sha256sum }}
         checksum/secret-jws-verification-keys: {{ .Values.config.jwsVerificationKeys | toString | sha256sum }}
@@ -71,7 +72,14 @@ spec:
       {{- if .Values.env.JWS_SIGN }}
       - name: jws-private-key
         secret:
+        {{- if .Values.config.jwsSigningKeySecret }}
+          secretName: {{ .Values.config.jwsSigningKeySecret.name }}
+          items:
+          - key: {{ .Values.config.jwsSigningKeySecret.key }}
+            path: private.key
+        {{ else }}
           secretName: {{ template "common.names.fullname" . }}-jws-priv-key
+        {{- end }}
       {{- end }}
       {{- if .Values.env.VALIDATE_INBOUND_JWS }}
       - name: jws-public-keys
@@ -157,7 +165,7 @@ spec:
             {{- else }}
             - name: {{ $k }}
               value: {{ include "common.tplvalues.render" (dict "value" $v "context" $) | quote }}
-            {{- end }}  
+            {{- end }}
             {{- end }}
           volumeMounts:
           {{- if .Values.env.JWS_SIGN }}

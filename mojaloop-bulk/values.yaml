@@ -15,7 +15,7 @@ bulk-api-adapter:
     image:
       registry: docker.io
       repository: mojaloop/bulk-api-adapter
-      tag: v17.0.0
+      tag: v17.1.1
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -32,6 +32,16 @@ bulk-api-adapter:
 
     replicaCount: 1
     command: '["node", "src/api/index.js"]'
+
+    # Mount configuration files in the app folder for overriding defaults
+    # configOverride:
+    #   # event sdk settings override
+    #   .EVENT_SDKrc:
+    #     AUDIT: kafka
+
+    #   # logging settings override
+    #   .CSLrc:
+    #     LOG_FILTER: ""
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -101,6 +111,9 @@ bulk-api-adapter:
           serviceName: bulk-service
 
     config:
+      hub_participant:
+        id: 1
+        name: Hub
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: kafka
       kafka_port: 9092
@@ -337,7 +350,7 @@ bulk-api-adapter:
     image:
       registry: docker.io
       repository: mojaloop/bulk-api-adapter
-      tag: v17.0.0
+      tag: v17.1.1
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -354,6 +367,16 @@ bulk-api-adapter:
 
     replicaCount: 1
     command: '["node", "src/handlers/index.js", "handler", "--notification"]'
+
+    # Mount configuration files in the app folder for overriding defaults
+    # configOverride:
+    #   # event sdk settings override
+    #   .EVENT_SDKrc:
+    #     AUDIT: kafka
+
+    #   # logging settings override
+    #   .CSLrc:
+    #     LOG_FILTER: ""
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -425,6 +448,9 @@ bulk-api-adapter:
           serviceName: bulk-handler-notification
 
     config:
+      hub_participant:
+        id: 1
+        name: Hub
       # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
       kafka_host: kafka
       kafka_port: 9092
@@ -477,8 +503,11 @@ bulk-api-adapter:
       # Parameters for JWS signing requests
       endpointSecurity:
         jwsSign: false
-        fspiopSourceSigningName: 'switch'
-        jwsSigningKey:
+        # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
+        # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
+        # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
+        jwsSigningKeySecret: null
+        jwsSigningKey: null
           # To generate this key:
           # Private:
           # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
@@ -681,7 +710,7 @@ bulk-centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.6.0
+      tag: v19.0.6
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -698,6 +727,16 @@ bulk-centralledger:
 
     replicaCount: 1
     command: '["node", "src/handlers/index.js", "handler", "--bulkprepare"]'
+
+    # Mount configuration files in the app folder for overriding defaults
+    # configOverride:
+    #   # event sdk settings override
+    #   .EVENT_SDKrc:
+    #     AUDIT: kafka
+
+    #   # logging settings override
+    #   .CSLrc:
+    #     LOG_FILTER: ""
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -876,7 +915,7 @@ bulk-centralledger:
           - name: KAFKA_PORT
             value: '{{ .Values.config.kafka_port }}'
       - name: wait-for-mysql
-        image: mysql:5.7
+        image: mysql:9.0.1
         imagePullPolicy: IfNotPresent
         command:
           - sh
@@ -1064,7 +1103,7 @@ bulk-centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.6.0
+      tag: v19.0.6
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -1081,6 +1120,16 @@ bulk-centralledger:
 
     replicaCount: 1
     command: '["node", "src/handlers/index.js", "handler", "--bulkfulfil"]'
+
+    # Mount configuration files in the app folder for overriding defaults
+    # configOverride:
+    #   # event sdk settings override
+    #   .EVENT_SDKrc:
+    #     AUDIT: kafka
+
+    #   # logging settings override
+    #   .CSLrc:
+    #     LOG_FILTER: ""
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -1247,7 +1296,7 @@ bulk-centralledger:
           - name: KAFKA_PORT
             value: '{{ .Values.config.kafka_port }}'
       - name: wait-for-mysql
-        image: mysql:5.7
+        image: mysql:9.0.1
         imagePullPolicy: IfNotPresent
         command:
           - sh
@@ -1435,7 +1484,7 @@ bulk-centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.6.0
+      tag: v19.0.6
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -1449,6 +1498,16 @@ bulk-centralledger:
       ##   - myRegistryKeySecretName
       ##
       pullSecrets: []
+
+    # Mount configuration files in the app folder for overriding defaults
+    # configOverride:
+    #   # event sdk settings override
+    #   .EVENT_SDKrc:
+    #     AUDIT: kafka
+
+    #   # logging settings override
+    #   .CSLrc:
+    #     LOG_FILTER: ""
 
     replicaCount: 1
     command: '["node", "src/handlers/index.js", "handler", "--bulkprocessing"]'
@@ -1627,7 +1686,7 @@ bulk-centralledger:
           - name: KAFKA_PORT
             value: '{{ .Values.config.kafka_port }}'
       - name: wait-for-mysql
-        image: mysql:5.7
+        image: mysql:9.0.1
         imagePullPolicy: IfNotPresent
         command:
           - sh
@@ -1815,7 +1874,7 @@ bulk-centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v17.6.0
+      tag: v19.0.6
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -1832,6 +1891,16 @@ bulk-centralledger:
 
     replicaCount: 1
     command: '["node", "src/handlers/index.js", "handler", "--bulkget"]'
+
+    # Mount configuration files in the app folder for overriding defaults
+    # configOverride:
+    #   # event sdk settings override
+    #   .EVENT_SDKrc:
+    #     AUDIT: kafka
+
+    #   # logging settings override
+    #   .CSLrc:
+    #     LOG_FILTER: ""
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -2007,7 +2076,7 @@ bulk-centralledger:
           - name: KAFKA_PORT
             value: '{{ .Values.config.kafka_port }}'
       - name: wait-for-mysql
-        image: mysql:5.7
+        image: mysql:9.0.1
         imagePullPolicy: IfNotPresent
         command:
           - sh

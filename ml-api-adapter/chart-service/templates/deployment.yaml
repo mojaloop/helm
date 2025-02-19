@@ -34,6 +34,9 @@ spec:
         {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+        {{- if .Values.configOverride }}
+        checksum/config-override: {{ include (print $.Template.BasePath "/config-override.yaml") . | sha256sum }}
+        {{- end }}
         # Custom Pod annotations
         {{- if .Values.podAnnotations }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $ ) | nindent 8 }}
@@ -43,6 +46,7 @@ spec:
         prometheus.io/scrape: "true"
         {{- end }}
     spec:
+      {{- include "common.topologySpread" . | nindent 6 }}
 {{- if .Values.affinity }}
       affinity:
 {{ toYaml .Values.affinity | indent 8 }}
@@ -102,6 +106,11 @@ spec:
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
           {{- end }}
           volumeMounts:
+{{- range $fileName, $fileContents := .Values.configOverride }}
+            - name: config-override-volume
+              mountPath: /opt/app/{{ $fileName }}
+              subPath: {{ $fileName | replace "/" "-" }}
+{{- end }}
             - name: {{ template "ml-api-adapter-service.fullname" . }}-config-volume
               mountPath: /opt/app/config
           env:
@@ -173,6 +182,11 @@ spec:
               value: {{ .Values.sidecar.config.event_log_metadata_only | quote }}
         {{- end }}
       volumes:
+        {{- if .Values.configOverride }}
+        - name: config-override-volume
+          configMap:
+            name: {{ template "ml-api-adapter-service.fullname" . }}-config-override
+        {{- end }}
         - name: {{ template "ml-api-adapter-service.fullname" . }}-config-volume
           configMap:
             name: {{ template "ml-api-adapter-service.fullname" . }}-config
