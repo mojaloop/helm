@@ -134,7 +134,21 @@ jobs:
             npm run lint
       - store_artifacts:
           path: /home/circleci/project/test/lint.html
-          destination: lint
+          destination: Lint-YAML
+  test-lint-k8s:
+    executor: default-machine
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Download kubectl-validate
+          command: |
+            curl -L --output /usr/bin/kubectl-validate https://github.com/kubernetes-sigs/kubectl-validate/releases/download/v0.0.4/kubectl-validate_linux_amd64.tar.gzhttps://github.com/kubernetes-sigs/kubectl-validate/releases/download/v0.0.4/kubectl-validate_linux_amd64.tar.gzhttps://github.com/kubernetes-sigs/kubectl-validate/releases/download/v0.0.4/kubectl-validate_linux_amd64.tar.gz
+            chmod +x /usr/bin/kubectl-validate
+      - run:
+          name: Run kubectl-validate
+          command: |
+            kubectl-validate test --version 1.32.1 |& grep -v $'OK\033\[0m$' | sed '/^$/N;/^\n$/D'
 
   audit-licenses:
     executor: default-machine
@@ -302,6 +316,15 @@ workflows:
               only: /v[0-9]+(\.[0-9]+)*(\-snapshot+((\.[0-9]+)?))?/
             branches:
               only: /main|(major|minor|patch)/.*/
+      - test-lint-k8s:
+          context: org-global
+          requires:
+            - test
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(\-snapshot+((\.[0-9]+)?))?/
+            branches:
+              only: /main|(major|minor|patch)/.*/
       - audit-licenses:
           context: org-global
           requires:
@@ -313,6 +336,7 @@ workflows:
           context: org-global
           requires:
             - test-lint-yaml
+            - test-lint-k8s
             - audit-licenses
           filters:
             tags:
