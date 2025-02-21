@@ -131,7 +131,7 @@ jobs:
             nvm install v20.18.0 && nvm alias default v20.18.0
             node --version
             npm ci --legacy-peer-deps
-            npm run lint || echo "Linting failed, check the report in artifacts"
+            npm run lint || {echo "Linting failed, check the report in artifacts";exit 1}
       - store_artifacts:
           path: /home/circleci/project/test/lint.html
           destination: Lint-YAML
@@ -143,7 +143,7 @@ jobs:
       - run:
           name: Download kubectl-validate
           command: |
-            curl -L --output ./kubectl-validate https://github.com/kubernetes-sigs/kubectl-validate/releases/download/v0.0.4/kubectl-validate_linux_amd64.tar.gzhttps://github.com/kubernetes-sigs/kubectl-validate/releases/download/v0.0.4/kubectl-validate_linux_amd64.tar.gzhttps://github.com/kubernetes-sigs/kubectl-validate/releases/download/v0.0.4/kubectl-validate_linux_amd64.tar.gz
+            curl -L --output ./kubectl-validate https://github.com/kubernetes-sigs/kubectl-validate/releases/download/v0.0.4/kubectl-validate_linux_amd64.tar.gz
             chmod +x ./kubectl-validate
       - run:
           name: Run kubectl-validate
