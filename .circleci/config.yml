@@ -102,8 +102,9 @@ jobs:
       - run:
           name: Rendering Helm Charts
           command: |
-            curl --output /usr/bin/yq https://github.com/mikefarah/yq/releases/download/v4.2.0/yq_linux_amd64
+            curl -L --output /usr/bin/yq https://github.com/mikefarah/yq/releases/download/v4.45.1/yq_linux_amd64
             chmod +x /usr/bin/yq
+            yq --version
             bash lint-render.sh
       - persist_to_workspace:
           root: .
@@ -113,7 +114,7 @@ jobs:
             - package-lock.json
             - eslint.config.mjs
 
-  test-render:
+  test-lint-yaml:
     executor: default-machine
     steps:
       - attach_workspace:
@@ -292,7 +293,7 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - test-render:
+      - test-lint-yaml:
           context: org-global
           requires:
             - test
@@ -311,7 +312,7 @@ workflows:
       - deploy:
           context: org-global
           requires:
-            - test-render
+            - test-lint-yaml
             - audit-licenses
           filters:
             tags:

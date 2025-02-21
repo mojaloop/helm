@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 
 #
-# Script to Lint all charts
+# Script to Render all charts
 #
 
-echo "Linting all Charts..."
+echo "Render all Charts..."
 
 set -e
-
-LOCAL_HELM_MOJALOOP_REPO_URI=${HELM_MOJALOOP_REPO_URI:-'https://docs.mojaloop.io/helm/repo'}
 
 trap 'echo "Command failed...exiting. Please fix me!"' ERR
 
@@ -60,8 +58,6 @@ else
         inter-scheme-proxy-adapter
     )
 fi
-
-echo "\n"
 
 for chart in "${charts[@]}"
 do
