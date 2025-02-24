@@ -108,13 +108,21 @@ CONFIG:
         - host: proxy-cache-redis
           port: 6379
 
-  ## ISO20022
+  ## FSPIOP mode deployment
   api_type: &API_TYPE "fspiop"
   ttk_transformer_name: &TTK_TRANSFORMER_NAME "none"
   SDK_ILP_VERSION: &SDK_ILP_VERSION "1"
+  validCondition: &validCondition "$param_validConditionV1"
+  ilpPacket: &ilpPacket "$param_validIlpPacketV1"
+  validFulfillment: &validFulfillment "$param_validFulfillmentV1"
+
+  ## ISO20022 mode deployment
   # api_type: &API_TYPE "iso20022"
   # ttk_transformer_name: &TTK_TRANSFORMER_NAME "fspiopToISO20022"
   # SDK_ILP_VERSION: &SDK_ILP_VERSION "4"
+  # validCondition: &validCondition "$param_validConditionV4"
+  # ilpPacket: &ilpPacket "$param_validIlpPacketV4"
+  # validFulfillment: &validFulfillment "$param_validFulfillmentV4"
   ## kafka | redis
   original_payload_storage: &ORIGINAL_PAYLOAD_STORAGE "kafka"
   payload_cache: &PAYLOAD_CACHE
@@ -13749,7 +13757,7 @@ ml-testing-toolkit:
           "homeTransactionId": "123ABC",
           "hubEmail": "some.email@gmail.com",
           "hub_operator": "NOT_APPLICABLE",
-          "ilpPacket": "$param_validIlpPacketV1",
+          "ilpPacket": *ilpPacket,
           "invalidFulfillment": "_3cco-YN5OGpRKVWV3n6x6uNpBTH9tYUdOYmHA-----",
           "invalidToIdType": "ACCOUNT_ID",
           "invalidToIdValue": "27713803099",
@@ -13790,9 +13798,9 @@ ml-testing-toolkit:
           "toBurmeseIdMiddleName": "အောင်",
           "toBurmeseIdLastName": "ဒေါ်သန္တာထွန်",
           "toBurmeseIdFspId": "$param_simNamePayeefsp",
-          "validCondition": "$param_validConditionV1",
+          "validCondition": *validCondition,
           "validCondition2": "$param_validCondition2V1",
-          "validFulfillment": "$param_validFulfillmentV1",
+          "validFulfillment": *validFulfillment,
           "validIlpPacket2": "$param_validIlpPacket2V1",
           "NORESPONSE_SIMPAYEE_NAME": "$param_simNameNoResponsePayeefsp",
           "SIM1_NAME": "$param_simNameTestfsp1",
@@ -14313,7 +14321,8 @@ ml-ttk-test-val-tp:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-17.0.1/collections/hub/provisioning/for_thirdparty
+    testCasesPathInZip: testing-toolkit-test-cases-17.0.1/collections/hub/thirdparty
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     # awsS3FilePath: ttk-tests/reports
     testSuiteName: Thirdparty Tests
     environmentName: Development
