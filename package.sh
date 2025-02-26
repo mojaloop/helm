@@ -85,7 +85,6 @@ do
     else # we're probably running in CI, this is a job triggered by a tag/release
         # When $GITHUB_TAG is present, we're actually releasing the chart- so we won't modify any
         # versions
-        helm package --sign --key 'user_name' --keyring ~/.gnupg/secring.gpg --passphrase-file ./passphrase.txt -u -d ./repo "$chart"
     fi
 done
 
