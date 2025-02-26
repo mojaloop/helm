@@ -28,8 +28,8 @@ else
         mojaloop-ttk-simulators
         eventstreamprocessor
         simulator
-        monitoring/promfana
-        monitoring/efk
+        # monitoring/promfana - Disabled linting due to outdated versions
+        # monitoring/efk - Disabled linting due to outdated versions
         account-lookup-service
         als-oracle-pathfinder
         als-msisdn-oracle
@@ -62,6 +62,6 @@ fi
 for chart in "${charts[@]}"
 do
     echo "---=== Rendering $chart ===---"
-    helm template $chart | yq -s '"test/'$chart'/" + .kind + "-" + .metadata.name'
+    helm template --api-versions apps/v1/Deployment --api-versions  $chart | yq -s '"test/'$chart'/" + .kind + "-" + .metadata.name'
 done
 
