@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Install gnupg 
+sudo apt-get install gnupg
+
+# Save secret key to key ring 
+echo $GPG_SECRET_KEY | base64 --decode > ~/.gnupg/secring.gpg
+
 set -e
 
 LOCAL_HELM_MOJALOOP_REPO_URI=${HELM_MOJALOOP_REPO_URI:-'https://mojaloop.github.io/helm/repo'}
@@ -64,7 +70,7 @@ for chart in "${charts[@]}"
 do
     if [ -z $BUILD_NUM ] || [ -z $GIT_SHA1 ]; then # we're most likely not running in CI
         # Probably running on someone's machine
-        helm package --sign --key 'Shuchita' --keyring ~/.gnupg/secring.gpg --passphrase-file ./passphrase.txt -u -d ./repo "$chart"
+        helm package --sign --key 'user_name' --keyring ~/.gnupg/secring.gpg --passphrase-file ./passphrase.txt -u -d ./repo "$chart"
     elif [ -z $GITHUB_TAG ] || [[ $GITHUB_TAG == *"snapshot"* ]]; then # we're probably running in CI, but this is not a job triggered by a tag or it's a snapshot release
         set -u
         # When $GITHUB_TAG is not present, we'll build a development version. This versioning
@@ -74,12 +80,12 @@ do
         # possible to specify a development version in requirements.yaml.
         CURRENT_VERSION=$(grep '^version: [0-9]\+\.[0-9]\+\.[0-9]\+\s*$' "$chart/Chart.yaml" | cut -d' ' -f2)
         NEW_VERSION="$CURRENT_VERSION-$BUILD_NUM-${GIT_SHA1:0:7}"
-        helm package --sign --key 'Shuchita' --keyring ~/.gnupg/secring.gpg --passphrase-file ./passphrase.txt -u -d ./repo "$chart" --version="$NEW_VERSION"
+        helm package --sign --key 'user_name' --keyring ~/.gnupg/secring.gpg --passphrase-file ./passphrase.txt -u -d ./repo "$chart" --version="$NEW_VERSION"
         set +u
     else # we're probably running in CI, this is a job triggered by a tag/release
         # When $GITHUB_TAG is present, we're actually releasing the chart- so we won't modify any
         # versions
-        helm package --sign --key 'Shuchita' --keyring ~/.gnupg/secring.gpg --passphrase-file ./passphrase.txt -u -d ./repo "$chart"
+        helm package --sign --key 'user_name' --keyring ~/.gnupg/secring.gpg --passphrase-file ./passphrase.txt -u -d ./repo "$chart"
     fi
 done
 
