@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit-client-lib
-  tag: v1.2.2
+  tag: v1.5.0
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -21,6 +21,7 @@ restartPolicy: Never
 
 ## Bash script for TTK CLI
 script: |
+    until nslookup github.com; do sleep 5;done;
     echo "Downloading the test collection...";
     wget {{ .Values.config.testCasesZipUrl }} -O downloaded-test-collections.zip;
     mkdir tmp_test_cases;
@@ -34,11 +35,13 @@ script: |
       {{- if .Values.config.awsS3BucketName }}
       --report-target s3://{{ .Values.config.awsS3BucketName }}/{{ .Values.config.awsS3FilePath }}/report.html \
       {{- end }}
+      {{- if .Values.config.labels }}
+      --labels {{ .Values.config.labels }} \
+      {{- end }}
       --report-auto-filename-enable true \
       {{- if .Values.configCreds.SLACK_WEBHOOK_URL }}
       --slack-webhook-url $SLACK_WEBHOOK_URL \
       {{- end }}
-      --extra-summary-information="Test Suite:{{ .Values.config.testSuiteName }},Environment:{{ .Values.config.environmentName }}" \
       {{- if .Values.config.saveReport }}
       --save-report true \
       {{- end }}
@@ -46,8 +49,12 @@ script: |
       --report-name {{ .Values.config.reportName }} \
       {{- end }}
       {{- if .Values.config.saveReportBaseUrl }}
-      --save-report-base-url {{ .Values.config.saveReportBaseUrl }}
-      {{- end }};
+      --save-report-base-url {{ .Values.config.saveReportBaseUrl }} \
+      {{- end }}
+      {{- if .Values.config.batchSize }}
+      --batch-size {{ .Values.config.batchSize }} \
+      {{- end }}
+      --extra-summary-information="Test Suite:{{ .Values.config.testSuiteName }},Environment:{{ .Values.config.environmentName }}";
     {{- if .Values.config.allowFailures }}
     export TEST_RUNNER_EXIT_CODE="$?"
     echo "Test Runner finished with exit code: $TEST_RUNNER_EXIT_CODE"
@@ -124,6 +131,10 @@ config:
   ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
   ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
   allowFailures: false
+
+## Env vars
+#env:
+#  key1: value1
 
 ## Optionally you can specify some parameters here and the references in the environment file like the format '$param_<Param Name>' will be replaced with their values specified here
 parameters: {}

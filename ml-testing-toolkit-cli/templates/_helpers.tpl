@@ -94,6 +94,14 @@ containers:
   envFrom:
   - secretRef:
       name: {{ template "ml-testing-toolkit-cli.fullname" . }}-aws-creds
+  {{- if .Values.env }}
+  env:
+    {{- range $key, $val := .Values.env }}
+    - name: {{ $key }}
+      value: {{ $val | quote }}
+    {{- end }}
+  {{- end }}
+
   volumeMounts:
     - name: {{ $serviceFullName }}-env
       mountPath: /opt/app/cli-testcase-environment.json
@@ -101,6 +109,8 @@ containers:
     - name: {{ $serviceFullName }}-conf
       mountPath: /opt/app/cli-default-config.json
       subPath: cli-default-config.json
+    - name: release-cd
+      mountPath: /etc/release_cd
 {{- end }}
 
 {{- define "ml-testing-toolkit-cli.template.volumes" }}
@@ -117,4 +127,8 @@ volumes:
     items:
       - key: cli-testcase-environment.json
         path: cli-testcase-environment.json
+- name: release-cd
+  configMap:
+    name: release-cd
+    optional: true
 {{- end }}

@@ -7,7 +7,7 @@ global: {}
 image:
   registry: docker.io
   repository: mojaloop/quoting-service
-  tag: v15.7.0
+  tag: v17.1.1
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -23,7 +23,12 @@ image:
   pullSecrets: []
 
 replicaCount: 1
-command: '["node", "src/handlers/index.js", "handler", "--quotes --bulk_quotes"]'
+command: '["node", "src/handlers/index.js", "handler", "--quotes", "--bulk_quotes", "--fx_quotes"]'
+
+rollingUpdate:
+  override: true
+  maxUnavailable: 20%
+  maxSurge: 20%
 
 ## Enable diagnostic mode in the deployment
 ##
@@ -35,7 +40,7 @@ diagnosticMode:
   ##
   command:
     - node
-    - src/handlers/index.js h --quotes --bulk_quotes
+    - src/handlers/index.js h --quotes --bulk_quotes --fx_quotes
   ## @param diagnosticMode.args Args to override all containers in the deployment
   ##
   args:
@@ -123,25 +128,40 @@ metrics:
       serviceName: quoting-service-handler
 
 config:
-
+  ## kafka | redis | ""
+  original_payload_storage: ""
+  payload_cache:
+    enabled: false
+    type: redis-cluster
+    connectionConfig:
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
+  hub_participant:
+    id: 1
+    name: Hub
   # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
   # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-  protocol_versions: |-
+  protocol_versions:
     {
         "CONTENT": {
-            "DEFAULT": "1.1",
+            "DEFAULT": "2.0",
             "VALIDATELIST": [
                 "1",
                 "1.0",
-                "1.1"
+                "1.1",
+                "2",
+                "2.0"
             ]
         },
         "ACCEPT": {
-            "DEFAULT": "1",
+            "DEFAULT": "2",
             "VALIDATELIST": [
                 "1",
                 "1.0",
-                "1.1"
+                "1.1",
+                "2",
+                "2.0"
             ]
         }
     }
@@ -196,8 +216,7 @@ config:
 
   endpointSecurity:
     jwsSign: false
-    fspiopSourceSigningName: 'switch'
-    jwsSigningKey: null 
+    jwsSigningKey: null
 # To generate this key:
 # Private:
 # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
@@ -221,6 +240,21 @@ config:
     # Not specifying or setting to 0 will default the cache to 60 seconds
     participant_data_expires_in_ms: 10
 
+  ## Proxy cache configuration
+  proxy_cache:
+    enabled: false
+    type: redis-cluster
+    proxyConfig:
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
+
+  uv_threadpool_size: 20
+
+## To pass arbitrary environment variables to the deployment
+# env:
+#   KEY: value
+
 rules: []
 
 ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
@@ -236,7 +270,7 @@ rules: []
 
 initContainers: |
   - name: wait-for-mysql
-    image: mysql:5.7
+    image: mysql:9.0.1
     imagePullPolicy: IfNotPresent
     command:
       - sh
@@ -300,7 +334,7 @@ podAnnotations: {}
 
 # think, if we need "service" for consumer?
 service:
-  internalPort: 3002
+  internalPort: 3003
   ## @param service.type %%MAIN_CONTAINER_NAME%% service type
   ##
   type: ClusterIP
@@ -350,3 +384,5 @@ resources: {}
 # requests:
 #  cpu: 100m
 #  memory: 128Mi
+
+usePdb: false

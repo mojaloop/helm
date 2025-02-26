@@ -1,0 +1,236 @@
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+  name: {{ include "account-lookup-service-handler-timeout.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "account-lookup-service-handler-timeout.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.Version }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+  annotations:
+    # Common annotations
+    {{- if $.Values.commonAnnotations }}
+      {{- include "common.tplvalues.render" ( dict "value" $.Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "account-lookup-service-handler-timeout.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "account-lookup-service-handler-timeout.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.Version }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        # Custom Pod Labels
+        {{- if .Values.podLabels }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.podLabels "context" $ ) | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+        {{- if .Values.configOverride }}
+        checksum/config-override: {{ include (print $.Template.BasePath "/config-override.yaml") . | sha256sum }}
+        {{- end }}
+        checksum/secret-jws: {{ include (print $.Template.BasePath "/secret-jws.yaml") . | sha256sum }}
+        # Custom Pod annotations
+        {{- if .Values.podAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $ ) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.metrics.enabled }}
+        prometheus.io/port: "{{ .Values.service.internalPort }}"
+        prometheus.io/scrape: "true"
+        {{- end }}
+    spec:
+      {{- include "common.topologySpread" . | nindent 6 }}
+      initContainers:
+        {{- if .Values.initContainers }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
+        {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" $) | nindent 6 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            {{- if .Values.env }}
+            {{- range $key, $val := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+            {{- end }}
+            - name: ALS_DATABASE__PASSWORD
+            {{- if .Values.config.db_secret }}
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ .Values.config.db_secret.name }}'
+                  key: '{{ .Values.config.db_secret.key }}'
+            {{- else }}
+              value: {{ .Values.config.db_password }}
+            {{- end }}
+            - name: LOG_LEVEL
+              value: {{ .Values.config.log_level }}
+            - name: CSL_LOG_TRANSPORT
+              value: {{ .Values.config.log_transport}}
+            - name: EVENT_SDK_LOG_FILTER
+              value: {{ .Values.config.event_log_filter | quote }}
+            - name: EVENT_SDK_LOG_METADATA_ONLY
+              value: {{ .Values.config.event_log_metadata_only | quote }}
+            {{- if .Values.sidecar.enabled }}
+            - name: EVENT_SDK_SIDECAR_DISABLED
+              value: "false"
+            - name: EVENT_SDK_SERVER_HOST
+              value: {{ .Values.sidecar.config.event_log_grpc_host | quote }}
+            - name: EVENT_SDK_SERVER_PORT
+              value: {{ .Values.sidecar.config.event_log_grpc_port | quote }}
+            {{- end }}
+            - name: EVENT_SDK_VENDOR_PREFIX
+              value: {{ .Values.config.event_trace_vendor | quote }}
+            - name: EVENT_SDK_TRACESTATE_HEADER_ENABLED
+              value: {{ .Values.config.event_trace_state_enabled | quote }}
+            - name: EVENT_SDK_ASYNC_OVERRIDE_EVENTS
+              value: {{ .Values.config.event_async_override | quote }}
+            - name: EVENT_SDK_TRACEID_PER_VENDOR
+              value: {{ .Values.config.event_traceid_per_vendor | quote }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.internalPort }}
+            {{- if .Values.diagnosticMode.enabled }}
+            - name: debug
+              containerPort: {{ .Values.diagnosticMode.debug.internalPort }}
+            {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.httpGet.path }}
+              port: {{ .Values.service.internalPort }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.httpGet.path }}
+              port: {{ .Values.service.internalPort }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          {{- end }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          volumeMounts:
+          - name: {{ template "account-lookup-service-handler-timeout.fullname" . }}-config-volume
+            mountPath: /opt/app/config
+{{- range $fileName, $fileContents := .Values.configOverride }}
+          - name: config-override-volume
+            mountPath: /opt/app/{{ $fileName }}
+            subPath: {{ $fileName | replace "/" "-" }}
+{{- end }}
+          {{- if .Values.config.endpointSecurity.jwsSign }}
+          - name: jws-signing-key
+            mountPath: /opt/app/secrets
+          {{- end }}
+      {{- if .Values.sidecar.enabled }}
+        - name: {{ .Chart.Name }}-sidecar
+          image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
+          imagePullPolicy: {{ .Values.sidecar.image.pullPolicy }}
+          {{- if .Values.sidecar.image.imagePullSecrets }}
+          imagePullSecrets:
+          {{ toYaml .Values.sidecar.image.imagePullSecrets | indent 10 }}
+          {{- end }}
+          command: {{ .Values.sidecar.image.command }}
+          ports:
+            - containerPort: {{ .Values.sidecar.service.internalPort }}
+          {{- if .Values.sidecar.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.sidecar.readinessProbe.httpGet.path }}
+              port: {{ .Values.sidecar.service.internalPort }}
+            initialDelaySeconds: {{ .Values.sidecar.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.sidecar.readinessProbe.periodSeconds }}
+          {{- end }}
+          {{- if .Values.sidecar.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.sidecar.livenessProbe.httpGet.path }}
+              port: {{ .Values.sidecar.service.internalPort }}
+            initialDelaySeconds: {{ .Values.sidecar.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.sidecar.livenessProbe.periodSeconds }}
+          {{- end }}
+          volumeMounts:
+            - name: {{ template "account-lookup-service-handler-timeout.fullname" . }}-sidecar-volume
+              mountPath: /opt/app/config
+          env:
+            - name: LOG_LEVEL
+              value: {{ .Values.sidecar.config.log_level | quote }}
+            - name: LOG_FILTER
+              value: {{ .Values.sidecar.config.log_filter | quote }}
+            - name: EVENT_SDK_LOG_FILTER
+              value: {{ .Values.sidecar.config.event_log_filter | quote }}
+            - name: EVENT_SDK_LOG_METADATA_ONLY
+              value: {{ .Values.sidecar.config.event_log_metadata_only | quote }}
+        {{- end }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      volumes:
+        {{- if .Values.configOverride }}
+        - name: config-override-volume
+          configMap:
+            name: {{ template "account-lookup-service-handler-timeout.fullname" . }}-config-override
+        {{- end }}
+        - name: {{ template "account-lookup-service-handler-timeout.fullname" . }}-config-volume
+          configMap:
+            name: {{ template "account-lookup-service-handler-timeout.fullname" . }}-config
+            items:
+            - key: default.json
+              path: default.json
+            - key: knexfile.js
+              path: knexfile.js
+        {{- if .Values.config.endpointSecurity.jwsSign }}
+        - name: jws-signing-key
+          secret:
+          {{- if .Values.config.endpointSecurity.jwsSigningKeySecret }}
+            secretName: {{ .Values.config.endpointSecurity.jwsSigningKeySecret.name }}
+            items:
+            - key: {{ .Values.config.endpointSecurity.jwsSigningKeySecret.key }}
+              path: jwsSigningKey.key
+          {{ else }}
+            secretName: {{ template "account-lookup-service-handler-timeout.fullname" . }}-jws-signing-key
+          {{- end }}
+        {{- end }}
+        {{- if .Values.sidecar.enabled }}
+        - name: {{ template "account-lookup-service-handler-timeout.fullname" . }}-sidecar-volume
+          configMap:
+            name: {{ template "account-lookup-service-handler-timeout.fullname" . }}-sidecar
+            items:
+            - key: default.json
+              path: default.json
+        {{- end }}

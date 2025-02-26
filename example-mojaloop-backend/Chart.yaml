@@ -1,8 +1,8 @@
 apiVersion: v2
 description: Example Helm chart for mojaloop backend dependencies
 name: example-mojaloop-backend
-version: 16.0.0
-appVersion: "nginx: 4.4.2; mysql: 9.19.1; kafka: 29.3.9; mongodb: 14.8.3; redis: 18.12.1"
+version: 16.0.4
+appVersion: "nginx: 4.4.2; mysql: 9.19.1; kafka: 29.3.14; mongodb: 14.8.3; redis: 18.12.1"
 home: http://mojaloop.io
 icon: http://mojaloop.io/images/logo.png
 sources:
@@ -25,7 +25,7 @@ dependencies:
       - dependency
       - backend
       - kafka
-    version: 29.3.9
+    version: 29.3.14
   ## mysql database
   - name: mysql
     alias: mysql
@@ -100,3 +100,15 @@ dependencies:
       - redis
       - thirdparty
     version: 18.12.1
+  ## Redis for Proxy Cache
+  - name: redis-cluster
+    alias: proxy-cache-redis
+    condition: proxy-cache-redis.enabled
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - mojaloop
+      - dependency
+      - backend
+      - redis
+      - proxy
+    version: 10.2.8

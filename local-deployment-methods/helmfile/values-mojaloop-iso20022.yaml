@@ -1,0 +1,144 @@
+CONFIG:
+  ## ISO20022
+  api_type: &API_TYPE "iso20022"
+  ttk_transformer_name: &TTK_TRANSFORMER_NAME "fspiopToISO20022"
+  ttk_input_values_override: &TTK_INPUT_VALUES_OVERRIDE
+    API_TYPE: *API_TYPE
+    ilpPacket: "$param_validIlpPacketV4"
+    validCondition: "$param_validConditionV4"
+    validFulfillment: "$param_validFulfillmentV4"
+  original_payload_storage: &ORIGINAL_PAYLOAD_STORAGE "redis"
+  payload_cache: &PAYLOAD_CACHE
+    enabled: true
+    type: redis-cluster
+    connectionConfig:
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
+
+x-disable-probes: &DISABLE_PROBES
+  metrics:
+    enabled: false
+  readinessProbe:
+    enabled: false
+  livenessProbe:
+    enabled: false
+
+account-lookup-service:
+  account-lookup-service:
+    <<: *DISABLE_PROBES
+    config:
+      api_type: *API_TYPE
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
+      payload_cache: *PAYLOAD_CACHE
+      log_level: debug
+
+quoting-service:
+  quoting-service:
+    <<: *DISABLE_PROBES
+    config:
+      api_type: *API_TYPE
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
+      payload_cache: *PAYLOAD_CACHE
+      log_level: debug
+      simple_routing_mode_enabled: false
+  quoting-service-handler:
+    <<: *DISABLE_PROBES
+    config:
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
+      payload_cache: *PAYLOAD_CACHE
+      log_level: debug
+      simple_routing_mode_enabled: false
+
+ml-api-adapter:
+  ml-api-adapter-service:
+    <<: *DISABLE_PROBES
+    # image:
+    #   repository: localhost:32000/mojaloop/ml-api-adapter
+    #   tag: v14.2.0-snapshot.local.13
+    # diagnosticMode:
+    #   enabled: true
+    config:
+      api_type: *API_TYPE
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
+      payload_cache: *PAYLOAD_CACHE
+  ml-api-adapter-handler-notification:
+    <<: *DISABLE_PROBES
+    # image:
+    #   repository: localhost:32000/mojaloop/ml-api-adapter
+    #   tag: v14.2.0-snapshot.local.13
+    # diagnosticMode:
+    #   enabled: true
+    config:
+      api_type: *API_TYPE
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
+      payload_cache: *PAYLOAD_CACHE
+
+ml-testing-toolkit:
+  ml-testing-toolkit-backend:
+    # image:
+    #   repository: localhost:32000/mojaloop/ml-testing-toolkit
+    #   tag: v18.2.1-snapshot.local.1
+    extraEnvironments:
+      hub-k8s-default-environment.json:
+        options:
+          transformerName: *TTK_TRANSFORMER_NAME
+        inputValues:
+          <<: *TTK_INPUT_VALUES_OVERRIDE
+
+ml-ttk-test-setup:
+  testCaseEnvironmentFile:
+    options:
+      transformerName: *TTK_TRANSFORMER_NAME
+    inputValues:
+      <<: *TTK_INPUT_VALUES_OVERRIDE
+ml-ttk-test-val-gp:
+  testCaseEnvironmentFile:
+    options:
+      transformerName: *TTK_TRANSFORMER_NAME
+    inputValues:
+      <<: *TTK_INPUT_VALUES_OVERRIDE
+ml-ttk-test-setup-interscheme:
+  testCaseEnvironmentFile:
+    options:
+      transformerName: *TTK_TRANSFORMER_NAME
+    inputValues:
+      <<: *TTK_INPUT_VALUES_OVERRIDE
+ml-ttk-test-val-interscheme:
+  testCaseEnvironmentFile:
+    options:
+      transformerName: *TTK_TRANSFORMER_NAME
+    inputValues:
+      <<: *TTK_INPUT_VALUES_OVERRIDE
+ml-ttk-test-cleanup:
+  testCaseEnvironmentFile:
+    options:
+      transformerName: *TTK_TRANSFORMER_NAME
+    inputValues:
+      <<: *TTK_INPUT_VALUES_OVERRIDE
+
+mojaloop-simulator:
+  defaults:
+    config:
+      schemeAdapter:
+        # image:
+        #   repository: localhost:32000/mojaloop/sdk-scheme-adapter
+        #   tag:  v23.6.0-snapshot.local.27
+        # diagnosticMode:
+        #   enabled: true
+        env:
+          API_TYPE: iso20022
+          ILP_VERSION: "4"
+          LOG_LEVEL: debug
+        readinessProbe:
+          enabled: false
+        livenessProbe:
+          enabled: false
+    metrics:
+      enabled: false
+
+inter-scheme-proxy-adapter:
+  <<: *DISABLE_PROBES
+  env:
+    LOG_LEVEL: debug
+    

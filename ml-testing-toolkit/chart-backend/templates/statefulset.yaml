@@ -32,6 +32,10 @@ spec:
         {{- if .Values.podAnnotations }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
+        {{- if .Values.metrics.enabled }}
+        prometheus.io/port: "{{ .Values.service.ports.adminApi.port }}"
+        prometheus.io/scrape: "true"
+        {{- end }}
       labels:
         app.kubernetes.io/name: {{ include "ml-testing-toolkit-backend.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
@@ -84,9 +88,19 @@ spec:
             {{- else }}
               value: {{ .Values.config.mongodb.password }}
             {{- end }}
+            - name: REPORTING_DB_CONNECTION_STRING
+            {{- if .Values.config.mongodb.connectionStringSecret.name }}
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ .Values.config.mongodb.connectionStringSecret.name }}'
+                  key: '{{ .Values.config.mongodb.connectionStringSecret.key }}'
+            {{- else }}
+              value: {{ .Values.config.mongodb.connectionString }}
+            {{- end }}
           ports:
             - containerPort: {{ .Values.service.ports.specApi.port }}
             - containerPort: {{ .Values.service.ports.adminApi.port }}
+              name: http
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
@@ -115,10 +129,12 @@ spec:
           {{- end }}
             - name: {{ $serviceFullName }}-volume-config-default
               mountPath: /opt/default_config
+            - name: release-cd-rc
+              mountPath: /home/ml-user/.release_cd
       volumes:
       {{- if .Values.persistence.enabled }}
         - name: ttk-data
-          emptyDir: {}  
+          emptyDir: {}
       {{- end }}
         - name: {{ template "ml-testing-toolkit-backend.fullname" . }}-volume-config-default
           configMap:
@@ -136,6 +152,10 @@ spec:
               - key: {{ $k }}
                 path: {{ $k }}
               {{- end }}
+        - name: release-cd-rc
+          configMap:
+            name: release-cd-rc
+            optional: true
 
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:

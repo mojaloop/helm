@@ -11,7 +11,7 @@ Enhancements and breaking changes to the [v15.2.0 Release](https://github.com/mo
 1. Performance improvement in Central Ledger via batching of position prepare and position filfill messages
 2. Performance improvement in ALS with the addition of participant requests caching, and logging fixes
 3. Refactoring of Quoting Service into an event-driven service to improve performance
-4. Helm chart: external K8s secret are now used for JWS signing key source if present 
+4. Helm chart: external K8s secret are now used for JWS signing key source if present
 5. General maintenance, bug fixes, and Nodejs upgrades
 
 ## 1. New Features

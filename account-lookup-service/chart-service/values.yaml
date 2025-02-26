@@ -5,7 +5,7 @@
 image:
   registry: docker.io
   repository: mojaloop/account-lookup-service
-  tag: v15.2.3
+  tag: v17.1.0
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -124,6 +124,11 @@ metrics:
       serviceName: account-lookup-service
 
 config:
+  ## fspiop | iso20022
+  api_type: fspiop
+  hub_participant:
+    id: 1
+    name: Hub
   ## Central-Ledger config
   central_services_host: '$release_name-centralledger-service'
   central_services_port: 80
@@ -157,22 +162,26 @@ config:
 
   # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
   # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-  protocol_versions: |
+  protocol_versions:
     {
         "CONTENT": {
-            "DEFAULT": "1.1",
+            "DEFAULT": "2.0",
             "VALIDATELIST": [
                 "1",
                 "1.0",
-                "1.1"
+                "1.1",
+                "2",
+                "2.0"
             ]
         },
         "ACCEPT": {
-            "DEFAULT": "1",
+            "DEFAULT": "2",
             "VALIDATELIST": [
                 "1",
                 "1.0",
-                "1.1"
+                "1.1",
+                "2",
+                "2.0"
             ]
         }
     }
@@ -208,7 +217,6 @@ config:
 
   endpointSecurity:
     jwsSign: false
-    fspiopSourceSigningName: switch
     # `jwsSigningKeySecret` is used to specify the secret that contains the JWS signing key.
     # If `jwsSigningKeySecret` is not null, then the `jwsSigningKey` value will be ignored.
     # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
@@ -239,6 +247,29 @@ config:
   event_trace_state_enabled: true
   event_traceid_per_vendor: false
 
+  ## Proxy cache configuration
+  proxy_cache:
+    enabled: false
+    type: redis-cluster
+    proxyConfig:
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
+
+  ## Handlers configuration
+  handlers:
+    DISABLED: true
+    MONITORING_PORT: 4003
+    TIMEOUT:
+      DISABLED: true
+      TIMEXP: "*/30 * * * * *"
+      TIMEZONE: "UTC"
+      BATCH_SIZE: 100
+
+## To pass arbitrary environment variables to the deployment
+#env:
+#  KEY: value
+
 ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
 ## e.g:
@@ -251,7 +282,7 @@ config:
 # initContainers: []
 initContainers: |
   - name: wait-for-mysql
-    image: mysql:5.7
+    image: mysql:9.0.1
     imagePullPolicy: IfNotPresent
     command:
       - sh

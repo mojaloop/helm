@@ -40,6 +40,7 @@ else
         monitoring/efk
         account-lookup-service
         als-oracle-pathfinder
+        als-msisdn-oracle
         # centralkms # Deprecated - No longer supported
         # forensicloggingsidecar # Deprecated - No longer supported
         centralledger
@@ -63,6 +64,7 @@ else
         mojaloop
         kube-system/ntpd/
         ml-operator
+        inter-scheme-proxy-adapter
     )
 fi
 
@@ -71,6 +73,15 @@ do
     if [ -z $BUILD_NUM ] || [ -z $GIT_SHA1 ]; then # we're most likely not running in CI
         # Probably running on someone's machine
         helm package --sign --key 'user_name' --keyring ~/.gnupg/secring.gpg --passphrase-file ./passphrase.txt -u -d ./repo "$chart"
+    elif [[ -z $GITHUB_TAG && $CIRCLE_BRANCH =~ ^(major|minor|patch)/(.*)$ ]]; then
+        set -u
+        # Build a pre-relase version from pre-relase branches major/name, minor/name, patch/name
+        # Can be used with helm upgrade --version '>=x.x.x-name.0 <x.x.x-name.999999' to avoid picking
+        # unintended versions from multiple active branches doing snapshot releases
+        CURRENT_VERSION=$(grep '^version: [0-9]\+\.[0-9]\+\.[0-9]\+\s*$' "$chart/Chart.yaml" | cut -d' ' -f2)
+        NEW_VERSION=$(echo ${CURRENT_VERSION} | awk -F. -v OFS=. '{$NF += 1 ; print}')-${BASH_REMATCH[2]}.${CIRCLE_BUILD_NUM}
+        helm package -u -d ./repo "$chart" --version="$NEW_VERSION"
+        set +u
     elif [ -z $GITHUB_TAG ] || [[ $GITHUB_TAG == *"snapshot"* ]]; then # we're probably running in CI, but this is not a job triggered by a tag or it's a snapshot release
         set -u
         # When $GITHUB_TAG is not present, we'll build a development version. This versioning

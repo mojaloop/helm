@@ -19,6 +19,9 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "centralledger-handler-transfer-get.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+{{- if (.Values.rollingUpdate).override }}
+  {{- include "common.rollingUpdateStrategy" . | nindent 2 }}
+{{- end }}
   template:
     metadata:
       labels:
@@ -31,8 +34,14 @@ spec:
         {{- if .Values.podLabels }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.podLabels "context" $ ) | nindent 8 }}
         {{- end }}
+        {{- if .Values.usePdb }}
+        {{- include "common.pdb.matchLabels" . | nindent 8 }}
+        {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/config.yaml") . | sha256sum }}
+        {{- if .Values.configOverride }}
+        checksum/config-override: {{ include (print $.Template.BasePath "/config-override.yaml") . | sha256sum }}
+        {{- end }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         # Custom Pod annotations
         {{- if .Values.podAnnotations }}
@@ -43,6 +52,7 @@ spec:
         prometheus.io/scrape: "true"
         {{- end }}
     spec:
+      {{- include "common.topologySpread" . | nindent 6 }}
 {{- if .Values.affinity }}
       affinity:
 {{ toYaml .Values.affinity | indent 8 }}
