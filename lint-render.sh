@@ -62,6 +62,6 @@ fi
 for chart in "${charts[@]}"
 do
     echo "---=== Rendering $chart ===---"
-    helm template --api-versions apps/v1/Deployment --api-versions  $chart | yq -s '"test/'$chart'/" + .kind + "-" + .metadata.name'
+    helm template --api-versions apps/v1/Deployment --api-versions batch/v1 $chart | yq -s '"test/'$chart'/" + .kind + "-" + .metadata.name'
 done
 
