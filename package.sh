@@ -80,7 +80,7 @@ do
         # unintended versions from multiple active branches doing snapshot releases
         CURRENT_VERSION=$(grep '^version: [0-9]\+\.[0-9]\+\.[0-9]\+\s*$' "$chart/Chart.yaml" | cut -d' ' -f2)
         NEW_VERSION=$(echo ${CURRENT_VERSION} | awk -F. -v OFS=. '{$NF += 1 ; print}')-${BASH_REMATCH[2]}.${CIRCLE_BUILD_NUM}
-        helm package -u -d ./repo "$chart" --version="$NEW_VERSION"
+        helm package --sign --key 'user_name' --keyring ~/.gnupg/secring.gpg --passphrase-file ./passphrase.txt -u -d ./repo "$chart" --version="$NEW_VERSION"
         set +u
     elif [ -z $GITHUB_TAG ] || [[ $GITHUB_TAG == *"snapshot"* ]]; then # we're probably running in CI, but this is not a job triggered by a tag or it's a snapshot release
         set -u
