@@ -20,7 +20,7 @@ spec:
       app.kubernetes.io/component: {{ .Chart.Name }}
   template:
     metadata:
-      annotations: 
+      annotations:
         checksum/config: {{ .Values.env | toString | sha256sum }}
         {{- if .Values.podAnnotations }}
         {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" $) | nindent 8 }}
@@ -103,11 +103,11 @@ spec:
           {{- end }}
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe:
-            {{- include "common.tplvalues.render" (dict "value" .Values.readinessProbe "context" $) | nindent 12 }}
+            {{- include "common.tplvalues.render" (dict "value" (omit .Values.readinessProbe "enabled") "context" $) | nindent 12 }}
           {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe:
-            {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe "context" $) | nindent 12 }}
+            {{- include "common.tplvalues.render" (dict "value" (omit .Values.livenessProbe "enabled") "context" $) | nindent 12 }}
           {{- end }}
           env:
             {{- range $k, $v := .Values.env }}
