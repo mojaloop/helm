@@ -93,11 +93,13 @@ CONFIG:
   tp_als_consent_svc_db_port: &TP_ALS_CONSENT_SVC_DB_PORT 3306
   tp_als_consent_svc_db_user: &TP_ALS_CONSENT_SVC_DB_USER "consent_oracle"
 
-  ## BATCH_PROCESSING: To enable batch processing set following to true
-  batch_processing_enabled: &CL_BATCH_PROCESSING_ENABLED true
+  ## BATCHING: This configures the batch size for the position batch handler (range: 1 - 100000)
+  batch_size: &BATCH_SIZE 100
 
   ## INTERSCHEME: To enable interscheme components and tests set following to true
-  interscheme_enabled: &INTERSCHEME_ENABLED true
+  ## When INTERSCHEME is disabled, we need to enable PAYEE_PARTICIPANT_CURRENCY_VALIDATION_ENABLED
+  ## to ensure normal single-scheme functionalities/validations work as expected, and vise versa.
+  interscheme_enabled: &INTERSCHEME_ENABLED false
 
   ## PROXY CACHE
   proxy_cache: &PROXY_CACHE
@@ -3152,9 +3154,6 @@ centralledger:
       ## Enable On-Us transfers
       enable_on_us_transfers: false
 
-      ## BATCH_PROCESSING: Set following to true for enabling batch processing
-      batch_processing_enabled: *CL_BATCH_PROCESSING_ENABLED
-
     ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     ## e.g:
@@ -3676,7 +3675,7 @@ centralledger:
 
     # Declare variables to be passed into your templates.
     ## BATCH_PROCESSING: enabled this to support batch processing
-    enabled: *CL_BATCH_PROCESSING_ENABLED
+    enabled: true
 
     image:
       registry: docker.io
@@ -3836,7 +3835,7 @@ centralledger:
 
       ## BATCH_PROCESSING: Custom configuration for batch processing
       # The batch size to be requested by the Kafka consumer.
-      batch_size: 100
+      batch_size: *BATCH_SIZE
       # Maximum amount of time to wait for a messages to be received by consumer.
       batch_consume_timeout_in_ms: 10
 
@@ -4518,9 +4517,6 @@ centralledger:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
-      ## BATCH_PROCESSING: Set following to true for enabling batch processing
-      batch_processing_enabled: *CL_BATCH_PROCESSING_ENABLED
-
     ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     ## e.g:
@@ -4864,9 +4860,6 @@ centralledger:
 
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
-
-      ## BATCH_PROCESSING: Set following to true for enabling batch processing
-      batch_processing_enabled: *CL_BATCH_PROCESSING_ENABLED
 
     ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -7319,24 +7312,28 @@ transaction-requests-service:
 
     # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
     # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-    protocol_versions: |
+    protocol_versions:
       {
-        "CONTENT": {
-          "DEFAULT": "1.1",
-          "VALIDATELIST": [
-            "1",
-            "1.0",
-            "1.1"
-          ]
-        },
-        "ACCEPT": {
-          "DEFAULT": "1",
-          "VALIDATELIST": [
-            "1",
-            "1.0",
-            "1.1"
-          ]
-        }
+          "CONTENT": {
+              "DEFAULT": "2.0",
+              "VALIDATELIST": [
+                  "1",
+                  "1.0",
+                  "1.1",
+                  "2",
+                  "2.0"
+              ]
+          },
+          "ACCEPT": {
+              "DEFAULT": "2",
+              "VALIDATELIST": [
+                  "1",
+                  "1.0",
+                  "1.1",
+                  "2",
+                  "2.0"
+              ]
+          }
       }
 
     log_level: info
@@ -11533,7 +11530,7 @@ mojaloop-bulk:
 
         # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
         # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-        protocol_versions: |
+        protocol_versions:
           {
             "CONTENT": {
               "DEFAULT": "2.0",
@@ -11787,7 +11784,7 @@ mojaloop-bulk:
 
         # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
         # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-        protocol_versions: |
+        protocol_versions:
           {
             "CONTENT": {
               "DEFAULT": "2.0",
