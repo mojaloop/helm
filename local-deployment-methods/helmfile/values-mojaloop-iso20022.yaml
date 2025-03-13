@@ -16,6 +16,63 @@ CONFIG:
         - host: proxy-cache-redis
           port: 6379
 
+  configOverride: &CONFIG_OVERRIDE
+    .EVENT_SDKrc:
+      LOG: 'off'
+      TRACE: 'off'
+      AUDIT: kafka
+      KAFKA:
+        PRODUCER:
+          EVENT:
+            AUDIT:
+              config:
+                options:
+                  messageCharset: utf8
+                  sync: true
+                rdkafkaConf:
+                  client.id: producer-event-audit
+                  compression.type: lz4
+                  dr_cb: false
+                  event_cb: true
+                  metadata.broker.list: kafka:9092
+                  queue.buffering.max.messages: 10000000
+                  socket.keepalive.enable: true
+                topicConf:
+                  partitioner: murmur2_random
+                  request.required.acks: all
+            LOG:
+              config:
+                options:
+                  messageCharset: utf8
+                  sync: true
+                rdkafkaConf:
+                  client.id: producer-event-log
+                  compression.type: lz4
+                  dr_cb: false
+                  event_cb: true
+                  metadata.broker.list: kafka:9092
+                  queue.buffering.max.messages: 10000000
+                  socket.keepalive.enable: true
+                topicConf:
+                  partitioner: murmur2_random
+                  request.required.acks: all
+            TRACE:
+              config:
+                options:
+                  messageCharset: utf8
+                  sync: true
+                rdkafkaConf:
+                  client.id: producer-event-trace
+                  compression.type: lz4
+                  dr_cb: false
+                  event_cb: true
+                  metadata.broker.list: kafka:9092
+                  queue.buffering.max.messages: 10000000
+                  socket.keepalive.enable: true
+                topicConf:
+                  partitioner: murmur2_random
+                  request.required.acks: all
+
 x-disable-probes: &DISABLE_PROBES
   metrics:
     enabled: false
@@ -27,6 +84,7 @@ x-disable-probes: &DISABLE_PROBES
 account-lookup-service:
   account-lookup-service:
     <<: *DISABLE_PROBES
+    configOverride: *CONFIG_OVERRIDE
     config:
       api_type: *API_TYPE
       original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
@@ -36,26 +94,28 @@ account-lookup-service:
 quoting-service:
   quoting-service:
     <<: *DISABLE_PROBES
+    configOverride: *CONFIG_OVERRIDE
     config:
       api_type: *API_TYPE
       original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
       payload_cache: *PAYLOAD_CACHE
       log_level: debug
       simple_routing_mode_enabled: false
+      simple_audit_enabled: true
   quoting-service-handler:
     <<: *DISABLE_PROBES
+    configOverride: *CONFIG_OVERRIDE
     config:
       original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
       payload_cache: *PAYLOAD_CACHE
       log_level: debug
       simple_routing_mode_enabled: false
+      simple_audit_enabled: true
 
 ml-api-adapter:
   ml-api-adapter-service:
     <<: *DISABLE_PROBES
-    # image:
-    #   repository: localhost:32000/mojaloop/ml-api-adapter
-    #   tag: v14.2.0-snapshot.local.13
+    configOverride: *CONFIG_OVERRIDE
     # diagnosticMode:
     #   enabled: true
     config:
@@ -64,9 +124,7 @@ ml-api-adapter:
       payload_cache: *PAYLOAD_CACHE
   ml-api-adapter-handler-notification:
     <<: *DISABLE_PROBES
-    # image:
-    #   repository: localhost:32000/mojaloop/ml-api-adapter
-    #   tag: v14.2.0-snapshot.local.13
+    configOverride: *CONFIG_OVERRIDE
     # diagnosticMode:
     #   enabled: true
     config:
