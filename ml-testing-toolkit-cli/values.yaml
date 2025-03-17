@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit-client-lib
-  tag: v1.6.1
+  tag: v1.8.0
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -41,6 +41,9 @@ script: |
       --report-auto-filename-enable true \
       {{- if .Values.configCreds.SLACK_WEBHOOK_URL }}
       --slack-webhook-url $SLACK_WEBHOOK_URL \
+      {{- end }}
+      {{- if .Values.configCreds.SLACK_WEBHOOK_URL_FOR_FAILED }}
+        --slack-webhook-url-for-failed $SLACK_WEBHOOK_URL_FOR_FAILED \
       {{- end }}
       {{- if .Values.config.saveReport }}
       --save-report true \
@@ -151,6 +154,7 @@ configCreds:
   AWS_REGION: 'us-west-2'
   ## Define Slack Webhook URL for announcements
   # SLACK_WEBHOOK_URL: 'slack_inbound_webhook'
+  # SLACK_WEBHOOK_URL_FOR_FAILED: 'slack_inbound_webhook'
 
 ## Optionally specify the config file defaults for TTK CLI
 ## You should specify at least mode here
@@ -161,6 +165,7 @@ configCreds:
 #   "reportTarget": "",
 #   "reportAutoFilenameEnable": true,
 #   "slackWebhookUrl": "",
+#   "slackWebhookUrlForFailed": "",
 #   "slackPassedImage": "",
 #   "slackFailedImage": ""
 # }
