@@ -94,12 +94,12 @@ Helm charts are first packaged—a process that bundles the chart’s files into
 
 #### **Steps:**
 
-These commands are incorporated in `publish.sh` and `.circleci/publish_helm_charts.sh`
+These commands are incorporated in `publish.sh` 3. Install GnuPG:
 
-3. Install GnuPG:
-   ```sh
-   sudo apt-get install gnupg
-   ```
+```sh
+sudo apt-get install gnupg
+```
+
 4. Save the Secret Key to the Keyring:
    ```sh
    echo $GPG_SECRET_KEY | base64 --decode > ~/.gnupg/secring.gpg
