@@ -212,7 +212,8 @@ Mojaloop Helm deployments currently include the following provisioning (`setup`)
 | Helm Test                  | Test Cases                                                                                                                                      |  Description   | Enabled by default? | Notes                                                                                                                                                                                                                                                                               |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ml-ttk-test-setup.tests    | [hub/provisioning](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/provisioning)                             |  Standard Provisioning Collection   | Yes                 | Required as a pre-requisite for all tests.                                                                                                                                                                                                                                          |
-| ml-ttk-test-val-gp         | [hub/golden_path](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/golden_path)                               |  Golden-Path (GP) Test Collection   | Yes                 | Previously named `ml-ttk-test-validation` prior to v13.1.0 release.                                                                                                                                                                                                                 |
+| ml-ttk-test-val-gp         | [hub/golden_path](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/golden_path)                               |  Golden-Path (GP) Test Collection FSPIOP Mode   | Yes                 | Previously named `ml-ttk-test-validation` prior to v13.1.0 release.                                                                                                                                                                                                                 |
+| ml-ttk-test-val-gp (ISO)         | [hub/golden_path](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/golden_path)                               |  Golden-Path (GP) Test Collection ISO20022 Mode   | No                 | `api_type: &API_TYPE "iso20022"`, `ttk_transformer_name: &TTK_TRANSFORMER_NAME "fspiopToISO20022"`, `SDK_ILP_VERSION: &SDK_ILP_VERSION "4"`, `validCondition: &validCondition "$param_validConditionV4"`, `ilpPacket: &ilpPacket "$param_validIlpPacketV4"`, `validFulfillment: &validFulfillment "$param_validFulfillmentV4"` This configuration needs to be set while disabling API_TYPE=fspiop.                                                                                                                                                                                                                |
 | ml-ttk-test-val-bulk       | [hub/other_tests/bulk_transfers](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/other_tests/bulk_transfers) |  Bulk Test Collection   | No                  | `mojaloop-bulk.enabled=true` must be set to deploy the Bulk-API-Adapter components.                                                                                                                                                                                                 |
 | ml-ttk-test-setup-sdk-bulk | [hub/provisioning_sdkbulk](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/provisioning_sdkbulk)             |  SDK Bulk Provisioning Collection   | No                  | `mojaloop-bulk.enabled=true` & `mojaloop-ttk-simulators.enabled=true` must be set to deploy the Bulk-API-Adapter and TTK Simulators components.                                                                                                                                                       |
 | ml-ttk-test-val-sdk-bulk   | [hub/sdk_scheme_adapter/bulk](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/sdk_scheme_adapter/bulk/basic)                                     |  SDK Bulk Test Collection   | No                  | `mojaloop-bulk.enabled=true` & `mojaloop-ttk-simulators.enabled=true` must be set to deploy Bulk-API-Adapter and TTK Simulators components. components.                                                                                                                                                              |
@@ -317,31 +318,8 @@ Refer to [Monitoring Documentation](./monitoring/README.md)
 
 ## Batch Processing
 
-To enable batch processing in your system, please follow the steps below:
-
-- **1. Add a New Kafka Topic:**
-    Add a new topic named `topic-transfer-position-batch` to your Kafka configuration. If you are using the example-mojaloop-backend for your backend dependencies, this topic is already added to the Kafka provisioning section by default.
-- **2. Update Mojaloop Values File:**
-    In the Mojaloop values file, make sure to enable the batch_processing_enabled flag in the global configuration.
-
-    ```yaml
-    global:
-        batch_processing_enabled: &CL_BATCH_PROCESSING_ENABLED true
-    ```
-
-    Enabling this variable does the following
-
-    **a. Activates Batch Position Handler:** Triggers the activation of the Batch Position Handler.
-
-    **b. Configures Prepare Handler for Kafka Events:** The configuration change also sets up the Prepare Handler to publish Kafka events to the newly designated batch topic.
-
-    ***Note:***
-
-    ***Please note that this configuration change relies on the use of the YAML anchor CL_BATCH_PROCESSING_ENABLED._***
-
-    ***It's essential to consider the context of your deployment. If you have the entire Helm values file as an override, this configuration change will work seamlessly.***
-
-    ***However, if you are using a Helm override file with only a subset of values overridden, ensure that you include all the configuration parameters associated with the CL_BATCH_PROCESSING_ENABLED anchor. Failing to include these parameters might result in unexpected behavior.***
+Mojaloop supports batch processing of position messages for higher throughput. To ensure batching works correctly in your setup, ensure to add the `topic-transfer-position-batch` topic to your Kafka configuration. 
+If you are using the example-mojaloop-backend for your backend dependencies, this topic is already added to the Kafka provisioning section by default.
 
 ## Known Issues
 

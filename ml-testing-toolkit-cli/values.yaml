@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   repository: mojaloop/ml-testing-toolkit-client-lib
-  tag: v1.5.0
+  tag: v1.6.1
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
@@ -35,6 +35,9 @@ script: |
       {{- if .Values.config.awsS3BucketName }}
       --report-target s3://{{ .Values.config.awsS3BucketName }}/{{ .Values.config.awsS3FilePath }}/report.html \
       {{- end }}
+      {{- if .Values.config.labels }}
+      --labels {{ .Values.config.labels }} \
+      {{- end }}
       --report-auto-filename-enable true \
       {{- if .Values.configCreds.SLACK_WEBHOOK_URL }}
       --slack-webhook-url $SLACK_WEBHOOK_URL \
@@ -51,7 +54,11 @@ script: |
       {{- if .Values.config.batchSize }}
       --batch-size {{ .Values.config.batchSize }} \
       {{- end }}
+      {{- if .Values.config.brief }}
+      --brief-summary-prefix="{{ .Values.config.environmentName }} {{ .Values.config.testSuiteName }}";
+      {{- else }}
       --extra-summary-information="Test Suite:{{ .Values.config.testSuiteName }},Environment:{{ .Values.config.environmentName }}";
+      {{- end }}
     {{- if .Values.config.allowFailures }}
     export TEST_RUNNER_EXIT_CODE="$?"
     echo "Test Runner finished with exit code: $TEST_RUNNER_EXIT_CODE"
@@ -128,6 +135,8 @@ config:
   ## by default this is `false` - which means that any consecutive Helm tests will not be executed by Helm.
   ## If this is set to `true` - it will allow all Helm tests to be executed regardless of any failures.
   allowFailures: false
+  ## Send brief summary to Slack
+  brief: false
 
 ## Env vars
 #env:
