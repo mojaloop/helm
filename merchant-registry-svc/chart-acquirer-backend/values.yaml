@@ -1,0 +1,37 @@
+# Default values for acquirer-backend.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+acquirerBackend:
+  replicaCount: 1
+  image:
+    repository: mojaloop/merchant-acquirer-backend
+    tag: 1.0.1
+  service:
+    type: ClusterIP
+    port: 5555
+  env:
+    dbHost: merchant-db-clusterip-service
+    dbPort: "3306"
+    database: acquirer_db
+    dbUsername: root
+    # db password will be fetched from k8s secret object
+
+    rabbitmqHost: rabbitmq-clusterip-service
+    rabbitmqPort: "5672"
+    rabbitmqUsername: guest
+    rabbitmqPassword: guest
+    sendgridApiKey: "YOUR_SENDGIRD_API_KEY" # 3rd Party Email Service
+    senderEmail: "test@example.com"
+    s3Endpoint: minio-clusterip-service
+    appURL: "http://www.acquirer-merchant.local" # for email verification backend link
+    frontendSetPasswordRedirectURL: "http://www.acquirer-merchant.local/set-password" # reset password link after email verification
+    recaptchaBackendSiteKey: "6LcEfT4pAAAAAF9a9PgebViC87aRPsd10JQDalNy"
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "512Mi"

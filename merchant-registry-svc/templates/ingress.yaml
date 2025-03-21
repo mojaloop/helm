@@ -1,0 +1,25 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-merchant-ingress
+  annotations:
+{{ toYaml .Values.ingress.annotations | nindent 4 }}
+spec:
+  rules:
+  {{- $releaseName := .Release.Name }}
+  {{- range .Values.ingress.hosts }}
+  - host: "{{ .host }}"
+    http:
+      paths:
+      {{- range .paths }}
+      - path: "{{ .path }}"
+        pathType: {{ .pathType }}
+        backend:
+          service:
+            name: "{{ $releaseName }}-{{ .serviceName }}"
+            port:
+              number: {{ .servicePort }}
+      {{- end }}
+  {{- end }}
+{{- end }}
