@@ -84,7 +84,7 @@ targets:
     spec:
       name: account-lookup-service
       file: Chart.yaml
-      key: $.dependencies[3].version
+      key: $.dependencies[4].version
   chart-admin:
     sourceid: account-lookup-service
     kind: helmchart
@@ -127,5 +127,27 @@ targets:
     kind: helmchart
     spec:
       name: account-lookup-service/chart-service
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  chart-handler-timeout:
+    sourceid: account-lookup-service
+    kind: helmchart
+    spec:
+      name: account-lookup-service/chart-handler-timeout
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
+  chart-handler-timeout--sidecar:
+    sourceid: event-sidecar
+    kind: helmchart
+    spec:
+      name: account-lookup-service/chart-handler-timeout
+      file: values.yaml
+      key: $.sidecar.image.tag
+  chart-handler-timeout--common:
+    sourceid: common
+    kind: helmchart
+    spec:
+      name: account-lookup-service/chart-handler-timeout
       file: Chart.yaml
       key: $.dependencies[0].version
