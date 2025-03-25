@@ -6,7 +6,14 @@ Date | Revision | Description
 
 ## 0. Summary
 
-Enhancements and breaking changes to the [v16.0.4 Release](https://github.com/mojaloop/helm/blob/main/.changelog/release-v16.0.4.md), which includes:
+Enhancements and breaking changes to the [v16.0.4 Release](https://github.com/mojaloop/helm/blob/main/.changelog/release-v16.0.4.md) and the [v16.0.0 Release](https://github.com/mojaloop/helm/blob/main/.changelog/release-v16.0.0.md) releases, which include:
+
+1. Performance improvement in Central Ledger via batching of position prepare and position filfill messages
+2. Performance improvement in ALS with the addition of participant requests caching, and logging fixes
+3. Refactoring of Quoting Service into an event-driven service to improve performance
+4. Helm chart: external K8s secret are now used for JWS signing key source if present
+5. General maintenance: bug fixes, updates to license headers and license files for compliance and Nodejs upgrades
+
 
 _Release summary points go here..._
 
@@ -93,7 +100,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 
 | API         | Supported Versions                                                                                                                                    | Notes |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
-| FSPIOP      | [v1.1](https://docs.mojaloop.io/api/fspiop/v1.1/api-definition.html), [v1.0](https://docs.mojaloop.io/api/fspiop/v1.0/api-definition.html) |       |
+| FSPIOP      | [v1.1](https://docs.mojaloop.io/api/fspiop/v1.1/api-definition.html), v2.0 |       |
 | Settlements | [v2.0](https://docs.mojaloop.io/api/settlement)                                                                                            |       |
 | Admin       | [v1.0](https://docs.mojaloop.io/api/administration/central-ledger-api.html)                                                                |       |
 | Oracle      | [v1.0](https://docs.mojaloop.io/legacy/api/als-oracle-api-specification.html)                                                              |       |
@@ -105,8 +112,8 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 
     | Dependency | Version |  Notes   |
     | ---------- | ------- | --- |
-    | Kubernetes | v1.29 | [AWS EKS](https://aws.amazon.com/eks/), [AWS EKS Supported Version Notes](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html)  |
-    | containerd  |  v1.6.19  |  |
+    | Kubernetes | v1.32 | [AWS EKS](https://aws.amazon.com/eks/), [AWS EKS Supported Version Notes](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html)  |
+    | containerd  |  v1.7.25  |  |
     | Nginx Ingress Controller | [helm-ingress-nginx-4.7.0](https://github.com/kubernetes/ingress-nginx/releases/tag/helm-chart-4.7.0) / [ingress-controller-v1.8.0](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v1.8.0) |     |
     |  Amazon Linux   |  v2   |     |
     |  MySQL   |  bitnami/mysql:8.0.32-debian-11-r0   |     |
@@ -114,7 +121,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
     |  Redis   |  bitnami/redis:7.0.5-debian-11-r7   |     |
     |  MongoDB   |  bitnami/mongodb:6.0.2-debian-11-r11   |     |
     |  Testing Toolkit Test Cases   |  [v17.0.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v17.0.0)   |     |
-    |  example-mojaloop-backend   |  v16.0.1   |  [README](https://github.com/mojaloop/helm/blob/main/example-mojaloop-backend/README.md)   |
+    |  example-mojaloop-backend   |  v17.0.0   |  [README](https://github.com/mojaloop/helm/blob/main/example-mojaloop-backend/README.md)   |
 
 2. It is recommended that all Mojaloop deployments are verified using the [Mojaloop Testing Toolkit](https://docs.mojaloop.io/documentation/mojaloop-technical-overview/ml-testing-toolkit/). More information can be found in the [Mojaloop Deployment Guide](https://docs.mojaloop.io/documentation/deployment-guide).
 
@@ -145,7 +152,27 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 
     For details regarding deployment and validation of simulators needed for bulk (for adoption provided in sdk-scheme-adapter) refer to [deploying Mojaloop TTK simulators](https://github.com/mojaloop/helm/blob/main/mojaloop-ttk-simulators/README.md).
 
-## 6. Breaking Changes
+
+## 6. Configuration Options:
+
+Mojaloop Helm deployments currently include the following configuration options:
+
+| Helm Test                  | Test Cases                                                                                                                                      |  Description   | Enabled by default? | Notes                                                                                                                                                                                                                                                                               |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | --- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ml-ttk-test-setup.tests    | [hub/provisioning](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/provisioning)                             |  Standard Provisioning Collection   | Yes                 | Required as a pre-requisite for all tests.                                                                                                                                                                                                                                          |
+| ml-ttk-test-val-gp         | [hub/golden_path](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/golden_path)                               |  Golden-Path (GP) Test Collection FSPIOP Mode   | Yes                 | Previously named `ml-ttk-test-validation` prior to v13.1.0 release.                                                                                                                                                                                                                 |
+| ml-ttk-test-val-gp (ISO)         | [hub/golden_path](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/golden_path)                               |  Golden-Path (GP) Test Collection ISO20022 Mode   | No                 | `api_type: &API_TYPE "iso20022"`, `ttk_transformer_name: &TTK_TRANSFORMER_NAME "fspiopToISO20022"`, `SDK_ILP_VERSION: &SDK_ILP_VERSION "4"`, `validCondition: &validCondition "$param_validConditionV4"`, `ilpPacket: &ilpPacket "$param_validIlpPacketV4"`, `validFulfillment: &validFulfillment "$param_validFulfillmentV4"` This configuration needs to be set while disabling API_TYPE=fspiop.                                                                                                                                                                                                                |
+| ml-ttk-test-setup-interscheme        | [hub/inter_scheme](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/provisioning/for_inter_scheme)                               |  Inter-scheme Provisioning Collection   | No                 | `interscheme_enabled: true`. This configuration needs to be set along with `cl_payee_participant_currency_validation_enabled: false` (otherwise tests fail; to confirm payee fsp validation is disabled in inter-scheme mode).                                                                                                                                         
+| ml-ttk-test-val-interscheme        | [hub/inter_scheme](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/inter_scheme)                               |  Inter-scheme Test Collection   | No                 | `interscheme_enabled: true`. This configuration needs to be set along with `cl_payee_participant_currency_validation_enabled: false` (otherwise tests fail; to confirm payee fsp validation is disabled in inter-scheme mode).                                                                                                                                         
+| ml-ttk-test-val-bulk       | [hub/other_tests/bulk_transfers](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/other_tests/bulk_transfers) |  Bulk Test Collection   | No                  | `mojaloop-bulk.enabled=true` must be set to deploy the Bulk-API-Adapter components.                                                                                                                                                                                                 |
+| ml-ttk-test-setup-sdk-bulk | [hub/provisioning_sdkbulk](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/provisioning_sdkbulk)             |  SDK Bulk Provisioning Collection   | No                  | `mojaloop-bulk.enabled=true` & `mojaloop-ttk-simulators.enabled=true` must be set to deploy the Bulk-API-Adapter and TTK Simulators components.                                                                                                                                                       |
+| ml-ttk-test-val-sdk-bulk   | [hub/sdk_scheme_adapter/bulk](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/sdk_scheme_adapter/bulk/basic)                                     |  SDK Bulk Test Collection   | No                  | `mojaloop-bulk.enabled=true` & `mojaloop-ttk-simulators.enabled=true` must be set to deploy Bulk-API-Adapter and TTK Simulators components. components.                                                                                                                                                              |
+| ml-ttk-test-val-sdk-r2p   | [hub/sdk_scheme_adapter/request-to-pay](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/sdk_scheme_adapter/request-to-pay/basic)                                     |  SDK Request To Pay Test Collection   | No                  | `mojaloop-ttk-simulators.enabled=true` must be set to deploy the TTK Simulators components. components.                                                                                                                                                              |
+| ml-ttk-test-setup-tp       | [hub/provisioning_thirdparty](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/provisioning_thirdparty)       |  Thirdparty Provisioning Collection   | No                  | `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` must be set to deploy the Thirdparty components.       |
+| ml-ttk-test-val-tp         | [hub/thirdparty](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/thirdparty)                                 |  Thirdparty Test Collection   | No                  | `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` must be set to deploy the Bulk-API-Adapter components. |
+| ml-ttk-test-cleanup         | [hub/cleanup](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/cleanup)                                 |  Thirdparty Test Collection   | Yes                  |  Post cleanup scripts, e.g. executes position reset test collection. Note that `ml-ttk-test-cleanup.test.config.saveReport` is disabled by default. |
+
+## 7. Breaking Changes
 
 
 ### central-ledger
@@ -411,7 +438,7 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
   * src/models/misc/migrationLock.js: (https://github.com/mojaloop/account-lookup-service/blob/0ab9e8adc9712fb9091d2fefd6e49e0dd12cfd17/src%2Fmodels%2Fmisc%2FmigrationLock.js)
   * test/unit/models/misc/migrationLock.test.js: (https://github.com/mojaloop/account-lookup-service/blob/0ab9e8adc9712fb9091d2fefd6e49e0dd12cfd17/test%2Funit%2Fmodels%2Fmisc%2FmigrationLock.test.js)
 
-## 7. Known Issues
+## 8. Known Issues
 
 1. [#2119 - Idempotency for duplicate quote request](https://github.com/mojaloop/project/issues/2119)
 2. [#2322 - Helm install failing with with "medium to large" release names](https://github.com/mojaloop/project/issues/2322)
@@ -421,11 +448,11 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
     1. [#2717 - Thirdparty TTK Test-Collection is not repeatable](https://github.com/mojaloop/project/issues/2717)
     2. [#2925 - Helm Test Intermittent failure with 'Generic ID not found](https://github.com/mojaloop/project/issues/2925)
 
-## 8. Contributors
+## 9. Contributors
 
-- Organizations: BMGF, InFiTX, MLF
-- Individuals: @TWith2Sugars, @dependabot[bot], @devarsh10, @elnyry-sam-k, @geka-evk, @gibaros, @kalinkrustev, @kleyow, @oderayi, @pawarspeaks, @shashi165, @vijayg10
+- Organizations: BMGF, Co-Develop, InFiTX, MLF
+- Individuals: @devarsh10, @elnyry-sam-k, @geka-evk, @gibaros, @kalinkrustev, @kleyow, @oderayi, @pawarspeaks, @s-prak, @shashi165, @TWith2Sugars, @vijayg10 
 
-*Note: companies are in alphabetical order, individuals are in no particular order.*
+*Note: names are listed in alphabetical order.*
 
 **Full Changelog**: https://github.com/mojaloop/helm/compare/v16.0.4...v17.0.0
