@@ -111,10 +111,11 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
     | containerd  |  v1.7.25  |  |
     | Nginx Ingress Controller | [helm-ingress-nginx-4.7.0](https://github.com/kubernetes/ingress-nginx/releases/tag/helm-chart-4.7.0) / [ingress-controller-v1.8.0](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v1.8.0) |     |
     |  Amazon Linux   |  v2   |     |
-    |  MySQL   |  bitnami/mysql:8.0.32-debian-11-r0   |     |
-    |  Kafka   |  bitnami/kafka:3.3.1-debian-11-r1   |     |
-    |  Redis   |  bitnami/redis:7.0.5-debian-11-r7   |     |
-    |  MongoDB   |  bitnami/mongodb:6.0.2-debian-11-r11   |     |
+    |  MySQL   |  bitnami/mysql:8.0.36-debian-11-r4   |     |
+    |  Kafka   |  bitnami/kafka:3.9.0-debian-12-r12   |     |
+    |  Redis   |  bitnami/redis:7.4.2-debian-12-r6   |     |
+    |  Redis Cache   |  bitnami/redis-cluster:7.2.5-debian-12-r3   |     |
+    |  MongoDB   |  bitnami/mongodb:8.0.6-debian-12-r0   |     |
     |  Testing Toolkit Test Cases   |  [v17.0.0](https://github.com/mojaloop/testing-toolkit-test-cases/releases/tag/v17.0.0)   |     |
     |  example-mojaloop-backend   |  v17.0.0   |  [README](https://github.com/mojaloop/helm/blob/main/example-mojaloop-backend/README.md)   |
 
