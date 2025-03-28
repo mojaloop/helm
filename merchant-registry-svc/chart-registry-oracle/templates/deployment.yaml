@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-registry-oracle-deployment
+spec:
+  replicas: {{ .Values.registryOracle.replicaCount }}
+  selector:
+    matchLabels:
+      component: registry-oracle
+  template:
+    metadata:
+      labels:
+        component: registry-oracle
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: registry-oracle
+          image: "{{ .Values.registryOracle.image.repository }}:{{ .Values.registryOracle.image.tag }}"
+          resources: 
+            {{- toYaml .Values.resources | nindent 12 }}
+          ports:
+            - containerPort: {{ .Values.registryOracle.service.port }}
+          env:
+            - name: DB_HOST
+              value: "{{ .Release.Name }}-{{ .Values.registryOracle.env.dbHost }}"
+            - name: DB_PORT
+              value: "{{ .Values.registryOracle.env.dbPort }}"
+            - name: DB_DATABASE
+              value: "{{ .Values.registryOracle.env.database }}"
+            - name: DB_USERNAME
+              value: "{{ .Values.registryOracle.env.dbUsername }}"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-{{ .Values.registryOracle.env.dbPasswordSecret.name }}
+                  key: {{ .Values.registryOracle.env.dbPasswordSecret.key }}
+            - name: RABBITMQ_HOST
+              value: "{{ .Release.Name }}-{{ .Values.registryOracle.env.rabbitmqHost }}"
+            - name: RABBITMQ_PORT
+              value: "{{ .Values.registryOracle.env.rabbitmqPort }}"
+            - name: RABBITMQ_USERNAME
+              value: "{{ .Values.registryOracle.env.rabbitmqUsername }}"
+            - name: RABBITMQ_PASSWORD
+              value: "{{ .Values.registryOracle.env.rabbitmqPassword }}"
+

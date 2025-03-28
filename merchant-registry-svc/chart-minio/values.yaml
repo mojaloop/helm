@@ -1,0 +1,30 @@
+# Default values for chart-minio.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+minio:
+  replicaCount: 1
+  image:
+    repository: minio/minio
+    tag: RELEASE.2023-07-21T21-12-44Z
+  service:
+    type: ClusterIP
+    port: 9000
+  pvc:
+    name: minio-s3-pvc
+    accessMode: ReadWriteOnce
+    size: 2Gi
+  env:
+    rootUser: "minioadmin"
+    rootPassword: "minioadmin"
+    serverUrl: "http://s3.acquirer-merchant.local"
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "512Mi"
+    ephemeral-storage: "2Gi"
+

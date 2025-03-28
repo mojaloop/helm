@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-merchant-db-deployment
+spec:
+  replicas: {{ .Values.merchantDb.replicaCount }}
+  selector:
+    matchLabels:
+      component: merchant-db
+  template:
+    metadata:
+      labels:
+        component: merchant-db
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: merchant-db
+        image: "{{ .Values.merchantDb.image.repository }}:{{ .Values.merchantDb.image.tag }}"
+        args: ["--default-authentication-plugin=mysql_native_password"]
+        resources: 
+          {{- toYaml .Values.resources | nindent 12 }}
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-{{ .Values.merchantDb.secret.name }}
+              key: mysql-root-password
+        ports:
+        - containerPort: {{ .Values.merchantDb.service.port }}
+        volumeMounts:
+        - name: merchant-db-vol
+          mountPath: /var/lib/mysql
+        - name: init-script
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: merchant-db-vol
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-merchant-db-pvc
+      - name: init-script
+        configMap:
+          name: {{ .Release.Name }}-{{ .Values.merchantDb.initScript.name }}
+

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-minio-deployment
+spec:
+  selector:
+    matchLabels:
+      component: minio
+  replicas: {{ .Values.minio.replicaCount }}
+  template:
+    metadata:
+      labels:
+        component: minio
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: minio
+          image: "{{ .Values.minio.image.repository }}:{{ .Values.minio.image.tag }}"
+          args:
+            - server
+            - /data
+          env:
+            - name: MINIO_ROOT_USER
+              value: "{{ .Values.minio.env.rootUser }}"
+            - name: MINIO_ROOT_PASSWORD
+              value: "{{ .Values.minio.env.rootPassword }}"
+            - name: MINIO_SERVER_URL
+              value: "{{ .Values.minio.env.serverUrl }}"
+          ports:
+            - containerPort: {{ .Values.minio.service.port }}
+          volumeMounts:
+            - name: storage
+              mountPath: "/data"
+          resources: 
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-minio-s3-pvc

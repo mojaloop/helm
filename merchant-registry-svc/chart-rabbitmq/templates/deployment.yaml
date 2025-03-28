@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-rabbitmq-deployment
+spec:
+  replicas: {{ .Values.rabbitmq.replicaCount }} 
+  selector:
+    matchLabels:
+      component: rabbitmq
+  template:
+    metadata:
+      labels:
+        component: rabbitmq
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: rabbitmq
+        image: "{{ .Values.rabbitmq.image.repository }}:{{ .Values.rabbitmq.image.tag }}"
+        resources: 
+          {{- toYaml .Values.resources | nindent 12 }}
+        env:
+        - name: RABBITMQ_DEFAULT_USER
+          value: "{{ .Values.rabbitmq.env.defaultUser }}"
+        - name: RABBITMQ_DEFAULT_PASS
+          value: "{{ .Values.rabbitmq.env.defaultPass }}"
+        ports:
+        {{- range .Values.rabbitmq.service.ports }}
+          - containerPort: {{ .port }}
+        {{- end }}
+

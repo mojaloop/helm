@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-acquirer-frontend-deployment
+spec:
+  replicas: {{ .Values.acquirerFrontend.replicaCount }}
+  selector:
+    matchLabels:
+      component: acquirer-frontend
+  template:
+    metadata:
+      labels:
+        component: acquirer-frontend
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: acquirer-frontend
+          image: "{{ .Values.acquirerFrontend.image.repository }}:{{ .Values.acquirerFrontend.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.acquirerFrontend.service.port }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+          - name: VITE_API_URL
+            value: "{{ .Values.acquirerFrontend.env.apiURL }}"
+          - name: VITE_PORT
+            value: "{{ .Values.acquirerFrontend.service.port }}"
+          - name: VITE_RECAPTCHA_SITE_KEY
+            value: {{ .Values.acquirerFrontend.env.recaptchaFrontendSiteKey }}
+

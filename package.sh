@@ -56,6 +56,7 @@ else
         thirdparty/chart-tp-api-svc
         thirdparty
         mojaloop
+        merchant-registry-svc
         kube-system/ntpd/
         ml-operator
         inter-scheme-proxy-adapter
