@@ -72,12 +72,35 @@ spec:
           name: {{ $prefix }}jws-public-keys
           {{- end }}
       - name: tls-secrets
+        {{- if (eq $config.config.schemeAdapter.secrets.tls.method "certmanager") }}
+        projected:
+          sources:
+            - secret:
+                name: {{ $fullName }}-tls-outbound
+                items:
+                  - key: ca.crt
+                    path: outbound-cacert.pem
+                  - key: tls.crt
+                    path: outbound-cert.pem
+                  - key: tls.key
+                    path: outbound-key.pem
+            - secret:
+                name: {{ $fullName }}-tls-inbound
+                items:
+                  - key: ca.crt
+                    path: inbound-cacert.pem
+                  - key: tls.crt
+                    path: inbound-cert.pem
+                  - key: tls.key
+                    path: inbound-key.pem
+        {{- else }}
         secret:
           {{- if $config.config.schemeAdapter.secrets.tlsSecretName }}
           secretName: {{ $config.config.schemeAdapter.secrets.tlsSecretName }}
           {{- else }}
           secretName: {{ $fullName }}-tls-creds
           {{- end }}
+        {{- end }}
       initContainers:
       {{- if $config.config.initContainers.waitForCache.enabled }}
       - name: wait-for-cache
