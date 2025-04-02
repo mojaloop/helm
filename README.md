@@ -316,7 +316,7 @@ e.g. `helm --namespace mojaloop del dev`
 
 ## Create Release PR
 
-Refer to [Create Release PR Documentation](./.github/README.md) 
+Refer to [Create Release PR Documentation](./.github/workflows/README.md) 
 
 ## Monitoring Mojaloop
 
