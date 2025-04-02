@@ -5,11 +5,11 @@
 The `Create Release PR` GitHub Workflow automates the creation of a release pull request (PR) for Mojaloop. It updates Helm chart dependencies, generates a changelog, deploys a test environment on Kubernetes, and runs validation tests. This workflow is manually triggered via GitHub’s `workflow_dispatch` event, offering flexibility with customizable inputs for release naming, versioning, and deployment configuration.
 
 ## Features
-- Creates a draft PR with updated Helm charts and release notes.
-- Deploys a test environment using Helm and Kubernetes.
-- Generates a changelog based on the last release tag.
-- Runs Testing Toolkit (TTK) tests to validate the deployment.
-- Integrates with AWS and external repositories like `oss-core-env`.
+1. Gathers latest releases of services based on input parameters.
+2. Deploys a test environment using Helm and Kubernetes.
+3. Generates a changelog based on the last release tag.
+4. Integrates with AWS and external repositories like `oss-core-env` to get config.
+5. Runs Testing Toolkit (TTK) tests to validate the deployment.
 
 ## Prerequisites
 - **GitHub Repository Access**: Write permissions to the target repository.
