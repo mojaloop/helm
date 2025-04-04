@@ -314,6 +314,10 @@ e.g. `helm --namespace mojaloop del dev`
 ./package.sh
 ```
 
+## Create Release PR
+
+Refer to [Create Release PR Documentation](./.github/workflows/README.md) 
+
 ## Monitoring Mojaloop
 
 Refer to [Monitoring Documentation](./monitoring/README.md)
