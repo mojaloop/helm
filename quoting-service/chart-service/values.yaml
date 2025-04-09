@@ -4,11 +4,10 @@
 # Declare global configurations
 global: {}
 
-
 image:
   registry: docker.io
   repository: mojaloop/quoting-service
-  tag: v17.1.1
+  tag: v17.7.1
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -87,7 +86,7 @@ sidecar:
   enabled: true
   image:
     repository: mojaloop/event-sidecar
-    tag: v14.0.0
+    tag: v14.0.3
     pullPolicy: IfNotPresent
     command: '["npm", "run", "start"]'
   service:
@@ -139,29 +138,7 @@ config:
     name: Hub
   # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
   # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-  protocol_versions:
-    {
-        "CONTENT": {
-            "DEFAULT": "2.0",
-            "VALIDATELIST": [
-                "1",
-                "1.0",
-                "1.1",
-                "2",
-                "2.0"
-            ]
-        },
-        "ACCEPT": {
-            "DEFAULT": "2",
-            "VALIDATELIST": [
-                "1",
-                "1.0",
-                "1.1",
-                "2",
-                "2.0"
-            ]
-        }
-    }
+  protocol_versions: {"CONTENT": {"DEFAULT": "2.0", "VALIDATELIST": ["1", "1.0", "1.1", "2", "2.0"]}, "ACCEPT": {"DEFAULT": "2", "VALIDATELIST": ["1", "1.0", "1.1", "2", "2.0"]}}
 
   ## DB Configuration
   # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
@@ -193,7 +170,7 @@ config:
   db_debug: false
   simple_routing_mode_enabled: true
   log_level: info
-  log_transport: file
+  log_transport: console
 
   ## Kafka Configuration (used for sidecar)
   # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
@@ -217,18 +194,18 @@ config:
   endpointSecurity:
     jwsSign: false
     jwsSigningKey: null
-# To generate this key:
-# Private:
-# ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
-# Public:
-# openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-# Should look like:
-# -----BEGIN RSA PRIVATE KEY-----
-# MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
-# ..
-# ..
-# mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
-# -----END RSA PRIVATE KEY-----
+    # To generate this key:
+    # Private:
+    # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+    # Public:
+    # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+    # Should look like:
+    # -----BEGIN RSA PRIVATE KEY-----
+    # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+    # ..
+    # ..
+    # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+    # -----END RSA PRIVATE KEY-----
   error_handling:
     include_cause_extension: false
     truncate_extensions: true
@@ -309,14 +286,14 @@ service:
   ## clusterIP: None
   ##
   clusterIP: null ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
-## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
-##
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+  ##
   loadBalancerIP: null ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
-## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
-## e.g:
-## loadBalancerSourceRanges:
-##   - 10.10.10.0/24
-##
+  ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+  ## e.g:
+  ## loadBalancerSourceRanges:
+  ##   - 10.10.10.0/24
+  ##
   loadBalancerSourceRanges: []
   ## @param service.externalTrafficPolicy %%MAIN_CONTAINER_NAME%% service external traffic policy
   ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
@@ -344,7 +321,7 @@ ingress:
   ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
   ##
   apiVersion: null ## @param ingress.hostname Default host for the ingress record
-##
+  ##
   hostname: quoting-service.local
   ## @param servicePort : port for the service
   ##
@@ -356,12 +333,12 @@ ingress:
   ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
   ##
   annotations: null ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
-## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
-## You can:
-##   - Use the `ingress.secrets` parameter to create this TLS secret
-##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
-##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
-##
+  ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
+  ## You can:
+  ##   - Use the `ingress.secrets` parameter to create this TLS secret
+  ##   - Relay on cert-manager to create it by setting `ingress.certManager=true`
+  ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+  ##
   tls: false
   ## @param ingress.certManager Add the corresponding annotations for cert-manager integration
   ##

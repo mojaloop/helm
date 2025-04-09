@@ -9,7 +9,7 @@ global: {}
 image:
   registry: docker.io
   repository: mojaloop/central-ledger
-  tag: v19.0.6
+  tag: v19.4.3
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -90,7 +90,7 @@ sidecar:
   enabled: true
   image:
     repository: mojaloop/event-sidecar
-    tag: v14.0.0
+    tag: v14.0.3
     pullPolicy: IfNotPresent
     command: '["npm", "run", "start"]'
   service:
@@ -115,9 +115,9 @@ sidecar:
     log_level: info
     log_filter: 'error, warn, info'
 
-       ## metric configuration for prometheus instrumentation
+## metric configuration for prometheus instrumentation
 metrics:
-       ## flag to enable/disable the metrics end-points
+  ## flag to enable/disable the metrics end-points
   enabled: false
   config:
     timeout: 5000
@@ -126,18 +126,18 @@ metrics:
       serviceName: central-handler-timeout
 
 config:
-       ## Forensic Logging sidecar
+  ## Forensic Logging sidecar
   # this is for Forensic Logging Sidecar
   forensicloggingsidecar_disabled: true
   forensicloggingsidecar_host: forensicloggingsidecar-ledger
   forensicloggingsidecar_port: 5678
 
-       ## Error handling Configuration
+  ## Error handling Configuration
   error_handling:
     include_cause_extension: false
     truncate_extensions: true
 
-       ## DB Configuration
+  ## DB Configuration
   # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
   db_type: 'mysql'
   # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
@@ -166,17 +166,17 @@ config:
   db_create_retry_interval_millis: 200
   db_debug: false
 
-       ## Hub Configuration
+  ## Hub Configuration
   hub_participant:
     id: 1
     name: Hub
 
-       ## Timeout Configuration
+  ## Timeout Configuration
   timeout:
     expiration: '*/15 * * * * *'
     timezone: UTC
 
-       ## MongoDB Configuration for Object Store
+  ## MongoDB Configuration for Object Store
   objstore_disabled: true
   mongo_host: 'cep-mongodb'
   mongo_port: 27017
@@ -193,18 +193,18 @@ config:
   #   key: mongodb-passwords
   mongo_database: mlos
 
-       ## Kafka Configuration
+  ## Kafka Configuration
   # this can be set if the dependency chart for kafka is disabled. If 'kafka_host' is commented out, then the name of the dependency chart will be used.
   kafka_host: kafka
   kafka_port: 9092
   kafka_partitioner: 'murmur2_random'
 
-       ## Log Configuration
+  ## Log Configuration
   log_level: info
   log_filter: 'error, warn, info'
-  log_transport: file
+  log_transport: console
 
-       ## Tracing Configuration
+  ## Tracing Configuration
   event_trace_vendor: mojaloop
   event_log_filter: 'audit:*, log:warn, log:error'
   # If set to true, only the metadata object from the event will be printed.
@@ -228,7 +228,7 @@ config:
       cluster:
         - host: proxy-cache-redis
           port: 6379
-  
+
 ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
 ## e.g:
@@ -315,11 +315,11 @@ service:
   ## e.g.:
   ## clusterIP: None
   ##
-  clusterIP:
+  clusterIP: null
   ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
   ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
   ##
-  loadBalancerIP:
+  loadBalancerIP: null
   ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
   ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
   ## e.g:
@@ -353,7 +353,7 @@ ingress:
   pathType: ImplementationSpecific
   ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
   ##
-  apiVersion:
+  apiVersion: null
   ## @param ingress.hostname Default host for the ingress record
   ##
   hostname: central-ledger-timeout.local
@@ -366,7 +366,7 @@ ingress:
   ## @param ingress.annotations Additional custom annotations for the ingress record
   ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
   ##
-  annotations:
+  annotations: null
   ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
   ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
   ## You can:
@@ -387,10 +387,10 @@ ingress:
   ##   - name: transfer-api-svc.local
   ##     path: /
   ##
-  extraHosts:
-  extraPaths:
-  extraTls:
-  secrets:
+  extraHosts: null
+  extraPaths: null
+  extraTls: null
+  secrets: null
   className: "nginx"
 
 # We usually recommend not to specify default resources and to leave this as a conscious
