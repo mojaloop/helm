@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-acquirer-backend-deployment
+spec:
+  replicas: {{ .Values.acquirerBackend.replicaCount }}
+  selector:
+    matchLabels:
+      component: acquirer-backend
+  template:
+    metadata:
+      labels:
+        component: acquirer-backend
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: acquirer-backend
+          image: "{{ .Values.acquirerBackend.image.repository }}:{{ .Values.acquirerBackend.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.acquirerBackend.service.port }}
+          resources: 
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+          - name: APP_URL # for email redirect verification
+            value: "{{ .Values.acquirerBackend.env.appURL }}"
+          - name: FRONTEND_SET_PASSWORD_URL
+            value: "{{ .Values.acquirerBackend.env.frontendSetPasswordRedirectURL }}"
+          - name: RECAPTCHA_SECRET_KEY
+            value: "{{ .Values.acquirerBackend.env.recaptchaBackendSiteKey }}"
+          - name: DB_HOST
+            value: "{{ .Release.Name }}-{{ .Values.acquirerBackend.env.dbHost }}"
+          - name: DB_PORT
+            value: "{{ .Values.acquirerBackend.env.dbPort }}"
+          - name: DB_DATABASE
+            value: "{{ .Values.acquirerBackend.env.database }}"
+          - name: DB_USERNAME
+            value: "{{ .Values.acquirerBackend.env.dbUsername }}"
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-merchant-db-secret
+                key: mysql-root-password
+          - name: SENDGRID_API_KEY
+            value: "{{ .Values.acquirerBackend.env.sendgridApiKey }}"
+          - name: SENDER_EMAIL
+            value: "{{ .Values.acquirerBackend.env.senderEmail }}"
+
+          - name: S3_ENDPOINT
+            value: "{{ .Release.Name }}-{{ .Values.acquirerBackend.env.s3Endpoint }}"
+
+          - name: RABBITMQ_HOST
+            value: "{{ .Release.Name }}-{{ .Values.acquirerBackend.env.rabbitmqHost }}"
+          - name: RABBITMQ_PORT
+            value: "{{ .Values.acquirerBackend.env.rabbitmqPort }}"
+          - name: RABBITMQ_USERNAME
+            value: "{{ .Values.acquirerBackend.env.rabbitmqUsername }}"
+          - name: RABBITMQ_PASSWORD
+            value: "{{ .Values.acquirerBackend.env.rabbitmqPassword }}"

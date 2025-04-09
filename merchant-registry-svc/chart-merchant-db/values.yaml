@@ -1,0 +1,32 @@
+# Default values for merchant-db.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+merchantDb:
+  replicaCount: 1
+  image:
+    repository: mysql
+    tag: 8.0.33
+  service:
+    type: ClusterIP
+    port: 3306
+  pvc:
+    size: 2Gi
+  secret:
+    name: merchant-db-secret
+    mysqlRootPassword: "cGFzc3dvcmQ=" # make sure to base64 encode the password
+  databases:
+    - name: acquirer_db
+    - name: registry_db
+  initScript:
+    name: merchant-db-init-script
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "512Mi"
+    ephemeral-storage: "2Gi"
+
