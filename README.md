@@ -255,7 +255,7 @@ Mojaloop Helm deployments currently include the following provisioning (`setup`)
 
 1. Add the following to your hosts file and ensure you have installed Ingress Controller on your Kubernetes Cluster:
 
-    `<ip-of-k8s-node-ingress>	 ml-api-adapter.local central-ledger.local account-lookup-service.local quoting-service.local central-settlement-service.local moja-simulator.local testing-toolkit.local testing-toolkit-specapi.local`
+    `<ip-of-k8s-node-ingress>	 ml-api-adapter.local central-ledger.local account-lookup-service.local quoting-service.local central-settlement-service.local moja-simulator.local testing-toolkit.local testing-toolkit-specapi.local www.acquirer-merchant.local`
 
 2. Curl Health End-points for ML-API-Adapter
 
