@@ -1,0 +1,56 @@
+{{- if .Values.tests.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "k6-tests.fullname" . }}
+  labels:
+      {{- include "k6-tests.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: {{ .Values.tests.weight | quote }}
+    helm.sh/hook-delete-policy: {{ .Values.tests.deletePolicy }}
+spec:
+  restartPolicy: {{ .Values.restartPolicy }}
+  containers:
+    - name: k6
+      image: {{ template "k6-tests.image" . }}
+      command:
+        - sh
+        - -c
+      args:
+        - |
+          until nslookup github.com; do sleep 5;done;
+          K6_SCRIPT_CONFIG_FILE_NAME=test.json k6 run --include-system-env-vars /scripts/index.js --address=0.0.0.0:6565;
+      ports:
+        - containerPort: 6565
+          protocol: TCP
+      envFrom:
+        - configMapRef:
+            name: {{ template "common.names.fullname" . }}-env
+      volumeMounts:
+        - name: {{ template "common.names.fullname" . }}-scenarios
+          mountPath: /scripts/config-k8s
+      livenessProbe:
+        httpGet:
+          path: /v1/status
+          port: 6565
+          scheme: HTTP
+        timeoutSeconds: 5
+        periodSeconds: 10
+        successThreshold: 1
+        failureThreshold: 6
+      readinessProbe:
+        httpGet:
+          path: /v1/status
+          port: 6565
+          scheme: HTTP
+        timeoutSeconds: 5
+        periodSeconds: 10
+        successThreshold: 1
+        failureThreshold: 6
+      imagePullPolicy: IfNotPresent
+  volumes:
+    - name: {{ template "common.names.fullname" . }}-scenarios
+      configMap:
+        name: {{ template "common.names.fullname" . }}-scenarios
+{{- end}}

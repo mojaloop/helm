@@ -8,6 +8,15 @@ CONFIG:
     validCondition: "$param_validConditionV4"
     validFulfillment: "$param_validFulfillmentV4"
   original_payload_storage: &ORIGINAL_PAYLOAD_STORAGE "redis"
+  # payload_cache: &PAYLOAD_CACHE
+  #   enabled: true
+  #   type: redis
+  #   connectionConfig:
+  #     cluster:
+  #       - host: proxy-cache-redis-headless
+  #         port: 6379
+  #     host: proxy-cache-redis-headless
+  #     port: 6379
   payload_cache: &PAYLOAD_CACHE
     enabled: true
     type: redis-cluster
@@ -123,6 +132,11 @@ ml-testing-toolkit:
           transformerName: *TTK_TRANSFORMER_NAME
         inputValues:
           <<: *TTK_INPUT_VALUES_OVERRIDE
+    initContainers: []
+    config:
+      mongodb:
+        password: ''
+        secret: null
 
 ml-ttk-test-setup:
   testCaseEnvironmentFile:
@@ -156,24 +170,11 @@ ml-ttk-test-cleanup:
       <<: *TTK_INPUT_VALUES_OVERRIDE
 
 mojaloop-simulator:
-  defaults:
-    config:
-      schemeAdapter:
-        # image:
-        #   repository: localhost:32000/mojaloop/sdk-scheme-adapter
-        #   tag:  v23.6.0-snapshot.local.27
-        # diagnosticMode:
-        #   enabled: true
-        env:
-          API_TYPE: iso20022
-          ILP_VERSION: "4"
-          LOG_LEVEL: debug
-        readinessProbe:
-          enabled: false
-        livenessProbe:
-          enabled: false
-    metrics:
-      enabled: false
+  enabled: false
+centralsettlement:
+  enabled: false
+transaction-requests-service:
+  enabled: false
 
 inter-scheme-proxy-adapter:
   <<: *DISABLE_PROBES
