@@ -10,6 +10,7 @@ This chart includes the following components:
 
 - An existing Mojaloop deployment (Note: this test harness assumes mojaloop is deployed in the `demo` namespace).
 - Helm 3.x
+- TTK setup collection to be executed in the `demo` namespace. (Ex: `helm -n demo test moja`)
 
 ## Setup
 
