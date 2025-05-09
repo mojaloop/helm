@@ -30,6 +30,7 @@ env:
 #   K6_PROMETHEUS_RW_SERVER_URL: http://prom-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090/api/v1/write
 #   K6_OUT: experimental-prometheus-rw
 
+  K6_SCRIPT_CONFIG_FILE_NAME: fspiopE2E.json
   K6_SCRIPT_CONFIG_FOLDER_NAME: config-k8s
   K6_SCRIPT_FSPIOP_FSP_POOL: '[{"partyId":19012345001,"fspId":"perffsp-1","wsUrl":"ws://perf-perffsp-1:3002"},{"partyId":19012345002,"fspId":"perffsp-2","wsUrl":"ws://perf-perffsp-2:3002"},{"partyId":19012345003,"fspId":"perffsp-3","wsUrl":"ws://perf-perffsp-3:3002"},{"partyId":19012345004,"fspId":"perffsp-4","wsUrl":"ws://perf-perffsp-4:3002"},{"partyId":19012345005,"fspId":"perffsp-5","wsUrl":"ws://perf-perffsp-5:3002"},{"partyId":19012345006,"fspId":"perffsp-6","wsUrl":"ws://perf-perffsp-6:3002"},{"partyId":19012345007,"fspId":"perffsp-7","wsUrl":"ws://perf-perffsp-7:3002"},{"partyId":19012345008,"fspId":"perffsp-8","wsUrl":"ws://perf-perffsp-8:3002"}]'
   K6_SCRIPT_WS_TIMEOUT_MS: '15000'
@@ -49,6 +50,11 @@ env:
   K6_SCRIPT_FSPIOP_TRANSFERS_CURRENCY: XXX
   K6_SCRIPT_FSPIOP_TRANSFERS_TARGET_CURRENCY: XTS
 
+  K6_SCRIPT_FX_E2E_SOURCE_AMOUNT: '2'
+  K6_SCRIPT_FX_E2E_SOURCE_CURRENCY: XXX
+  K6_SCRIPT_FX_E2E_TARGET_AMOUNT: '3'
+  K6_SCRIPT_FX_E2E_TARGET_CURRENCY: XTS
+
   K6_SCRIPT_ID_TYPE: 'MSISDN'
 
   API_TYPE: iso20022
@@ -64,10 +70,10 @@ scenarios:
           "env": {
             "UNIDIRECTIONAL": "false"
           },
-          "startVUs": 5,
+          "startVUs": 1,
           "stages": [
-            { "duration": "30s", "target": 300 },
-            { "duration": "2m", "target": 300 }
+            { "duration": "30s", "target": 30 },
+            { "duration": "5m", "target": 30 }
           ]
         }
       },
@@ -76,6 +82,28 @@ scenarios:
         "iteration_duration": [ "avg<9000" ],
         "http_req_failed": [ "rate<0.01" ],
         "http_req_duration": [ "avg<5000" ]
+      }
+    }
+  fxSendE2E.json: |
+    {
+      "scenarios": {
+        "fxSendE2E": {
+          "executor": "ramping-vus",
+          "exec": "fxSendE2EScenarios",
+          "env": {
+            "UNIDIRECTIONAL": "false"
+          },
+          "startVUs": 1,
+          "stages": [
+            { "duration": "30s", "target": 30 },
+            { "duration": "5m", "target": 30 }
+          ]
+        }
+      },
+      "thresholds": {
+        "iteration_duration": [ "p(95)<1000" ],
+        "http_req_failed": [ "rate<0.01" ],
+        "http_req_duration": [ "p(95)<1000" ]
       }
     }
   fspiopDiscovery.json: |
@@ -253,7 +281,7 @@ containerSecurityContext:
 image:
   registry: docker.io
   repository: mojaloop/ml-core-test-harness
-  tag: v2.2.1
+  tag: v2.3.0
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
