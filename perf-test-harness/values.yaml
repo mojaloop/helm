@@ -37,6 +37,11 @@ perffsp-8:
   env:
     CBH_FSPIOP_FSP_ID: perffsp-8
 
+perffxp:
+  enabled: true
+  env:
+    CBH_FSPIOP_FSP_ID: perffxp
+
 
 ml-ttk-test-setup:
   tests:
@@ -46,7 +51,7 @@ ml-ttk-test-setup:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     # testCasesZipUrl: https://github.com/mojaloop/ml-core-test-harness/archive/refs/heads/main.zip
     testCasesZipUrl: https://github.com/mojaloop/ml-core-test-harness/archive/refs/tags/v2.2.1.zip
-    testCasesPathInZip: ml-core-test-harness-2.2.1/docker/ml-testing-toolkit/test-cases/collections/provisioning/participants_perf
+    testCasesPathInZip: ml-core-test-harness-2.3.0/docker/ml-testing-toolkit/test-cases/collections/provisioning/participants_perf,tmp_test_cases/ml-core-test-harness-2.3.0/docker/ml-testing-toolkit/test-cases/collections/provisioning/fxp.json
     ttkBackendURL: http://moja-ml-testing-toolkit-backend.demo.svc.cluster.local:5050
     testSuiteName: Perf Provisioning Collection
     environmentName: Development
@@ -94,7 +99,7 @@ ml-ttk-test-setup:
       "PERF_FSP6_ADDRESS": "19012345006",
       "PERF_FSP7_ADDRESS": "19012345007",
       "PERF_FSP8_ADDRESS": "19012345008",
-      "PERF_FXP_CALLBACK_ENDPOINT_BASE_URL": "http://perf-perffxp-1/fxp",
+      "PERF_FXP_CALLBACK_ENDPOINT_BASE_URL": "http://perf-perffxp/fxp",
       "PERF_FSP1_CALLBACK_ENDPOINT_BASE_URL": "http://perf-perffsp-1/fspiop",
       "PERF_FSP2_CALLBACK_ENDPOINT_BASE_URL": "http://perf-perffsp-2/fspiop",
       "PERF_FSP3_CALLBACK_ENDPOINT_BASE_URL": "http://perf-perffsp-3/fspiop",
@@ -109,41 +114,28 @@ k6-tests:
   tests:
     enabled: true
     weight: -8
+  env:
+    K6_SCRIPT_CONFIG_FILE_NAME: test.json
   scenarios:
-    # test.json: |
-    #   {
-    #     "scenarios": {
-    #       "test": {
-    #         "executor": "shared-iterations",
-    #         "exec": "fspiopE2EScenarios",
-    #         "env": {
-    #           "UNIDIRECTIONAL": "false"
-    #         },
-    #         "vus": 1,
-    #         "iterations": 1
-    #       }
-    #     }
-    #   }
     test.json: |
       {
         "scenarios": {
-          "fspiopE2E": {
+          "fxSendE2E": {
             "executor": "ramping-vus",
-            "exec": "fspiopE2EScenarios",
+            "exec": "fxSendE2EScenarios",
             "env": {
               "UNIDIRECTIONAL": "false"
             },
-            "startVUs": 5,
+            "startVUs": 1,
             "stages": [
-              { "duration": "30s", "target": 300 },
-              { "duration": "2m", "target": 300 }
+              { "duration": "30s", "target": 30 },
+              { "duration": "5m", "target": 30 }
             ]
           }
         },
         "thresholds": {
-          "checks": [ "rate>0.99" ],
-          "iteration_duration": [ "avg<9000" ],
+          "iteration_duration": [ "p(95)<1000" ],
           "http_req_failed": [ "rate<0.01" ],
-          "http_req_duration": [ "avg<5000" ]
+          "http_req_duration": [ "p(95)<1000" ]
         }
       }
