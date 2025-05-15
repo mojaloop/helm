@@ -1,0 +1,23 @@
+{{- if not .Values.ui.disabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "connection-manager.fullname" . }}-ui
+  labels:
+    app.kubernetes.io/component: ui
+{{ include "connection-manager.labels" . | indent 4 }}
+spec:
+  type: "NodePort"
+  ports:
+    {{- with .Values.ui }}
+    - name: {{ .ports.containerPort | quote }}
+      port: {{ .ports.containerPort }}
+      targetPort: {{ .ports.containerPort }}
+      nodePort: {{ .ports.nodePort }} 
+    {{- end }}
+  selector:
+    app.kubernetes.io/name: {{ include "connection-manager.fullname" . }}-ui
+    app.kubernetes.io/instance: {{ .Release.Name }}
+status:
+  loadBalancer: {}
+{{- end -}}
