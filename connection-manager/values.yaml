@@ -1,0 +1,200 @@
+api:
+  disabled: false
+  image:
+    name: ghcr.io/modusbox/connection-manager-api
+    version: v1.9.6
+  ports:
+    containerPort: 3001
+    nodePort: 31057
+  oauth:
+    enabled: "FALSE"
+    issuer: https://localhost/oauth2/token
+    key: mysecretkey
+    secret: changeme
+    resetPassword:
+      issuer: https://localhost/scim2/Users
+      user: myuser
+      pass: changeme
+  url: https://localhost
+  auth2fa:
+    enabled: "FALSE"
+  totp:
+    admin:
+      issuer: https://localhost/totp
+      user: myuser
+      password: changeme
+    label: MCM
+    issuer: MCM
+  wso2:
+    manager:
+      service:
+        url: https://localhost:9443/services/RemoteUserStoreManagerService.RemoteUserStoreManagerServiceHttpsSoap12Endpoint
+        user: myuser
+        pass: changeme
+  extraTLS:
+    certChain:
+      enabled: 0
+      stringValue: this_is_a_default
+    rootCert:
+      enabled: 0
+      stringValue: this_is_a_default
+  wso2TokenIssuer:
+    cert:
+      enabled: 0
+      stringValue: this_is_a_default
+    embeddedCertificate:
+      enabled: 0
+      stringValue: this_is_a_default
+  switchFQDN: switch.example.com
+  certManager:
+    enabled: false
+    serverCertSecretName: dummy
+    serverCertSecretNamespace: dummy
+  vault:
+    auth:
+      k8s:
+        enabled: true
+        token: /var/run/secrets/kubernetes.io/serviceaccount/token
+        mountPoint: kubernetes
+        role: demo
+      appRole:
+        enabled: false
+        roleId: /vault/role-id
+        roleSecretId: /vault/role-secret-id
+    endpoint: http://vault:8200
+    mounts:
+      pki: pki
+      intermediatePki: pki_int
+      kv: secrets
+      dfspClientCertBundle: secret/onboarding_pm4mls
+      dfspInternalIPWhitelistBundle: secret/whitelist_pm4mls
+      dfspExternalIPWhitelistBundle: secret/whitelist_fsps
+    pkiServerRole: server-role
+    pkiClientRole: client-role
+    signExpiryHours: 43800
+    keyLength: 2048
+  serviceAccount:
+    externallyManaged: false
+    serviceAccountNameOverride: null
+  rbac:
+    enabled: true
+  annotations: {}
+
+ui:
+  disabled: false
+  checkSessionUrl: ''
+  loginUrl: ''
+  loginProvider: ''
+  logoutUrl: ''
+  image:
+    name: ghcr.io/pm4ml/connection-manager-ui
+    version: 1.8.4
+  ports:
+    containerPort: 8080
+    nodePort: 31627
+  oauth:
+    enabled: false
+    hubOidcProviderUrl: https://changeme
+    clientId: mcm-portal
+    clientSecret: changeme
+#    clientSecretName: changeme
+#    clientSecretKey: changeme
+
+migrations:
+  enabled: true
+
+db:
+  user: mcm
+  password: changeme
+  host: localhost
+  port: 3306
+  schema: mcm
+
+ingress:
+  enabled: true
+  host: localhost
+  annotations: {}
+  tls: []
+  pathType: ImplementationSpecific
+  className: "nginx"
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+# development friendly variables
+imagePullPolicy: IfNotPresent
+
+config:
+  tlsClientCSRParametersData: |-
+    {
+      "subject": {
+        "CN": "test_client_mcm",
+        "E": "mcm@test.com",
+        "O": "test",
+        "OU": "test",
+        "C": "US",
+        "ST": "test",
+        "L": "test"
+      },
+      "extensions": {
+        "subjectAltName": {
+          "dns": [
+          ],
+          "ips": [
+          ]
+        }
+      }
+    }
+  tlsServerCSRParametersData: |-
+    {
+      "subject": {
+        "CN": "test_client_mcm",
+        "E": "mcm@test.com",
+        "O": "test",
+        "OU": "test",
+        "C": "US",
+        "ST": "test",
+        "L": "test"
+      },
+      "extensions": {
+        "subjectAltName": {
+          "dns": [
+          ],
+          "ips": [
+          ]
+        }
+      }
+    }
+  caCSRParametersData: |-
+    {
+      "CN": "CA",
+      "E": "ca@test.com",
+      "O": "test",
+      "OU": "test",
+      "C": "US",
+      "ST": "test",
+      "L": "test"
+    }
+
+tests:
+  api:
+    enabled: true
+    weight: -5
+    deletePolicy: before-hook-creation
+    script: "https://raw.githubusercontent.com/modusbox/connection-manager-api/{{ .Values.api.image.version }}/scripts/run-functional-tests.sh"
+    git:
+      url: https://github.com/modusbox/connection-manager-api.git
+      tag: "{{ .Values.api.image.version }}"
+    targetDirectory: /tmp/tests
+    nvm:
+      version: v0.39.1
+    # Configuration Ref: https://github.com/modusbox/connection-manager-api/tree/master/functional-tests#configuration
+    env:
+      # MCM API URL e.g. http(s)://<host>:<port>/api
+      APP_ENDPOINT: 'http://{{ include "connection-manager.fullname" . }}-api:3001/api'
+      # MCM OAuth Client Key
+      APP_OAUTH_CLIENT_KEY: '{{ if eq (.Values.api.oauth.enabled | toString | lower) "true" }}{{ .Values.api.oauth.key }}{{ end }}'
+      # MCM OAuth Client Secret
+      APP_OAUTH_CLIENT_SECRET: '{{ if eq (.Values.api.oauth.enabled | toString | lower) "true" }}{{ .Values.api.oauth.secret }}{{ end }}'
+      # OAuth Issuer URL e.g. http(s)://<host>:<port>/oauth2/token
+      # Note: `client_credentials` grant_type must be supported
+      OAUTH2_ISSUER: '{{ if eq (.Values.api.oauth.enabled | toString | lower) "true" }}{{ .Values.api.oauth.issuer }}{{ end }}'

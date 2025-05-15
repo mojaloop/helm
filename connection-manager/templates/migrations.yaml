@@ -1,0 +1,55 @@
+{{- if .Values.migrations.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{.Release.Name}}-migration-job
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: "{{ .Release.Name }}-migration-job"
+      labels:
+        app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    spec:
+      containers:
+      - name: db-migration
+          {{- with .Values.api }}
+        image: "{{ .image.name }}:{{ .image.version }}"
+          {{- end }}
+        command:
+        - /usr/local/bin/npm
+        args:
+        - run
+        - migrate-and-seed
+        env:
+        - name: DATABASE_HOST
+          value: {{ .Values.db.host }}
+        - name: DATABASE_USER
+          value: {{ .Values.db.user }}
+        {{- if .Values.db.passwordSecret }}
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.db.passwordSecret }}
+              key: {{ .Values.db.passwordSecretKey }}
+        {{- else }}
+        - name: DATABASE_PASSWORD
+          value: {{ .Values.db.password }}
+        {{- end }}
+        - name: DATABASE_SCHEMA
+          value: {{ .Values.db.schema }}
+        - name: DATABASE_PORT
+          value: {{ .Values.db.port | quote }}
+      restartPolicy: OnFailure
+  backoffLimit: 20
+{{- end}}
