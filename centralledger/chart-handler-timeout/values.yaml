@@ -9,7 +9,7 @@ global: {}
 image:
   registry: docker.io
   repository: mojaloop/central-ledger
-  tag: v19.4.3
+  tag: v19.6.0
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -225,6 +225,20 @@ config:
     enabled: false
     type: redis-cluster
     proxyConfig:
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
+
+  distLockConfig:
+    enabled: false
+    lockTimeout: 10000
+    acquireTimeout: 5000
+    driftFactor: 0.01
+    retryCount: 3
+    retryDelay: 200
+    retryJitter: 100
+    redisConfigs:
+    - type: redis-cluster
       cluster:
         - host: proxy-cache-redis
           port: 6379
