@@ -6,7 +6,7 @@ const seedsDirectory = '/opt/app/seeds'
 const Config = require('/opt/app/src/lib/config')
 
 module.exports = {
-    client: 'mysql',
+    client: 'mysql2',
     connection: Config.DATABASE.connection,
     pool: Config.DATABASE.pool,
     migrations: {
