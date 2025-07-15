@@ -15,6 +15,14 @@ CONFIG:
   als_db_port: &ALS_DB_PORT 3306
   als_db_user: &ALS_DB_USER "account_lookup"
 
+  als_db_additional_connection_options: &ALS_DB_ADDITIONAL_CONNECTION_OPTIONS {}
+  als_db_ssl_enabled: &ALS_DB_SSL_ENABLED false
+  als_db_ssl_verify: &ALS_DB_SSL_VERIFY false
+  als_db_ssl_ca_secret: &ALS_DB_SSL_CA_SECRET null
+  # als_db_ssl_ca_secret: &ALS_DB_SSL_CA_SECRET
+  #   name: &ALS_DB_SSL_CA_SECRET_NAME mysqldb
+  #   key: &ALS_DB_SSL_CA_SECRET_KEY mysql-ca-cert
+
   ## ALS MSISDN Oracle
   als_msisdn_oracle_db_name: &ALS_ORACLE_DB_NAME "oracle_msisdn"
   als_msisdn_oracle_db_password: &ALS_ORACLE_DB_PASSWORD ''
@@ -24,6 +32,14 @@ CONFIG:
   als_msisdn_oracle_db_host: &ALS_ORACLE_DB_HOST 'mysqldb'
   als_msisdn_oracle_db_port: &ALS_ORACLE_DB_PORT 3306
   als_msisdn_oracle_db_user: &ALS_ORACLE_DB_USER "oracle_msisdn"
+
+  als_msisdn_oracle_db_additional_connection_options: &ALS_ORACLE_DB_ADDITIONAL_CONNECTION_OPTIONS {}
+  als_msisdn_oracle_db_ssl_enabled: &ALS_ORACLE_DB_SSL_ENABLED false
+  als_msisdn_oracle_db_ssl_verify: &ALS_ORACLE_DB_SSL_VERIFY false
+  als_msisdn_oracle_db_ssl_ca_secret: &ALS_ORACLE_DB_SSL_CA_SECRET null
+  # als_msisdn_oracle_db_ssl_ca_secret: &ALS_ORACLE_DB_SSL_CA_SECRET
+  #   name: &ALS_ORACLE_DB_SSL_CA_SECRET_NAME mysqldb
+  #   key: &ALS_ORACLE_DB_SSL_CA_SECRET_KEY mysql-ca-cert
 
   ## CENTRAL-LEDGER BACKEND
   cl_db_name: &CL_DB_NAME "central_ledger"
@@ -35,6 +51,14 @@ CONFIG:
   cl_db_port: &CL_DB_PORT 3306
   cl_db_user: &CL_DB_USER "central_ledger"
   cl_payee_participant_currency_validation_enabled: &PAYEE_PARTICIPANT_CURRENCY_VALIDATION_ENABLED true
+
+  cl_db_additional_connection_options: &CL_DB_ADDITIONAL_CONNECTION_OPTIONS {}
+  cl_db_ssl_enabled: &CL_DB_SSL_ENABLED false
+  cl_db_ssl_verify: &CL_DB_SSL_VERIFY false
+  cl_db_ssl_ca_secret: &CL_DB_SSL_CA_SECRET null
+  # cl_db_ssl_ca_secret: &CL_DB_SSL_CA_SECRET
+  #   name: &CL_DB_SSL_CA_SECRET_NAME mysqldb
+  #   key: &CL_DB_SSL_CA_SECRET_KEY mysql-ca-cert
 
   ## KAFKA BACKEND
   kafka_host: &KAFKA_HOST 'kafka'
@@ -159,7 +183,7 @@ account-lookup-service:
     image:
       registry: docker.io
       repository: mojaloop/account-lookup-service
-      tag: v17.7.1
+      tag: v17.12.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -280,6 +304,12 @@ account-lookup-service:
       db_debug: false
       display_routes: true
       run_migrations: false
+      db_additional_connection_options: *ALS_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *ALS_DB_SSL_ENABLED
+      db_ssl_verify: *ALS_DB_SSL_VERIFY
+      db_ssl_ca_secret: *ALS_DB_SSL_CA_SECRET
 
       endpointSecurity:
         jwsSign: true
@@ -340,50 +370,11 @@ account-lookup-service:
       ## ISO20022 configuration
       api_type: *API_TYPE
 
-    # @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
-    # ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    # e.g:
-    # initContainers:
-    #  - name: your-image-name
-    #    image: your-image
-    #    imagePullPolicy: Always
-    #    command: ['sh', '-c', 'echo "hello world"']
-    #
+    ## @param initContainers
+    ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
     # initContainers: []
-    initContainers: |
-      - name: wait-for-mysql
-        image: mysql:9.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-            do
-              echo --------------------;
-              echo Waiting for MySQL...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MySQL ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.db_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.db_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.db_user }}'
-          - name: DB_PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.db_database }}'
 
     service:
       internalPort: 4002
@@ -518,7 +509,7 @@ account-lookup-service:
     image:
       registry: docker.io
       repository: mojaloop/account-lookup-service
-      tag: v17.7.1
+      tag: v17.12.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -633,6 +624,12 @@ account-lookup-service:
       db_reap_interval_millis: 1000
       db_create_retry_interval_millis: 200
       db_debug: false
+      db_additional_connection_options: *ALS_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *ALS_DB_SSL_ENABLED
+      db_ssl_verify: *ALS_DB_SSL_VERIFY
+      db_ssl_ca_secret: *ALS_DB_SSL_CA_SECRET
 
       endpointSecurity:
         jwsSign: false
@@ -678,72 +675,11 @@ account-lookup-service:
 
       proxy_cache: *PROXY_CACHE
 
-    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
-    ##
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
     # initContainers: []
-    initContainers: |
-      - name: wait-for-mysql
-        image: mysql:9.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ;
-            do
-              echo --------------------;
-              echo Waiting for MySQL...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MySQL ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.db_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.db_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.db_user }}'
-          - name: DB_PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.db_database }}'
-      - name: run-migration
-        image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - npm run migrate
-        env:
-          - name: ALS_MIGRATIONS__RUN_DATA_MIGRATIONS
-            value: 'true'
-          - name: ALS_DATABASE__PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-        volumeMounts:
-          - name: '{{ template "account-lookup-service-admin.fullname" . }}-config-volume'
-            mountPath: /opt/app/config
 
     service:
       internalPort: 4001
@@ -876,7 +812,7 @@ account-lookup-service:
     image:
       registry: docker.io
       repository: mojaloop/account-lookup-service
-      tag: v17.7.1
+      tag: v17.12.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -997,6 +933,12 @@ account-lookup-service:
       # db_debug: false
       display_routes: true
       # run_migrations: false
+      # db_additional_connection_options: *ALS_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      # ## SSL Configuration
+      # db_ssl_enabled: *ALS_DB_SSL_ENABLED
+      # db_ssl_verify: *ALS_DB_SSL_VERIFY
+      # db_ssl_ca_secret: *ALS_DB_SSL_CA_SECRET
 
       endpointSecurity:
         jwsSign: true
@@ -1064,50 +1006,11 @@ account-lookup-service:
           TIMEZONE: "UTC"
           BATCH_SIZE: 100
 
-    # @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
-    # ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    # e.g:
-    # initContainers:
-    #  - name: your-image-name
-    #    image: your-image
-    #    imagePullPolicy: Always
-    #    command: ['sh', '-c', 'echo "hello world"']
-    #
-    initContainers: []
-    # initContainers: |
-    #   - name: wait-for-mysql
-    #     image: mysql:9.0.1
-    #     imagePullPolicy: IfNotPresent
-    #     command:
-    #       - sh
-    #       - -c
-    #       - |
-    #         until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-    #         do
-    #           echo --------------------;
-    #           echo Waiting for MySQL...;
-    #           sleep 2;
-    #         done;
-    #         echo ====================;
-    #         echo MySQL ok!;
-    #     env:
-    #       - name: DB_HOST
-    #         value: '{{ .Values.config.db_host }}'
-    #       - name: DB_PORT
-    #         value: '{{ .Values.config.db_port }}'
-    #       - name: DB_USER
-    #         value: '{{ .Values.config.db_user }}'
-    #       - name: DB_PASSWORD
-    #         {{- if .Values.config.db_secret }}
-    #         valueFrom:
-    #             secretKeyRef:
-    #               name: '{{ .Values.config.db_secret.name }}'
-    #               key: '{{ .Values.config.db_secret.key }}'
-    #         {{- else }}
-    #         value: {{ .Values.config.db_password }}
-    #         {{- end }}
-    #       - name: DB_DATABASE
-    #         value: '{{ .Values.config.db_database }}'
+    ## @param initContainers
+    ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
+    # initContainers: []
 
     service:
       internalPort: 4003
@@ -1664,7 +1567,7 @@ quoting-service:
     image:
       registry: docker.io
       repository: mojaloop/quoting-service
-      tag: v17.7.1
+      tag: v17.11.0-snapshot.0
 
     config:
       hub_participant: *HUB_PARTICIPANT
@@ -1696,6 +1599,13 @@ quoting-service:
       db_reap_interval_millis: 1000
       db_create_retry_interval_millis: 200
       db_debug: false
+      db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *CL_DB_SSL_ENABLED
+      db_ssl_verify: *CL_DB_SSL_VERIFY
+      db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
+
       simple_routing_mode_enabled: true
       log_level: info
       log_transport: console
@@ -1774,7 +1684,7 @@ quoting-service:
     image:
       registry: docker.io
       repository: mojaloop/quoting-service
-      tag: v17.7.1
+      tag: v17.11.0-snapshot.0
 
     config:
       hub_participant: *HUB_PARTICIPANT
@@ -2526,7 +2436,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.7.0
+      tag: v19.8.0-snapshot.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2631,7 +2541,7 @@ centralledger:
       # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
       db_type: 'mysql'
       # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-      db_driver: 'mysql'
+      db_driver: 'mysql2'
       db_host: *CL_DB_HOST
       db_port: *CL_DB_PORT
       db_user: *CL_DB_USER
@@ -2655,6 +2565,12 @@ centralledger:
       db_reap_interval_millis: 1000
       db_create_retry_interval_millis: 200
       db_debug: false
+      db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *CL_DB_SSL_ENABLED
+      db_ssl_verify: *CL_DB_SSL_VERIFY
+      db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
 
       ## Log Configuration
       log_level: info
@@ -2677,50 +2593,12 @@ centralledger:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
-    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
-    ##
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
     # initContainers: []
-    initContainers: |
-      - name: wait-for-mysql
-        image: mysql:9.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ;
-            do
-              echo --------------------;
-              echo Waiting for MySQL...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MySQL ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.db_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.db_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.db_user }}'
-          - name: DB_PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.db_database }}'
+
 
     service:
       internalPort: 3001
@@ -2844,7 +2722,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.7.0
+      tag: v19.8.0-snapshot.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2951,7 +2829,7 @@ centralledger:
       # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
       db_type: 'mysql'
       # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-      db_driver: 'mysql'
+      db_driver: 'mysql2'
       db_host: *CL_DB_HOST
       db_port: *CL_DB_PORT
       db_user: *CL_DB_USER
@@ -2975,6 +2853,12 @@ centralledger:
       db_reap_interval_millis: 1000
       db_create_retry_interval_millis: 200
       db_debug: false
+      db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *CL_DB_SSL_ENABLED
+      db_ssl_verify: *CL_DB_SSL_VERIFY
+      db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
 
       ## Log Configuration
       log_level: info
@@ -3000,69 +2884,11 @@ centralledger:
       ## Enable On-Us transfers
       enable_on_us_transfers: false
 
-    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
-    ##
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
     # initContainers: []
-    initContainers: |
-      - name: wait-for-kafka
-        image: solsson/kafka:2.8.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-            do
-              echo --------------------;
-              echo Waiting for Kafka...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo Kafka ok!;
-        env:
-          - name: KAFKA_HOST
-            value: '{{ .Values.config.kafka_host }}'
-          - name: KAFKA_PORT
-            value: '{{ .Values.config.kafka_port }}'
-      - name: wait-for-mysql
-        image: mysql:9.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-            do
-              echo --------------------;
-              echo Waiting for MySQL...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MySQL ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.db_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.db_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.db_user }}'
-          - name: DB_PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.db_database }}'
 
     service:
       internalPort: 3001
@@ -3186,7 +3012,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.7.0
+      tag: v19.8.0-snapshot.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3293,7 +3119,7 @@ centralledger:
       # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
       db_type: 'mysql'
       # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-      db_driver: 'mysql'
+      db_driver: 'mysql2'
       db_host: *CL_DB_HOST
       db_port: *CL_DB_PORT
       db_user: *CL_DB_USER
@@ -3317,6 +3143,12 @@ centralledger:
       db_reap_interval_millis: 1000
       db_create_retry_interval_millis: 200
       db_debug: false
+      db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *CL_DB_SSL_ENABLED
+      db_ssl_verify: *CL_DB_SSL_VERIFY
+      db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
 
       ## Log Configuration
       log_level: info
@@ -3339,69 +3171,11 @@ centralledger:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
-    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
-    ##
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
     # initContainers: []
-    initContainers: |
-      - name: wait-for-kafka
-        image: solsson/kafka:2.8.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-            do
-              echo --------------------;
-              echo Waiting for Kafka...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo Kafka ok!;
-        env:
-          - name: KAFKA_HOST
-            value: '{{ .Values.config.kafka_host }}'
-          - name: KAFKA_PORT
-            value: '{{ .Values.config.kafka_port }}'
-      - name: wait-for-mysql
-        image: mysql:9.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-            do
-              echo --------------------;
-              echo Waiting for MySQL...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MySQL ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.db_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.db_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.db_user }}'
-          - name: DB_PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.db_database }}'
 
     service:
       internalPort: 3001
@@ -3526,7 +3300,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.7.0
+      tag: v19.8.0-snapshot.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3633,7 +3407,7 @@ centralledger:
       # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
       db_type: 'mysql'
       # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-      db_driver: 'mysql'
+      db_driver: 'mysql2'
       db_host: *CL_DB_HOST
       db_port: *CL_DB_PORT
       db_user: *CL_DB_USER
@@ -3657,6 +3431,12 @@ centralledger:
       db_reap_interval_millis: 1000
       db_create_retry_interval_millis: 200
       db_debug: false
+      db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *CL_DB_SSL_ENABLED
+      db_ssl_verify: *CL_DB_SSL_VERIFY
+      db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
 
       ## Log Configuration
       log_level: info
@@ -3685,69 +3465,11 @@ centralledger:
       # Maximum amount of time to wait for a messages to be received by consumer.
       batch_consume_timeout_in_ms: 10
 
-    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
-    ##
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
     # initContainers: []
-    initContainers: |
-      - name: wait-for-kafka
-        image: solsson/kafka:2.8.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-            do
-              echo --------------------;
-              echo Waiting for Kafka...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo Kafka ok!;
-        env:
-          - name: KAFKA_HOST
-            value: '{{ .Values.config.kafka_host }}'
-          - name: KAFKA_PORT
-            value: '{{ .Values.config.kafka_port }}'
-      - name: wait-for-mysql
-        image: mysql:9.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-            do
-              echo --------------------;
-              echo Waiting for MySQL...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MySQL ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.db_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.db_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.db_user }}'
-          - name: DB_PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.db_database }}'
 
     service:
       internalPort: 3001
@@ -3871,7 +3593,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.7.0
+      tag: v19.8.0-snapshot.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3978,7 +3700,7 @@ centralledger:
       # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
       db_type: 'mysql'
       # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-      db_driver: 'mysql'
+      db_driver: 'mysql2'
       db_host: *CL_DB_HOST
       db_port: *CL_DB_PORT
       db_user: *CL_DB_USER
@@ -4002,6 +3724,12 @@ centralledger:
       db_reap_interval_millis: 1000
       db_create_retry_interval_millis: 200
       db_debug: false
+      db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *CL_DB_SSL_ENABLED
+      db_ssl_verify: *CL_DB_SSL_VERIFY
+      db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
 
       ## Log Configuration
       log_level: info
@@ -4024,69 +3752,11 @@ centralledger:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
-    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
-    ##
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
     # initContainers: []
-    initContainers: |
-      - name: wait-for-kafka
-        image: solsson/kafka:2.8.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-            do
-              echo --------------------;
-              echo Waiting for Kafka...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo Kafka ok!;
-        env:
-          - name: KAFKA_HOST
-            value: '{{ .Values.config.kafka_host }}'
-          - name: KAFKA_PORT
-            value: '{{ .Values.config.kafka_port }}'
-      - name: wait-for-mysql
-        image: mysql:9.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-            do
-              echo --------------------;
-              echo Waiting for MySQL...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MySQL ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.db_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.db_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.db_user }}'
-          - name: DB_PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.db_database }}'
 
     service:
       internalPort: 3001
@@ -4210,7 +3880,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.7.0
+      tag: v19.8.0-snapshot.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -4317,7 +3987,7 @@ centralledger:
       # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
       db_type: 'mysql'
       # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-      db_driver: 'mysql'
+      db_driver: 'mysql2'
       db_host: *CL_DB_HOST
       db_port: *CL_DB_PORT
       db_user: *CL_DB_USER
@@ -4341,6 +4011,12 @@ centralledger:
       db_reap_interval_millis: 1000
       db_create_retry_interval_millis: 200
       db_debug: false
+      db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *CL_DB_SSL_ENABLED
+      db_ssl_verify: *CL_DB_SSL_VERIFY
+      db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
 
       ## Log Configuration
       log_level: info
@@ -4363,69 +4039,11 @@ centralledger:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
-    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
-    ##
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
     # initContainers: []
-    initContainers: |
-      - name: wait-for-kafka
-        image: solsson/kafka:2.8.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-            do
-              echo --------------------;
-              echo Waiting for Kafka...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo Kafka ok!;
-        env:
-          - name: KAFKA_HOST
-            value: '{{ .Values.config.kafka_host }}'
-          - name: KAFKA_PORT
-            value: '{{ .Values.config.kafka_port }}'
-      - name: wait-for-mysql
-        image: mysql:9.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-            do
-              echo --------------------;
-              echo Waiting for MySQL...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MySQL ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.db_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.db_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.db_user }}'
-          - name: DB_PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.db_database }}'
 
     service:
       internalPort: 3001
@@ -4549,7 +4167,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.7.0
+      tag: v19.8.0-snapshot.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -4656,7 +4274,7 @@ centralledger:
       # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
       db_type: 'mysql'
       # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-      db_driver: 'mysql'
+      db_driver: 'mysql2'
       db_host: *CL_DB_HOST
       db_port: *CL_DB_PORT
       db_user: *CL_DB_USER
@@ -4680,6 +4298,12 @@ centralledger:
       db_reap_interval_millis: 1000
       db_create_retry_interval_millis: 200
       db_debug: false
+      db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *CL_DB_SSL_ENABLED
+      db_ssl_verify: *CL_DB_SSL_VERIFY
+      db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
 
       ## Timeout Configuration
       timeout:
@@ -4707,69 +4331,11 @@ centralledger:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
-    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
-    ##
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
     # initContainers: []
-    initContainers: |
-      - name: wait-for-kafka
-        image: solsson/kafka:2.8.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-            do
-              echo --------------------;
-              echo Waiting for Kafka...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo Kafka ok!;
-        env:
-          - name: KAFKA_HOST
-            value: '{{ .Values.config.kafka_host }}'
-          - name: KAFKA_PORT
-            value: '{{ .Values.config.kafka_port }}'
-      - name: wait-for-mysql
-        image: mysql:9.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-            do
-              echo --------------------;
-              echo Waiting for MySQL...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MySQL ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.db_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.db_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.db_user }}'
-          - name: DB_PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.db_database }}'
 
     service:
       internalPort: 3001
@@ -4893,7 +4459,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.7.0
+      tag: v19.8.0-snapshot.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -5000,7 +4566,7 @@ centralledger:
       # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
       db_type: 'mysql'
       # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-      db_driver: 'mysql'
+      db_driver: 'mysql2'
       db_host: *CL_DB_HOST
       db_port: *CL_DB_PORT
       db_user: *CL_DB_USER
@@ -5024,6 +4590,12 @@ centralledger:
       db_reap_interval_millis: 1000
       db_create_retry_interval_millis: 200
       db_debug: false
+      db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *CL_DB_SSL_ENABLED
+      db_ssl_verify: *CL_DB_SSL_VERIFY
+      db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
 
       ## Log Configuration
       log_level: info
@@ -5046,69 +4618,11 @@ centralledger:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
-    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
-    ##
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
     # initContainers: []
-    initContainers: |
-      - name: wait-for-kafka
-        image: solsson/kafka:2.8.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-            do
-              echo --------------------;
-              echo Waiting for Kafka...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo Kafka ok!;
-        env:
-          - name: KAFKA_HOST
-            value: '{{ .Values.config.kafka_host }}'
-          - name: KAFKA_PORT
-            value: '{{ .Values.config.kafka_port }}'
-      - name: wait-for-mysql
-        image: mysql:9.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-            do
-              echo --------------------;
-              echo Waiting for MySQL...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MySQL ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.db_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.db_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.db_user }}'
-          - name: DB_PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.db_database }}'
 
     service:
       internalPort: 3001
@@ -5231,7 +4745,7 @@ centralsettlement:
     image:
       registry: docker.io
       repository: mojaloop/central-settlement
-      tag: v17.0.6
+      tag: v17.2.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -5447,6 +4961,13 @@ centralsettlement:
       db_reap_interval_millis: 1000
       db_create_retry_interval_millis: 200
       db_debug: false
+      db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *CL_DB_SSL_ENABLED
+      db_ssl_verify: *CL_DB_SSL_VERIFY
+      db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
+
       # Api Handler Configuration
       handlers:
         disabled: true
@@ -5477,69 +4998,11 @@ centralsettlement:
         include_cause_extension: false
         truncate_extensions: true
 
-    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
-    ##
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
     # initContainers: []
-    initContainers: |
-      - name: wait-for-kafka
-        image: solsson/kafka:2.8.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-            do
-              echo --------------------;
-              echo Waiting for Kafka...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo Kafka ok!;
-        env:
-          - name: KAFKA_HOST
-            value: '{{ .Values.config.kafka_host }}'
-          - name: KAFKA_PORT
-            value: '{{ .Values.config.kafka_port }}'
-      - name: wait-for-mysql
-        image: mysql:9.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-            do
-              echo --------------------;
-              echo Waiting for MySQL...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MySQL ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.db_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.db_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.db_user }}'
-          - name: DB_PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.db_database }}'
 
     service:
       internalPort: 3007
@@ -5659,7 +5122,7 @@ centralsettlement:
     image:
       registry: docker.io
       repository: mojaloop/central-settlement
-      tag: v17.0.6
+      tag: v17.2.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -5877,6 +5340,13 @@ centralsettlement:
       db_reap_interval_millis: 1000
       db_create_retry_interval_millis: 200
       db_debug: false
+      db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *CL_DB_SSL_ENABLED
+      db_ssl_verify: *CL_DB_SSL_VERIFY
+      db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
+
       # Api Handler Configuration
       handlers:
         disabled: false
@@ -5907,69 +5377,11 @@ centralsettlement:
         include_cause_extension: false
         truncate_extensions: true
 
-    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
-    ##
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
     # initContainers: []
-    initContainers: |
-      - name: wait-for-kafka
-        image: solsson/kafka:2.8.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-            do
-              echo --------------------;
-              echo Waiting for Kafka...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo Kafka ok!;
-        env:
-          - name: KAFKA_HOST
-            value: '{{ .Values.config.kafka_host }}'
-          - name: KAFKA_PORT
-            value: '{{ .Values.config.kafka_port }}'
-      - name: wait-for-mysql
-        image: mysql:9.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-            do
-              echo --------------------;
-              echo Waiting for MySQL...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MySQL ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.db_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.db_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.db_user }}'
-          - name: DB_PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.db_database }}'
 
     service:
       internalPort: 3007
@@ -6091,7 +5503,7 @@ centralsettlement:
     image:
       registry: docker.io
       repository: mojaloop/central-settlement
-      tag: v17.0.6
+      tag: v17.2.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -6309,6 +5721,13 @@ centralsettlement:
       db_reap_interval_millis: 1000
       db_create_retry_interval_millis: 200
       db_debug: false
+      db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *CL_DB_SSL_ENABLED
+      db_ssl_verify: *CL_DB_SSL_VERIFY
+      db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
+
       # Api Handler Configuration
       handlers:
         disabled: false
@@ -6339,69 +5758,11 @@ centralsettlement:
         include_cause_extension: false
         truncate_extensions: true
 
-    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
-    ##
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
     # initContainers: []
-    initContainers: |
-      - name: wait-for-kafka
-        image: solsson/kafka:2.8.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-            do
-              echo --------------------;
-              echo Waiting for Kafka...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo Kafka ok!;
-        env:
-          - name: KAFKA_HOST
-            value: '{{ .Values.config.kafka_host }}'
-          - name: KAFKA_PORT
-            value: '{{ .Values.config.kafka_port }}'
-      - name: wait-for-mysql
-        image: mysql:9.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-            do
-              echo --------------------;
-              echo Waiting for MySQL...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MySQL ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.db_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.db_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.db_user }}'
-          - name: DB_PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.db_database }}'
 
     service:
       internalPort: 3007
@@ -6523,7 +5884,7 @@ centralsettlement:
     image:
       registry: docker.io
       repository: mojaloop/central-settlement
-      tag: v17.0.6
+      tag: v17.2.0-snapshot.0
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -6741,6 +6102,13 @@ centralsettlement:
       db_reap_interval_millis: 1000
       db_create_retry_interval_millis: 200
       db_debug: false
+      db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+      ## SSL Configuration
+      db_ssl_enabled: *CL_DB_SSL_ENABLED
+      db_ssl_verify: *CL_DB_SSL_VERIFY
+      db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
+
       # Api Handler Configuration
       handlers:
         disabled: false
@@ -6861,69 +6229,11 @@ centralsettlement:
               payeeFspId)
           }
 
-    ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
-    ##
+    ## The initContainers configuration comes from the corresponding sub chart.
+    ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
     # initContainers: []
-    initContainers: |
-      - name: wait-for-kafka
-        image: solsson/kafka:2.8.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-            do
-              echo --------------------;
-              echo Waiting for Kafka...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo Kafka ok!;
-        env:
-          - name: KAFKA_HOST
-            value: '{{ .Values.config.kafka_host }}'
-          - name: KAFKA_PORT
-            value: '{{ .Values.config.kafka_port }}'
-      - name: wait-for-mysql
-        image: mysql:9.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-            do
-              echo --------------------;
-              echo Waiting for MySQL...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MySQL ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.db_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.db_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.db_user }}'
-          - name: DB_PASSWORD
-            {{- if .Values.config.db_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.db_secret.name }}'
-                  key: '{{ .Values.config.db_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.db_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.db_database }}'
 
     service:
       internalPort: 3007
@@ -11791,7 +11101,7 @@ mojaloop-bulk:
       image:
         registry: docker.io
         repository: mojaloop/central-ledger
-        tag: v19.7.0
+        tag: v19.8.0-snapshot.2
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -11889,7 +11199,7 @@ mojaloop-bulk:
         # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-        db_driver: 'mysql'
+        db_driver: 'mysql2'
         db_host: *CL_DB_HOST
         db_port: *CL_DB_PORT
         db_user: *CL_DB_USER
@@ -11913,6 +11223,12 @@ mojaloop-bulk:
         db_reap_interval_millis: 1000
         db_create_retry_interval_millis: 200
         db_debug: false
+        db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+        ## SSL Configuration
+        db_ssl_enabled: *CL_DB_SSL_ENABLED
+        db_ssl_verify: *CL_DB_SSL_VERIFY
+        db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
 
         ## MongoDB Configuration for Object Store
         objstore_disabled: false
@@ -11942,102 +11258,11 @@ mojaloop-bulk:
         ## Enable On-Us transfers
         enable_on_us_transfers: false
 
-      ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+      ## @param initContainers
       ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-      ## e.g:
-      ## initContainers:
-      ##  - name: your-image-name
-      ##    image: your-image
-      ##    imagePullPolicy: Always
-      ##    command: ['sh', '-c', 'echo "hello world"']
-      ##
+      ## The initContainers configuration comes from the corresponding sub chart.
+      ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
       # initContainers: []
-      initContainers: |
-        - name: wait-for-kafka
-          image: solsson/kafka:2.8.1
-          imagePullPolicy: IfNotPresent
-          command:
-            - sh
-            - -c
-            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-              do
-                echo --------------------;
-                echo Waiting for Kafka...;
-                sleep 2;
-              done;
-              echo ====================;
-              echo Kafka ok!;
-          env:
-            - name: KAFKA_HOST
-              value: '{{ .Values.config.kafka_host }}'
-            - name: KAFKA_PORT
-              value: '{{ .Values.config.kafka_port }}'
-        - name: wait-for-mysql
-          image: mysql:9.0.1
-          imagePullPolicy: IfNotPresent
-          command:
-            - sh
-            - -c
-            - |
-              until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-              do
-                echo --------------------;
-                echo Waiting for MySQL...;
-                sleep 2;
-              done;
-              echo ====================;
-              echo MySQL ok!;
-          env:
-            - name: DB_HOST
-              value: '{{ .Values.config.db_host }}'
-            - name: DB_PORT
-              value: '{{ .Values.config.db_port }}'
-            - name: DB_USER
-              value: '{{ .Values.config.db_user }}'
-            - name: DB_PASSWORD
-              {{- if .Values.config.db_secret }}
-              valueFrom:
-                  secretKeyRef:
-                    name: '{{ .Values.config.db_secret.name }}'
-                    key: '{{ .Values.config.db_secret.key }}'
-              {{- else }}
-              value: {{ .Values.config.db_password }}
-              {{- end }}
-            - name: DB_DATABASE
-              value: '{{ .Values.config.db_database }}'
-        - name: wait-for-mongodb
-          image: bitnami/mongodb:6.0.1
-          imagePullPolicy: IfNotPresent
-          command:
-            - sh
-            - -c
-            - |
-              until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-              do
-                echo --------------------;
-                echo Waiting for MongoDB...;
-                sleep 2;
-              done;
-              echo ====================;
-              echo MongoDB ok!;
-          env:
-            - name: DB_HOST
-              value: '{{ .Values.config.mongo_host }}'
-            - name: DB_PORT
-              value: '{{ .Values.config.mongo_port }}'
-            - name: DB_USER
-              value: '{{ .Values.config.mongo_user }}'
-            - name: DB_PASS
-              {{- if .Values.config.mongo_secret }}
-              valueFrom:
-                  secretKeyRef:
-                    name: '{{ .Values.config.mongo_secret.name }}'
-                    key: '{{ .Values.config.mongo_secret.key }}'
-              {{- else }}
-              value: {{ .Values.config.mongo_password }}
-              {{- end }}
-            - name: DB_DATABASE
-              value: '{{ .Values.config.mongo_database }}'
 
       service:
         internalPort: 3001
@@ -12160,7 +11385,7 @@ mojaloop-bulk:
       image:
         registry: docker.io
         repository: mojaloop/central-ledger
-        tag: v19.7.0
+        tag: v19.8.0-snapshot.2
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -12258,7 +11483,7 @@ mojaloop-bulk:
         # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-        db_driver: 'mysql'
+        db_driver: 'mysql2'
         db_host: *CL_DB_HOST
         db_port: *CL_DB_PORT
         db_user: *CL_DB_USER
@@ -12282,6 +11507,12 @@ mojaloop-bulk:
         db_reap_interval_millis: 1000
         db_create_retry_interval_millis: 200
         db_debug: false
+        db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+        ## SSL Configuration
+        db_ssl_enabled: *CL_DB_SSL_ENABLED
+        db_ssl_verify: *CL_DB_SSL_VERIFY
+        db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
 
         ## MongoDB Configuration for Object Store
         objstore_disabled: false
@@ -12308,102 +11539,11 @@ mojaloop-bulk:
         ## Node Configuration
         log_level: info
 
-      ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+      ## @param initContainers
       ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-      ## e.g:
-      ## initContainers:
-      ##  - name: your-image-name
-      ##    image: your-image
-      ##    imagePullPolicy: Always
-      ##    command: ['sh', '-c', 'echo "hello world"']
-      ##
+      ## The initContainers configuration comes from the corresponding sub chart.
+      ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
       # initContainers: []
-      initContainers: |
-        - name: wait-for-kafka
-          image: solsson/kafka:2.8.1
-          imagePullPolicy: IfNotPresent
-          command:
-            - sh
-            - -c
-            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-              do
-                echo --------------------;
-                echo Waiting for Kafka...;
-                sleep 2;
-              done;
-              echo ====================;
-              echo Kafka ok!;
-          env:
-            - name: KAFKA_HOST
-              value: '{{ .Values.config.kafka_host }}'
-            - name: KAFKA_PORT
-              value: '{{ .Values.config.kafka_port }}'
-        - name: wait-for-mysql
-          image: mysql:9.0.1
-          imagePullPolicy: IfNotPresent
-          command:
-            - sh
-            - -c
-            - |
-              until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-              do
-                echo --------------------;
-                echo Waiting for MySQL...;
-                sleep 2;
-              done;
-              echo ====================;
-              echo MySQL ok!;
-          env:
-            - name: DB_HOST
-              value: '{{ .Values.config.db_host }}'
-            - name: DB_PORT
-              value: '{{ .Values.config.db_port }}'
-            - name: DB_USER
-              value: '{{ .Values.config.db_user }}'
-            - name: DB_PASSWORD
-              {{- if .Values.config.db_secret }}
-              valueFrom:
-                  secretKeyRef:
-                    name: '{{ .Values.config.db_secret.name }}'
-                    key: '{{ .Values.config.db_secret.key }}'
-              {{- else }}
-              value: {{ .Values.config.db_password }}
-              {{- end }}
-            - name: DB_DATABASE
-              value: '{{ .Values.config.db_database }}'
-        - name: wait-for-mongodb
-          image: bitnami/mongodb:6.0.1
-          imagePullPolicy: IfNotPresent
-          command:
-            - sh
-            - -c
-            - |
-              until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-              do
-                echo --------------------;
-                echo Waiting for MongoDB...;
-                sleep 2;
-              done;
-              echo ====================;
-              echo MongoDB ok!;
-          env:
-            - name: DB_HOST
-              value: '{{ .Values.config.mongo_host }}'
-            - name: DB_PORT
-              value: '{{ .Values.config.mongo_port }}'
-            - name: DB_USER
-              value: '{{ .Values.config.mongo_user }}'
-            - name: DB_PASS
-              {{- if .Values.config.mongo_secret }}
-              valueFrom:
-                  secretKeyRef:
-                    name: '{{ .Values.config.mongo_secret.name }}'
-                    key: '{{ .Values.config.mongo_secret.key }}'
-              {{- else }}
-              value: {{ .Values.config.mongo_password }}
-              {{- end }}
-            - name: DB_DATABASE
-              value: '{{ .Values.config.mongo_database }}'
 
       service:
         internalPort: 3001
@@ -12526,7 +11666,7 @@ mojaloop-bulk:
       image:
         registry: docker.io
         repository: mojaloop/central-ledger
-        tag: v19.7.0
+        tag: v19.8.0-snapshot.2
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -12624,7 +11764,7 @@ mojaloop-bulk:
         # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-        db_driver: 'mysql'
+        db_driver: 'mysql2'
         db_host: *CL_DB_HOST
         db_port: *CL_DB_PORT
         db_user: *CL_DB_USER
@@ -12648,6 +11788,12 @@ mojaloop-bulk:
         db_reap_interval_millis: 1000
         db_create_retry_interval_millis: 200
         db_debug: false
+        db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+        ## SSL Configuration
+        db_ssl_enabled: *CL_DB_SSL_ENABLED
+        db_ssl_verify: *CL_DB_SSL_VERIFY
+        db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
 
         ## MongoDB Configuration for Object Store
         objstore_disabled: false
@@ -12674,102 +11820,11 @@ mojaloop-bulk:
         ## Node Configuration
         log_level: info
 
-      ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+      ## @param initContainers
       ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-      ## e.g:
-      ## initContainers:
-      ##  - name: your-image-name
-      ##    image: your-image
-      ##    imagePullPolicy: Always
-      ##    command: ['sh', '-c', 'echo "hello world"']
-      ##
+      ## The initContainers configuration comes from the corresponding sub chart.
+      ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
       # initContainers: []
-      initContainers: |
-        - name: wait-for-kafka
-          image: solsson/kafka:2.8.1
-          imagePullPolicy: IfNotPresent
-          command:
-            - sh
-            - -c
-            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-              do
-                echo --------------------;
-                echo Waiting for Kafka...;
-                sleep 2;
-              done;
-              echo ====================;
-              echo Kafka ok!;
-          env:
-            - name: KAFKA_HOST
-              value: '{{ .Values.config.kafka_host }}'
-            - name: KAFKA_PORT
-              value: '{{ .Values.config.kafka_port }}'
-        - name: wait-for-mysql
-          image: mysql:9.0.1
-          imagePullPolicy: IfNotPresent
-          command:
-            - sh
-            - -c
-            - |
-              until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-              do
-                echo --------------------;
-                echo Waiting for MySQL...;
-                sleep 2;
-              done;
-              echo ====================;
-              echo MySQL ok!;
-          env:
-            - name: DB_HOST
-              value: '{{ .Values.config.db_host }}'
-            - name: DB_PORT
-              value: '{{ .Values.config.db_port }}'
-            - name: DB_USER
-              value: '{{ .Values.config.db_user }}'
-            - name: DB_PASSWORD
-              {{- if .Values.config.db_secret }}
-              valueFrom:
-                  secretKeyRef:
-                    name: '{{ .Values.config.db_secret.name }}'
-                    key: '{{ .Values.config.db_secret.key }}'
-              {{- else }}
-              value: {{ .Values.config.db_password }}
-              {{- end }}
-            - name: DB_DATABASE
-              value: '{{ .Values.config.db_database }}'
-        - name: wait-for-mongodb
-          image: bitnami/mongodb:6.0.1
-          imagePullPolicy: IfNotPresent
-          command:
-            - sh
-            - -c
-            - |
-              until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-              do
-                echo --------------------;
-                echo Waiting for MongoDB...;
-                sleep 2;
-              done;
-              echo ====================;
-              echo MongoDB ok!;
-          env:
-            - name: DB_HOST
-              value: '{{ .Values.config.mongo_host }}'
-            - name: DB_PORT
-              value: '{{ .Values.config.mongo_port }}'
-            - name: DB_USER
-              value: '{{ .Values.config.mongo_user }}'
-            - name: DB_PASS
-              {{- if .Values.config.mongo_secret }}
-              valueFrom:
-                  secretKeyRef:
-                    name: '{{ .Values.config.mongo_secret.name }}'
-                    key: '{{ .Values.config.mongo_secret.key }}'
-              {{- else }}
-              value: {{ .Values.config.mongo_password }}
-              {{- end }}
-            - name: DB_DATABASE
-              value: '{{ .Values.config.mongo_database }}'
 
       service:
         internalPort: 3001
@@ -12892,7 +11947,7 @@ mojaloop-bulk:
       image:
         registry: docker.io
         repository: mojaloop/central-ledger
-        tag: v19.7.0
+        tag: v19.8.0-snapshot.2
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
         ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -12990,7 +12045,7 @@ mojaloop-bulk:
         # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
         db_type: 'mysql'
         # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-        db_driver: 'mysql'
+        db_driver: 'mysql2'
         db_host: *CL_DB_HOST
         db_port: *CL_DB_PORT
         db_user: *CL_DB_USER
@@ -13014,6 +12069,12 @@ mojaloop-bulk:
         db_reap_interval_millis: 1000
         db_create_retry_interval_millis: 200
         db_debug: false
+        db_additional_connection_options: *CL_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+        ## SSL Configuration
+        db_ssl_enabled: *CL_DB_SSL_ENABLED
+        db_ssl_verify: *CL_DB_SSL_VERIFY
+        db_ssl_ca_secret: *CL_DB_SSL_CA_SECRET
 
         ## MongoDB Configuration for Object Store
         objstore_disabled: false
@@ -13040,102 +12101,11 @@ mojaloop-bulk:
         ## Node Configuration
         log_level: info
 
-      ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+      ## @param initContainers
       ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-      ## e.g:
-      ## initContainers:
-      ##  - name: your-image-name
-      ##    image: your-image
-      ##    imagePullPolicy: Always
-      ##    command: ['sh', '-c', 'echo "hello world"']
-      ##
+      ## The initContainers configuration comes from the corresponding sub chart.
+      ## If you want to add additional initContainers, you can do so by copying the existing configuration from the subchart and add new items in the array.
       # initContainers: []
-      initContainers: |
-        - name: wait-for-kafka
-          image: solsson/kafka:2.8.1
-          imagePullPolicy: IfNotPresent
-          command:
-            - sh
-            - -c
-            - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-              do
-                echo --------------------;
-                echo Waiting for Kafka...;
-                sleep 2;
-              done;
-              echo ====================;
-              echo Kafka ok!;
-          env:
-            - name: KAFKA_HOST
-              value: '{{ .Values.config.kafka_host }}'
-            - name: KAFKA_PORT
-              value: '{{ .Values.config.kafka_port }}'
-        - name: wait-for-mysql
-          image: mysql:9.0.1
-          imagePullPolicy: IfNotPresent
-          command:
-            - sh
-            - -c
-            - |
-              until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-              do
-                echo --------------------;
-                echo Waiting for MySQL...;
-                sleep 2;
-              done;
-              echo ====================;
-              echo MySQL ok!;
-          env:
-            - name: DB_HOST
-              value: '{{ .Values.config.db_host }}'
-            - name: DB_PORT
-              value: '{{ .Values.config.db_port }}'
-            - name: DB_USER
-              value: '{{ .Values.config.db_user }}'
-            - name: DB_PASSWORD
-              {{- if .Values.config.db_secret }}
-              valueFrom:
-                  secretKeyRef:
-                    name: '{{ .Values.config.db_secret.name }}'
-                    key: '{{ .Values.config.db_secret.key }}'
-              {{- else }}
-              value: {{ .Values.config.db_password }}
-              {{- end }}
-            - name: DB_DATABASE
-              value: '{{ .Values.config.db_database }}'
-        - name: wait-for-mongodb
-          image: bitnami/mongodb:6.0.1
-          imagePullPolicy: IfNotPresent
-          command:
-            - sh
-            - -c
-            - |
-              until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-              do
-                echo --------------------;
-                echo Waiting for MongoDB...;
-                sleep 2;
-              done;
-              echo ====================;
-              echo MongoDB ok!;
-          env:
-            - name: DB_HOST
-              value: '{{ .Values.config.mongo_host }}'
-            - name: DB_PORT
-              value: '{{ .Values.config.mongo_port }}'
-            - name: DB_USER
-              value: '{{ .Values.config.mongo_user }}'
-            - name: DB_PASS
-              {{- if .Values.config.mongo_secret }}
-              valueFrom:
-                  secretKeyRef:
-                    name: '{{ .Values.config.mongo_secret.name }}'
-                    key: '{{ .Values.config.mongo_secret.key }}'
-              {{- else }}
-              value: {{ .Values.config.mongo_password }}
-              {{- end }}
-            - name: DB_DATABASE
-              value: '{{ .Values.config.mongo_database }}'
 
       service:
         internalPort: 3001
@@ -13260,6 +12230,12 @@ als-msisdn-oracle:
       key: *ALS_ORACLE_DB_SECRET_KEY
     db_database: *ALS_ORACLE_DB_NAME
     # db_password: ''
+    db_additional_connection_options: *ALS_ORACLE_DB_ADDITIONAL_CONNECTION_OPTIONS
+
+    ## SSL Configuration
+    db_ssl_enabled: *ALS_ORACLE_DB_SSL_ENABLED
+    db_ssl_verify: *ALS_ORACLE_DB_SSL_VERIFY
+    db_ssl_ca_secret: *ALS_ORACLE_DB_SSL_CA_SECRET
 
 inter-scheme-proxy-adapter:
   enabled: *INTERSCHEME_ENABLED

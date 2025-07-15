@@ -1,0 +1,61 @@
+{{/*
+  Mojaloop Common template for MySQL wait-for-mysql initContainer as a full resource
+  Usage: {{- include "mojaloop-common.waitForMysqlInitContainer" . | nindent 2 }}
+*/}}
+{{- define "mojaloop-common.waitForMysqlInitContainer" -}}
+- name: wait-for-mysql
+  image: mysql:9.0.1
+  imagePullPolicy: IfNotPresent
+  command:
+    - sh
+    - -c
+    - |
+      # Conditionally add SSL options if present
+      MYSQL_SSL_OPTIONS=""
+      if [ "${DB_SSL_ENABLED}" = "true" ]; then
+        MYSQL_SSL_OPTIONS="--ssl-mode=REQUIRED"
+        if [ "${DB_SSL_VERIFY}" = "true" ]; then
+          MYSQL_SSL_OPTIONS="${MYSQL_SSL_OPTIONS} --ssl-verify-server-cert"
+        fi
+        if [ -n "${DB_SSL_CA}" ]; then
+          MYSQL_SSL_OPTIONS="${MYSQL_SSL_OPTIONS} --ssl-ca=${DB_SSL_CA}"
+        fi
+      fi
+      until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} $MYSQL_SSL_OPTIONS ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
+      do
+        echo --------------------;
+        echo Waiting for MySQL...;
+        sleep 2;
+      done;
+      echo ====================;
+      echo MySQL ok!;
+  env:
+    - name: DB_HOST
+      value: '{{ .Values.config.db_host }}'
+    - name: DB_PORT
+      value: '{{ .Values.config.db_port }}'
+    - name: DB_USER
+      value: '{{ .Values.config.db_user }}'
+    - name: DB_PASSWORD
+      {{- if .Values.config.db_secret }}
+      valueFrom:
+          secretKeyRef:
+            name: '{{ .Values.config.db_secret.name }}'
+            key: '{{ .Values.config.db_secret.key }}'
+      {{- else }}
+      value: {{ .Values.config.db_password }}
+      {{- end }}
+    - name: DB_SSL_ENABLED
+      value: 'true'
+    - name: DB_SSL_VERIFY
+      value: '{{ .Values.config.db_ssl_verify }}'
+    {{- if .Values.config.db_ssl_ca_secret }}
+    - name: DB_SSL_CA
+      valueFrom:
+          secretKeyRef:
+            name: '{{ .Values.config.db_ssl_ca_secret.name }}'
+            key: '{{ .Values.config.db_ssl_ca_secret.key }}'
+    {{- end }}
+    - name: DB_DATABASE
+      value: '{{ .Values.config.db_database }}'
+{{- end }}
