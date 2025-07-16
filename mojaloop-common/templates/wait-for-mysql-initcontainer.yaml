@@ -21,7 +21,7 @@
           MYSQL_SSL_OPTIONS="${MYSQL_SSL_OPTIONS} --ssl-ca=${DB_SSL_CA}"
         fi
       fi
-      until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} $MYSQL_SSL_OPTIONS ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
+      until result=$(mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" --password="${DB_PASSWORD}" $MYSQL_SSL_OPTIONS "${DB_DATABASE}" -ss -N -e "${DB_WAIT_QUERY:-select 1;}") && eval "echo query_result=\$result" && { [ -z "$result" ] && false || { [ -n "${DB_EXPECTED_RESULT}" ] && [ "$result" != "${DB_EXPECTED_RESULT}" ] && false || true; }; };
       do
         echo --------------------;
         echo Waiting for MySQL...;
