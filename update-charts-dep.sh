@@ -32,6 +32,14 @@ declare -a charts=(
     als-msisdn-oracle
     # centralkms # Deprecated - No longer supported
     # forensicloggingsidecar # Deprecated - No longer supported
+    centralledger/chart-handler-admin-transfer
+    centralledger/chart-handler-timeout
+    centralledger/chart-handler-transfer-fulfil
+    centralledger/chart-handler-transfer-get
+    centralledger/chart-handler-transfer-position
+    centralledger/chart-handler-transfer-position-batch
+    centralledger/chart-handler-transfer-prepare
+    centralledger/chart-service
     centralledger
     # centralenduserregistry # Deprecated - No longer supported
     centralsettlement
