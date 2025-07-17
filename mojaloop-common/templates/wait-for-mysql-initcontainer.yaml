@@ -18,7 +18,8 @@
           MYSQL_SSL_OPTIONS="${MYSQL_SSL_OPTIONS} --ssl-verify-server-cert"
         fi
         if [ -n "${DB_SSL_CA}" ]; then
-          MYSQL_SSL_OPTIONS="${MYSQL_SSL_OPTIONS} --ssl-ca=${DB_SSL_CA}"
+          echo "$DB_SSL_CA" > /tmp/ca.pem
+          MYSQL_SSL_OPTIONS="${MYSQL_SSL_OPTIONS} --ssl-ca=/tmp/ca.pem"
         fi
       fi
       until result=$(mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" --password="${DB_PASSWORD}" $MYSQL_SSL_OPTIONS "${DB_DATABASE}" -ss -N -e "${DB_WAIT_QUERY:-select 1;}") && eval "echo query_result=\$result" && { [ -z "$result" ] && false || { [ -n "${DB_EXPECTED_RESULT}" ] && [ "$result" != "${DB_EXPECTED_RESULT}" ] && false || true; }; };
