@@ -5,7 +5,7 @@
 image:
   registry: docker.io
   repository: mojaloop/account-lookup-service
-  tag: v17.7.1
+  tag: v17.12.0
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -160,7 +160,7 @@ config:
     expiresIn: 61000
   ## DB Configuration
   db_type: mysql
-  db_driver: mysql
+  db_driver: mysql2
   db_host: mysqldb
   db_port: 3306
   db_user: account_lookup
@@ -184,6 +184,15 @@ config:
   db_reap_interval_millis: 1000
   db_create_retry_interval_millis: 200
   db_debug: false
+  db_additional_connection_options: {}
+
+  ## SSL Configuration
+  db_ssl_enabled: false
+  db_ssl_verify: false
+  ### Configure this if you want to pass a CA certificate of the server.
+  # db_ssl_ca_secret:
+  #   name: mysql-tls-client-creds
+  #   key: cacert.pem
 
   display_routes: true
   run_migrations: false
@@ -255,39 +264,7 @@ config:
 ##
 # initContainers: []
 initContainers: |
-  - name: wait-for-mysql
-    image: mysql:9.0.1
-    imagePullPolicy: IfNotPresent
-    command:
-      - sh
-      - -c
-      - |
-        until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD}  ${DB_DATABASE} -e 'select version()' ;
-        do
-          echo --------------------;
-          echo Waiting for MySQL...;
-          sleep 2;
-        done;
-        echo ====================;
-        echo MySQL ok!;
-    env:
-      - name: DB_HOST
-        value: '{{ .Values.config.db_host }}'
-      - name: DB_PORT
-        value: '{{ .Values.config.db_port }}'
-      - name: DB_USER
-        value: '{{ .Values.config.db_user }}'
-      - name: DB_PASSWORD
-        {{- if .Values.config.db_secret }}
-        valueFrom:
-            secretKeyRef:
-              name: '{{ .Values.config.db_secret.name }}'
-              key: '{{ .Values.config.db_secret.key }}'
-        {{- else }}
-        value: {{ .Values.config.db_password }}
-        {{- end }}
-      - name: DB_DATABASE
-        value: '{{ .Values.config.db_database }}'
+  {{- include "mojaloop-common.waitForMysqlInitContainer" . | nindent 0 }}
   - name: run-migration
     image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
     imagePullPolicy: IfNotPresent
@@ -307,6 +284,17 @@ initContainers: |
         {{- else }}
         value: {{ .Values.config.db_password }}
         {{- end }}
+      {{- if .Values.config.db_ssl_enabled }}
+      - name: ALS_DATABASE__ADDITIONAL_CONNECTION_OPTIONS__ssl__rejectUnauthorized
+        value: {{ .Values.config.db_ssl_verify | quote}}
+      {{- if .Values.config.db_ssl_ca_secret }}
+      - name: ALS_DATABASE__ADDITIONAL_CONNECTION_OPTIONS__ssl__ca
+        valueFrom:
+          secretKeyRef:
+            name: '{{ .Values.config.db_ssl_ca_secret.name }}'
+            key: '{{ .Values.config.db_ssl_ca_secret.key }}'
+      {{- end }}
+      {{- end }}
     volumeMounts:
       - name: '{{ template "account-lookup-service-admin.fullname" . }}-config-volume'
         mountPath: /opt/app/config
