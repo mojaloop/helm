@@ -35,8 +35,6 @@ else
         account-lookup-service
         als-oracle-pathfinder
         als-msisdn-oracle
-        # centralkms # Deprecated - No longer supported
-        # forensicloggingsidecar # Deprecated - No longer supported
         centralledger/chart-handler-admin-transfer
         centralledger/chart-handler-timeout
         centralledger/chart-handler-transfer-fulfil
@@ -46,15 +44,12 @@ else
         centralledger/chart-handler-transfer-prepare
         centralledger/chart-service
         centralledger
-        # centralenduserregistry # Deprecated - No longer supported
         centralsettlement/chart-service
         centralsettlement
         emailnotifier
         centraleventprocessor
         ml-api-adapter
         quoting-service
-        # finance-portal # Deprecated - No longer supported
-        # finance-portal-settlement-management # Deprecated - No longer supported
         transaction-requests-service
         bulk-centralledger/
         bulk-api-adapter/
@@ -66,7 +61,6 @@ else
         thirdparty
         mojaloop
         merchant-registry-svc
-        kube-system/ntpd/
         ml-operator
         inter-scheme-proxy-adapter
     )
