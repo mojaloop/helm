@@ -7,7 +7,7 @@ global: {}
 image:
   registry: docker.io
   repository: mojaloop/quoting-service
-  tag: v17.10.2
+  tag: v17.12.0
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -86,7 +86,7 @@ sidecar:
   enabled: true
   image:
     repository: mojaloop/event-sidecar
-    tag: v14.1.2
+    tag: v14.0.3
     pullPolicy: IfNotPresent
     command: '["npm", "run", "start"]'
   service:
@@ -144,7 +144,7 @@ config:
   # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
   db_type: 'mysql'
   # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
-  db_driver: 'mysql'
+  db_driver: 'mysql2'
   db_host: mysqldb
   db_port: 3306
   db_user: central_ledger
@@ -168,6 +168,16 @@ config:
   db_reap_interval_millis: 1000
   db_create_retry_interval_millis: 200
   db_debug: false
+  db_additional_connection_options: {}
+
+  ## SSL Configuration
+  db_ssl_enabled: false
+  db_ssl_verify: false
+  ### Configure this if you want to pass a CA certificate of the server.
+  # db_ssl_ca_secret:
+  #   name: mysql-tls-client-creds
+  #   key: cacert.pem
+
   simple_routing_mode_enabled: true
   log_level: info
   log_transport: console
