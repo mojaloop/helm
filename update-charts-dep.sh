@@ -30,8 +30,6 @@ declare -a charts=(
     account-lookup-service
     als-oracle-pathfinder
     als-msisdn-oracle
-    # centralkms # Deprecated - No longer supported
-    # forensicloggingsidecar # Deprecated - No longer supported
     centralledger/chart-handler-admin-transfer
     centralledger/chart-handler-timeout
     centralledger/chart-handler-transfer-fulfil
@@ -41,12 +39,9 @@ declare -a charts=(
     centralledger/chart-handler-transfer-prepare
     centralledger/chart-service
     centralledger
-    # centralenduserregistry # Deprecated - No longer supported
     centralsettlement
     ml-api-adapter
     quoting-service
-    # finance-portal # Deprecated - No longer supported
-    # finance-portal-settlement-management # Deprecated - No longer supported
     transaction-requests-service
     emailnotifier
     centraleventprocessor
