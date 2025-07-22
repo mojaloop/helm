@@ -9,7 +9,7 @@ global: {}
 image:
   registry: docker.io
   repository: mojaloop/central-ledger
-  tag: v19.3.0
+  tag: v19.8.0
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -110,8 +110,8 @@ config:
   ## DB Configuration
   # db_type can either be 'postgres' or 'mysql'. Ensure the correct DB is enabled and configured below: postgresql.enabled or mysql.enabled
   db_type: 'mysql'
-  # db_driver can either be 'pg' or 'mysql2'. Ensure the correct corresponding db_type above has been set.
-  db_driver: mysql2
+  # db_driver can either be 'pg' or 'mysql'. Ensure the correct corresponding db_type above has been set.
+  db_driver: 'mysql2'
   db_host: mysqldb
   db_port: 3306
   db_user: central_ledger
@@ -135,6 +135,15 @@ config:
   db_reap_interval_millis: 1000
   db_create_retry_interval_millis: 200
   db_debug: false
+  db_additional_connection_options: {}
+
+  ## SSL Configuration
+  db_ssl_enabled: false
+  db_ssl_verify: false
+  ### Configure this if you want to pass a CA certificate of the server.
+  # db_ssl_ca_secret:
+  #   name: mysql-tls-client-creds
+  #   key: cacert.pem
 
   ## Hub Configuration
   hub_participant:
@@ -200,39 +209,7 @@ initContainers: |
         value: '{{ .Values.config.kafka_host }}'
       - name: KAFKA_PORT
         value: '{{ .Values.config.kafka_port }}'
-  - name: wait-for-mysql
-    image: mysql:9.0.1
-    imagePullPolicy: IfNotPresent
-    command:
-      - sh
-      - -c
-      - |
-        until result=$(mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} --password=${DB_PASSWORD} ${DB_DATABASE} -ss -N -e 'select is_locked from migration_lock;') && eval 'echo is_locked=$result' && if [ -z $result ]; then false; fi && if [ $result -ne 0 ]; then false; fi;
-        do
-          echo --------------------;
-          echo Waiting for MySQL...;
-          sleep 2;
-        done;
-        echo ====================;
-        echo MySQL ok!;
-    env:
-      - name: DB_HOST
-        value: '{{ .Values.config.db_host }}'
-      - name: DB_PORT
-        value: '{{ .Values.config.db_port }}'
-      - name: DB_USER
-        value: '{{ .Values.config.db_user }}'
-      - name: DB_PASSWORD
-        {{- if .Values.config.db_secret }}
-        valueFrom:
-            secretKeyRef:
-              name: '{{ .Values.config.db_secret.name }}'
-              key: '{{ .Values.config.db_secret.key }}'
-        {{- else }}
-        value: {{ .Values.config.db_password }}
-        {{- end }}
-      - name: DB_DATABASE
-        value: '{{ .Values.config.db_database }}'
+  {{- include "mojaloop-common.waitForMysqlInitContainer" . | nindent 0 }}
   - name: wait-for-mongodb
     image: bitnami/mongodb:6.0.1
     imagePullPolicy: IfNotPresent
