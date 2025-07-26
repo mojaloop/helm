@@ -25,6 +25,7 @@
   - [Helper scripts](#helper-scripts)
   - [Monitoring Mojaloop](#monitoring-mojaloop)
   - [Batch Processing](#batch-processing)
+  - [Helm Provenance and Integrity](#helm-provenance-and-integrity)
 
 ## Quick Links
 
@@ -46,27 +47,27 @@
 
 1. Add Helm dependency repositories:
 
-    ```bash
-    helm repo add stable https://charts.helm.sh/stable
-    helm repo add incubator https://charts.helm.sh/incubator
-    helm repo add kiwigrid https://kiwigrid.github.io
-    helm repo add kokuwa https://kokuwaio.github.io/helm-charts
-    helm repo add elastic https://helm.elastic.co
-    helm repo add codecentric https://codecentric.github.io/helm-charts
-    helm repo add bitnami https://charts.bitnami.com/bitnami
-    helm repo add mojaloop-charts https://mojaloop.github.io/charts/repo 
-    helm repo add redpanda https://charts.redpanda.com
-    ```
+   ```bash
+   helm repo add stable https://charts.helm.sh/stable
+   helm repo add incubator https://charts.helm.sh/incubator
+   helm repo add kiwigrid https://kiwigrid.github.io
+   helm repo add kokuwa https://kokuwaio.github.io/helm-charts
+   helm repo add elastic https://helm.elastic.co
+   helm repo add codecentric https://codecentric.github.io/helm-charts
+   helm repo add bitnami https://charts.bitnami.com/bitnami
+   helm repo add mojaloop-charts https://mojaloop.github.io/charts/repo
+   helm repo add redpanda https://charts.redpanda.com
+   ```
 
 ### Configure remote Mojaloop Helm repo on your Helm Client
 
 1. Add Mojaloop repo
 
-    `helm repo add mojaloop https://mojaloop.io/helm/repo/`
+   `helm repo add mojaloop https://mojaloop.io/helm/repo/`
 
 2. Keep your local Mojaloop repo up to date
 
-    `helm repo update`
+   `helm repo update`
 
 ## Deployment
 
@@ -80,61 +81,61 @@ Refer to [example-mojaloop-backend/README.md#installation](./example-mojaloop-ba
 
 The following Helm Charts have the following external dependencies:
 
-|  Chart   |  Dependency   |  Notes   |
-| --- | --- | --- |
-|  Account-Lookup-Service   |  MySQL   |     |
-|   Quoting-Service  |  MySQL   |     |
-|  ML-API-Adapter   |  Kafka   |     |
-|  Central-Ledger  |   Kafka, MySQL, MongoDB  |     |
-|  Central-Settlements   |  MySQL   |     |
-|  Central-Event-Processor   |  Kafka, MongoDB   |     |
-|  Transaction-Request-Service   |   N/A  |     |
-|  Thirdparty Auth-Service   |   Redis, MySQL  |     |
-|   Thirdparty Consent Oracle  |   MySQL  |     |
-|  Thirdparty SDK  |   N/A  |     |
-|  Simulator   |   N/A  |     |
-|   Mojaloop-Simulator  |  Redis   |   There is a dependency on Redis, however due to the dynamic nature of the Mojaloop-Simulator, a Redis container will be created dynamically for each configured Simulator.  |
-|  Mojaloop-Testing-Toolkit   |   MongoDB  |     |
-|  Mojaloop-TTK-Simulators   |   Redis, MongoDB  |     |
-|  SDK-Scheme-Adapter   |   Redis, Kafka  |    |
-|   Bulk-API-Adapter  |   Kafka, MongoDB  |     |
-|     |     |     |
+| Chart                       | Dependency            | Notes                                                                                                                                                                     |
+| --------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Account-Lookup-Service      | MySQL                 |                                                                                                                                                                           |
+| Quoting-Service             | MySQL                 |                                                                                                                                                                           |
+| ML-API-Adapter              | Kafka                 |                                                                                                                                                                           |
+| Central-Ledger              | Kafka, MySQL, MongoDB |                                                                                                                                                                           |
+| Central-Settlements         | MySQL                 |                                                                                                                                                                           |
+| Central-Event-Processor     | Kafka, MongoDB        |                                                                                                                                                                           |
+| Transaction-Request-Service | N/A                   |                                                                                                                                                                           |
+| Thirdparty Auth-Service     | Redis, MySQL          |                                                                                                                                                                           |
+| Thirdparty Consent Oracle   | MySQL                 |                                                                                                                                                                           |
+| Thirdparty SDK              | N/A                   |                                                                                                                                                                           |
+| Simulator                   | N/A                   |                                                                                                                                                                           |
+| Mojaloop-Simulator          | Redis                 | There is a dependency on Redis, however due to the dynamic nature of the Mojaloop-Simulator, a Redis container will be created dynamically for each configured Simulator. |
+| Mojaloop-Testing-Toolkit    | MongoDB               |                                                                                                                                                                           |
+| Mojaloop-TTK-Simulators     | Redis, MongoDB        |                                                                                                                                                                           |
+| SDK-Scheme-Adapter          | Redis, Kafka          |                                                                                                                                                                           |
+| Bulk-API-Adapter            | Kafka, MongoDB        |                                                                                                                                                                           |
+|                             |                       |                                                                                                                                                                           |
 
 ### Deploying Mojaloop Helm Charts
 
 1. Deploy the Mojaloop chart
 
-    This chart is a "Wrapper" chart that packages the core Mojaloop components that one would use as a base "Switch" deployment. It includes all the components that one needs for executing and testing the Discovery, Quoting, and Transfer phases of the FSPIOP API specification, as well as supporting components for Bulk, and Settlement Processing.
+   This chart is a "Wrapper" chart that packages the core Mojaloop components that one would use as a base "Switch" deployment. It includes all the components that one needs for executing and testing the Discovery, Quoting, and Transfer phases of the FSPIOP API specification, as well as supporting components for Bulk, and Settlement Processing.
 
-    *Warning: This will deploy all core Mojaloop charts with default backends configurations. See [#deploying-backend-dependencies](#deploying-backend-dependencies) on how to deploy them using the [example-mojaloop-backend/README.md](./example-mojaloop-backend/README.md) Helm chart.*
+   _Warning: This will deploy all core Mojaloop charts with default backends configurations. See [#deploying-backend-dependencies](#deploying-backend-dependencies) on how to deploy them using the [example-mojaloop-backend/README.md](./example-mojaloop-backend/README.md) Helm chart._
 
-    - `helm --namespace <namespace> install <release_name> mojaloop/mojaloop`
+   - `helm --namespace <namespace> install <release_name> mojaloop/mojaloop`
 
-    e.g. `helm --namespace moja install dev mojaloop/mojaloop`
+   e.g. `helm --namespace moja install dev mojaloop/mojaloop`
 
 2. Deploy Mojaloop with Bulk-API-Adapter
 
-    *Warning: This will deploy all core Mojaloop charts.* and the Bulk-API-Adapter
+   _Warning: This will deploy all core Mojaloop charts._ and the Bulk-API-Adapter
 
-    - `helm --namespace <namespace> install <release_name> mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true `
+   - `helm --namespace <namespace> install <release_name> mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true `
 
-    e.g. `helm --namespace moja install dev mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true `
+   e.g. `helm --namespace moja install dev mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true `
 
 3. Deploy Mojaloop with Thirdparty components
 
-    Refer to [thirdparty/README.md](./thirdparty/README.md) for more information on what pre-requisites are required to enable Thirdparty components and how to  manually deploy backend dependencies.
+   Refer to [thirdparty/README.md](./thirdparty/README.md) for more information on what pre-requisites are required to enable Thirdparty components and how to manually deploy backend dependencies.
 
 4. Deploy Mojaloop with Bulk-API-Adapter and SDK-TTK Bulk simulators
 
-    *Warning: This will deploy all core Mojaloop charts.*, the Bulk-API-Adapter and additional SDK+TTK simulators
+   _Warning: This will deploy all core Mojaloop charts._, the Bulk-API-Adapter and additional SDK+TTK simulators
 
-    - `helm --namespace <namespace> install <release_name> mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true `
+   - `helm --namespace <namespace> install <release_name> mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true `
 
-    e.g. `helm --namespace moja install dev mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true --set mojaloop-ttk-simulators.enabled=true --set global.kafka.host=<MOJALOOP_INSTALL_NAME>-kafka --set global.redis.host=<REDIS_INSTALL_NAME>-redis-master --set ml-ttk-test-val-sdk-bulk.tests.enabled=true`
+   e.g. `helm --namespace moja install dev mojaloop/mojaloop --set mojaloop-bulk.enabled=true --set ml-ttk-test-val-bulk.tests.enabled=true --set mojaloop-ttk-simulators.enabled=true --set global.kafka.host=<MOJALOOP_INSTALL_NAME>-kafka --set global.redis.host=<REDIS_INSTALL_NAME>-redis-master --set ml-ttk-test-val-sdk-bulk.tests.enabled=true`
 
 5. Deploy specific chart
 
-    *Warning: This will deploy a single Mojaloop charts. You will need to ensure that you have met all pre-requisites for that chart (e.g. external dependencies such as MySQL, Kafka, AND internal dependencies such as the Central-Ledger API Service). This can be done by customization the values.yaml of each chart to suite your environment.*
+   _Warning: This will deploy a single Mojaloop charts. You will need to ensure that you have met all pre-requisites for that chart (e.g. external dependencies such as MySQL, Kafka, AND internal dependencies such as the Central-Ledger API Service). This can be done by customization the values.yaml of each chart to suite your environment._
 
    - `helm --namespace <namespace> install <release_name> mojaloop/<chart_name> -f {custom-values.yaml}`
 
@@ -143,6 +144,7 @@ The following Helm Charts have the following external dependencies:
    Refer to the following default chart config file for configurable values: http://mojaloop.io/helm/<chart_name>/values.yaml
 
    Alternatively one can set specific values via cli arguments based on the config file above:
+
    - `helm --namespace <namespace> install <release_name> mojaloop/<chart_name> --set foo=bar --set {key.subkey.subsubkey}={value}`
 
 6. Deploy specific version for a chart
@@ -159,11 +161,11 @@ The following Helm Charts have the following external dependencies:
 
    - `helm --namespace <namespace> install <release_name> mojaloop/mojaloop --devel`
 
-       This is useful if you've had some work merged into main but it has not yet been released.
+     This is useful if you've had some work merged into main but it has not yet been released.
 
-       The `--devel` flag can also be supplied to `helm search` and `helm upgrade` commands.
+     The `--devel` flag can also be supplied to `helm search` and `helm upgrade` commands.
 
-       Development versions can be specified in a `requirements.yaml` file if you're using Mojaloop as a child chart.
+     Development versions can be specified in a `requirements.yaml` file if you're using Mojaloop as a child chart.
 
 ## Upgrading Deployments from Repo
 
@@ -175,7 +177,7 @@ e.g. `helm --namespace moja upgrade dev mojaloop/centralenduserregistry`
 
 ### Update Chart Dependencies for Source for local repo deployments (i.e. from the cloned github repository)
 
-Run the following script `sh ./update-charts-dep.sh` in the helm root folder. 
+Run the following script `sh ./update-charts-dep.sh` in the helm root folder.
 
 This script will ensure that all dependencies and child-dependencies are updated correctly. This is temporary until recursive updates is supported in future: https://github.com/kubernetes/helm/issues/2247.
 
@@ -183,17 +185,17 @@ This script will ensure that all dependencies and child-dependencies are updated
 
 1. Deploy specific chart
 
-    - `helm --namespace <namespace> install <release_name> <chart_folder>`
+   - `helm --namespace <namespace> install <release_name> <chart_folder>`
 
-    e.g. `helm --namespace mojaloop install dev ./centralledger`
+   e.g. `helm --namespace mojaloop install dev ./centralledger`
 
 2. Deploy the Mojaloop chart
 
-    *Warning: This will deploy all core Mojaloop charts with default backends. See [#deploying-backends](#deploying-backends) on how to disabled the default backends and deploy them using the [example-mojaloop-backend/README.md](./example-mojaloop-backend/README.md) Helm chart.*
+   _Warning: This will deploy all core Mojaloop charts with default backends. See [#deploying-backends](#deploying-backends) on how to disabled the default backends and deploy them using the [example-mojaloop-backend/README.md](./example-mojaloop-backend/README.md) Helm chart._
 
-    - `helm --namespace <namespace> install <release_name> mojaloop`
+   - `helm --namespace <namespace> install <release_name> mojaloop`
 
-    e.g. `helm --namespace mojaloop install dev ./mojaloop`
+   e.g. `helm --namespace mojaloop install dev ./mojaloop`
 
 ## Upgrading Deployments from Source
 
@@ -226,30 +228,30 @@ Mojaloop Helm deployments currently include the following provisioning (`setup`)
 
 1. Ensure Tests are enabled
 
-    Ensure the following properties are set in your [values.yaml](./mojaloop/values.yaml) file depending on which tests you wish to execute:
+   Ensure the following properties are set in your [values.yaml](./mojaloop/values.yaml) file depending on which tests you wish to execute:
 
-    - `ml-ttk-test-setup.tests.enabled=true`
-    - `ml-ttk-test-val-gp.tests.enabled=true`
-    - `ml-ttk-test-val-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true` is set_)
-    - `ml-ttk-test-setup-sdk-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true`, `mojaloop-ttk-simulators.enabled=true` is set_)
-    - `ml-ttk-test-val-sdk-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true`, `mojaloop-ttk-simulators.enabled=true` is set_)
-    - `ml-ttk-test-val-sdk-r2p.tests.enabled=true` (_Note: only applicable if `mojaloop-ttk-simulators.enabled=true` is set_)
-    - `ml-ttk-test-setup-tp.tests.enabled=true` (_Note: only applicable if `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` is set_)
-    - `ml-ttk-test-val-tp.tests.enabled=true` (_Note: only applicable if `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` is set_)
-    - `ml-ttk-test-cleanup.test.enabled=true`
+   - `ml-ttk-test-setup.tests.enabled=true`
+   - `ml-ttk-test-val-gp.tests.enabled=true`
+   - `ml-ttk-test-val-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true` is set_)
+   - `ml-ttk-test-setup-sdk-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true`, `mojaloop-ttk-simulators.enabled=true` is set_)
+   - `ml-ttk-test-val-sdk-bulk.tests.enabled=true` (_Note: only applicable if `mojaloop-bulk.enabled=true`, `mojaloop-ttk-simulators.enabled=true` is set_)
+   - `ml-ttk-test-val-sdk-r2p.tests.enabled=true` (_Note: only applicable if `mojaloop-ttk-simulators.enabled=true` is set_)
+   - `ml-ttk-test-setup-tp.tests.enabled=true` (_Note: only applicable if `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` is set_)
+   - `ml-ttk-test-val-tp.tests.enabled=true` (_Note: only applicable if `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` is set_)
+   - `ml-ttk-test-cleanup.test.enabled=true`
 
-    Or alternatively add `--set` for each of the above parameters on the install command:
+   Or alternatively add `--set` for each of the above parameters on the install command:
 
-    `helm install ... --set ml-ttk-test-setup.tests.enabled=true --set ml-ttk-test-val-gp.tests.enabled=true ...`
+   `helm install ... --set ml-ttk-test-setup.tests.enabled=true --set ml-ttk-test-val-gp.tests.enabled=true ...`
 
 2. Run Tests
 
-    Run tests:
-    `helm test <RELEASE_NAME>`
+   Run tests:
+   `helm test <RELEASE_NAME>`
 
-    Run tests with logs:
+   Run tests with logs:
 
-    `helm test <RELEASE_NAME> --logs`
+   `helm test <RELEASE_NAME> --logs`
 
 ### Ingress
 
@@ -275,11 +277,11 @@ Mojaloop Helm deployments currently include the following provisioning (`setup`)
 
 4. Testing Toolkit
 
-    Open [http://testing-toolkit.local](http://testing-toolkit.local) in your browser.
+   Open [http://testing-toolkit.local](http://testing-toolkit.local) in your browser.
 
-    Or access the [Mobile Simulator](http://testing-toolkit.local/mobilesimulator) Demo directly on [http://testing-toolkit.local/mobilesimulator](http://testing-toolkit.local/mobilesimulator).
+   Or access the [Mobile Simulator](http://testing-toolkit.local/mobilesimulator) Demo directly on [http://testing-toolkit.local/mobilesimulator](http://testing-toolkit.local/mobilesimulator).
 
-    Check out the [User Guide](https://github.com/mojaloop/ml-testing-toolkit/blob/master/documents/User-Guide.md) to learn more about the [Testing Toolkit](https://github.com/mojaloop/ml-testing-toolkit/blob/master/documents/Mojaloop-Testing-Toolkit.md).
+   Check out the [User Guide](https://github.com/mojaloop/ml-testing-toolkit/blob/master/documents/User-Guide.md) to learn more about the [Testing Toolkit](https://github.com/mojaloop/ml-testing-toolkit/blob/master/documents/Mojaloop-Testing-Toolkit.md).
 
 ## Removing Deployments
 
@@ -324,9 +326,17 @@ Refer to [Monitoring Documentation](./monitoring/README.md)
 
 ## Batch Processing
 
-Mojaloop supports batch processing of position messages for higher throughput. To ensure batching works correctly in your setup, ensure to add the `topic-transfer-position-batch` topic to your Kafka configuration. 
+Mojaloop supports batch processing of position messages for higher throughput. To ensure batching works correctly in your setup, ensure to add the `topic-transfer-position-batch` topic to your Kafka configuration.
 If you are using the example-mojaloop-backend for your backend dependencies, this topic is already added to the Kafka provisioning section by default.
 
-## Known Issues
+## Helm Provenance and Integrity
 
-1. Snapshot releases will fail if the commit SHA starts with a 0 - https://github.com/helm/helm/issues/7064
+Helm provenance ensures that Helm charts are securely signed and verified, preventing tampering and ensuring trust in deployments.
+
+This covers:
+
+- Setting up and managing GnuPG keys
+- Packaging and signing Helm charts
+- Verifying Helm chart integrity before installation
+
+Refer to the [Helm Provenance and Integrity](./PROVENANCE.md).
