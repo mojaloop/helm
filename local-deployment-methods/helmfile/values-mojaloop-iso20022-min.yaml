@@ -1,0 +1,183 @@
+CONFIG:
+  ## ISO20022
+  api_type: &API_TYPE "iso20022"
+  ttk_transformer_name: &TTK_TRANSFORMER_NAME "fspiopToISO20022"
+  ttk_input_values_override: &TTK_INPUT_VALUES_OVERRIDE
+    API_TYPE: *API_TYPE
+    ilpPacket: "$param_validIlpPacketV4"
+    validCondition: "$param_validConditionV4"
+    validFulfillment: "$param_validFulfillmentV4"
+  original_payload_storage: &ORIGINAL_PAYLOAD_STORAGE "redis"
+  # payload_cache: &PAYLOAD_CACHE
+  #   enabled: true
+  #   type: redis
+  #   connectionConfig:
+  #     cluster:
+  #       - host: proxy-cache-redis-headless
+  #         port: 6379
+  #     host: proxy-cache-redis-headless
+  #     port: 6379
+  payload_cache: &PAYLOAD_CACHE
+    enabled: true
+    type: redis-cluster
+    connectionConfig:
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
+  eventSdk: &EVENT_SDK_CONFIG
+    .EVENT_SDKrc:
+      LOG: 'off'
+      TRACE: 'off'
+      AUDIT: kafka
+      KAFKA:
+        PRODUCER:
+          EVENT:
+            AUDIT:
+              config:
+                options:
+                  sync: true
+                  messageCharset: utf8
+                topicConf:
+                  request.required.acks: all
+                  partitioner: murmur2_random
+                rdkafkaConf:
+                  compression.type: lz4
+                  metadata.broker.list: kafka:9092
+                  client.id: producer-event-audit
+                  event_cb: true
+                  dr_cb: false
+                  socket.keepalive.enable: true
+                  queue.buffering.max.messages: 10000000
+
+x-disable-probes: &DISABLE_PROBES
+  metrics:
+    enabled: false
+  readinessProbe:
+    enabled: false
+  livenessProbe:
+    enabled: false
+
+account-lookup-service:
+  account-lookup-service:
+    <<: *DISABLE_PROBES
+    config:
+      api_type: *API_TYPE
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
+      payload_cache: *PAYLOAD_CACHE
+      log_level: debug
+    configOverride: *EVENT_SDK_CONFIG
+  account-lookup-service-admin:
+    configOverride: *EVENT_SDK_CONFIG
+
+quoting-service:
+  quoting-service:
+    <<: *DISABLE_PROBES
+    config:
+      api_type: *API_TYPE
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
+      payload_cache: *PAYLOAD_CACHE
+      log_level: debug
+      simple_routing_mode_enabled: false
+
+    configOverride:
+      <<: *EVENT_SDK_CONFIG
+      .QUOTErc:
+        SIMPLE_AUDIT: 'true'
+  quoting-service-handler:
+    <<: *DISABLE_PROBES
+    config:
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
+      payload_cache: *PAYLOAD_CACHE
+      log_level: debug
+      simple_routing_mode_enabled: false
+    configOverride:
+      <<: *EVENT_SDK_CONFIG
+      .QUOTErc:
+        SIMPLE_AUDIT: 'true'
+
+ml-api-adapter:
+  ml-api-adapter-service:
+    <<: *DISABLE_PROBES
+    # image:
+    #   repository: localhost:32000/mojaloop/ml-api-adapter
+    #   tag: v14.2.0-snapshot.local.13
+    # diagnosticMode:
+    #   enabled: true
+    config:
+      api_type: *API_TYPE
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
+      payload_cache: *PAYLOAD_CACHE
+    configOverride: *EVENT_SDK_CONFIG
+  ml-api-adapter-handler-notification:
+    <<: *DISABLE_PROBES
+    # image:
+    #   repository: localhost:32000/mojaloop/ml-api-adapter
+    #   tag: v14.2.0-snapshot.local.13
+    # diagnosticMode:
+    #   enabled: true
+    config:
+      api_type: *API_TYPE
+      original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
+      payload_cache: *PAYLOAD_CACHE
+    configOverride: *EVENT_SDK_CONFIG
+
+ml-testing-toolkit:
+  ml-testing-toolkit-backend:
+    # image:
+    #   repository: localhost:32000/mojaloop/ml-testing-toolkit
+    #   tag: v18.2.1-snapshot.local.1
+    extraEnvironments:
+      hub-k8s-default-environment.json:
+        options:
+          transformerName: *TTK_TRANSFORMER_NAME
+        inputValues:
+          <<: *TTK_INPUT_VALUES_OVERRIDE
+    initContainers: []
+    config:
+      mongodb:
+        password: ''
+        secret: null
+
+ml-ttk-test-setup:
+  testCaseEnvironmentFile:
+    options:
+      transformerName: *TTK_TRANSFORMER_NAME
+    inputValues:
+      <<: *TTK_INPUT_VALUES_OVERRIDE
+ml-ttk-test-val-gp:
+  testCaseEnvironmentFile:
+    options:
+      transformerName: *TTK_TRANSFORMER_NAME
+    inputValues:
+      <<: *TTK_INPUT_VALUES_OVERRIDE
+ml-ttk-test-setup-interscheme:
+  testCaseEnvironmentFile:
+    options:
+      transformerName: *TTK_TRANSFORMER_NAME
+    inputValues:
+      <<: *TTK_INPUT_VALUES_OVERRIDE
+ml-ttk-test-val-interscheme:
+  testCaseEnvironmentFile:
+    options:
+      transformerName: *TTK_TRANSFORMER_NAME
+    inputValues:
+      <<: *TTK_INPUT_VALUES_OVERRIDE
+ml-ttk-test-cleanup:
+  testCaseEnvironmentFile:
+    options:
+      transformerName: *TTK_TRANSFORMER_NAME
+    inputValues:
+      <<: *TTK_INPUT_VALUES_OVERRIDE
+
+mojaloop-simulator:
+  enabled: false
+centralsettlement:
+  enabled: false
+transaction-requests-service:
+  enabled: false
+
+inter-scheme-proxy-adapter:
+  <<: *DISABLE_PROBES
+  env:
+    LOG_LEVEL: debug
+    

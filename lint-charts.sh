@@ -50,6 +50,7 @@ else
         mojaloop-bulk/
         mojaloop-simulator
         mojaloop
+        merchant-registry-svc
         # kube-system/ntpd/ # Deprecated - No longer supported
         ml-operator
         thirdparty/chart-auth-svc

@@ -14,7 +14,7 @@ ml-api-adapter-service:
   image:
     registry: docker.io
     repository: mojaloop/ml-api-adapter
-    tag: v16.0.2
+    tag: v16.5.6
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -80,7 +80,7 @@ ml-api-adapter-service:
     enabled: true
     image:
       repository: mojaloop/event-sidecar
-      tag: v14.0.0
+      tag: v14.0.3
       pullPolicy: IfNotPresent
     readinessProbe:
       enabled: true
@@ -112,14 +112,7 @@ ml-api-adapter-service:
       command:
         - sh
         - -c
-        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-          do
-            echo --------------------;
-            echo Waiting for Kafka...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo Kafka ok!;
+        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; do echo --------------------; echo Waiting for Kafka...; sleep 2; done; echo ====================; echo Kafka ok!;
       env:
         - name: KAFKA_HOST
           value: '{{ .Values.config.kafka_host }}'
@@ -173,33 +166,11 @@ ml-api-adapter-service:
 
     # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
     # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-    protocol_versions:
-      {
-          "CONTENT": {
-              "DEFAULT": "2.0",
-              "VALIDATELIST": [
-                  "1",
-                  "1.0",
-                  "1.1",
-                  "2",
-                  "2.0"
-              ]
-          },
-          "ACCEPT": {
-              "DEFAULT": "2",
-              "VALIDATELIST": [
-                  "1",
-                  "1.0",
-                  "1.1",
-                  "2",
-                  "2.0"
-              ]
-          }
-      }
+    protocol_versions: {"CONTENT": {"DEFAULT": "2.0", "VALIDATELIST": ["1", "1.0", "1.1", "2", "2.0"]}, "ACCEPT": {"DEFAULT": "2", "VALIDATELIST": ["1", "1.0", "1.1", "2", "2.0"]}}
     ## Log Configuration
     log_level: info
     log_filter: 'error, warn, info'
-    log_transport: file
+    log_transport: console
 
     ## Health Check endpoint
     central_services_health_endpoint_param: '/health'
@@ -246,17 +217,17 @@ ml-api-adapter-service:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
+      http: null
+      https: null
     ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
+    clusterIP: null
     ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
+    loadBalancerIP: null
     ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
@@ -290,7 +261,7 @@ ml-api-adapter-service:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
+    apiVersion: null
     ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: ml-api-adapter.local
@@ -303,7 +274,7 @@ ml-api-adapter-service:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
+    annotations: null
     ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
@@ -324,23 +295,23 @@ ml-api-adapter-service:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
   ##
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
-    #  memory: 128Mi
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
 
 ml-api-adapter-handler-notification:
   enabled: true
@@ -351,7 +322,7 @@ ml-api-adapter-handler-notification:
   image:
     registry: docker.io
     repository: mojaloop/ml-api-adapter
-    tag: v16.0.2
+    tag: v16.5.6
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -419,7 +390,7 @@ ml-api-adapter-handler-notification:
     enabled: true
     image:
       repository: mojaloop/event-sidecar
-      tag: v14.0.0
+      tag: v14.0.3
       pullPolicy: IfNotPresent
     readinessProbe:
       enabled: true
@@ -453,14 +424,7 @@ ml-api-adapter-handler-notification:
         command:
           - sh
           - -c
-          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-            do
-              echo --------------------;
-              echo Waiting for Kafka...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo Kafka ok!;
+          - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT}; do echo --------------------; echo Waiting for Kafka...; sleep 2; done; echo ====================; echo Kafka ok!;
         env:
           - name: KAFKA_HOST
             value: '{{ .Values.config.kafka_host }}'
@@ -514,29 +478,7 @@ ml-api-adapter-handler-notification:
 
     # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
     # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-    protocol_versions:
-      {
-          "CONTENT": {
-              "DEFAULT": "2.0",
-              "VALIDATELIST": [
-                  "1",
-                  "1.0",
-                  "1.1",
-                  "2",
-                  "2.0"
-              ]
-          },
-          "ACCEPT": {
-              "DEFAULT": "2",
-              "VALIDATELIST": [
-                  "1",
-                  "1.0",
-                  "1.1",
-                  "2",
-                  "2.0"
-              ]
-          }
-      }
+    protocol_versions: {"CONTENT": {"DEFAULT": "2.0", "VALIDATELIST": ["1", "1.0", "1.1", "2", "2.0"]}, "ACCEPT": {"DEFAULT": "2", "VALIDATELIST": ["1", "1.0", "1.1", "2", "2.0"]}}
     ## Endpoint Cache Configuration
     endpoint_cache_expiresInMs: 180000
     endpoint_cache_generateTimeoutMs: 30000
@@ -547,7 +489,7 @@ ml-api-adapter-handler-notification:
     ## Log Configuration
     log_level: info
     log_filter: 'error, warn, info'
-    log_transport: file
+    log_transport: console
 
     ## Health Check endpoint
     central_services_health_endpoint_param: '/health'
@@ -570,18 +512,18 @@ ml-api-adapter-handler-notification:
       # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
       jwsSigningKeySecret: null
       jwsSigningKey: null
-        # To generate this key:
-        # Private:
-        # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
-        # Public:
-        # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-        # Should look like:
-        # -----BEGIN RSA PRIVATE KEY-----
-        # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
-        # ..
-        # ..
-        # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
-        # -----END RSA PRIVATE KEY-----
+      # To generate this key:
+      # Private:
+      # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+      # Public:
+      # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+      # Should look like:
+      # -----BEGIN RSA PRIVATE KEY-----
+      # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+      # ..
+      # ..
+      # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+      # -----END RSA PRIVATE KEY-----
 
     ## Error handling Configuration
     error_handling:
@@ -609,7 +551,7 @@ ml-api-adapter-handler-notification:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
+    apiVersion: null
     ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: ml-api-adapter-notification.local
@@ -622,7 +564,7 @@ ml-api-adapter-handler-notification:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
+    annotations: null
     ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
@@ -643,20 +585,20 @@ ml-api-adapter-handler-notification:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
   ##
   resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
-    #  memory: 128Mi
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi

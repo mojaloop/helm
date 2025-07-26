@@ -1,0 +1,141 @@
+# Default values for example mojaloop backend.
+# This is a YAML-formatted file.
+# Declare global configurations
+global:
+  simsNamespace: demo
+
+perffsp-1:
+  enabled: true
+  env:
+    CBH_FSPIOP_FSP_ID: perffsp-1
+perffsp-2:
+  enabled: true
+  env:
+    CBH_FSPIOP_FSP_ID: perffsp-2
+perffsp-3:
+  enabled: true
+  env:
+    CBH_FSPIOP_FSP_ID: perffsp-3
+perffsp-4:
+  enabled: true
+  env:
+    CBH_FSPIOP_FSP_ID: perffsp-4
+perffsp-5:
+  enabled: true
+  env:
+    CBH_FSPIOP_FSP_ID: perffsp-5
+perffsp-6:
+  enabled: true
+  env:
+    CBH_FSPIOP_FSP_ID: perffsp-6
+perffsp-7:
+  enabled: true
+  env:
+    CBH_FSPIOP_FSP_ID: perffsp-7
+perffsp-8:
+  enabled: true
+  env:
+    CBH_FSPIOP_FSP_ID: perffsp-8
+
+perffxp:
+  enabled: true
+  env:
+    CBH_FSPIOP_FSP_ID: perffxp
+
+
+ml-ttk-test-setup:
+  tests:
+    enabled: true
+    weight: -9
+  config:
+    ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
+    # testCasesZipUrl: https://github.com/mojaloop/ml-core-test-harness/archive/refs/heads/main.zip
+    testCasesZipUrl: https://github.com/mojaloop/ml-core-test-harness/archive/refs/tags/v2.3.0.zip
+    testCasesPathInZip: ml-core-test-harness-2.3.0/docker/ml-testing-toolkit/test-cases/collections/provisioning/participants_perf,tmp_test_cases/ml-core-test-harness-2.3.0/docker/ml-testing-toolkit/test-cases/collections/provisioning/fxp.json
+    ttkBackendURL: http://moja-ml-testing-toolkit-backend.demo.svc.cluster.local:5050
+    testSuiteName: Perf Provisioning Collection
+    environmentName: Development
+    saveReport: false
+    allowFailures: false
+  testCaseEnvironmentFile: {
+    "options": {
+      "breakOnError": false,
+      "transformerName": "fspiopToISO20022",
+      "generateIDType": "ulid"
+    },
+    "inputValues": {
+      "HOST_ACCOUNT_LOOKUP_SERVICE": "http://moja-account-lookup-service",
+      "HOST_ACCOUNT_LOOKUP_ADMIN": "http://moja-account-lookup-service-admin",
+      "HOST_CENTRAL_LEDGER": "http://moja-centralledger-service",
+      "HOST_QUOTING_SERVICE": "http://moja-quoting-service",
+      "accept": "application/vnd.interoperability.parties+json;version=1.0",
+      "acceptParticipants": "application/vnd.interoperability.participants+json;version=1.0",
+      "acceptQuotes": "application/vnd.interoperability.quotes+json;version=1.0",
+      "acceptTransfers": "application/vnd.interoperability.transfers+json;version=1.0",
+      "contentType": "application/vnd.interoperability.parties+json;version=1.0",
+      "contentTypeParticipants": "application/vnd.interoperability.participants+json;version=1.0",
+      "contentTypeQuotes": "application/vnd.interoperability.quotes+json;version=1.0",
+      "currency": "XXX",
+      "currency2": "XTS",
+      "cgscurrency": "XOF",
+      "HUB_NAME": "hub",
+      "hubEmail": "some.email@email.com",
+      "hub_operator": "NOT_APPLICABLE",
+      "toIdType": "MSISDN",
+      "NET_DEBIT_CAP": "50000000",
+      "PERF_FSP1_ID": "perffsp-1",
+      "PERF_FSP2_ID": "perffsp-2",
+      "PERF_FSP3_ID": "perffsp-3",
+      "PERF_FSP4_ID": "perffsp-4",
+      "PERF_FSP5_ID": "perffsp-5",
+      "PERF_FSP6_ID": "perffsp-6",
+      "PERF_FSP7_ID": "perffsp-7",
+      "PERF_FSP8_ID": "perffsp-8",
+      "PERF_FSP1_ADDRESS": "19012345001",
+      "PERF_FSP2_ADDRESS": "19012345002",
+      "PERF_FSP3_ADDRESS": "19012345003",
+      "PERF_FSP4_ADDRESS": "19012345004",
+      "PERF_FSP5_ADDRESS": "19012345005",
+      "PERF_FSP6_ADDRESS": "19012345006",
+      "PERF_FSP7_ADDRESS": "19012345007",
+      "PERF_FSP8_ADDRESS": "19012345008",
+      "PERF_FXP_CALLBACK_ENDPOINT_BASE_URL": "http://perf-perffxp/fxp",
+      "PERF_FSP1_CALLBACK_ENDPOINT_BASE_URL": "http://perf-perffsp-1/fspiop",
+      "PERF_FSP2_CALLBACK_ENDPOINT_BASE_URL": "http://perf-perffsp-2/fspiop",
+      "PERF_FSP3_CALLBACK_ENDPOINT_BASE_URL": "http://perf-perffsp-3/fspiop",
+      "PERF_FSP4_CALLBACK_ENDPOINT_BASE_URL": "http://perf-perffsp-4/fspiop",
+      "PERF_FSP5_CALLBACK_ENDPOINT_BASE_URL": "http://perf-perffsp-5/fspiop",
+      "PERF_FSP6_CALLBACK_ENDPOINT_BASE_URL": "http://perf-perffsp-6/fspiop",
+      "PERF_FSP7_CALLBACK_ENDPOINT_BASE_URL": "http://perf-perffsp-7/fspiop",
+      "PERF_FSP8_CALLBACK_ENDPOINT_BASE_URL": "http://perf-perffsp-8/fspiop"
+    }
+  }
+k6-tests:
+  tests:
+    enabled: true
+    weight: -8
+  env:
+    K6_SCRIPT_CONFIG_FILE_NAME: test.json
+  scenarios:
+    test.json: |
+      {
+        "scenarios": {
+          "fxSendE2E": {
+            "executor": "ramping-vus",
+            "exec": "fxSendE2EScenarios",
+            "env": {
+              "UNIDIRECTIONAL": "false"
+            },
+            "startVUs": 1,
+            "stages": [
+              { "duration": "30s", "target": 30 },
+              { "duration": "5m", "target": 30 }
+            ]
+          }
+        },
+        "thresholds": {
+          "iteration_duration": [ "p(95)<1000" ],
+          "http_req_failed": [ "rate<0.01" ],
+          "http_req_duration": [ "p(95)<1000" ]
+        }
+      }

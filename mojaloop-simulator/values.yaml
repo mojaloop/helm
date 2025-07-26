@@ -2,7 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-
 simulators: {}
 
 # Usage:
@@ -36,7 +35,6 @@ simulators: {}
 #         enabled: true
 #
 # The above config will create 1 instance of a simulator, with a thirdparty-sdk
-
 
 # TODO & notes:
 # * do the port _numbers_ matter at all? Can we get rid of them?
@@ -106,11 +104,10 @@ simulators: {}
 # * It is likely possible to have the user supply a CA cert + key and use those to generate and
 #   sign automatically generated per-simulator keys.
 
-
-  # Every key added to this `simulators` object will be a simulator that takes on the default
-  # config below. The default is deliberately left empty so nothing is deployed by default.
-  # payerfsp: {}
-  # payeefsp: {}
+# Every key added to this `simulators` object will be a simulator that takes on the default
+# config below. The default is deliberately left empty so nothing is deployed by default.
+# payerfsp: {}
+# payeefsp: {}
 
 defaultProbes: &defaultProbes
   livenessProbe:
@@ -165,11 +162,11 @@ ingress:
 # your switch is using `FSPIOP-Source: peter` you will need a property `peter` in the following
 # object. Do not add the public keys of your simulators to this object. Instead, put them in
 # `mojaloop-simulator.simulators.$yourSimName.config.schemeAdapter.secrets.jws.publicKey`.
-sharedJWSPubKeys:
-  # switch: |-
-  #   -----BEGIN PUBLIC KEY-----
-  #   blah blah blah
-  #   -----END PUBLIC KEY-----
+sharedJWSPubKeys: null
+# switch: |-
+#   -----BEGIN PUBLIC KEY-----
+#   blah blah blah
+#   -----END PUBLIC KEY-----
 
 defaults:
   # Changes to this object in the parent chart, for example 'mojaloop-simulator.defaults' will be
@@ -201,10 +198,7 @@ defaults:
     ##   - myRegistryKeySecretName
     ##
     imagePullSecrets: []
-
-    cache:
-
-      # These will be supplied directly to the init containers array in the deployment for the
+    cache: # These will be supplied directly to the init containers array in the deployment for the
       # scheme adapter. They should look exactly as you'd declare them inside the deployment.
       # Example: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#init-containers-in-use
       # This init container will have the same environment variables as the main backend container,
@@ -231,6 +225,11 @@ defaults:
     schemeAdapter:
       secrets:
         tls:
+          # Uncomment method below to use certmanager for generating TLS certs, the default is to let Helm generate them for you,
+          # which is not good when using ArgoCD, as it leads to unnecessary sync.
+          # When using certmanager, an issuer named `simulator-ca-issuer` must be created in the same namespace.
+          # method: certmanager
+
           # In order to enable TLS with your supplied credentials, you will need to:
           # 1. set all three of the `cert`, `key`, `cacert` fields appropriately for each of
           # `inbound` and `outbound` as per your preference.
@@ -292,7 +291,7 @@ defaults:
           publicKey: ''
       image:
         repository: mojaloop/sdk-scheme-adapter
-        tag: v24.0.8
+        tag: v24.6.2
         pullPolicy: IfNotPresent
         command: '[ "yarn", "start:api-svc" ]'
       <<: *defaultProbes
@@ -464,10 +463,9 @@ defaults:
     backend:
       image:
         repository: mojaloop/mojaloop-simulator
-        tag: v15.1.5
+        tag: v15.3.0
         pullPolicy: IfNotPresent
       <<: *defaultProbes
-
       # These will be supplied directly to the init containers array in the deployment for the
       # backend. They should look exactly as you'd declare them inside the deployment.
       # Example: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#init-containers-in-use
@@ -608,7 +606,7 @@ defaults:
           publicKey: ''
       image:
         repository: mojaloop/thirdparty-sdk
-        tag: v15.1.1
+        tag: v15.1.3
         pullPolicy: IfNotPresent
         # inboundCommand: '[ "npm", "run", "start:inbound" ]' ## TODO: Remove
         # outboundCommand: '[ "npm", "run", "start:outbound" ]' ## TODO: Remove
@@ -642,21 +640,21 @@ defaults:
         NODE_ENV: production
         INBOUND_LISTEN_PORT: 4005
         OUTBOUND_LISTEN_PORT: 4006
-         # Path to JWS signing key (private key of THIS DFSP)
+        # Path to JWS signing key (private key of THIS DFSP)
         JWS_SIGNING_KEY_PATH: "/jwsSigningKey/private.key" # do not change this unless you know what you are doing - this will break the chart
         JWS_VERIFICATION_KEYS_DIRECTORY: "/jwsVerificationKeys"
 
     resources: {}
-      # We usually recommend not to specify default resources and to leave this as a conscious
-      # choice for the user. This also increases chances charts run on environments with little
-      # resources, such as Minikube. If you do want to specify resources, uncomment the following
-      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-      # limits:
-      #  cpu: 100m
-      #  memory: 128Mi
-      # requests:
-      #  cpu: 100m
-      #  memory: 128Mi
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
 
     ## Pod scheduling preferences.
     ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity

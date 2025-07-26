@@ -13,7 +13,7 @@ bulk-api-adapter-service:
   image:
     registry: docker.io
     repository: mojaloop/bulk-api-adapter
-    tag: v17.1.6
+    tag: v17.1.9
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -125,29 +125,11 @@ bulk-api-adapter-service:
       callback:
         rejectUnauthorized: true
     log_level: 'info'
-    log_transport: file
+    log_transport: console
 
     # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
     # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-    protocol_versions: |
-      {
-          "CONTENT": {
-              "DEFAULT": "1.1",
-              "VALIDATELIST": [
-                  "1",
-                  "1.0",
-                  "1.1"
-              ]
-          },
-          "ACCEPT": {
-              "DEFAULT": "1",
-              "VALIDATELIST": [
-                  "1",
-                  "1.0",
-                  "1.1"
-              ]
-          }
-      }
+    protocol_versions: {"CONTENT": {"DEFAULT": "2.0", "VALIDATELIST": ["1", "1.0", "1.1", "2", "2.0"]}, "ACCEPT": {"DEFAULT": "2", "VALIDATELIST": ["1", "1.0", "1.1", "2", "2.0"]}}
 
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -230,17 +212,17 @@ bulk-api-adapter-service:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
+      http: null
+      https: null
     ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
+    clusterIP: null
     ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
+    loadBalancerIP: null
     ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
@@ -274,7 +256,7 @@ bulk-api-adapter-service:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
+    apiVersion: null
     ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: bulk-api-adapter.local
@@ -287,7 +269,7 @@ bulk-api-adapter-service:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
+    annotations: null
     ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
@@ -308,10 +290,10 @@ bulk-api-adapter-service:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
 
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -335,7 +317,7 @@ bulk-api-adapter-handler-notification:
   image:
     registry: docker.io
     repository: mojaloop/bulk-api-adapter
-    tag: v17.1.6
+    tag: v17.1.9
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -448,29 +430,11 @@ bulk-api-adapter-handler-notification:
       callback:
         rejectUnauthorized: true
     log_level: 'info'
-    log_transport: file
+    log_transport: console
 
     # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
     # and for generating requests/callbacks from the Switch itself (DEFAULT value)
-    protocol_versions: |
-      {
-          "CONTENT": {
-              "DEFAULT": "1.1",
-              "VALIDATELIST": [
-                  "1",
-                  "1.0",
-                  "1.1"
-              ]
-          },
-          "ACCEPT": {
-              "DEFAULT": "1",
-              "VALIDATELIST": [
-                  "1",
-                  "1.0",
-                  "1.1"
-              ]
-          }
-      }
+    protocol_versions: {"CONTENT": {"DEFAULT": "2.0", "VALIDATELIST": ["1", "1.0", "1.1", "2", "2.0"]}, "ACCEPT": {"DEFAULT": "2", "VALIDATELIST": ["1", "1.0", "1.1", "2", "2.0"]}}
 
     # Parameters for JWS signing requests
     endpointSecurity:
@@ -480,18 +444,18 @@ bulk-api-adapter-handler-notification:
       # Expected properties of `jwsSigningKeySecret` are `name` and `key`.
       jwsSigningKeySecret: null
       jwsSigningKey: null
-        # To generate this key:
-        # Private:
-        # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
-        # Public:
-        # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-        # Should look like:
-        # -----BEGIN RSA PRIVATE KEY-----
-        # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
-        # ..
-        # ..
-        # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
-        # -----END RSA PRIVATE KEY-----
+      # To generate this key:
+      # Private:
+      # ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+      # Public:
+      # openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+      # Should look like:
+      # -----BEGIN RSA PRIVATE KEY-----
+      # MIIJKQIBAAKCAgEAxfqaZivMPd4MpdBHu0jVMf3MSuSdkSMHn+sNJdDQfl+x4R5R
+      # ..
+      # ..
+      # mBynFpdjO0D3PnLKjnBDn1vFAfANOwVpGXCw5mn+484A/SIXYebWruFd03g4
+      # -----END RSA PRIVATE KEY-----
 
   ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -574,17 +538,17 @@ bulk-api-adapter-handler-notification:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
+      http: null
+      https: null
     ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
+    clusterIP: null
     ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
+    loadBalancerIP: null
     ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
@@ -618,7 +582,7 @@ bulk-api-adapter-handler-notification:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
+    apiVersion: null
     ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: bulk-api-adapter-notification.local
@@ -631,7 +595,7 @@ bulk-api-adapter-handler-notification:
     ## @param ingress.annotations Additional custom annotations for the ingress record
     ## NOTE: If `ingress.certManager=true`, annotation `kubernetes.io/tls-acme: "true"` will automatically be added
     ##
-    annotations:
+    annotations: null
     ## @param ingress.tls Enable TLS configuration for the host defined at `ingress.hostname` parameter
     ## TLS certificates will be retrieved from a TLS secret with name: `{{- printf "%s-tls" .Values.ingress.hostname }}`
     ## You can:
@@ -652,10 +616,10 @@ bulk-api-adapter-handler-notification:
     ##   - name: transfer-api-svc.local
     ##     path: /
     ##
-    extraHosts:
-    extraPaths:
-    extraTls:
-    secrets:
+    extraHosts: null
+    extraPaths: null
+    extraTls: null
+    secrets: null
     className: "nginx"
 
   # We usually recommend not to specify default resources and to leave this as a conscious

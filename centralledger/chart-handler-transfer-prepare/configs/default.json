@@ -38,7 +38,8 @@
         "IDLE_TIMEOUT_MILLIS": {{ .Values.config.db_idle_timeout_millis }},
         "REAP_INTERVAL_MILLIS": {{ .Values.config.db_reap_interval_millis }},
         "CREATE_RETRY_INTERVAL_MILLIS": {{ .Values.config.db_create_retry_interval_millis }},
-        "DEBUG": {{ .Values.config.db_debug }}
+        "DEBUG": {{ .Values.config.db_debug }},
+        "ADDITIONAL_CONNECTION_OPTIONS": {{ .Values.config.db_additional_connection_options | toPrettyJson | nindent 4 }}
     },
     "MONGODB": {
         "DISABLED": {{ .Values.config.objstore_disabled }},
@@ -100,7 +101,6 @@
     "PROXY_CACHE": {{ .Values.config.proxy_cache | toPrettyJson | nindent 2 }},
     "API_DOC_ENDPOINTS_ENABLED": true,
     "KAFKA": {
-        {{ if $.Values.config.batch_processing_enabled }}
         "EVENT_TYPE_ACTION_TOPIC_MAP" : {
             "POSITION":{
               "PREPARE": "topic-transfer-position-batch",
@@ -108,7 +108,6 @@
               "BULK_PREPARE": "topic-transfer-position"
             }
         },
-        {{ end }}
         "TOPIC_TEMPLATES": {
             "PARTICIPANT_TOPIC_TEMPLATE": {
                 "TEMPLATE": "topic-{{"{{"}}participantName{{"}}"}}-{{"{{"}}functionality{{"}}"}}-{{"{{"}}action{{"}}"}}",

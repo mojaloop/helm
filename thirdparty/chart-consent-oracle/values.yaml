@@ -3,7 +3,7 @@ enabled: true
 image:
   registry: docker.io
   repository: mojaloop/als-consent-oracle
-  tag: v0.2.3
+  tag: v1.1.2
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -29,14 +29,14 @@ diagnosticMode:
   enabled: false
   ## @param diagnosticMode.command Command to override all containers in the deployment
   ##
-  command: 
+  command:
     - node
     - ./dist/src/cli.js
   ## @param diagnosticMode.args Args to override all containers in the deployment
   ##
   args:
     - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-  
+
   ## @param diagnosticMode.debug config to override all debug information
   ##
   debug:
@@ -80,9 +80,9 @@ containerSecurityContext:
 
 # Add exta environment variables here
 env: []
-  # e.g.
-  # - name: LOG_LEVEL
-  #   value: debug
+# e.g.
+# - name: LOG_LEVEL
+#   value: debug
 
 ## Svc configs
 config:
@@ -114,7 +114,7 @@ config_files:
         "COLOR": true
       },
       "DATABASE": {
-        "DIALECT": "mysql",
+        "DIALECT": "mysql2",
         "HOST": "{{ .Values.config.db_host }}",
         "PORT": {{ .Values.config.db_port }},
         "USER": "{{ .Values.config.db_user }}",
@@ -224,11 +224,11 @@ service:
   ## e.g.:
   ## clusterIP: None
   ##
-  clusterIP:
+  clusterIP: null
   ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
   ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
   ##
-  loadBalancerIP:
+  loadBalancerIP: null
   ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
   ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
   ## e.g:
@@ -264,7 +264,7 @@ ingress:
   pathType: ImplementationSpecific
   ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
   ##
-  apiVersion:
+  apiVersion: null
   ## @param ingress.hostname Default host for the ingress record
   ##
   hostname: consent-oracle.local

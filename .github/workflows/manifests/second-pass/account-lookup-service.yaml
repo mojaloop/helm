@@ -11,6 +11,11 @@ sources:
     spec: 
       url: file://./account-lookup-service
       name: account-lookup-service-admin
+  account-lookup-service-handler-timeout:
+    kind: helmchart
+    spec: 
+      url: file://./account-lookup-service
+      name: account-lookup-service-handler-timeout
   als-oracle-pathfinder:
     kind: helmchart
     spec: 
@@ -40,8 +45,8 @@ targets:
     transformers:
       - addprefix: '">= '
       - addsuffix: '"'
-  als-oracle-pathfinder:
-    sourceid: als-oracle-pathfinder
+  account-lookup-service-handler-timeout:
+    sourceid: account-lookup-service-handler-timeout
     kind: helmchart
     spec:
       name: account-lookup-service
@@ -50,4 +55,13 @@ targets:
     transformers:
       - addprefix: '">= '
       - addsuffix: '"'
-  
+  als-oracle-pathfinder:
+    sourceid: als-oracle-pathfinder
+    kind: helmchart
+    spec:
+      name: account-lookup-service
+      file: Chart.yaml
+      key: $.dependencies[3].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'

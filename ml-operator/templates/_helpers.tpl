@@ -14,7 +14,6 @@ Common labels
 */}}
 {{- define "ml-operator.labels" -}}
 helm.sh/chart: {{ include "ml-operator.chart" . }}
-app.kubernetes.io/name: {{ include "ml-operator.name" . }}
 {{ include "ml-operator.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}

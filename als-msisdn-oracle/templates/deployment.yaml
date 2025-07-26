@@ -114,6 +114,15 @@ spec:
             {{- else }}
               value: {{ .Values.config.db_password }}
             {{- end }}
+            {{- if .Values.config.db_ssl_enabled }}
+            {{- if .Values.config.db_ssl_ca_secret }}
+            - name: ALS_MSISDN_ORACLE_DATABASE_SSL_CA
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ .Values.config.db_ssl_ca_secret.name }}'
+                  key: '{{ .Values.config.db_ssl_ca_secret.key }}'
+            {{- end }}
+            {{- end }}
           {{- range $envItem := .Values.env }}
             - name: {{ $envItem.name }}
               value: {{ $envItem.value }}

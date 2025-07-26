@@ -99,6 +99,60 @@ jobs:
           name: Linting Helm Charts
           command: |
             bash lint-charts.sh
+      - run:
+          name: Rendering Helm Charts
+          command: |
+            curl -L --output /usr/bin/yq https://github.com/mikefarah/yq/releases/download/v4.45.1/yq_linux_amd64
+            chmod +x /usr/bin/yq
+            yq --version
+            bash lint-render.sh
+      - persist_to_workspace:
+          root: .
+          paths:
+            - test
+            - package.json
+            - package-lock.json
+            - eslint.config.mjs
+
+  test-lint-yaml:
+    executor: default-machine
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Set up nvm
+          command: |
+            # Note: this needs to be separate from the nvm install step
+            echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
+            echo "[ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\"" >> $BASH_ENV
+      - run:
+          name: Install and run linter
+          command: |
+            nvm install v20.18.0 && nvm alias default v20.18.0
+            node --version
+            npm ci --legacy-peer-deps
+            npm run lint || { echo -e "\e[31mLinting failed, check the report in artifacts\e[0m"; exit 1; }
+      - store_artifacts:
+          path: /home/circleci/project/test/lint.html
+          destination: Lint-YAML
+  test-lint-k8s:
+    executor: default-machine
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Download kubectl-validate
+          command: |
+            curl -L --output ./kubectl-validate https://github.com/kubernetes-sigs/kubectl-validate/releases/download/v0.0.4/kubectl-validate_linux_amd64.tar.gz
+            tar -xvf ./kubectl-validate
+            chmod +x ./kubectl-validate
+      - run:
+          name: Run kubectl-validate
+          command: |
+            ./kubectl-validate test --version 1.32 |& grep -v $'OK\033\[0m$' | sed '/^$/N;/^\n$/D'
+      - store_artifacts:
+          path: /home/circleci/project/test
+          destination: Lint-k8s
 
   audit-licenses:
     executor: default-machine
@@ -257,6 +311,24 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - test-lint-yaml:
+          context: org-global
+          requires:
+            - test
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(\-snapshot+((\.[0-9]+)?))?/
+            branches:
+              only: /main|(major|minor|patch)/.*/
+      - test-lint-k8s:
+          context: org-global
+          requires:
+            - test
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(\-snapshot+((\.[0-9]+)?))?/
+            branches:
+              only: /main|(major|minor|patch)/.*/
       - audit-licenses:
           context: org-global
           requires:
@@ -267,7 +339,8 @@ workflows:
       - deploy:
           context: org-global
           requires:
-            - test
+            - test-lint-yaml
+            - test-lint-k8s
             - audit-licenses
           filters:
             tags:

@@ -118,6 +118,17 @@ spec:
             {{- else }}
               value: {{ .Values.config.db_password }}
             {{- end }}
+            {{- if .Values.config.db_ssl_enabled }}
+            - name: CLEDG_DATABASE__ADDITIONAL_CONNECTION_OPTIONS__ssl__rejectUnauthorized
+              value: {{ .Values.config.db_ssl_verify | quote}}
+            {{- if .Values.config.db_ssl_ca_secret }}
+            - name: CLEDG_DATABASE__ADDITIONAL_CONNECTION_OPTIONS__ssl__ca
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ .Values.config.db_ssl_ca_secret.name }}'
+                  key: '{{ .Values.config.db_ssl_ca_secret.key }}'
+            {{- end }}
+            {{- end }}
             - name: CLEDG_MONGODB__PASSWORD
             {{- if .Values.config.mongo_secret }}
               valueFrom:
@@ -130,7 +141,7 @@ spec:
             - name: LOG_LEVEL
               value: {{ .Values.config.log_level }}
             - name: CSL_LOG_TRANSPORT
-              value: {{ .Values.config.log_transport}}
+              value: {{ .Values.config.log_transport | quote}}
           volumeMounts:
           - name: {{ template "centralledger-handler-bulk-transfer-get.fullname" . }}-config-volume
             mountPath: /opt/app/config

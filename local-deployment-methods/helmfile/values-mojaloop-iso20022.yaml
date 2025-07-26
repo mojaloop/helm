@@ -15,6 +15,30 @@ CONFIG:
       cluster:
         - host: proxy-cache-redis
           port: 6379
+  eventSdk: &EVENT_SDK_CONFIG
+    .EVENT_SDKrc:
+      LOG: 'off'
+      TRACE: 'off'
+      AUDIT: kafka
+      KAFKA:
+        PRODUCER:
+          EVENT:
+            AUDIT:
+              config:
+                options:
+                  sync: true
+                  messageCharset: utf8
+                topicConf:
+                  request.required.acks: all
+                  partitioner: murmur2_random
+                rdkafkaConf:
+                  compression.type: lz4
+                  metadata.broker.list: kafka:9092
+                  client.id: producer-event-audit
+                  event_cb: true
+                  dr_cb: false
+                  socket.keepalive.enable: true
+                  queue.buffering.max.messages: 10000000
 
 x-disable-probes: &DISABLE_PROBES
   metrics:
@@ -32,6 +56,9 @@ account-lookup-service:
       original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
       payload_cache: *PAYLOAD_CACHE
       log_level: debug
+    configOverride: *EVENT_SDK_CONFIG
+  account-lookup-service-admin:
+    configOverride: *EVENT_SDK_CONFIG
 
 quoting-service:
   quoting-service:
@@ -42,6 +69,11 @@ quoting-service:
       payload_cache: *PAYLOAD_CACHE
       log_level: debug
       simple_routing_mode_enabled: false
+
+    configOverride:
+      <<: *EVENT_SDK_CONFIG
+      .QUOTErc:
+        SIMPLE_AUDIT: 'true'
   quoting-service-handler:
     <<: *DISABLE_PROBES
     config:
@@ -49,6 +81,10 @@ quoting-service:
       payload_cache: *PAYLOAD_CACHE
       log_level: debug
       simple_routing_mode_enabled: false
+    configOverride:
+      <<: *EVENT_SDK_CONFIG
+      .QUOTErc:
+        SIMPLE_AUDIT: 'true'
 
 ml-api-adapter:
   ml-api-adapter-service:
@@ -62,6 +98,7 @@ ml-api-adapter:
       api_type: *API_TYPE
       original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
       payload_cache: *PAYLOAD_CACHE
+    configOverride: *EVENT_SDK_CONFIG
   ml-api-adapter-handler-notification:
     <<: *DISABLE_PROBES
     # image:
@@ -73,6 +110,7 @@ ml-api-adapter:
       api_type: *API_TYPE
       original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
       payload_cache: *PAYLOAD_CACHE
+    configOverride: *EVENT_SDK_CONFIG
 
 ml-testing-toolkit:
   ml-testing-toolkit-backend:

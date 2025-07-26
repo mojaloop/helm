@@ -4,7 +4,7 @@ auth-svc:
   image:
     registry: docker.io
     repository: mojaloop/auth-service
-    tag: v15.0.0
+    tag: v15.2.5
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -151,8 +151,7 @@ auth-svc:
           }
         },
         "DATABASE": {
-          "client": "mysql",
-          "version": "5.5",
+          "client": "mysql2",
           "connection": {
             "host": "{{ .Values.config.db_host }}",
             "port": {{ .Values.config.db_port }},
@@ -295,17 +294,17 @@ auth-svc:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
+      http: null
+      https: null
     ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
+    clusterIP: null
     ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
+    loadBalancerIP: null
     ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
@@ -341,7 +340,7 @@ auth-svc:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
+    apiVersion: null
     ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: auth-service.local
@@ -420,7 +419,7 @@ consent-oracle:
   image:
     registry: docker.io
     repository: mojaloop/als-consent-oracle
-    tag: v0.2.3
+    tag: v1.1.2
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -497,9 +496,9 @@ consent-oracle:
 
   # Add exta environment variables here
   env: []
-    # e.g.
-    # - name: LOG_LEVEL
-    #   value: debug
+  # e.g.
+  # - name: LOG_LEVEL
+  #   value: debug
 
   ## Svc configs
   config:
@@ -531,7 +530,7 @@ consent-oracle:
           "COLOR": true
         },
         "DATABASE": {
-          "DIALECT": "mysql",
+          "DIALECT": "mysql2",
           "HOST": "{{ .Values.config.db_host }}",
           "PORT": {{ .Values.config.db_port }},
           "USER": "{{ .Values.config.db_user }}",
@@ -636,17 +635,17 @@ consent-oracle:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
+      http: null
+      https: null
     ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
+    clusterIP: null
     ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
+    loadBalancerIP: null
     ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
@@ -682,7 +681,7 @@ consent-oracle:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
+    apiVersion: null
     ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: consent-oracle.local
@@ -761,7 +760,7 @@ tp-api-svc:
   image:
     registry: docker.io
     repository: mojaloop/thirdparty-api-svc
-    tag: v15.0.1
+    tag: v15.0.2
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -839,9 +838,9 @@ tp-api-svc:
 
   # Add exta environment variables here
   env: []
-    # e.g. to change the Log Level:
-    # - name: LOG_LEVEL
-    #   value: debug
+  # e.g. to change the Log Level:
+  # - name: LOG_LEVEL
+  #   value: debug
 
   ## Svc configs
   config:
@@ -929,17 +928,17 @@ tp-api-svc:
     ## NOTE: choose port between <30000-32767>
     ##
     nodePorts:
-      http:
-      https:
+      http: null
+      https: null
     ## @param service.clusterIP %%MAIN_CONTAINER_NAME%% service Cluster IP
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP:
+    clusterIP: null
     ## @param service.loadBalancerIP %%MAIN_CONTAINER_NAME%% service Load Balancer IP
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
     ##
-    loadBalancerIP:
+    loadBalancerIP: null
     ## @param service.loadBalancerSourceRanges %%MAIN_CONTAINER_NAME%% service Load Balancer sources
     ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
     ## e.g:
@@ -975,7 +974,7 @@ tp-api-svc:
     pathType: ImplementationSpecific
     ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
     ##
-    apiVersion:
+    apiVersion: null
     ## @param ingress.hostname Default host for the ingress record
     ##
     hostname: tp-api-svc.local
@@ -1148,7 +1147,6 @@ thirdparty-simulator:
   # * can _probably_ remove port numbers from services to simplify chart (although perhaps not? try
   #   to port-forward with a named port instead of a numbered port?)
 
-
   simulators:
     ## Every key added to this `simulators` object will be a simulator that takes on the default
     ## config below. The default is deliberately left empty so nothing is deployed by default.
@@ -1162,95 +1160,7 @@ thirdparty-simulator:
       config:
         thirdpartysdk:
           enabled: true
-          config: {
-            production.json: {
-              "control": {
-                "mgmtAPIWsUrl": "127.0.0.1",
-                "mgmtAPIWsPort": 4010
-              },
-              "inbound": {
-                "port": 4005,
-                "host": "0.0.0.0",
-                "pispTransactionMode": true,
-                "tls": {
-                  "mutualTLS": {
-                    "enabled": false
-                  },
-                  "creds": {
-                    "ca": "/secrets/dfsp_or_3ppi_client_cacert.pem",
-                    "cert": "/secrets/dfsp_or_3ppi_server_cert.pem",
-                    "key": "/secrets/dfsp_or_3ppi_server_key.key"
-                  }
-                }
-              },
-              "outbound": {
-                "port": 4006,
-                "host": "0.0.0.0",
-                "tls": {
-                  "mutualTLS": {
-                    "enabled": false
-                  },
-                  "creds": {
-                    "ca": "/secrets/hub_server_cacert.pem",
-                    "cert": "/secrets/dfsp_or_3ppi_client_cert.cer",
-                    "key": "/secrets/dfsp_or_3ppi_client_key.key"
-                  }
-                }
-              },
-              "requestProcessingTimeoutSeconds": 30,
-              "wso2": {
-                "auth": {
-                  "staticToken": "test-static-token",
-                  "tokenEndpoint": "",
-                  "clientKey": "test-client-key",
-                  "clientSecret": "test-client-secret",
-                  "refreshSeconds": 3600
-                }
-              },
-              "redis": {
-                "port": 6379,
-                "timeout": 100
-              },
-              "inspect": {
-                "depth": 4,
-                "showHidden": false,
-                "color": true
-              },
-              "shared": {
-                "authServiceParticipantId": "centralauth",
-                "thirdpartyRequestsEndpoint": "$release_name-tp-api-svc",
-                "servicesEndpoint": "$release_name-tp-api-svc",
-                "alsEndpoint": "$release_name-account-lookup-service",
-                "quotesEndpoint": "$release_name-quoting-service",
-                "transfersEndpoint": "$release_name-ml-api-adapter-service",
-                "dfspId": "$name",
-                "dfspBackendUri": "$full_name-backend:3000",
-                "dfspBackendHttpScheme": "http",
-                "dfspBackendVerifyAuthorizationPath": "verify-authorization",
-                "dfspBackendVerifyConsentPath": "verify-consent",
-                "sdkRequestToPayTransferUri": "0.0.0.0:3000/requestToPayTransfer",
-                "sdkOutgoingUri": "$full_name-scheme-adapter:4001",
-                "sdkOutgoingHttpScheme": "http",
-                "sdkOutgoingPartiesInformationPath": "parties/{Type}/{ID}/{SubId}",
-                "sdkNotifyAboutTransferUri": "ml-testing-toolkit:4040/thirdpartyRequests/transactions/{ID}",
-                "tempOverrideQuotesPartyIdType": "MSISDN",
-                "testShouldOverrideConsentId": true,
-                "testConsentRequestToConsentMap": {
-                    "76059a0a-684f-4002-a880-b01159afe119": "76059a0a-684f-4002-a880-b01159afe119",
-                    "6bf07f98-cfce-45ba-b048-7a86bac45d79": "be433b9e-9473-4b7d-bdd5-ac5b42463afb",
-                    "c51ec534-ee48-4575-b6a9-ead2955b8069": "46876aac-5db8-4353-bb3c-a6a905843ce7",
-                    "d51ec534-ee48-4575-b6a9-ead2955b8069": "23b07761-6b41-442a-b3d5-d876a6ea9ecc",
-                    "b5d6206c-4f06-497d-af15-ed866ea6958f": "2acf1dfa-ce45-486e-b19e-ae4ad9804a63"
-                  },
-                "testOverrideTransactionChallenge": "OWZhYjAxZTcwYjU4YzRhMzRmOWQwNzBmZjllZDFiNjc2NWVhMzA1NGI1MWZjZThjZGFjNDEyZDBmNmM2MWFhMQ"
-              },
-              "pm4mlEnabled": false,
-              "validateInboundJws": false,
-              "jwsSign": false,
-              "jwsSigningKey": "/jwsSigningKey.key",
-              "jwsVerificationKeysDirectory": null
-            }
-          }
+          config: {production.json: {"control": {"mgmtAPIWsUrl": "127.0.0.1", "mgmtAPIWsPort": 4010}, "inbound": {"port": 4005, "host": "0.0.0.0", "pispTransactionMode": true, "tls": {"mutualTLS": {"enabled": false}, "creds": {"ca": "/secrets/dfsp_or_3ppi_client_cacert.pem", "cert": "/secrets/dfsp_or_3ppi_server_cert.pem", "key": "/secrets/dfsp_or_3ppi_server_key.key"}}}, "outbound": {"port": 4006, "host": "0.0.0.0", "tls": {"mutualTLS": {"enabled": false}, "creds": {"ca": "/secrets/hub_server_cacert.pem", "cert": "/secrets/dfsp_or_3ppi_client_cert.cer", "key": "/secrets/dfsp_or_3ppi_client_key.key"}}}, "requestProcessingTimeoutSeconds": 30, "wso2": {"auth": {"staticToken": "test-static-token", "tokenEndpoint": "", "clientKey": "test-client-key", "clientSecret": "test-client-secret", "refreshSeconds": 3600}}, "redis": {"port": 6379, "timeout": 100}, "inspect": {"depth": 4, "showHidden": false, "color": true}, "shared": {"authServiceParticipantId": "centralauth", "thirdpartyRequestsEndpoint": "$release_name-tp-api-svc", "servicesEndpoint": "$release_name-tp-api-svc", "alsEndpoint": "$release_name-account-lookup-service", "quotesEndpoint": "$release_name-quoting-service", "transfersEndpoint": "$release_name-ml-api-adapter-service", "dfspId": "$name", "dfspBackendUri": "$full_name-backend:3000", "dfspBackendHttpScheme": "http", "dfspBackendVerifyAuthorizationPath": "verify-authorization", "dfspBackendVerifyConsentPath": "verify-consent", "sdkRequestToPayTransferUri": "0.0.0.0:3000/requestToPayTransfer", "sdkOutgoingUri": "$full_name-scheme-adapter:4001", "sdkOutgoingHttpScheme": "http", "sdkOutgoingPartiesInformationPath": "parties/{Type}/{ID}/{SubId}", "sdkNotifyAboutTransferUri": "ml-testing-toolkit:4040/thirdpartyRequests/transactions/{ID}", "tempOverrideQuotesPartyIdType": "MSISDN", "testShouldOverrideConsentId": true, "testConsentRequestToConsentMap": {"76059a0a-684f-4002-a880-b01159afe119": "76059a0a-684f-4002-a880-b01159afe119", "6bf07f98-cfce-45ba-b048-7a86bac45d79": "be433b9e-9473-4b7d-bdd5-ac5b42463afb", "c51ec534-ee48-4575-b6a9-ead2955b8069": "46876aac-5db8-4353-bb3c-a6a905843ce7", "d51ec534-ee48-4575-b6a9-ead2955b8069": "23b07761-6b41-442a-b3d5-d876a6ea9ecc", "b5d6206c-4f06-497d-af15-ed866ea6958f": "2acf1dfa-ce45-486e-b19e-ae4ad9804a63"}, "testOverrideTransactionChallenge": "OWZhYjAxZTcwYjU4YzRhMzRmOWQwNzBmZjllZDFiNjc2NWVhMzA1NGI1MWZjZThjZGFjNDEyZDBmNmM2MWFhMQ"}, "pm4mlEnabled": false, "validateInboundJws": false, "jwsSign": false, "jwsSigningKey": "/jwsSigningKey.key", "jwsVerificationKeysDirectory": null}}
 
         schemeAdapter:
           secrets:
@@ -1994,11 +1904,11 @@ thirdparty-simulator:
   # your switch is using `FSPIOP-Source: peter` you will need a property `peter` in the following
   # object. Do not add the public keys of your simulators to this object. Instead, put them in
   # `mojaloop-simulator.simulators.$yourSimName.config.schemeAdapter.secrets.jws.publicKey`.
-  sharedJWSPubKeys:
-    # switch: |-
-    #   -----BEGIN PUBLIC KEY-----
-    #   blah blah blah
-    #   -----END PUBLIC KEY-----
+  sharedJWSPubKeys: null
+  # switch: |-
+  #   -----BEGIN PUBLIC KEY-----
+  #   blah blah blah
+  #   -----END PUBLIC KEY-----
 
   defaults:
     # Changes to this object in the parent chart, for example 'mojaloop-simulator.defaults' will be
@@ -2016,10 +1926,7 @@ thirdparty-simulator:
       ##   - myRegistryKeySecretName
       ##
       imagePullSecrets: []
-
-      cache:
-
-        # These will be supplied directly to the init containers array in the deployment for the
+      cache: # These will be supplied directly to the init containers array in the deployment for the
         # scheme adapter. They should look exactly as you'd declare them inside the deployment.
         # Example: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#init-containers-in-use
         # This init container will have the same environment variables as the main backend container,
@@ -2070,7 +1977,7 @@ thirdparty-simulator:
             publicKey: ''
         image:
           repository: mojaloop/sdk-scheme-adapter
-          tag: v24.0.8
+          tag: v24.6.2
           pullPolicy: IfNotPresent
           command: '[ "yarn", "start:api-svc" ]'
         <<: *defaultProbes
@@ -2222,10 +2129,9 @@ thirdparty-simulator:
       backend:
         image:
           repository: mojaloop/mojaloop-simulator
-          tag: v15.1.5
+          tag: v15.3.0
           pullPolicy: IfNotPresent
         <<: *defaultProbes
-
         # These will be supplied directly to the init containers array in the deployment for the
         # backend. They should look exactly as you'd declare them inside the deployment.
         # Example: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/#init-containers-in-use
@@ -2366,7 +2272,7 @@ thirdparty-simulator:
             publicKey: ''
         image:
           repository: mojaloop/thirdparty-sdk
-          tag: v15.1.1
+          tag: v15.1.3
           pullPolicy: IfNotPresent
           inboundCommand: '[ "npm", "run", "start:inbound" ]'
           outboundCommand: '[ "npm", "run", "start:outbound" ]'
@@ -2394,83 +2300,7 @@ thirdparty-simulator:
                   type: Utilization
                   averageUtilization: 80
         config:
-            production.json: {
-                "control": {
-                  "mgmtAPIWsUrl": "127.0.0.1",
-                  "mgmtAPIWsPort": 4010
-                },
-                "inbound": {
-                  "port": 4005,
-                  "host": "0.0.0.0",
-                  "pispTransactionMode": true,
-                  "tls": {
-                    "mutualTLS": {
-                      "enabled": false
-                    },
-                    "creds": {
-                      "ca": "/secrets/dfsp_or_3ppi_client_cacert.pem",
-                      "cert": "/secrets/dfsp_or_3ppi_server_cert.pem",
-                      "key": "/secrets/dfsp_or_3ppi_server_key.key"
-                    }
-                  }
-                },
-                "outbound": {
-                  "port": 4006,
-                  "host": "0.0.0.0",
-                  "tls": {
-                    "mutualTLS": {
-                      "enabled": false
-                    },
-                    "creds": {
-                      "ca": "/secrets/hub_server_cacert.pem",
-                      "cert": "/secrets/dfsp_or_3ppi_client_cert.cer",
-                      "key": "/secrets/dfsp_or_3ppi_client_key.key"
-                    }
-                  }
-                },
-                "requestProcessingTimeoutSeconds": 30,
-                "wso2": {
-                  "auth": {
-                    "staticToken": "test-static-token",
-                    "tokenEndpoint": "",
-                    "clientKey": "test-client-key",
-                    "clientSecret": "test-client-secret",
-                    "refreshSeconds": 3600
-                  }
-                },
-                "redis": {
-                  "port": 6379,
-                  "timeout": 100
-                },
-                "inspect": {
-                  "depth": 4,
-                  "showHidden": false,
-                  "color": true
-                },
-                "shared": {
-                  "authServiceParticipantId": "centralauth",
-                  "thirdpartyRequestsEndpoint": "$release_name-tp-api-svc",
-                  "servicesEndpoint": "$release_name-tp-api-svc",
-                  "alsEndpoint": "$release_name-account-lookup-service",
-                  "quotesEndpoint": "$release_name-quoting-service",
-                  "transfersEndpoint": "$release_name-ml-api-adapter-service",
-                  "dfspId": "$name",
-                  "dfspBackendUri": "$full_name-backend:3000",
-                  "dfspBackendHttpScheme": "http",
-                  "dfspBackendVerifyAuthorizationPath": "verify-authorization",
-                  "dfspBackendVerifyConsentPath": "verify-consent",
-                  "sdkRequestToPayTransferUri": "0.0.0.0:3000/requestToPayTransfer",
-                  "sdkOutgoingUri": "$full_name-scheme-adapter:4001",
-                  "sdkOutgoingHttpScheme": "http",
-                  "sdkOutgoingPartiesInformationPath": "parties/{Type}/{ID}/{SubId}",
-                  "sdkNotifyAboutTransferUri": "ml-testing-toolkit:4040/thirdpartyRequests/transactions/{ID}"
-                },
-                "pm4mlEnabled": false,
-                "validateInboundJws": false,
-                "jwsSign": false,
-                "jwsSigningKey": "/jwsSigningKey.key",
-                "jwsVerificationKeysDirectory": null
-              }
+            production.json: {"control": {"mgmtAPIWsUrl": "127.0.0.1", "mgmtAPIWsPort": 4010}, "inbound": {"port": 4005, "host": "0.0.0.0", "pispTransactionMode": true, "tls": {"mutualTLS": {"enabled": false}, "creds": {"ca": "/secrets/dfsp_or_3ppi_client_cacert.pem", "cert": "/secrets/dfsp_or_3ppi_server_cert.pem", "key": "/secrets/dfsp_or_3ppi_server_key.key"}}}, "outbound": {"port": 4006, "host": "0.0.0.0", "tls": {"mutualTLS": {"enabled": false}, "creds": {"ca": "/secrets/hub_server_cacert.pem", "cert": "/secrets/dfsp_or_3ppi_client_cert.cer", "key": "/secrets/dfsp_or_3ppi_client_key.key"}}}, "requestProcessingTimeoutSeconds": 30, "wso2": {"auth": {"staticToken": "test-static-token", "tokenEndpoint": "", "clientKey": "test-client-key", "clientSecret": "test-client-secret", "refreshSeconds": 3600}}, "redis": {"port": 6379, "timeout": 100}, "inspect": {"depth": 4, "showHidden": false, "color": true}, "shared": {"authServiceParticipantId": "centralauth", "thirdpartyRequestsEndpoint": "$release_name-tp-api-svc", "servicesEndpoint": "$release_name-tp-api-svc", "alsEndpoint": "$release_name-account-lookup-service", "quotesEndpoint": "$release_name-quoting-service", "transfersEndpoint": "$release_name-ml-api-adapter-service", "dfspId": "$name", "dfspBackendUri": "$full_name-backend:3000", "dfspBackendHttpScheme": "http", "dfspBackendVerifyAuthorizationPath": "verify-authorization", "dfspBackendVerifyConsentPath": "verify-consent", "sdkRequestToPayTransferUri": "0.0.0.0:3000/requestToPayTransfer", "sdkOutgoingUri": "$full_name-scheme-adapter:4001", "sdkOutgoingHttpScheme": "http", "sdkOutgoingPartiesInformationPath": "parties/{Type}/{ID}/{SubId}", "sdkNotifyAboutTransferUri": "ml-testing-toolkit:4040/thirdpartyRequests/transactions/{ID}"}, "pm4mlEnabled": false, "validateInboundJws": false, "jwsSign": false, "jwsSigningKey": "/jwsSigningKey.key", "jwsVerificationKeysDirectory": null}
 
         env:
           NODE_ENV: production
@@ -2491,16 +2321,16 @@ thirdparty-simulator:
       #      - chart-example.local
 
     resources: {}
-      # We usually recommend not to specify default resources and to leave this as a conscious
-      # choice for the user. This also increases chances charts run on environments with little
-      # resources, such as Minikube. If you do want to specify resources, uncomment the following
-      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-      # limits:
-      #  cpu: 100m
-      #  memory: 128Mi
-      # requests:
-      #  cpu: 100m
-      #  memory: 128Mi
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
 
     ## Pod scheduling preferences.
     ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity

@@ -121,6 +121,17 @@ spec:
             {{- else }}
               value: {{ .Values.config.db_password }}
             {{- end }}
+            {{- if .Values.config.db_ssl_enabled }}
+            - name: CLEDG_DATABASE__ADDITIONAL_CONNECTION_OPTIONS__ssl__rejectUnauthorized
+              value: {{ .Values.config.db_ssl_verify | quote}}
+            {{- if .Values.config.db_ssl_ca_secret }}
+            - name: CLEDG_DATABASE__ADDITIONAL_CONNECTION_OPTIONS__ssl__ca
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ .Values.config.db_ssl_ca_secret.name }}'
+                  key: '{{ .Values.config.db_ssl_ca_secret.key }}'
+            {{- end }}
+            {{- end }}
             ## TODO: Add env var injection for password/secret once supported
             # - name: ?_DATABASE__PASSWORD
             # {{- if .Values.config.mongo_secret }}
