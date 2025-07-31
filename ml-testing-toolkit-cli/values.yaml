@@ -24,12 +24,12 @@ script: |
     until nslookup github.com; do sleep 5;done;
     echo "Downloading the test collection...";
     wget {{ .Values.config.testCasesZipUrl }} -O downloaded-test-collections.zip;
-    mkdir tmp_test_cases;
-    unzip -d tmp_test_cases -o downloaded-test-collections.zip;
+    mkdir /tmp/test_cases;
+    unzip -d /tmp/test_cases -o downloaded-test-collections.zip;
     npm run cli -- \
       -c cli-default-config.json \
       -e cli-testcase-environment.json \
-      -i tmp_test_cases/{{ .Values.config.testCasesPathInZip }} \
+      -i /tmp/test_cases/{{ .Values.config.testCasesPathInZip }} \
       -u {{ .Values.config.ttkBackendURL | replace "$release_name" .Release.Name }} \
       --report-format html \
       {{- if .Values.config.awsS3BucketName }}

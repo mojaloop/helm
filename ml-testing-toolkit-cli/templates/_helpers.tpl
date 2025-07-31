@@ -101,6 +101,8 @@ containers:
       value: {{ $val | quote }}
     {{- end }}
   {{- end }}
+  securityContext:
+    readOnlyRootFilesystem: true
 
   volumeMounts:
     - name: {{ $serviceFullName }}-env
@@ -111,6 +113,8 @@ containers:
       subPath: cli-default-config.json
     - name: release-cd
       mountPath: /etc/release_cd
+    - name: tmp
+      mountPath: /tmp
 {{- end }}
 
 {{- define "ml-testing-toolkit-cli.template.volumes" }}
@@ -131,4 +135,6 @@ volumes:
   configMap:
     name: release-cd
     optional: true
+- name: tmp
+  emptyDir: {}
 {{- end }}
