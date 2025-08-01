@@ -10111,7 +10111,19 @@ mojaloop-ttk-simulators:
               - sh
               - -c
               - |
-                until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
+                # Parse DB_PARAMS JSON and append as key=value pairs to the connection string
+                PARAMS=""
+                if [ -n "${DB_PARAMS}" ] && [ "${DB_PARAMS}" != "{}" ]; then
+                  for key in $(echo "${DB_PARAMS}" | jq -r 'keys[]'); do
+                  value=$(echo "${DB_PARAMS}" | jq -r --arg k "$key" '.[$k]')
+                  PARAMS="${PARAMS}&${key}=${value}"
+                  done
+                fi
+                # Remove leading '&' and prepend '?' if there are params
+                if [ -n "${PARAMS}" ]; then
+                  PARAMS="?${PARAMS#&}"
+                fi
+                until mongosh "mongodb://${DB_HOST}:${DB_PORT}/${DB_DATABASE}${PARAMS}" --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
                 do
                   echo --------------------;
                   echo Waiting for MongoDB...;
@@ -10137,7 +10149,12 @@ mojaloop-ttk-simulators:
               {{- end }}
               - name: DB_DATABASE
                 value: '{{ .Values.config.mongodb.database }}'
-
+              - name: DB_PARAMS
+              {{- if .Values.config.mongodb.params }}
+                value: {{ .Values.config.mongodb.params | toJson }}
+              {{- else }}
+                value: {}
+              {{- end }}
         ingress:
           enabled: true
           hosts:
@@ -10166,6 +10183,8 @@ mojaloop-ttk-simulators:
             connectionStringSecret:
               name: *TTK_MONGO_CONNECTION_STRING_SECRET_NAME
               key: *TTK_MONGO_CONNECTION_STRING_SECRET_KEY
+            params: *TTK_MONGO_PARAMS
+
         config_files:
           rules_response__default.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v24.6.3/test/func_bulk/config/ttk-ttksim1/spec_files/rules_response/default.json'
           api_definitions__mojaloop_simulator_sim_2.1__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v24.6.3/test/func_bulk/config/ttk-ttksim1/spec_files/api_definitions/sdk-scheme-adapter-backend-v2_1_0-openapi3-snippets_2.1/api_spec.yaml'
@@ -10696,7 +10715,19 @@ mojaloop-bulk:
             - sh
             - -c
             - |
-              until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
+              # Parse DB_PARAMS JSON and append as key=value pairs to the connection string
+              PARAMS=""
+              if [ -n "${DB_PARAMS}" ] && [ "${DB_PARAMS}" != "{}" ]; then
+                for key in $(echo "${DB_PARAMS}" | jq -r 'keys[]'); do
+                value=$(echo "${DB_PARAMS}" | jq -r --arg k "$key" '.[$k]')
+                PARAMS="${PARAMS}&${key}=${value}"
+                done
+              fi
+              # Remove leading '&' and prepend '?' if there are params
+              if [ -n "${PARAMS}" ]; then
+                PARAMS="?${PARAMS#&}"
+              fi
+              until mongosh "mongodb://${DB_HOST}:${DB_PORT}/${DB_DATABASE}${PARAMS}" --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
               do
                 echo --------------------;
                 echo Waiting for MongoDB...;
@@ -10722,6 +10753,12 @@ mojaloop-bulk:
               {{- end }}
             - name: DB_DATABASE
               value: '{{ .Values.config.mongo_database }}'
+            - name: DB_PARAMS
+              {{- if .Values.config.mongo_params }}
+              value: {{ .Values.config.mongo_params | toJson }}
+              {{- else }}
+              value: {}
+              {{- end }}
 
       ingress:
         enabled: true
@@ -10949,7 +10986,19 @@ mojaloop-bulk:
             - sh
             - -c
             - |
-              until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
+              # Parse DB_PARAMS JSON and append as key=value pairs to the connection string
+              PARAMS=""
+              if [ -n "${DB_PARAMS}" ] && [ "${DB_PARAMS}" != "{}" ]; then
+                for key in $(echo "${DB_PARAMS}" | jq -r 'keys[]'); do
+                value=$(echo "${DB_PARAMS}" | jq -r --arg k "$key" '.[$k]')
+                PARAMS="${PARAMS}&${key}=${value}"
+                done
+              fi
+              # Remove leading '&' and prepend '?' if there are params
+              if [ -n "${PARAMS}" ]; then
+                PARAMS="?${PARAMS#&}"
+              fi
+              until mongosh "mongodb://${DB_HOST}:${DB_PORT}/${DB_DATABASE}${PARAMS}" --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
               do
                 echo --------------------;
                 echo Waiting for MongoDB...;
@@ -10975,6 +11024,12 @@ mojaloop-bulk:
               {{- end }}
             - name: DB_DATABASE
               value: '{{ .Values.config.mongo_database }}'
+            - name: DB_PARAMS
+              {{- if .Values.config.mongo_params }}
+              value: {{ .Values.config.mongo_params | toJson }}
+              {{- else }}
+              value: {}
+              {{- end }}
 
       service:
         internalPort: 8088
@@ -12273,7 +12328,19 @@ ml-testing-toolkit:
           - sh
           - -c
           - |
-            until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
+            # Parse DB_PARAMS JSON and append as key=value pairs to the connection string
+            PARAMS=""
+            if [ -n "${DB_PARAMS}" ] && [ "${DB_PARAMS}" != "{}" ]; then
+              for key in $(echo "${DB_PARAMS}" | jq -r 'keys[]'); do
+              value=$(echo "${DB_PARAMS}" | jq -r --arg k "$key" '.[$k]')
+              PARAMS="${PARAMS}&${key}=${value}"
+              done
+            fi
+            # Remove leading '&' and prepend '?' if there are params
+            if [ -n "${PARAMS}" ]; then
+              PARAMS="?${PARAMS#&}"
+            fi
+            until mongosh "mongodb://${DB_HOST}:${DB_PORT}/${DB_DATABASE}${PARAMS}" --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
             do
               echo --------------------;
               echo Waiting for MongoDB...;
@@ -12320,6 +12387,7 @@ ml-testing-toolkit:
         connectionStringSecret:
           name: *TTK_MONGO_CONNECTION_STRING_SECRET_NAME
           key: *TTK_MONGO_CONNECTION_STRING_SECRET_KEY
+        params: *TTK_MONGO_PARAMS
 
     ingress:
       enabled: true
