@@ -52,6 +52,8 @@ spec:
         {{- end }}
     spec:
       volumes:
+      - name: tmp
+        emptyDir: {}
       {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
       - name: jws-private-key
         secret:
@@ -106,6 +108,8 @@ spec:
       - name: wait-for-cache
         image: "{{ $config.config.cache.image.repository }}:{{ $config.config.cache.image.tag }}"
         imagePullPolicy: {{ $config.config.cache.image.pullPolicy }}
+        securityContext:
+          readOnlyRootFilesystem: true
         command:
           - sh
           - "-c"
@@ -120,6 +124,8 @@ spec:
         imagePullSecrets:
         {{ toYaml $config.config.imagePullSecrets | indent 10 }}
         {{- end }}
+        securityContext:
+          readOnlyRootFilesystem: true
         command: {{ $config.config.schemeAdapter.image.command }}
         ports:
           - name: inboundapi
@@ -158,6 +164,8 @@ spec:
         {{- end }}
         - name: tls-secrets
           mountPath: "/secrets/"
+        - name: tmp
+          mountPath: /tmp
         env:
         ## This is defined by the config.schemeAdapter.env.CACHE_HOST and config.schemeAdapter.env.CACHE_PORT as "redis://%s:%s" with defaults if one or neither are defined.
         - name: CACHE_URL
@@ -230,6 +238,8 @@ spec:
         imagePullSecrets:
         {{ toYaml $config.config.imagePullSecrets | indent 10 }}
         {{- end }}
+        securityContext:
+          readOnlyRootFilesystem: true
         ports:
           - name: simapi
             containerPort: 3000 # these are hard-coded in the service
@@ -323,6 +333,8 @@ spec:
       - name: cache
         image: "{{ $config.config.cache.image.repository }}:{{ $config.config.cache.image.tag }}"
         imagePullPolicy: {{ $config.config.cache.image.pullPolicy }}
+        securityContext:
+          readOnlyRootFilesystem: true
         ports:
         - name: redis
           containerPort: 6379
