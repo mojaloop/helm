@@ -23,9 +23,9 @@ restartPolicy: Never
 script: |
     until nslookup github.com; do sleep 5;done;
     echo "Downloading the test collection...";
-    wget {{ .Values.config.testCasesZipUrl }} -O downloaded-test-collections.zip;
+    wget {{ .Values.config.testCasesZipUrl }} -O /tmp/downloaded-test-collections.zip;
     mkdir /tmp/test_cases;
-    unzip -d /tmp/test_cases -o downloaded-test-collections.zip;
+    unzip -d /tmp/test_cases -o /tmp/downloaded-test-collections.zip;
     npm run cli -- \
       -c cli-default-config.json \
       -e cli-testcase-environment.json \
