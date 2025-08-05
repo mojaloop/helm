@@ -127,8 +127,11 @@ spec:
               mountPath: /opt/app/examples/environments/{{ $k }}
               subPath: {{ $k }}
           {{- end }}
+          {{- range $k, $v := .Values.config_files }}
             - name: {{ $serviceFullName }}-volume-config-default
-              mountPath: /opt/default_config
+              mountPath: /opt/app/spec_files/{{ $k | replace "__" "/" }}
+              subPath: {{ $k }}
+          {{- end }}
             - name: release-cd-rc
               mountPath: /home/ml-user/.release_cd
       volumes:
