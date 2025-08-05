@@ -10111,11 +10111,22 @@ mojaloop-ttk-simulators:
               - sh
               - -c
               - |
-                until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
+                MONGO_TLS_ARGS=""
+                if [ "$DB_SSL_ENABLED" = "true" ]; then
+              MONGO_TLS_ARGS="--tls"
+              if [ "$DB_SSL_VERIFY" = "false" ]; then
+                MONGO_TLS_ARGS="$MONGO_TLS_ARGS --tlsAllowInvalidCertificates"
+              fi
+              if [ -n "$DB_SSL_CA" ]; then
+                echo "$DB_SSL_CA" > /tmp/ca.pem
+                MONGO_TLS_ARGS="$MONGO_TLS_ARGS --tlsCAFile /tmp/ca.pem"
+              fi
+                fi
+                until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" $MONGO_TLS_ARGS --eval "disableTelemetry();db.adminCommand('ping')" ;
                 do
-                  echo --------------------;
-                  echo Waiting for MongoDB...;
-                  sleep 2;
+              echo --------------------;
+              echo Waiting for MongoDB...;
+              sleep 2;
                 done;
                 echo ====================;
                 echo MongoDB ok!;
@@ -10137,7 +10148,17 @@ mojaloop-ttk-simulators:
               {{- end }}
               - name: DB_DATABASE
                 value: '{{ .Values.config.mongodb.database }}'
-
+              - name: DB_SSL_ENABLED
+                value: '{{ .Values.config.mongodb.ssl.enabled }}'
+              - name: DB_SSL_VERIFY
+                value: '{{ .Values.config.mongodb.ssl.verify }}'
+              {{- if .Values.config.mongodb.ssl.caSecret.name }}
+              - name: DB_SSL_CA
+                valueFrom:
+                  secretKeyRef:
+                    name: '{{ .Values.config.mongodb.ssl.caSecret.name }}'
+                    key: '{{ .Values.config.mongodb.ssl.caSecret.key }}'
+              {{- end }}
         ingress:
           enabled: true
           hosts:
@@ -12270,17 +12291,28 @@ ml-testing-toolkit:
         image: bitnami/mongodb:6.0.1
         imagePullPolicy: IfNotPresent
         command:
-          - sh
-          - -c
-          - |
-            until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-            do
-              echo --------------------;
-              echo Waiting for MongoDB...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MongoDB ok!;
+           - sh
+           - -c
+           - |
+             MONGO_TLS_ARGS=""
+             if [ "$DB_SSL_ENABLED" = "true" ]; then
+          MONGO_TLS_ARGS="--tls"
+          if [ "$DB_SSL_VERIFY" = "false" ]; then
+            MONGO_TLS_ARGS="$MONGO_TLS_ARGS --tlsAllowInvalidCertificates"
+          fi
+          if [ -n "$DB_SSL_CA" ]; then
+            echo "$DB_SSL_CA" > /tmp/ca.pem
+            MONGO_TLS_ARGS="$MONGO_TLS_ARGS --tlsCAFile /tmp/ca.pem"
+          fi
+             fi
+             until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" $MONGO_TLS_ARGS --eval "disableTelemetry();db.adminCommand('ping')" ;
+             do
+          echo --------------------;
+          echo Waiting for MongoDB...;
+          sleep 2;
+             done;
+             echo ====================;
+             echo MongoDB ok!;
         env:
           - name: DB_HOST
             value: '{{ .Values.config.mongodb.host }}'
@@ -12299,7 +12331,17 @@ ml-testing-toolkit:
           {{- end }}
           - name: DB_DATABASE
             value: '{{ .Values.config.mongodb.database }}'
-
+          - name: DB_SSL_ENABLED
+            value: '{{ .Values.config.mongodb.ssl.enabled }}'
+          - name: DB_SSL_VERIFY
+            value: '{{ .Values.config.mongodb.ssl.verify }}'
+          {{- if .Values.config.mongodb.ssl.caSecret.name }}
+          - name: DB_SSL_CA
+            valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.mongodb.ssl.caSecret.name }}'
+                key: '{{ .Values.config.mongodb.ssl.caSecret.key }}'
+          {{- end }}
     config:
       mongodb:
         host: *TTK_MONGO_HOST
