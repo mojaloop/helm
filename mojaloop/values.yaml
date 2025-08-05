@@ -87,6 +87,7 @@ CONFIG:
   ttk_mongo_connection_string_secret: &TTK_MONGO_CONNECTION_STRING_SECRET
     name: &TTK_MONGO_CONNECTION_STRING_SECRET_NAME null
     key: &TTK_MONGO_CONNECTION_STRING_SECRET_KEY null
+  ttk_mongo_params: &TTK_MONGO_PARAMS {}
   # SSL/TLS configuration for TTK services
   ttk_ssl_enabled: &TTK_SSL_ENABLED false
   ttk_ssl_verify: &TTK_SSL_VERIFY false
@@ -10164,6 +10165,12 @@ mojaloop-ttk-simulators:
                     name: '{{ .Values.config.mongodb.ssl.caSecret.name }}'
                     key: '{{ .Values.config.mongodb.ssl.caSecret.key }}'
               {{- end }}
+              - name: DB_PARAMS
+              {{- if .Values.config.mongodb.params }}
+                value: {{ .Values.config.mongodb.params | toJson }}
+              {{- else }}
+                value: {}
+              {{- end }}
         ingress:
           enabled: true
           hosts:
@@ -10192,6 +10199,7 @@ mojaloop-ttk-simulators:
             connectionStringSecret:
               name: *TTK_MONGO_CONNECTION_STRING_SECRET_NAME
               key: *TTK_MONGO_CONNECTION_STRING_SECRET_KEY
+            params: *TTK_MONGO_PARAMS
             ssl:
               enabled: *TTK_SSL_ENABLED
               verify: *TTK_SSL_VERIFY
@@ -10381,6 +10389,7 @@ mojaloop-ttk-simulators:
           api_definitions__mojaloop_sdk_outbound_scheme_adapter_2.1__callback_map.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v24.6.3/test/func_bulk/config/ttk-ttksim2/spec_files/api_definitions/sdk-scheme-adapter-outbound-v2_1_0-openapi3-snippets_2.1/callback_map.json'
         config:
           mongodb:
+            params: *TTK_MONGO_PARAMS
             ssl:
               enabled: *TTK_SSL_ENABLED
               verify: *TTK_SSL_VERIFY
@@ -10562,6 +10571,7 @@ mojaloop-ttk-simulators:
           api_definitions__mojaloop_sdk_outbound_scheme_adapter_2.1__callback_map.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v24.6.3/test/func_bulk/config/ttk-ttksim3/spec_files/api_definitions/sdk-scheme-adapter-outbound-v2_1_0-openapi3-snippets_2.1/callback_map.json'
         config:
           mongodb:
+            params: *MONGO_DB_PARAMS
             ssl:
               enabled: *TTK_SSL_ENABLED
               verify: *TTK_SSL_VERIFY
@@ -12383,6 +12393,7 @@ ml-testing-toolkit:
         connectionStringSecret:
           name: *TTK_MONGO_CONNECTION_STRING_SECRET_NAME
           key: *TTK_MONGO_CONNECTION_STRING_SECRET_KEY
+        params: *TTK_MONGO_PARAMS
         ssl:
           enabled: *TTK_SSL_ENABLED
           verify: *TTK_SSL_VERIFY
