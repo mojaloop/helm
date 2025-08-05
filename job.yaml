@@ -1,0 +1,86 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: moja-centralledger-service-migration
+  namespace: moja2
+  labels:
+    batch.kubernetes.io/job-name: moja-centralledger-service-migration
+    job-name: moja-centralledger-service-migration
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+spec:
+  parallelism: 1
+  completions: 1
+  backoffLimit: 3  # Increased from 0 to 3 to allow retries and keep failed pods
+  ttlSecondsAfterFinished: 3600  # Pods are cleaned up 1 hour after completion (optional)
+  template:
+    metadata:
+      labels:
+        batch.kubernetes.io/job-name: moja-centralledger-service-migration
+        job-name: moja-centralledger-service-migration
+    spec:
+      volumes:
+        - name: moja-centralledger-service-config-volume
+          configMap:
+            name: moja-centralledger-service-config
+            items:
+              - key: default.json
+                path: default.json
+              - key: knexfile.js
+                path: knexfile.js
+            defaultMode: 420
+      initContainers:
+        - name: wait-for-mysql
+          image: mysql:9.0.1
+          command:
+            - sh
+            - '-c'
+            - >
+              until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER}
+              --password=${DB_PASSWORD} ${DB_DATABASE} -e 'select version()' ;
+              do
+                echo --------------------;
+                echo Waiting for MySQL...;
+                sleep 2;
+              done;
+              echo ====================;
+              echo MySQL ok!;
+          env:
+            - name: DB_HOST
+              value: mysqldb
+            - name: DB_PORT
+              value: '3306'
+            - name: DB_USER
+              value: central_ledger
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysqldb
+                  key: mysql-password
+            - name: DB_DATABASE
+              value: central_ledger
+          imagePullPolicy: IfNotPresent
+      containers:
+        - name: run-migration
+          image: shashi165/central-ledger:v19.4.1-1
+          command:
+            - sh
+            - '-c'
+            - npm run migrate
+          env:
+            - name: CLEDG_MIGRATIONS__RUN_DATA_MIGRATIONS
+              value: 'true'
+            - name: CLEDG_DATABASE__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysqldb
+                  key: mysql-password
+          volumeMounts:
+            - name: moja-centralledger-service-config-volume
+              mountPath: /opt/app/config
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Never  # Changed from OnFailure to Never
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler

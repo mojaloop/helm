@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kafka-debug-ui
+  namespace: moja3
+  labels:
+    app: kafka-debug-ui
+spec:
+  containers:
+    - name: kafka-debug-ui
+      image: docker.redpanda.com/redpandadata/console:latest
+      env:
+        - name: KAFKA_BROKERS
+          value: "kafka:9092"
+      ports:
+        - containerPort: 8080
+      resources:
+        limits:
+          memory: "512Mi"
+          cpu: "500m"
+        requests:
+          memory: "256Mi"
+          cpu: "250m"
+  restartPolicy: OnFailure
+

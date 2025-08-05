@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kafka-debug-ui-ingress
+  namespace: moja3
+  labels:
+    app.kubernetes.io/instance: moja
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: kafka-debug-ui
+  annotations:
+    meta.helm.sh/release-name: moja
+    meta.helm.sh/release-namespace: moja3
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: kafka-ui.local
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: kafka-debug-ui-service
+                port:
+                  number: 8080
+
