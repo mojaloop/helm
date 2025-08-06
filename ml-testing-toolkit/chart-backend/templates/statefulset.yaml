@@ -102,11 +102,8 @@ spec:
             - name: REPORTING_DB_SSL_VERIFY
               value: '{{ .Values.config.mongodb.ssl.verify }}'
             {{- if .Values.config.mongodb.ssl.caSecret.name }}
-            - name: REPORTING_DB_SSL_CA
-              valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.mongodb.ssl.caSecret.name }}'
-                  key: '{{ .Values.config.mongodb.ssl.caSecret.key }}'
+            - name: REPORTING_DB_SSL_CA_FILE_PATH
+              value: "/opt/app/mongo-ca/mongo-ca.pem"
             {{- end }}
           ports:
             - containerPort: {{ .Values.service.ports.specApi.port }}
@@ -145,6 +142,11 @@ spec:
           {{- end }}
             - name: release-cd-rc
               mountPath: /home/ml-user/.release_cd
+          {{- if .Values.config.mongodb.ssl.caSecret.name }}
+          - name: mongo-ca
+            mountPath: /opt/app/mongo-ca
+            readOnly: true
+          {{- end }}
       volumes:
       {{- if .Values.persistence.enabled }}
         - name: ttk-data
@@ -170,6 +172,14 @@ spec:
           configMap:
             name: release-cd-rc
             optional: true
+        {{- if .Values.config.mongodb.ssl.caSecret.name }}
+        - name: mongo-ca
+          secret:
+            secretName: '{{ .Values.config.mongodb.ssl.caSecret.name }}'
+            items:
+              - key: '{{ .Values.config.mongodb.ssl.caSecret.key }}'
+                path: mongo-ca.pem
+        {{- end }}
 
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
