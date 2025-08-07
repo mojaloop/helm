@@ -101,7 +101,7 @@ spec:
               value: '{{ .Values.config.mongodb.ssl.enabled }}'
             - name: REPORTING_DB_SSL_VERIFY
               value: '{{ .Values.config.mongodb.ssl.verify }}'
-            {{- if .Values.config.mongodb.ssl.caSecret.name }}
+            {{- if and .Values.config.mongodb.ssl.caSecret (hasKey .Values.config.mongodb.ssl.caSecret "name") (not (empty .Values.config.mongodb.ssl.caSecret.name)) }}
             - name: REPORTING_DB_SSL_CA_FILE_PATH
               value: "/opt/app/mongo-ca/mongo-ca.pem"
             {{- end }}
@@ -142,10 +142,10 @@ spec:
           {{- end }}
             - name: release-cd-rc
               mountPath: /home/ml-user/.release_cd
-          {{- if .Values.config.mongodb.ssl.caSecret.name }}
-          - name: mongo-ca
-            mountPath: /opt/app/mongo-ca
-            readOnly: true
+          {{- if and .Values.config.mongodb.ssl.caSecret (hasKey .Values.config.mongodb.ssl.caSecret "name") (not (empty .Values.config.mongodb.ssl.caSecret.name)) }}
+            - name: mongo-ca
+              mountPath: /opt/app/mongo-ca
+              readOnly: true
           {{- end }}
       volumes:
       {{- if .Values.persistence.enabled }}
@@ -172,7 +172,7 @@ spec:
           configMap:
             name: release-cd-rc
             optional: true
-        {{- if .Values.config.mongodb.ssl.caSecret.name }}
+        {{- if and .Values.config.mongodb.ssl.caSecret (hasKey .Values.config.mongodb.ssl.caSecret "name") (not (empty .Values.config.mongodb.ssl.caSecret.name)) }}
         - name: mongo-ca
           secret:
             secretName: '{{ .Values.config.mongodb.ssl.caSecret.name }}'
