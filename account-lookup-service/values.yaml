@@ -425,6 +425,15 @@ account-lookup-service-admin:
     db_reap_interval_millis: 1000
     db_create_retry_interval_millis: 200
     db_debug: false
+    db_additional_connection_options: {}
+
+    ## SSL Configuration
+    db_ssl_enabled: false
+    db_ssl_verify: false
+    ### Configure this if you want to pass a CA certificate of the server.
+    # db_ssl_ca_secret:
+    #   name: mysql-tls-client-creds
+    #   key: cacert.pem
 
     # Protocol versions used for validating (VALIDATELIST) incoming FSPIOP API Headers (Content-type, Accept),
     # and for generating requests/callbacks from the Switch itself (DEFAULT value)
@@ -531,6 +540,17 @@ account-lookup-service-admin:
           {{- else }}
           value: {{ .Values.config.db_password }}
           {{- end }}
+        {{- if .Values.config.db_ssl_enabled }}
+        - name: ALS_DATABASE__ADDITIONAL_CONNECTION_OPTIONS__ssl__rejectUnauthorized
+          value: {{ .Values.config.db_ssl_verify | quote}}
+        {{- if .Values.config.db_ssl_ca_secret }}
+        - name: ALS_DATABASE__ADDITIONAL_CONNECTION_OPTIONS__ssl__ca
+          valueFrom:
+            secretKeyRef:
+              name: '{{ .Values.config.db_ssl_ca_secret.name }}'
+              key: '{{ .Values.config.db_ssl_ca_secret.key }}'
+        {{- end }}
+        {{- end }}
       volumeMounts:
         - name: '{{ template "account-lookup-service-admin.fullname" . }}-config-volume'
           mountPath: /opt/app/config
