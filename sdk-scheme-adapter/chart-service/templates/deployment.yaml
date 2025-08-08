@@ -69,6 +69,8 @@ spec:
           {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
         {{- end }}
       volumes:
+      - name: writable-tmp
+        emptyDir: {}      
       {{- if .Values.env.JWS_SIGN }}
       - name: jws-private-key
         secret:
@@ -146,6 +148,8 @@ spec:
             {{- include "common.tplvalues.render" (dict "value" .Values.livenessProbe "context" $) | nindent 12 }}
           {{- end }}
           env:
+            - name: TMPDIR
+              value: /writable-tmp          
             {{- if not (hasKey .Values.env "BACKEND_ENDPOINT") }}
             - name: BACKEND_ENDPOINT
               value: {{ printf "%s-backend:3000" (include "common.names.fullname" . ) }}
@@ -177,3 +181,5 @@ spec:
           - name: jws-public-keys
             mountPath: "/jwsVerificationKeys/"
           {{- end }}
+          - name: writable-tmp
+            mountPath: /writable-tmp          
