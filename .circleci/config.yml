@@ -194,6 +194,39 @@ jobs:
           path: /tmp/license-scanner/results
           destination: licenses
 
+  sbom-aggregate:
+    executor: default-docker-helm
+    steps:
+      - run:
+          <<: *defaults_Dependencies
+      - checkout
+      - run:
+          <<: *defaults_environment
+      - run:
+          name: Install dependencies
+          command: |
+            apk update && apk add --no-cache \
+            nodejs \
+            npm \
+            bash \
+            curl \
+            jq \
+            coreutils
+      - run:
+          name: Generate SBOM aggregate
+          command: npx -y --package @mojaloop/ml-depcheck-utility@1.1.3 generate-aggregate .circleci/sbom-repos-list.json
+      - run : 
+          name: If this is a release, upload the sbom file to the github release
+          command: |
+            if [ "${CIRCLE_TAG}" = "" ] || [[ "$CIRCLE_TAG" == *-snapshot* ]]; then
+              exit 0
+            fi
+            mv sbom.csv ./sbom-aggregate-${CIRCLE_TAG}.csv
+            .circleci/upload-github-release-asset.sh github_api_token=$GITHUB_TOKEN owner=mojaloop repo=helm tag=${CIRCLE_TAG} filename=sbom-aggregate-${CIRCLE_TAG}.csv
+      - store_artifacts:
+          path: ./sbom-aggregate-${CIRCLE_TAG}.csv
+          destination: sbom
+
   deploy:
     executor: default-docker-helm
     environment:
@@ -330,6 +363,13 @@ workflows:
             branches:
               only: /main|(major|minor|patch)/.*/
       - audit-licenses:
+          context: org-global
+          requires:
+            - setup
+          filters:
+            tags:
+              only: /.*/
+      - sbom-aggregate:
           context: org-global
           requires:
             - setup
