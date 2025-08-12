@@ -115,7 +115,7 @@ parameters: {}
 ##    imagePullPolicy: Always
 ##    command: ['sh', '-c', 'echo "hello world"']
 ##
-initContainers: []
+initContainers:
 ## Use the following initContainers if you are using a MongoDB as a dependency
 # initContainers: |
 #   - name: wait-for-mongodb
@@ -151,6 +151,35 @@ initContainers: []
 #       {{- end }}
 #       - name: DB_DATABASE
 #         value: '{{ .Values.config.mongodb.database }}'
+
+  - name: add-extra-specs
+    image: busybox:1.36
+    command:
+      [
+        "sh",
+        "-c",
+        "
+          set -e;
+          cd /opt/default_config;
+          for FILE in *; do
+            CONTENT=$(cat \"$FILE\");
+            DEST=\"/opt/app/spec_files/${FILE//__/\/}\";
+            mkdir -p \"$(dirname \"$DEST\")\";
+            if echo \"$CONTENT\" | grep -q '^\"http'; then
+              URL=$(echo \"$CONTENT\" | tr -d '\"');
+              echo \"Downloading $URL to $DEST\";
+              wget -q -O \"$DEST\" \"$URL\";
+            else
+              cp \"$FILE\" \"$DEST\";
+            fi
+          done
+        "
+      ]
+    volumeMounts:
+      - name: spec-files
+        mountPath: /opt/app/spec_files
+      - name: ml-testing-toolkit-backend-volume-config-default
+        mountPath: /opt/default_config        
 
 ## @param master.podLabels Extra labels for pod(s)
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
