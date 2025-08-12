@@ -28,7 +28,7 @@ replicaCount: 1
 # .Values.persistence.enabled = true
 commandPersistence: '["sh", "-c", "if [ -d /opt/ttk-data ]; then if [ ! -d /opt/ttk-data/spec_files ]; then cp -pR spec_files /opt/ttk-data/spec_files; fi; mv spec_files spec_files_bkp; ln -s /opt/ttk-data/spec_files spec_files; fi; npm run start;"]'
 # .Values.persistence.enabled = false
-command: '["sh", "-c", "cd /opt/default_config; for FILE in *; do newFileName=/opt/app/spec_files/${FILE//__/\\/}; mkdir -p ${newFileName%/*}; firstLine=$(head -n 1 $FILE | tr -d \\\"); regex=\"^(http|https|ftp)://\"; if [[ \"$firstLine\" =~ $regex ]]; then wget $firstLine -O $newFileName; else cp $FILE $newFileName; fi; done; cd /opt/app; npm run start;"]'
+command: '["sh", "-c", "npm run start;"]'
 
 ## Pod scheduling preferences.
 ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -155,26 +155,23 @@ initContainers:
   - name: add-extra-specs
     image: busybox:1.36
     command:
-      [
-        "sh",
-        "-c",
-        "
-          set -e;
-          cd /opt/default_config;
-          for FILE in *; do
-            CONTENT=$(cat \"$FILE\");
-            DEST=\"/opt/app/spec_files/${FILE//__/\/}\";
-            mkdir -p \"$(dirname \"$DEST\")\";
-            if echo \"$CONTENT\" | grep -q '^\"http'; then
-              URL=$(echo \"$CONTENT\" | tr -d '\"');
-              echo \"Downloading $URL to $DEST\";
-              wget -q -O \"$DEST\" \"$URL\";
-            else
-              cp \"$FILE\" \"$DEST\";
-            fi
-          done
-        "
-      ]
+          - sh
+          - -c
+          - |
+            set -e
+            cd /opt/default_config
+            for FILE in *; do
+              CONTENT=$(cat "$FILE")
+              DEST="/opt/app/spec_files/${FILE//__/\/}"
+              mkdir -p "$(dirname "$DEST")"
+              if echo "$CONTENT" | grep -q '^"http'; then
+                URL=$(echo "$CONTENT" | tr -d '"')
+                echo "Downloading $URL to $DEST"
+                wget -q -O "$DEST" "$URL"
+              else
+                cp "$FILE" "$DEST"
+              fi
+            done
     volumeMounts:
       - name: spec-files
         mountPath: /opt/app/spec_files
