@@ -138,6 +138,16 @@ spec:
             {{- else }}
               value: {{ .Values.config.mongodb.connectionString }}
             {{- end }}
+            - name: REPORTING_DB_SSL_ENABLED
+              value: '{{ .Values.config.mongodb.ssl.enabled }}'
+            - name: REPORTING_DB_SSL_VERIFY
+              value: '{{ .Values.config.mongodb.ssl.verify }}'
+            {{- if and .Values.config.mongodb.ssl.caSecret (hasKey .Values.config.mongodb.ssl.caSecret "name") (not (empty .Values.config.mongodb.ssl.caSecret.name)) }}
+            - name: REPORTING_DB_SSL_CA_FILE_PATH
+              value: "/opt/app/mongo-ca/mongo-ca.pem"
+            {{- end }}
+            - name: REPORTING_DB_PARAMS
+              value: '{{ .Values.config.mongodb.params | toJson }}'
           ports:
             - containerPort: {{ .Values.service.ports.specApi.port }}
             - containerPort: {{ .Values.service.ports.adminApi.port }}
@@ -172,7 +182,12 @@ spec:
               mountPath: /home/ml-user/.release_cd
             - name: spec-files  # Added to mount merged files
               mountPath: /opt/app/spec_files
-              readOnly: true              
+              readOnly: true
+          {{- if and .Values.config.mongodb.ssl.caSecret (hasKey .Values.config.mongodb.ssl.caSecret "name") (not (empty .Values.config.mongodb.ssl.caSecret.name)) }}
+            - name: mongo-ca
+              mountPath: /opt/app/mongo-ca
+              readOnly: true
+          {{- end }}
       volumes:
       {{- if .Values.persistence.enabled }}
         - name: ttk-data
@@ -199,8 +214,15 @@ spec:
             name: release-cd-rc
             optional: true
         - name: spec-files
-          emptyDir: {}            
-
+          emptyDir: {}
+        {{- if and .Values.config.mongodb.ssl.caSecret (hasKey .Values.config.mongodb.ssl.caSecret "name") (not (empty .Values.config.mongodb.ssl.caSecret.name)) }}
+        - name: mongo-ca
+          secret:
+            secretName: '{{ .Values.config.mongodb.ssl.caSecret.name }}'
+            items:
+              - key: '{{ .Values.config.mongodb.ssl.caSecret.key }}'
+                path: mongo-ca.pem
+        {{- end }}
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
   - metadata:
