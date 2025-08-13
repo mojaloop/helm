@@ -63,6 +63,48 @@ spec:
         {{- if .Values.initContainers }}
           {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
         {{- end }}
+        - name: copy-original-files
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}          
+          command:
+            - sh
+            - -c
+            - |
+              cp -r /opt/app/spec_files/* /opt/app/spec_files/.* /target/ 2>/dev/null || true
+          volumeMounts:
+            - name: spec-files
+              mountPath: /target
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
+        - name: add-extra-specs
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              cd /opt/default_config
+              for FILE in *; do
+                CONTENT=$(cat "$FILE")
+                DEST="/opt/app/spec_files/${FILE//__/\/}"
+                mkdir -p "$(dirname "$DEST")"
+                if echo "$CONTENT" | grep -q '^"http'; then
+                  URL=$(echo "$CONTENT" | tr -d '"')
+                  echo "Downloading $URL to $DEST"
+                  wget -q -O "$DEST" "$URL"
+                else
+                  echo "Copying $FILE to $DEST"
+                  cp "$FILE" "$DEST"
+                fi
+              done
+          volumeMounts:
+            - name: spec-files
+              mountPath: /opt/app/spec_files
+            - name: {{ include "ml-testing-toolkit-backend.fullname" . }}-volume-config-default
+              mountPath: /opt/default_config
       {{- if .Values.image.pullSecrets }}
       {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" $) | nindent 6 }}
       {{- end }}
@@ -127,10 +169,11 @@ spec:
               mountPath: /opt/app/examples/environments/{{ $k }}
               subPath: {{ $k }}
           {{- end }}
-            - name: {{ $serviceFullName }}-volume-config-default
-              mountPath: /opt/default_config
             - name: release-cd-rc
               mountPath: /home/ml-user/.release_cd
+            - name: spec-files  # Added to mount merged files
+              mountPath: /opt/app/spec_files
+              readOnly: true              
       volumes:
       {{- if .Values.persistence.enabled }}
         - name: ttk-data
