@@ -70,7 +70,15 @@ spec:
             - sh
             - -c
             - |
-              cp -r /opt/app/spec_files/* /opt/app/spec_files/.* /target/ 2>/dev/null || true
+              set -e
+              echo "Copying files to /tmp/stage"
+              mkdir -p /tmp/stage
+              cp -r -v /opt/app/spec_files/. /tmp/stage/ || { echo "Copy to /tmp/stage failed"; exit 1; }
+              echo "Setting permissions in /tmp/stage:"
+              chmod -R 644 /tmp/stage/* 2>/dev/null || true
+              find /tmp/stage -type d -exec chmod 755 {} \; 2>/dev/null || true
+              echo "Copying from /tmp/stage to /target"
+              cp -r -v /tmp/stage/. /target/ || { echo "Copy to /target failed"; exit 1; }
           volumeMounts:
             - name: spec-files
               mountPath: /target
@@ -86,17 +94,24 @@ spec:
             - |
               set -e
               cd /opt/default_config
+              echo "Listing ConfigMap files:"
+              ls -l
               for FILE in *; do
                 CONTENT=$(cat "$FILE")
                 DEST="/opt/app/spec_files/${FILE//__/\/}"
                 mkdir -p "$(dirname "$DEST")"
-                if echo "$CONTENT" | grep -q '^"http'; then
-                  URL=$(echo "$CONTENT" | tr -d '"')
-                  echo "Downloading $URL to $DEST"
-                  wget -q -O "$DEST" "$URL"
+                if [ ! -f "$DEST" ]; then
+                  if echo "$CONTENT" | grep -q '^"http'; then
+                    URL=$(echo "$CONTENT" | tr -d '"')
+                    echo "Downloading $URL to $DEST"
+                    wget -q --tries=3 --timeout=10 -O "$DEST" "$URL" || echo "Failed to download $URL"
+                  else
+                    echo "Copying $FILE to $DEST"
+                    cp "$FILE" "$DEST"
+                  fi
+                  chmod 644 "$DEST" 2>/dev/null || true
                 else
-                  echo "Copying $FILE to $DEST"
-                  cp "$FILE" "$DEST"
+                  echo "Skipping $FILE, already exists at $DEST"
                 fi
               done
           volumeMounts:
