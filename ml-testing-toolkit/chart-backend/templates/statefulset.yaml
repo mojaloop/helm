@@ -63,6 +63,55 @@ spec:
         {{- if .Values.initContainers }}
           {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
         {{- end }}
+        - name: copy-original-files
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}          
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "Copying files to /tmp/stage"
+              mkdir -p /tmp/stage
+              cp -r -v /opt/app/spec_files/. /tmp/stage/ || { echo "Copy to /tmp/stage failed"; exit 1; }
+              echo "Setting permissions in /tmp/stage:"
+              chmod -R 644 /tmp/stage/* 2>/dev/null || true
+              find /tmp/stage -type d -exec chmod 755 {} \; 2>/dev/null || true
+              echo "Copying from /tmp/stage to /target"
+              cp -r -v /tmp/stage/. /target/ || { echo "Copy to /target failed"; exit 1; }
+          volumeMounts:
+            - name: spec-files
+              mountPath: /target
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        - name: add-extra-specs
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              cd /opt/default_config
+              for FILE in *; do
+                CONTENT=$(cat "$FILE")
+                DEST="/opt/app/spec_files/${FILE//__/\/}"
+                mkdir -p "$(dirname "$DEST")"
+                if echo "$CONTENT" | grep -q '^"http'; then
+                  URL=$(echo "$CONTENT" | tr -d '"')
+                  echo "Downloading $URL to $DEST"
+                  wget -q -O "$DEST" "$URL"
+                else
+                  echo "Copying $FILE to $DEST"
+                  cp "$FILE" "$DEST"
+                fi
+              done
+          volumeMounts:
+            - name: spec-files
+              mountPath: /opt/app/spec_files
+            - name: {{ include "ml-testing-toolkit-backend.fullname" . }}-volume-config-default
+              mountPath: /opt/default_config
       {{- if .Values.image.pullSecrets }}
       {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.image) "context" $) | nindent 6 }}
       {{- end }}
@@ -137,13 +186,11 @@ spec:
               mountPath: /opt/app/examples/environments/{{ $k }}
               subPath: {{ $k }}
           {{- end }}
-          {{- range $k, $v := .Values.config_files }}
-            - name: {{ $serviceFullName }}-volume-config-default
-              mountPath: /opt/app/spec_files/{{ $k | replace "__" "/" }}
-              subPath: {{ $k }}
-          {{- end }}
             - name: release-cd-rc
               mountPath: /home/ml-user/.release_cd
+            - name: spec-files  # Added to mount merged files
+              mountPath: /opt/app/spec_files
+              readOnly: true
           {{- if and .Values.config.mongodb.ssl.caSecret (hasKey .Values.config.mongodb.ssl.caSecret "name") (not (empty .Values.config.mongodb.ssl.caSecret.name)) }}
             - name: mongo-ca
               mountPath: /opt/app/mongo-ca
@@ -174,6 +221,8 @@ spec:
           configMap:
             name: release-cd-rc
             optional: true
+        - name: spec-files
+          emptyDir: {}
         {{- if and .Values.config.mongodb.ssl.caSecret (hasKey .Values.config.mongodb.ssl.caSecret "name") (not (empty .Values.config.mongodb.ssl.caSecret.name)) }}
         - name: mongo-ca
           secret:
@@ -182,7 +231,6 @@ spec:
               - key: '{{ .Values.config.mongodb.ssl.caSecret.key }}'
                 path: mongo-ca.pem
         {{- end }}
-
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
   - metadata:
