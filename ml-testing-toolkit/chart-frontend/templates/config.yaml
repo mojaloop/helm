@@ -10,6 +10,4 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 data:
-  {{- range $k, $v := .Values.config }}
-    {{ $k }}: {{ $v | quote | replace "$release_name" $releaseName }}
-  {{- end }}
+  config.json: | {{ .Values.config | toPrettyJson | nindent 4 }}
