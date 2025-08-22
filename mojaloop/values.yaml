@@ -93,7 +93,7 @@ CONFIG:
   ttk_ssl_enabled: &TTK_SSL_ENABLED false
   ttk_ssl_verify: &TTK_SSL_VERIFY false
   ttk_ssl_ca_secret: &TTK_SSL_CA_SECRET {}
-
+  ttk_ssl_client_cert: &TTK_SSL_CLIENT_CERT {}
 
   ## MOJALOOP-TTK-SIMULATORS BACKEND
   moja_ttk_sim_kafka_host: &MOJA_TTK_SIM_KAFKA_HOST kafka
@@ -10126,6 +10126,10 @@ mojaloop-ttk-simulators:
                     echo "$DB_SSL_CA" > /tmp/ca.pem
                     MONGO_TLS_ARGS="$MONGO_TLS_ARGS --tlsCAFile /tmp/ca.pem"
                   fi
+                  if [ -n "$DB_SSL_CLIENT_CERT" ]; then
+                    echo "$DB_SSL_CLIENT_CERT" > /tmp/client-cert.pem
+                    MONGO_TLS_ARGS="$MONGO_TLS_ARGS --tlsCertificateKeyFile /tmp/client-cert.pem"
+                  fi
                 fi;
                 PARAMS="";
                 if [ -n "$DB_PARAMS" ]; then
@@ -10169,6 +10173,13 @@ mojaloop-ttk-simulators:
                     name: '{{ .Values.config.mongodb.ssl.caSecret.name }}'
                     key: '{{ .Values.config.mongodb.ssl.caSecret.key }}'
               {{- end }}
+              {{- if .Values.config.mongodb.ssl.clientCert.name }}
+              - name: DB_SSL_CLIENT_CERT
+                valueFrom:
+                  secretKeyRef:
+                    name: '{{ .Values.config.mongodb.ssl.clientCert.name }}'
+                    key: '{{ .Values.config.mongodb.ssl.clientCert.key }}'
+              {{- end }}
               {{- if .Values.config.mongodb.params }}
               - name: DB_PARAMS
                 value: {{ .Values.config.mongodb.params | toJson | quote }}
@@ -10206,6 +10217,7 @@ mojaloop-ttk-simulators:
               enabled: *TTK_SSL_ENABLED
               verify: *TTK_SSL_VERIFY
               caSecret: *TTK_SSL_CA_SECRET
+              clientCert: *TTK_SSL_CLIENT_CERT
         config_files:
           rules_response__default.json: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v24.10.5/test/func_bulk/config/ttk-ttksim1/spec_files/rules_response/default.json'
           api_definitions__mojaloop_simulator_sim_2.1__api_spec.yaml: 'https://github.com/mojaloop/sdk-scheme-adapter/raw/v24.10.5/test/func_bulk/config/ttk-ttksim1/spec_files/api_definitions/sdk-scheme-adapter-backend-v2_1_0-openapi3-snippets_2.1/api_spec.yaml'
@@ -12337,6 +12349,10 @@ ml-testing-toolkit:
                 echo "$DB_SSL_CA" > /tmp/ca.pem
                 MONGO_TLS_ARGS="$MONGO_TLS_ARGS --tlsCAFile /tmp/ca.pem"
               fi
+              if [ -n "$DB_SSL_CLIENT_CERT" ]; then
+                echo "$DB_SSL_CLIENT_CERT" > /tmp/client-cert.pem
+                MONGO_TLS_ARGS="$MONGO_TLS_ARGS --tlsCertificateKeyFile /tmp/client-cert.pem"
+              fi
             fi;
             PARAMS="";
             if [ -n "$DB_PARAMS" ]; then
@@ -12380,6 +12396,13 @@ ml-testing-toolkit:
                 name: '{{ .Values.config.mongodb.ssl.caSecret.name }}'
                 key: '{{ .Values.config.mongodb.ssl.caSecret.key }}'
           {{- end }}
+          {{- if .Values.config.mongodb.ssl.clientCert.name }}
+          - name: DB_SSL_CLIENT_CERT
+            valueFrom:
+              secretKeyRef:
+                name: '{{ .Values.config.mongodb.ssl.clientCert.name }}'
+                key: '{{ .Values.config.mongodb.ssl.clientCert.key }}'
+          {{- end }}
           {{- if .Values.config.mongodb.params }}
           - name: DB_PARAMS
             value: {{ .Values.config.mongodb.params | toJson | quote }}
@@ -12409,6 +12432,7 @@ ml-testing-toolkit:
           enabled: *TTK_SSL_ENABLED
           verify: *TTK_SSL_VERIFY
           caSecret: *TTK_SSL_CA_SECRET
+          clientCert: *TTK_SSL_CLIENT_CERT
     ingress:
       enabled: true
       hosts:

@@ -105,6 +105,10 @@ spec:
             - name: REPORTING_DB_SSL_CA_FILE_PATH
               value: "/opt/app/mongo-ca/mongo-ca.pem"
             {{- end }}
+            {{- if and .Values.config.mongodb.ssl.clientCert (hasKey .Values.config.mongodb.ssl.clientCert "name") (not (empty .Values.config.mongodb.ssl.clientCert.name)) }}
+            - name: REPORTING_DB_SSL_CLIENT_CERT_FILE_PATH
+              value: "/opt/app/mongo-client-cert/mongo-client-cert.pem"
+            {{- end }}
             - name: REPORTING_DB_PARAMS
               value: '{{ .Values.config.mongodb.params | toJson }}'
           ports:
@@ -149,6 +153,11 @@ spec:
               mountPath: /opt/app/mongo-ca
               readOnly: true
           {{- end }}
+          {{- if and .Values.config.mongodb.ssl.clientCert (hasKey .Values.config.mongodb.ssl.clientCert "name") (not (empty .Values.config.mongodb.ssl.clientCert.name)) }}
+            - name: mongo-client-cert
+              mountPath: /opt/app/mongo-client-cert
+              readOnly: true
+          {{- end }}
       volumes:
       {{- if .Values.persistence.enabled }}
         - name: ttk-data
@@ -181,6 +190,14 @@ spec:
             items:
               - key: '{{ .Values.config.mongodb.ssl.caSecret.key }}'
                 path: mongo-ca.pem
+        {{- end }}
+        {{- if and .Values.config.mongodb.ssl.clientCert (hasKey .Values.config.mongodb.ssl.clientCert "name") (not (empty .Values.config.mongodb.ssl.clientCert.name)) }}
+        - name: mongo-client-cert
+          secret:
+            secretName: '{{ .Values.config.mongodb.ssl.clientCert.name }}'
+            items:
+              - key: '{{ .Values.config.mongodb.ssl.clientCert.key }}'
+                path: mongo-client-cert.pem
         {{- end }}
 
   {{- if .Values.persistence.enabled }}
