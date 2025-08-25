@@ -11,10 +11,10 @@ mkdir -p ~/.gnupg
 chmod 700 ~/.gnupg
 
 # Import secret key
-echo "$GPG_SECRET_KEY" | base64 --decode > ~/.gnupg/secring.gpg
+echo "$GPG_SECRET_KEY" | base64 -d > ~/.gnupg/secring.gpg
 
 # Import public key
-echo "$GPG_PUBLIC_KEY" | base64 --decode > ~/.gnupg/pubring.gpg
+echo "$GPG_PUBLIC_KEY" | base64 -d > ~/.gnupg/pubring.gpg
 
 # --- Extract key UID (email) ---
 KEY_UID=$(gpg --list-secret-keys --with-colons | awk -F: '/^uid:/ {print $10; exit}')
