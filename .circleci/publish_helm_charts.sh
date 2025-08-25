@@ -34,7 +34,7 @@ helm repo index . --url $LOCAL_HELM_MOJALOOP_REPO_URI
 git status
 
 echo "Staging packaged Helm charts..." | tee git.log
-git add ./*.tgz ./index.yaml ../README.md ../LICENSE.md ../CODEOWNERS
+git add ./*.tgz ./*.prov ./index.yaml ./helm-publickey.asc ../README.md ../LICENSE.md ../CODEOWNERS
 
 echo "Commiting changes..." | tee git.log
 git commit -a -m "'$COMMIT_MESSAGE'"
