@@ -331,6 +331,8 @@ If you are using the example-mojaloop-backend for your backend dependencies, thi
 
 ## Helm Provenance and Integrity
 
+**Note: This feature is introduced in mojaloop with version 17.1.0**
+
 Helm provenance ensures that Helm charts are securely signed and verified, preventing tampering and ensuring trust in deployments.
 
 This covers:
