@@ -11,10 +11,10 @@ mkdir -p ~/.gnupg
 chmod 700 ~/.gnupg
 
 # Import secret key
-echo "$GPG_SECRET_KEY" | base64 --decode > ~/.gnupg/secring.gpg
+echo "$GPG_SECRET_KEY" | base64 -d > ~/.gnupg/secring.gpg
 
 # Import public key
-echo "$GPG_PUBLIC_KEY" | base64 --decode > ~/.gnupg/pubring.gpg
+echo "$GPG_PUBLIC_KEY" | base64 -d > ~/.gnupg/pubring.gpg
 
 # --- Extract key UID (email) ---
 KEY_UID=$(gpg --list-secret-keys --with-colons | awk -F: '/^uid:/ {print $10; exit}')
@@ -156,7 +156,7 @@ cd ./repo
 helm repo index . --url "$LOCAL_HELM_MOJALOOP_REPO_URI"
 
 # Export public key for consumers
-gpg --export "$KEY_UID" > ./helm-publickey.asc
+gpg --export "$KEY_UID" > ./moja-helm-pubring.gpg
 
 cd ..
 
@@ -166,8 +166,8 @@ Ensure you check the output for any errors. \n \
 Ignore any http errors when connecting to \"local\" chart repository.\n \
 \n \
 Charts, provenance files, and public key are available in ./repo \n \
-You can import the key with: \n \
-  curl -s $LOCAL_HELM_MOJALOOP_REPO_URI/helm-publickey.asc | gpg --import \n \
+You can download the public key with: \n \
+  curl -s $LOCAL_HELM_MOJALOOP_REPO_URI/moja-helm-pubring.gpg > ~/.gnupg/pubring.gpg \n \
 and verify with: \n \
   helm pull <chart> --verify \n \
 Run the following command to serve a local repository: helm serve --repo-path ./repo \n \
