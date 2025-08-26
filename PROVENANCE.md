@@ -94,17 +94,19 @@ Helm charts are first packaged—a process that bundles the chart’s files into
 
 #### **Steps:**
 
-These commands are incorporated in `publish.sh` 3. Install GnuPG:
+1. Install GnuPG in .circleci/config.yml:
 
 ```sh
-sudo apt-get install gnupg
+    apk --no-cache add --update gnupg
 ```
 
-4. Save the Secret Key to the Keyring:
+These commands are incorporated in `package.sh` 
+
+2. Save the Secret Key to the Keyring:
    ```sh
    echo $GPG_SECRET_KEY | base64 --decode > ~/.gnupg/secring.gpg
    ```
-5. Package the Helm Chart with a Signed Provenance File:
+3. Package the Helm Chart with a Signed Provenance File:
 
    ```sh
    helm package --sign --key <user_name> --keyring ~/.gnupg/secring.gpg --passphrase-file ./passphrase.txt -u -d ./repo <chart_name> --version <version>
@@ -118,13 +120,18 @@ sudo apt-get install gnupg
    - `-d ./repo` : Specifies the destination directory for the packaged chart.
    - `--version <version>` : Specifies the chart version, which can be a development release.
 
-6. This command generates `.tgz` (Helm chart archive) and `.prov` (provenance) files.<br>
+4. This command generates `.tgz` (Helm chart archive) and `.prov` (provenance) files.<br>
+
+5. We also export the public key pubpubring.gpg and add it to the chart repo so users can download it and use it to    verify the helm chart
+  ```sh
+  gpg --export "$KEY_UID" > ./moja-helm-pubring.gpg
+  ```
 
 This command is incorporated in `.circleci/publish_helm_charts.sh`
 
-7. Push the Generated Files to the GitHub Pages Branch:
+5. Push the Generated Files to the GitHub Pages Branch:
    ```sh
-   git add ./*.tgz ./*.prov
+   git add ./*.tgz ./*.prov ./moja-helm-pubring.gpg
    git push -q origin $GITHUB_TARGET_BRANCH
    ```
 
@@ -143,7 +150,23 @@ helm repo add mojaloop https://mojaloop.io/helm/repo/
 helm repo update
 ```
 
-#### **2. Test Installation Without Deploying It**
+#### **2. Download the public key to verify the helm chart**
+  You need to download the public key and store it in `~/.gnupg/pubring.gpg` file
+  ```sh
+  curl -s https://mojaloop.github.io/helm/repo/moja-helm-pubring.gpg > ~/.gnupg/pubring.gpg
+  ```
+  `~/.gnupg/pubring.gpg` is the default public key used by the helm in verify command.
+
+  Alternatively, you can store the key in any other file and use it explicitly in the helm verify commands
+
+  e.g.
+  ```sh
+  curl -s https://mojaloop.github.io/helm/repo/moja-helm-pubring.gpg > ./moja-helm-pubring.gpg
+
+  helm --namespace demo install --verify moja mojaloop/mojaloop --create-namespace --dry-run --keyring ./moja-helm-pubring.gpg
+
+  ```
+#### **3. Test Installation Without Deploying It**
 
 Before performing an actual deployment, you can simulate the installation to verify the chart and configurations by performing a dry run.
 
@@ -151,7 +174,7 @@ Before performing an actual deployment, you can simulate the installation to ver
 helm --namespace demo install --verify moja mojaloop/mojaloop --create-namespace --dry-run
 ```
 
-#### **3. Installing and Verifying the Latest Version**
+#### **4. Installing and Verifying the Latest Version**
 
 To install the latest version of Mojaloop while verifying its signature:
 
@@ -159,7 +182,7 @@ To install the latest version of Mojaloop while verifying its signature:
 helm --namespace demo install --verify moja mojaloop/mojaloop --create-namespace
 ```
 
-#### **4. Installing and Verifying Development Versions**
+#### **5. Installing and Verifying Development Versions**
 
 To install the latest development version:
 
