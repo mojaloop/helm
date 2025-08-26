@@ -4,6 +4,8 @@ Helm provenance refers to the process of verifying the authenticity and integrit
 
 Helm has provenance tools which help chart users verify the integrity and origin of a package. Using industry-standard tools based on PKI, GnuPG, and well-respected package managers, Helm can generate and verify signature files.
 
+**Note: This feature is introduced in mojaloop with version 17.1.0**
+
 ## Overview
 
 Integrity is established by comparing a chart to a provenance record. Provenance records are stored in provenance files, which are stored alongside a packaged chart. For example, if a chart is named `myapp-1.2.3.tgz`, its provenance file will be `myapp-1.2.3.tgz.prov`.
@@ -137,9 +139,12 @@ This command is incorporated in `.circleci/publish_helm_charts.sh`
 
 ---
 
-### 3. Helm Install and Helm Verify
+### 3. Helm Install and Helm Verify since mojaloop version 17.1.0
 
 These commands ensure that the Helm chart being installed is authentic and untampered by checking its cryptographic signature against the corresponding `.prov` file. This guarantees that the chart was packaged and signed by a trusted source, helping to maintain the integrity and security of the deployment.
+
+
+**Note: This feature will not work with mojaloop versions prior to 17.1.0**
 
 #### **1. Add Mojaloop Repo to Your Helm Config**
 
