@@ -1,0 +1,27 @@
+{{/*
+  Mojaloop Common template for Kafka wait-for-kafka initContainer as a full resource
+  Usage: {{- include "mojaloop-common.probesSidecar" . | nindent 10 }}
+*/}}
+{{- define "mojaloop-common.probesSidecar" -}}
+{{- if .Values.sidecar.readinessProbe.enabled }}
+readinessProbe:
+httpGet:
+    path: {{ .Values.sidecar.readinessProbe.httpGet.path }}
+    port: {{ .Values.sidecar.service.internalPort }}
+initialDelaySeconds: {{ .Values.sidecar.readinessProbe.initialDelaySeconds }}
+periodSeconds: {{ .Values.sidecar.readinessProbe.periodSeconds }}
+{{ if .Values.sidecar.readinessProbe.timeoutSeconds }}timeoutSeconds: {{ .Values.sidecar.readinessProbe.timeoutSeconds }}{{ end }}
+{{ if .Values.sidecar.readinessProbe.successThreshold }}successThreshold: {{ .Values.sidecar.readinessProbe.successThreshold }}{{ end }}
+{{ if .Values.sidecar.readinessProbe.failureThreshold }}failureThreshold: {{ .Values.sidecar.readinessProbe.failureThreshold }}{{ end }}
+{{- end }}
+{{- if .Values.sidecar.livenessProbe.enabled }}
+livenessProbe:
+httpGet:
+    path: {{ .Values.sidecar.livenessProbe.httpGet.path }}
+    port: {{ .Values.sidecar.service.internalPort }}
+initialDelaySeconds: {{ .Values.sidecar.livenessProbe.initialDelaySeconds }}
+periodSeconds: {{ .Values.sidecar.livenessProbe.periodSeconds }}
+{{ if .Values.sidecar.livenessProbe.timeoutSeconds }}timeoutSeconds: {{ .Values.sidecar.livenessProbe.timeoutSeconds }}{{ end }}
+{{ if .Values.sidecar.livenessProbe.successThreshold }}successThreshold: {{ .Values.sidecar.livenessProbe.successThreshold }}{{ end }}
+{{ if .Values.sidecar.livenessProbe.failureThreshold }}failureThreshold: {{ .Values.sidecar.livenessProbe.failureThreshold }}{{ end }}
+{{- end }}
