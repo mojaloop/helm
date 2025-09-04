@@ -188,25 +188,7 @@ cl-handler-bulk-transfer-prepare:
   ##
   # initContainers: []
   initContainers: |
-    - name: wait-for-kafka
-      image: solsson/kafka:2.8.1
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-          do
-            echo --------------------;
-            echo Waiting for Kafka...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo Kafka ok!;
-      env:
-        - name: KAFKA_HOST
-          value: '{{ .Values.config.kafka_host }}'
-        - name: KAFKA_PORT
-          value: '{{ .Values.config.kafka_port }}'
+    {{- include "mojaloop-common.waitForKafkaInitContainer" . | nindent 4 }}
     - name: wait-for-mysql
       image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
@@ -559,25 +541,7 @@ cl-handler-bulk-transfer-fulfil:
   ##
   # initContainers: []
   initContainers: |
-    - name: wait-for-kafka
-      image: solsson/kafka:2.8.1
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-          do
-            echo --------------------;
-            echo Waiting for Kafka...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo Kafka ok!;
-      env:
-        - name: KAFKA_HOST
-          value: '{{ .Values.config.kafka_host }}'
-        - name: KAFKA_PORT
-          value: '{{ .Values.config.kafka_port }}'
+    {{- include "mojaloop-common.waitForKafkaInitContainer" . | nindent 4 }}
     - name: wait-for-mysql
       image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
@@ -939,25 +903,7 @@ cl-handler-bulk-transfer-processing:
   ##
   # initContainers: []
   initContainers: |
-    - name: wait-for-kafka
-      image: solsson/kafka:2.8.1
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-          do
-            echo --------------------;
-            echo Waiting for Kafka...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo Kafka ok!;
-      env:
-        - name: KAFKA_HOST
-          value: '{{ .Values.config.kafka_host }}'
-        - name: KAFKA_PORT
-          value: '{{ .Values.config.kafka_port }}'
+    {{- include "mojaloop-common.waitForKafkaInitContainer" . | nindent 4 }}
     - name: wait-for-mysql
       image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
@@ -1319,25 +1265,7 @@ cl-handler-bulk-transfer-get:
   ##
   # initContainers: []
   initContainers: |
-    - name: wait-for-kafka
-      image: solsson/kafka:2.8.1
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-          do
-            echo --------------------;
-            echo Waiting for Kafka...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo Kafka ok!;
-      env:
-        - name: KAFKA_HOST
-          value: '{{ .Values.config.kafka_host }}'
-        - name: KAFKA_PORT
-          value: '{{ .Values.config.kafka_port }}'
+    {{- include "mojaloop-common.waitForKafkaInitContainer" . | nindent 4 }}
     - name: wait-for-mysql
       image: mysql:9.0.1
       imagePullPolicy: IfNotPresent

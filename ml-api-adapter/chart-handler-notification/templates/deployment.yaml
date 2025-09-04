@@ -96,22 +96,7 @@ spec:
             - name: debug
               containerPort: {{ .Values.diagnosticMode.debug.internalPort }}
             {{- end }}
-          {{- if .Values.readinessProbe.enabled }}
-          readinessProbe:
-            httpGet:
-              path: {{ .Values.readinessProbe.httpGet.path }}
-              port: {{ .Values.service.internalPort }}
-            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
-          {{- end }}
-          {{- if .Values.livenessProbe.enabled }}
-          livenessProbe:
-            httpGet:
-              path: {{ .Values.livenessProbe.httpGet.path }}
-              port: {{ .Values.service.internalPort }}
-            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
-          {{- end }}
+          {{- include "mojaloop-common.probes" . | nindent 10 }}
           volumeMounts:
 {{- range $fileName, $fileContents := .Values.configOverride }}
             - name: config-override-volume
@@ -162,22 +147,7 @@ spec:
           command: {{ .Values.sidecar.image.command }}
           ports:
             - containerPort: {{ .Values.sidecar.service.internalPort }}
-          {{- if .Values.sidecar.readinessProbe.enabled }}
-          readinessProbe:
-            httpGet:
-              path: {{ .Values.sidecar.readinessProbe.httpGet.path }}
-              port: {{ .Values.sidecar.service.internalPort }}
-            initialDelaySeconds: {{ .Values.sidecar.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.sidecar.readinessProbe.periodSeconds }}
-          {{- end }}
-          {{- if .Values.sidecar.livenessProbe.enabled }}
-          livenessProbe:
-            httpGet:
-              path: {{ .Values.sidecar.livenessProbe.httpGet.path }}
-              port: {{ .Values.sidecar.service.internalPort }}
-            initialDelaySeconds: {{ .Values.sidecar.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.sidecar.livenessProbe.periodSeconds }}
-          {{- end }}
+          {{- include "mojaloop-common.probesSidecar" . | nindent 10 }}
           volumeMounts:
             - name: {{ template "ml-api-adapter-handler-notification.fullname" . }}-sidecar-volume
               mountPath: /opt/app/config
