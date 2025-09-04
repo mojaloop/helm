@@ -6,7 +6,7 @@
 
 echo "Render all Charts..."
 
-set -e
+set -eo pipefail
 
 trap 'echo "Command failed...exiting. Please fix me!"' ERR
 
