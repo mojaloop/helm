@@ -158,40 +158,7 @@ bulk-api-adapter:
     # initContainers: []
     initContainers: |
       {{- include "mojaloop-common.waitForKafkaInitContainer" . | nindent 6 }}
-      - name: wait-for-mongodb
-        image: bitnami/mongodb:6.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-            do
-              echo --------------------;
-              echo Waiting for MongoDB...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MongoDB ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.mongo_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.mongo_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.mongo_user }}'
-          - name: DB_PASS
-            {{- if .Values.config.mongo_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.mongo_secret.name }}'
-                  key: '{{ .Values.config.mongo_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.mongo_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.mongo_database }}'
-
+      {{- include "mojaloop-common.waitForMongodbInitContainer" . | nindent 6 }}
     service:
       internalPort: 8088
       ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -479,40 +446,7 @@ bulk-api-adapter:
     # initContainers: []
     initContainers: |
       {{- include "mojaloop-common.waitForKafkaInitContainer" . | nindent 6 }}
-      - name: wait-for-mongodb
-        image: bitnami/mongodb:6.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-            do
-              echo --------------------;
-              echo Waiting for MongoDB...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MongoDB ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.mongo_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.mongo_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.mongo_user }}'
-          - name: DB_PASS
-            {{- if .Values.config.mongo_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.mongo_secret.name }}'
-                  key: '{{ .Values.config.mongo_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.mongo_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.mongo_database }}'
-
+      {{- include "mojaloop-common.waitForMongodbInitContainer" . | nindent 6 }}
     service:
       internalPort: 8088
       ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -857,40 +791,7 @@ bulk-centralledger:
             {{- end }}
           - name: DB_DATABASE
             value: '{{ .Values.config.db_database }}'
-      - name: wait-for-mongodb
-        image: bitnami/mongodb:6.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-            do
-              echo --------------------;
-              echo Waiting for MongoDB...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MongoDB ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.mongo_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.mongo_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.mongo_user }}'
-          - name: DB_PASS
-            {{- if .Values.config.mongo_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.mongo_secret.name }}'
-                  key: '{{ .Values.config.mongo_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.mongo_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.mongo_database }}'
-
+      {{- include "mojaloop-common.waitForMongodbInitContainer" . | nindent 6 }}
     service:
       internalPort: 3001
       ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -1220,40 +1121,7 @@ bulk-centralledger:
             {{- end }}
           - name: DB_DATABASE
             value: '{{ .Values.config.db_database }}'
-      - name: wait-for-mongodb
-        image: bitnami/mongodb:6.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-            do
-              echo --------------------;
-              echo Waiting for MongoDB...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MongoDB ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.mongo_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.mongo_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.mongo_user }}'
-          - name: DB_PASS
-            {{- if .Values.config.mongo_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.mongo_secret.name }}'
-                  key: '{{ .Values.config.mongo_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.mongo_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.mongo_database }}'
-
+      {{- include "mojaloop-common.waitForMongodbInitContainer" . | nindent 6 }}
     service:
       internalPort: 3001
       ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -1592,40 +1460,7 @@ bulk-centralledger:
             {{- end }}
           - name: DB_DATABASE
             value: '{{ .Values.config.db_database }}'
-      - name: wait-for-mongodb
-        image: bitnami/mongodb:6.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-            do
-              echo --------------------;
-              echo Waiting for MongoDB...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MongoDB ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.mongo_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.mongo_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.mongo_user }}'
-          - name: DB_PASS
-            {{- if .Values.config.mongo_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.mongo_secret.name }}'
-                  key: '{{ .Values.config.mongo_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.mongo_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.mongo_database }}'
-
+      {{- include "mojaloop-common.waitForMongodbInitContainer" . | nindent 6 }}
     service:
       internalPort: 3001
       ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -1964,40 +1799,7 @@ bulk-centralledger:
             {{- end }}
           - name: DB_DATABASE
             value: '{{ .Values.config.db_database }}'
-      - name: wait-for-mongodb
-        image: bitnami/mongodb:6.0.1
-        imagePullPolicy: IfNotPresent
-        command:
-          - sh
-          - -c
-          - |
-            until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-            do
-              echo --------------------;
-              echo Waiting for MongoDB...;
-              sleep 2;
-            done;
-            echo ====================;
-            echo MongoDB ok!;
-        env:
-          - name: DB_HOST
-            value: '{{ .Values.config.mongo_host }}'
-          - name: DB_PORT
-            value: '{{ .Values.config.mongo_port }}'
-          - name: DB_USER
-            value: '{{ .Values.config.mongo_user }}'
-          - name: DB_PASS
-            {{- if .Values.config.mongo_secret }}
-            valueFrom:
-                secretKeyRef:
-                  name: '{{ .Values.config.mongo_secret.name }}'
-                  key: '{{ .Values.config.mongo_secret.key }}'
-            {{- else }}
-            value: {{ .Values.config.mongo_password }}
-            {{- end }}
-          - name: DB_DATABASE
-            value: '{{ .Values.config.mongo_database }}'
-
+      {{- include "mojaloop-common.waitForMongodbInitContainer" . | nindent 6 }}
     service:
       internalPort: 3001
       ## @param service.type %%MAIN_CONTAINER_NAME%% service type
