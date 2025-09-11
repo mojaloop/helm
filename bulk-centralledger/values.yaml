@@ -188,25 +188,7 @@ cl-handler-bulk-transfer-prepare:
   ##
   # initContainers: []
   initContainers: |
-    - name: wait-for-kafka
-      image: solsson/kafka:2.8.1
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-          do
-            echo --------------------;
-            echo Waiting for Kafka...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo Kafka ok!;
-      env:
-        - name: KAFKA_HOST
-          value: '{{ .Values.config.kafka_host }}'
-        - name: KAFKA_PORT
-          value: '{{ .Values.config.kafka_port }}'
+    {{- include "mojaloop-common.waitForKafkaInitContainer" . | nindent 0 }}
     - name: wait-for-mysql
       image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
@@ -240,40 +222,7 @@ cl-handler-bulk-transfer-prepare:
           {{- end }}
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
-    - name: wait-for-mongodb
-      image: bitnami/mongodb:6.0.1
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - |
-          until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-          do
-            echo --------------------;
-            echo Waiting for MongoDB...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo MongoDB ok!;
-      env:
-        - name: DB_HOST
-          value: '{{ .Values.config.mongo_host }}'
-        - name: DB_PORT
-          value: '{{ .Values.config.mongo_port }}'
-        - name: DB_USER
-          value: '{{ .Values.config.mongo_user }}'
-        - name: DB_PASS
-          {{- if .Values.config.mongo_secret }}
-          valueFrom:
-              secretKeyRef:
-                name: '{{ .Values.config.mongo_secret.name }}'
-                key: '{{ .Values.config.mongo_secret.key }}'
-          {{- else }}
-          value: {{ .Values.config.mongo_password }}
-          {{- end }}
-        - name: DB_DATABASE
-          value: '{{ .Values.config.mongo_database }}'
-
+    {{- include "mojaloop-common.waitForMongodbInitContainer" . | nindent 0 }}
   service:
     internalPort: 3001
     ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -559,25 +508,7 @@ cl-handler-bulk-transfer-fulfil:
   ##
   # initContainers: []
   initContainers: |
-    - name: wait-for-kafka
-      image: solsson/kafka:2.8.1
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-          do
-            echo --------------------;
-            echo Waiting for Kafka...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo Kafka ok!;
-      env:
-        - name: KAFKA_HOST
-          value: '{{ .Values.config.kafka_host }}'
-        - name: KAFKA_PORT
-          value: '{{ .Values.config.kafka_port }}'
+    {{- include "mojaloop-common.waitForKafkaInitContainer" . | nindent 0 }}
     - name: wait-for-mysql
       image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
@@ -611,40 +542,7 @@ cl-handler-bulk-transfer-fulfil:
           {{- end }}
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
-    - name: wait-for-mongodb
-      image: bitnami/mongodb:6.0.1
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - |
-          until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-          do
-            echo --------------------;
-            echo Waiting for MongoDB...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo MongoDB ok!;
-      env:
-        - name: DB_HOST
-          value: '{{ .Values.config.mongo_host }}'
-        - name: DB_PORT
-          value: '{{ .Values.config.mongo_port }}'
-        - name: DB_USER
-          value: '{{ .Values.config.mongo_user }}'
-        - name: DB_PASS
-          {{- if .Values.config.mongo_secret }}
-          valueFrom:
-              secretKeyRef:
-                name: '{{ .Values.config.mongo_secret.name }}'
-                key: '{{ .Values.config.mongo_secret.key }}'
-          {{- else }}
-          value: {{ .Values.config.mongo_password }}
-          {{- end }}
-        - name: DB_DATABASE
-          value: '{{ .Values.config.mongo_database }}'
-
+    {{- include "mojaloop-common.waitForMongodbInitContainer" . | nindent 0 }}
   service:
     internalPort: 3001
     ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -939,25 +837,7 @@ cl-handler-bulk-transfer-processing:
   ##
   # initContainers: []
   initContainers: |
-    - name: wait-for-kafka
-      image: solsson/kafka:2.8.1
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-          do
-            echo --------------------;
-            echo Waiting for Kafka...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo Kafka ok!;
-      env:
-        - name: KAFKA_HOST
-          value: '{{ .Values.config.kafka_host }}'
-        - name: KAFKA_PORT
-          value: '{{ .Values.config.kafka_port }}'
+    {{- include "mojaloop-common.waitForKafkaInitContainer" . | nindent 0 }}
     - name: wait-for-mysql
       image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
@@ -991,40 +871,7 @@ cl-handler-bulk-transfer-processing:
           {{- end }}
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
-    - name: wait-for-mongodb
-      image: bitnami/mongodb:6.0.1
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - |
-          until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-          do
-            echo --------------------;
-            echo Waiting for MongoDB...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo MongoDB ok!;
-      env:
-        - name: DB_HOST
-          value: '{{ .Values.config.mongo_host }}'
-        - name: DB_PORT
-          value: '{{ .Values.config.mongo_port }}'
-        - name: DB_USER
-          value: '{{ .Values.config.mongo_user }}'
-        - name: DB_PASS
-          {{- if .Values.config.mongo_secret }}
-          valueFrom:
-              secretKeyRef:
-                name: '{{ .Values.config.mongo_secret.name }}'
-                key: '{{ .Values.config.mongo_secret.key }}'
-          {{- else }}
-          value: {{ .Values.config.mongo_password }}
-          {{- end }}
-        - name: DB_DATABASE
-          value: '{{ .Values.config.mongo_database }}'
-
+    {{- include "mojaloop-common.waitForMongodbInitContainer" . | nindent 0 }}
   service:
     internalPort: 3001
     ## @param service.type %%MAIN_CONTAINER_NAME%% service type
@@ -1319,25 +1166,7 @@ cl-handler-bulk-transfer-get:
   ##
   # initContainers: []
   initContainers: |
-    - name: wait-for-kafka
-      image: solsson/kafka:2.8.1
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
-          do
-            echo --------------------;
-            echo Waiting for Kafka...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo Kafka ok!;
-      env:
-        - name: KAFKA_HOST
-          value: '{{ .Values.config.kafka_host }}'
-        - name: KAFKA_PORT
-          value: '{{ .Values.config.kafka_port }}'
+    {{- include "mojaloop-common.waitForKafkaInitContainer" . | nindent 0 }}
     - name: wait-for-mysql
       image: mysql:9.0.1
       imagePullPolicy: IfNotPresent
@@ -1371,40 +1200,7 @@ cl-handler-bulk-transfer-get:
           {{- end }}
         - name: DB_DATABASE
           value: '{{ .Values.config.db_database }}'
-    - name: wait-for-mongodb
-      image: bitnami/mongodb:6.0.1
-      imagePullPolicy: IfNotPresent
-      command:
-        - sh
-        - -c
-        - |
-          until mongosh mongodb://${DB_HOST}:${DB_PORT} --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" --eval "disableTelemetry();db.adminCommand('ping')" ;
-          do
-            echo --------------------;
-            echo Waiting for MongoDB...;
-            sleep 2;
-          done;
-          echo ====================;
-          echo MongoDB ok!;
-      env:
-        - name: DB_HOST
-          value: '{{ .Values.config.mongo_host }}'
-        - name: DB_PORT
-          value: '{{ .Values.config.mongo_port }}'
-        - name: DB_USER
-          value: '{{ .Values.config.mongo_user }}'
-        - name: DB_PASS
-          {{- if .Values.config.mongo_secret }}
-          valueFrom:
-              secretKeyRef:
-                name: '{{ .Values.config.mongo_secret.name }}'
-                key: '{{ .Values.config.mongo_secret.key }}'
-          {{- else }}
-          value: {{ .Values.config.mongo_password }}
-          {{- end }}
-        - name: DB_DATABASE
-          value: '{{ .Values.config.mongo_database }}'
-
+    {{- include "mojaloop-common.waitForMongodbInitContainer" . | nindent 0 }}
   service:
     internalPort: 3001
     ## @param service.type %%MAIN_CONTAINER_NAME%% service type

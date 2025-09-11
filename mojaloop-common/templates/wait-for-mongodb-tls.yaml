@@ -1,0 +1,81 @@
+{{/*
+  Mojaloop Common template for MongoDB wait-for-mongodb-tls initContainer as a full resource
+  Usage: {{- include "mojaloop-common.waitForMongodbTlsInitContainer" . | nindent 2 }}
+*/}}
+{{- define "mojaloop-common.waitForMongodbTlsInitContainer" -}}
+- name: wait-for-mongodb
+  image: bitnami/mongodb:6.0.1
+  imagePullPolicy: IfNotPresent
+  command:
+    - sh
+    - -c
+    - |
+      MONGO_TLS_ARGS="";
+      if [ "$DB_SSL_ENABLED" = "true" ]; then
+        MONGO_TLS_ARGS="--tls=true";
+        if [ "$DB_SSL_VERIFY" = "false" ]; then
+          MONGO_TLS_ARGS="$MONGO_TLS_ARGS --tlsAllowInvalidHostnames=true";
+        fi;
+        if [ -n "$DB_SSL_CA" ]; then
+          echo "$DB_SSL_CA" > /tmp/ca.pem
+          MONGO_TLS_ARGS="$MONGO_TLS_ARGS --tlsCAFile /tmp/ca.pem"
+        fi
+        if [ -n "$DB_SSL_CLIENT_CERT" ]; then
+          echo "$DB_SSL_CLIENT_CERT" > /tmp/client-cert.pem
+          MONGO_TLS_ARGS="$MONGO_TLS_ARGS --tlsCertificateKeyFile /tmp/client-cert.pem"
+        fi
+      fi;
+      PARAMS="";
+      if [ -n "$DB_PARAMS" ]; then
+        PARAMS=$(echo "$DB_PARAMS" | jq -r 'to_entries | map("\(.key)=\(.value|tostring)") | join("&")');
+        PARAMS="?$PARAMS";
+      fi;
+      until mongosh "mongodb://${DB_HOST}:${DB_PORT}/${DB_DATABASE}${PARAMS}" --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" $MONGO_TLS_ARGS --eval "disableTelemetry();db.adminCommand('ping')" ;
+      do
+        echo --------------------;
+        echo Waiting for MongoDB...;
+        sleep 2;
+      done;
+      echo ====================;
+      echo MongoDB ok!;
+  env:
+    - name: DB_HOST
+      value: '{{ .Values.config.mongodb.host }}'
+    - name: DB_PORT
+      value: '{{ .Values.config.mongodb.port }}'
+    - name: DB_USER
+      value: '{{ .Values.config.mongodb.user }}'
+    - name: DB_PASS
+    {{- if .Values.config.mongodb.secret }}
+      valueFrom:
+        secretKeyRef:
+          name: '{{ .Values.config.mongodb.secret.name }}'
+          key: '{{ .Values.config.mongodb.secret.key }}'
+    {{- else }}
+      value: {{ .Values.config.mongodb.password }}
+    {{- end }}
+    - name: DB_DATABASE
+      value: '{{ .Values.config.mongodb.database }}'
+    - name: DB_SSL_ENABLED
+      value: '{{ .Values.config.mongodb.ssl.enabled }}'
+    - name: DB_SSL_VERIFY
+      value: '{{ .Values.config.mongodb.ssl.verify }}'
+    {{- if .Values.config.mongodb.ssl.caSecret.name }}
+    - name: DB_SSL_CA
+      valueFrom:
+        secretKeyRef:
+          name: '{{ .Values.config.mongodb.ssl.caSecret.name }}'
+          key: '{{ .Values.config.mongodb.ssl.caSecret.key }}'
+    {{- end }}
+    {{- if .Values.config.mongodb.ssl.clientCert.name }}
+    - name: DB_SSL_CLIENT_CERT
+      valueFrom:
+        secretKeyRef:
+          name: '{{ .Values.config.mongodb.ssl.clientCert.name }}'
+          key: '{{ .Values.config.mongodb.ssl.clientCert.key }}'
+    {{- end }}
+    {{- if .Values.config.mongodb.params }}
+    - name: DB_PARAMS
+      value: {{ .Values.config.mongodb.params | toJson | quote }}
+    {{- end }}
+{{- end }}

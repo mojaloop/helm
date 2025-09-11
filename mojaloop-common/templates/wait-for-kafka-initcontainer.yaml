@@ -1,0 +1,27 @@
+{{/*
+  Mojaloop Common template for Kafka wait-for-kafka initContainer as a full resource
+  Usage: {{- include "mojaloop-common.waitForKafkaInitContainer" . | nindent 2 }}
+*/}}
+{{- define "mojaloop-common.waitForKafkaInitContainer" -}}
+- name: wait-for-kafka
+  image: solsson/kafka:2.8.1
+  imagePullPolicy: IfNotPresent
+  securityContext:
+    readOnlyRootFilesystem: true
+  command:
+    - sh
+    - -c
+    - until ./bin/kafka-broker-api-versions.sh --bootstrap-server ${KAFKA_HOST}:${KAFKA_PORT};
+      do
+        echo --------------------;
+        echo Waiting for Kafka...;
+        sleep 2;
+      done;
+      echo ====================;
+      echo Kafka ok!;
+  env:
+    - name: KAFKA_HOST
+      value: '{{ .Values.config.kafka_host }}'
+    - name: KAFKA_PORT
+      value: '{{ .Values.config.kafka_port }}'
+{{- end }}
