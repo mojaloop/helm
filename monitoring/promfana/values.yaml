@@ -7,8 +7,9 @@ prometheus:
   rbac:
     create: true
 
-  podSecurityPolicy:
-    enabled: false
+  # PodSecurityPolicy removed in Kubernetes 1.25+
+  # podSecurityPolicy:
+  #   enabled: false
 
   imagePullSecrets:
   # - name: "image-pull-secret"
@@ -54,7 +55,7 @@ prometheus:
     ##
     image:
       repository: prom/alertmanager
-      tag: v0.21.0
+      tag: v0.27.0
       pullPolicy: IfNotPresent
 
     ## alertmanager priorityClassName
@@ -80,7 +81,7 @@ prometheus:
     ## Additional alertmanager container environment variable
     ## For instance to add a http_proxy
     ##
-    extraEnv: {}
+    extraEnv: []
 
     ## Additional alertmanager Secret mounts
     # Defines additional mounts with secrets. Secrets must be manually created in the namespace.
@@ -252,19 +253,9 @@ prometheus:
     ##
     podLabels: {}
 
-    ## Specify if a Pod Security Policy for node-exporter must be created
-    ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/
-    ##
-    podSecurityPolicy:
-      annotations: {}
-        ## Specify pod annotations
-        ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#apparmor
-        ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#seccomp
-        ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#sysctl
-        ##
-        # seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
-        # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
-        # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+    ## PodSecurityPolicy deprecated in Kubernetes 1.25+
+    ## Use PodSecurityStandards instead
+    ## Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
 
     ## Use a StatefulSet if replicaCount needs to be greater than 1 (see below)
     ##
@@ -346,8 +337,8 @@ prometheus:
       ## configmap-reload container image
       ##
       image:
-        repository: jimmidyson/configmap-reload
-        tag: v0.4.0
+        repository: quay.io/prometheus-operator/prometheus-config-reloader
+        tag: v0.85.0
         pullPolicy: IfNotPresent
 
       ## Additional configmap-reload container arguments
@@ -384,8 +375,8 @@ prometheus:
       ## configmap-reload container image
       ##
       image:
-        repository: jimmidyson/configmap-reload
-        tag: v0.4.0
+        repository: quay.io/prometheus-operator/prometheus-config-reloader
+        tag: v0.85.0
         pullPolicy: IfNotPresent
 
       ## Additional configmap-reload container arguments
@@ -442,22 +433,12 @@ prometheus:
     ##
     image:
       repository: prom/node-exporter
-      tag: v1.0.1
+      tag: v1.8.2
       pullPolicy: IfNotPresent
 
-    ## Specify if a Pod Security Policy for node-exporter must be created
-    ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/
-    ##
-    podSecurityPolicy:
-      annotations: {}
-        ## Specify pod annotations
-        ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#apparmor
-        ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#seccomp
-        ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#sysctl
-        ##
-        # seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
-        # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
-        # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+    ## PodSecurityPolicy deprecated in Kubernetes 1.25+
+    ## Use PodSecurityStandards instead
+    ## Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
 
     ## node-exporter priorityClassName
     ##
@@ -577,13 +558,13 @@ prometheus:
     #   - yournamespace
 
     name: server
-    sidecarContainers:
+    sidecarContainers: {}
 
     ## Prometheus server container image
     ##
     image:
       repository: prom/prometheus
-      tag: v2.20.1
+      tag: v3.5.0
       pullPolicy: IfNotPresent
 
     ## prometheus server priorityClassName
@@ -704,7 +685,7 @@ prometheus:
     ingress:
       ## If true, Prometheus server Ingress will be created
       ##
-      enabled: false
+      enabled: true
 
       ## Prometheus server Ingress annotations
       ##
@@ -855,19 +836,9 @@ prometheus:
     ##
     alertmanagers: []
 
-    ## Specify if a Pod Security Policy for node-exporter must be created
-    ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/
-    ##
-    podSecurityPolicy:
-      annotations: {}
-        ## Specify pod annotations
-        ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#apparmor
-        ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#seccomp
-        ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#sysctl
-        ##
-        # seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
-        # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
-        # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+    ## PodSecurityPolicy deprecated in Kubernetes 1.25+
+    ## Use PodSecurityStandards instead
+    ## Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
 
     ## Use a StatefulSet if replicaCount needs to be greater than 1 (see below)
     ##
@@ -992,7 +963,7 @@ prometheus:
     ##
     image:
       repository: prom/pushgateway
-      tag: v1.2.0
+      tag: v1.10.0
       pullPolicy: IfNotPresent
 
     ## pushgateway priorityClassName
@@ -1072,19 +1043,9 @@ prometheus:
     ##
     podAnnotations: {}
 
-    ## Specify if a Pod Security Policy for node-exporter must be created
-    ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/
-    ##
-    podSecurityPolicy:
-      annotations: {}
-        ## Specify pod annotations
-        ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#apparmor
-        ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#seccomp
-        ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#sysctl
-        ##
-        # seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
-        # seccomp.security.alpha.kubernetes.io/defaultProfileName: 'docker/default'
-        # apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+    ## PodSecurityPolicy deprecated in Kubernetes 1.25+
+    ## Use PodSecurityStandards instead
+    ## Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/
 
     replicaCount: 1
 
@@ -1645,8 +1606,9 @@ prometheus:
 grafana:
   rbac:
     create: true
-    pspEnabled: true
-    pspUseAppArmor: true
+    # PSP deprecated - removed pspEnabled and pspUseAppArmor
+    # pspEnabled: false
+    # pspUseAppArmor: false
     namespaced: false
     extraRoleRules: []
     # - apiGroups: []
@@ -1695,7 +1657,7 @@ grafana:
 
   image:
     repository: grafana/grafana
-    tag: 7.1.1
+    tag: 12.1.1
     sha: ""
     pullPolicy: IfNotPresent
 
@@ -1708,8 +1670,10 @@ grafana:
 
   testFramework:
     enabled: true
-    image: "bats/bats"
-    tag: "v1.1.0"
+    image:
+      registry: docker.io
+      repository: bats/bats
+      tag: "v1.4.1"
     imagePullPolicy: IfNotPresent
     securityContext: {}
 
@@ -1782,7 +1746,7 @@ grafana:
     #     - "my.host.com"
 
   ingress:
-    enabled: false
+    enabled: true
     # Values can be templated
     annotations: {}
       # kubernetes.io/ingress.class: nginx
