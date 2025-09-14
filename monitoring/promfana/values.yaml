@@ -1935,9 +1935,11 @@ grafana:
      datasources:
      - name: Prometheus
        type: prometheus
-       url: http://prometheus-prometheus-server
+       url: http://promfana-prometheus-server
        access: proxy
        isDefault: true
+       editable: true
+       uid: Prometheus 
 
   ## Configure notifiers
   ## ref: http://docs.grafana.org/administration/provisioning/#alert-notification-channels
@@ -1962,18 +1964,58 @@ grafana:
   ##
   ## `path` must be /var/lib/grafana/dashboards/<provider_name>
   ##
-  dashboardProviders: {}
-  #  dashboardproviders.yaml:
-  #    apiVersion: 1
-  #    providers:
-  #    - name: 'default'
-  #      orgId: 1
-  #      folder: ''
-  #      type: file
-  #      disableDeletion: false
-  #      editable: true
-  #      options:
-  #        path: /var/lib/grafana/dashboards/default
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'mojaloop-application'
+        orgId: 1
+        folder: 'Mojaloop - Application'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/mojaloop-application
+      - name: 'mojaloop-datastore'
+        orgId: 1
+        folder: 'Mojaloop - Datastore'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/mojaloop-datastore
+      - name: 'mojaloop-messaging'
+        orgId: 1
+        folder: 'Mojaloop - Messaging'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/mojaloop-messaging
+      - name: 'mojaloop-kubernetes'
+        orgId: 1
+        folder: 'Mojaloop - Kubernetes'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/mojaloop-kubernetes
+      - name: 'mojaloop-infrastructure'
+        orgId: 1
+        folder: 'Mojaloop - Infrastructure'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/mojaloop-infrastructure
+      - name: 'mojaloop-jmeter'
+        orgId: 1
+        folder: 'Mojaloop - JMeter'
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/mojaloop-jmeter
 
   ## Configure grafana dashboard to import
   ## NOTE: To use dashboards you must also enable/configure dashboardProviders
@@ -1981,22 +2023,73 @@ grafana:
   ##
   ## dashboards per provider, use provider name as key.
   ##
-  dashboards: {}
-    # default:
-    #   some-dashboard:
-    #     json: |
-    #       $RAW_JSON
-    #   custom-dashboard:
-    #     file: dashboards/custom-dashboard.json
-    #   prometheus-stats:
-    #     gnetId: 2
-    #     revision: 2
-    #     datasource: Prometheus
-    #   local-dashboard:
-    #     url: https://example.com/repository/test.json
-    #   local-dashboard-base64:
-    #     url: https://example.com/repository/test-b64.json
-    #     b64content: true
+  dashboards:
+    mojaloop-application:
+      ml-adapter:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/mojaloop/dashboard-ml-adapter.json
+        datasource: Prometheus
+      central-services:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/mojaloop/dashboard-central-services.json
+        datasource: Prometheus
+      central-services-characterization:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/mojaloop/dashboard-central-services-characterization.json
+        datasource: Prometheus
+      nodejs-application:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/mojaloop/dashboard-NodeJSApplication.json
+        datasource: Prometheus
+      simulators:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/mojaloop/dashboard-simulators.json
+        datasource: Prometheus
+      account-lookup-service:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/mojaloop/dashboard-account-lookup-service.json
+        datasource: Prometheus
+      quoting-service:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/mojaloop/dashboard-quoting-service.json
+        datasource: Prometheus
+      performance-troubleshooting:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/mojaloop/dashboard-performance-troubleshooting.json
+        datasource: Prometheus
+    mojaloop-datastore:
+      mysql-overview:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/datastore/dashboard-MySQL%20Overview.json
+        datasource: Prometheus
+      pxc-galera-overview:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/datastore/dashboard-PXC_Galera%20Cluster%20Overview.json
+        datasource: Prometheus
+      pxc-galera-graphs:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/datastore/dashboard-PXC_Galera%20Graphs.json
+        datasource: Prometheus
+      mysql-exporter-quickstart:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/datastore/dashboard-mysql-exporter-quickstart.json
+        datasource: Prometheus
+      redis-exporter-quickstart:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/datastore/dashboard-redis-exporter-quickstart.json
+        datasource: Prometheus
+    mojaloop-messaging:
+      kafka-cluster-overview:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/messaging/dashboard-kafka-cluster-overview.json
+        datasource: Prometheus
+      kafka-topic-overview:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/messaging/dashboard-kafka-topic-overview.json
+        datasource: Prometheus
+    mojaloop-kubernetes:
+      kubernetes-deployment:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/kubernetes/Kubernetes%20Deployment.json
+        datasource: Prometheus
+      kubernetes-monitoring:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/kubernetes/kubernetes-monitoring-dashboard.json
+        datasource: Prometheus
+    mojaloop-infrastructure:
+      prometheus-stats:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/infrastructure/mojaloop-prometheus-stats.json
+        datasource: Prometheus
+      prometheus-remote-write:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/infrastructure/prometheus-remote-write.json
+        datasource: Prometheus
+    mojaloop-jmeter:
+      jmeter-metrics:
+        url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/jmeter/dashboard-JMeterMetricTemplate.json
+        datasource: Prometheus
 
   ## Reference to external ConfigMap per provider. Use provider name as key and ConfiMap name as value.
   ## A provider dashboards must be defined either by external ConfigMaps or in values.yaml, not in both.
