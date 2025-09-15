@@ -1939,7 +1939,7 @@ grafana:
        access: proxy
        isDefault: true
        editable: true
-       uid: Prometheus 
+       #uid: Prometheus 
 
   ## Configure notifiers
   ## ref: http://docs.grafana.org/administration/provisioning/#alert-notification-channels
@@ -1974,6 +1974,7 @@ grafana:
         type: file
         disableDeletion: false
         editable: true
+        allowUiUpdates: true
         options:
           path: /var/lib/grafana/dashboards/mojaloop-application
       - name: 'mojaloop-datastore'
@@ -1982,6 +1983,7 @@ grafana:
         type: file
         disableDeletion: false
         editable: true
+        allowUiUpdates: true
         options:
           path: /var/lib/grafana/dashboards/mojaloop-datastore
       - name: 'mojaloop-messaging'
@@ -1990,6 +1992,7 @@ grafana:
         type: file
         disableDeletion: false
         editable: true
+        allowUiUpdates: true
         options:
           path: /var/lib/grafana/dashboards/mojaloop-messaging
       - name: 'mojaloop-kubernetes'
@@ -1998,6 +2001,7 @@ grafana:
         type: file
         disableDeletion: false
         editable: true
+        allowUiUpdates: true
         options:
           path: /var/lib/grafana/dashboards/mojaloop-kubernetes
       - name: 'mojaloop-infrastructure'
@@ -2006,6 +2010,7 @@ grafana:
         type: file
         disableDeletion: false
         editable: true
+        allowUiUpdates: true
         options:
           path: /var/lib/grafana/dashboards/mojaloop-infrastructure
       - name: 'mojaloop-jmeter'
@@ -2014,8 +2019,18 @@ grafana:
         type: file
         disableDeletion: false
         editable: true
+        allowUiUpdates: true
         options:
           path: /var/lib/grafana/dashboards/mojaloop-jmeter
+      - name: 'kube-prometheus'
+        orgId: 1
+        folder: 'Kube-Prometheus'
+        type: file
+        disableDeletion: false
+        editable: true
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/kube-prometheus
 
   ## Configure grafana dashboard to import
   ## NOTE: To use dashboards you must also enable/configure dashboardProviders
@@ -2089,6 +2104,27 @@ grafana:
     mojaloop-jmeter:
       jmeter-metrics:
         url: https://raw.githubusercontent.com/mojaloop/helm/master/monitoring/dashboards/jmeter/dashboard-JMeterMetricTemplate.json
+        datasource: Prometheus
+    kube-prometheus:
+      alertmanager-overview:
+        gnetId: 9578
+        revision: 4
+        datasource: Prometheus
+      kubernetes-apiserver:
+        gnetId: 12006
+        revision: 1
+        datasource: Prometheus  
+      kubernetes-cluster-monitoring:
+        gnetId: 7249
+        revision: 1
+        datasource: Prometheus
+      node-exporter:
+        gnetId: 1860
+        revision: 29
+        datasource: Prometheus
+      kubernetes-pods:
+        gnetId: 6417
+        revision: 1
         datasource: Prometheus
 
   ## Reference to external ConfigMap per provider. Use provider name as key and ConfiMap name as value.
