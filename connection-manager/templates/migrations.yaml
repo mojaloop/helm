@@ -1,0 +1,159 @@
+{{- if .Values.migrations.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{.Release.Name}}-migration-job
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": {{ .Values.migrations.deletePolicy }}
+spec:
+  template:
+    metadata:
+      name: "{{ .Release.Name }}-migration-job"
+      labels:
+        app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    spec:
+      {{- if .Values.api.serviceAccount.serviceAccountNameOverride }}
+      serviceAccountName: {{ .Values.api.serviceAccount.serviceAccountNameOverride }}
+      {{- else }}
+      serviceAccountName: {{ include "connection-manager.fullname" . }}-api
+      {{- end }}
+      initContainers:
+      - name: wait-for-db
+        image: busybox:1.36
+        securityContext:
+          readOnlyRootFilesystem: true
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Waiting for DNS resolution of $DATABASE_HOST..."
+          until nslookup "$DATABASE_HOST"; do
+            echo "DB host $DATABASE_HOST not yet resolvable, retrying in 5s..."
+            sleep 5
+          done
+          echo "DB host $DATABASE_HOST resolved"
+        env:
+        - name: DATABASE_HOST
+          value: {{ .Values.db.host }}
+      containers:
+      - name: db-migration
+        securityContext:
+          readOnlyRootFilesystem: true
+          {{- with .Values.api }}
+        image: "{{ .image.name }}:{{ .image.version }}"
+          {{- end }}
+        command:
+        - /usr/local/bin/npm
+        args:
+        - run
+        - {{ default "migrate-and-seed" .Values.migrations.script }}
+        env:
+        - name: NPM_CONFIG_UPDATE_NOTIFIER
+          value: 'false'
+        - name: DATABASE_HOST
+          value: {{ .Values.db.host }}
+        - name: DATABASE_USER
+          value: {{ .Values.db.user }}
+        {{- if .Values.db.passwordSecret }}
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.db.passwordSecret }}
+              key: {{ .Values.db.passwordSecretKey }}
+        {{- else }}
+        - name: DATABASE_PASSWORD
+          value: {{ .Values.db.password }}
+        {{- end }}
+        {{- if .Values.db.sslEnabled }}
+        - name: DATABASE_SSL_ENABLED
+          value: 'true'
+        - name: DATABASE_SSL_VERIFY
+          value: {{ .Values.db.sslVerify | quote}}
+        {{- if .Values.db.sslCaSecret }}
+        - name: DATABASE_SSL_CA
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.db.sslCaSecret }}
+              key: {{ .Values.db.sslCaSecretKey }}
+        {{- end }}
+        {{- end }}
+        - name: DATABASE_SCHEMA
+          value: {{ .Values.db.schema }}
+        - name: DATABASE_PORT
+          value: {{ .Values.db.port | quote }}
+        - name: SWITCH_ID
+          value: {{ .Values.api.switchId | quote }}
+        - name: DFSP_SEED
+          value: {{ .Values.db.dfspSeed | quote }}
+        {{- if .Values.api.vault.auth.k8s.enabled }}
+        - name: VAULT_AUTH_METHOD
+          value: K8S
+        - name: VAULT_K8S_TOKEN_FILE
+          value: {{ .Values.api.vault.auth.k8s.token }}
+        - name: VAULT_K8S_ROLE
+          value: {{ .Values.api.vault.auth.k8s.role }}
+        - name: VAULT_K8S_AUTH_MOUNT_POINT
+          value: {{ .Values.api.vault.auth.k8s.mountPoint }}
+        {{- else if .Values.api.vault.auth.appRole.enabled }}
+        - name: VAULT_AUTH_METHOD
+          value: APP_ROLE
+        - name: VAULT_ROLE_ID_FILE
+          value: {{ .Values.api.vault.auth.appRole.roleId }}
+        - name: VAULT_ROLE_SECRET_ID_FILE
+          value: {{ .Values.api.vault.auth.appRole.roleSecretId }}
+        {{- end }}
+        - name: VAULT_ENDPOINT
+          value: {{ .Values.api.vault.endpoint }}
+        - name: VAULT_MOUNT_PKI
+          value: {{ .Values.api.vault.mounts.pki }}
+        - name: VAULT_MOUNT_INTERMEDIATE_PKI
+          value: {{ .Values.api.vault.mounts.intermediatePki }}
+        - name: VAULT_MOUNT_KV
+          value: {{ .Values.api.vault.mounts.kv }}
+        - name: VAULT_PKI_SERVER_ROLE
+          value: {{ .Values.api.vault.pkiServerRole }}
+        - name: VAULT_PKI_CLIENT_ROLE
+          value: {{ .Values.api.vault.pkiClientRole }}
+        - name: VAULT_SIGN_EXPIRY_HOURS
+          value: {{ .Values.api.vault.signExpiryHours | quote }}
+        - name: CLIENT_CSR_PARAMETERS
+          value: /resources/tlsClientCSRParameters.json
+        - name: VAULT_MOUNT_DFSP_CLIENT_CERT_BUNDLE
+          value: {{ .Values.api.vault.mounts.dfspClientCertBundle | quote }}
+        - name: VAULT_MOUNT_DFSP_INT_IP_WHITELIST_BUNDLE
+          value: {{ .Values.api.vault.mounts.dfspInternalIPWhitelistBundle | quote }}
+        - name: VAULT_MOUNT_DFSP_EXT_IP_WHITELIST_BUNDLE
+          value: {{ .Values.api.vault.mounts.dfspExternalIPWhitelistBundle | quote }}
+        - name: PRIVATE_KEY_LENGTH
+          value: {{ .Values.api.vault.keyLength | quote }}
+        volumeMounts:
+          - name: {{ .Release.Name }}-secret-volume
+            readOnly: true
+            mountPath: /mcm_secrets
+          - name: tls-configmap
+            mountPath: /resources
+      volumes:
+        - name: {{ .Release.Name }}-secret-volume
+          secret:
+            secretName: {{ .Release.Name }}-secret
+        - name: tls-configmap
+          configMap:
+            name: {{ include "connection-manager.fullname" . }}-api-tls-configmap
+            items:
+            - key: tlsClientCSRParameters.json
+              path: tlsClientCSRParameters.json
+            - key: tlsServerCSRParameters.json
+              path: tlsServerCSRParameters.json
+            - key: caCSRParameters.json
+              path: caCSRParameters.json
+      restartPolicy: OnFailure
+  backoffLimit: 20
+{{- end}}

@@ -1,0 +1,25 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named: {{ .Release.Name }}.
+
+To learn more about this release: https://github.com/modusbox/helm/releases/tag/connection-manager-{{ .Chart.Version }}
+
+To learn more about this deployment, try:
+
+  $ helm status {{ .Release.Name }}
+
+{{- if (index .Values "tests" "api" "enabled") }}
+
+Use the following command to execute Test cases:
+
+  $ helm -n {{ .Release.Namespace }} test {{ .Release.Name }}
+
+Use the following command to execute Test cases and print logs to console:
+
+  $ helm -n {{ .Release.Namespace }} test {{ .Release.Name }} --logs
+
+View Test logs with the following commands:
+
+  $ kubectl -n {{ .Release.Namespace }} logs pod/{{ include "connection-manager.fullname" . }}-api-test
+
+{{- end}}

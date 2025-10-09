@@ -1,0 +1,232 @@
+{{- if not .Values.api.disabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "connection-manager.fullname" . }}-api
+  labels:
+    app.kubernetes.io/component: api
+{{ include "connection-manager.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.api.replicaCount }}
+  strategy: {}
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: {{ include "connection-manager.fullname" . }}-api
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+{{- with .Values.api.annotations }}
+      annotations:
+{{- toYaml . | nindent 8 }}
+{{- end }}
+      labels: *labels
+    spec:
+      {{- if .Values.api.serviceAccount.serviceAccountNameOverride }}
+      serviceAccountName: {{ .Values.api.serviceAccount.serviceAccountNameOverride }}
+      {{- else }}
+      serviceAccountName: {{ include "connection-manager.fullname" . }}-api
+      {{- end }}
+      containers:
+        - name: connection-manager-api
+          securityContext:
+            readOnlyRootFilesystem: true
+          {{- with .Values.api }}
+          image: "{{ .image.name }}:{{ .image.version }}"
+          ports:
+            - containerPort: {{ .ports.containerPort }}
+            {{- if .ports.metricsServerPort }}
+            - containerPort: {{ .ports.metricsServerPort }}
+            {{- end }}
+          {{- end }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          env:
+            - name: DATABASE_HOST
+              value: {{ .Values.db.host }}
+            - name: DATABASE_USER
+              value: {{ .Values.db.user }}
+            {{- if .Values.db.passwordSecret }}
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.passwordSecret }}
+                  key: {{ .Values.db.passwordSecretKey }}
+            {{- else }}
+            - name: DATABASE_PASSWORD
+              value: {{ .Values.db.password }}
+            {{- end }}
+            {{- if .Values.db.sslEnabled }}
+            - name: DATABASE_SSL_ENABLED
+              value: 'true'
+            - name: DATABASE_SSL_VERIFY
+              value: {{ .Values.db.sslVerify | quote}}
+            {{- if .Values.db.sslCaSecret }}
+            - name: DATABASE_SSL_CA
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.sslCaSecret }}
+                  key: {{ .Values.db.sslCaSecretKey }}
+            {{- end }}
+            {{- end }}
+            - name: DATABASE_SCHEMA
+              value: {{ .Values.db.schema }}
+            - name: DATABASE_PORT
+              value: {{ .Values.db.port | quote }}
+            - name: PORT
+              value: {{ .Values.api.ports.containerPort | quote }}
+            - name: AUTH_ENABLED
+              value: {{ .Values.api.oauth.enabled | quote }}
+            - name: OAUTH2_ISSUER
+              value: {{ .Values.api.oauth.issuer }}
+            - name: APP_OAUTH_CLIENT_KEY
+              value: {{ .Values.api.oauth.key }}
+            {{- if .Values.api.oauth.clientSecretSecret }}
+            - name: APP_OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.api.oauth.clientSecretSecret }}
+                  key: {{ .Values.api.oauth.clientSecretSecretKey }}
+            {{- else }}
+            - name: APP_OAUTH_CLIENT_SECRET
+              value: {{ .Values.api.oauth.secret }}
+            {{- end }}
+            - name: AUTH_2FA_ENABLED
+              value: {{ .Values.api.auth2fa.enabled | quote }}
+            - name: TOTP_ADMIN_ISSUER
+              value: {{ .Values.api.totp.admin.issuer }}
+            - name: TOTP_ADMIN_AUTH_USER
+              value: {{ .Values.api.totp.admin.user }}
+            - name: TOTP_ADMIN_AUTH_PASSWORD
+              value: {{ .Values.api.totp.admin.password }}
+            - name: TOTP_LABEL
+              value: {{ .Values.api.totp.label }}
+            - name: TOTP_ISSUER
+              value: {{ .Values.api.totp.issuer }}
+            - name: WSO2_MANAGER_SERVICE_URL
+              value: {{ .Values.api.wso2.manager.service.url }}
+            - name: WSO2_MANAGER_SERVICE_USER
+              value: {{ .Values.api.wso2.manager.service.user }}
+            - name: WSO2_MANAGER_SERVICE_PASSWORD
+              value: {{ .Values.api.wso2.manager.service.pass }}
+            - name: OAUTH_RESET_PASSWORD_ISSUER
+              value: {{ .Values.api.oauth.resetPassword.issuer }}
+            - name: OAUTH_RESET_PASSWORD_AUTH_USER
+              value: {{ .Values.api.oauth.resetPassword.user }}
+            - name: OAUTH_RESET_PASSWORD_AUTH_PASSWORD
+              value: {{ .Values.api.oauth.resetPassword.pass }}
+            {{- if .Values.api.extraTLS.certChain.enabled }}
+            - name: EXTRA_CERTIFICATE_CHAIN_FILE_NAME
+              value: /mcm_secrets/extraTLS_cert_chain.pem
+            {{- end }}
+            {{- if .Values.api.extraTLS.rootCert.enabled }}
+            - name: EXTRA_ROOT_CERT_FILE_NAME
+              value: /mcm_secrets/extraTLS_root_cert.pem
+            {{- end }}
+            {{- if .Values.api.wso2TokenIssuer.cert.enabled }}
+            - name: CERTIFICATE_FILE_NAME
+              value: /mcm_secrets/wso2_token_issuer_cert.pem
+            {{- end }}
+            {{- if .Values.api.wso2TokenIssuer.embeddedCertificate.enabled }}
+            - name: EMBEDDED_CERTIFICATE
+              value: .Values.api.wso2TokenIssuer.embeddedCertificate.stringValue
+            {{- end }}
+            {{- if .Values.api.vault.auth.k8s.enabled }}
+            - name: VAULT_AUTH_METHOD
+              value: K8S
+            - name: VAULT_K8S_TOKEN_FILE
+              value: {{ .Values.api.vault.auth.k8s.token }}
+            - name: VAULT_K8S_ROLE
+              value: {{ .Values.api.vault.auth.k8s.role }}
+            - name: VAULT_K8S_AUTH_MOUNT_POINT
+              value: {{ .Values.api.vault.auth.k8s.mountPoint }}
+            {{- else if .Values.api.vault.auth.appRole.enabled }}
+            - name: VAULT_AUTH_METHOD
+              value: APP_ROLE
+            - name: VAULT_ROLE_ID_FILE
+              value: {{ .Values.api.vault.auth.appRole.roleId }}
+            - name: VAULT_ROLE_SECRET_ID_FILE
+              value: {{ .Values.api.vault.auth.appRole.roleSecretId }}
+            {{- end }}
+            - name: VAULT_ENDPOINT
+              value: {{ .Values.api.vault.endpoint }}
+            - name: VAULT_MOUNT_PKI
+              value: {{ .Values.api.vault.mounts.pki }}
+            - name: VAULT_MOUNT_INTERMEDIATE_PKI
+              value: {{ .Values.api.vault.mounts.intermediatePki }}
+            - name: VAULT_MOUNT_KV
+              value: {{ .Values.api.vault.mounts.kv }}
+            - name: VAULT_PKI_SERVER_ROLE
+              value: {{ .Values.api.vault.pkiServerRole }}
+            - name: VAULT_PKI_CLIENT_ROLE
+              value: {{ .Values.api.vault.pkiClientRole }}
+            - name: VAULT_SIGN_EXPIRY_HOURS
+              value: {{ .Values.api.vault.signExpiryHours | quote }}
+            - name: CLIENT_CSR_PARAMETERS
+              value: /resources/tlsClientCSRParameters.json
+            - name: SERVER_CSR_PARAMETERS
+              value: /resources/tlsServerCSRParameters.json
+            - name: CA_CSR_PARAMETERS
+              value: /resources/caCSRParameters.json
+            - name: VAULT_MOUNT_DFSP_CLIENT_CERT_BUNDLE
+              value: {{ .Values.api.vault.mounts.dfspClientCertBundle | quote }}
+            - name: VAULT_MOUNT_DFSP_INT_IP_WHITELIST_BUNDLE
+              value: {{ .Values.api.vault.mounts.dfspInternalIPWhitelistBundle | quote }}
+            - name: VAULT_MOUNT_DFSP_EXT_IP_WHITELIST_BUNDLE
+              value: {{ .Values.api.vault.mounts.dfspExternalIPWhitelistBundle | quote }}
+            - name: SWITCH_FQDN
+              value: {{ .Values.api.switchFQDN | quote }}
+            - name: SWITCH_ID
+              value: {{ .Values.api.switchId | quote }}
+            - name: PRIVATE_KEY_LENGTH
+              value: {{ .Values.api.vault.keyLength | quote }}
+            - name: CERT_MANAGER_ENABLED
+              value: {{ .Values.api.certManager.enabled | quote }}
+            - name: CERT_MANAGER_SERVER_CERT_SECRET_NAME
+              value: {{ .Values.api.certManager.serverCertSecretName | quote }}
+            - name: CERT_MANAGER_SERVER_CERT_SECRET_NAMESPACE
+              value: {{ .Values.api.certManager.serverCertSecretNamespace | quote }}
+            {{- if .Values.api.ports.metricsServerPort }}
+            - name: METRICS_SERVER_PORT
+              value: {{ .Values.api.ports.metricsServerPort | quote }}
+            {{- end }}
+            - name: PING_PONG_SERVER_URL
+              value: {{ .Values.api.pingPongServerUrl | quote }}
+            {{- if .Values.api.env }}
+            {{- range $key, $val := .Values.api.env }}
+            - name: {{ $key | quote }}
+              {{- if kindIs "map" $val }}
+              {{- toYaml $val | nindent 14 }}
+              {{- else }}
+              value: {{ $val | quote }}
+              {{- end }}
+            {{- end }}
+            {{- end }}
+          {{- if .Values.api.envFrom }}
+          envFrom:
+            {{- toYaml .Values.api.envFrom | nindent 12 }}
+          {{- end }}
+          resources: {}
+          volumeMounts:
+          - name: {{ .Release.Name }}-secret-volume
+            readOnly: true
+            mountPath: /mcm_secrets
+          - name: tls-configmap
+            mountPath: /resources
+          stdin: true
+          tty: true
+      volumes:
+        - name: {{ .Release.Name }}-secret-volume
+          secret:
+            secretName: {{ .Release.Name }}-secret
+        - name: tls-configmap
+          configMap:
+            name: {{ include "connection-manager.fullname" . }}-api-tls-configmap
+            items:
+            - key: tlsClientCSRParameters.json
+              path: tlsClientCSRParameters.json
+            - key: tlsServerCSRParameters.json
+              path: tlsServerCSRParameters.json
+            - key: caCSRParameters.json
+              path: caCSRParameters.json
+      hostname: connection-manager-api
+      restartPolicy: Always
+{{- end -}}
