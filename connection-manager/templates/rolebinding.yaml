@@ -1,13 +1,18 @@
-{{- if and (not .Values.api.disabled) (.Values.api.rbac.enabled) (.Values.api.vault.auth.k8s.enabled) -}}
+{{- if and (not .Values.api.disabled) (.Values.api.rbac.enabled) -}}
 
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
-  name: {{ include "connection-manager.fullname" . }}-api-vault
+  name: {{ include "connection-manager.fullname" . }}-api
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/component: api
+{{ include "connection-manager.labels" . | indent 4 }}
+
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: system:auth-delegator
+  kind: Role
+  name: {{ include "connection-manager.fullname" . }}-api
 subjects:
   - kind: ServiceAccount
     {{- if .Values.api.serviceAccount.serviceAccountNameOverride }}
