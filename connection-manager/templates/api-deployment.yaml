@@ -26,10 +26,21 @@ spec:
       {{- else }}
       serviceAccountName: {{ include "connection-manager.fullname" . }}-api
       {{- end }}
+      automountServiceAccountToken: {{ .Values.api.vault.auth.k8s.enabled }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
       containers:
         - name: connection-manager-api
           securityContext:
             readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1001
+            capabilities:
+              drop:
+                - ALL
           {{- with .Values.api }}
           image: "{{ .image.name }}:{{ .image.version }}"
           ports:

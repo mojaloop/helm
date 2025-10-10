@@ -17,11 +17,22 @@ spec:
     metadata:
       labels: *labels
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
       containers:
         - name: connection-manager-ui
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           securityContext:
             readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1001
+            capabilities:
+              drop:
+                - ALL
           env:
             - name: API_BASE_URL
               value: {{ .Values.api.url | quote }}
