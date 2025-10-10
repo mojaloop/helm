@@ -9,45 +9,45 @@ api:
     nodePort: 31057
     metricsServerPort: 9100
   # env:
-  #   key: values 
+  #   key: values
   pingPongServerUrl: http://ml-participant-connection-test-svc:80
-  oauth:
-    enabled: "FALSE"
-    issuer: https://localhost/oauth2/token
-    key: mysecretkey
-    secret: changeme
-    resetPassword:
-      issuer: https://localhost/scim2/Users
-      user: myuser
-      pass: changeme
+
+  # Keycloak integration for authentication and user management
+  keycloak:
+    enabled: false
+    baseUrl: http://localhost:8080
+    discoveryUrl: http://localhost:8080/realms/dfsps/.well-known/openid-configuration
+    adminClientId: connection-manager-api-service
+    adminClientSecret: changeme
+    # adminClientSecretName: keycloak-secret
+    # adminClientSecretKey: secret
+    dfspsRealm: dfsps
+    autoCreateAccounts: true
+
+  # Keto authorization integration
+  keto:
+    enabled: false
+    writeUrl: http://localhost:4467
+
+  # OpenID Connect configuration
+  openid:
+    enabled: false
+    clientId: connection-manager-auth-client
+    clientSecret: changeme
+    # clientSecretName: oidc-secret
+    # clientSecretKey: secret
+
+  # MCM UI URL for redirects and CORS
+  clientUrl: http://localhost:3000/
+
+  # API URL for ingress
   url: https://localhost
-  auth2fa:
-    enabled: "FALSE"
-  totp:
-    admin:
-      issuer: https://localhost/totp
-      user: myuser
-      password: changeme
-    label: MCM
-    issuer: MCM
-  wso2:
-    manager:
-      service:
-        url: https://localhost:9443/services/RemoteUserStoreManagerService.RemoteUserStoreManagerServiceHttpsSoap12Endpoint
-        user: myuser
-        pass: changeme
+
   extraTLS:
     certChain:
       enabled: 0
       stringValue: this_is_a_default
     rootCert:
-      enabled: 0
-      stringValue: this_is_a_default
-  wso2TokenIssuer:
-    cert:
-      enabled: 0
-      stringValue: this_is_a_default
-    embeddedCertificate:
       enabled: 0
       stringValue: this_is_a_default
   switchFQDN: switch.example.com
@@ -213,10 +213,3 @@ tests:
     env:
       # MCM API URL e.g. http(s)://<host>:<port>/api
       APP_ENDPOINT: 'http://{{ include "connection-manager.fullname" . }}-api:3001/api'
-      # MCM OAuth Client Key
-      APP_OAUTH_CLIENT_KEY: '{{ if eq (.Values.api.oauth.enabled | toString | lower) "true" }}{{ .Values.api.oauth.key }}{{ end }}'
-      # MCM OAuth Client Secret
-      APP_OAUTH_CLIENT_SECRET: '{{ if eq (.Values.api.oauth.enabled | toString | lower) "true" }}{{ .Values.api.oauth.secret }}{{ end }}'
-      # OAuth Issuer URL e.g. http(s)://<host>:<port>/oauth2/token
-      # Note: `client_credentials` grant_type must be supported
-      OAUTH2_ISSUER: '{{ if eq (.Values.api.oauth.enabled | toString | lower) "true" }}{{ .Values.api.oauth.issuer }}{{ end }}'

@@ -73,46 +73,6 @@ spec:
               value: {{ .Values.db.port | quote }}
             - name: PORT
               value: {{ .Values.api.ports.containerPort | quote }}
-            - name: AUTH_ENABLED
-              value: {{ .Values.api.oauth.enabled | quote }}
-            - name: OAUTH2_ISSUER
-              value: {{ .Values.api.oauth.issuer }}
-            - name: APP_OAUTH_CLIENT_KEY
-              value: {{ .Values.api.oauth.key }}
-            {{- if .Values.api.oauth.clientSecretSecret }}
-            - name: APP_OAUTH_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.api.oauth.clientSecretSecret }}
-                  key: {{ .Values.api.oauth.clientSecretSecretKey }}
-            {{- else }}
-            - name: APP_OAUTH_CLIENT_SECRET
-              value: {{ .Values.api.oauth.secret }}
-            {{- end }}
-            - name: AUTH_2FA_ENABLED
-              value: {{ .Values.api.auth2fa.enabled | quote }}
-            - name: TOTP_ADMIN_ISSUER
-              value: {{ .Values.api.totp.admin.issuer }}
-            - name: TOTP_ADMIN_AUTH_USER
-              value: {{ .Values.api.totp.admin.user }}
-            - name: TOTP_ADMIN_AUTH_PASSWORD
-              value: {{ .Values.api.totp.admin.password }}
-            - name: TOTP_LABEL
-              value: {{ .Values.api.totp.label }}
-            - name: TOTP_ISSUER
-              value: {{ .Values.api.totp.issuer }}
-            - name: WSO2_MANAGER_SERVICE_URL
-              value: {{ .Values.api.wso2.manager.service.url }}
-            - name: WSO2_MANAGER_SERVICE_USER
-              value: {{ .Values.api.wso2.manager.service.user }}
-            - name: WSO2_MANAGER_SERVICE_PASSWORD
-              value: {{ .Values.api.wso2.manager.service.pass }}
-            - name: OAUTH_RESET_PASSWORD_ISSUER
-              value: {{ .Values.api.oauth.resetPassword.issuer }}
-            - name: OAUTH_RESET_PASSWORD_AUTH_USER
-              value: {{ .Values.api.oauth.resetPassword.user }}
-            - name: OAUTH_RESET_PASSWORD_AUTH_PASSWORD
-              value: {{ .Values.api.oauth.resetPassword.pass }}
             {{- if .Values.api.extraTLS.certChain.enabled }}
             - name: EXTRA_CERTIFICATE_CHAIN_FILE_NAME
               value: /mcm_secrets/extraTLS_cert_chain.pem
@@ -120,14 +80,6 @@ spec:
             {{- if .Values.api.extraTLS.rootCert.enabled }}
             - name: EXTRA_ROOT_CERT_FILE_NAME
               value: /mcm_secrets/extraTLS_root_cert.pem
-            {{- end }}
-            {{- if .Values.api.wso2TokenIssuer.cert.enabled }}
-            - name: CERTIFICATE_FILE_NAME
-              value: /mcm_secrets/wso2_token_issuer_cert.pem
-            {{- end }}
-            {{- if .Values.api.wso2TokenIssuer.embeddedCertificate.enabled }}
-            - name: EMBEDDED_CERTIFICATE
-              value: .Values.api.wso2TokenIssuer.embeddedCertificate.stringValue
             {{- end }}
             {{- if .Values.api.vault.auth.k8s.enabled }}
             - name: VAULT_AUTH_METHOD
@@ -190,6 +142,52 @@ spec:
             {{- end }}
             - name: PING_PONG_SERVER_URL
               value: {{ .Values.api.pingPongServerUrl | quote }}
+            {{- if .Values.api.keycloak.enabled }}
+            - name: KEYCLOAK_ENABLED
+              value: "true"
+            - name: KEYCLOAK_BASE_URL
+              value: {{ .Values.api.keycloak.baseUrl | quote }}
+            - name: KEYCLOAK_DISCOVERY_URL
+              value: {{ .Values.api.keycloak.discoveryUrl | quote }}
+            - name: KEYCLOAK_ADMIN_CLIENT_ID
+              value: {{ .Values.api.keycloak.adminClientId | quote }}
+            {{- if .Values.api.keycloak.adminClientSecretName }}
+            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.api.keycloak.adminClientSecretName }}
+                  key: {{ .Values.api.keycloak.adminClientSecretKey }}
+            {{- else }}
+            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
+              value: {{ .Values.api.keycloak.adminClientSecret | quote }}
+            {{- end }}
+            - name: KEYCLOAK_DFSPS_REALM
+              value: {{ .Values.api.keycloak.dfspsRealm | quote }}
+            - name: KEYCLOAK_AUTO_CREATE_ACCOUNTS
+              value: {{ .Values.api.keycloak.autoCreateAccounts | quote }}
+            {{- end }}
+            {{- if .Values.api.keto.enabled }}
+            - name: ENABLE_KETO
+              value: "true"
+            - name: KETO_WRITE_URL
+              value: {{ .Values.api.keto.writeUrl | quote }}
+            {{- end }}
+            {{- if .Values.api.openid.enabled }}
+            - name: OPENID_CLIENT_ID
+              value: {{ .Values.api.openid.clientId | quote }}
+            {{- if .Values.api.openid.clientSecretName }}
+            - name: OPENID_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.api.openid.clientSecretName }}
+                  key: {{ .Values.api.openid.clientSecretKey }}
+            {{- else }}
+            - name: OPENID_CLIENT_SECRET
+              value: {{ .Values.api.openid.clientSecret | quote }}
+            {{- end }}
+            {{- end }}
+            - name: CLIENT_URL
+              value: {{ .Values.api.clientUrl | quote }}
             {{- if .Values.api.env }}
             {{- range $key, $val := .Values.api.env }}
             - name: {{ $key | quote }}
