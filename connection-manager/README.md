@@ -78,9 +78,9 @@ The following table lists further configuration parameters of the Connection Man
 | `ui.disabled` | `false` | If set to `true` this disables the UI frontend |
 | `api.disabled` | `false` | If set to `true` this disables the API backend |
 | `imagePullPolicy` | `IfNotPresent` | Container image pull policy |
-| `ui.image.name` | `ghcr.io/pm4ml/connection-manager-ui` | Name of UI frontend Docker Image |
+| `ui.image.name` | `mojaloop/connection-manager-ui` | Name of UI frontend Docker Image |
 | `ui.image.version` | `v1.10.0` | The version of the UI frontend Docker Image |
-| `api.image.name` | `docker.io/infitx/connection-manager-api` | Name of API backend Docker Image |
+| `api.image.name` | `mojaloop/connection-manager-api` | Name of API backend Docker Image |
 | `api.image.version` | `v3.0.2` | The version of the API backend Docker Image |
 | `ui.ports.containerPort` | `8080` | Port the UI frontend runs on |
 | `ui.ports.nodePort` | `31627` | NodePort used by Kubernetes |
