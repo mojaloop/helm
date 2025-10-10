@@ -2,12 +2,12 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{.Release.Name}}-migration-job
+  name: {{ .Release.Name }}-migration-job
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
-    helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-delete-policy": {{ .Values.migrations.deletePolicy }}
@@ -25,11 +25,30 @@ spec:
       {{- else }}
       serviceAccountName: {{ include "connection-manager.fullname" . }}-api
       {{- end }}
+      automountServiceAccountToken: {{ .Values.api.vault.auth.k8s.enabled }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
       initContainers:
       - name: wait-for-db
         image: busybox:1.36
         securityContext:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1001
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          limits:
+            memory: 64Mi
+            ephemeral-storage: 50Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
+            ephemeral-storage: 10Mi
         command:
         - /bin/sh
         - -c
@@ -47,9 +66,23 @@ spec:
       - name: db-migration
         securityContext:
           readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1001
+          capabilities:
+            drop:
+              - ALL
           {{- with .Values.api }}
         image: "{{ .image.name }}:{{ .image.version }}"
           {{- end }}
+        resources:
+          limits:
+            memory: 512Mi
+            ephemeral-storage: 1Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+            ephemeral-storage: 100Mi
         command:
         - /usr/local/bin/npm
         args:
