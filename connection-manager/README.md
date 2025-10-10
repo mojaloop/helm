@@ -14,53 +14,79 @@ One of the largest challenges that faces any DFSP is connecting to the Hub, then
 
 The following table lists the parameters you are expected to edit for your deployment of the Connection Manager.
 
+### Database Configuration
+
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `db.host` | `localhost` | Hostname of database |
-| `db.user` | `root` | Username for authenticating to database |
-| `db.password` | `changeme` | Password for `db.user` |
-| `db.schema` | `tsp` | Name of database table |
+| `db.user` | `mcm` | Username for authenticating to database |
+| `db.password` | `changeme` | Password for `db.user` (use `db.passwordSecret` for production) |
+| `db.passwordSecret` | - | Secret name containing database password |
+| `db.passwordSecretKey` | - | Key in secret containing database password |
+| `db.schema` | `mcm` | Name of database schema |
 | `db.port` | `3306` | TCP port to connect to database |
-| `api.url` | `https://localhost` | Base URL used by frontend to connect to the API server |
+| `db.sslEnabled` | `false` | Enable SSL for database connection |
 
-If `api.oauth.enabled` is set to `"TRUE"` then the following fields must also be configured.
-And also `ui.oauth.enabled` must be set to `"TRUE"`
+### API Configuration
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `api.oauth.issuer` | `https://localhost/oauth2/token` | OAuth2 Token issuer |
-| `api.oauth.key` | `mysecretkey` | OAuth2 Client Key |
-| `api.oauth.secret` | `mysecret` | OAuth2 Client Secret |
-| `api.oauth.resetPassword.issuer` | `https://localhost/scim2/Users` | OAuth2 Reset password issuer |
-| `api.oauth.resetPassword.user` | `myuser` | OAuth2 Reset password operation user |
-| `api.oauth.resetPassword.pass` | `changeme` | OAuth2 Reset password operation password |
+| `api.url` | `https://localhost` | Base URL for API ingress |
+| `api.clientUrl` | `http://localhost:3000/` | MCM UI URL for CORS and redirects |
+| `api.switchFQDN` | `switch.example.com` | FQDN of the Mojaloop switch |
+| `api.switchId` | `dummySwitchId` | Identifier for the switch |
 
-To configure an MCM environment declaratively, rather than by calling the API after server start,
-configure the following fields:
+### Authentication Configuration (Keycloak)
+
+To enable Keycloak authentication, set `api.keycloak.enabled` to `true` and configure:
 
 | Parameter | Default | Description |
-| `api.env.name` | `null` | If specified, an environment with this name will be created before server start |
-| `api.env.{cn,c,l,o,ou,st}` | `null` | X509 attributes for the environment. All optional. |
+|-----------|---------|-------------|
+| `api.keycloak.enabled` | `false` | Enable Keycloak authentication |
+| `api.keycloak.baseUrl` | `http://localhost:8080` | Keycloak server base URL |
+| `api.keycloak.discoveryUrl` | - | OIDC discovery URL |
+| `api.keycloak.adminClientId` | `connection-manager-api-service` | Keycloak admin client ID |
+| `api.keycloak.adminClientSecret` | `changeme` | Admin client secret (use secret reference for production) |
+| `api.keycloak.dfspsRealm` | `dfsps` | Keycloak realm for DFSPs |
+| `api.keycloak.autoCreateAccounts` | `true` | Auto-create user accounts |
+
+### Authorization Configuration (Keto)
+
+To enable Keto authorization, set `api.keto.enabled` to `true` and configure:
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `api.keto.enabled` | `false` | Enable Keto authorization |
+| `api.keto.writeUrl` | `http://localhost:4467` | Keto write API URL |
+
+### OpenID Connect Configuration
+
+To enable OpenID Connect, set `api.openid.enabled` to `true` and configure:
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `api.openid.enabled` | `false` | Enable OpenID Connect |
+| `api.openid.clientId` | `connection-manager-auth-client` | OIDC client ID |
+| `api.openid.clientSecret` | `changeme` | OIDC client secret (use secret reference for production) |
 
 ## Developer/Debugging Configuration
 
-The following table lists further configuration parameters of the Connection Manager. These parameters should __not__ be edited during normal operations. They are provided to aid developement and debugging only.
+The following table lists further configuration parameters of the Connection Manager. These parameters should __not__ be edited during normal operations. They are provided to aid development and debugging only.
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `ui.disabled` | Not set | If set to `true` this disabled the UI frontend |
-| `api.disabled` | Not set | If set to `true` this disables the API backend |
-| `api.auth_enabled` | `"FALSE"` | Enables authentication to the API.  Set to `"TRUE"` to enable. __MUST__ be a string. Must have the same value of `ui.auth_enabled` __WARNING__ Disabling authentication increases the chance of a success attack on your deployment. |
-| `ui.auth_enabled` | `"FALSE"` | Enables authentication to the UI. Must have the same value of `api.auth_enabled` It cannot be one enabled and the other don't |
-| `imagePullPolicy` | `ifNotPresent` | Container pull policy |
-| `ui.image.name` | foo | name of UI frontend Docker Image |
-| `ui.image.version` | Chart version specific | The version of the UI frontend Docker Image |
-| `api.image.name` | foo | Name of API backend Docker Image |
-| `api.image.version` | Chart version specific | The version of the API bakcend Docker Image |
-| `ui.ports.containerPort` | `8080` | port the UI frontend runs on |
-| `ui.ports.nodePort` | foo | NodePort used by Kubernetes |
-| `api.ports.containerPort` | `8080` | port the API backend runs on |
-| `api.ports.nodePort` | foo | NodePort used by Kubernetes |
+| `ui.disabled` | `false` | If set to `true` this disables the UI frontend |
+| `api.disabled` | `false` | If set to `true` this disables the API backend |
+| `imagePullPolicy` | `IfNotPresent` | Container image pull policy |
+| `ui.image.name` | `ghcr.io/pm4ml/connection-manager-ui` | Name of UI frontend Docker Image |
+| `ui.image.version` | `1.8.4` | The version of the UI frontend Docker Image |
+| `api.image.name` | `docker.io/infitx/connection-manager-api` | Name of API backend Docker Image |
+| `api.image.version` | `v2.14.0` | The version of the API backend Docker Image |
+| `ui.ports.containerPort` | `8080` | Port the UI frontend runs on |
+| `ui.ports.nodePort` | `31627` | NodePort used by Kubernetes |
+| `api.ports.containerPort` | `3001` | Port the API backend runs on |
+| `api.ports.nodePort` | `31057` | NodePort used by Kubernetes |
+| `api.ports.metricsServerPort` | `9100` | Port for metrics server |
 
 ## Updating this Chart
 
