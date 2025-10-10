@@ -1,0 +1,22 @@
+{{- if not .Values.api.disabled -}}
+
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "connection-manager.fullname" . }}-api
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/component: api
+{{ include "connection-manager.labels" . | indent 4 }}
+
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+
+{{- end -}}

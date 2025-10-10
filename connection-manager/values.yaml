@@ -1,0 +1,226 @@
+api:
+  disabled: false
+  replicaCount: 1
+  image:
+    name: mojaloop/connection-manager-api
+    version: v3.0.2
+  ports:
+    containerPort: 3001
+    nodePort: 31057
+    metricsServerPort: 9100
+  # env:
+  #   key: values
+  pingPongServerUrl: https://ml-participant-connection-test-svc:80
+
+  # Keycloak integration for authentication and user management
+  keycloak:
+    enabled: false
+    baseUrl: http://localhost:8080
+    discoveryUrl: http://localhost:8080/realms/dfsps/.well-known/openid-configuration
+    adminClientId: connection-manager-api-service
+    adminClientSecret: changeme
+    # adminClientSecretName: keycloak-secret
+    # adminClientSecretKey: secret
+    dfspsRealm: dfsps
+    autoCreateAccounts: true
+
+  # Keto authorization integration
+  keto:
+    enabled: false
+    writeUrl: http://localhost:4467
+
+  # OpenID Connect configuration
+  openid:
+    enabled: false
+    clientId: connection-manager-auth-client
+    clientSecret: changeme
+    # clientSecretName: oidc-secret
+    # clientSecretKey: secret
+
+  # MCM UI URL for redirects and CORS
+  clientUrl: http://localhost:3000/
+
+  # API URL for ingress
+  url: https://localhost
+
+  extraTLS:
+    certChain:
+      enabled: 0
+      stringValue: this_is_a_default
+    rootCert:
+      enabled: 0
+      stringValue: this_is_a_default
+  switchFQDN: switch.example.com
+  switchId: dummySwitchId
+  certManager:
+    enabled: false
+    serverCertSecretName: dummy
+    serverCertSecretNamespace: dummy
+  vault:
+    auth:
+      k8s:
+        enabled: true
+        token: /var/run/secrets/kubernetes.io/serviceaccount/token
+        mountPoint: kubernetes
+        role: demo
+      appRole:
+        enabled: false
+        roleId: /vault/role-id
+        roleSecretId: /vault/role-secret-id
+    endpoint: https://vault:8200
+    mounts:
+      pki: pki
+      intermediatePki: pki_int
+      kv: secrets
+      dfspClientCertBundle: secret/onboarding_pm4mls
+      dfspInternalIPWhitelistBundle: secret/whitelist_pm4mls
+      dfspExternalIPWhitelistBundle: secret/whitelist_fsps
+    pkiServerRole: server-role
+    pkiClientRole: client-role
+    signExpiryHours: 43800
+    keyLength: 2048
+  serviceAccount:
+    name: connection-manager-api
+  rbac:
+    enabled: true
+  annotations: {}
+  env: {}
+  envFrom: []
+  resources:
+    limits:
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+ui:
+  disabled: false
+  checkSessionUrl: ''
+  loginUrl: ''
+  loginProvider: ''
+  logoutUrl: ''
+  image:
+    name: mojaloop/connection-manager-ui
+    version: v1.10.0
+  ports:
+    containerPort: 8080
+    nodePort: 31627
+  oauth:
+    enabled: false
+    hubOidcProviderUrl: https://changeme
+    clientId: mcm-portal
+    clientSecret: changeme
+#    clientSecretName: changeme
+#    clientSecretKey: changeme
+  env: {}
+  envFrom: []
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+migrations:
+  enabled: true
+  deletePolicy: hook-succeeded
+  script: migrate-and-seed
+
+db:
+  user: mcm
+  password: changeme
+  # To use a secret for the password, set the following values
+  # passwordSecret: ''
+  # passwordSecretKey: ''
+  host: localhost
+  port: 3306
+  schema: mcm
+  dfspSeed: ''
+  ## SSL Configuration
+  sslEnabled: false
+  sslVerify: false
+  ### Configure this if you want to pass a CA certificate of the server.
+  # sslCaSecret: mysql-tls-client-creds
+  # sslCaSecretKey: cacert.pem
+
+ingress:
+  enabled: true
+  host: localhost
+  annotations: {}
+  tls: []
+  pathType: ImplementationSpecific
+  className: "nginx"
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+# development friendly variables
+imagePullPolicy: IfNotPresent
+
+config:
+  tlsClientCSRParametersData: |-
+    {
+      "subject": {
+        "CN": "test_client_mcm",
+        "E": "mcm@test.com",
+        "O": "test",
+        "OU": "test",
+        "C": "US",
+        "ST": "test",
+        "L": "test"
+      },
+      "extensions": {
+        "subjectAltName": {
+          "dns": [
+          ],
+          "ips": [
+          ]
+        }
+      }
+    }
+  tlsServerCSRParametersData: |-
+    {
+      "subject": {
+        "CN": "test_client_mcm",
+        "E": "mcm@test.com",
+        "O": "test",
+        "OU": "test",
+        "C": "US",
+        "ST": "test",
+        "L": "test"
+      },
+      "extensions": {
+        "subjectAltName": {
+          "dns": [
+          ],
+          "ips": [
+          ]
+        }
+      }
+    }
+  caCSRParametersData: |-
+    {
+      "CN": "CA",
+      "E": "ca@test.com",
+      "O": "test",
+      "OU": "test",
+      "C": "US",
+      "ST": "test",
+      "L": "test"
+    }
+
+tests:
+  api:
+    enabled: false
+    weight: -5
+    deletePolicy: before-hook-creation
+    script: "https://raw.githubusercontent.com/mojaloop/connection-manager-api/{{ .Values.api.image.version }}/scripts/run-functional-tests.sh"
+    git:
+      url: https://github.com/mojaloop/connection-manager-api.git
+      tag: "{{ .Values.api.image.version }}"
+    targetDirectory: /tmp/tests
+    nvm:
+      version: v0.39.1
+    # Configuration Ref: https://github.com/mojaloop/connection-manager-api/tree/master/functional-tests#configuration
+    env:
+      # MCM API URL e.g. http(s)://<host>:<port>/api
+      APP_ENDPOINT: 'http://{{ include "connection-manager.fullname" . }}-api:3001/api'

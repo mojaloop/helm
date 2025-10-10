@@ -1,0 +1,20 @@
+{{- if not .Values.api.disabled -}}
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "connection-manager.fullname" . }}-api
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/component: api
+{{ include "connection-manager.labels" . | indent 4 }}
+
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "connection-manager.fullname" . }}-api
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.api.serviceAccount.name }}
+    namespace: {{ .Release.Namespace }}
+{{- end -}}

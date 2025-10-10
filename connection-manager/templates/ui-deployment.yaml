@@ -1,0 +1,92 @@
+{{- if not .Values.ui.disabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "connection-manager.fullname" . }}-ui
+  labels:
+    app.kubernetes.io/component: ui
+{{ include "connection-manager.labels" . | indent 4 }}
+spec:
+  replicas: 1
+  strategy: {}
+  selector:
+    matchLabels: &labels
+      app.kubernetes.io/name: {{ include "connection-manager.fullname" . }}-ui
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels: *labels
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+        - name: connection-manager-ui
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1001
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: API_BASE_URL
+              value: {{ .Values.api.url | quote }}
+            - name: CHECK_SESSION_URL
+              value: {{ .Values.ui.checkSessionUrl | quote }}
+            - name: LOGIN_URL
+              value: {{ .Values.ui.loginUrl | quote }}
+            - name: LOGIN_PROVIDER
+              value: {{ .Values.ui.loginProvider | quote }}
+            - name: LOGOUT_URL
+              value: {{ .Values.ui.logoutUrl | quote }}
+            {{- with .Values.ui.oauth }}
+            - name: AUTH_ENABLED
+              value: {{ .enabled | quote }}
+            - name: UI_OIDC_LOGIN_REDIRECT_URL
+              value: "{{ .hubOidcProviderUrl }}/auth"
+            - name: OIDC_TOKEN_PROVIDER_URL
+              value: "{{ .hubOidcProviderUrl }}/token"
+            - name: OIDC_CLIENT_ID
+              value: {{ .clientId | quote }}
+            - name: OIDC_CLIENT_SECRET
+              {{- if .clientSecretName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .clientSecretName }}
+                  key: {{ .clientSecretKey }}
+              {{- else }}
+              value: {{ .clientSecret }}
+              {{- end }}
+            {{- end }}
+            {{- if .Values.ui.env }}
+            {{- range $key, $val := .Values.ui.env }}
+            - name: {{ $key | quote }}
+              {{- if kindIs "map" $val }}
+              {{- toYaml $val | nindent 14 }}
+              {{- else }}
+              value: {{ $val | quote }}
+              {{- end }}
+            {{- end }}
+            {{- end }}
+          {{- if .Values.ui.envFrom }}
+          envFrom:
+            {{- toYaml .Values.ui.envFrom | nindent 12 }}
+          {{- end }}
+          {{- with .Values.ui }}
+          image: "{{ .image.name }}:{{ .image.version }}"
+          ports:
+            - containerPort: {{ .ports.containerPort }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.ui.resources | nindent 12 }}
+          stdin: true
+          tty: true
+      hostname: connection-manager-ui
+      restartPolicy: Always
+status: {}
+{{- end -}}
