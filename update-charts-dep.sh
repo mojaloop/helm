@@ -56,6 +56,7 @@ declare -a charts=(
     merchant-registry-svc
     inter-scheme-proxy-adapter
     merchant-registry-svc
+    connection-manager
     mojaloop
 )
 

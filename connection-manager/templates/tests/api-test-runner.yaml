@@ -1,0 +1,47 @@
+{{- if .Values.tests.api.enabled -}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "connection-manager.fullname" . }}-api-test
+  labels:
+    app.kubernetes.io/component: test-api
+{{ include "connection-manager.labels" . | indent 4 }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: {{ .Values.tests.api.weight | quote }}
+    helm.sh/hook-delete-policy: {{ .Values.tests.api.deletePolicy }}
+spec:
+  restartPolicy: Never
+  containers:
+    - name: test-runner
+      image: ubuntu
+      command:
+        - bash
+        - -c
+        - |
+          set -e
+          echo "----- Install dependencies -----"
+          apt-get update
+          apt-get -y install curl git
+          curl -o- $NVM_SCRIPT | bash
+          echo "----- Downloading $TEST_SCRIPT -----"
+          curl $TEST_SCRIPT --output /tmp/script.sh
+          echo "----- Running $TEST_SCRIPT -----"
+          bash -i /tmp/script.sh
+          set +e
+      env:
+        - name: NVM_SCRIPT
+          value: {{ printf "https://raw.githubusercontent.com/nvm-sh/nvm/%s/install.sh"  .Values.tests.api.nvm.version | quote }}
+        - name: TEST_SCRIPT
+          value: {{ tpl .Values.tests.api.script . | quote }}
+        - name: GIT_URL
+          value: {{ tpl .Values.tests.api.git.url . | quote }}
+        - name: GIT_TAG
+          value: {{ tpl .Values.tests.api.git.tag . | quote }}
+        - name: TARGET_DIR
+          value: {{ tpl .Values.tests.api.targetDirectory . | quote }}
+        {{- range $name, $value := .Values.tests.api.env }}
+        - name: {{ $name }}
+          value: {{ tpl $value $ | quote }}
+        {{- end }}
+{{- end }}

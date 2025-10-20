@@ -1,0 +1,118 @@
+{{- if .Values.migrations.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-migration-job
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": {{ .Values.migrations.deletePolicy }}
+spec:
+  template:
+    metadata:
+      name: "{{ .Release.Name }}-migration-job"
+      labels:
+        app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    spec:
+      serviceAccountName: {{ .Values.api.serviceAccount.name }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      initContainers:
+      - name: wait-for-db
+        image: busybox:1.36
+        securityContext:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1001
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          limits:
+            memory: 64Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Waiting for DNS resolution of $DATABASE_HOST..."
+          until nslookup "$DATABASE_HOST"; do
+            echo "DB host $DATABASE_HOST not yet resolvable, retrying in 5s..."
+            sleep 5
+          done
+          echo "DB host $DATABASE_HOST resolved"
+        env:
+        - name: DATABASE_HOST
+          value: {{ .Values.db.host }}
+      containers:
+      - name: db-migration
+        securityContext:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1001
+          capabilities:
+            drop:
+              - ALL
+          {{- with .Values.api }}
+        image: "{{ .image.name }}:{{ .image.version }}"
+          {{- end }}
+        resources:
+          limits:
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        command:
+        - /usr/local/bin/npm
+        args:
+        - run
+        - {{ default "migrate-and-seed" .Values.migrations.script }}
+        env:
+        - name: NPM_CONFIG_UPDATE_NOTIFIER
+          value: 'false'
+        - name: DATABASE_HOST
+          value: {{ .Values.db.host }}
+        - name: DATABASE_USER
+          value: {{ .Values.db.user }}
+        {{- if .Values.db.passwordSecret }}
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.db.passwordSecret }}
+              key: {{ .Values.db.passwordSecretKey }}
+        {{- else }}
+        - name: DATABASE_PASSWORD
+          value: {{ .Values.db.password }}
+        {{- end }}
+        {{- if .Values.db.sslEnabled }}
+        - name: DATABASE_SSL_ENABLED
+          value: 'true'
+        - name: DATABASE_SSL_VERIFY
+          value: {{ .Values.db.sslVerify | quote }}
+        {{- if .Values.db.sslCaSecret }}
+        - name: DATABASE_SSL_CA
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.db.sslCaSecret }}
+              key: {{ .Values.db.sslCaSecretKey }}
+        {{- end }}
+        {{- end }}
+        - name: DATABASE_SCHEMA
+          value: {{ .Values.db.schema }}
+        - name: DATABASE_PORT
+          value: {{ .Values.db.port | quote }}
+      restartPolicy: OnFailure
+  backoffLimit: 20
+{{- end }}
