@@ -37,16 +37,33 @@ done
 # This is a temporary workaround to revert the changes
 # git diff --ignore-blank-lines --no-color | git apply --cached --ignore-whitespace && git checkout -- . && git reset
 
-# Capture and show git apply output if it fails
-if ! output=$(git diff --ignore-blank-lines --no-color | \
-              git apply --cached --ignore-whitespace 2>&1); then
-  echo "git apply failed with exit code $?."
-  echo "---- git apply output ----"
-  echo "$output"
-  echo "---------------------------"
-  exit 1  # Explicitly fail the job
+diff_output=$(git diff --ignore-blank-lines --no-color)
+
+if [[ -z "$diff_output" ]]; then
+  echo "✅ No diff to apply — nothing to normalize."
+else
+  # Try applying the patch, capture output
+  if ! apply_output=$(echo "$diff_output" | \
+        git apply --cached --ignore-whitespace --ignore-space-change 2>&1); then
+    echo "❌ git apply failed with exit code $?."
+    echo "---- git apply output ----"
+    echo "$apply_output"
+    echo "---------------------------"
+    exit 1
+  else
+    echo "✅ Patch applied cleanly to index."
+  fi
 fi
 
-# Only runs if patch succeeded
+# Clean working directory and index (only if patch succeeded)
 git restore --staged .
 git restore .
+
+# Optional: show remaining differences, if any
+remaining=$(git status --porcelain)
+if [[ -n "$remaining" ]]; then
+  echo "⚠️  Warning: files still differ after cleanup:"
+  echo "$remaining"
+else
+  echo "✨ Working tree clean after normalization."
+fi
