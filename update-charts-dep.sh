@@ -8,12 +8,11 @@ set -eux
 
 trap 'echo "Dep update failed...exiting. Please fix me!"' ERR
 
-echo "Removing old charts..."
-find ./ -name "charts"| xargs rm -Rf
-find ./ -name "tmpcharts"| xargs rm -Rf
+# echo "Removing old charts..."
+# find ./ -name "charts"| xargs rm -Rf
+# find ./ -name "tmpcharts"| xargs rm -Rf
 
 declare -a charts=(
-    example-mojaloop-backend
     ml-operator
     simulator
     ml-testing-toolkit
@@ -59,6 +58,17 @@ declare -a charts=(
     connection-manager
     mojaloop
 )
+
+# Clean up charts folders only for those listed
+for chart in "${charts[@]}"; do
+    if [ -d "$chart/charts" ]; then
+        echo "Removing old dependencies for $chart..."
+        rm -rf "$chart/charts"
+    fi
+    if [ -d "$chart/tmpcharts" ]; then
+        rm -rf "$chart/tmpcharts"
+    fi
+done
 
 echo "Updating all Charts..."
 for chart in "${charts[@]}"
