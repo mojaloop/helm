@@ -56,14 +56,6 @@ else
 fi
 
 # Clean working directory and index (only if patch succeeded)
-git restore --staged .
-git restore .
 
-# Optional: show remaining differences, if any
-remaining=$(git status --porcelain)
-if [[ -n "$remaining" ]]; then
-  echo "⚠️  Warning: files still differ after cleanup:"
-  echo "$remaining"
-else
-  echo "✨ Working tree clean after normalization."
-fi
+git checkout -- .
+git reset
