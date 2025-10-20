@@ -40,18 +40,18 @@ done
 diff_output=$(git diff --ignore-blank-lines --no-color)
 
 if [[ -z "$diff_output" ]]; then
-  echo "✅ No diff to apply — nothing to normalize."
+  echo "No diff to apply — nothing to normalize."
 else
   # Try applying the patch, capture output
   if ! apply_output=$(echo "$diff_output" | \
         git apply --cached --ignore-whitespace --ignore-space-change 2>&1); then
-    echo "❌ git apply failed with exit code $?."
+    echo "git apply failed with exit code $?."
     echo "---- git apply output ----"
     echo "$apply_output"
     echo "---------------------------"
     exit 1
   else
-    echo "✅ Patch applied cleanly to index."
+    echo "Patch applied cleanly to index."
   fi
 fi
 
