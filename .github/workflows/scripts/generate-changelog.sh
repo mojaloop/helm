@@ -87,6 +87,9 @@ find . -type d -name '[!.]*' -exec test -e "{}/Chart.yaml" ';' -print | while re
 done
 
 # Checkout out last release tag and extract repository name and tag in its all values.yaml files
+echo "Running git status to see current state"
+git status
+echo "Running git stash to save current changes..."
 git stash
 git switch --detach $last_release_tag
 find . -type d -name '[!.]*' -exec test -e "{}/Chart.yaml" ';' -print | while read chart_dir; do
@@ -98,7 +101,23 @@ done
 
 # Checkout back to current branch
 git checkout $current_branch
-git stash pop
+# git stash pop
+
+echo "🔄 Restoring stashed changes..."
+if ! output=$(git stash pop 2>&1); then
+  echo "❌ git stash pop failed with exit code $?."
+  echo "---- git stash pop output ----"
+  echo "$output"
+  echo "------------------------------"
+  # You can choose to fail or continue depending on your workflow:
+  exit 1
+else
+  echo "✅ git stash pop succeeded."
+  echo "$output"
+fi
+
+echo "Running git status to see current state"
+git status
 
 # accept all stashed changes
 # git stash list | awk -F: '{print $1}' | xargs -n 1 git stash apply
