@@ -27,13 +27,13 @@ updatecli apply --config .github/workflows/manifests/first-pass
 
 pass_count=0
 
-# # Repeatedly run the second-pass manifests until no changes are detected
-# while ! (grep -q "* Changed:	0" $dir/output.log); do
-#     echo -e "\nUpdating charts ... pass: $((++pass_count))\n"
-#     ./update-charts-dep.sh 
-#     find . -maxdepth 1 -type d -not -path '*/\.*' | sed 's/^\.\///g' | xargs -I {} helm repo index {} 
-#     updatecli apply --config .github/workflows/manifests/second-pass |& tee $dir/output.log
-# done
+# Repeatedly run the second-pass manifests until no changes are detected
+while ! (grep -q "* Changed:	0" $dir/output.log); do
+    echo -e "\nUpdating charts ... pass: $((++pass_count))\n"
+    ./update-charts-dep.sh 
+    find . -maxdepth 1 -type d -not -path '*/\.*' | sed 's/^\.\///g' | xargs -I {} helm repo index {} 
+    updatecli apply --config .github/workflows/manifests/second-pass |& tee $dir/output.log
+done
 
 # Revert newline changes in charts
 # Updatecli currently does not preserve line breaks in yaml files - issue https://github.com/goccy/go-yaml/pull/412
