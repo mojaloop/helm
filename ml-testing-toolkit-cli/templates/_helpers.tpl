@@ -93,12 +93,20 @@ containers:
     {{- include "common.tplvalues.render" (dict "value" .Values.script "context" $) | nindent 12 }}
   envFrom:
   - secretRef:
+      {{- if .Values.envSecret }}
+      name: {{ .Values.envSecret }}
+      {{- else }}
       name: {{ template "ml-testing-toolkit-cli.fullname" . }}-aws-creds
+      {{- end }}
   {{- if .Values.env }}
   env:
     {{- range $key, $val := .Values.env }}
     - name: {{ $key }}
       value: {{ $val | quote }}
+    {{- end }}
+    {{- if .Values.extraCaCerts }}
+    - name: NODE_EXTRA_CA_CERTS
+      value: "/opt/app/extra-ca-certs.crt"
     {{- end }}
   {{- end }}
   securityContext:
@@ -115,6 +123,11 @@ containers:
       mountPath: /etc/release_cd
     - name: tmp
       mountPath: /tmp
+    {{- if .Values.extraCaCerts }}
+    - name: extra-ca-certs
+      mountPath: /opt/app/extra-ca-certs.crt
+      subPath: ca.crt
+    {{- end }}
 {{- end }}
 
 {{- define "ml-testing-toolkit-cli.template.volumes" }}
@@ -135,6 +148,11 @@ volumes:
   configMap:
     name: release-cd
     optional: true
+{{- if .Values.extraCaCerts }}
+- name: extra-ca-certs
+  secret:
+    name: {{ .Values.extraCaCerts }}
+{{- end }}
 - name: tmp
   emptyDir: {}
 {{- end }}
