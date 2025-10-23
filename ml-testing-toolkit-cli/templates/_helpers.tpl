@@ -150,7 +150,7 @@ volumes:
     optional: true
 {{- if .Values.extraCaCerts }}
 - name: extra-ca-certs
-  secret:
+  secretName:
     name: {{ .Values.extraCaCerts }}
 {{- end }}
 - name: tmp
