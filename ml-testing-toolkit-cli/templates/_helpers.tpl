@@ -150,8 +150,8 @@ volumes:
     optional: true
 {{- if .Values.extraCaCerts }}
 - name: extra-ca-certs
-  secretName:
-    name: {{ .Values.extraCaCerts }}
+  secret:
+    secretName: {{ .Values.extraCaCerts }}
 {{- end }}
 - name: tmp
   emptyDir: {}
