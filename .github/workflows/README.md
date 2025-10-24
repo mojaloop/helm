@@ -86,7 +86,7 @@ mojaloop/
 
 ## Dependencies
 - **Helm Repositories**:
-  - `stable`, `incubator`, `kiwigrid`, `kokuwa`, `elastic`, `codecentric`, `bitnami`, `mojaloop-charts`, `redpanda`, `mojaloop`
+  - `stable`, `incubator`, `kokuwa`, `elastic`, `codecentric`, `bitnami`, `mojaloop-charts`, `redpanda`, `mojaloop`
 - **Tools**: `Helm v3.13.3`, `updatecli v0.71.0`, `mo`, `jq`.
 - **External Repos**: `mojaloop/oss-core-env`, `testing-toolkit-test-cases`.
 
@@ -144,8 +144,8 @@ pass_count=0
 # Repeatedly run the second-pass manifests until no changes are detected
 while ! (grep -q "* Changed:	0" $dir/output.log); do
     echo -e "\nUpdating charts ... pass: $((++pass_count))\n"
-    ./update-charts-dep.sh 
-    find . -maxdepth 1 -type d -not -path '*/\.*' | sed 's/^\.\///g' | xargs -I {} helm repo index {} 
+    ./update-charts-dep.sh
+    find . -maxdepth 1 -type d -not -path '*/\.*' | sed 's/^\.\///g' | xargs -I {} helm repo index {}
     updatecli apply --config .github/workflows/manifests/second-pass |& tee $dir/output.log
 done
 ```
@@ -187,7 +187,7 @@ sources:
       repository: event-sidecar
   common:
     kind: helmchart
-    spec: 
+    spec:
       url: https://mojaloop.github.io/charts/repo
       name: common
 
@@ -234,9 +234,9 @@ targets:
   ```
 
   #### Explanation
-  
+
   - Sources: Fetch latest versions
-    - `githubRelease`: Queries GitHub for release tags    
+    - `githubRelease`: Queries GitHub for release tags
     - `helmchart`: Queries the `common` chart version from `https://mojaloop.github.io/charts/repo`
   - Conditions: Verifies Docker image tags exist
   - Targets: Updates files
@@ -253,22 +253,22 @@ name: account-lookup-service
 sources:
   account-lookup-service:
     kind: helmchart
-    spec: 
+    spec:
       url: file://./account-lookup-service
       name: account-lookup-service
   account-lookup-service-admin:
     kind: helmchart
-    spec: 
+    spec:
       url: file://./account-lookup-service
       name: account-lookup-service-admin
   account-lookup-service-handler-timeout:
     kind: helmchart
-    spec: 
+    spec:
       url: file://./account-lookup-service
       name: account-lookup-service-handler-timeout
   als-oracle-pathfinder:
     kind: helmchart
-    spec: 
+    spec:
       url: file://./account-lookup-service
       name: als-oracle-pathfinder
 
@@ -299,7 +299,7 @@ targets:
 
 ```
   #### Explanation
-  
+
   - Sources: Fetches versions from local Helm charts (e.g., `file://./account-lookup-service`).
   - Conditions: VNone (assumes local charts are valid).
   - Targets: Updates `Chart.yaml` dependency versions (e.g., `$.dependencies[0].version`) with a `">= X.Y.Z"` format, ensuring compatibility constraints. Here the `$.dependencies[0]` refers to the first entry under `sources` in the same file. It is important to get the correct index number.
@@ -354,7 +354,7 @@ targets:
       file: mojaloop/values.yaml
       matchpattern: '(testing-toolkit-test-cases)-([\d\.]+)(-snapshot(\.\d+)?)?'
       replacepattern: '$1-{{ source "ml-testing-toolkit-test-cases-trimmed" }}'
- 
+
 ```
 
   #### Explanation

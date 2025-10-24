@@ -101,17 +101,16 @@ jobs:
 
           # Install jq
           sudo apt-get install jq
-  
+
       - name: Setup Helm repositories
         run: |
           helm repo add stable https://charts.helm.sh/stable
           helm repo add incubator https://charts.helm.sh/incubator
-          helm repo add kiwigrid https://kiwigrid.github.io
           helm repo add kokuwa https://kokuwaio.github.io/helm-charts
           helm repo add elastic https://helm.elastic.co
           helm repo add codecentric https://codecentric.github.io/helm-charts
           helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm repo add mojaloop-charts https://mojaloop.github.io/charts/repo 
+          helm repo add mojaloop-charts https://mojaloop.github.io/charts/repo
           helm repo add redpanda https://charts.redpanda.com
           helm repo add mojaloop https://mojaloop.io/helm/repo/
           helm repo update
@@ -163,7 +162,7 @@ jobs:
         env:
           AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
         run: updatecli apply --config .github/workflows/manifests/third-pass/mojaloop.yaml
-      
+
       - name: Syncronize release version with mojaloop chart version
         env:
           AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
@@ -203,24 +202,24 @@ jobs:
           repository: mojaloop/oss-core-env
           ref: main
           path: .tmp/oss-core-env
-      
+
       - name: Prepare deployment values file
         run: |
           set -a && . .tmp/oss-core-env/config/test-mojaloop-live/.env && set +a
           sed -i "s/{{CI_ENV_NAME}}/$ENV_NAME/" .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }}
           sed -i "s/{{CI_HELM_NAMESPACE}}/${{ inputs.deployment_namespace }}/" .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }}
           sed -i "s/{{CI_ENV_VERSION}}/${{ steps.determine-release-version.outputs.RELEASE_VERSION }}/" .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }}
-      
+
       - name: Set KUBECONFIG
         run: |
           echo "${{ secrets.AUTO_RELEASE_KUBECONFIG }}" > .tmp/test.mojaloop.live.conf
           chmod 600 .tmp/test.mojaloop.live.conf
-          
+
       - name: Cluster Info
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
         run: kubectl cluster-info
-      
+
       - name: Delete existing deployments
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
@@ -234,26 +233,26 @@ jobs:
       - name: Build charts
         run: |
           ./update-charts-dep.sh
-          
+
       - name: Deploy charts
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
         run: |
           # Install Mojaloop
           helm install ${{ inputs.deployment_release_name }} ./mojaloop -f .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }} --namespace ${{ inputs.deployment_namespace }}
-      
+
       - name: Wait for deployment to be ready
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
         timeout-minutes: 15
         run: |
-          while [[ $(kubectl get pods -n ${{ inputs.deployment_namespace }} -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}' | grep False) ]]; do 
+          while [[ $(kubectl get pods -n ${{ inputs.deployment_namespace }} -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}' | grep False) ]]; do
             echo "Waiting for pods to be ready..."
             sleep 10
           done
           echo "All pods are ready!"
         continue-on-error: true
-      
+
       - name: Run TTK tests
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
@@ -261,7 +260,7 @@ jobs:
         run: |
           helm test ${{ inputs.deployment_release_name }} --namespace ${{ inputs.deployment_namespace }}
         continue-on-error: true
-      
+
       - name: Clean up
         run: |
             rm -rf .tmp
