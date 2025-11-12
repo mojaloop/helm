@@ -15,7 +15,6 @@ HELM_CHECK=$(helm version --short)
 # ## Add dependency repos
 helm repo add stable https://charts.helm.sh/stable
 helm repo add incubator https://charts.helm.sh/incubator
-helm repo add kiwigrid https://kiwigrid.github.io
 helm repo add kokuwa https://kokuwaio.github.io/helm-charts
 helm repo add elastic https://helm.elastic.co
 helm repo add bitnami https://charts.bitnami.com/bitnami
