@@ -75,6 +75,7 @@ else
         centralledger
         centralsettlement/chart-service
         centralsettlement
+        connection-manager
         emailnotifier
         centraleventprocessor
         ml-api-adapter
