@@ -12144,6 +12144,194 @@ inter-scheme-proxy-adapter:
 
 connection-manager:
   enabled: false
+  api:
+    disabled: false
+    replicaCount: 1
+    image:
+      name: mojaloop/connection-manager-api
+      version: v3.1.2
+    ports:
+      containerPort: 3001
+      nodePort: 31057
+      metricsServerPort: 9100
+    pingPongServerUrl: https://ml-participant-connection-test-svc:80
+    keycloak:
+      enabled: false
+      baseUrl: http://localhost:8080
+      discoveryUrl: http://localhost:8080/realms/dfsps/.well-known/openid-configuration
+      adminClientId: connection-manager-api-service
+      adminClientSecret: changeme
+      dfspsRealm: dfsps
+      autoCreateAccounts: true
+    keto:
+      enabled: false
+      writeUrl: http://localhost:4467
+    openid:
+      enabled: false
+      clientId: connection-manager-auth-client
+      clientSecret: changeme
+    clientUrl: http://localhost:3000/
+    url: https://localhost
+    extraTLS:
+      certChain:
+        enabled: 0
+        stringValue: this_is_a_default
+      rootCert:
+        enabled: 0
+        stringValue: this_is_a_default
+    switchFQDN: switch.example.com
+    switchId: dummySwitchId
+    certManager:
+      enabled: false
+      serverCertSecretName: dummy
+      serverCertSecretNamespace: dummy
+    vault:
+      auth:
+        k8s:
+          enabled: true
+          token: /var/run/secrets/kubernetes.io/serviceaccount/token
+          mountPoint: kubernetes
+          role: demo
+        appRole:
+          enabled: false
+          roleId: /vault/role-id
+          roleSecretId: /vault/role-secret-id
+      endpoint: https://vault:8200
+      mounts:
+        pki: pki
+        intermediatePki: pki_int
+        kv: secrets
+        dfspClientCertBundle: secret/onboarding_pm4mls
+        dfspInternalIPWhitelistBundle: secret/whitelist_pm4mls
+        dfspExternalIPWhitelistBundle: secret/whitelist_fsps
+      pkiServerRole: server-role
+      pkiClientRole: client-role
+      signExpiryHours: 43800
+      keyLength: 2048
+    serviceAccount:
+      name: connection-manager-api
+    rbac:
+      enabled: true
+    annotations: {}
+    env: {}
+    envFrom: []
+    resources:
+      limits:
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+  ui:
+    disabled: false
+    checkSessionUrl: ''
+    loginUrl: ''
+    loginProvider: ''
+    logoutUrl: ''
+    image:
+      name: mojaloop/connection-manager-ui
+      version: v1.10.0
+    ports:
+      containerPort: 8080
+      nodePort: 31627
+    oauth:
+      enabled: false
+      hubOidcProviderUrl: https://changeme
+      clientId: mcm-portal
+      clientSecret: changeme
+    env: {}
+    envFrom: []
+    resources:
+      limits:
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi
+  migrations:
+    enabled: true
+    deletePolicy: hook-succeeded
+    script: migrate-and-seed
+  db:
+    user: mcm
+    password: changeme
+    host: localhost
+    port: 3306
+    schema: mcm
+    dfspSeed: ''
+    sslEnabled: false
+    sslVerify: false
+  ingress:
+    enabled: false
+    host: localhost
+    annotations: {}
+    tls: []
+    pathType: ImplementationSpecific
+    className: "nginx"
+  imagePullPolicy: IfNotPresent
+  config:
+    tlsClientCSRParametersData: |-
+      {
+        "subject": {
+          "CN": "test_client_mcm",
+          "E": "mcm@test.com",
+          "O": "test",
+          "OU": "test",
+          "C": "US",
+          "ST": "test",
+          "L": "test"
+        },
+        "extensions": {
+          "subjectAltName": {
+            "dns": [
+            ],
+            "ips": [
+            ]
+          }
+        }
+      }
+    tlsServerCSRParametersData: |-
+      {
+        "subject": {
+          "CN": "test_client_mcm",
+          "E": "mcm@test.com",
+          "O": "test",
+          "OU": "test",
+          "C": "US",
+          "ST": "test",
+          "L": "test"
+        },
+        "extensions": {
+          "subjectAltName": {
+            "dns": [
+            ],
+            "ips": [
+            ]
+          }
+        }
+      }
+    caCSRParametersData: |-
+      {
+        "CN": "CA",
+        "E": "ca@test.com",
+        "O": "test",
+        "OU": "test",
+        "C": "US",
+        "ST": "test",
+        "L": "test"
+      }
+  tests:
+    api:
+      enabled: false
+      weight: -5
+      deletePolicy: before-hook-creation
+      script: "https://raw.githubusercontent.com/mojaloop/connection-manager-api/{{ .Values.api.image.version }}/scripts/run-functional-tests.sh"
+      git:
+        url: https://github.com/mojaloop/connection-manager-api.git
+        tag: "{{ .Values.api.image.version }}"
+      targetDirectory: /tmp/tests
+      nvm:
+        version: v0.39.1
+      env:
+        APP_ENDPOINT: 'http://{{ include "connection-manager.fullname" . }}-api:3001/api'
 
 ml-testing-toolkit:
   enabled: true
