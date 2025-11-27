@@ -1,6 +1,9 @@
 CONFIG:
   ## ISO20022
   api_type: &API_TYPE "iso20022"
+  sdk_ilp_version: &SDK_ILP_VERSION "4"
+  moja_ttk_sim_redis_host: &MOJA_TTK_SIM_REDIS_HOST "ttksims-redis-master"
+  moja_ttk_sim_redis_port: &MOJA_TTK_SIM_REDIS_PORT 6379
   ttk_transformer_name: &TTK_TRANSFORMER_NAME "fspiopToISO20022"
   ttk_input_values_override: &TTK_INPUT_VALUES_OVERRIDE
     API_TYPE: *API_TYPE
@@ -111,6 +114,21 @@ ml-api-adapter:
       original_payload_storage: *ORIGINAL_PAYLOAD_STORAGE
       payload_cache: *PAYLOAD_CACHE
     configOverride: *EVENT_SDK_CONFIG
+
+mojaloop-ttk-simulators:
+  e2e-sim1: &e2eConfig
+    sdk-scheme-adapter:
+      sdk-scheme-adapter-api-svc:
+        redis:
+          host: *MOJA_TTK_SIM_REDIS_HOST
+          port: *MOJA_TTK_SIM_REDIS_PORT
+        env:
+          API_TYPE: *API_TYPE
+          ILP_VERSION: *SDK_ILP_VERSION
+
+  e2e-sim2: *e2eConfig
+
+  e2e-sim-fxp1: *e2eConfig
 
 ml-testing-toolkit:
   ml-testing-toolkit-backend:
