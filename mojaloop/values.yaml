@@ -10514,6 +10514,18 @@ mojaloop-ttk-simulators:
           ILP_VERSION: *SDK_ILP_VERSION
           SUPPORTED_CURRENCIES : XXX
 
+  e2e-sim3:
+    enabled: true
+    sdk-scheme-adapter:
+      sdk-scheme-adapter-api-svc:
+        redis:
+          host: *MOJA_TTK_SIM_REDIS_HOST
+          port: *MOJA_TTK_SIM_REDIS_PORT
+        env:
+          API_TYPE: *API_TYPE
+          ILP_VERSION: *SDK_ILP_VERSION
+          SUPPORTED_CURRENCIES : XTS
+
   e2e-sim-fxp1:
     enabled: true
     sdk-scheme-adapter:
@@ -12420,7 +12432,7 @@ ml-testing-toolkit:
         adminApi:
           host: testing-toolkit.local
     config_files:
-      user_config.json: {"DEFAULT_ENVIRONMENT_FILE_NAME": "hub-k8s-default-environment.json", "TRANSFERS_VALIDATION_CONDITION": false, "TRANSFERS_VALIDATION_ILP_PACKET": false, "TRANSFERS_VALIDATION_WITH_PREVIOUS_QUOTES": false}
+      user_config.json: {"DEFAULT_ENVIRONMENT_FILE_NAME": "hub-k8s-default-environment.json", "TRANSFERS_VALIDATION_CONDITION": false, "TRANSFERS_VALIDATION_ILP_PACKET": false, "TRANSFERS_VALIDATION_WITH_PREVIOUS_QUOTES": false, "DEFAULT_REQUEST_TIMEOUT": 20000}
       # system_config.json: {
       #   ## Uncomment for Socket IO configs for UI to Backend interactions. This may help if long running Test-Collections time-out.
       #   #  "SOCKET_IO_ENGINE_OPTIONS": {
@@ -12569,6 +12581,7 @@ ml-testing-toolkit:
       simNameTTKSim3: 'ttksim3'
       simNameE2ESim1: 'e2e-sim1'
       simNameE2ESim2: 'e2e-sim2'
+      simNameE2ESim3: 'e2e-sim3'
       simNameE2ESimFXP1: 'e2e-sim-fxp1'
       validIlpPacketV1: 'AYIDBQAAAAAAACcQJGcucGF5ZWVmc3AubXNpc2RuLnt7cmVjZWl2ZXJtc2lzZG59fYIC1GV5SjBjbUZ1YzJGamRHbHZia2xrSWpvaVptVXhNREU0Wm1NdE1EaGxZeTAwWWpJM0xUbGpZalF0TnpjMk9URTFNR00zT1dKaklpd2ljWFZ2ZEdWSlpDSTZJbVpsTVRBeE9HWmpMVEE0WldNdE5HSXlOeTA1WTJJMExUYzNOamt4TlRCak56bGlZeUlzSW5CaGVXVmxJanA3SW5CaGNuUjVTV1JKYm1adklqcDdJbkJoY25SNVNXUlVlWEJsSWpvaVRWTkpVMFJPSWl3aWNHRnlkSGxKWkdWdWRHbG1hV1Z5SWpvaWUzdHlaV05sYVhabGNrMVRTVk5FVG4xOUlpd2labk53U1dRaU9pSndZWGxsWldaemNDSjlmU3dpY0dGNVpYSWlPbnNpY0dGeWRIbEpaRWx1Wm04aU9uc2ljR0Z5ZEhsSlpGUjVjR1VpT2lKTlUwbFRSRTRpTENKd1lYSjBlVWxrWlc1MGFXWnBaWElpT2lJeU56Y3hNemd3TXprd05TSXNJbVp6Y0Vsa0lqb2ljR0Y1WlhKbWMzQWlmU3dpY0dWeWMyOXVZV3hKYm1adklqcDdJbU52YlhCc1pYaE9ZVzFsSWpwN0ltWnBjbk4wVG1GdFpTSTZJazFoZEhNaUxDSnNZWE4wVG1GdFpTSTZJa2hoWjIxaGJpSjlMQ0prWVhSbFQyWkNhWEowYUNJNklqRTVPRE10TVRBdE1qVWlmWDBzSW1GdGIzVnVkQ0k2ZXlKaGJXOTFiblFpT2lJeE1EQWlMQ0pqZFhKeVpXNWplU0k2SWxWVFJDSjlMQ0owY21GdWMyRmpkR2x2YmxSNWNHVWlPbnNpYzJObGJtRnlhVzhpT2lKVVVrRk9VMFpGVWlJc0ltbHVhWFJwWVhSdmNpSTZJbEJCV1VWU0lpd2lhVzVwZEdsaGRHOXlWSGx3WlNJNklrTlBUbE5WVFVWU0luMTkA'
       validConditionV1: 'GRzLaTP7DJ9t4P-a_BA0WA9wzzlsugf00-Tn6kESAfM'
@@ -12829,7 +12842,25 @@ ml-testing-toolkit:
           "TTKSIM3_NAME": "$param_simNameTTKSim3",
           "E2ESIM1_NAME": "$param_simNameE2ESim1",
           "E2ESIM2_NAME": "$param_simNameE2ESim2",
+          "E2ESIM3_NAME": "$param_simNameE2ESim3",
           "E2ESIMFXP1_NAME": "$param_simNameE2ESimFXP1",
+          "E2ESIM1_MSISDN_1": "9990001001",
+          "E2ESIM1_MSISDN_2": "9990001002",
+          "E2ESIM2_MSISDN_1": "9990002001",
+          "E2ESIM2_MSISDN_2": "9990002002",
+          "E2ESIM3_MSISDN_1": "9990003001",
+          "E2ESIM3_MSISDN_2": "9990003002",
+          "E2E_SOURCE_CURRENCY": "XXX",
+          "E2E_SEND_AMOUNT": "100",
+          "E2E_TARGET_CURRENCY": "XTS",
+          "E2E_RECEIVE_AMOUNT": "100",
+          "E2E_MSISDN_DFSP_MIGRATION": "9990009001",
+          "E2E_FXPQUOTES_TIMEOUT_AMOUNT": "7",
+          "E2E_FXPQUOTES_GENERIC_ERROR_AMOUNT":"8",
+          "E2E_FXPTRANSFERS_TIMEOUT_AMOUNT":"11",
+          "E2E_FXPTRANSFERS_GENERIC_ERROR_AMOUNT":"12",
+          "E2E_FXPTRANSFERS_ABORTED_AMOUNT":"13",
+          "E2E_TRANSFERS_ABORTED_AMOUNT":"16",
           "TTKSIM1_MSISDN": "16135551212",
           "TTKSIM2_MSISDN_PREFIX": "4561",
           "TTKSIM3_MSISDN_PREFIX": "5671",
@@ -12852,14 +12883,14 @@ ml-testing-toolkit:
           "E2ESIM2_OUTBOUND_URL": "http://$release_name-$param_simNameE2ESim2-sdk:4001",
           "E2ESIM2_SDK_TESTAPI_URL": "http://$release_name-$param_simNameE2ESim2-sdk:4002",
           "E2ESIM2_SDK_TESTAPI_WS_URL": "ws://$release_name-$param_simNameE2ESim2-sdk:4002",
+          "E2ESIM3_CALLBACK_URL": "http://$release_name-$param_simNameE2ESim3-sdk:4000",
+          "E2ESIM3_OUTBOUND_URL": "http://$release_name-$param_simNameE2ESim3-sdk:4001",
+          "E2ESIM3_SDK_TESTAPI_URL": "http://$release_name-$param_simNameE2ESim3-sdk:4002",
+          "E2ESIM3_SDK_TESTAPI_WS_URL": "ws://$release_name-$param_simNameE2ESim3-sdk:4002",
           "E2ESIMFXP1_CALLBACK_URL": "http://$release_name-$param_simNameE2ESimFXP1-sdk:4000",
           "E2ESIMFXP1_OUTBOUND_URL": "http://$release_name-$param_simNameE2ESimFXP1-sdk:4001",
           "E2ESIMFXP1_SDK_TESTAPI_URL": "http://$release_name-$param_simNameE2ESimFXP1-sdk:4002",
           "E2ESIMFXP1_SDK_TESTAPI_WS_URL": "ws://$release_name-$param_simNameE2ESimFXP1-sdk:4002",
-          "E2ESIM1_MSISDN_1": "9990001001",
-          "E2ESIM1_MSISDN_2": "9990001002",
-          "E2ESIM2_MSISDN_1": "9990002001",
-          "E2ESIM2_MSISDN_2": "9990002002",
           "FX_PAYER_DFSP_ID": "ttkfxpayer",
           "FX_PAYEE_DFSP_ID": "ttkfxpayee",
           "FX_MSISDN_1": "54321001",
@@ -12970,8 +13001,8 @@ ml-ttk-posthook-setup:
     weight: -5
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
-    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v20.0.0.zip
-    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-20.0.0/collections/hub/provisioning/for_golden_path
+    testCasesZipUrl: &ttkGitUrl https://github.com/mojaloop/testing-toolkit-test-cases/archive/v20.1.0.zip
+    testCasesPathInZip: &ttkGitPathSetup testing-toolkit-test-cases-20.1.0/collections/hub/provisioning/for_golden_path
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
   parameters:
     <<: *simNames
@@ -12984,7 +13015,7 @@ ml-ttk-posthook-tests:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-20.0.0/collections/hub/golden_path
+    testCasesPathInZip: &ttkGitPathGP testing-toolkit-test-cases-20.1.0/collections/hub/golden_path
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
@@ -13085,7 +13116,7 @@ ml-ttk-cronjob-cleanup:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: &ttkGitPathCleanup testing-toolkit-test-cases-20.0.0/collections/hub/cleanup
+    testCasesPathInZip: &ttkGitPathCleanup testing-toolkit-test-cases-20.1.0/collections/hub/cleanup
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
@@ -13198,7 +13229,7 @@ ml-ttk-test-val-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-20.0.0/collections/hub/other_tests/bulk_transfers
+    testCasesPathInZip: testing-toolkit-test-cases-20.1.0/collections/hub/other_tests/bulk_transfers
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -13243,7 +13274,7 @@ ml-ttk-test-setup-tp:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-20.0.0/collections/hub/provisioning/for_thirdparty
+    testCasesPathInZip: testing-toolkit-test-cases-20.1.0/collections/hub/provisioning/for_thirdparty
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -13288,7 +13319,7 @@ ml-ttk-test-val-tp:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-20.0.0/collections/hub/thirdparty
+    testCasesPathInZip: testing-toolkit-test-cases-20.1.0/collections/hub/thirdparty
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
     # awsS3FilePath: ttk-tests/reports
     testSuiteName: Thirdparty Tests
@@ -13331,7 +13362,7 @@ ml-ttk-test-setup-sdk-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-20.0.0/collections/hub/provisioning/for_sdk_bulk
+    testCasesPathInZip: testing-toolkit-test-cases-20.1.0/collections/hub/provisioning/for_sdk_bulk
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -13376,7 +13407,7 @@ ml-ttk-test-val-sdk-bulk:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-20.0.0/collections/hub/sdk_scheme_adapter/bulk/basic
+    testCasesPathInZip: testing-toolkit-test-cases-20.1.0/collections/hub/sdk_scheme_adapter/bulk/basic
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -13421,7 +13452,7 @@ ml-ttk-test-val-sdk-r2p:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-20.0.0/collections/hub/sdk_scheme_adapter/request-to-pay/basic
+    testCasesPathInZip: testing-toolkit-test-cases-20.1.0/collections/hub/sdk_scheme_adapter/request-to-pay/basic
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -13466,7 +13497,7 @@ ml-ttk-test-setup-interscheme:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-20.0.0/collections/hub/provisioning/for_inter_scheme
+    testCasesPathInZip: testing-toolkit-test-cases-20.1.0/collections/hub/provisioning/for_inter_scheme
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports
@@ -13491,7 +13522,7 @@ ml-ttk-test-val-interscheme:
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
     testCasesZipUrl: *ttkGitUrl
-    testCasesPathInZip: testing-toolkit-test-cases-20.0.0/collections/hub/inter_scheme
+    testCasesPathInZip: testing-toolkit-test-cases-20.1.0/collections/hub/inter_scheme
     ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
     # awsS3BucketName: aws-s3-bucket-name
     # awsS3FilePath: ttk-tests/reports

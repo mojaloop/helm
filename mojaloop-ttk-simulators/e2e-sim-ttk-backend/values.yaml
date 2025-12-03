@@ -1,0 +1,59 @@
+ml-testing-toolkit:
+  enabled: true
+
+  ml-testing-toolkit-backend:
+    enabled: true
+    nameOverride: 'e2e-sim-ttk-backend'
+    config:
+      mongodb:
+        params: {}
+        ssl:
+          enabled: false
+          verify: false
+          caSecret: {}
+    config_files:
+      user_config.json:
+        SCRIPT_TIMEOUT: 60000
+        DEFAULT_REQUEST_TIMEOUT: 60000
+        CALLBACK_TIMEOUT: 60000
+        DEFAULT_ENVIRONMENT_FILE_NAME: 'hub-k8s-default-environment.json'
+
+      system_config.json: {
+        "API_DEFINITIONS": [
+          {
+            "type": "mojaloop_connector_outbound",
+            "version": "2.1",
+            "folderPath": "mojaloop_connector_outbound_2.1",
+            "asynchronous": false,
+            "hostnames": [],
+            "prefix": "/sdk-out",
+          },
+          {
+            "type": "mojaloop_connector_backend",
+            "version": "2.1",
+            "folderPath": "mojaloop_connector_backend_2.1",
+            "asynchronous": false,
+          }
+        ]
+      }
+      rules_response__default.json: https://raw.githubusercontent.com/mojaloop/testing-toolkit-test-cases/refs/tags/v20.1.0/rules/e2e/sync-response-rules.json
+      api_definitions__mojaloop_connector_backend_2.1__api_spec.yaml: "https://raw.githubusercontent.com/mojaloop/api-snippets/refs/tags/v17.10.2/docs/sdk-scheme-adapter-backend-v2_1_0-openapi3-snippets.yaml"
+      api_definitions__mojaloop_connector_outbound_2.1__api_spec.yaml: "https://raw.githubusercontent.com/mojaloop/api-snippets/refs/tags/v17.10.2/docs/sdk-scheme-adapter-outbound-v2_1_0-openapi3-snippets.yaml"
+      ## The PR https://github.com/mojaloop/api-snippets/pull/201 broke the backend simulation, that is why we are using the older version above
+      # api_definitions__mojaloop_connector_backend_2.1__api_spec.yaml: "https://raw.githubusercontent.com/mojaloop/api-snippets/refs/tags/v18.2.1/docs/sdk-scheme-adapter-backend-v2_1_0-openapi3-snippets.yaml"
+      # api_definitions__mojaloop_connector_outbound_2.1__api_spec.yaml: "https://raw.githubusercontent.com/mojaloop/api-snippets/refs/tags/v18.2.1/docs/sdk-scheme-adapter-outbound-v2_1_0-openapi3-snippets.yaml"
+      api_definitions__mojaloop_connector_outbound_2.1__callback_map.json: []
+
+    initContainers: []
+
+    ingress:
+      enabled: false
+
+    extraEnvironments:
+      hub-k8s-default-environment.json: {
+        "inputValues": {}
+      }
+
+  ml-testing-toolkit-frontend:
+    enabled: false
+
