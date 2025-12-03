@@ -24,17 +24,18 @@ sdk-scheme-adapter:
     env:
       LOG_LEVEL : debug
       DFSP_ID: '{{ .Values.config.simName }}'
-      BACKEND_ENDPOINT: '{{ .Release.Name }}-{{ .Values.config.simName }}-ttk-backend:4040'
+      BACKEND_ENDPOINT: '{{ .Release.Name }}-e2e-sim-ttk-backend:4040'
+      FX_TRANSFERS_ENDPOINT: '{{ .Release.Name }}-ml-api-adapter-service'
       API_TYPE : iso20022
       ILP_VERSION : 4
-      SUPPORTED_CURRENCIES : XXX
+      SUPPORTED_CURRENCIES : XXX,XTS
       JWS_SIGN : false
       JWS_SIGN_PUT_PARTIES : false
       VALIDATE_INBOUND_JWS : false
       VALIDATE_INBOUND_PUT_PARTIES_JWS : false
       RESERVE_NOTIFICATION : false
       OAUTH_TOKEN_ENDPOINT: ""
-      REQUEST_PROCESSING_TIMEOUT_SECONDS: 20
+      REQUEST_PROCESSING_TIMEOUT_SECONDS: 15
       ENABLE_FSPIOP_EVENT_HANDLER: false
       ENABLE_BACKEND_EVENT_HANDLER: false
       ENABLE_TEST_FEATURES : true
@@ -45,61 +46,3 @@ sdk-scheme-adapter:
 
   sdk-scheme-adapter-cmd-evt-handler:
     enabled: false
-
-ml-testing-toolkit:
-  enabled: true
-
-  ml-testing-toolkit-backend:
-    enabled: true
-    nameOverride: 'e2e-sim-fxp1-ttk-backend'
-    config:
-      mongodb:
-        params: {}
-        ssl:
-          enabled: false
-          verify: false
-          caSecret: {}
-    config_files:
-      user_config.json:
-        SCRIPT_TIMEOUT: 60000
-        DEFAULT_REQUEST_TIMEOUT: 60000
-        CALLBACK_TIMEOUT: 60000
-        DEFAULT_ENVIRONMENT_FILE_NAME: 'hub-k8s-default-environment.json'
-
-      system_config.json: {
-        "API_DEFINITIONS": [
-          {
-            "type": "mojaloop_simulator_inbound",
-            "version": "2.1",
-            "folderPath": "mojaloop_simulator_sim_2.1",
-            "asynchronous": true
-          },
-          {
-            "type": "scheme_adapter_outbound",
-            "version": "2.1",
-            "folderPath": "mojaloop_sdk_outbound_scheme_adapter_2.1",
-            "hostnames": [],
-            "prefix": "/sdk-out",
-            "asynchronous": true
-          }
-        ]
-      }
-      ## TODO: Need to replace the following with proper URLs
-      rules_response__default.json: https://raw.githubusercontent.com/mojaloop/testing-toolkit-test-cases/v16.1.0-fx-snapshot.1/rules/pm4ml/fxp_response_rules.json
-      api_definitions__mojaloop_connector_backend_2.1__api_spec.yaml: "https://raw.githubusercontent.com/mojaloop/api-snippets/v17.10.2/docs/sdk-scheme-adapter-backend-v2_1_0-openapi3-snippets.yaml"
-      api_definitions__mojaloop_connector_outbound_2.1__api_spec.yaml: "https://raw.githubusercontent.com/mojaloop/api-snippets/v17.10.2/docs/sdk-scheme-adapter-outbound-v2_1_0-openapi3-snippets.yaml"
-      api_definitions__mojaloop_connector_outbound_2.1__callback_map.json: []
-
-    initContainers: []
-
-    ingress:
-      enabled: false
-
-    extraEnvironments:
-      hub-k8s-default-environment.json: {
-        "inputValues": {}
-      }
-
-  ml-testing-toolkit-frontend:
-    enabled: false
-

@@ -25,7 +25,9 @@ declare -a charts=(
     mojaloop-ttk-simulators/chart-sim3
     mojaloop-ttk-simulators/e2e-sim1
     mojaloop-ttk-simulators/e2e-sim2
+    mojaloop-ttk-simulators/e2e-sim3
     mojaloop-ttk-simulators/e2e-sim-fxp1
+    mojaloop-ttk-simulators/e2e-sim-ttk-backend
     mojaloop-ttk-simulators
     eventstreamprocessor
     monitoring/promfana
