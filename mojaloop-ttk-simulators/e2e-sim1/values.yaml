@@ -1,0 +1,49 @@
+sdk-scheme-adapter:
+  enabled: true
+
+  ## Local re-usable configs
+  config:
+    simName: &CONFIG_SIM_NAME e2e-sim1
+    database: &CONFIG_SIM_DB 1
+
+  sdk-scheme-adapter-api-svc:
+    enabled: true
+    nameOverride: 'e2e-sim1-sdk'
+
+    initContainers: []
+
+    redis:
+      database: *CONFIG_SIM_DB # This is a number between 0 to 15
+
+    config:
+      simName: *CONFIG_SIM_NAME
+
+    ingress:
+      enabled: false
+
+    env:
+      LOG_LEVEL : debug
+      DFSP_ID: '{{ .Values.config.simName }}'
+      BACKEND_ENDPOINT: '{{ .Release.Name }}-e2e-sim-ttk-backend:4040'
+      FX_TRANSFERS_ENDPOINT: '{{ .Release.Name }}-ml-api-adapter-service'
+      API_TYPE : iso20022
+      ILP_VERSION : 4
+      SUPPORTED_CURRENCIES : XXX
+      GET_SERVICES_FXP_RESPONSE: e2e-sim-fxp1
+      JWS_SIGN : false
+      JWS_SIGN_PUT_PARTIES : false
+      VALIDATE_INBOUND_JWS : false
+      VALIDATE_INBOUND_PUT_PARTIES_JWS : false
+      RESERVE_NOTIFICATION : false
+      OAUTH_TOKEN_ENDPOINT: ""
+      REQUEST_PROCESSING_TIMEOUT_SECONDS: 15
+      ENABLE_FSPIOP_EVENT_HANDLER: false
+      ENABLE_BACKEND_EVENT_HANDLER: false
+      ENABLE_TEST_FEATURES : true
+      ALLOW_TRANSFER_WITHOUT_QUOTE : true
+      WSO2_AUTH_FAILURE_REQUEST_RETRIES : 0
+  sdk-scheme-adapter-dom-evt-handler:
+    enabled: false
+
+  sdk-scheme-adapter-cmd-evt-handler:
+    enabled: false
