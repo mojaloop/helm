@@ -33,6 +33,7 @@ else
         account-lookup-service
         als-oracle-pathfinder
         als-msisdn-oracle
+        als-static-oracle
         # centralkms # Deprecated - No longer supported
         # forensicloggingsidecar # Deprecated - No longer supported
         centralledger

@@ -64,6 +64,7 @@ else
         account-lookup-service
         als-oracle-pathfinder
         als-msisdn-oracle
+        als-static-oracle
         centralledger/chart-handler-admin-transfer
         centralledger/chart-handler-timeout
         centralledger/chart-handler-transfer-fulfil
