@@ -24,10 +24,14 @@
           MYSQL_SSL_OPTIONS="${MYSQL_SSL_OPTIONS} --ssl-ca=/tmp/ca.pem"
         fi
       fi
-      until result=$(mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" --password="${DB_PASSWORD}" $MYSQL_SSL_OPTIONS "${DB_DATABASE}" -ss -N -e "${DB_WAIT_QUERY:-select 1;}") && eval "echo query_result=\$result" && { [ -z "$result" ] && false || { [ -n "${DB_EXPECTED_RESULT}" ] && [ "$result" != "${DB_EXPECTED_RESULT}" ] && false || true; }; };
+      retries=0;
+      max_retries=10;
+      until [ $retries -eq $max_retries ] || result=$(mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" --password="${DB_PASSWORD}" $MYSQL_SSL_OPTIONS "${DB_DATABASE}" -ss -N -e "${DB_WAIT_QUERY:-select 1;}") && eval "echo query_result=\$result" && { [ -z "$result" ] && false || { [ -n "${DB_EXPECTED_RESULT}" ] && [ "$result" != "${DB_EXPECTED_RESULT}" ] && false || true; }; };
       do
         echo --------------------;
         echo Waiting for MySQL...;
+        retries=$((retries+1));
+        echo "Retry $retries of $max_retries";
         sleep 2;
       done;
       echo ====================;
