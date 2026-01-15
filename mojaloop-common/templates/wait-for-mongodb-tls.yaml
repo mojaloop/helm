@@ -30,10 +30,14 @@
         PARAMS=$(echo "$DB_PARAMS" | jq -r 'to_entries | map("\(.key)=\(.value|tostring)") | join("&")');
         PARAMS="?$PARAMS";
       fi;
-      until mongosh "mongodb://${DB_HOST}:${DB_PORT}/${DB_DATABASE}${PARAMS}" --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" $MONGO_TLS_ARGS --eval "disableTelemetry();db.adminCommand('ping')" ;
+      retries=0;
+      max_retries=10;
+      until [ $retries -eq $max_retries ] || mongosh "mongodb://${DB_HOST}:${DB_PORT}/${DB_DATABASE}${PARAMS}" --authenticationDatabase "${DB_DATABASE}" --username "${DB_USER}" --password "${DB_PASS}" $MONGO_TLS_ARGS --eval "disableTelemetry();db.adminCommand('ping')" ;
       do
         echo --------------------;
         echo Waiting for MongoDB...;
+        retries=$((retries+1));
+        echo "Retry $retries of $max_retries";
         sleep 2;
       done;
       echo ====================;
