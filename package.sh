@@ -94,6 +94,7 @@ else
         merchant-registry-svc
         ml-operator
         inter-scheme-proxy-adapter
+        ory-services
     )
 fi
 
