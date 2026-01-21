@@ -1,0 +1,19 @@
+{{- if .Values.kratosRoleWebhook.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ory-services.fullname" . }}-kratos-role-webhook
+  labels:
+    {{- include "ory-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: kratos-role-webhook
+spec:
+  type: {{ .Values.kratosRoleWebhook.service.type }}
+  ports:
+    - port: {{ .Values.kratosRoleWebhook.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "ory-services.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: kratos-role-webhook
+{{- end }}

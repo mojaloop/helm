@@ -1,0 +1,94 @@
+image:
+  repository: mojaloop/ml-ory-iam-services
+  tag: "v0.1.1"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+ketoBatchAuth:
+  enabled: true
+  replicaCount: 1
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 3000
+
+  env:
+    PORT: "3000"
+    KETO_READ_URL: "http://keto-read.ory.svc.cluster.local"
+
+  resources:
+    requests:
+      memory: "32Mi"
+      cpu: "25m"
+    limits:
+      memory: "64Mi"
+      cpu: "100m"
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 3
+    periodSeconds: 5
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+
+kratosRoleWebhook:
+  enabled: true
+  replicaCount: 1
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+
+  env:
+    PORT: "8080"
+    KRATOS_ADMIN_URL: "http://kratos-admin.ory.svc.cluster.local:80"
+    KETO_READ_URL: "http://keto-read.ory.svc.cluster.local"
+
+  resources:
+    requests:
+      memory: "32Mi"
+      cpu: "25m"
+    limits:
+      memory: "64Mi"
+      cpu: "100m"
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 3
+    periodSeconds: 5
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}

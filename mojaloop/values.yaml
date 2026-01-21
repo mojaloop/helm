@@ -12383,6 +12383,89 @@ connection-manager:
       env:
         APP_ENDPOINT: 'http://{{ include "connection-manager.fullname" . }}-api:3001/api'
 
+ory-services:
+  enabled: false
+  ## Requires Ory Keto and Kratos to be deployed (typically in 'ory' namespace)
+  ## See: https://www.ory.sh/docs/keto and https://www.ory.sh/docs/kratos
+  image:
+    repository: mojaloop/ml-ory-iam-services
+    tag: "v0.1.1"
+    pullPolicy: IfNotPresent
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+  ketoBatchAuth:
+    enabled: true
+    replicaCount: 1
+    service:
+      type: ClusterIP
+      port: 80
+      targetPort: 3000
+    env:
+      PORT: "3000"
+      KETO_READ_URL: "http://keto-read.ory.svc.cluster.local"
+    resources:
+      requests:
+        memory: "32Mi"
+        cpu: "25m"
+      limits:
+        memory: "64Mi"
+        cpu: "100m"
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 3
+      periodSeconds: 5
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    podAnnotations: {}
+  kratosRoleWebhook:
+    enabled: true
+    replicaCount: 1
+    service:
+      type: ClusterIP
+      port: 80
+      targetPort: 8080
+    env:
+      PORT: "8080"
+      KRATOS_ADMIN_URL: "http://kratos-admin.ory.svc.cluster.local:80"
+      KETO_READ_URL: "http://keto-read.ory.svc.cluster.local"
+    resources:
+      requests:
+        memory: "32Mi"
+        cpu: "25m"
+      limits:
+        memory: "64Mi"
+        cpu: "100m"
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: http
+      initialDelaySeconds: 3
+      periodSeconds: 5
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    podAnnotations: {}
+  serviceAccount:
+    create: false
+    name: ""
+    annotations: {}
+
 ml-testing-toolkit:
   enabled: true
   ml-testing-toolkit-backend: ## @param initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
