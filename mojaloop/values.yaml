@@ -13667,3 +13667,72 @@ ml-ttk-test-cleanup:
   parameters:
     <<: *simNames
   testCaseEnvironmentFile: *ttkInputValues
+
+ml-ttk-test-mcm-rbac:
+  tests:
+    enabled: false
+    weight: 3
+  config:
+    testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/v20.3.0-mcm-rbac.0.zip
+    testCasesPathInZip: testing-toolkit-test-cases-20.3.0-mcm-rbac.0/collections/hub/mcm
+    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
+    testSuiteName: MCM RBAC Tests
+    environmentName: Development
+    saveReport: true
+    saveReportBaseUrl: "testing-toolkit.local"
+    reportName: mcm_rbac_tests
+    allowFailures: false
+    mcmScriptsVersion: v3.7.0-snapshot.0
+    ## MCM service configuration
+    mcmUrl: http://mcm-connection-manager-api:3001
+    kratosPublicUrl: http://kratos-public
+    keycloakUrl: http://keycloak
+    keycloakRealm: mojaloop
+    mailpitUrl: http://mailpit-http:8025
+    portalAdminUser: portal_admin
+  env:
+    NPM_CONFIG_UPDATE_NOTIFIER: "false"
+  script: |
+    set -e
+    echo "===================================="
+    echo "MCM RBAC Test Runner"
+    echo "===================================="
+
+    # Wait for DNS
+    until nslookup github.com; do echo "Waiting for DNS..."; sleep 5; done
+
+    # Download scripts
+    echo "Downloading MCM test scripts..."
+    MCM_SCRIPTS_BASE="https://raw.githubusercontent.com/mojaloop/connection-manager-api/{{ .Values.config.mcmScriptsVersion }}/scripts"
+    wget "${MCM_SCRIPTS_BASE}/mcm-test-setup" -O /tmp/mcm-test-setup
+    wget "${MCM_SCRIPTS_BASE}/mcm-rbac-test.sh" -O /tmp/mcm-rbac-test.sh
+    chmod +x /tmp/mcm-test-setup /tmp/mcm-rbac-test.sh
+
+    # Download test collections
+    echo "Downloading test collections..."
+    wget {{ .Values.config.testCasesZipUrl }} -O /tmp/test-collections.zip
+    mkdir -p /tmp/test_cases
+    unzip -d /tmp/test_cases -o /tmp/test-collections.zip
+
+    # Export environment variables for mcm-rbac-test.sh
+    export MCM_URL="{{ .Values.config.mcmUrl }}"
+    export KRATOS_PUBLIC_URL="{{ .Values.config.kratosPublicUrl }}"
+    export KEYCLOAK_URL="{{ .Values.config.keycloakUrl }}"
+    export KEYCLOAK_REALM="{{ .Values.config.keycloakRealm }}"
+    export MAILPIT_URL="{{ .Values.config.mailpitUrl }}"
+    export PORTAL_ADMIN_USER="{{ .Values.config.portalAdminUser }}"
+    export PORTAL_ADMIN_PASSWORD="${PORTAL_ADMIN_PASSWORD}"
+    export TTK_BACKEND_URL="{{ .Values.config.ttkBackendURL | replace "$release_name" .Release.Name }}"
+    export TEST_CASES_DIR="/tmp/test_cases/{{ .Values.config.testCasesPathInZip }}"
+    export SAVE_REPORT="{{ .Values.config.saveReport }}"
+    export SAVE_REPORT_BASE_URL="{{ .Values.config.saveReportBaseUrl }}"
+    export ALLOW_FAILURES="{{ .Values.config.allowFailures }}"
+
+    # Run MCM RBAC tests
+    /tmp/mcm-rbac-test.sh
+  configFileDefaults:
+    mode: outbound
+    logLevel: "2"
+  parameters: {}
+  testCaseEnvironmentFile:
+    inputValues: {}
