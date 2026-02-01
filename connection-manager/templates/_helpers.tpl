@@ -32,6 +32,14 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
+Migration job suffix - hash of image version for declarative GitOps-friendly job naming.
+Job only recreates when image version changes.
+*/}}
+{{- define "connection-manager.migrationSuffix" -}}
+{{- .Values.api.image.version | sha256sum | trunc 8 -}}
+{{- end -}}
+
+{{/*
 Common labels
 */}}
 {{- define "connection-manager.labels" -}}

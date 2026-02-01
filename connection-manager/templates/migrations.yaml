@@ -2,19 +2,16 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-migration-job
+  name: {{ .Release.Name }}-migration-{{ include "connection-manager.migrationSuffix" . }}
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-delete-policy": {{ .Values.migrations.deletePolicy }}
 spec:
   template:
     metadata:
-      name: "{{ .Release.Name }}-migration-job"
+      name: "{{ .Release.Name }}-migration-{{ include "connection-manager.migrationSuffix" . }}"
       labels:
         app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
