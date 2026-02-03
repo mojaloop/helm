@@ -110,6 +110,16 @@ spec:
           value: {{ .Values.db.schema }}
         - name: DATABASE_PORT
           value: {{ .Values.db.port | quote }}
+        {{- if .Values.migrations.env }}
+        {{- range $key, $val := .Values.migrations.env }}
+        - name: {{ $key | quote }}
+          {{- if kindIs "map" $val }}
+          {{- toYaml $val | nindent 10 }}
+          {{- else }}
+          value: {{ $val | quote }}
+          {{- end }}
+        {{- end }}
+        {{- end }}
       restartPolicy: OnFailure
   backoffLimit: 20
 {{- end }}
