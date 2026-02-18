@@ -1,0 +1,72 @@
+{{- if .Values.kratosRoleWebhook.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ory-services.fullname" . }}-kratos-role-webhook
+  labels:
+    {{- include "ory-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: kratos-role-webhook
+spec:
+  replicas: {{ .Values.kratosRoleWebhook.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ory-services.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: kratos-role-webhook
+  template:
+    metadata:
+      {{- with .Values.kratosRoleWebhook.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ory-services.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: kratos-role-webhook
+    spec:
+      automountServiceAccountToken: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: kratos-role-webhook
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          image: "{{ .Values.image.repository }}:{{ include "ory-services.imageTag" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["kratos-role-webhook"]
+          ports:
+            - name: http
+              containerPort: {{ .Values.kratosRoleWebhook.service.targetPort }}
+              protocol: TCP
+          env:
+            {{- range $key, $value := .Values.kratosRoleWebhook.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.kratosRoleWebhook.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.kratosRoleWebhook.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.kratosRoleWebhook.resources | nindent 12 }}
+      {{- with .Values.kratosRoleWebhook.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.kratosRoleWebhook.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.kratosRoleWebhook.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

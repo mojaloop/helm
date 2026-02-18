@@ -1,0 +1,72 @@
+{{- if .Values.ketoBatchAuth.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ory-services.fullname" . }}-keto-batch-auth
+  labels:
+    {{- include "ory-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: keto-batch-auth
+spec:
+  replicas: {{ .Values.ketoBatchAuth.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ory-services.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: keto-batch-auth
+  template:
+    metadata:
+      {{- with .Values.ketoBatchAuth.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ory-services.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: keto-batch-auth
+    spec:
+      automountServiceAccountToken: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: keto-batch-auth
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          image: "{{ .Values.image.repository }}:{{ include "ory-services.imageTag" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["keto-batch-auth"]
+          ports:
+            - name: http
+              containerPort: {{ .Values.ketoBatchAuth.service.targetPort }}
+              protocol: TCP
+          env:
+            {{- range $key, $value := .Values.ketoBatchAuth.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.ketoBatchAuth.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.ketoBatchAuth.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.ketoBatchAuth.resources | nindent 12 }}
+      {{- with .Values.ketoBatchAuth.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ketoBatchAuth.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ketoBatchAuth.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
