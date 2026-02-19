@@ -2,7 +2,7 @@
 
 Date | Revision | Description
 ---------|----------|---------
-2026-01-16 | 0 | Initial draft
+2026-02-19 | 0 | Initial draft
 
 ## 0. Summary
 
@@ -13,8 +13,10 @@ _Release summary points go here..._
 ## 1. New Features
 * **mojaloop/#574** added validation of local destination for external source ([mojaloop/#574](https://github.com/mojaloop/account-lookup-service/pull/574)), closes [mojaloop/#574](https://github.com/mojaloop/project/issues/574)
 * **mojaloop/#578** improve inter-scheme discovery flow ([mojaloop/#578](https://github.com/mojaloop/account-lookup-service/pull/578)), closes [mojaloop/#578](https://github.com/mojaloop/project/issues/578)
+* **mojaloop/#604** updated deps ([mojaloop/#604](https://github.com/mojaloop/account-lookup-service/pull/604)), closes [mojaloop/#604](https://github.com/mojaloop/project/issues/604)
 * **mojaloop/#1207** enhance distributed lock management with automatic extension and fix metrics ([mojaloop/#1207](https://github.com/mojaloop/central-ledger/pull/1207)), closes [mojaloop/#1207](https://github.com/mojaloop/project/issues/1207)
 * **mojaloop/#610** add timeout to callback requests ([mojaloop/#610](https://github.com/mojaloop/ml-api-adapter/pull/610)), closes [mojaloop/#610](https://github.com/mojaloop/project/issues/610)
+* **mojaloop/#447** updated central-service-shared ([mojaloop/#447](https://github.com/mojaloop/quoting-service/pull/447)), closes [mojaloop/#447](https://github.com/mojaloop/project/issues/447)
 * **mojaloop/#614** improve transfer status delivery effort ([mojaloop/#614](https://github.com/mojaloop/sdk-scheme-adapter/pull/614)), closes [mojaloop/#614](https://github.com/mojaloop/project/issues/614)
 * **mojaloop/#616** improved logging ([mojaloop/#616](https://github.com/mojaloop/sdk-scheme-adapter/pull/616)), closes [mojaloop/#616](https://github.com/mojaloop/project/issues/616)
 * **mojaloop/#617** improve certificate syncing ([mojaloop/#617](https://github.com/mojaloop/sdk-scheme-adapter/pull/617)), closes [mojaloop/#617](https://github.com/mojaloop/project/issues/617)
@@ -30,13 +32,17 @@ _Release summary points go here..._
 * **mojaloop/#1212** use local lock with distlock ([mojaloop/#1212](https://github.com/mojaloop/central-ledger/pull/1212)), closes [mojaloop/#1212](https://github.com/mojaloop/project/issues/1212)
 * **mojaloop/#1218** participant limit cache could process transfer without erroring ([mojaloop/#1218](https://github.com/mojaloop/central-ledger/pull/1218)), closes [mojaloop/#1218](https://github.com/mojaloop/project/issues/1218)
 * **mojaloop/#1232** add condition on adjust limits ([mojaloop/#1232](https://github.com/mojaloop/central-ledger/pull/1232)), closes [mojaloop/#1232](https://github.com/mojaloop/project/issues/1232)
+* **mojaloop/#1253** do not modify the abort message in position handler #4317 ([mojaloop/#1253](https://github.com/mojaloop/central-ledger/pull/1253)), closes [mojaloop/#1253](https://github.com/mojaloop/project/issues/1253)
+* **mojaloop/#460** remove trailing zeros in response amounts #4302 ([mojaloop/#460](https://github.com/mojaloop/central-settlement/pull/460)), closes [mojaloop/#460](https://github.com/mojaloop/project/issues/460)
 * **mojaloop/#617** added generateHapiRoutes to avoid hapi routes manual definition ([mojaloop/#617](https://github.com/mojaloop/ml-api-adapter/pull/617)), closes [mojaloop/#617](https://github.com/mojaloop/project/issues/617)
 * **mojaloop/#619** added process.on listeners; improved consumer healthCheck ([mojaloop/#619](https://github.com/mojaloop/ml-api-adapter/pull/619)), closes [mojaloop/#619](https://github.com/mojaloop/project/issues/619)
+* **mojaloop/#626** updated deps ([mojaloop/#626](https://github.com/mojaloop/ml-api-adapter/pull/626)), closes [mojaloop/#626](https://github.com/mojaloop/project/issues/626)
 * **mojaloop/#43** fixed missing Slack notifications of timeout ([mojaloop/#43](https://github.com/mojaloop/ml-testing-toolkit-client-lib/pull/43)), closes [mojaloop/#43](https://github.com/mojaloop/project/issues/43)
 * **mojaloop/#44** improved timeout Slack report ([mojaloop/#44](https://github.com/mojaloop/ml-testing-toolkit-client-lib/pull/44)), closes [mojaloop/#44](https://github.com/mojaloop/project/issues/44)
 * **mojaloop/#342** fix MyEmitter memory leak ([mojaloop/#342](https://github.com/mojaloop/ml-testing-toolkit/pull/342)), closes [mojaloop/#342](https://github.com/mojaloop/project/issues/342)
 * **mojaloop/#349** added logs to output error ([mojaloop/#349](https://github.com/mojaloop/ml-testing-toolkit/pull/349)), closes [mojaloop/#349](https://github.com/mojaloop/project/issues/349)
 * **mojaloop/#350** included ISO20022 messages in TTK report callbacks ([mojaloop/#350](https://github.com/mojaloop/ml-testing-toolkit/pull/350)), closes [mojaloop/#350](https://github.com/mojaloop/project/issues/350)
+* **mojaloop/#371** download spec files issue #4197 ([mojaloop/#371](https://github.com/mojaloop/ml-testing-toolkit/pull/371)), closes [mojaloop/#371](https://github.com/mojaloop/project/issues/371)
 * **mojaloop/#424** removed unneeded info from logs ([mojaloop/#424](https://github.com/mojaloop/quoting-service/pull/424)), closes [mojaloop/#424](https://github.com/mojaloop/project/issues/424)
 * **mojaloop/#fxTransfers logic of sending notifications (** changed PATCH transfers/fxTransfers logic of sending notifications ([mojaloop/#605](https://github.com/mojaloop/sdk-scheme-adapter/pull/605)), closes [mojaloop/#fxTransfers logic of sending notifications (](https://github.com/mojaloop/project/issues/fxTransfers logic of sending notifications ()
 * **mojaloop/#607** updated deps ([mojaloop/#607](https://github.com/mojaloop/sdk-scheme-adapter/pull/607)), closes [mojaloop/#607](https://github.com/mojaloop/project/issues/607)
@@ -44,36 +50,37 @@ _Release summary points go here..._
 
 ## 3. Application Versions
 
-1. central-event-processor: v12.1.1 ->                     [v12.2.3](https://github.com/mojaloop/central-event-processor/releases/v12.2.3)                     ([Compare](https://github.com/mojaloop/central-event-processor/compare/v12.1.1...v12.2.3))
-2. bulk-api-adapter: v17.2.2 ->                     [v17.2.3](https://github.com/mojaloop/bulk-api-adapter/releases/v17.2.3)                     ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v17.2.2...v17.2.3))
+1. central-event-processor: v12.1.1 ->                     [v12.2.4](https://github.com/mojaloop/central-event-processor/releases/v12.2.4)                     ([Compare](https://github.com/mojaloop/central-event-processor/compare/v12.1.1...v12.2.4))
+2. bulk-api-adapter: v17.2.2 ->                     [v17.2.5](https://github.com/mojaloop/bulk-api-adapter/releases/v17.2.5)                     ([Compare](https://github.com/mojaloop/bulk-api-adapter/compare/v17.2.2...v17.2.5))
 3. event-sidecar: v14.2.0 ->                     [v14.2.1](https://github.com/mojaloop/event-sidecar/releases/v14.2.1)                     ([Compare](https://github.com/mojaloop/event-sidecar/compare/v14.2.0...v14.2.1))
 4. ml-testing-toolkit-ui: v16.6.4 ->                     [v16.7.4](https://github.com/mojaloop/ml-testing-toolkit-ui/releases/v16.7.4)                     ([Compare](https://github.com/mojaloop/ml-testing-toolkit-ui/compare/v16.6.4...v16.7.4))
 5. als-oracle-pathfinder: v12.3.1 ->                     [v12.3.4](https://github.com/mojaloop/als-oracle-pathfinder/releases/v12.3.4)                     ([Compare](https://github.com/mojaloop/als-oracle-pathfinder/compare/v12.3.1...v12.3.4))
-6. ml-testing-toolkit: v18.15.0 ->                     [v18.16.6](https://github.com/mojaloop/ml-testing-toolkit/releases/v18.16.6)                     ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v18.15.0...v18.16.6))
+6. ml-testing-toolkit: v18.15.0 ->                     [v18.19.1](https://github.com/mojaloop/ml-testing-toolkit/releases/v18.19.1)                     ([Compare](https://github.com/mojaloop/ml-testing-toolkit/compare/v18.15.0...v18.19.1))
 7. als-static-oracle-svc:  ->                     [v0.0.30](https://github.com/mojaloop/als-static-oracle-svc/releases/v0.0.30)                     ([Compare](https://github.com/mojaloop/als-static-oracle-svc/compare/...v0.0.30))
 8. transaction-requests-service: v14.4.5 ->                     [v14.4.7](https://github.com/mojaloop/transaction-requests-service/releases/v14.4.7)                     ([Compare](https://github.com/mojaloop/transaction-requests-service/compare/v14.4.5...v14.4.7))
-9. ml-api-adapter: v16.5.9 ->                     [v16.7.0](https://github.com/mojaloop/ml-api-adapter/releases/v16.7.0)                     ([Compare](https://github.com/mojaloop/ml-api-adapter/compare/v16.5.9...v16.7.0))
+9. ml-api-adapter: v16.5.9 ->                     [v16.8.2](https://github.com/mojaloop/ml-api-adapter/releases/v16.8.2)                     ([Compare](https://github.com/mojaloop/ml-api-adapter/compare/v16.5.9...v16.8.2))
 10. ml-testing-toolkit-client-lib: v1.10.3 ->                     [v1.12.2](https://github.com/mojaloop/ml-testing-toolkit-client-lib/releases/v1.12.2)                     ([Compare](https://github.com/mojaloop/ml-testing-toolkit-client-lib/compare/v1.10.3...v1.12.2))
-11. sdk-scheme-adapter: v24.10.5 ->                     [v24.18.5](https://github.com/mojaloop/sdk-scheme-adapter/releases/v24.18.5)                     ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v24.10.5...v24.18.5))
-12. mojaloop-simulator: v15.4.2 ->                     [v15.5.2](https://github.com/mojaloop/mojaloop-simulator/releases/v15.5.2)                     ([Compare](https://github.com/mojaloop/mojaloop-simulator/compare/v15.4.2...v15.5.2))
-13. thirdparty-api-svc: v15.1.2 ->                     [v15.1.4](https://github.com/mojaloop/thirdparty-api-svc/releases/v15.1.4)                     ([Compare](https://github.com/mojaloop/thirdparty-api-svc/compare/v15.1.2...v15.1.4))
+11. sdk-scheme-adapter: v24.10.5 ->                     [v24.19.3](https://github.com/mojaloop/sdk-scheme-adapter/releases/v24.19.3)                     ([Compare](https://github.com/mojaloop/sdk-scheme-adapter/compare/v24.10.5...v24.19.3))
+12. mojaloop-simulator: v15.4.2 ->                     [v15.5.3](https://github.com/mojaloop/mojaloop-simulator/releases/v15.5.3)                     ([Compare](https://github.com/mojaloop/mojaloop-simulator/compare/v15.4.2...v15.5.3))
+13. thirdparty-api-svc: v15.1.2 ->                     [v15.1.5](https://github.com/mojaloop/thirdparty-api-svc/releases/v15.1.5)                     ([Compare](https://github.com/mojaloop/thirdparty-api-svc/compare/v15.1.2...v15.1.5))
 14. als-consent-oracle: v1.1.4 ->                     [v1.1.6](https://github.com/mojaloop/als-consent-oracle/releases/v1.1.6)                     ([Compare](https://github.com/mojaloop/als-consent-oracle/compare/v1.1.4...v1.1.6))
-15. account-lookup-service: v17.12.2 ->                     [v17.14.11](https://github.com/mojaloop/account-lookup-service/releases/v17.14.11)                     ([Compare](https://github.com/mojaloop/account-lookup-service/compare/v17.12.2...v17.14.11))
+15. account-lookup-service: v17.12.2 ->                     [v17.15.2](https://github.com/mojaloop/account-lookup-service/releases/v17.15.2)                     ([Compare](https://github.com/mojaloop/account-lookup-service/compare/v17.12.2...v17.15.2))
 16. simulator: v12.3.2 ->                     [v12.3.6](https://github.com/mojaloop/simulator/releases/v12.3.6)                     ([Compare](https://github.com/mojaloop/simulator/compare/v12.3.2...v12.3.6))
-17. quoting-service: v17.12.1 ->                     [v17.13.11](https://github.com/mojaloop/quoting-service/releases/v17.13.11)                     ([Compare](https://github.com/mojaloop/quoting-service/compare/v17.12.1...v17.13.11))
-18. central-ledger: v19.8.3 ->                     [v19.12.0](https://github.com/mojaloop/central-ledger/releases/v19.12.0)                     ([Compare](https://github.com/mojaloop/central-ledger/compare/v19.8.3...v19.12.0))
-19. central-settlement: v17.2.2 ->                     [v17.3.2](https://github.com/mojaloop/central-settlement/releases/v17.3.2)                     ([Compare](https://github.com/mojaloop/central-settlement/compare/v17.2.2...v17.3.2))
-20. email-notifier: v14.1.4 ->                     [v14.1.6](https://github.com/mojaloop/email-notifier/releases/v14.1.6)                     ([Compare](https://github.com/mojaloop/email-notifier/compare/v14.1.4...v14.1.6))
-21. auth-service: [v15.2.7](https://github.com/mojaloop/auth-service/releases/v15.2.7)
-22. als-msisdn-oracle-svc: [v0.0.21](https://github.com/mojaloop/als-msisdn-oracle-svc/releases/v0.0.21)
-23. callback-handler-simulator-svc: [v0.1.3](https://github.com/mojaloop/callback-handler-simulator-svc/releases/v0.1.3)
-24. merchant-acquirer-backend: [1.0.1](https://github.com/mojaloop/merchant-acquirer-backend/releases/1.0.1)
-25. merchant-acquirer-frontend: [1.0.1](https://github.com/mojaloop/merchant-acquirer-frontend/releases/1.0.1)
-26. inter-scheme-proxy-adapter: [v1.3.3](https://github.com/mojaloop/inter-scheme-proxy-adapter/releases/v1.3.3)
-27. merchant-registry-oracle: [1.0.1](https://github.com/mojaloop/merchant-registry-oracle/releases/1.0.1)
-28. thirdparty-sdk: [v15.1.3](https://github.com/mojaloop/thirdparty-sdk/releases/v15.1.3)
-29. ml-core-test-harness: [v2.3.0](https://github.com/mojaloop/ml-core-test-harness/releases/v2.3.0)
-30. event-stream-processor: [v12.0.0-snapshot.14](https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.14)
+17. quoting-service: v17.12.1 ->                     [v17.14.3](https://github.com/mojaloop/quoting-service/releases/v17.14.3)                     ([Compare](https://github.com/mojaloop/quoting-service/compare/v17.12.1...v17.14.3))
+18. ml-ory-iam-services:  ->                     ["v0.1.1"](https://github.com/mojaloop/ml-ory-iam-services/releases/"v0.1.1")                     ([Compare](https://github.com/mojaloop/ml-ory-iam-services/compare/..."v0.1.1"))
+19. central-ledger: v19.8.3 ->                     [v19.12.7](https://github.com/mojaloop/central-ledger/releases/v19.12.7)                     ([Compare](https://github.com/mojaloop/central-ledger/compare/v19.8.3...v19.12.7))
+20. central-settlement: v17.2.2 ->                     [v17.3.3](https://github.com/mojaloop/central-settlement/releases/v17.3.3)                     ([Compare](https://github.com/mojaloop/central-settlement/compare/v17.2.2...v17.3.3))
+21. email-notifier: v14.1.4 ->                     [v14.1.7](https://github.com/mojaloop/email-notifier/releases/v14.1.7)                     ([Compare](https://github.com/mojaloop/email-notifier/compare/v14.1.4...v14.1.7))
+22. auth-service: [v15.2.7](https://github.com/mojaloop/auth-service/releases/v15.2.7)
+23. als-msisdn-oracle-svc: [v0.0.21](https://github.com/mojaloop/als-msisdn-oracle-svc/releases/v0.0.21)
+24. callback-handler-simulator-svc: [v0.1.3](https://github.com/mojaloop/callback-handler-simulator-svc/releases/v0.1.3)
+25. merchant-acquirer-backend: [1.0.1](https://github.com/mojaloop/merchant-acquirer-backend/releases/1.0.1)
+26. merchant-acquirer-frontend: [1.0.1](https://github.com/mojaloop/merchant-acquirer-frontend/releases/1.0.1)
+27. inter-scheme-proxy-adapter: [v1.3.3](https://github.com/mojaloop/inter-scheme-proxy-adapter/releases/v1.3.3)
+28. merchant-registry-oracle: [1.0.1](https://github.com/mojaloop/merchant-registry-oracle/releases/1.0.1)
+29. thirdparty-sdk: [v15.1.3](https://github.com/mojaloop/thirdparty-sdk/releases/v15.1.3)
+30. ml-core-test-harness: [v2.3.0](https://github.com/mojaloop/ml-core-test-harness/releases/v2.3.0)
+31. event-stream-processor: [v12.0.0-snapshot.14](https://github.com/mojaloop/event-stream-processor/releases/v12.0.0-snapshot.14)
 
 ## 4. API Versions
 
@@ -137,18 +144,18 @@ This release supports the following versions of the [Mojaloop family of APIs](ht
 
 
 ### central-ledger
-  * migrations/310405_participantPositionChange-positionChange.js: (https://github.com/mojaloop/central-ledger/blob/930f69d15031c810e85037e0cb93789706839051/migrations%2F310405_participantPositionChange-positionChange.js)
-  * migrations/310406_participantPositionChange-positionChange-revert.js: (https://github.com/mojaloop/central-ledger/blob/930f69d15031c810e85037e0cb93789706839051/migrations%2F310406_participantPositionChange-positionChange-revert.js)
-  * migrations/961000_participantEndpoint_unique.js: (https://github.com/mojaloop/central-ledger/blob/930f69d15031c810e85037e0cb93789706839051/migrations%2F961000_participantEndpoint_unique.js)
-  * migrations/961001_transferForwarded.js: (https://github.com/mojaloop/central-ledger/blob/930f69d15031c810e85037e0cb93789706839051/migrations%2F961001_transferForwarded.js)
-  * migrations/961002_fxTransferForwarded.js: (https://github.com/mojaloop/central-ledger/blob/930f69d15031c810e85037e0cb93789706839051/migrations%2F961002_fxTransferForwarded.js)
+  * migrations/310405_participantPositionChange-positionChange.js: (https://github.com/mojaloop/central-ledger/blob/be78a42de066e54995cd443a87743db87d100dcd/migrations%2F310405_participantPositionChange-positionChange.js)
+  * migrations/310406_participantPositionChange-positionChange-revert.js: (https://github.com/mojaloop/central-ledger/blob/be78a42de066e54995cd443a87743db87d100dcd/migrations%2F310406_participantPositionChange-positionChange-revert.js)
+  * migrations/961000_participantEndpoint_unique.js: (https://github.com/mojaloop/central-ledger/blob/be78a42de066e54995cd443a87743db87d100dcd/migrations%2F961000_participantEndpoint_unique.js)
+  * migrations/961001_transferForwarded.js: (https://github.com/mojaloop/central-ledger/blob/be78a42de066e54995cd443a87743db87d100dcd/migrations%2F961001_transferForwarded.js)
+  * migrations/961002_fxTransferForwarded.js: (https://github.com/mojaloop/central-ledger/blob/be78a42de066e54995cd443a87743db87d100dcd/migrations%2F961002_fxTransferForwarded.js)
 ### ml-api-adapter
-  * config/default.json: (https://github.com/mojaloop/ml-api-adapter/blob/ca89dfbb1a8a89d2fe01f36ac64ad65274b41e77/config%2Fdefault.json)
+  * config/default.json: (https://github.com/mojaloop/ml-api-adapter/blob/99d921942a5fd8f904516ad4e2dd41cbb69f9467/config%2Fdefault.json)
 ### quoting-service
-  * config/default.json: (https://github.com/mojaloop/quoting-service/blob/54e8ffc3d9302e299990315210436603f432c8b7/config%2Fdefault.json)
+  * config/default.json: (https://github.com/mojaloop/quoting-service/blob/e1f9ccc986f056b0bbe54545b690f94419b17f5a/config%2Fdefault.json)
 ### account-lookup-service
-  * config/default.json: (https://github.com/mojaloop/account-lookup-service/blob/244d5e363caa282a90a362358aa5ec59c355cd1a/config%2Fdefault.json)
-  * docker/account-lookup-service/default.json: (https://github.com/mojaloop/account-lookup-service/blob/244d5e363caa282a90a362358aa5ec59c355cd1a/docker%2Faccount-lookup-service%2Fdefault.json)
+  * config/default.json: (https://github.com/mojaloop/account-lookup-service/blob/98989b58a03e3ab3d5a8856935217c45a4d87ed0/config%2Fdefault.json)
+  * docker/account-lookup-service/default.json: (https://github.com/mojaloop/account-lookup-service/blob/98989b58a03e3ab3d5a8856935217c45a4d87ed0/docker%2Faccount-lookup-service%2Fdefault.json)
 
 ## 7. Known Issues
 
