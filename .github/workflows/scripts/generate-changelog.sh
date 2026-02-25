@@ -87,18 +87,28 @@ find . -type d -name '[!.]*' -exec test -e "{}/Chart.yaml" ';' -print | while re
 done
 
 # Checkout out last release tag and extract repository name and tag in its all values.yaml files
-git stash
-git switch --detach $last_release_tag
-find . -type d -name '[!.]*' -exec test -e "{}/Chart.yaml" ';' -print | while read chart_dir; do
-    base_chart_dir=$(echo $chart_dir | cut -d'/' -f2)
-    if [[ ! " ${excluded_charts[@]} " =~ " ${base_chart_dir} " ]]; then
-        helm show values "$chart_dir" | grep -E 'repository:|tag:' | awk '{print $1 $2}' >> "${dir}/tags/last-release-tags.log"
-    fi
+# Extract CURRENT tags from the current working tree
+find . -type d -name '[!.]*' -exec test -e "{}/Chart.yaml" ';' -print | while read -r chart_dir; do
+  base_chart_dir=$(echo "$chart_dir" | cut -d'/' -f2)
+  if [[ ! " ${excluded_charts[*]} " =~ " ${base_chart_dir} " ]]; then
+    helm show values "$chart_dir" | grep -E 'repository:|tag:' | awk '{print $1 $2}' >> "${dir}/tags/current-tags.log"
+  fi
 done
 
-# Checkout back to current branch
-git checkout $current_branch
-git stash pop
+# Extract LAST RELEASE tags using a temporary git worktree
+last_release_wt="${dir}/worktrees/last-release"
+mkdir -p "${dir}/worktrees"
+git worktree add -f "$last_release_wt" "$last_release_tag" >/dev/null
+
+find "$last_release_wt" -type d -name '[!.]*' -exec test -e "{}/Chart.yaml" ';' -print | while read -r chart_dir; do
+  rel="${chart_dir#${last_release_wt}/}"
+  base_chart_dir=$(echo "$rel" | cut -d'/' -f1)
+  if [[ ! " ${excluded_charts[*]} " =~ " ${base_chart_dir} " ]]; then
+    helm show values "$chart_dir" | grep -E 'repository:|tag:' | awk '{print $1 $2}' >> "${dir}/tags/last-release-tags.log"
+  fi
+done
+
+git worktree remove -f "$last_release_wt" >/dev/null
 
 # accept all stashed changes
 # git stash list | awk -F: '{print $1}' | xargs -n 1 git stash apply
@@ -108,50 +118,107 @@ git stash pop
 # The associative arrays are indexed by the repository name and the value is the tag
 # We then iterate through the associative arrays and generate the changelog for each repository that has changed
 
-# Read last release tags into associative array 'last_release_tags' 
-while IFS= read -r line
-do
-    if [[ $line == *"repository:"* ]]
-    then
-        repository=$(echo $line | cut -d':' -f2 | cut -d' ' -f1)
-        last_release_tags[$repository]=null
-    fi
-    
-    if [[ $line == *"tag:"* ]]
-    then
-        tag=$(echo $line | cut -d':' -f2)
-        last_release_tags[$repository]=$tag
-    fi
+# Trim leading/trailing whitespace (pure bash, no xargs)
+trim() {
+  local s="$1"
+  s="${s#"${s%%[![:space:]]*}"}"   # leading
+  s="${s%"${s##*[![:space:]]}"}"   # trailing
+  printf '%s' "$s"
+}
+############################################
+# Read last release tags into associative array 'last_release_tags'
+############################################
+while IFS= read -r line; do
+  if [[ $line == repository:* ]]; then
+    repository="$(trim "${line#repository:}")"
+    last_release_tags["$repository"]=null
+
+  elif [[ $line == tag:* ]]; then
+    tag="$(trim "${line#tag:}")"
+    last_release_tags["$repository"]="$tag"
+  fi
 done < "$dir/tags/last-release-tags.log"
 
+############################################
 # Read current tags into associative array 'current_tags'
-while IFS= read -r line
-do
-    if [[ $line == *"repository:"* ]]
-    then
-        repository=$(echo $line | cut -d':' -f2 | cut -d' ' -f1)
-        current_tags[$repository]=null
-    fi
-    
-    if [[ $line == *"tag:"* ]]
-    then
-        tag=$(echo $line | cut -d':' -f2)
-        current_tags[$repository]=$tag
-    fi
+############################################
+while IFS= read -r line; do
+  if [[ $line == repository:* ]]; then
+    repository="$(trim "${line#repository:}")"
+    current_tags["$repository"]=null
+
+  elif [[ $line == tag:* ]]; then
+    tag="$(trim "${line#tag:}")"
+    current_tags["$repository"]="$tag"
+  fi
 done < "$dir/tags/current-tags.log"
 
-# Generate changelog for each mojaloop repository that has changed using github api
-for repository in "${!last_release_tags[@]}"
-do
-    if [[ $repository == mojaloop* && ${current_tags[$repository]} && ${last_release_tags[$repository]} != ${current_tags[$repository]} ]]
-    then
-        repository_short_name=$(echo $repository | cut -d'/' -f2)
-        curl -s -L \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $AUTO_RELEASE_TOKEN" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/$repository/compare/${last_release_tags[$repository]}...${current_tags[$repository]} > $dir/changelogs/$repository_short_name.json
-    fi
+echo "DEBUG: last_release_tags entries = ${#last_release_tags[@]}"
+echo "DEBUG: current_tags entries      = ${#current_tags[@]}"
+
+echo "DEBUG: sample last_release_tags:"
+for k in "${!last_release_tags[@]}"; do echo "  $k => ${last_release_tags[$k]}"; break; done
+echo "DEBUG: sample current_tags:"
+for k in "${!current_tags[@]}"; do echo "  $k => ${current_tags[$k]}"; break; done
+############################################
+# Generate changelog for repos that changed
+############################################
+
+is_bad_ref() {
+  local ref="$1"
+  ref="$(trim "$ref")"
+
+  # empty / null
+  [[ -z "$ref" || "$ref" == "null" ]] && return 0
+
+  # obvious templating or quoting artifacts
+  [[ "$ref" == *"{{"* || "$ref" == *"}}"* || "$ref" == *"{"* || "$ref" == *"}"* ]] && return 0
+  [[ "$ref" == *"\""* || "$ref" == *"'"* ]] && return 0
+
+  # whitespace inside ref is suspicious for URLs
+  [[ "$ref" =~ [[:space:]] ]] && return 0
+
+  return 1
+}
+
+for repository in "${!last_release_tags[@]}"; do
+  last="${last_release_tags[$repository]}"
+  curr="${current_tags[$repository]}"
+
+  echo "DEBUG repo=[$repository] last=[$last] curr=[$curr]"
+
+  # Only Mojaloop GitHub repos in owner/repo form
+  if [[ "$repository" != mojaloop/* ]]; then
+    continue
+  fi
+
+  # Need both refs and must be different
+  if is_bad_ref "$last" || is_bad_ref "$curr"; then
+    echo "WARN: skipping $repository due to bad ref(s): last=[$last] curr=[$curr]" >&2
+    continue
+  fi
+
+  if [[ "$last" == "$curr" ]]; then
+    continue
+  fi
+
+  repository_short_name="$(echo "$repository" | cut -d'/' -f2)"
+  out="$dir/changelogs/$repository_short_name.json"
+
+  url="https://api.github.com/repos/$repository/compare/${last}...${curr}"
+
+  # Do not let a single repo failure kill the whole script
+  http_code="$(curl -sS -L -o "$out" -w "%{http_code}" \
+    -H "Accept: application/vnd.github+json" \
+    -H "Authorization: Bearer $AUTO_RELEASE_TOKEN" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    "$url" || true)"
+
+  if [[ "$http_code" != "200" ]]; then
+    echo "WARN: compare failed for $repository ($http_code) url=$url" >&2
+    rm -f "$out"
+    continue
+  fi
 done
 
 echo "Changelog generated successfully."

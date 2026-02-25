@@ -343,14 +343,14 @@ workflows:
             - setup
           filters:
             tags:
-              only: /.*/
+              ignore: /.*-snapshot.*/
       - test-lint-yaml:
           context: org-global
           requires:
             - test
           filters:
             tags:
-              only: /v[0-9]+(\.[0-9]+)*(\-snapshot+((\.[0-9]+)?))?/
+              ignore: /.*-snapshot.*/
             branches:
               only: /main|(major|minor|patch)/.*/
       - test-lint-k8s:
@@ -359,7 +359,7 @@ workflows:
             - test
           filters:
             tags:
-              only: /v[0-9]+(\.[0-9]+)*(\-snapshot+((\.[0-9]+)?))?/
+              ignore: /.*-snapshot.*/
             branches:
               only: /main|(major|minor|patch)/.*/
       - audit-licenses:
@@ -384,6 +384,16 @@ workflows:
             - audit-licenses
           filters:
             tags:
-              only: /v[0-9]+(\.[0-9]+)*(\-snapshot+((\.[0-9]+)?))?/
+              ignore: /.*-snapshot.*/
             branches:
               only: /main|(major|minor|patch)/.*/
+      - deploy:
+          name: deploy-snapshot
+          context: org-global
+          requires:
+            - audit-licenses
+          filters:
+            tags:
+              only: /.*-snapshot.*/
+            branches:
+              ignore: /.*/
