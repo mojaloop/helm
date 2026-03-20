@@ -1,0 +1,17 @@
+name: Trigger CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  trigger-cd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger ml-helm-aws-cd-test-ops pipeline
+        run: |
+          curl -X POST \
+            -H "Circle-Token: ${{ secrets.CIRCLECI_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            https://circleci.com/api/v2/project/gh/mojaloop/ml-helm-aws-cd-test-ops/pipeline
