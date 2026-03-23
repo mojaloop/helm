@@ -1,0 +1,28 @@
+name: Trigger CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  trigger-cd:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Trigger ml-helm-aws-cd-test-ops pipeline
+        env:
+          CIRCLECI_TOKEN: ${{ secrets.CIRCLECI_TOKEN }}
+        run: |
+          set -euo pipefail
+          url="https://circleci.com/api/v2/project/gh/mojaloop/ml-helm-aws-cd-test-ops/pipeline"
+          echo "Triggering CircleCI pipeline"
+          curl --fail -sS -X POST \
+            -H "Circle-Token: ${CIRCLECI_TOKEN}" \
+            -H "Content-Type: application/json" \
+            "$url"
+          echo "CircleCI pipeline triggered successfully."
+        shell: bash

@@ -2,19 +2,16 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-migration-job
+  name: {{ .Release.Name }}-migration-{{ include "connection-manager.migrationSuffix" . }}
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-delete-policy": {{ .Values.migrations.deletePolicy }}
 spec:
   template:
     metadata:
-      name: "{{ .Release.Name }}-migration-job"
+      name: "{{ .Release.Name }}-migration-{{ include "connection-manager.migrationSuffix" . }}"
       labels:
         app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -113,6 +110,16 @@ spec:
           value: {{ .Values.db.schema }}
         - name: DATABASE_PORT
           value: {{ .Values.db.port | quote }}
+        {{- if .Values.migrations.env }}
+        {{- range $key, $val := .Values.migrations.env }}
+        - name: {{ $key | quote }}
+          {{- if kindIs "map" $val }}
+          {{- toYaml $val | nindent 10 }}
+          {{- else }}
+          value: {{ $val | quote }}
+          {{- end }}
+        {{- end }}
+        {{- end }}
       restartPolicy: OnFailure
   backoffLimit: 20
 {{- end }}
