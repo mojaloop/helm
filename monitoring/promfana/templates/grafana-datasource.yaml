@@ -1,0 +1,23 @@
+{{- if .Values.kps.grafana.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasource
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  prometheus.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: {{ .Values.prometheusDatasource.name | quote }}
+        uid: {{ .Values.prometheusDatasource.uid | quote }}
+        type: prometheus
+        access: proxy
+        orgId: 1
+        url: {{ include "promfana.prometheusDatasourceURL" . | quote }}
+        version: 1
+        editable: true
+        isDefault: {{ .Values.prometheusDatasource.isDefault }}
+{{- end }}

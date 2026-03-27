@@ -1,160 +1,202 @@
-# Prometheus & Grafana Monitoring for Mojaloop
+# Promfana
 
-**What?**
-- **Prometheus**: Leading open-source instrumentation solution for monitoring
-- **Grafana**: The open platform for beautiful analytics and monitoring
+This chart is a Mojaloop wrapper around `kube-prometheus-stack`.
 
-**Why?**
-- Metric Instrumentation for Mojaloop
-- Low overhead on nodejs (histograms + pull metric end-point)
-- Real-time metric visualization for Performance and Health monitoring of the Mojaloop Stack
+## What this chart does
 
-## Mojaloop Prometheus & Grafana Installation
+- Installs Prometheus and Grafana through `kube-prometheus-stack`
+- Keeps defaults minimal
+- Packages Grafana dashboards as part of the Helm release
+- Preserves Grafana folders using ConfigMap annotations
+- Avoids hardcoding the namespace by rendering namespaced URLs dynamically
+- Supports a Grafana admin secret managed by this chart
 
-### 1. Installation
+## Included by default
 
-Ensure that you have setup the Mojaloop Helm repository: `helm repo add mojaloop http://mojaloop.io/helm/repo/`
+- Prometheus: enabled
+- Grafana: enabled
+- kube-state-metrics: enabled
+- node-exporter: enabled
+- Prometheus Operator: enabled
+- Alertmanager: disabled
+- Grafana ingress: disabled
+- Persistence: disabled
+- Dashboards: enabled
 
-#### 1.1. Install Helm Chart: 
+## Dashboard folders
 
-`helm install --namespace=monitoring --name=promfana mojaloop/promfana`
+Place dashboard JSON files in:
 
-___Note that you are welcome to change the target namespace in the above command as required.___
+- `dashboards/application/`
+- `dashboards/datastore/`
+- `dashboards/messaging/`
+- `dashboards/kubernetes/`
 
-#### 1.2. Configure Network Policy to allow for all Ingresses into the your Mojaloop environment from the Internal K8s Network:
+These map to the following Grafana folders by default:
 
-Run the following command, taking note that the following parameters will need to be changed: `$NAME_SPACE`, `$IP_RANGE`
-```YAML
-    cat <<EOF | kubectl create -f -
-    apiVersion: extensions/v1beta1
-    kind: NetworkPolicy
-    metadata:
-      name: hn-nodes-custom
-      namespace: $NAME_SPACE
-    spec:
-      ingress:
-      - from:
-        - ipBlock:
-            cidr: $IP_RANGE
-      podSelector: {}
-      policyTypes:
-      - Ingress
-     EOF
-``` 
+- `Mojaloop - Application`
+- `Mojaloop - Datastore`
+- `Mojaloop - Messaging`
+- `Mojaloop - Kubernetes`
 
-Parameters that you will need to be configured:
+## Install
 
-1. Update the `$NAME_SPACE` to match your target Mojaloop namespace. Specifically the namespace where you have deployed Mojaloop.
-2. Where the cidr should be updated to match your cluster's k8s virtual network range. e.g. `$IP_RANGE`=`10.42.0.0/24`.
+Add the chart repository and install with the default release name `promfana`:
 
-__Note: this NetworkPolicy will need to be created for any Namespace that contains pods with Prometheus metric collection end-points. Failing to do so will results in Prometheus being unable to collect metrics from any pods within that namespace.__
-
-### 2. Grafana Dashboard Credentials:
-
-User: `kubectl -n monitoring get secrets/promfana-grafana -o 'go-template={{index .data "admin-user"}}' | base64 -D`
-Password: `kubectl -n monitoring get secrets/promfana-grafana -o 'go-template={{index .data "admin-password"}}' | base64 -D`
-
-### 3. Configure Grafana Data Source:
-
-Login to the Grafana dashboard.
-
-1. Create a new Data Source
-2. Name: `Prometheus`
-3. Type: `Prometheus`
-4. Mark it as `default`
-5. URL: `http://promfana-prometheus-server`
-
-### 4. Import Dashboards
-
-Instructions [Grafana Dashboard Installation](./dashboards/README.md)
-
-
-## Alternative Manual Prometheus & Grafana without Mojaloop Helm Chart/Repository
-
-### 1. Install Prometheus
-
-`helm install --namespace=monitoring --name=prom stable/prometheus -f values.yaml`
-
-__Where the values.yaml is the respective values file for the stable/prometheus chart__
-
-### 2. Install Grafana
-
-`helm install --namespace=monitoring --name=graf stable/grafana -f values.yaml`
-
-__Where the values.yaml is the respective values file for the stable/grafana chart__
-
-___Note: Please ensure that you configure the Ingress for Grafana & Prometheus as required in the values.yaml.___
-
-___Note: Target namespace in the above command can be changed as required.___
-
-### 3. Follow the above steps in "Mojaloop Prometheus & Grafana Installation" section 
-
-- [Network Policy Configuration](#12-Configure-Network-Policy-to-allow-for-all-Ingresses-into-the-your-Mojaloop-environment-from-the-Internal-K8s-Network)
-- [Grafana Dashboard Credentials](#2-Grafana-Dashboard-Credentials)
-- [Configure Grafana Data Source](#3-Configure-Grafana-Data-Source)
-- [Import Dashboards](#4-Import-Dashboards)
-
-## Known issues
-
-1. **Warning:** Prometheus does not have an authentication mechanism. To be addressed in future. It is not recommended that you expose this through Ingress publicly. 
-
-2. Affinity and tolerations are not being set correctly by the Prometheus helm chart as when this was written. One must manually add this in the deployment template if desired until the issue has been resolved.
-
-```JSON
-        "affinity": {
-          "nodeAffinity": {
-            "requiredDuringSchedulingIgnoredDuringExecution": {
-              "nodeSelectorTerms": [
-                {
-                  "matchExpressions": [
-                    {
-                      "key": "node-role-type",
-                      "operator": "In",
-                      "values": [
-                        "controlplane"
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          }
-        },
-        "tolerations": [
-          {
-            "key": "dedicated",
-            "operator": "Equal",
-            "value": "master",
-            "effect": "NoSchedule"
-          }
-        ]
-```
-
-3. Grafana dashboards show an error 414 - Request-URI Too Large.
-
-This is more than likely caused by default configuration of the Ingress Controller (or similiar proxy/routing device) not able to handle the length of the URI being requested by the Grafana dashboards.
-
-This can be resolved by configuring your Ingress Controller to accept larger URIs.
-
-The following example configuration for Ingress-Nginx Controller can be made to resolve this:
-
-```YAML
-  client-header-buffer-size: 16k
-  large-client-header-buffers: 4 32k
-```
-
-Refer to the below links for more information:
-- [client-header-buffer-size](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#client-header-buffer-size)
-- [large-client-header-buffers](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#large-client-header-buffers)
-
-4. MySQL Percona Xtra DB Cluster is not showing metrics on the datastore dashboards
-
-Ensure that the MySQL Percona Xtra DB Cluster has been correctly annotated with the following:
-- prometheus.io/port=9104
-- prometheus.io/scrape=true
-
-Example command to add the annotations to an existing deployment:
 ```bash
-kubectl -n <NAMESPACE> annotate pods <RELEASE_NAME>-centralledger-mysql-0 prometheus.io/port=9104
-kubectl -n <NAMESPACE> annotate pods <RELEASE_NAME>-centralledger-mysql-0 prometheus.io/scrape=true
+helm repo add mojaloop https://mojaloop.github.io/charts/repo
+helm repo update
+
+helm install promfana mojaloop/promfana   --namespace monitoring   --create-namespace
+```
+
+You can install into any namespace by changing `--namespace`:
+
+```bash
+helm install promfana mojaloop/promfana   --namespace observability   --create-namespace
+```
+
+> Namespace is fully dynamic in this chart. Resources created by this chart use `{{ .Release.Namespace }}` and the Prometheus datasource URL is rendered with the install namespace.
+
+## Access Grafana from your local machine
+
+Grafana ingress is disabled by default, so the easiest local access method is port-forwarding the Grafana service.
+
+### 1) Find the Grafana service name
+
+```bash
+kubectl get svc -n monitoring   -l app.kubernetes.io/name=grafana,app.kubernetes.io/instance=promfana
+```
+
+### 2) Port-forward Grafana to your local machine
+
+```bash
+kubectl port-forward -n monitoring   svc/$(kubectl get svc -n monitoring   -l app.kubernetes.io/name=grafana,app.kubernetes.io/instance=promfana   -o jsonpath='{.items[0].metadata.name}')   3000:80
+```
+
+Then open:
+
+```text
+http://localhost:3000
+```
+
+## Access Grafana through an ingress URL
+
+If you want a browser-friendly URL instead of port-forwarding, enable ingress in `values.yaml`:
+
+```yaml
+kps:
+  grafana:
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - grafana.mojaloop.local
+      tls: []
+    grafana.ini:
+      server:
+        root_url: https://grafana.mojaloop.local
+```
+
+Then point the hostname to your ingress IP using DNS or `/etc/hosts`.
+
+## Get the Grafana admin password
+
+This chart creates a secret by default:
+
+- Secret name: `promfana-grafana-admin`
+- User key: `admin-user`
+- Password key: `admin-password`
+
+### Get the admin username
+
+```bash
+kubectl get secret promfana-grafana-admin -n monitoring   -o jsonpath='{.data.admin-user}' | base64 --decode && echo
+```
+
+### Get the admin password
+
+```bash
+kubectl get secret promfana-grafana-admin -n monitoring   -o jsonpath='{.data.admin-password}' | base64 --decode && echo
+```
+
+If you change the secret name or keys in `values.yaml`, use those values instead.
+
+## Good practice for credentials
+
+This chart keeps the Secret resource in the chart, but you should still override the default placeholder password in real environments.
+
+Example:
+
+```yaml
+grafanaAdminSecret:
+  enabled: true
+  name: promfana-grafana-admin
+  username: admin
+  password: "replace-this-in-your-own-values-file"
+
+kps:
+  grafana:
+    admin:
+      existingSecret: promfana-grafana-admin
+      userKey: admin-user
+      passwordKey: admin-password
+```
+
+For more advanced environments, you can point Grafana at a different existing secret by overriding:
+
+```yaml
+kps:
+  grafana:
+    admin:
+      existingSecret: my-external-grafana-secret
+      userKey: admin-user
+      passwordKey: admin-password
+```
+
+## Alertmanager
+
+Alertmanager is disabled by default to keep the install minimal.
+
+Enable it only when needed:
+
+```yaml
+kps:
+  alertmanager:
+    enabled: true
+```
+
+Notification receivers are intentionally left empty by default. Users can override them with Slack, email, webhook, or other receiver configuration as needed.
+
+## Prometheus datasource
+
+This chart provisions a Grafana datasource named `Prometheus`.
+
+By default it points Grafana at:
+
+```text
+http://prometheus-operated.<install-namespace>.svc:9090
+```
+
+If your environment uses a different Prometheus service, override:
+
+```yaml
+prometheusDatasource:
+  serviceName: your-prometheus-service
+  servicePort: 9090
+```
+
+## Important notes
+
+- Keep Prometheus internal by default. Do not expose it publicly unless you have a specific reason and appropriate access controls.
+- If you enable Grafana ingress with HTTPS, also set `kps.grafana.grafana.ini.server.root_url` and consider setting `kps.grafana.grafana.ini.security.cookie_secure: true`.
+- If you install with a release name other than `promfana`, also override:
+  - `grafanaAdminSecret.name`
+  - `kps.grafana.admin.existingSecret`
+
+## Package / template locally
+
+```bash
+helm dependency update monitoring/promfana
+helm template promfana ./monitoring/promfana --namespace monitoring
 ```
