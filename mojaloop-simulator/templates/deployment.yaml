@@ -5,6 +5,7 @@
 {{- $releaseName := .Release.Name -}}
 
 {{- range $name, $customConfig := .Values.simulators }}
+{{- if $customConfig }}
 {{- $fullName := printf "%s%s" $prefix $name }}
 {{- $config := merge $customConfig $.Values.defaults }}
 {{- $initContainerEnv := dict "SIM_NAME" $name "SIM_SCHEME_ADAPTER_SERVICE_NAME" (printf "sim-%s-scheme-adapter" $name) "SIM_BACKEND_SERVICE_NAME" (printf "sim-%s-backend" $name) "SIM_CACHE_SERVICE_NAME" (printf "sim-%s-cache" $name) -}}
@@ -481,6 +482,10 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
 ---
+{{- end }}
+##
+### End if
+##
 {{- end }}
 ##
 ### End loop through simulators
