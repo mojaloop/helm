@@ -25,6 +25,14 @@
     "DEBUG": {{ .Values.config.db_debug }},
     "ADDITIONAL_CONNECTION_OPTIONS": {{ .Values.config.db_additional_connection_options | toPrettyJson | nindent 4 }}
   },
+  "MONGODB": {
+    "DISABLED": true,
+    "HOST": "mongodb",
+    "PORT": "27017",
+    "USER": "",
+    "PASSWORD": "",
+    "DATABASE": "mlos"
+  },
   "WINDOW_AGGREGATION": {
     "RETRY_COUNT": {{ .Values.config.window_aggregation.retry_count }},
     "RETRY_INTERVAL": {{ .Values.config.window_aggregation.retry_interval }}
@@ -32,12 +40,22 @@
   "TRANSFER_VALIDITY_SECONDS": "432000",
   "HUB_PARTICIPANT": {
       "ID": {{ .Values.config.hub_participant.id }},
-      "NAME": "{{ .Values.config.hub_participant.name }}"
+      "NAME": "{{ .Values.config.hub_participant.name }}",
+      "ACCOUNTS": [
+        "HUB_RECONCILIATION",
+        "HUB_MULTILATERAL_SETTLEMENT",
+        "HUB_FEE"
+      ]
   },
   "HANDLERS": {
     "DISABLED": {{ .Values.config.handlers.disabled }},
     "API": {
       "DISABLED": {{ .Values.config.handlers.api.disabled }}
+    },
+    "TIMEOUT": {
+      "DISABLED": true,
+      "TIMEXP": "*/15 * * * * *",
+      "TIMEZONE": "UTC"
     },
     "SETTINGS": {
       "RULES": {
@@ -46,6 +64,51 @@
         "CONSUMER_COMMIT": true,
         "FROM_SWITCH": true
     }
+    }
+  },
+  "INSTRUMENTATION": {
+    "METRICS": {
+      "DISABLED": true,
+      "labels": {
+        "fspId": "*"
+      },
+      "config": {
+        "timeout": 5000,
+        "prefix": "moja_",
+        "defaultLabels": {
+          "serviceName": "central-settlement"
+        }
+      }
+    }
+  },
+  "MIGRATIONS": {
+    "DISABLED": true,
+    "RUN_DATA_MIGRATIONS": true
+  },
+  "AMOUNT": {
+    "PRECISION": 18,
+    "SCALE": 4
+  },
+  "SIDECAR": {
+    "DISABLED": true,
+    "HOST": "localhost",
+    "PORT": 5678,
+    "CONNECT_TIMEOUT": 45000,
+    "RECONNECT_INTERVAL": 5000
+  },
+  "PARTICIPANT_INITIAL_POSITION": 0,
+  "INTERNAL_TRANSFER_VALIDITY_SECONDS": "432000",
+  "PAYEE_PARTICIPANT_CURRENCY_VALIDATION_ENABLED": true,
+  "CACHE": {
+    "CACHE_ENABLED": false,
+    "MAX_BYTE_SIZE": 10000000,
+    "EXPIRES_IN_MS": 1000
+  },
+  "PROXY_CACHE": {
+    "enabled": false,
+    "type": "redis-cluster",
+    "proxyConfig": {
+      "cluster": []
     }
   },
   "API_DOC_ENDPOINTS_ENABLED": true,
