@@ -1,0 +1,35 @@
+apiVersion: v2
+name: mojaloop-iam
+description: Mojaloop IAM stack — Ory (Oathkeeper, Keto, Kratos), Keycloak operator, and Mojaloop Ory IAM services
+type: application
+version: 17.2.0
+appVersion: "0.1.0"
+keywords:
+  - mojaloop
+  - iam
+  - rbac
+  - ory
+  - keycloak
+sources:
+  - https://github.com/mojaloop/helm
+dependencies:
+  - name: oathkeeper
+    version: 0.55.0
+    repository: "https://k8s.ory.sh/helm/charts"
+    condition: oathkeeper.enabled
+  - name: keto
+    version: 0.55.0
+    repository: "https://k8s.ory.sh/helm/charts"
+    condition: keto.enabled
+  - name: kratos
+    version: 0.55.0
+    repository: "https://k8s.ory.sh/helm/charts"
+    condition: kratos.enabled
+  - name: keycloak-operator
+    alias: keycloak
+    version: 1.11.4
+    repository: "https://charts.adfinis.com"
+    condition: keycloak.enabled
+  - name: ory-services
+    version: 17.2.0
+    repository: "file://../ory-services"
