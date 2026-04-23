@@ -160,8 +160,8 @@ The following Helm Charts have the following external dependencies:
 Setting `iam.enabled: true` on the top-level Mojaloop chart activates the full IAM stack via the `mojaloop-iam` sub-chart:
 
 - `oathkeeper`, `keto`, `kratos` (upstream Ory charts)
-- `keycloak` (Keycloak operator)
-- `ory-services` (Mojaloop Ory IAM services: keto-batch-auth, kratos-role-webhook)
+- `hydra` (Ory Hydra OAuth2/OIDC server)
+- `ml-iam-services` (Mojaloop Ory IAM services: keto-batch-auth, kratos-role-webhook)
 
 It also signals that per-app IAM should be enabled for apps that support it (e.g. `connection-manager`).
 
@@ -169,15 +169,15 @@ It also signals that per-app IAM should be enabled for apps that support it (e.g
 helm --namespace moja install dev mojaloop/mojaloop --set iam.enabled=true
 ```
 
-Chart-specific configuration lives under each sub-chart's values key inside `mojaloop-iam` (`oathkeeper`, `keto`, `kratos`, `keycloak`, `ory-services`). Defaults are sane for a reference deployment — override DSNs, secrets, and FQDNs for anything beyond local testing.
+Chart-specific configuration lives under each sub-chart's values key inside `mojaloop-iam` (`oathkeeper`, `keto`, `kratos`, `hydra`, `ml-iam-services`). Defaults are sane for a reference deployment — override DSNs, secrets, and FQDNs for anything beyond local testing.
 
-If you already run parts of the stack externally (e.g. an existing Keycloak), opt out per chart while keeping the rest:
+If you already run parts of the stack externally (e.g. an existing Hydra), opt out per chart while keeping the rest:
 
 ```bash
-helm ... --set iam.enabled=true --set mojaloop-iam.keycloak.enabled=false
+helm ... --set iam.enabled=true --set mojaloop-iam.hydra.enabled=false
 ```
 
-Each of `oathkeeper`, `keto`, `kratos`, `keycloak` accepts an `.enabled` override under `mojaloop-iam.*` that wins over `iam.enabled`.
+Each of `oathkeeper`, `keto`, `kratos`, `hydra` accepts an `.enabled` override under `mojaloop-iam.*` that wins over `iam.enabled`.
 
 ### Deploying development versions
 
