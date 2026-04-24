@@ -56,6 +56,7 @@
    helm repo add bitnami https://charts.bitnami.com/bitnami
    helm repo add mojaloop-charts https://mojaloop.github.io/charts/repo
    helm repo add redpanda https://charts.redpanda.com
+   helm repo add ory https://k8s.ory.sh/helm/charts
    ```
 
 ### Configure remote Mojaloop Helm repo on your Helm Client
@@ -154,6 +155,30 @@ The following Helm Charts have the following external dependencies:
 
    Refer to the following default chart config file for values: http://mojaloop.io/helm/<chart_name>/values.yaml
 
+### Deploying with IAM
+
+Setting `iam.enabled: true` on the top-level Mojaloop chart activates the full IAM stack via the `mojaloop-iam` sub-chart:
+
+- `oathkeeper`, `keto`, `kratos` (upstream Ory charts)
+- `hydra` (Ory Hydra OAuth2/OIDC server)
+- `ml-iam-services` (Mojaloop Ory IAM services: keto-batch-auth, kratos-role-webhook)
+
+It also signals that per-app IAM should be enabled for apps that support it (e.g. `connection-manager`).
+
+```bash
+helm --namespace moja install dev mojaloop/mojaloop --set iam.enabled=true
+```
+
+Chart-specific configuration lives under each sub-chart's values key inside `mojaloop-iam` (`oathkeeper`, `keto`, `kratos`, `hydra`, `ml-iam-services`). Defaults are sane for a reference deployment — override DSNs, secrets, and FQDNs for anything beyond local testing.
+
+If you already run parts of the stack externally (e.g. an existing Hydra), opt out per chart while keeping the rest:
+
+```bash
+helm ... --set iam.enabled=true --set mojaloop-iam.hydra.enabled=false
+```
+
+Each of `oathkeeper`, `keto`, `kratos`, `hydra` accepts an `.enabled` override under `mojaloop-iam.*` that wins over `iam.enabled`.
+
 ### Deploying development versions
 
 1. To deploy the latest development version, use the `--devel` flag:
@@ -223,7 +248,7 @@ Mojaloop Helm deployments currently include the following provisioning (`setup`)
 | ml-ttk-test-val-sdk-r2p   | [hub/sdk_scheme_adapter/request-to-pay](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/sdk_scheme_adapter/request-to-pay/basic)                                     |  SDK Request To Pay Test Collection   | No                  | `mojaloop-ttk-simulators.enabled=true` must be set to deploy the TTK Simulators components. components.                                                                                                                                                              |
 | ml-ttk-test-setup-tp       | [hub/provisioning_thirdparty](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/provisioning_thirdparty)       |  Thirdparty Provisioning Collection   | No                  | `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` must be set to deploy the Thirdparty components.       |
 | ml-ttk-test-val-tp         | [hub/thirdparty](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/thirdparty)                                 |  Thirdparty Test Collection   | No                  | `thirdparty.enabled=true`, `account-lookup-service.account-lookup-service.config.featureEnableExtendedPartyIdType=true` & `account-lookup-service.account-lookup-service-admin.config.featureEnableExtendedPartyIdType=true` must be set to deploy the Bulk-API-Adapter components. |
-| ml-ttk-test-mcm-rbac       | [hub/mcm](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/mcm)                                         |  MCM RBAC Test Collection   | No                  | `connection-manager.enabled=true` & `ory-services.enabled=true` must be set to deploy the Connection Manager and Ory IAM components. |
+| ml-ttk-test-mcm-iam       | [hub/mcm](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/mcm)                                         |  MCM IAM Test Collection   | No                  | `connection-manager.enabled=true` & `iam.enabled=true` must be set to deploy the Connection Manager and Ory IAM components. |
 | ml-ttk-test-cleanup         | [hub/cleanup](https://github.com/mojaloop/testing-toolkit-test-cases/tree/master/collections/hub/cleanup)                                 |  Thirdparty Test Collection   | Yes                  |  Post cleanup scripts, e.g. executes position reset test collection. Note that `ml-ttk-test-cleanup.test.config.saveReport` is disabled by default. |
 
 1. Ensure Tests are enabled
