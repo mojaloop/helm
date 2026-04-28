@@ -170,6 +170,9 @@ CONFIG:
 # Declare global configurations
 global: {}
 
+iam:
+  enabled: false
+
 pdb:
   enabled: true
   maxUnavailable: 1
@@ -12241,6 +12244,8 @@ inter-scheme-proxy-adapter:
 
 connection-manager:
   enabled: false
+  iam:
+    enabled: false
   api:
     disabled: false
     replicaCount: 1
@@ -12430,89 +12435,6 @@ connection-manager:
         version: v0.39.1
       env:
         APP_ENDPOINT: 'http://{{ include "connection-manager.fullname" . }}-api:3001/api'
-
-ory-services:
-  enabled: false
-  ## Requires Ory Keto and Kratos to be deployed (typically in 'ory' namespace)
-  ## See: https://www.ory.sh/docs/keto and https://www.ory.sh/docs/kratos
-  image:
-    repository: mojaloop/ml-ory-iam-services
-    tag: "v0.1.1"
-    pullPolicy: IfNotPresent
-  imagePullSecrets: []
-  nameOverride: ""
-  fullnameOverride: ""
-  ketoBatchAuth:
-    enabled: true
-    replicaCount: 1
-    service:
-      type: ClusterIP
-      port: 80
-      targetPort: 3000
-    env:
-      PORT: "3000"
-      KETO_READ_URL: "http://keto-read.ory.svc.cluster.local"
-    resources:
-      requests:
-        memory: "32Mi"
-        cpu: "25m"
-      limits:
-        memory: "64Mi"
-        cpu: "100m"
-    livenessProbe:
-      httpGet:
-        path: /health
-        port: http
-      initialDelaySeconds: 10
-      periodSeconds: 10
-    readinessProbe:
-      httpGet:
-        path: /health
-        port: http
-      initialDelaySeconds: 3
-      periodSeconds: 5
-    nodeSelector: {}
-    tolerations: []
-    affinity: {}
-    podAnnotations: {}
-  kratosRoleWebhook:
-    enabled: true
-    replicaCount: 1
-    service:
-      type: ClusterIP
-      port: 80
-      targetPort: 8080
-    env:
-      PORT: "8080"
-      KRATOS_ADMIN_URL: "http://kratos-admin.ory.svc.cluster.local:80"
-      KETO_READ_URL: "http://keto-read.ory.svc.cluster.local"
-    resources:
-      requests:
-        memory: "32Mi"
-        cpu: "25m"
-      limits:
-        memory: "64Mi"
-        cpu: "100m"
-    livenessProbe:
-      httpGet:
-        path: /health
-        port: http
-      initialDelaySeconds: 10
-      periodSeconds: 10
-    readinessProbe:
-      httpGet:
-        path: /health
-        port: http
-      initialDelaySeconds: 3
-      periodSeconds: 5
-    nodeSelector: {}
-    tolerations: []
-    affinity: {}
-    podAnnotations: {}
-  serviceAccount:
-    create: false
-    name: ""
-    annotations: {}
 
 ml-testing-toolkit:
   enabled: true
@@ -13213,21 +13135,21 @@ ml-ttk-test-cleanup:
     <<: *simNames
   testCaseEnvironmentFile: *ttkInputValues
 
-ml-ttk-test-mcm-rbac:
+ml-ttk-test-mcm-iam:
   tests:
     enabled: false
     weight: 3
   config:
-    testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/v20.3.0-mcm-rbac.0.zip
-    testCasesPathInZip: testing-toolkit-test-cases-20.3.0-mcm-rbac.0/collections/hub/mcm
+    testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/v20.3.0-mcm-iam.10.zip
+    testCasesPathInZip: testing-toolkit-test-cases-20.3.0-mcm-iam.10/collections/hub/mcm
     ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
-    testSuiteName: MCM RBAC Tests
+    testSuiteName: MCM IAM Tests
     environmentName: Development
     saveReport: true
     saveReportBaseUrl: "testing-toolkit.local"
-    reportName: mcm_rbac_tests
+    reportName: mcm_iam_tests
     allowFailures: false
-    mcmScriptsVersion: v3.7.0-snapshot.0
+    mcmScriptsVersion: v3.8.0-snapshot.25
     ## MCM service configuration
     mcmUrl: http://mcm-connection-manager-api:3001
     kratosPublicUrl: http://kratos-public
@@ -13240,7 +13162,7 @@ ml-ttk-test-mcm-rbac:
   script: |
     set -e
     echo "===================================="
-    echo "MCM RBAC Test Runner"
+    echo "MCM IAM Test Runner"
     echo "===================================="
 
     # Wait for DNS
@@ -13250,8 +13172,8 @@ ml-ttk-test-mcm-rbac:
     echo "Downloading MCM test scripts..."
     MCM_SCRIPTS_BASE="https://raw.githubusercontent.com/mojaloop/connection-manager-api/{{ .Values.config.mcmScriptsVersion }}/scripts"
     wget "${MCM_SCRIPTS_BASE}/mcm-test-setup" -O /tmp/mcm-test-setup
-    wget "${MCM_SCRIPTS_BASE}/mcm-rbac-test.sh" -O /tmp/mcm-rbac-test.sh
-    chmod +x /tmp/mcm-test-setup /tmp/mcm-rbac-test.sh
+    wget "${MCM_SCRIPTS_BASE}/mcm-iam-test.sh" -O /tmp/mcm-iam-test.sh
+    chmod +x /tmp/mcm-test-setup /tmp/mcm-iam-test.sh
 
     # Download test collections
     echo "Downloading test collections..."
@@ -13259,7 +13181,7 @@ ml-ttk-test-mcm-rbac:
     mkdir -p /tmp/test_cases
     unzip -d /tmp/test_cases -o /tmp/test-collections.zip
 
-    # Export environment variables for mcm-rbac-test.sh
+    # Export environment variables for mcm-iam-test.sh
     export MCM_URL="{{ .Values.config.mcmUrl }}"
     export KRATOS_PUBLIC_URL="{{ .Values.config.kratosPublicUrl }}"
     export KEYCLOAK_URL="{{ .Values.config.keycloakUrl }}"
@@ -13273,8 +13195,8 @@ ml-ttk-test-mcm-rbac:
     export SAVE_REPORT_BASE_URL="{{ .Values.config.saveReportBaseUrl }}"
     export ALLOW_FAILURES="{{ .Values.config.allowFailures }}"
 
-    # Run MCM RBAC tests
-    /tmp/mcm-rbac-test.sh
+    # Run MCM IAM tests
+    /tmp/mcm-iam-test.sh
   configFileDefaults:
     mode: outbound
     logLevel: "2"
