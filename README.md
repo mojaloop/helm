@@ -57,6 +57,7 @@
    helm repo add mojaloop-charts https://mojaloop.github.io/charts/repo
    helm repo add redpanda https://charts.redpanda.com
    helm repo add ory https://k8s.ory.sh/helm/charts
+   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
    ```
 
 ### Configure remote Mojaloop Helm repo on your Helm Client

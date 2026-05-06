@@ -1,0 +1,45 @@
+name: promfana
+
+sources:
+  kube-prometheus-stack:
+    kind: helmchart
+    spec:
+      url: https://prometheus-community.github.io/helm-charts
+      name: kube-prometheus-stack
+  prometheus-kafka-exporter:
+    kind: helmchart
+    spec:
+      url: https://prometheus-community.github.io/helm-charts
+      name: prometheus-kafka-exporter
+
+conditions: {}
+
+targets:
+  appVersion-kube-prometheus-stack:
+    sourceid: kube-prometheus-stack
+    kind: file
+    spec:
+      file: monitoring/promfana/Chart.yaml
+      matchpattern: '(kube-prometheus-stack: v)([\d\.]+)'
+      replacepattern: '$1{{ source "kube-prometheus-stack" }}'
+  appVersion-prometheus-kafka-exporter:
+    sourceid: prometheus-kafka-exporter
+    kind: file
+    spec:
+      file: monitoring/promfana/Chart.yaml
+      matchpattern: '(prometheus-kafka-exporter: v)([\d\.]+)'
+      replacepattern: '$1{{ source "prometheus-kafka-exporter" }}'
+  kube-prometheus-stack:
+    sourceid: kube-prometheus-stack
+    kind: helmchart
+    spec:
+      name: monitoring/promfana
+      file: Chart.yaml
+      key: $.dependencies[0].version
+  prometheus-kafka-exporter:
+    sourceid: prometheus-kafka-exporter
+    kind: helmchart
+    spec:
+      name: monitoring/promfana
+      file: Chart.yaml
+      key: $.dependencies[1].version
