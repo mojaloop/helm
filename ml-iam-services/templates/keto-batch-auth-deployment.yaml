@@ -2,15 +2,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "ory-services.fullname" . }}-keto-batch-auth
+  name: {{ include "ml-iam-services.fullname" . }}-keto-batch-auth
   labels:
-    {{- include "ory-services.labels" . | nindent 4 }}
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
     app.kubernetes.io/component: keto-batch-auth
 spec:
   replicas: {{ .Values.ketoBatchAuth.replicaCount }}
   selector:
     matchLabels:
-      {{- include "ory-services.selectorLabels" . | nindent 6 }}
+      {{- include "ml-iam-services.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: keto-batch-auth
   template:
     metadata:
@@ -19,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "ory-services.selectorLabels" . | nindent 8 }}
+        {{- include "ml-iam-services.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: keto-batch-auth
     spec:
       automountServiceAccountToken: false
@@ -39,7 +39,7 @@ spec:
             capabilities:
               drop:
                 - ALL
-          image: "{{ .Values.image.repository }}:{{ include "ory-services.imageTag" . }}"
+          image: "{{ .Values.image.repository }}:{{ include "ml-iam-services.imageTag" . }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args: ["keto-batch-auth"]
           ports:

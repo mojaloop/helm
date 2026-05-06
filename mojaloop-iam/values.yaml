@@ -1,0 +1,292 @@
+oathkeeper:
+  enabled: true
+  global:
+    ory:
+      oathkeeper:
+        maester:
+          mode: controller
+  replicaCount: 1
+  fullnameOverride: "oathkeeper"
+  oathkeeper:
+    config:
+      log:
+        level: info
+        format: json
+      access_rules:
+        matching_strategy: regexp
+      authenticators:
+        jwt:
+          enabled: true
+          config:
+            jwks_urls:
+              - https://localhost/realms/hub-operators/protocol/openid-connect/certs
+        cookie_session:
+          enabled: true
+          config:
+            check_session_url: http://kratos-public/sessions/whoami
+            preserve_path: true
+            extra_from: "@this"
+            subject_from: "identity.traits.subject"
+            only:
+              - ory_kratos_session
+        anonymous:
+          enabled: true
+          config:
+            subject: guest
+      authorizers:
+        allow:
+          enabled: true
+        keto_engine_acp_ory:
+          enabled: true
+          config:
+            base_url: "http://keto-read"
+            required_action: "read"
+            required_resource: "unknown"
+            flavor: "regex"
+        remote_json:
+          enabled: true
+          config:
+            remote: http://keto-read/relation-tuples/check
+            payload: |
+              {
+                "subject": "{{ print .Subject }}",
+                "resource": "{{ printIndex .MatchContext.RegexpCaptureGroups 0 }}"
+              }
+      mutators:
+        id_token:
+          enabled: true
+          config:
+            issuer_url: http://oathkeeper-api:4456/
+            jwks_url: http://oathkeeper:4456/.well-known/jwks.json
+        header:
+          enabled: true
+          config:
+            headers:
+              X-User: '{{ print .Subject }}'
+              X-Client-Id: '{{ print .Extra.client_id }}'
+              X-Extra: '{{ print .Extra }}'
+              X-Email: '{{ print (((.Extra.identity).traits).email) }}'
+              X-Roles: '{{ toJson (((.Extra.identity).traits).roles) }}'
+      errors:
+        fallback:
+          - json
+        handlers:
+          json:
+            enabled: true
+            config:
+              verbose: true
+          redirect:
+            enabled: false
+      serve:
+        proxy:
+          port: 4455
+        api:
+          port: 4456
+    mutatorIdTokenJWKs: {}
+    managedAccessRules: false
+  maester:
+    enabled: true
+    oathkeeperFullnameOverride: 'oathkeeper'
+  oathkeeper-maester:
+    fullnameOverride: 'oathkeeper-maester'
+    oathkeeperFullnameOverride: 'oathkeeper'
+    deployment:
+      envs:
+        - name: authorizersAvailable
+          value: allow,deny,noop,remote_json,keto_engine_acp_ory
+  serviceMonitor:
+    scheme: http
+    scrapeInterval: 60s
+    scrapeTimeout: 30s
+
+keto:
+  enabled: true
+  replicaCount: 1
+  secret:
+    enabled: false
+    nameOverride: keto-secret
+  service:
+    metrics:
+      enabled: true
+      type: ClusterIP
+      loadBalancerIP: ""
+      name: http-metrics
+      port: 80
+      annotations: {}
+  keto:
+    command: ["keto"]
+    automigration:
+      enabled: true
+      type: initContainer
+    config:
+      serve:
+        read:
+          port: 4466
+        write:
+          port: 4467
+        metrics:
+          port: 4468
+      namespaces:
+        - id: 0
+          name: role
+        - id: 1
+          name: permission
+        - id: 2
+          name: participant
+  serviceMonitor:
+    scheme: http
+    scrapeInterval: 60s
+    scrapeTimeout: 30s
+
+kratos:
+  enabled: true
+  replicaCount: 1
+  fullnameOverride: "kratos"
+  secret:
+    enabled: false
+    nameOverride: kratos-secret
+  courier:
+    enabled: false
+  kratos:
+    development: false
+    automigration:
+      enabled: true
+      type: initContainer
+    identitySchemas:
+      "identity.default.schema.json": |
+        {
+          "$id": "https://mojaloop.io/kratos-schema/identity.schema.json",
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "Person",
+          "type": "object",
+          "properties": {
+            "traits": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "title": "E-Mail",
+                  "type": "string",
+                  "format": "email"
+                },
+                "subject": {
+                  "title": "Subject",
+                  "type": "string"
+                },
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "roles": {
+                  "title": "User Roles",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      "role-injection-body.jsonnet": |
+        function(ctx) {
+          identity_id: ctx.identity.id,
+          user_subject: ctx.identity.traits.subject
+        }
+    config:
+      identity:
+        default_schema_id: default
+        schemas:
+          - id: default
+            url: file:///etc/config/identity.default.schema.json
+      serve:
+        public:
+          base_url: https://localhost/kratos/
+          port: 4433
+          cors:
+            enabled: true
+            allowed_origins:
+              - https://*.localhost
+        admin:
+          port: 4434
+      selfservice:
+        default_browser_return_url: https://localhost/ui/welcome
+        allowed_return_urls:
+          - https://*.localhost
+        methods:
+          password:
+            enabled: false
+          oidc:
+            enabled: true
+        flows:
+          login:
+            ui_url: https://localhost/ui/login
+            lifespan: 10m
+            after:
+              oidc:
+                default_browser_return_url: https://localhost/ui/welcome
+                hooks:
+                  - hook: web_hook
+                    config:
+                      url: http://ml-iam-services-kratos-role-webhook/inject-roles
+                      method: POST
+                      body: file:///etc/config/role-injection-body.jsonnet
+                      response:
+                        parse: false
+                      auth:
+                        type: api_key
+                        config:
+                          name: Authorization
+                          value: Bearer kratos-webhook-token
+                          in: header
+          logout:
+            after:
+              default_browser_return_url: https://localhost/realms/hub-operators/protocol/openid-connect/logout
+          error:
+            ui_url: https://localhost/ui/error
+          registration:
+            after:
+              oidc:
+                hooks:
+                  - hook: web_hook
+                    config:
+                      url: http://ml-iam-services-kratos-role-webhook/inject-roles
+                      method: POST
+                      body: file:///etc/config/role-injection-body.jsonnet
+                      response:
+                        parse: false
+                      auth:
+                        type: api_key
+                        config:
+                          name: Authorization
+                          value: Bearer kratos-webhook-token
+                          in: header
+                  - hook: session
+      log:
+        level: info
+        format: json
+      ciphers:
+        algorithm: xchacha20-poly1305
+      hashers:
+        algorithm: bcrypt
+        bcrypt:
+          cost: 8
+      session:
+        cookie:
+          domain: localhost
+  serviceMonitor:
+    enabled: true
+    scheme: http
+    scrapeInterval: 60s
+    scrapeTimeout: 30s
+
+hydra:
+  enabled: true
+
+ml-iam-services:
+  ketoBatchAuth:
+    env:
+      KETO_READ_URL: "http://keto-read"
+  kratosRoleWebhook:
+    env:
+      KRATOS_ADMIN_URL: "http://kratos-admin"
+      KETO_READ_URL: "http://keto-read"
