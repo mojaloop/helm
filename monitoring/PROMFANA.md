@@ -58,6 +58,51 @@ helm install promfana mojaloop/promfana   --namespace observability   --create-n
 
 > Namespace is fully dynamic in this chart. Resources created by this chart use `{{ .Release.Namespace }}` and the Prometheus datasource URL is rendered with the install namespace.
 
+## Deployment sequence
+
+`ServiceMonitor` is a Custom Resource Definition (CRD) that is installed by `kube-prometheus-stack` (this chart). Any chart that creates `ServiceMonitor` resources — such as `example-mojaloop-backend` when metrics are enabled — must be installed **after** promfana so the CRD exists.
+
+### Fresh install with monitoring enabled
+
+```bash
+# 1. Install promfana first — this registers the ServiceMonitor CRD
+helm install promfana mojaloop/promfana --namespace monitoring --create-namespace
+
+# 2. Install backend with metrics and ServiceMonitors enabled
+helm install backend mojaloop/example-mojaloop-backend \
+  --set mysql.metrics.enabled=true \
+  --set mysql.metrics.serviceMonitor.enabled=true \
+  --set kafka.metrics.serviceMonitor.enabled=true
+
+# 3. Install mojaloop
+helm install moja mojaloop/mojaloop
+
+# 4. Run tests
+helm test moja
+```
+
+### Enabling monitoring on an existing deployment
+
+If `example-mojaloop-backend` was installed without monitoring and you want to add it later:
+
+```bash
+# 1. Install promfana — CRDs are now registered
+helm install promfana mojaloop/promfana --namespace monitoring --create-namespace
+
+# 2. Upgrade backend to enable the metrics exporter and ServiceMonitors
+helm upgrade backend mojaloop/example-mojaloop-backend \
+  --set mysql.metrics.enabled=true \
+  --set mysql.metrics.serviceMonitor.enabled=true \
+  --set kafka.metrics.serviceMonitor.enabled=true
+
+# 3. (Dev/test only) Re-run helm test — MySQL data is lost on restart when persistence
+#    is disabled. Re-running the tests re-provisions the hub and runs the test suite
+#    from a clean state.
+helm test moja
+```
+
+> **Note on data loss:** Enabling `mysql.metrics.enabled=true` adds an exporter sidecar container to the MySQL pod, which triggers a pod restart. In dev/test environments where persistence is disabled this will wipe MySQL data — this is acceptable since the environment is ephemeral. In production environments MySQL data is safe because persistence is enabled.
+
 ## Access Grafana from your local machine
 
 Grafana ingress is disabled by default, so the easiest local access method is port-forwarding the Grafana service.

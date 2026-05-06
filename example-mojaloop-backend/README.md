@@ -25,6 +25,20 @@ from the published Helm repo:
 helm -n mojaloop install backend mojaloop/example-mojaloop-backend
 ```
 
+## Monitoring (Observability)
+
+Metrics collection via Prometheus is supported for MySQL and Kafka but is **disabled by default** so the chart installs without requiring `kube-prometheus-stack` (KPS) CRDs.
+
+| Setting | Default | Effect |
+|---|---|---|
+| `mysql.metrics.enabled` | `false` | Deploys a `mysqld-exporter` sidecar on the MySQL pod |
+| `mysql.metrics.serviceMonitor.enabled` | `false` | Creates a `ServiceMonitor` CRD resource (requires KPS) |
+| `kafka.metrics.serviceMonitor.enabled` | `false` | Creates a `ServiceMonitor` CRD resource (requires KPS) |
+
+To enable monitoring, promfana (or any `kube-prometheus-stack` installation) **must be installed before** this chart when `serviceMonitor.enabled=true`, as the `ServiceMonitor` CRD must already exist.
+
+Refer to [monitoring/PROMFANA.md](../monitoring/PROMFANA.md#deployment-sequence) for the correct deployment sequence, including how to enable monitoring on an existing installation.
+
 ## Mojaloop
 
 The default CONFIG header section on the [mojaloop/values.yaml](../mojaloop/values.yaml) header has been configured to work with the backend dependencies deployed by this Helm wrapper chart.
