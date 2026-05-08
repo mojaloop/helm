@@ -18,6 +18,17 @@ kafka:
   image:
     registry: docker.io
     repository: bitnamilegacy/kafka
+  ## Enable metrics and serviceMonitor when monitoring (promfana/kube-prometheus-stack) is installed
+  metrics:
+    jmx:
+      enabled: false
+      image:
+        registry: docker.io
+        repository: bitnamilegacy/jmx-exporter
+        tag: 1.1.0
+    serviceMonitor:
+      enabled: false
+      path: /metrics
 
   listeners:
     client:
@@ -144,11 +155,17 @@ mysql:
   image:
     registry: docker.io
     repository: bitnamilegacy/mysql
+  ## Enable metrics and serviceMonitor when monitoring (promfana/kube-prometheus-stack) is installed
   metrics:
     enabled: false
     image:
       registry: docker.io
       repository: bitnamilegacy/mysqld-exporter
+      tag: 0.17.2
+    serviceMonitor:
+      enabled: false
+      interval: 30s
+      scrapeTimeout: 10s
 
   tls:
     enabled: false

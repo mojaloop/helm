@@ -1,0 +1,28 @@
+{{- if .Values.serviceMonitors.enabled }}
+{{- $root := . }}
+{{- $defaults := .Values.serviceMonitors.defaults | default dict }}
+
+{{- range $sm := .Values.serviceMonitors.items }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ $sm.name | quote }}
+  namespace: {{ $root.Release.Namespace | quote }}
+  labels:
+    release: {{ $root.Release.Name | quote }}
+
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ default $defaults.targetNamespace $sm.targetNamespace | quote }}
+
+  selector:
+{{ toYaml $sm.selector | nindent 4 }}
+
+  endpoints:
+    - port: {{ default $defaults.port $sm.port | quote }}
+      path: {{ default $defaults.path $sm.path | quote }}
+      interval: {{ default $defaults.interval $sm.interval | quote }}
+{{- end }}
+{{- end }}

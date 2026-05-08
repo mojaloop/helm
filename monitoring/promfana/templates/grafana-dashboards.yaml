@@ -1,0 +1,62 @@
+{{- if .Values.dashboards.enabled }}
+
+{{- if .Values.dashboards.folders.application.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-grafana-dashboards-application
+  namespace: {{ .Release.Namespace }}
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: {{ .Values.dashboards.folderNames.application | quote }}
+data:
+{{ (.Files.Glob "dashboards/application/*.json").AsConfig | indent 2 }}
+---
+{{- end }}
+
+{{- if .Values.dashboards.folders.datastore.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-grafana-dashboards-datastore
+  namespace: {{ .Release.Namespace }}
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: {{ .Values.dashboards.folderNames.datastore | quote }}
+data:
+{{ (.Files.Glob "dashboards/datastore/*.json").AsConfig | indent 2 }}
+---
+{{- end }}
+
+{{- if .Values.dashboards.folders.messaging.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-grafana-dashboards-messaging
+  namespace: {{ .Release.Namespace }}
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: {{ .Values.dashboards.folderNames.messaging | quote }}
+data:
+{{ (.Files.Glob "dashboards/messaging/*.json").AsConfig | indent 2 }}
+---
+{{- end }}
+
+{{- if .Values.dashboards.folders.kubernetes.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-grafana-dashboards-kubernetes
+  namespace: {{ .Release.Namespace }}
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: {{ .Values.dashboards.folderNames.kubernetes | quote }}
+data:
+{{ (.Files.Glob "dashboards/kubernetes/*.json").AsConfig | indent 2 }}
+{{- end }}
+
+{{- end }}
