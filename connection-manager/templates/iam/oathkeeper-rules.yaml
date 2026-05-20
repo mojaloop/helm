@@ -1,0 +1,530 @@
+{{- if .Values.iam.enabled -}}
+{{- $fqdn := .Values.api.url | trimPrefix "https://" | trimPrefix "http://" -}}
+{{- $ketoRead := .Values.global.iam.keto.readUrl -}}
+{{- $ketoBatch := .Values.global.iam.keto.batchAuthUrl -}}
+{{- $hydraJwks := printf "%s/.well-known/jwks.json" .Values.global.iam.hydra.publicUrl -}}
+---
+# Authentication endpoints - open to authenticated users
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-auth-endpoints
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/auth/<.*>
+    methods:
+      - GET
+      - POST
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: allow
+  mutators:
+    - handler: header
+---
+# DFSP list - dfspList permission
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsps-list
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps<$>
+    methods: [GET]
+  authenticators:
+    - handler: cookie_session
+    - handler: jwt
+      config:
+        jwks_urls:
+          - {{ $hydraJwks }}
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/relation-tuples/check
+      payload: |
+        {{`{
+          "namespace": "permission",
+          "object": "dfspList",
+          "relation": "granted",
+          "subject_id": "{{ print .Subject }}"
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# DFSP create - dfspManage permission
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsps-create
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps<$>
+    methods: [POST]
+  authenticators:
+    - handler: cookie_session
+    - handler: jwt
+      config:
+        jwks_urls:
+          - {{ $hydraJwks }}
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/relation-tuples/check
+      payload: |
+        {{`{
+          "namespace": "permission",
+          "object": "dfspManage",
+          "relation": "granted",
+          "subject_id": "{{ print .Subject }}"
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# Single DFSP read - admin OR DFSP member (browser + PM4ML)
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-single-read
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/<?!jwscerts|servercerts><[^/]+><$>
+    methods: [GET]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoBatch }}
+      payload: |
+        {{`{
+          "tuples": [
+            {
+              "namespace": "permission",
+              "object": "dfspManage",
+              "relation": "granted",
+              "subject_id": "{{ print .Subject }}"
+            },
+            {
+              "namespace": "role",
+              "object": "dfsp:{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}",
+              "relation": "member",
+              "subject_id": "{{ print .Subject }}"
+            }
+          ]
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+          X-DFSP-ID: {{ `'{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}'` }}
+---
+# Single DFSP update - browser only (admin OR DFSP member)
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-single-update
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/<?!jwscerts|servercerts><[^/]+><$>
+    methods: [PUT]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoBatch }}
+      payload: |
+        {{`{
+          "tuples": [
+            {
+              "namespace": "permission",
+              "object": "dfspManage",
+              "relation": "granted",
+              "subject_id": "{{ print .Subject }}"
+            },
+            {
+              "namespace": "role",
+              "object": "dfsp:{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}",
+              "relation": "member",
+              "subject_id": "{{ print .Subject }}"
+            }
+          ]
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+          X-DFSP-ID: {{ `'{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}'` }}
+---
+# Single DFSP delete - browser only, dfspManage only
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-single-delete
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/<?!jwscerts|servercerts><[^/]+><$>
+    methods: [DELETE]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/relation-tuples/check
+      payload: |
+        {{`{
+          "namespace": "permission",
+          "object": "dfspManage",
+          "relation": "granted",
+          "subject_id": "{{ print .Subject }}"
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+          X-DFSP-ID: {{ `'{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}'` }}
+---
+# DFSP credentials - browser only, DFSP member only
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-credentials
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/<[^/]+>/credentials
+    methods: [GET, POST, PUT, DELETE]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/relation-tuples/check
+      payload: |
+        {{`{
+          "namespace": "role",
+          "object": "dfsp:{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}",
+          "relation": "member",
+          "subject_id": "{{ print .Subject }}"
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+          X-DFSP-ID: {{ `'{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}'` }}
+---
+# DFSP sub-paths GET/POST (excluding endpoints and credentials) - admin OR member (browser + PM4ML)
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-admin-access
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/<?!endpoints><[^/]+>/<?!credentials><.*>
+    methods: [GET, POST]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoBatch }}
+      payload: |
+        {{`{
+          "tuples": [
+            {
+              "namespace": "permission",
+              "object": "dfspManage",
+              "relation": "granted",
+              "subject_id": "{{ print .Subject }}"
+            },
+            {
+              "namespace": "role",
+              "object": "dfsp:{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}",
+              "relation": "member",
+              "subject_id": "{{ print .Subject }}"
+            }
+          ]
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+          X-DFSP-ID: {{ `'{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}'` }}
+---
+# DFSP sub-paths PUT/DELETE - browser only (admin OR member)
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-admin-modify
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/<?!endpoints><[^/]+>/<?!credentials><.*>
+    methods: [PUT, DELETE]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoBatch }}
+      payload: |
+        {{`{
+          "tuples": [
+            {
+              "namespace": "permission",
+              "object": "dfspManage",
+              "relation": "granted",
+              "subject_id": "{{ print .Subject }}"
+            },
+            {
+              "namespace": "role",
+              "object": "dfsp:{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}",
+              "relation": "member",
+              "subject_id": "{{ print .Subject }}"
+            }
+          ]
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+          X-DFSP-ID: {{ `'{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}'` }}
+---
+# DFSP unprocessed endpoints - browser only, dfspManage
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-endpoints-unprocessed
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/endpoints/unprocessed
+    methods: [GET, POST, PUT, DELETE]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/relation-tuples/check
+      payload: |
+        {{`{
+          "namespace": "permission",
+          "object": "dfspManage",
+          "relation": "granted",
+          "subject_id": "{{ print .Subject }}"
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# DFSP server certificates - browser only, dfspManage
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-servercerts
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/servercerts
+    methods: [GET]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/relation-tuples/check
+      payload: |
+        {{`{
+          "namespace": "permission",
+          "object": "dfspManage",
+          "relation": "granted",
+          "subject_id": "{{ print .Subject }}"
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# DFSP JWS certificates - dfspJwsCertsView
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-jwscerts
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/jwscerts
+    methods: [GET]
+  authenticators:
+    - handler: cookie_session
+    - handler: jwt
+      config:
+        jwks_urls:
+          - {{ $hydraJwks }}
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/relation-tuples/check
+      payload: |
+        {{`{
+          "namespace": "permission",
+          "object": "dfspJwsCertsView",
+          "relation": "granted",
+          "subject_id": "{{ print .Subject }}"
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# Monetary zones - browser only, monetaryZonesView
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-monetaryzones
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/monetaryzones
+    methods: [GET]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/relation-tuples/check
+      payload: |
+        {{`{
+          "namespace": "permission",
+          "object": "monetaryZonesView",
+          "relation": "granted",
+          "subject_id": "{{ print .Subject }}"
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# Hub endpoints - read access (hubEndpointsView)
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-hub-read
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/hub/<.*>
+    methods: [GET]
+  authenticators:
+    - handler: cookie_session
+    - handler: jwt
+      config:
+        jwks_urls:
+          - {{ $hydraJwks }}
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/relation-tuples/check
+      payload: |
+        {{`{
+          "namespace": "permission",
+          "object": "hubEndpointsView",
+          "relation": "granted",
+          "subject_id": "{{ print .Subject }}"
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# Hub endpoints - write access (hubEndpointsManage)
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-hub-write
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/hub/<.*>
+    methods: [POST, PUT, DELETE]
+  authenticators:
+    - handler: cookie_session
+    - handler: jwt
+      config:
+        jwks_urls:
+          - {{ $hydraJwks }}
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/relation-tuples/check
+      payload: |
+        {{`{
+          "namespace": "permission",
+          "object": "hubEndpointsManage",
+          "relation": "granted",
+          "subject_id": "{{ print .Subject }}"
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# PM4ML API - DFSP-specific owner access (machine clients)
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-pm4mlapi-dfsp-owner-access
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/<?!endpoints|jwscerts><([^/]+)><(?:/(?!credentials).*)?$>
+    methods: [GET, POST]
+  authenticators:
+    - handler: jwt
+      config:
+        jwks_urls:
+          - {{ $hydraJwks }}
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/relation-tuples/check
+      payload: |
+        {{`{
+          "namespace": "role",
+          "object": "dfsp:{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}",
+          "relation": "member",
+          "subject_id": "{{ print .Subject }}"
+        }`}}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-Client: {{ `'{{ print .Subject }}'` }}
+          X-DFSP-ID: {{ `'{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}'` }}
+{{- end }}
