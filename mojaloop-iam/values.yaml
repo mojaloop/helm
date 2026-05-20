@@ -127,12 +127,20 @@ keto:
         metrics:
           port: 4468
       namespaces:
-        - id: 0
-          name: role
-        - id: 1
-          name: permission
-        - id: 2
-          name: participant
+        location: file:///etc/keto-namespaces
+  # OPL namespace files ship inside service Docker images and are mounted
+  # via K8s ImageVolume + subPath. Each contributing service adds:
+  #   extraVolumes:
+  #     - name: <svc>-opl
+  #       image: { reference: <org>/<svc>:<tag> }
+  #   extraVolumeMounts:
+  #     - name: <svc>-opl
+  #       mountPath: /etc/keto-namespaces/<svc>.ts
+  #       subPath: <path/to/svc>.keto.ts
+  # Keto loads all .ts files from /etc/keto-namespaces at startup.
+  deployment:
+    extraVolumes: []
+    extraVolumeMounts: []
   serviceMonitor:
     scheme: http
     scrapeInterval: 60s

@@ -1,0 +1,434 @@
+{{/*
+  These rules call Keto /permissions/check against the Hub and Dfsp
+  namespaces defined in OPL by mojaloop/connection-manager-api:
+  permissions/mcm.keto.ts (see that file's README for the model).
+*/}}
+{{- if .Values.iam.enabled -}}
+{{- $fqdn := .Values.api.url | trimPrefix "https://" | trimPrefix "http://" -}}
+{{- $ketoRead := .Values.global.iam.keto.readUrl -}}
+{{- $hydraJwks := printf "%s/.well-known/jwks.json" .Values.global.iam.hydra.publicUrl -}}
+---
+# Authentication endpoints - open to authenticated users
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-auth-endpoints
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/auth/<.*>
+    methods:
+      - GET
+      - POST
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: allow
+  mutators:
+    - handler: header
+---
+# DFSP list - Hub.dfspList
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsps-list
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps<$>
+    methods: [GET]
+  authenticators:
+    - handler: cookie_session
+    - handler: jwt
+      config:
+        jwks_urls:
+          - {{ $hydraJwks }}
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/permissions/check
+      payload: |
+        {{ `{
+          "namespace": "Hub",
+          "object": "mojaloop",
+          "relation": "dfspList",
+          "subject_id": "{{ print .Subject }}"
+        }` }}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# DFSP create - Hub.dfspManage
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsps-create
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps<$>
+    methods: [POST]
+  authenticators:
+    - handler: cookie_session
+    - handler: jwt
+      config:
+        jwks_urls:
+          - {{ $hydraJwks }}
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/permissions/check
+      payload: |
+        {{ `{
+          "namespace": "Hub",
+          "object": "mojaloop",
+          "relation": "dfspManage",
+          "subject_id": "{{ print .Subject }}"
+        }` }}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# Single DFSP get - Dfsp.view (admin or member)
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-single-get
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/<?!jwscerts|servercerts><[^/]+><$>
+    methods: [GET, PUT]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/permissions/check
+      payload: |
+        {{ `{
+          "namespace": "Dfsp",
+          "object": "{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}",
+          "relation": "view",
+          "subject_id": "{{ print .Subject }}"
+        }` }}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+          X-DFSP-ID: {{ `'{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}'` }}
+---
+# Single DFSP delete - Hub.dfspManage (admin only)
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-single-delete
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/<?!jwscerts|servercerts><[^/]+><$>
+    methods: [DELETE]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/permissions/check
+      payload: |
+        {{ `{
+          "namespace": "Hub",
+          "object": "mojaloop",
+          "relation": "dfspManage",
+          "subject_id": "{{ print .Subject }}"
+        }` }}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+          X-DFSP-ID: {{ `'{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}'` }}
+---
+# DFSP credentials - Dfsp.credentialsAccess (member only)
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-credentials
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/<[^/]+>/credentials
+    methods: [GET, POST, PUT, DELETE]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/permissions/check
+      payload: |
+        {{ `{
+          "namespace": "Dfsp",
+          "object": "{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}",
+          "relation": "credentialsAccess",
+          "subject_id": "{{ print .Subject }}"
+        }` }}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+          X-DFSP-ID: {{ `'{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}'` }}
+---
+# DFSP sub-paths (excluding endpoints and credentials) - Dfsp.manage
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-admin-access
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/<?!endpoints><[^/]+>/<?!credentials><.*>
+    methods: [GET, POST, PUT, DELETE]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/permissions/check
+      payload: |
+        {{ `{
+          "namespace": "Dfsp",
+          "object": "{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}",
+          "relation": "manage",
+          "subject_id": "{{ print .Subject }}"
+        }` }}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+          X-DFSP-ID: {{ `'{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}'` }}
+---
+# DFSP unprocessed endpoints - Hub.dfspManage
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-endpoints-unprocessed
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/endpoints/unprocessed
+    methods: [GET, POST, PUT, DELETE]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/permissions/check
+      payload: |
+        {{ `{
+          "namespace": "Hub",
+          "object": "mojaloop",
+          "relation": "dfspManage",
+          "subject_id": "{{ print .Subject }}"
+        }` }}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# DFSP server certificates - Hub.serverCertsView
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-servercerts
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/servercerts
+    methods: [GET]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/permissions/check
+      payload: |
+        {{ `{
+          "namespace": "Hub",
+          "object": "mojaloop",
+          "relation": "serverCertsView",
+          "subject_id": "{{ print .Subject }}"
+        }` }}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# DFSP JWS certificates - Hub.jwsCertsView
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-dfsp-jwscerts
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/jwscerts
+    methods: [GET]
+  authenticators:
+    - handler: cookie_session
+    - handler: jwt
+      config:
+        jwks_urls:
+          - {{ $hydraJwks }}
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/permissions/check
+      payload: |
+        {{ `{
+          "namespace": "Hub",
+          "object": "mojaloop",
+          "relation": "jwsCertsView",
+          "subject_id": "{{ print .Subject }}"
+        }` }}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# Monetary zones - Hub.monetaryZonesView
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-monetaryzones
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/monetaryzones
+    methods: [GET]
+  authenticators:
+    - handler: cookie_session
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/permissions/check
+      payload: |
+        {{ `{
+          "namespace": "Hub",
+          "object": "mojaloop",
+          "relation": "monetaryZonesView",
+          "subject_id": "{{ print .Subject }}"
+        }` }}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# Hub endpoints - read access (Hub.endpointsView)
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-hub-read
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/hub/<.*>
+    methods: [GET]
+  authenticators:
+    - handler: cookie_session
+    - handler: jwt
+      config:
+        jwks_urls:
+          - {{ $hydraJwks }}
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/permissions/check
+      payload: |
+        {{ `{
+          "namespace": "Hub",
+          "object": "mojaloop",
+          "relation": "endpointsView",
+          "subject_id": "{{ print .Subject }}"
+        }` }}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# Hub endpoints - write access (Hub.endpointsManage)
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-hub-write
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/hub/<.*>
+    methods: [POST, PUT, DELETE]
+  authenticators:
+    - handler: cookie_session
+    - handler: jwt
+      config:
+        jwks_urls:
+          - {{ $hydraJwks }}
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/permissions/check
+      payload: |
+        {{ `{
+          "namespace": "Hub",
+          "object": "mojaloop",
+          "relation": "endpointsManage",
+          "subject_id": "{{ print .Subject }}"
+        }` }}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-User: {{ `'{{ print .Subject }}'` }}
+---
+# PM4ML API - DFSP-specific owner access (machine clients) - Dfsp.memberAccess (member only)
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: mcm-pm4mlapi-dfsp-owner-access
+  namespace: {{ .Release.Namespace }}
+spec:
+  match:
+    url: <http|https>://{{ $fqdn }}/api/dfsps/<?!endpoints|jwscerts><([^/]+)><(?:/(?!credentials).*)?$>
+    methods: [GET, POST]
+  authenticators:
+    - handler: jwt
+      config:
+        jwks_urls:
+          - {{ $hydraJwks }}
+  authorizer:
+    handler: remote_json
+    config:
+      remote: {{ $ketoRead }}/permissions/check
+      payload: |
+        {{ `{
+          "namespace": "Dfsp",
+          "object": "{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}",
+          "relation": "memberAccess",
+          "subject_id": "{{ print .Subject }}"
+        }` }}
+  mutators:
+    - handler: header
+      config:
+        headers:
+          X-Client: {{ `'{{ print .Subject }}'` }}
+          X-DFSP-ID: {{ `'{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}'` }}
+{{- end }}

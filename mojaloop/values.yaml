@@ -168,10 +168,37 @@ CONFIG:
 # Default values for central.
 # This is a YAML-formatted file.
 # Declare global configurations
-global: {}
+global:
+  iam:
+    keto:
+      readUrl: http://keto-read
+      writeUrl: http://keto-write
+      batchAuthUrl: http://ml-iam-services-keto-batch-auth
+    kratos:
+      adminUrl: http://kratos-admin
+      publicUrl: http://kratos-public
+      roleWebhookUrl: http://ml-iam-services-kratos-role-webhook
+    hydra:
+      adminUrl: http://hydra-admin
+      publicUrl: http://hydra-public
+    oathkeeper:
+      proxyUrl: http://oathkeeper-proxy:4455
+      apiUrl: http://oathkeeper-api:4456
 
 iam:
   enabled: false
+
+mojaloop-iam:
+  keto:
+    deployment:
+      extraVolumes:
+        - name: mcm-opl
+          image:
+            reference: mojaloop/connection-manager-api:v3.8.0
+      extraVolumeMounts:
+        - name: mcm-opl
+          mountPath: /etc/keto-namespaces/mcm.ts
+          subPath: opt/app/permissions/mcm.keto.ts
 
 pdb:
   enabled: true

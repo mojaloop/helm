@@ -1,0 +1,26 @@
+name: mojaloop-iam
+
+sources:
+  ml-iam-services:
+    kind: githubrelease
+    spec:
+      owner: mojaloop
+      token: '{{ requiredEnv "AUTO_RELEASE_TOKEN" }}'
+      repository: ml-iam-services
+
+conditions:
+  docker-ml-iam-services:
+    sourceid: ml-iam-services
+    kind: dockerimage
+    spec:
+      image: mojaloop/ml-iam-services
+
+targets:
+  ml-iam-services:
+    sourceid: ml-iam-services
+    kind: helmchart
+    spec:
+      name: ml-iam-services
+      file: values.yaml
+      key: $.image.tag
+      appversion: true
