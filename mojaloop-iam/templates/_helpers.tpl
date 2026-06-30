@@ -1,22 +1,28 @@
 {{/*
-Stable Postgres superuser password shared between
-postgresql-credentials-secret and ory-database-secrets. Both templates
-need the same value at first-install render time, before either Secret
-exists in the cluster.
+Stable per-purpose password derivation shared across the credentials
+Secret, the Postgres init-SQL Secret, and the per-service DSN Secrets.
+Every call in one render produces the same string for the same purpose;
+across renders the lookup branch keeps the value stable on upgrade.
 
-Strategy:
-  - If ml-iam-postgresql-credentials exists in the cluster, return that.
-  - Otherwise derive a deterministic 24-char value from Release/Chart
-    identifiers so every template that calls this helper in the same
-    render produces the same string. Operators can rotate later with
-    `kubectl delete secret ml-iam-postgresql-credentials` followed by a
-    helm upgrade — the chart will generate a fresh derived value.
+Usage:
+  {{ include "iam.derivedPassword" (dict "ctx" . "purpose" "postgres") }}
+  {{ include "iam.derivedPassword" (dict "ctx" . "purpose" "hydra") }}
+
+If ml-iam-postgresql-credentials exists in the cluster, the helper reuses
+the stored value under key '<purpose>-password'. Otherwise it derives a
+deterministic 24-char string from Release/Chart identifiers + purpose.
+Operators can rotate later with
+`kubectl delete secret ml-iam-postgresql-credentials` followed by a
+helm upgrade.
 */}}
-{{- define "iam.postgresPassword" -}}
-{{- $existing := lookup "v1" "Secret" .Release.Namespace "ml-iam-postgresql-credentials" -}}
-{{- if and $existing $existing.data (index $existing.data "postgres-password") -}}
-{{- index $existing.data "postgres-password" | b64dec -}}
+{{- define "iam.derivedPassword" -}}
+{{- $ctx := .ctx -}}
+{{- $purpose := .purpose -}}
+{{- $key := printf "%s-password" $purpose -}}
+{{- $existing := lookup "v1" "Secret" $ctx.Release.Namespace "ml-iam-postgresql-credentials" -}}
+{{- if and $existing $existing.data (index $existing.data $key) -}}
+{{- index $existing.data $key | b64dec -}}
 {{- else -}}
-{{- printf "%s/%s/%s/postgres" .Release.Name .Release.Namespace .Chart.Name | sha256sum | trunc 24 -}}
+{{- printf "%s/%s/%s/%s" $ctx.Release.Name $ctx.Release.Namespace $ctx.Chart.Name $purpose | sha256sum | trunc 24 -}}
 {{- end -}}
 {{- end -}}
