@@ -34,7 +34,7 @@ spec:
         - name: kratos-public
           port: 80
 {{- end }}
-{{- if and .Values.gateway.hosts.auth .Values.kratosUI.enabled }}
+{{- if and .Values.gateway.hosts.auth (index .Values "kratos-ui" "enabled") }}
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -48,7 +48,7 @@ spec:
     - {{ .Values.gateway.hosts.auth | quote }}
   rules:
     - backendRefs:
-        - name: ml-iam-kratosUI
+        - name: ml-iam-kratos-ui
           port: 80
 {{- end }}
 {{- if and .Values.gateway.hosts.mailpit .Values.mailpit.enabled }}
