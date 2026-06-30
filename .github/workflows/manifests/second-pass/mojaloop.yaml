@@ -73,11 +73,16 @@ sources:
       name: ml-testing-toolkit-cli
   inter-scheme-proxy-adapter:
     kind: helmchart
-    spec: 
+    spec:
       url: file://./mojaloop
       name: inter-scheme-proxy-adapter
+  mojaloop-iam:
+    kind: helmchart
+    spec:
+      url: file://./mojaloop
+      name: mojaloop-iam
 
-  
+
 conditions: {}
 
 targets:
@@ -378,6 +383,16 @@ targets:
       name: mojaloop
       file: Chart.yaml
       key: $.dependencies[30].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'
+  mojaloop-iam:
+    sourceid: mojaloop-iam
+    kind: helmchart
+    spec:
+      name: mojaloop
+      file: Chart.yaml
+      key: $.dependencies[32].version
     transformers:
       - addprefix: '">= '
       - addsuffix: '"'

@@ -19,6 +19,8 @@ helm repo add kokuwa https://kokuwaio.github.io/helm-charts
 helm repo add elastic https://helm.elastic.co
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add codecentric https://codecentric.github.io/helm-charts
+helm repo add ory https://k8s.ory.sh/helm/charts
+helm repo add jouve https://jouve.github.io/charts/
 
 # ## Add Mojaloop repo
 helm repo add mojaloop http://mojaloop.io/helm/repo/

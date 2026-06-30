@@ -19,14 +19,20 @@ oathkeeper:
           enabled: true
           config:
             jwks_urls:
-              - https://localhost/realms/hub-operators/protocol/openid-connect/certs
+              - http://hydra-public/.well-known/jwks.json
+            target_audience:
+              - connection-manager-api
+            # Hydra generates its JWT signing keysets lazily on first use;
+            # 5s covers the cold keygen and only ever applies once.
+            jwks_max_wait: 5s
         cookie_session:
           enabled: true
           config:
             check_session_url: http://kratos-public/sessions/whoami
             preserve_path: true
+            preserve_query: true
             extra_from: "@this"
-            subject_from: "identity.traits.subject"
+            subject_from: identity.id
             only:
               - ory_kratos_session
         anonymous:
@@ -63,10 +69,11 @@ oathkeeper:
           config:
             headers:
               X-User: '{{ print .Subject }}'
-              X-Client-Id: '{{ print .Extra.client_id }}'
-              X-Extra: '{{ print .Extra }}'
-              X-Email: '{{ print (((.Extra.identity).traits).email) }}'
-              X-Roles: '{{ toJson (((.Extra.identity).traits).roles) }}'
+              X-Email: '{{ with .Extra.identity }}{{ print .traits.email }}{{ end }}'
+              X-DFSP-ID: '{{ with .Extra.identity }}{{ with .metadata_public }}{{ with .dfspId }}{{ . }}{{ end }}{{ end }}{{ end }}'
+              X-Roles: '[{{ if .Extra.identity }}{{ with .Extra.identity.metadata_public }}{{ with .role }}"{{ . }}"{{ end }}{{ with .dfspId }}"dfsp:{{ . }}"{{ end }}{{ end }}{{ else }}"dfsp:{{ print .Subject }}"{{ end }}]'
+        noop:
+          enabled: true
       errors:
         fallback:
           - json
@@ -77,12 +84,18 @@ oathkeeper:
               verbose: true
           redirect:
             enabled: false
+            config:
+              to: ""
+              when:
+                - error: [unauthorized, forbidden]
+                  request:
+                    header:
+                      accept: [text/html]
       serve:
         proxy:
           port: 4455
         api:
           port: 4456
-    mutatorIdTokenJWKs: {}
     managedAccessRules: false
   maester:
     enabled: true
@@ -127,12 +140,20 @@ keto:
         metrics:
           port: 4468
       namespaces:
-        - id: 0
-          name: role
-        - id: 1
-          name: permission
-        - id: 2
-          name: participant
+        location: file:///etc/keto-namespaces
+  # OPL namespace files ship inside service Docker images and are mounted
+  # via K8s ImageVolume + subPath. Each contributing service adds:
+  #   extraVolumes:
+  #     - name: <svc>-opl
+  #       image: { reference: <org>/<svc>:<tag> }
+  #   extraVolumeMounts:
+  #     - name: <svc>-opl
+  #       mountPath: /etc/keto-namespaces/<svc>.ts
+  #       subPath: <path/to/svc>.keto.ts
+  # Keto loads all .ts files from /etc/keto-namespaces at startup.
+  deployment:
+    extraVolumes: []
+    extraVolumeMounts: []
   serviceMonitor:
     scheme: http
     scrapeInterval: 60s
@@ -146,7 +167,16 @@ kratos:
     enabled: false
     nameOverride: kratos-secret
   courier:
-    enabled: false
+    enabled: true
+  deployment:
+    extraVolumes:
+      - name: courier-templates-recovery-valid
+        configMap:
+          name: kratos-courier-recovery-valid
+    extraVolumeMounts:
+      - name: courier-templates-recovery-valid
+        mountPath: /conf/courier-templates/recovery/valid
+        readOnly: true
   kratos:
     development: false
     automigration:
@@ -166,11 +196,16 @@ kratos:
                 "email": {
                   "title": "E-Mail",
                   "type": "string",
-                  "format": "email"
-                },
-                "subject": {
-                  "title": "Subject",
-                  "type": "string"
+                  "format": "email",
+                  "minLength": 3,
+                  "ory.sh/kratos": {
+                    "credentials": {
+                      "password": { "identifier": true },
+                      "code": { "identifier": true, "via": "email" }
+                    },
+                    "recovery": { "via": "email" },
+                    "verification": { "via": "email" }
+                  }
                 },
                 "name": {
                   "title": "Name",
@@ -183,7 +218,9 @@ kratos:
                     "type": "string"
                   }
                 }
-              }
+              },
+              "required": ["email"],
+              "additionalProperties": false
             }
           }
         }
@@ -214,9 +251,19 @@ kratos:
           - https://*.localhost
         methods:
           password:
-            enabled: false
+            enabled: true
+          code:
+            enabled: true
+            config:
+              lifespan: 168h
+          link:
+            enabled: true
+            config:
+              lifespan: 168h
           oidc:
             enabled: true
+          profile:
+            enabled: false
         flows:
           login:
             ui_url: https://localhost/ui/login
@@ -273,6 +320,12 @@ kratos:
       session:
         cookie:
           domain: localhost
+      courier:
+        template_override_path: /conf/courier-templates
+        smtp:
+          connection_uri: smtp://mailpit:1025/?disable_starttls=true
+          from_address: noreply@mojaloop.local
+          from_name: Mojaloop MCM
   serviceMonitor:
     enabled: true
     scheme: http
@@ -281,6 +334,45 @@ kratos:
 
 hydra:
   enabled: true
+  secret:
+    enabled: false
+    nameOverride: hydra-secret
+  deployment:
+    initContainerSecurityContext:
+      capabilities:
+        drop: [ALL]
+      seccompProfile:
+        type: RuntimeDefault
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+  hydra:
+    automigration:
+      enabled: true
+      type: initContainer
+    config:
+      serve:
+        cookies:
+          same_site_mode: Lax
+        public:
+          cors:
+            enabled: true
+            allowed_origins:
+              - "*"
+      strategies:
+        access_token: jwt
+      oidc:
+        subject_identifiers:
+          supported_types:
+            - public
+      ttl:
+        access_token: 1h
+        id_token: 1h
+        refresh_token: 720h
+        auth_code: 10m
+      log:
+        level: info
+        format: json
 
 ml-iam-services:
   ketoBatchAuth:
@@ -290,3 +382,67 @@ ml-iam-services:
     env:
       KRATOS_ADMIN_URL: "http://kratos-admin"
       KETO_READ_URL: "http://keto-read"
+
+# Helm hook that seeds the initial hub-admin: a Kratos identity (password
+# credential) and the Hub:<ketoHubObject>#admins Keto tuple. Opt-in; production
+# deployments typically bootstrap admins via SSO and leave this disabled.
+#
+# Admin password source:
+#   - If adminPasswordSecret is set, the password is read from that Secret.
+#   - Otherwise, the chart generates a random password on first install,
+#     persists it in Secret 'iam-bootstrap-admin-password' (kept across helm
+#     uninstall), and reuses it on subsequent upgrades.
+iamBootstrap:
+  enabled: false
+  image: python:3.14-alpine
+  kratosAdminUrl: http://kratos-admin
+  ketoWriteUrl: http://keto-write
+  adminEmail: admin@mcm.local
+  adminPasswordSecret: ""
+  adminPasswordSecretKey: password
+  hubAdminRole: hub-admin
+  ketoHubObject: mojaloop
+
+# Kratos self-service UI: login, recovery, settings, error pages.
+kratos-ui:
+  enabled: false
+
+# Mailpit SMTP catcher for dev/CI. Acts as the Kratos courier backend so
+# invitation and recovery emails can be inspected via Mailpit's web UI.
+mailpit:
+  enabled: false
+
+# External exposure via Gateway API HTTPRoutes. The parent Gateway is
+# expected to exist already (typical Cilium/Contour/NGINX-GW shape, with
+# allowedRoutes.namespaces.from: All on its HTTPS listener); the chart
+# only renders HTTPRoutes that attach to it. Setting host fields below
+# to a non-empty string causes the corresponding HTTPRoute to render.
+# oathkeeperProxyConsumerNamespaces lists the namespaces whose HTTPRoutes
+# are allowed to backend into oathkeeper-proxy. Renders a single
+# ReferenceGrant; the IAM chart itself names no specific consumer.
+gateway:
+  enabled: false
+  parentRefs: []
+  hosts:
+    hydra: ""
+    kratos: ""
+    auth: ""
+    mailpit: ""
+  oathkeeperProxyConsumerNamespaces: []
+
+# Bundled PostgreSQL — when enabled, the chart provisions a Postgres instance
+# with three databases (hydra, kratos, keto) on first install, materialises
+# 'ml-iam-postgresql-credentials' with an autogenerated superuser password,
+# and synthesises hydra-secret/kratos-secret/keto-secret with DSNs pointing
+# at it. Disable to bring an external Postgres; in that case the three Ory
+# Secrets must be supplied externally before installing.
+postgresql:
+  enabled: true
+  fullnameOverride: ml-iam-postgresql
+  auth:
+    existingSecret: ml-iam-postgresql-credentials
+    secretKeys:
+      adminPasswordKey: postgres-password
+  primary:
+    initdb:
+      scriptsSecret: ml-iam-postgresql-initdb

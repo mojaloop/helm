@@ -1,0 +1,150 @@
+{{- if .Values.iamBootstrap.enabled -}}
+{{- /*
+  Admin password: either reference an existing Secret (prod, Vault-backed) or
+  the chart auto-generates one on first install and persists it in
+  Secret 'iam-bootstrap-admin-password' (kept across helm uninstall).
+*/}}
+{{- $useExternal := ne .Values.iamBootstrap.adminPasswordSecret "" -}}
+{{- $generatedPassword := "" -}}
+{{- if not $useExternal -}}
+  {{- $existing := lookup "v1" "Secret" .Release.Namespace "iam-bootstrap-admin-password" -}}
+  {{- if and $existing $existing.data $existing.data.password -}}
+    {{- $generatedPassword = $existing.data.password | b64dec -}}
+  {{- else -}}
+    {{- $generatedPassword = randAlphaNum 24 -}}
+  {{- end -}}
+{{- end -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iam-bootstrap-script
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+data:
+  bootstrap.py: |
+    #!/usr/bin/env python3
+    # Seed initial hub-admin: Kratos identity (password credential) + Hub admin
+    # Keto tuple. Idempotent, safe to re-run.
+    import json, os, urllib.parse, urllib.request
+
+    KRATOS = os.environ["KRATOS_ADMIN_URL"]
+    KETO   = os.environ["KETO_WRITE_URL"]
+    EMAIL  = os.environ["ADMIN_EMAIL"]
+    PASS   = os.environ["ADMIN_PASSWORD"]
+    ROLE   = os.environ["HUB_ADMIN_ROLE"]
+    OBJECT = os.environ["HUB_OBJECT"]
+
+    def req(method, url, body=None):
+        data = json.dumps(body).encode() if body is not None else None
+        headers = {"Content-Type": "application/json"} if data else {}
+        r = urllib.request.Request(url, data=data, method=method, headers=headers)
+        with urllib.request.urlopen(r) as resp:
+            payload = resp.read()
+        return json.loads(payload) if payload else None
+
+    existing = req("GET",
+        f"{KRATOS}/admin/identities?{urllib.parse.urlencode({'credentials_identifier': EMAIL})}")
+    if existing:
+        ident = existing[0]["id"]
+        print(f"hub-admin identity exists: {ident} ({EMAIL})")
+    else:
+        ident = req("POST", f"{KRATOS}/admin/identities", {
+            "schema_id": "default",
+            "traits": {"email": EMAIL, "roles": [ROLE]},
+            "metadata_public": {"role": ROLE},
+            "credentials": {"password": {"config": {"password": PASS}}},
+            "verifiable_addresses": [{"value": EMAIL, "via": "email",
+                                       "verified": True, "status": "completed"}],
+        })["id"]
+        print(f"created hub-admin identity {ident} ({EMAIL})")
+
+    req("PUT", f"{KETO}/admin/relation-tuples", {
+        "namespace": "Hub", "object": OBJECT, "relation": "admins", "subject_id": ident,
+    })
+    print(f"wrote Hub:{OBJECT}#admins@User:{ident}")
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: iam-bootstrap
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: iam-bootstrap
+          image: {{ .Values.iamBootstrap.image | quote }}
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 64Mi
+          command: ["python3", "/scripts/bootstrap.py"]
+          env:
+            - name: KRATOS_ADMIN_URL
+              value: {{ .Values.iamBootstrap.kratosAdminUrl | quote }}
+            - name: KETO_WRITE_URL
+              value: {{ .Values.iamBootstrap.ketoWriteUrl | quote }}
+            - name: ADMIN_EMAIL
+              value: {{ .Values.iamBootstrap.adminEmail | quote }}
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  {{- if $useExternal }}
+                  name: {{ .Values.iamBootstrap.adminPasswordSecret | quote }}
+                  key: {{ .Values.iamBootstrap.adminPasswordSecretKey | quote }}
+                  {{- else }}
+                  name: iam-bootstrap-admin-password
+                  key: password
+                  {{- end }}
+            - name: HUB_ADMIN_ROLE
+              value: {{ .Values.iamBootstrap.hubAdminRole | quote }}
+            - name: HUB_OBJECT
+              value: {{ .Values.iamBootstrap.ketoHubObject | quote }}
+          volumeMounts:
+            - name: script
+              mountPath: /scripts
+              readOnly: true
+      volumes:
+        - name: script
+          configMap:
+            name: iam-bootstrap-script
+            defaultMode: 0755
+{{- if not $useExternal }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: iam-bootstrap-admin-password
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/resource-policy": keep
+type: Opaque
+stringData:
+  password: {{ $generatedPassword | quote }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,22 @@
+name: mojaloop-iam
+
+sources:
+  ml-iam-services:
+    kind: helmchart
+    spec:
+      url: file://./ml-iam-services
+      name: ml-iam-services
+
+conditions: {}
+
+targets:
+  ml-iam-services:
+    sourceid: ml-iam-services
+    kind: helmchart
+    spec:
+      name: mojaloop-iam
+      file: Chart.yaml
+      key: $.dependencies[4].version
+    transformers:
+      - addprefix: '">= '
+      - addsuffix: '"'

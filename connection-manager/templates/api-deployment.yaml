@@ -118,6 +118,8 @@ spec:
               value: {{ .Values.api.vault.pkiClientRole }}
             - name: VAULT_SIGN_EXPIRY_HOURS
               value: {{ .Values.api.vault.signExpiryHours | quote }}
+            - name: INTERNAL_CA_TTL
+              value: {{ .Values.api.vault.internalCaTtl | quote }}
             - name: CLIENT_CSR_PARAMETERS
               value: /resources/tlsClientCSRParameters.json
             - name: SERVER_CSR_PARAMETERS
@@ -177,6 +179,30 @@ spec:
               value: "true"
             - name: KETO_WRITE_URL
               value: {{ .Values.api.keto.writeUrl | quote }}
+            {{- end }}
+            {{- if .Values.iam.enabled }}
+            - name: IAM_ENABLED
+              value: "true"
+            - name: IAM_AUTO_CREATE_ACCOUNTS
+              value: {{ .Values.iam.autoCreateAccounts | default true | quote }}
+            - name: HYDRA_ADMIN_URL
+              value: {{ .Values.global.iam.hydra.adminUrl | quote }}
+            - name: HYDRA_PUBLIC_URL
+              value: {{ .Values.global.iam.hydra.publicUrl | quote }}
+            - name: HYDRA_AUDIENCE
+              value: {{ .Values.iam.hydra.audience | quote }}
+            - name: KRATOS_ADMIN_URL
+              value: {{ .Values.global.iam.kratos.adminUrl | quote }}
+            - name: KRATOS_PUBLIC_URL
+              value: {{ .Values.global.iam.kratos.publicUrl | quote }}
+            - name: KRATOS_IDENTITY_SCHEMA_ID
+              value: {{ .Values.iam.kratos.identitySchemaId | quote }}
+            - name: KRATOS_INVITE_RETURN_TO_URL
+              value: {{ .Values.iam.kratos.inviteReturnToUrl | default .Values.api.clientUrl | quote }}
+            - name: KETO_READ_URL
+              value: {{ .Values.global.iam.keto.readUrl | quote }}
+            - name: KETO_WRITE_URL
+              value: {{ .Values.global.iam.keto.writeUrl | quote }}
             {{- end }}
             {{- if .Values.api.openid.enabled }}
             - name: OPENID_CLIENT_ID
