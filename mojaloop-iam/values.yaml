@@ -69,10 +69,11 @@ oathkeeper:
           config:
             headers:
               X-User: '{{ print .Subject }}'
-              X-Client-Id: '{{ print .Extra.client_id }}'
-              X-Extra: '{{ print .Extra }}'
-              X-Email: '{{ print (((.Extra.identity).traits).email) }}'
-              X-Roles: '{{ toJson (((.Extra.identity).traits).roles) }}'
+              X-Email: '{{ with .Extra.identity }}{{ print .traits.email }}{{ end }}'
+              X-DFSP-ID: '{{ with .Extra.identity }}{{ with .metadata_public }}{{ with .dfspId }}{{ . }}{{ end }}{{ end }}{{ end }}'
+              X-Roles: '[{{ if .Extra.identity }}{{ with .Extra.identity.metadata_public }}{{ with .role }}"{{ . }}"{{ end }}{{ with .dfspId }}"dfsp:{{ . }}"{{ end }}{{ end }}{{ else }}"dfsp:{{ print .Subject }}"{{ end }}]'
+        noop:
+          enabled: true
       errors:
         fallback:
           - json
