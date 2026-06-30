@@ -154,7 +154,7 @@ kratos:
     enabled: false
     nameOverride: kratos-secret
   courier:
-    enabled: false
+    enabled: true
   kratos:
     development: false
     automigration:
@@ -174,11 +174,16 @@ kratos:
                 "email": {
                   "title": "E-Mail",
                   "type": "string",
-                  "format": "email"
-                },
-                "subject": {
-                  "title": "Subject",
-                  "type": "string"
+                  "format": "email",
+                  "minLength": 3,
+                  "ory.sh/kratos": {
+                    "credentials": {
+                      "password": { "identifier": true },
+                      "code": { "identifier": true, "via": "email" }
+                    },
+                    "recovery": { "via": "email" },
+                    "verification": { "via": "email" }
+                  }
                 },
                 "name": {
                   "title": "Name",
@@ -191,7 +196,9 @@ kratos:
                     "type": "string"
                   }
                 }
-              }
+              },
+              "required": ["email"],
+              "additionalProperties": false
             }
           }
         }
@@ -222,9 +229,19 @@ kratos:
           - https://*.localhost
         methods:
           password:
-            enabled: false
+            enabled: true
+          code:
+            enabled: true
+            config:
+              lifespan: 168h
+          link:
+            enabled: true
+            config:
+              lifespan: 168h
           oidc:
             enabled: true
+          profile:
+            enabled: false
         flows:
           login:
             ui_url: https://localhost/ui/login
@@ -281,6 +298,11 @@ kratos:
       session:
         cookie:
           domain: localhost
+      courier:
+        smtp:
+          connection_uri: smtp://mailpit:1025/?disable_starttls=true
+          from_address: noreply@mojaloop.local
+          from_name: Mojaloop MCM
   serviceMonitor:
     enabled: true
     scheme: http
@@ -318,3 +340,12 @@ iamBootstrap:
   adminPasswordSecretKey: password
   hubAdminRole: hub-admin
   ketoHubObject: mojaloop
+
+# Kratos self-service UI: login, recovery, settings, error pages.
+kratosUI:
+  enabled: false
+
+# Mailpit SMTP catcher for dev/CI. Acts as the Kratos courier backend so
+# invitation and recovery emails can be inspected via Mailpit's web UI.
+mailpit:
+  enabled: false
