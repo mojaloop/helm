@@ -409,9 +409,9 @@ mailpit:
 # allowedRoutes.namespaces.from: All on its HTTPS listener); the chart
 # only renders HTTPRoutes that attach to it. Setting host fields below
 # to a non-empty string causes the corresponding HTTPRoute to render.
-# When gateway.crossNamespaceMcmApi is true, a ReferenceGrant is rendered
-# allowing the connection-manager chart's HTTPRoute in the mojaloop
-# namespace to use the oathkeeper-proxy Service in this namespace.
+# oathkeeperProxyConsumerNamespaces lists the namespaces whose HTTPRoutes
+# are allowed to backend into oathkeeper-proxy. Renders a single
+# ReferenceGrant; the IAM chart itself names no specific consumer.
 gateway:
   enabled: false
   parentRefs: []
@@ -420,9 +420,7 @@ gateway:
     kratos: ""
     auth: ""
     mailpit: ""
-  crossNamespaceMcmApi:
-    enabled: false
-    fromNamespace: mojaloop
+  oathkeeperProxyConsumerNamespaces: []
 
 # Bundled PostgreSQL — when enabled, the chart provisions a Postgres instance
 # with three databases (hydra, kratos, keto) on first install, materialises

@@ -68,18 +68,20 @@ spec:
         - name: ml-iam-mailpit-http
           port: 80
 {{- end }}
-{{- if .Values.gateway.crossNamespaceMcmApi.enabled }}
+{{- with .Values.gateway.oathkeeperProxyConsumerNamespaces }}
 ---
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: ReferenceGrant
 metadata:
-  name: mcm-api-to-oathkeeper-proxy
-  namespace: {{ .Release.Namespace }}
+  name: oathkeeper-proxy-consumers
+  namespace: {{ $.Release.Namespace }}
 spec:
   from:
+    {{- range . }}
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      namespace: {{ .Values.gateway.crossNamespaceMcmApi.fromNamespace | quote }}
+      namespace: {{ . | quote }}
+    {{- end }}
   to:
     - group: ""
       kind: Service
