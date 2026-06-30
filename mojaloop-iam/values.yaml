@@ -131,7 +131,7 @@ keto:
     command: ["keto"]
     automigration:
       enabled: true
-      type: initContainer
+      type: job
     config:
       serve:
         read:
@@ -338,6 +338,15 @@ hydra:
   secret:
     enabled: false
     nameOverride: hydra-secret
+  deployment:
+    initContainerSecurityContext:
+      capabilities:
+        drop: [ALL]
+      seccompProfile:
+        type: RuntimeDefault
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
   hydra:
     automigration:
       enabled: true
