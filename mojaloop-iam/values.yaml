@@ -298,3 +298,23 @@ ml-iam-services:
     env:
       KRATOS_ADMIN_URL: "http://kratos-admin"
       KETO_READ_URL: "http://keto-read"
+
+# Helm hook that seeds the initial hub-admin: a Kratos identity (password
+# credential) and the Hub:<ketoHubObject>#admins Keto tuple. Opt-in; production
+# deployments typically bootstrap admins via SSO and leave this disabled.
+#
+# Admin password source:
+#   - If adminPasswordSecret is set, the password is read from that Secret.
+#   - Otherwise, the chart generates a random password on first install,
+#     persists it in Secret 'iam-bootstrap-admin-password' (kept across helm
+#     uninstall), and reuses it on subsequent upgrades.
+iamBootstrap:
+  enabled: false
+  image: python:3.14-alpine
+  kratosAdminUrl: http://kratos-admin
+  ketoWriteUrl: http://keto-write
+  adminEmail: admin@mcm.local
+  adminPasswordSecret: ""
+  adminPasswordSecretKey: password
+  hubAdminRole: hub-admin
+  ketoHubObject: mojaloop
