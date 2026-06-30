@@ -19,14 +19,20 @@ oathkeeper:
           enabled: true
           config:
             jwks_urls:
-              - https://localhost/realms/hub-operators/protocol/openid-connect/certs
+              - http://hydra-public/.well-known/jwks.json
+            target_audience:
+              - connection-manager-api
+            # Hydra generates its JWT signing keysets lazily on first use;
+            # 5s covers the cold keygen and only ever applies once.
+            jwks_max_wait: 5s
         cookie_session:
           enabled: true
           config:
             check_session_url: http://kratos-public/sessions/whoami
             preserve_path: true
+            preserve_query: true
             extra_from: "@this"
-            subject_from: "identity.traits.subject"
+            subject_from: identity.id
             only:
               - ory_kratos_session
         anonymous:
@@ -155,6 +161,15 @@ kratos:
     nameOverride: kratos-secret
   courier:
     enabled: true
+  deployment:
+    extraVolumes:
+      - name: courier-templates-recovery-valid
+        configMap:
+          name: kratos-courier-recovery-valid
+    extraVolumeMounts:
+      - name: courier-templates-recovery-valid
+        mountPath: /conf/courier-templates/recovery/valid
+        readOnly: true
   kratos:
     development: false
     automigration:
@@ -299,6 +314,7 @@ kratos:
         cookie:
           domain: localhost
       courier:
+        template_override_path: /conf/courier-templates
         smtp:
           connection_uri: smtp://mailpit:1025/?disable_starttls=true
           from_address: noreply@mojaloop.local
@@ -311,6 +327,32 @@ kratos:
 
 hydra:
   enabled: true
+  secret:
+    enabled: true
+  hydra:
+    config:
+      serve:
+        cookies:
+          same_site_mode: Lax
+        public:
+          cors:
+            enabled: true
+            allowed_origins:
+              - "*"
+      strategies:
+        access_token: jwt
+      oidc:
+        subject_identifiers:
+          supported_types:
+            - public
+      ttl:
+        access_token: 1h
+        id_token: 1h
+        refresh_token: 720h
+        auth_code: 10m
+      log:
+        level: info
+        format: json
 
 ml-iam-services:
   ketoBatchAuth:

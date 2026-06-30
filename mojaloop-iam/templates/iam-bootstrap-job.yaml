@@ -80,10 +80,29 @@ spec:
   template:
     spec:
       restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: iam-bootstrap
           image: {{ .Values.iamBootstrap.image | quote }}
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 64Mi
           command: ["python3", "/scripts/bootstrap.py"]
           env:
             - name: KRATOS_ADMIN_URL

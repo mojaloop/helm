@@ -1,0 +1,12 @@
+{{- if .Values.kratos.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kratos-courier-recovery-valid
+  namespace: {{ .Release.Namespace }}
+data:
+  {{- range $path, $_ := .Files.Glob "files/courier-templates/recovery/valid/*" }}
+  {{ base $path }}: |-
+    {{- $.Files.Get $path | nindent 4 }}
+  {{- end }}
+{{- end }}
