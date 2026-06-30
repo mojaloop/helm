@@ -155,17 +155,20 @@ db:
   # sslCaSecret: mysql-tls-client-creds
   # sslCaSecretKey: cacert.pem
 
-ingress:
+# External exposure is via Gateway API HTTPRoutes; no legacy Ingress.
+# A single MCM HTTPRoute fans out by path on `gateway.host`:
+#   /api/* → oathkeeper-proxy (cross-namespace, gated by a ReferenceGrant
+#            that the mojaloop-iam chart renders)
+#   /*     → mcm-connection-manager-ui
+gateway:
   enabled: false
-  host: localhost
-  annotations: {}
-  tls: []
-  pathType: ImplementationSpecific
-  className: "nginx"
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-# development friendly variables
+  host: ""
+  parentRefs: []
+  oathkeeper:
+    serviceNamespace: iam
+    serviceName: oathkeeper-proxy
+    servicePort: 4455
+
 imagePullPolicy: IfNotPresent
 
 config:
