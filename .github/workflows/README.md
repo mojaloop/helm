@@ -45,16 +45,49 @@ Customize the workflow via the GitHub UI or API:
 5. Optionally adjust optional inputs (e.g., `release_name`, `release_version`).
 6. Click **Run workflow** to start the process.
 
-### What Happens
-- **Checkout**: Pulls code from the specified branch.
-- **Setup**: Installs Helm (v3.13.3), `mo`, `updatecli` (v0.71.0), and `jq`.
-- **Chart Updates**: Syncs Helm chart dependencies from multiple repositories.
-- **Changelog**: Generates a changelog from the last release tag.
-- **Versioning**: Determines or uses the provided release version.
-- **Release Prep**: Updates TTK test cases and Mojaloop chart versions.
-- **PR Creation**: Creates a draft PR with release notes.
-- **Deployment**: Deploys to Kubernetes using `oss-core-env` values.
-- **Testing**: Runs TTK tests and cleans up temporary files.
+### Pipeline
+The workflow is split into one job per phase, wired linearly:
+
+```
+update-charts ─▶ changelog ─▶ determine-version ─▶ ttk ─▶ finalize ─▶ create-pr ─▶ deploy
+```
+
+| Job | Does | Needs |
+|-----|------|-------|
+| `update-charts` | `update-charts.sh` (first + second pass) — bumps chart & image versions | — |
+| `changelog` | `generate-changelog.sh` — needs full history and tags | `update-charts` |
+| `determine-version` | `determine-release-version.sh`, validates `vX.Y.Z`, exposes `RELEASE_VERSION` | `changelog` |
+| `ttk` | Cuts the `testing-toolkit-test-cases` release, then third-pass updatecli | `update-charts`, `determine-version` |
+| `finalize` | Sets `mojaloop/Chart.yaml` version, writes the release note | `ttk`, `determine-version` |
+| `create-pr` | Opens the draft PR | `finalize`, `determine-version` |
+| `deploy` | Deploys to the cluster and runs TTK tests; gated by the `deploy` input | `create-pr`, `determine-version` |
+
+`deploy` runs after `create-pr`, so a deploy failure does not affect the created PR. Set the
+`deploy` input to `false` to skip it.
+
+Every job starts with `actions/checkout` then `uses: ./.github/actions/setup` — the composite
+action ([`.github/actions/setup/action.yml`](../actions/setup/action.yml)) that installs Helm
+(v3.13.3), `mo`, `updatecli` (v0.71.0) and `jq`, and adds the Helm repositories. `create-pr` does
+not use `setup`.
+
+### State passed between jobs
+Each job runs on a fresh runner. The mutated working tree travels as a tar artifact (`.git`, built
+`charts/`, `tmpcharts*`, and `.tmp` are excluded). `RELEASE_VERSION` travels as a
+`determine-version` job output.
+
+| Artifact | Produced by | Contains | Consumed by |
+|----------|-------------|----------|-------------|
+| `worktree-charts` | `update-charts` | chart/image version bumps | `changelog`, `ttk` |
+| `worktree-ttk` | `ttk` | + TTK version in `mojaloop/values.yaml` | `finalize` |
+| `worktree-final` | `finalize` | + `mojaloop/Chart.yaml` version, + `.changelog/` note | `create-pr`, `deploy` |
+| `changelog-data` | `changelog` | `.tmp/changelogs`, `.tmp/tags` | `determine-version`, `finalize` |
+
+Artifacts have 5-day retention.
+
+### Re-running a failed phase
+Use **Re-run failed jobs** in the Actions UI, or `gh run rerun <run-id> --failed`. Successful
+upstream artifacts are reused, so `update-charts` is not repeated (within the 5-day retention
+window).
 
 ## Outputs
 - **Draft Pull Request**: Contains updated charts, changelog, and release notes in the `release/release-candidate-<release_name>-<release_version>-<run_id>` branch.
@@ -65,16 +98,19 @@ Customize the workflow via the GitHub UI or API:
 Relevant files and scripts:
 ```
 .github/
-├── workflows/
-│   └── create-release-pr.yml       # Workflow definition
-│   └── scripts/
-│       ├── update-charts.sh        # Updates Helm chart dependencies
-│       ├── generate-changelog.sh   # Generates changelog
-│       ├── determine-release-version.sh  # Determines release version
-│       └── generate-release-note.sh     # Creates release note
-└── manifests/
-└── third-pass/
-└── mojaloop.yaml           # Updatecli config for TTK versions
+├── actions/
+│   └── setup/action.yml            # Composite action: install tools + add Helm repos (used by every job)
+└── workflows/
+    ├── create-release-pr.yml       # Workflow definition
+    ├── scripts/
+    │   ├── update-charts.sh        # Updates Helm chart dependencies
+    │   ├── generate-changelog.sh   # Generates changelog
+    │   ├── determine-release-version.sh  # Determines release version
+    │   └── generate-release-note.sh      # Creates release note
+    └── manifests/
+        ├── first-pass/             # Updatecli: external sources (GitHub releases, published charts)
+        ├── second-pass/            # Updatecli: local file:// chart dependency versions
+        └── third-pass/mojaloop.yaml  # Updatecli: TTK test-case versions
 mojaloop/
 └── Chart.yaml                      # Mojaloop Helm chart
 ```
@@ -85,8 +121,8 @@ mojaloop/
 - **Cleanup**: Temporary files (e.g., `.tmp/`) are removed post-execution.
 
 ## Dependencies
-- **Helm Repositories**:
-  - `stable`, `incubator`, `kokuwa`, `elastic`, `codecentric`, `bitnami`, `mojaloop-charts`, `redpanda`, `mojaloop`
+- **Helm Repositories** (added by `.github/actions/setup/action.yml`):
+  - `stable`, `incubator`, `kokuwa`, `elastic`, `codecentric`, `bitnami`, `mojaloop-charts`, `redpanda`, `mojaloop`, `prometheus-community`, `ory`
 - **Tools**: `Helm v3.13.3`, `updatecli v0.71.0`, `mo`, `jq`.
 - **External Repos**: `mojaloop/oss-core-env`, `testing-toolkit-test-cases`.
 
@@ -97,9 +133,10 @@ mojaloop/
 
 ## Contributing
 To modify this workflow:
-1. Edit `.github/workflows/create-release-pr.yml`.
+1. Edit `.github/workflows/create-release-pr.yml` (jobs) or `.github/actions/setup/action.yml` (toolchain and Helm repos, shared by every job).
 2. Update scripts in `.github/workflows/scripts/` as needed.
-3. Test changes in a feature branch and submit a PR to `main`.
+3. A new job that reads `RELEASE_VERSION` must list `determine-version` in its `needs`. A new job that mutates the tree must download the latest `worktree-*` artifact, `tar xzf` it, make its change, then repack with the same `--exclude` flags and upload a new `worktree-*`.
+4. Test changes in a feature branch and submit a PR to `main`.
 
 
 ## Helm Chart Dependency Update Script

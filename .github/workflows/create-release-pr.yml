@@ -1,17 +1,26 @@
-# NOTES:
-# - GitHub Actions must be explicitly allowed to create pull requests in this repository.
-#   This setting can be found in the repository's settings under Actions > General > Workflow permissions.
-# - A repository secret `AUTO_RELEASE_TOKEN` (permissions: `contents: write`, `pull-requests: write`, `repositories: read`) needs to be created.
-#   The secret should contain a github access token (classic token (scope: repo (Full control of private repositories)) works better) with the permissions specified above.
-#   The secret is used by the `create-pull-request` action to create the pull request and `updatecli` to access all updateable repositories.
-#   The secret can be created at https://github.com/mojaloop/helm/settings/secrets/actions
+# Create Release PR
 #
-# KNOWN ISSUES:
-#  - https://github.com/updatecli/updatecli/issues/1332
-#  - https://github.com/goccy/go-yaml/issues/298
-#  The underlying libraries used by updatecli for parsing yaml files have issues with maintaining multiline strings format and nodes with anchor.
-#  These issues are being worked on by the maintainers of the libraries and will be resolved in future releases.
-#  In the meantime, the workaround is to manually fix the affected files after the updatecli run.
+# Requirements:
+# - GitHub Actions must be allowed to create pull requests in this repository
+#   (Settings > Actions > General > Workflow permissions).
+# - Secret `AUTO_RELEASE_TOKEN` (contents: write, pull-requests: write, repositories: read);
+#   a classic PAT with scope `repo` works best.
+#
+# The pipeline is split into one job per phase, wired linearly:
+#   update-charts -> changelog -> determine-version -> ttk -> finalize -> create-pr -> deploy
+#
+# State passed between jobs:
+#   * The mutated working tree travels as a tar artifact (.git is excluded -- it is ~2GB):
+#       update-charts -> worktree-charts   (chart/image version bumps)
+#       ttk           -> worktree-ttk       (+ TTK test-case version in mojaloop/values.yaml)
+#       finalize      -> worktree-final     (+ mojaloop/Chart.yaml version, + .changelog note)
+#   * generate-changelog output (.tmp/changelogs, .tmp/tags) -> changelog-data
+#   * RELEASE_VERSION -> determine-version job output
+#
+# `deploy` runs after `create-pr`, so a deploy failure does not affect the created PR.
+# Set the `deploy` input to false to skip it.
+#
+# See .github/workflows/README.md for inputs, secrets, and updatecli pass details.
 
 name: Create Release PR
 
@@ -40,6 +49,11 @@ on:
         description: "Example backend version (e.g. v1.0.0)"
         required: true
         default: "v15.0.0"
+      deploy:
+        type: boolean
+        description: "Run the deploy + TTK test job after the PR is created (best-effort)"
+        required: false
+        default: true
       deployment_release_name:
         type: string
         description: "Deployment release name (e.g. moja1)"
@@ -57,9 +71,226 @@ on:
         default: "helm-values-moja2-mojaloop-v16.0.0.yaml"
 
 jobs:
-  create_release_pr:
-    name: Create Release PR
+  # Phase 1: bump every chart/image dependency version.
+  update-charts:
+    name: Update chart dependencies
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - name: Update chart dependencies
+        env:
+          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+        run: .github/workflows/scripts/update-charts.sh
+      - name: Pack mutated working tree
+        run: |
+          tar czf /tmp/worktree.tgz \
+            --exclude=.git --exclude=charts --exclude='tmpcharts*' --exclude=.tmp .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worktree-charts
+          path: /tmp/worktree.tgz
+          retention-days: 5
+
+  # Phase 2: generate the cross-repo changelog (needs full history + the bumped tree).
+  changelog:
+    name: Generate changelog
+    runs-on: ubuntu-latest
+    needs: [update-charts]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v4
+        with:
+          name: worktree-charts
+          path: /tmp
+      - name: Restore mutated working tree
+        run: tar xzf /tmp/worktree.tgz
+      - name: Generate changelog
+        env:
+          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+        run: .github/workflows/scripts/generate-changelog.sh '${{ inputs.last_release_tag }}'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: changelog-data
+          path: |
+            .tmp/changelogs
+            .tmp/tags
+          retention-days: 5
+
+  # Phase 3: derive the single RELEASE_VERSION from the changelog, and validate it.
+  determine-version:
+    name: Determine release version
+    runs-on: ubuntu-latest
+    needs: [changelog]
+    outputs:
+      release_version: ${{ steps.determine.outputs.RELEASE_VERSION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v4
+        with:
+          name: changelog-data
+          path: .tmp
+      - name: Determine release version number
+        id: determine
+        env:
+          _RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          if [[ -z "$_RELEASE_VERSION" ]]; then
+            release_version=$(.github/workflows/scripts/determine-release-version.sh '${{ inputs.last_release_tag }}')
+            echo "release_version=$release_version"
+            echo "RELEASE_VERSION=$(echo $release_version)" >> "$GITHUB_OUTPUT"
+          else
+            echo "RELEASE_VERSION=$(echo $_RELEASE_VERSION)" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Validate next release version
+        run: |
+          release_version='${{ steps.determine.outputs.RELEASE_VERSION }}'
+          if [[ -z "$release_version" || ! "$release_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "RELEASE_VERSION is not set or is not a valid semver version"
+            exit 1
+          fi
+
+  # Phase 4: cut the TTK test-cases release, then pin its version in mojaloop/values.yaml.
+  ttk:
+    name: Prepare and update TTK test cases
+    runs-on: ubuntu-latest
+    needs: [update-charts, determine-version]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v4
+        with:
+          name: worktree-charts
+          path: /tmp
+      - name: Restore mutated working tree
+        run: tar xzf /tmp/worktree.tgz
+      - name: Prepare TTK test cases release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.AUTO_RELEASE_TOKEN }}
+          repo: testing-toolkit-test-cases
+          makeLatest: true
+          allowUpdates: false
+          generateReleaseNotes: true
+          skipIfReleaseExists: true
+          tag: ${{ needs.determine-version.outputs.release_version }}
+          commit: master
+      - name: Update TTK test cases version
+        env:
+          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+        run: updatecli apply --config .github/workflows/manifests/third-pass/mojaloop.yaml
+      - name: Pack mutated working tree
+        run: |
+          tar czf /tmp/worktree.tgz \
+            --exclude=.git --exclude=charts --exclude='tmpcharts*' --exclude=.tmp .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worktree-ttk
+          path: /tmp/worktree.tgz
+          retention-days: 5
+
+  # Phase 5: stamp the release version onto the mojaloop chart and write the release note.
+  finalize:
+    name: Finalize release (chart version + note)
+    runs-on: ubuntu-latest
+    needs: [ttk, determine-version]
+    outputs:
+      release_note_file: ${{ steps.note.outputs.RELEASE_NOTE_FILE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v4
+        with:
+          name: worktree-ttk
+          path: /tmp
+      - name: Restore mutated working tree
+        run: tar xzf /tmp/worktree.tgz
+      - uses: actions/download-artifact@v4
+        with:
+          name: changelog-data
+          path: .tmp
+      - name: Synchronize release version with mojaloop chart version
+        run: |
+          release_version='${{ needs.determine-version.outputs.release_version }}'
+          if [[ -z "$release_version" || ! "$release_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "RELEASE_VERSION is not set or is not a valid semver version"
+            exit 1
+          fi
+          release_version="${release_version:1}"
+          awk -v release_version="$release_version" '/^version:/ {print "version: " release_version; next} 1' mojaloop/Chart.yaml > mojaloop/Chart.yaml.tmp && mv mojaloop/Chart.yaml.tmp mojaloop/Chart.yaml
+      - name: Generate release note
+        id: note
+        env:
+          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+        run: |
+          .github/workflows/scripts/generate-release-note.sh '${{ inputs.release_name }}' '${{ needs.determine-version.outputs.release_version }}' '${{ inputs.last_release_tag }}' '${{ needs.determine-version.outputs.release_version }}' '${{ inputs.example_backend_version }}'
+          echo "RELEASE_NOTE_FILE=.changelog/release-${{ needs.determine-version.outputs.release_version }}.md" >> "$GITHUB_OUTPUT"
+      - name: Pack finalized working tree
+        run: |
+          tar czf /tmp/worktree.tgz \
+            --exclude=.git --exclude=charts --exclude='tmpcharts*' --exclude=.tmp .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: worktree-final
+          path: /tmp/worktree.tgz
+          retention-days: 5
+
+  # Phase 6: open the PR from the finalized tree.
+  create-pr:
+    name: Create pull request
+    runs-on: ubuntu-latest
+    needs: [finalize, determine-version]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: worktree-final
+          path: /tmp
+      - name: Restore finalized working tree
+        run: tar xzf /tmp/worktree.tgz
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.AUTO_RELEASE_TOKEN }}
+          commit-message: "chore: upgrade helm chart depdenencies"
+          title: "[auto] feat: release candidate for ${{ inputs.release_name }} ${{ needs.determine-version.outputs.release_version }}"
+          body-path: ${{ needs.finalize.outputs.release_note_file }}
+          branch: release/release-candidate-${{ inputs.release_name }}-${{ needs.determine-version.outputs.release_version }}-${{ github.run_id }}
+          base: main
+          draft: true
+
+  # Phase 7 (best-effort): deploy the finalized charts and run the TTK tests.
+  deploy:
+    name: Deploy and test
+    runs-on: ubuntu-latest
+    needs: [create-pr, determine-version]
+    if: ${{ inputs.deploy }}
     env:
       AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
       AWS_DEFAULT_OUTPUT: ${{ vars.AWS_DEFAULT_OUTPUT }}
@@ -72,131 +303,13 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
           fetch-depth: 0
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v3
+      - uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v4
         with:
-          version: v3.13.3
-
-      - name: Install dependencies
-        run: |
-          # Install mo
-          curl -sSL https://raw.githubusercontent.com/tests-always-included/mo/master/mo -o mo
-          if [ $? -ne 0 ]; then
-            echo "Failed to download mo"
-            exit 1
-          fi
-          sudo chmod +x mo
-          if [ $? -ne 0 ]; then
-            echo "Failed to make mo executable"
-            exit 1
-          fi
-          sudo mv mo /usr/local/bin/
-
-          mo --help
-
-          # Install updatecli
-          curl -sL https://github.com/updatecli/updatecli/releases/download/v0.71.0/updatecli_amd64.deb -o /tmp/updatecli_amd64.deb
-          sudo apt install /tmp/updatecli_amd64.deb
-
-          # Install jq
-          sudo apt-get install jq
-
-      - name: Setup Helm repositories
-        run: |
-          helm repo add stable https://charts.helm.sh/stable
-          helm repo add incubator https://charts.helm.sh/incubator
-          helm repo add kokuwa https://kokuwaio.github.io/helm-charts
-          helm repo add elastic https://helm.elastic.co
-          helm repo add codecentric https://codecentric.github.io/helm-charts
-          helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm repo add mojaloop-charts https://mojaloop.github.io/charts/repo
-          helm repo add redpanda https://charts.redpanda.com
-          helm repo add mojaloop https://mojaloop.io/helm/repo/
-          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-          helm repo add ory https://k8s.ory.sh/helm/charts
-          helm repo update
-
-      - name: Update chart dependencies
-        env:
-          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
-        run: .github/workflows/scripts/update-charts.sh
-
-      - name: Generate changelog
-        env:
-          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
-        run: .github/workflows/scripts/generate-changelog.sh ${{ inputs.last_release_tag }}
-
-      - name: Determine release version number
-        id: determine-release-version
-        env:
-          _RELEASE_VERSION: ${{ inputs.release_version }}
-        run: |
-          if [[ -z $_RELEASE_VERSION ]]; then
-            release_version=$(.github/workflows/scripts/determine-release-version.sh '${{ inputs.last_release_tag }}')
-            echo "release_version=$release_version"
-            echo "RELEASE_VERSION=$(echo $release_version)" >> "$GITHUB_OUTPUT"
-          else
-            echo "RELEASE_VERSION=$(echo $_RELEASE_VERSION)" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Next release version
-        run: |
-          release_version='${{ steps.determine-release-version.outputs.RELEASE_VERSION }}'
-          if [[ -z "$release_version" || ! "$release_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "RELEASE_VERSION is not set or is not a valid semver version"
-            exit 1
-          fi
-
-      - name: Prepare TTK test cases release
-        uses: ncipollo/release-action@v1
-        with:
-          token: ${{ secrets.AUTO_RELEASE_TOKEN }}
-          repo: testing-toolkit-test-cases
-          makeLatest: true
-          allowUpdates: false
-          generateReleaseNotes: true
-          skipIfReleaseExists: true
-          tag: ${{ steps.determine-release-version.outputs.RELEASE_VERSION }}
-          commit: master
-
-      - name: Update TTK test cases version
-        env:
-          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
-        run: updatecli apply --config .github/workflows/manifests/third-pass/mojaloop.yaml
-
-      - name: Syncronize release version with mojaloop chart version
-        env:
-          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
-        run: |
-          release_version='${{ steps.determine-release-version.outputs.RELEASE_VERSION }}'
-          if [[ -z "$release_version" || ! "$release_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "RELEASE_VERSION is not set or is not a valid semver version"
-            exit 1
-          fi
-          release_version="${release_version:1}"
-          sed -i "s/^version:.*/version: $release_version/" mojaloop/Chart.yaml
-          awk -v release_version="$release_version" '/^version:/ {print "version: " release_version; next} 1' mojaloop/Chart.yaml > mojaloop/Chart.yaml.tmp && mv mojaloop/Chart.yaml.tmp mojaloop/Chart.yaml
-
-      - name: Generate release note
-        id: generate-release-note
-        env:
-          AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
-        run: |
-          .github/workflows/scripts/generate-release-note.sh '${{ inputs.release_name }}' '${{ steps.determine-release-version.outputs.RELEASE_VERSION }}' '${{ inputs.last_release_tag }}' '${{ steps.determine-release-version.outputs.RELEASE_VERSION }}' '${{ inputs.example_backend_version }}'
-          echo "RELEASE_NOTE_FILE=.changelog/release-${{ steps.determine-release-version.outputs.RELEASE_VERSION }}.md" >> "$GITHUB_OUTPUT"
-
-      - name: Create pull request
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.AUTO_RELEASE_TOKEN }}
-          commit-message: "chore: upgrade helm chart depdenencies"
-          title: "[auto] feat: release candidate for ${{ inputs.release_name }} ${{ steps.determine-release-version.outputs.RELEASE_VERSION }}"
-          body-path: ${{ steps.generate-release-note.outputs.RELEASE_NOTE_FILE }}
-          branch: release/release-candidate-${{ inputs.release_name }}-${{ steps.determine-release-version.outputs.RELEASE_VERSION }}-${{ github.run_id }}
-          base: main
-          draft: true
-
+          name: worktree-final
+          path: /tmp
+      - name: Restore finalized working tree
+        run: tar xzf /tmp/worktree.tgz
       - name: Clone oss-core-env repository
         uses: actions/checkout@v4
         with:
@@ -204,65 +317,52 @@ jobs:
           repository: mojaloop/oss-core-env
           ref: main
           path: .tmp/oss-core-env
-
       - name: Prepare deployment values file
         run: |
           set -a && . .tmp/oss-core-env/config/test-mojaloop-live/.env && set +a
           sed -i "s/{{CI_ENV_NAME}}/$ENV_NAME/" .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }}
           sed -i "s/{{CI_HELM_NAMESPACE}}/${{ inputs.deployment_namespace }}/" .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }}
-          sed -i "s/{{CI_ENV_VERSION}}/${{ steps.determine-release-version.outputs.RELEASE_VERSION }}/" .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }}
-
+          sed -i "s/{{CI_ENV_VERSION}}/${{ needs.determine-version.outputs.release_version }}/" .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }}
       - name: Set KUBECONFIG
         run: |
           echo "${{ secrets.AUTO_RELEASE_KUBECONFIG }}" > .tmp/test.mojaloop.live.conf
           chmod 600 .tmp/test.mojaloop.live.conf
-
       - name: Cluster Info
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
         run: kubectl cluster-info
-
       - name: Delete existing deployments
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
         run: helm ls -n ${{ inputs.deployment_namespace }} --short | xargs -L1 sh -c 'if [ -n "$1" ]; then helm uninstall -n ${{ inputs.deployment_namespace }} "$1"; fi' _
-
       - name: Deploy backend
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
         run: helm install backend mojaloop/example-mojaloop-backend --namespace ${{ inputs.deployment_namespace }}
-
       - name: Build charts
-        run: |
-          ./update-charts-dep.sh
-
+        run: ./update-charts-dep.sh
       - name: Deploy charts
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
         run: |
-          # Install Mojaloop
           helm install ${{ inputs.deployment_release_name }} ./mojaloop -f .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }} --namespace ${{ inputs.deployment_namespace }}
-
       - name: Wait for deployment to be ready
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
         timeout-minutes: 15
+        continue-on-error: true
         run: |
           while [[ $(kubectl get pods -n ${{ inputs.deployment_namespace }} -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}' | grep False) ]]; do
             echo "Waiting for pods to be ready..."
             sleep 10
           done
           echo "All pods are ready!"
-        continue-on-error: true
-
       - name: Run TTK tests
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
         timeout-minutes: 15
-        run: |
-          helm test ${{ inputs.deployment_release_name }} --namespace ${{ inputs.deployment_namespace }}
         continue-on-error: true
-
+        run: helm test ${{ inputs.deployment_release_name }} --namespace ${{ inputs.deployment_namespace }}
       - name: Clean up
-        run: |
-            rm -rf .tmp
+        if: ${{ always() }}
+        run: rm -rf .tmp
