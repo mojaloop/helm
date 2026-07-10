@@ -78,20 +78,23 @@ mkdir -p "$dir/tags"
 
 current_branch=$(git branch --show-current)
 
-# Extract and store repository name and tag in all values.yaml files
-find . -type d -name '[!.]*' -exec test -e "{}/Chart.yaml" ';' -print | while read chart_dir; do
-    base_chart_dir=$(echo $chart_dir | cut -d'/' -f2)
-    if [[ ! " ${excluded_charts[@]} " =~ " ${base_chart_dir} " ]]; then
-        helm show values "$chart_dir" | grep -E 'repository:|tag:' | awk '{print $1 $2}' >> "${dir}/tags/current-tags.log"
-    fi
-done
+# Emit the image repository/tag pairs of a chart's values, one "key:value" per line.
+# A `tag:` is only emitted when it directly follows a `repository:`, so unrelated keys
+# are ignored -- e.g. connection-manager's `git: {url, tag}` block, which otherwise
+# lands in the log with no repository and either overwrites the previous repo's tag or
+# aborts the reader below with "bad array subscript".
+extract_image_tags() {
+  helm show values "$1" | awk '
+    $1 == "repository:" { print $1 $2; have = 1; next }
+    $1 == "tag:"        { if (have) print $1 $2; have = 0; next }
+  '
+}
 
-# Checkout out last release tag and extract repository name and tag in its all values.yaml files
 # Extract CURRENT tags from the current working tree
 find . -type d -name '[!.]*' -exec test -e "{}/Chart.yaml" ';' -print | while read -r chart_dir; do
   base_chart_dir=$(echo "$chart_dir" | cut -d'/' -f2)
   if [[ ! " ${excluded_charts[*]} " =~ " ${base_chart_dir} " ]]; then
-    helm show values "$chart_dir" | grep -E 'repository:|tag:' | awk '{print $1 $2}' >> "${dir}/tags/current-tags.log"
+    extract_image_tags "$chart_dir" >> "${dir}/tags/current-tags.log"
   fi
 done
 
@@ -104,7 +107,7 @@ find "$last_release_wt" -type d -name '[!.]*' -exec test -e "{}/Chart.yaml" ';' 
   rel="${chart_dir#${last_release_wt}/}"
   base_chart_dir=$(echo "$rel" | cut -d'/' -f1)
   if [[ ! " ${excluded_charts[*]} " =~ " ${base_chart_dir} " ]]; then
-    helm show values "$chart_dir" | grep -E 'repository:|tag:' | awk '{print $1 $2}' >> "${dir}/tags/last-release-tags.log"
+    extract_image_tags "$chart_dir" >> "${dir}/tags/last-release-tags.log"
   fi
 done
 
@@ -128,12 +131,16 @@ trim() {
 ############################################
 # Read last release tags into associative array 'last_release_tags'
 ############################################
+repository=""
 while IFS= read -r line; do
   if [[ $line == repository:* ]]; then
     repository="$(trim "${line#repository:}")"
-    last_release_tags["$repository"]=null
+    if [[ -n $repository ]]; then
+      last_release_tags["$repository"]=null
+    fi
 
   elif [[ $line == tag:* ]]; then
+    [[ -n $repository ]] || continue
     tag="$(trim "${line#tag:}")"
     last_release_tags["$repository"]="$tag"
   fi
@@ -142,12 +149,16 @@ done < "$dir/tags/last-release-tags.log"
 ############################################
 # Read current tags into associative array 'current_tags'
 ############################################
+repository=""
 while IFS= read -r line; do
   if [[ $line == repository:* ]]; then
     repository="$(trim "${line#repository:}")"
-    current_tags["$repository"]=null
+    if [[ -n $repository ]]; then
+      current_tags["$repository"]=null
+    fi
 
   elif [[ $line == tag:* ]]; then
+    [[ -n $repository ]] || continue
     tag="$(trim "${line#tag:}")"
     current_tags["$repository"]="$tag"
   fi
