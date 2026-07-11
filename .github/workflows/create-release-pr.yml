@@ -70,6 +70,11 @@ on:
         required: true
         default: "helm-values-moja2-mojaloop-v16.0.0.yaml"
 
+# GITHUB_TOKEN is only used by actions/checkout. All release/PR operations use the
+# AUTO_RELEASE_TOKEN PAT, so least-privilege read is sufficient.
+permissions:
+  contents: read
+
 jobs:
   # Phase 1: bump every chart/image dependency version.
   update-charts:
@@ -117,7 +122,8 @@ jobs:
       - name: Generate changelog
         env:
           AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
-        run: .github/workflows/scripts/generate-changelog.sh '${{ inputs.last_release_tag }}'
+          LAST_RELEASE_TAG: ${{ inputs.last_release_tag }}
+        run: .github/workflows/scripts/generate-changelog.sh "$LAST_RELEASE_TAG"
       - uses: actions/upload-artifact@v4
         with:
           name: changelog-data
@@ -148,18 +154,20 @@ jobs:
         id: determine
         env:
           _RELEASE_VERSION: ${{ inputs.release_version }}
+          LAST_RELEASE_TAG: ${{ inputs.last_release_tag }}
         run: |
           if [[ -z "$_RELEASE_VERSION" ]]; then
-            release_version=$(.github/workflows/scripts/determine-release-version.sh '${{ inputs.last_release_tag }}')
+            release_version=$(.github/workflows/scripts/determine-release-version.sh "$LAST_RELEASE_TAG")
             echo "release_version=$release_version"
             echo "RELEASE_VERSION=$(echo $release_version)" >> "$GITHUB_OUTPUT"
           else
             echo "RELEASE_VERSION=$(echo $_RELEASE_VERSION)" >> "$GITHUB_OUTPUT"
           fi
       - name: Validate next release version
+        env:
+          RELEASE_VERSION: ${{ steps.determine.outputs.RELEASE_VERSION }}
         run: |
-          release_version='${{ steps.determine.outputs.RELEASE_VERSION }}'
-          if [[ -z "$release_version" || ! "$release_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if [[ -z "$RELEASE_VERSION" || ! "$RELEASE_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "RELEASE_VERSION is not set or is not a valid semver version"
             exit 1
           fi
@@ -183,7 +191,7 @@ jobs:
       - name: Restore mutated working tree
         run: tar xzf /tmp/worktree.tgz
       - name: Prepare TTK test cases release
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
         with:
           token: ${{ secrets.AUTO_RELEASE_TOKEN }}
           repo: testing-toolkit-test-cases
@@ -232,21 +240,26 @@ jobs:
           name: changelog-data
           path: .tmp
       - name: Synchronize release version with mojaloop chart version
+        env:
+          RELEASE_VERSION: ${{ needs.determine-version.outputs.release_version }}
         run: |
-          release_version='${{ needs.determine-version.outputs.release_version }}'
-          if [[ -z "$release_version" || ! "$release_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if [[ -z "$RELEASE_VERSION" || ! "$RELEASE_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "RELEASE_VERSION is not set or is not a valid semver version"
             exit 1
           fi
-          release_version="${release_version:1}"
+          release_version="${RELEASE_VERSION:1}"
           awk -v release_version="$release_version" '/^version:/ {print "version: " release_version; next} 1' mojaloop/Chart.yaml > mojaloop/Chart.yaml.tmp && mv mojaloop/Chart.yaml.tmp mojaloop/Chart.yaml
       - name: Generate release note
         id: note
         env:
           AUTO_RELEASE_TOKEN: ${{ secrets.AUTO_RELEASE_TOKEN }}
+          RELEASE_NAME: ${{ inputs.release_name }}
+          RELEASE_VERSION: ${{ needs.determine-version.outputs.release_version }}
+          LAST_RELEASE_TAG: ${{ inputs.last_release_tag }}
+          EXAMPLE_BACKEND_VERSION: ${{ inputs.example_backend_version }}
         run: |
-          .github/workflows/scripts/generate-release-note.sh '${{ inputs.release_name }}' '${{ needs.determine-version.outputs.release_version }}' '${{ inputs.last_release_tag }}' '${{ needs.determine-version.outputs.release_version }}' '${{ inputs.example_backend_version }}'
-          echo "RELEASE_NOTE_FILE=.changelog/release-${{ needs.determine-version.outputs.release_version }}.md" >> "$GITHUB_OUTPUT"
+          .github/workflows/scripts/generate-release-note.sh "$RELEASE_NAME" "$RELEASE_VERSION" "$LAST_RELEASE_TAG" "$RELEASE_VERSION" "$EXAMPLE_BACKEND_VERSION"
+          echo "RELEASE_NOTE_FILE=.changelog/release-${RELEASE_VERSION}.md" >> "$GITHUB_OUTPUT"
       - name: Pack finalized working tree
         run: |
           tar czf /tmp/worktree.tgz \
@@ -275,7 +288,7 @@ jobs:
       - name: Restore finalized working tree
         run: tar xzf /tmp/worktree.tgz
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@4e1beaa7521e8b457b572c090b25bd3db56bf1c5 # v5
         with:
           token: ${{ secrets.AUTO_RELEASE_TOKEN }}
           commit-message: "chore: upgrade helm chart depdenencies"
@@ -297,6 +310,10 @@ jobs:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      DEPLOYMENT_NAMESPACE: ${{ inputs.deployment_namespace }}
+      DEPLOYMENT_RELEASE_NAME: ${{ inputs.deployment_release_name }}
+      DEPLOYMENT_VALUES_FILE: ${{ inputs.deployment_values_file }}
+      RELEASE_VERSION: ${{ needs.determine-version.outputs.release_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -320,9 +337,10 @@ jobs:
       - name: Prepare deployment values file
         run: |
           set -a && . .tmp/oss-core-env/config/test-mojaloop-live/.env && set +a
-          sed -i "s/{{CI_ENV_NAME}}/$ENV_NAME/" .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }}
-          sed -i "s/{{CI_HELM_NAMESPACE}}/${{ inputs.deployment_namespace }}/" .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }}
-          sed -i "s/{{CI_ENV_VERSION}}/${{ needs.determine-version.outputs.release_version }}/" .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }}
+          values_file=".tmp/oss-core-env/config/test-mojaloop-live/$DEPLOYMENT_VALUES_FILE"
+          sed -i "s/{{CI_ENV_NAME}}/$ENV_NAME/" "$values_file"
+          sed -i "s/{{CI_HELM_NAMESPACE}}/$DEPLOYMENT_NAMESPACE/" "$values_file"
+          sed -i "s/{{CI_ENV_VERSION}}/$RELEASE_VERSION/" "$values_file"
       - name: Set KUBECONFIG
         run: |
           echo "${{ secrets.AUTO_RELEASE_KUBECONFIG }}" > .tmp/test.mojaloop.live.conf
@@ -334,25 +352,25 @@ jobs:
       - name: Delete existing deployments
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
-        run: helm ls -n ${{ inputs.deployment_namespace }} --short | xargs -L1 sh -c 'if [ -n "$1" ]; then helm uninstall -n ${{ inputs.deployment_namespace }} "$1"; fi' _
+        run: helm ls -n "$DEPLOYMENT_NAMESPACE" --short | xargs -L1 sh -c 'if [ -n "$1" ]; then helm uninstall -n "$DEPLOYMENT_NAMESPACE" "$1"; fi' _
       - name: Deploy backend
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
-        run: helm install backend mojaloop/example-mojaloop-backend --namespace ${{ inputs.deployment_namespace }}
+        run: helm install backend mojaloop/example-mojaloop-backend --namespace "$DEPLOYMENT_NAMESPACE"
       - name: Build charts
         run: ./update-charts-dep.sh
       - name: Deploy charts
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
         run: |
-          helm install ${{ inputs.deployment_release_name }} ./mojaloop -f .tmp/oss-core-env/config/test-mojaloop-live/${{ inputs.deployment_values_file }} --namespace ${{ inputs.deployment_namespace }}
+          helm install "$DEPLOYMENT_RELEASE_NAME" ./mojaloop -f ".tmp/oss-core-env/config/test-mojaloop-live/$DEPLOYMENT_VALUES_FILE" --namespace "$DEPLOYMENT_NAMESPACE"
       - name: Wait for deployment to be ready
         env:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
         timeout-minutes: 15
         continue-on-error: true
         run: |
-          while [[ $(kubectl get pods -n ${{ inputs.deployment_namespace }} -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}' | grep False) ]]; do
+          while [[ $(kubectl get pods -n "$DEPLOYMENT_NAMESPACE" -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}' | grep False) ]]; do
             echo "Waiting for pods to be ready..."
             sleep 10
           done
@@ -362,7 +380,7 @@ jobs:
           KUBECONFIG: .tmp/test.mojaloop.live.conf
         timeout-minutes: 15
         continue-on-error: true
-        run: helm test ${{ inputs.deployment_release_name }} --namespace ${{ inputs.deployment_namespace }}
+        run: helm test "$DEPLOYMENT_RELEASE_NAME" --namespace "$DEPLOYMENT_NAMESPACE"
       - name: Clean up
         if: ${{ always() }}
         run: rm -rf .tmp
