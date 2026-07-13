@@ -180,6 +180,48 @@ helm ... --set iam.enabled=true --set mojaloop-iam.hydra.enabled=false
 
 Each of `oathkeeper`, `keto`, `kratos`, `hydra` accepts an `.enabled` override under `mojaloop-iam.*` that wins over `iam.enabled`.
 
+### Deploying with Helmfile (multi-namespace)
+
+Helmfile deploys each chart as an independent Helm release with its own namespace, dependency ordering, and rollback scope.
+
+**Install helmfile** (v1.5+):
+```bash
+curl -fsSL https://github.com/helmfile/helmfile/releases/latest/download/helmfile_linux_amd64.tar.gz | tar xz -C ~/.local/bin helmfile
+```
+
+**Deploy with defaults** (multi-namespace):
+```bash
+helmfile -f helmfile.yaml.gotmpl apply
+```
+
+**Deploy with custom config**:
+```bash
+helmfile -f helmfile.yaml.gotmpl --state-values-file my-deployment.yaml apply
+```
+
+The deployment config file can override shared infrastructure (Kafka, MySQL, etc.) and per-chart values. See `examples/deployment.yaml` for a starting point.
+
+**Single namespace** (backward compatible with umbrella chart):
+```bash
+helmfile -f helmfile.yaml.gotmpl -e single-namespace apply
+```
+
+**List releases without deploying**:
+```bash
+helmfile -f helmfile.yaml.gotmpl list
+```
+
+**Files**:
+
+| File | Purpose |
+|------|---------|
+| `helmfile.yaml.gotmpl` | Release definitions, ordering, cross-chart wiring |
+| `defaults.yaml` | Infrastructure defaults (Kafka, MySQL, MongoDB, hub config) |
+| `namespaces.yaml` | Default namespace assignments (11 namespaces) |
+| `namespaces-single.yaml` | Single namespace override |
+| `release-matrix.yaml` | Chart version pins |
+| `examples/deployment.yaml` | Example user deployment config |
+
 ### Deploying development versions
 
 1. To deploy the latest development version, use the `--devel` flag:
