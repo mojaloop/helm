@@ -58,6 +58,21 @@
         "API": {
             "DISABLED": false
         },
+        "TIMEOUT": {
+            "DISABLED": true,
+            "TIMEXP": "*/15 * * * * *",
+            "TIMEZONE": "UTC",
+            "DIST_LOCK": {
+              "enabled": false,
+              "lockTimeout": 10000,
+              "acquireTimeout": 5000,
+              "driftFactor": 0.01,
+              "retryCount": 3,
+              "retryDelay": 200,
+              "retryJitter": 100,
+              "redisConfigs": [{ "type": "redis-cluster", "cluster": [{ "host": "localhost", "port": 6379 }] }]
+            }
+        },
         "SETTINGS": {
             "RULES": {
                 "SCRIPTS_FOLDER": "./scripts/transferSettlementTemp",
@@ -65,12 +80,6 @@
                 "CONSUMER_COMMIT": true,
                 "FROM_SWITCH": true
             }
-        },
-        "TIMEOUT": {
-            "DISABLED": false,
-            "DIST_LOCK": {{ .Values.config.distLockConfig | toPrettyJson | nindent 2 }},
-            "TIMEXP": {{ .Values.config.timeout.expiration | quote }},
-            "TIMEZONE": {{ .Values.config.timeout.timezone | quote }}
         }
     },
     "INSTRUMENTATION": {
@@ -104,7 +113,8 @@
         ]
     },
     "INTERNAL_TRANSFER_VALIDITY_SECONDS": "432000",
-    "PAYEE_PARTICIPANT_CURRENCY_VALIDATION_ENABLED":  {{ .Values.config.payee_participant_currency_validation_enabled }},
+    "ENABLE_ON_US_TRANSFERS": false,
+    "PAYEE_PARTICIPANT_CURRENCY_VALIDATION_ENABLED": {{ .Values.config.payee_participant_currency_validation_enabled }},
     "CACHE": {
         "CACHE_ENABLED": {{ .Values.config.cache_enabled }},
         "MAX_BYTE_SIZE": {{ .Values.config.cache_max_byte_size }},
@@ -114,10 +124,19 @@
     "API_DOC_ENDPOINTS_ENABLED": true,
     "KAFKA": {
         "EVENT_TYPE_ACTION_TOPIC_MAP" : {
-            "POSITION":{
-                "TIMEOUT_RESERVED": "topic-transfer-position-batch",
-                "FX_TIMEOUT_RESERVED": "topic-transfer-position-batch"
-            }
+          "POSITION":{
+            "PREPARE": null,
+            "FX_PREPARE": null,
+            "BULK_PREPARE": null,
+            "COMMIT": null,
+            "BULK_COMMIT": null,
+            "RESERVE": null,
+            "FX_RESERVE": null,
+            "TIMEOUT_RESERVED": "topic-transfer-position-batch",
+            "FX_TIMEOUT_RESERVED": "topic-transfer-position-batch",
+            "ABORT": null,
+            "FX_ABORT": null
+          }
         },
         "TOPIC_TEMPLATES": {
             "PARTICIPANT_TOPIC_TEMPLATE": {
@@ -277,6 +296,30 @@
                         }
                     }
                 },
+                "POSITION_BATCH": {
+                    "config": {
+                        "options": {
+                            "mode": 2,
+                            "batchSize": 1,
+                            "pollFrequency": 10,
+                            "recursiveTimeout": 100,
+                            "messageCharset": "utf8",
+                            "messageAsJSON": true,
+                            "sync": true,
+                            "consumeTimeout": 1000
+                        },
+                        "rdkafkaConf": {
+                            "client.id": "cl-con-transfer-position-batch",
+                            "group.id": "cl-group-transfer-position-batch",
+                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+                            "socket.keepalive.enable": true,
+                            "allow.auto.create.topics": true
+                        },
+                        "topicConf": {
+                            "auto.offset.reset": "earliest"
+                        }
+                    }
+                },
                 "FULFIL": {
                     "config": {
                         "options": {
@@ -351,6 +394,58 @@
                         }
                     }
                 }
+            },
+            "NOTIFICATION": {
+              "EVENT": {
+                "config": {
+                  "options": {
+                    "mode": 2,
+                    "batchSize": 1,
+                    "pollFrequency": 10,
+                    "recursiveTimeout": 100,
+                    "messageCharset": "utf8",
+                    "messageAsJSON": true,
+                    "sync": true,
+                    "consumeTimeout": 1000
+                  },
+                  "rdkafkaConf": {
+                    "client.id": "TESTONLY",
+                    "group.id": "TESTONLY",
+                    "metadata.broker.list": "localhost:9092",
+                    "socket.keepalive.enable": true,
+                    "allow.auto.create.topics": true
+                  },
+                  "topicConf": {
+                    "auto.offset.reset": "earliest"
+                  }
+                }
+              }
+            },
+            "DEFERREDSETTLEMENT": {
+              "CLOSE": {
+                "config": {
+                  "options": {
+                    "mode": 2,
+                    "batchSize": 1,
+                    "pollFrequency": 10,
+                    "recursiveTimeout": 100,
+                    "messageCharset": "utf8",
+                    "messageAsJSON": true,
+                    "sync": true,
+                    "consumeTimeout": 1000
+                  },
+                  "rdkafkaConf": {
+                    "client.id": "cs-con-deferredsettlement-close",
+                    "group.id": "cs-group-deferredsettlement-close",
+                    "metadata.broker.list": "localhost:9092",
+                    "socket.keepalive.enable": true,
+                    "allow.auto.create.topics": true
+                  },
+                  "topicConf": {
+                    "auto.offset.reset": "earliest"
+                  }
+                }
+              }
             }
         },
         "PRODUCER": {
