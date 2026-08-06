@@ -144,16 +144,22 @@ db:
   # sslCaSecret: mysql-tls-client-creds
   # sslCaSecretKey: cacert.pem
 
-ingress:
+## External exposure: Gateway API HTTPRoutes for the API and UI. Each route
+## attaches to the Gateways listed in its parentRefs; a Gateway in another
+## namespace admits the routes through its listener's allowedRoutes.
+gateway:
   enabled: false
-  host: localhost
-  annotations: {}
-  tls: []
-  pathType: ImplementationSpecific
-  className: "nginx"
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  api:
+    ## Hostnames served by the API route, e.g. [api.mcm.example.com]
+    hosts: []
+    ## Gateways to attach to, e.g. [{name: cilium-gateway, namespace: gateway}]
+    parentRefs: []
+  ui:
+    ## Hostnames served by the UI route, e.g. [mcm.example.com]
+    hosts: []
+    ## Gateways to attach to, e.g. [{name: cilium-gateway, namespace: gateway}]
+    parentRefs: []
+
 # development friendly variables
 imagePullPolicy: IfNotPresent
 
