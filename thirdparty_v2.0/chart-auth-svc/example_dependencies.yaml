@@ -43,6 +43,7 @@ spec:
       labels:
         app: mysql-auth-svc
     spec:
+      automountServiceAccountToken: false
       containers:
       - image: mysql:9.0.1
         name: mysql-auth-svc
@@ -62,6 +63,9 @@ spec:
         ports:
         - containerPort: 3306
           name: mysql
+        resources:
+          limits:
+            memory: "512Mi"
       #   volumeMounts:
       #   - name: mysql-auth-svc-persistent-storage
       #     mountPath: /var/lib/mysql
@@ -94,9 +98,13 @@ spec:
       labels:
         app: auth-svc-redis
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: redis
           image: redis:5.0.4-alpine
+          resources:
+            limits:
+              memory: "256Mi"
 ---
 apiVersion: v1
 kind: Service
