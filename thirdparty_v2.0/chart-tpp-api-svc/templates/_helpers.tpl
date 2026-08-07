@@ -1,21 +1,21 @@
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "tpp-api-svc-2.chart" -}}
+{{- define "tpp-api-svc.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{- define "tpp-api-svc-2.name" -}}
+{{- define "tpp-api-svc.name" -}}
 {{- default .Chart.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
-{{- define "tpp-api-svc-2.labels" -}}
-helm.sh/chart: {{ include "tpp-api-svc-2.chart" . }}
-app.kubernetes.io/name: {{ include "tpp-api-svc-2.name" . }}
-{{ include "tpp-api-svc-2.selectorLabels" . }}
+{{- define "tpp-api-svc.labels" -}}
+helm.sh/chart: {{ include "tpp-api-svc.chart" . }}
+app.kubernetes.io/name: {{ include "tpp-api-svc.name" . }}
+{{ include "tpp-api-svc.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -25,8 +25,8 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "tpp-api-svc-2.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "tpp-api-svc-2.name" . }}
+{{- define "tpp-api-svc.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "tpp-api-svc.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
