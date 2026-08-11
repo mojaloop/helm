@@ -6,7 +6,7 @@ This folder has the Helm charts to run `tpp-api-svc`, which is based on the Moja
 
 Mojaloop lets people pay each other. Some payments are started by a third app, not by the bank app itself. This is called "Third Party Payments" (or PISP for short).
 
-There used to be one service that handled this, called `tp-api-svc`. It worked fine, but the team rewrote it from scratch with new code. The new service is called `tpp-api-svc`. It does the *same job* as the old one, just with newer code underneath.
+This new service `tpp-api-svc` which is based on Mojaloop PISP v2.0 replaces the older versions based a v1.0 of the PISP API
 
 This folder (`thirdparty_v2.0`) is where we are adding Helm charts for the **new** `tpp-api-svc`, so people can install it and try it out, before it becomes the official version everyone uses.
 
