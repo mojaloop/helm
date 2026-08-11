@@ -14,7 +14,7 @@ This folder (`thirdparty_v2.0`) is where we are adding Helm charts for the **new
 
 When you run `helm install` on this chart, it deploys exactly **3 things**:
 
-1. `tpp-api-svc` — the new Third Party API Service
+1. `tpp-api-svc` — the Third Party API Service based on PISP v2.0 API
 2. `consent-oracle` — keeps track of who owns which consent
 3. `auth-svc` — checks and stores consent, so the third-party app is allowed to act
 
