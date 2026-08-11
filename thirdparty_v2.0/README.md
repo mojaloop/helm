@@ -6,8 +6,6 @@ This folder has the Helm charts to run `tpp-api-svc`.
 
 Mojaloop lets people pay each other. Some payments are started by a third app, not by the bank app itself. This is called "Third Party Payments" (or PISP for short).
 
-There used to be one service that handled this, called `tp-api-svc`. It worked fine, but the team rewrote it from scratch with new code. The new service is called `tpp-api-svc`. It does the *same job* as the old one, just with newer code underneath.
-
 This folder (`thirdparty_v2.0`) is where we are adding Helm charts for the **new** `tpp-api-svc`, so people can install it and try it out, before it becomes the official version everyone uses.
 
 ## What does `helm install` actually do here?
@@ -25,8 +23,6 @@ When you run `helm install` on this chart, it deploys exactly **3 things**:
 We are **assuming** this, based on how the old `thirdparty/` folder is set up in this same repo — the old service also needed `auth-svc` and `consent-oracle` to work. Nobody from the Mojaloop team has confirmed this in writing yet for the new service. If it turns out `tpp-api-svc` needs something different, this list will need to change.
 
 ## Sub-Charts
-
-All three sub-charts below were copied from the `thirdparty` directory (the old v1.0 setup) as a starting point.
 
 - [chart-tpp-api-svc](./chart-tpp-api-svc) — the new Third Party API Service (`tpp-api-svc`). Copied from `chart-tp-api-svc`, then changed to match the new service — new image, new port, new config.
 - [chart-auth-svc](./chart-auth-svc) — Central Auth Service. Copied as-is, not changed yet.
