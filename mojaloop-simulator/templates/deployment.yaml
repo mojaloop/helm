@@ -57,7 +57,12 @@ spec:
       {{- if $config.config.schemeAdapter.env.JWS_SIGN }}
       - name: jws-private-key
         secret:
-          {{- if $config.config.schemeAdapter.secrets.jws.privateKeySecret }}
+          {{- if (eq ($config.config.schemeAdapter.secrets.jws.method | default "") "certmanager") }}
+          secretName: {{ $fullName }}-jws
+          items:
+            - key: tls.key
+              path: private.key
+          {{- else if $config.config.schemeAdapter.secrets.jws.privateKeySecret }}
           secretName: {{ $config.config.schemeAdapter.secrets.jws.privateKeySecret.name }}
           items:
             - key: {{ $config.config.schemeAdapter.secrets.jws.privateKeySecret.key }}
