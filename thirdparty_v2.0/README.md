@@ -1,6 +1,6 @@
 # thirdparty-v2
 
-This folder has the Helm charts to run `tpp-api-svc`.
+This folder has the Helm charts to run `tpp-api-svc`, which is based on the Mojaloop PISP v2.0 API.
 
 ## What is this?
 
