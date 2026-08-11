@@ -22,7 +22,9 @@ When you run `helm install` on this chart, it deploys exactly **3 things**:
 
 ## Why does `tpp-api-svc` depend on `consent-oracle` and `auth-svc`?
 
-We are **assuming** this, based on how the old `thirdparty/` folder is set up in this same repo — the old service also needed `auth-svc` and `consent-oracle` to work. Nobody from the Mojaloop team has confirmed this in writing yet for the new service. If it turns out `tpp-api-svc` needs something different, this list will need to change.
+The tpp-api-svc depends on
+- the consent-oracle to store mappings between consents and DFSPs via the Account Lookup Service (ALS)
+- the auth-svc for authorization and authentication services usually during quoting phase and in other places as needed
 
 ## Sub-Charts
 
