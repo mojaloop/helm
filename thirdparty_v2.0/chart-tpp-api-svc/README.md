@@ -9,4 +9,4 @@ It is stateless, and routes requests between DFSPs, PISPs and Auth-Svc component
 - auth-svc
 - consent-oracle
 
-> Note: this dependency list has not been confirmed by the Mojaloop maintainers on issue #4517 — kept consistent with the v1.0 service for now.
+> Note: Dependency list to be confirmed before a release quality update

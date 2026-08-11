@@ -1,10 +1,12 @@
 # thirdparty-v2
 
-This folder has the Helm charts to run `tpp-api-svc`.
+This folder has the Helm charts to run `tpp-api-svc`, which is based on the Mojaloop PISP v2.0 API.
 
 ## What is this?
 
 Mojaloop lets people pay each other. Some payments are started by a third app, not by the bank app itself. This is called "Third Party Payments" (or PISP for short).
+
+This new service `tpp-api-svc` which is based on Mojaloop PISP v2.0 replaces the older versions based a v1.0 of the PISP API
 
 This folder (`thirdparty_v2.0`) is where we are adding Helm charts for the **new** `tpp-api-svc`, so people can install it and try it out, before it becomes the official version everyone uses.
 
@@ -12,7 +14,7 @@ This folder (`thirdparty_v2.0`) is where we are adding Helm charts for the **new
 
 When you run `helm install` on this chart, it deploys exactly **3 things**:
 
-1. `tpp-api-svc` — the new Third Party API Service
+1. `tpp-api-svc` — the Third Party API Service based on PISP v2.0 API
 2. `consent-oracle` — keeps track of who owns which consent
 3. `auth-svc` — checks and stores consent, so the third-party app is allowed to act
 
@@ -20,7 +22,9 @@ When you run `helm install` on this chart, it deploys exactly **3 things**:
 
 ## Why does `tpp-api-svc` depend on `consent-oracle` and `auth-svc`?
 
-We are **assuming** this, based on how the old `thirdparty/` folder is set up in this same repo — the old service also needed `auth-svc` and `consent-oracle` to work. Nobody from the Mojaloop team has confirmed this in writing yet for the new service. If it turns out `tpp-api-svc` needs something different, this list will need to change.
+The tpp-api-svc depends on
+- the consent-oracle to store mappings between consents and DFSPs via the Account Lookup Service (ALS)
+- the auth-svc for authorization and authentication services usually during quoting phase and in other places as needed
 
 ## Sub-Charts
 
