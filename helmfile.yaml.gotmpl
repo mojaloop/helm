@@ -1,0 +1,377 @@
+environments:
+  default:
+    values:
+      - namespaces.yaml
+      - release-matrix.yaml
+      - defaults.yaml
+  single-namespace:
+    values:
+      - namespaces-single.yaml
+      - release-matrix.yaml
+      - defaults.yaml
+
+---
+
+{{ $ns := .Values.namespaces }}
+{{ $overrides := .Values | get "releases" dict }}
+
+# Cross-namespace service endpoints
+{{ $kafkaHost := printf "%s.%s.svc.cluster.local" .Values.kafka.host $ns.db }}
+{{ $kafkaPort := .Values.kafka.port }}
+{{ $mysqlHost := printf "%s.%s.svc.cluster.local" .Values.mysql.host $ns.db }}
+{{ $mysqlPort := .Values.mysql.port }}
+{{ $mongoHost := printf "%s.%s.svc.cluster.local" .Values.mongo.host $ns.db }}
+{{ $mongoPort := .Values.mongo.port }}
+{{ $ttkMongoHost := printf "%s.%s.svc.cluster.local" .Values.ttkMongo.host $ns.db }}
+{{ $ttkSimsRedisHost := printf "%s.%s.svc.cluster.local" .Values.ttkSimsRedis.host $ns.db }}
+
+# IAM endpoints
+{{ $ketoReadUrl := printf "http://keto-read.%s.svc.cluster.local" $ns.iam }}
+{{ $ketoWriteUrl := printf "http://keto-write.%s.svc.cluster.local" $ns.iam }}
+{{ $kratosPublicUrl := printf "http://kratos-public.%s.svc.cluster.local" $ns.iam }}
+{{ $kratosAdminUrl := printf "http://kratos-admin.%s.svc.cluster.local" $ns.iam }}
+{{ $hydraPublicUrl := printf "http://hydra-public.%s.svc.cluster.local" $ns.iam }}
+{{ $hydraAdminUrl := printf "http://hydra-admin.%s.svc.cluster.local" $ns.iam }}
+{{ $oathkeeperProxyUrl := printf "http://oathkeeper-proxy.%s.svc.cluster.local" $ns.iam }}
+{{ $ketoBatchAuthUrl := printf "http://ory-services-keto-batch-auth.%s.svc.cluster.local" $ns.iam }}
+{{ $kratosRoleWebhookUrl := printf "http://ory-services-kratos-role-webhook.%s.svc.cluster.local" $ns.iam }}
+
+# Shared config shortcuts
+{{ $hub := .Values.hub }}
+{{ $feat := .Values.features }}
+{{ $mysqlSecret := .Values.mysql.secret }}
+{{ $mongo := .Values.mongo }}
+{{ $ttkMongo := .Values.ttkMongo }}
+
+releases:
+  # -- Backend (databases, Kafka) -----------------------------------------
+  - name: backend
+    namespace: {{ $ns.db }}
+    chart: ./example-mojaloop-backend
+    version: {{ .Values | get "matrix.example-mojaloop-backend" }}
+{{- if hasKey $overrides "backend" }}
+    values:
+      - {{ index $overrides "backend" | toYaml | nindent 8 }}
+{{- end }}
+
+  # -- IAM (Ory stack) ----------------------------------------------------
+  - name: mojaloop-iam
+    namespace: {{ $ns.iam }}
+    chart: ./mojaloop-iam
+    version: {{ .Values | get "matrix.mojaloop-iam" }}
+    needs:
+      - {{ $ns.db }}/backend
+{{- if hasKey $overrides "mojaloop-iam" }}
+    values:
+      - {{ index $overrides "mojaloop-iam" | toYaml | nindent 8 }}
+{{- end }}
+
+  # -- Core services -------------------------------------------------------
+  - name: centralledger
+    namespace: {{ $ns.core }}
+    chart: ./centralledger
+    version: {{ .Values | get "matrix.centralledger" }}
+    needs:
+      - {{ $ns.db }}/backend
+    values:
+      - centralledger-mysql:
+          config:
+            db_host: {{ $mysqlHost }}
+            db_port: {{ $mysqlPort }}
+            db_user: {{ .Values.databases.centralLedger.user }}
+            db_database: {{ .Values.databases.centralLedger.name }}
+            db_secret: {{ $mysqlSecret | toYaml | nindent 14 }}
+        config:
+          kafka_host: {{ $kafkaHost }}
+          kafka_port: {{ $kafkaPort }}
+          hub_participant:
+            id: {{ $hub.id }}
+            name: {{ $hub.name }}
+          batch_size: {{ $feat.batchSize }}
+          payee_participant_currency_validation_enabled: {{ $feat.payeeParticipantCurrencyValidationEnabled }}
+          obj_mongo_host: {{ $mongoHost }}
+          obj_mongo_port: {{ $mongoPort }}
+          obj_mongo_user: {{ $mongo.user }}
+          obj_mongo_database: {{ $mongo.database }}
+          obj_mongo_secret: {{ $mongo.secret | toYaml | nindent 12 }}
+{{- if hasKey $overrides "centralledger" }}
+      - {{ index $overrides "centralledger" | toYaml | nindent 8 }}
+{{- end }}
+
+  - name: account-lookup-service
+    namespace: {{ $ns.core }}
+    chart: ./account-lookup-service
+    version: {{ .Values | get "matrix.account-lookup-service" }}
+    needs:
+      - {{ $ns.core }}/centralledger
+    values:
+      - account-lookup-service:
+          config:
+            db_host: {{ $mysqlHost }}
+            db_port: {{ $mysqlPort }}
+            db_user: {{ .Values.databases.als.user }}
+            db_database: {{ .Values.databases.als.name }}
+            db_secret: {{ $mysqlSecret | toYaml | nindent 14 }}
+            kafka_host: {{ $kafkaHost }}
+            kafka_port: {{ $kafkaPort }}
+            hub_participant:
+              id: {{ $hub.id }}
+              name: {{ $hub.name }}
+{{- if hasKey $overrides "account-lookup-service" }}
+      - {{ index $overrides "account-lookup-service" | toYaml | nindent 8 }}
+{{- end }}
+
+  - name: quoting-service
+    namespace: {{ $ns.core }}
+    chart: ./quoting-service
+    version: {{ .Values | get "matrix.quoting-service" }}
+    needs:
+      - {{ $ns.core }}/centralledger
+    values:
+      - config:
+          kafka_host: {{ $kafkaHost }}
+          kafka_port: {{ $kafkaPort }}
+          db_host: {{ $mysqlHost }}
+          db_port: {{ $mysqlPort }}
+          db_user: {{ .Values.databases.centralLedger.user }}
+          db_database: {{ .Values.databases.centralLedger.name }}
+          db_secret: {{ $mysqlSecret | toYaml | nindent 12 }}
+          hub_participant:
+            id: {{ $hub.id }}
+            name: {{ $hub.name }}
+{{- if hasKey $overrides "quoting-service" }}
+      - {{ index $overrides "quoting-service" | toYaml | nindent 8 }}
+{{- end }}
+
+  - name: ml-api-adapter
+    namespace: {{ $ns.core }}
+    chart: ./ml-api-adapter
+    version: {{ .Values | get "matrix.ml-api-adapter" }}
+    needs:
+      - {{ $ns.core }}/centralledger
+    values:
+      - config:
+          kafka_host: {{ $kafkaHost }}
+          kafka_port: {{ $kafkaPort }}
+          hub_participant:
+            id: {{ $hub.id }}
+            name: {{ $hub.name }}
+{{- if hasKey $overrides "ml-api-adapter" }}
+      - {{ index $overrides "ml-api-adapter" | toYaml | nindent 8 }}
+{{- end }}
+
+  - name: transaction-requests-service
+    namespace: {{ $ns.core }}
+    chart: ./transaction-requests-service
+    version: {{ .Values | get "matrix.transaction-requests-service" }}
+    needs:
+      - {{ $ns.core }}/centralledger
+    values:
+      - config:
+          kafka_host: {{ $kafkaHost }}
+          kafka_port: {{ $kafkaPort }}
+{{- if hasKey $overrides "transaction-requests-service" }}
+      - {{ index $overrides "transaction-requests-service" | toYaml | nindent 8 }}
+{{- end }}
+
+  - name: centraleventprocessor
+    namespace: {{ $ns.core }}
+    chart: ./centraleventprocessor
+    version: {{ .Values | get "matrix.centraleventprocessor" }}
+    needs:
+      - {{ $ns.core }}/centralledger
+    values:
+      - config:
+          kafka_host: {{ $kafkaHost }}
+          kafka_port: {{ $kafkaPort }}
+          mongo_host: {{ $mongoHost }}
+          mongo_port: {{ $mongoPort }}
+          mongo_user: {{ $mongo.user }}
+          mongo_database: {{ $mongo.database }}
+{{- if hasKey $overrides "centraleventprocessor" }}
+      - {{ index $overrides "centraleventprocessor" | toYaml | nindent 8 }}
+{{- end }}
+
+  - name: emailnotifier
+    namespace: {{ $ns.core }}
+    chart: ./emailnotifier
+    version: {{ .Values | get "matrix.emailnotifier" }}
+    needs:
+      - {{ $ns.core }}/centralledger
+    values:
+      - config:
+          kafka_host: {{ $kafkaHost }}
+          kafka_port: {{ $kafkaPort }}
+{{- if hasKey $overrides "emailnotifier" }}
+      - {{ index $overrides "emailnotifier" | toYaml | nindent 8 }}
+{{- end }}
+
+  - name: inter-scheme-proxy-adapter
+    namespace: {{ $ns.core }}
+    chart: ./inter-scheme-proxy-adapter
+    version: {{ .Values | get "matrix.inter-scheme-proxy-adapter" }}
+    needs:
+      - {{ $ns.core }}/centralledger
+    values:
+      - config:
+          kafka_host: {{ $kafkaHost }}
+          kafka_port: {{ $kafkaPort }}
+          proxy_cache: {{ .Values.proxyCache | toYaml | nindent 12 }}
+{{- if hasKey $overrides "inter-scheme-proxy-adapter" }}
+      - {{ index $overrides "inter-scheme-proxy-adapter" | toYaml | nindent 8 }}
+{{- end }}
+
+  # -- Settlement -----------------------------------------------------------
+  - name: centralsettlement
+    namespace: {{ $ns.settlement }}
+    chart: ./centralsettlement
+    version: {{ .Values | get "matrix.centralsettlement" }}
+    needs:
+      - {{ $ns.core }}/centralledger
+    values:
+      - centralsettlement-service:
+          config:
+            kafka_host: {{ $kafkaHost }}
+            kafka_port: {{ $kafkaPort }}
+            db_host: {{ $mysqlHost }}
+            db_port: {{ $mysqlPort }}
+            db_user: {{ .Values.databases.centralLedger.user }}
+            db_database: {{ .Values.databases.centralLedger.name }}
+            db_secret: {{ $mysqlSecret | toYaml | nindent 14 }}
+            hub_participant:
+              id: {{ $hub.id }}
+              name: {{ $hub.name }}
+{{- if hasKey $overrides "centralsettlement" }}
+      - {{ index $overrides "centralsettlement" | toYaml | nindent 8 }}
+{{- end }}
+
+  # -- MCM ------------------------------------------------------------------
+  - name: connection-manager
+    namespace: {{ $ns.mcm }}
+    chart: ./connection-manager
+    version: {{ .Values | get "matrix.connection-manager" }}
+    needs:
+      - {{ $ns.iam }}/mojaloop-iam
+      - {{ $ns.db }}/backend
+    values:
+      - global:
+          iam:
+            keto:
+              readUrl: {{ $ketoReadUrl }}
+              writeUrl: {{ $ketoWriteUrl }}
+            kratos:
+              publicUrl: {{ $kratosPublicUrl }}
+              adminUrl: {{ $kratosAdminUrl }}
+            hydra:
+              publicUrl: {{ $hydraPublicUrl }}
+              adminUrl: {{ $hydraAdminUrl }}
+            oathkeeper:
+              proxyUrl: {{ $oathkeeperProxyUrl }}
+            ketoBatchAuth:
+              url: {{ $ketoBatchAuthUrl }}
+            kratosRoleWebhook:
+              url: {{ $kratosRoleWebhookUrl }}
+        api:
+          env:
+            DB_HOST: {{ $mysqlHost }}
+            DB_PORT: "{{ $mysqlPort }}"
+{{- if hasKey $overrides "connection-manager" }}
+      - {{ index $overrides "connection-manager" | toYaml | nindent 8 }}
+{{- end }}
+
+  # -- Bulk -----------------------------------------------------------------
+  - name: mojaloop-bulk
+    namespace: {{ $ns.core }}
+    chart: ./mojaloop-bulk
+    version: {{ .Values | get "matrix.mojaloop-bulk" }}
+    needs:
+      - {{ $ns.core }}/centralledger
+    values:
+      - config:
+          kafka_host: {{ $kafkaHost }}
+          kafka_port: {{ $kafkaPort }}
+          db_host: {{ $mysqlHost }}
+          db_port: {{ $mysqlPort }}
+          obj_mongo_host: {{ $mongoHost }}
+          obj_mongo_port: {{ $mongoPort }}
+          hub_participant:
+            id: {{ $hub.id }}
+            name: {{ $hub.name }}
+{{- if hasKey $overrides "mojaloop-bulk" }}
+      - {{ index $overrides "mojaloop-bulk" | toYaml | nindent 8 }}
+{{- end }}
+
+  - name: bulk-api-adapter
+    namespace: {{ $ns.core }}
+    chart: ./bulk-api-adapter
+    version: {{ .Values | get "matrix.bulk-api-adapter" }}
+    needs:
+      - {{ $ns.core }}/centralledger
+    values:
+      - config:
+          kafka_host: {{ $kafkaHost }}
+          kafka_port: {{ $kafkaPort }}
+          hub_participant:
+            id: {{ $hub.id }}
+            name: {{ $hub.name }}
+{{- if hasKey $overrides "bulk-api-adapter" }}
+      - {{ index $overrides "bulk-api-adapter" | toYaml | nindent 8 }}
+{{- end }}
+
+  # -- Testing --------------------------------------------------------------
+  - name: ml-testing-toolkit
+    namespace: {{ $ns.test }}
+    chart: ./ml-testing-toolkit
+    version: {{ .Values | get "matrix.ml-testing-toolkit" }}
+    needs:
+      - {{ $ns.core }}/centralledger
+    values:
+      - config:
+          mongodb:
+            host: {{ $ttkMongoHost }}
+            port: {{ $ttkMongo.port }}
+            user: {{ $ttkMongo.user }}
+            database: {{ $ttkMongo.database }}
+            secret: {{ $ttkMongo.secret | toYaml | nindent 14 }}
+{{- if hasKey $overrides "ml-testing-toolkit" }}
+      - {{ index $overrides "ml-testing-toolkit" | toYaml | nindent 8 }}
+{{- end }}
+
+  # -- Simulators -----------------------------------------------------------
+  - name: simulator
+    namespace: {{ $ns.sims }}
+    chart: ./simulator
+    version: {{ .Values | get "matrix.simulator" }}
+    needs:
+      - {{ $ns.core }}/centralledger
+{{- if hasKey $overrides "simulator" }}
+    values:
+      - {{ index $overrides "simulator" | toYaml | nindent 8 }}
+{{- end }}
+
+  - name: mojaloop-simulator
+    namespace: {{ $ns.sims }}
+    chart: ./mojaloop-simulator
+    version: {{ .Values | get "matrix.mojaloop-simulator" }}
+    needs:
+      - {{ $ns.core }}/centralledger
+{{- if hasKey $overrides "mojaloop-simulator" }}
+    values:
+      - {{ index $overrides "mojaloop-simulator" | toYaml | nindent 8 }}
+{{- end }}
+
+  - name: mojaloop-ttk-simulators
+    namespace: {{ $ns.sims }}
+    chart: ./mojaloop-ttk-simulators
+    version: {{ .Values | get "matrix.mojaloop-ttk-simulators" }}
+    needs:
+      - {{ $ns.test }}/ml-testing-toolkit
+    values:
+      - config:
+          kafka_host: {{ $kafkaHost }}
+          kafka_port: {{ $kafkaPort }}
+          redis_host: {{ $ttkSimsRedisHost }}
+          redis_port: {{ .Values.ttkSimsRedis.port }}
+{{- if hasKey $overrides "mojaloop-ttk-simulators" }}
+      - {{ index $overrides "mojaloop-ttk-simulators" | toYaml | nindent 8 }}
+{{- end }}
