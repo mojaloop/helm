@@ -91,6 +91,8 @@ spec:
             {{- end }}
           {{- include "mojaloop-common.probes" . | nindent 10 }}
           env:
+            - name: ERROR_HANDLING_AJV_JOI_PARITY
+              value: {{ .Values.config.error_handling_ajv_joi_parity | quote }}
             - name: CLEDG_DATABASE__PASSWORD
             {{- if .Values.config.db_secret }}
               valueFrom:
@@ -171,6 +173,8 @@ spec:
             - name: {{ template "centralledger-service.fullname" . }}-sidecar-volume
               mountPath: /opt/app/config
           env:
+            - name: ERROR_HANDLING_AJV_JOI_PARITY
+              value: {{ .Values.config.error_handling_ajv_joi_parity | quote }}
             - name: LOG_LEVEL
               value: {{ .Values.sidecar.config.log_level | quote }}
             - name: LOG_FILTER
