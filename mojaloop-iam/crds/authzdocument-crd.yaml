@@ -1,0 +1,83 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: authzdocuments.mojaloop.io
+spec:
+  group: mojaloop.io
+  scope: Namespaced
+  names:
+    kind: AuthzDocument
+    plural: authzdocuments
+    singular: authzdocument
+    shortNames:
+      - authzdoc
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Service
+          type: string
+          jsonPath: .status.service
+        - name: State
+          type: string
+          jsonPath: .status.state
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: >-
+            A service's authorization surface, for a service whose surface
+            changes while the deployment runs. What a chart mounts and what a
+            resource declares are read the same way, so a helm upgrade and a
+            kubectl apply reach the gateway by one path.
+
+            Who may write one is Kubernetes' answer: grant a service's
+            ServiceAccount write on its own document by name, and the API
+            server enforces that it cannot touch another's.
+          type: object
+          required: [spec]
+          properties:
+            spec:
+              type: object
+              required: [document]
+              properties:
+                document:
+                  description: >-
+                    The service's OpenAPI document, as its own operator
+                    generated it. Annotated with x-authz, so it says which
+                    service it is and what each operation is scoped by.
+                  type: string
+                url:
+                  description: Where the service is served, which the gateway rules match on.
+                  type: object
+                  properties:
+                    host:
+                      type: string
+                    path:
+                      type: string
+            status:
+              type: object
+              properties:
+                service:
+                  description: The service the document declares.
+                  type: string
+                state:
+                  description: >-
+                    Accepted when this document is part of what the gateway
+                    now enforces. Refused when it is wrong. Blocked when
+                    another document is wrong, since nothing is published
+                    while any of them is.
+                  type: string
+                  enum: [Accepted, Refused, Blocked]
+                messages:
+                  description: What refused it, in the words the composer used.
+                  type: array
+                  items:
+                    type: string
+                observedGeneration:
+                  description: The generation this status answers.
+                  type: integer

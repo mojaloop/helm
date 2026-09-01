@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "mojaloop-iam values",
+  "description": "Checked by helm before anything is rendered, so a malformed roles file is a refused template rather than a failed rollout.",
+  "type": "object",
+  "properties": {
+    "global": {
+      "type": "object",
+      "properties": {
+        "authz": {
+          "description": "The services this deployment runs, one entry each.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "image", "spec", "url"],
+            "additionalProperties": true,
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "image": { "type": "string", "minLength": 1 },
+              "spec": {
+                "description": "Where the OpenAPI document sits inside that image.",
+                "type": "string",
+                "pattern": "^/"
+              },
+              "url": {
+                "type": "object",
+                "required": ["host"],
+                "properties": {
+                  "host": { "type": "string", "minLength": 1 },
+                  "path": { "type": "string", "pattern": "^/" }
+                }
+              }
+            }
+          }
+        },
+        "resourceNames": {
+          "description": "One real thing under several services' names.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["members"],
+            "properties": {
+              "label": { "type": "string" },
+              "members": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["service", "type"],
+                  "properties": {
+                    "service": { "type": "string", "minLength": 1 },
+                    "type": { "type": "string", "minLength": 1 }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "iamRoles": {
+          "description": "The deployment's roles, the assignments it ships with, and the duties it keeps apart.",
+          "type": "object",
+          "required": ["roles"],
+          "additionalProperties": false,
+          "properties": {
+            "roles": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "required": ["grants"],
+                "additionalProperties": false,
+                "properties": {
+                  "params": {
+                    "description": "Arguments an assignment fills; each one instantiates the role.",
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "onProvision": {
+                    "description": "The principal this role goes to when its resource appears.",
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "grants": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "required": ["permission"],
+                      "additionalProperties": false,
+                      "properties": {
+                        "permission": {
+                          "description": "<service>.<permission>, as the catalog spells it.",
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]*\\.[A-Za-z0-9_.-]+$"
+                        },
+                        "bind": {
+                          "description": "Per resource type: all, an id, a list of ids, or $param.",
+                          "type": "object",
+                          "additionalProperties": {
+                            "oneOf": [
+                              { "type": "string", "minLength": 1 },
+                              { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "assignments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["subject", "role"],
+                "additionalProperties": false,
+                "properties": {
+                  "subject": { "type": "string", "minLength": 1 },
+                  "role": { "type": "string", "minLength": 1 },
+                  "args": { "type": "object", "additionalProperties": { "type": "string" } }
+                }
+              }
+            },
+            "exclusions": {
+              "description": "Permissions that may not end up in one pair of hands.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name", "a", "b"],
+                "additionalProperties": false,
+                "properties": {
+                  "name": { "type": "string", "minLength": 1 },
+                  "a": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+                  "b": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
