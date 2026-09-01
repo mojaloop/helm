@@ -1,79 +1,50 @@
+{{- /*
+  IdP routes, each gateway.hosts entry is a host string (routed via the shared
+  gateway.parentRefs) or a {host, parentRefs} map for its own attachment
+*/}}
 {{- if .Values.gateway.enabled -}}
-{{- $parentRefs := .Values.gateway.parentRefs -}}
-{{- if .Values.gateway.hosts.hydra }}
+{{- $defaultRefs := .Values.gateway.parentRefs -}}
+{{- range $route := list
+  (dict "key" "hydra" "name" "hydra-public" "backend" "hydra-public" "enabled" true)
+  (dict "key" "kratos" "name" "kratos-public" "backend" "kratos-public" "enabled" true)
+  (dict "key" "auth" "name" "kratos-ui" "backend" "kratos-ui" "enabled" (index $.Values "kratos-ui" "enabled"))
+  (dict "key" "mailpit" "name" "mailpit" "backend" "mailpit-http" "enabled" $.Values.mailpit.enabled)
+}}
+{{- $entry := index $.Values.gateway.hosts $route.key }}
+{{- if and $entry $route.enabled }}
+{{- $host := $entry }}
+{{- $refs := $defaultRefs }}
+{{- if kindIs "map" $entry }}{{ $host = $entry.host }}{{ $refs = $entry.parentRefs | default $defaultRefs }}{{ end }}
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: hydra-public
-  namespace: {{ .Release.Namespace }}
+  name: {{ $route.name }}
+  namespace: {{ $.Release.Namespace }}
 spec:
   parentRefs:
-    {{- toYaml $parentRefs | nindent 4 }}
+    {{- toYaml $refs | nindent 4 }}
   hostnames:
-    - {{ .Values.gateway.hosts.hydra | quote }}
+    - {{ $host | quote }}
   rules:
-    - backendRefs:
-        - name: ml-iam-hydra-public
-          port: 4444
-{{- end }}
-{{- if .Values.gateway.hosts.kratos }}
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: kratos-public
-  namespace: {{ .Release.Namespace }}
-spec:
-  parentRefs:
-    {{- toYaml $parentRefs | nindent 4 }}
-  hostnames:
-    - {{ .Values.gateway.hosts.kratos | quote }}
-  rules:
-    - backendRefs:
-        - name: kratos-public
+    - filters:
+        # The scope is the decision endpoint's word, so a client's own copy is
+        # removed at the edge and cannot reach anything behind it.
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            remove:
+              - X-Scope
+      backendRefs:
+        - name: {{ $route.backend }}
           port: 80
 {{- end }}
-{{- if and .Values.gateway.hosts.auth (index .Values "kratos-ui" "enabled") }}
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: kratos-ui
-  namespace: {{ .Release.Namespace }}
-spec:
-  parentRefs:
-    {{- toYaml $parentRefs | nindent 4 }}
-  hostnames:
-    - {{ .Values.gateway.hosts.auth | quote }}
-  rules:
-    - backendRefs:
-        - name: ml-iam-kratos-ui
-          port: 80
 {{- end }}
-{{- if and .Values.gateway.hosts.mailpit .Values.mailpit.enabled }}
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: mailpit
-  namespace: {{ .Release.Namespace }}
-spec:
-  parentRefs:
-    {{- toYaml $parentRefs | nindent 4 }}
-  hostnames:
-    - {{ .Values.gateway.hosts.mailpit | quote }}
-  rules:
-    - backendRefs:
-        - name: ml-iam-mailpit-http
-          port: 80
-{{- end }}
-{{- with .Values.gateway.oathkeeperProxyConsumerNamespaces }}
+{{- with .Values.gateway.oathkeeperConsumerNamespaces }}
 ---
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: ReferenceGrant
 metadata:
-  name: oathkeeper-proxy-consumers
+  name: oathkeeper-consumers
   namespace: {{ $.Release.Namespace }}
 spec:
   from:
@@ -85,6 +56,6 @@ spec:
   to:
     - group: ""
       kind: Service
-      name: oathkeeper-proxy
+      name: oathkeeper-api
 {{- end }}
 {{- end }}

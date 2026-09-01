@@ -60,8 +60,13 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
-Image tag
+The IAM build. A deployment that also composes its authorization surface names
+that build once in global.iamImage, and the composer and these processes are
+the same code reading the same catalog format.
 */}}
-{{- define "ml-iam-services.imageTag" -}}
-{{- .Values.image.tag | default .Chart.AppVersion }}
+{{- define "ml-iam-services.image" -}}
+{{- with .Values.global }}{{ with .iamImage }}{{ . }}{{ end }}{{ end }}
+{{- if not (and .Values.global .Values.global.iamImage) }}
+{{- .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+{{- end }}
 {{- end }}

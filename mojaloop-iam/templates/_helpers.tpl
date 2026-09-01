@@ -1,28 +1,16 @@
 {{/*
-Stable per-purpose password derivation shared across the credentials
-Secret, the Postgres init-SQL Secret, and the per-service DSN Secrets.
-Every call in one render produces the same string for the same purpose;
-across renders the lookup branch keeps the value stable on upgrade.
-
-Usage:
-  {{ include "iam.derivedPassword" (dict "ctx" . "purpose" "postgres") }}
-  {{ include "iam.derivedPassword" (dict "ctx" . "purpose" "hydra") }}
-
-If ml-iam-postgresql-credentials exists in the cluster, the helper reuses
-the stored value under key '<purpose>-password'. Otherwise it derives a
-deterministic 24-char string from Release/Chart identifiers + purpose.
-Operators can rotate later with
-`kubectl delete secret ml-iam-postgresql-credentials` followed by a
-helm upgrade.
+Build an Ory DSN for one service from .Values.database, driver form per
+database.type, database.params overrides the per-driver defaults
+Usage: {{ include "iam.dsn" (dict "db" .Values.database "svc" .Values.database.hydra) }}
 */}}
-{{- define "iam.derivedPassword" -}}
-{{- $ctx := .ctx -}}
-{{- $purpose := .purpose -}}
-{{- $key := printf "%s-password" $purpose -}}
-{{- $existing := lookup "v1" "Secret" $ctx.Release.Namespace "ml-iam-postgresql-credentials" -}}
-{{- if and $existing $existing.data (index $existing.data $key) -}}
-{{- index $existing.data $key | b64dec -}}
+{{- define "iam.dsn" -}}
+{{- $db := .db -}}
+{{- $svc := .svc -}}
+{{- if eq $db.type "mysql" -}}
+{{- $params := $db.params | default "parseTime=true&max_conns=20&max_idle_conns=4" -}}
+mysql://{{ $svc.user }}:{{ $svc.password }}@tcp({{ $db.host }}:{{ $db.port }})/{{ $svc.database }}?{{ $params }}
 {{- else -}}
-{{- printf "%s/%s/%s/%s" $ctx.Release.Name $ctx.Release.Namespace $ctx.Chart.Name $purpose | sha256sum | trunc 24 -}}
+{{- $params := $db.params | default "sslmode=disable&max_conns=20&max_idle_conns=4" -}}
+postgres://{{ $svc.user }}:{{ $svc.password }}@{{ $db.host }}:{{ $db.port }}/{{ $svc.database }}?{{ $params }}
 {{- end -}}
 {{- end -}}

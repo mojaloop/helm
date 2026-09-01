@@ -163,7 +163,7 @@ Setting `iam.enabled: true` on the top-level Mojaloop chart activates the full I
 
 - `oathkeeper`, `keto`, `kratos` (upstream Ory charts)
 - `hydra` (Ory Hydra OAuth2/OIDC server)
-- `ml-iam-services` (Mojaloop Ory IAM services: keto-batch-auth, kratos-role-webhook)
+- `ml-iam-services` (Mojaloop Ory IAM services: kratos-role-webhook)
 
 It also signals that per-app IAM should be enabled for apps that support it (e.g. `connection-manager`).
 

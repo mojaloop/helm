@@ -1,0 +1,26 @@
+{{- /*
+  The files Oathkeeper and Keto mount, present from the moment the namespace
+  exists so both start without waiting on anything.
+
+  Keto refuses to start when its model file is missing, and a kubelet that
+  mounts a key before it exists backs off for minutes. So the keys are created
+  empty at install and the IAM writes the composition over them: an empty model
+  is one Keto accepts and reloads out of, and an empty rule set is one the
+  gateway answers with 404.
+
+  Install only. Once the IAM has published, this is the live composition, and
+  an upgrade that reset it would blank the gateway until the next reconcile.
+*/}}
+{{- if .Values.global.authz }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authz-published
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "-5"
+data:
+  access-rules.yml: ""
+  keto-namespaces.ts: ""
+{{- end }}

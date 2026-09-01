@@ -1,0 +1,31 @@
+{{- /*
+  Every service this deployment runs: where its document sits inside its image,
+  and where the service is served.
+
+  The IAM mounts each of those images and composes the documents together with
+  the ones services declare while running, so a permission id claimed twice or
+  a request two services both match stops the rollout instead of reaching a
+  cluster. What it composes is published for Oathkeeper, Keto and the role UI.
+*/}}
+{{- if .Values.global.authz }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authz-registry
+  namespace: {{ .Release.Namespace }}
+data:
+  registry.yaml: |
+    {{- range .Values.global.authz }}
+    - spec: /authz/{{ .name }}{{ .spec }}
+      url:
+        host: {{ .url.host | quote }}
+        {{- with .url.path }}
+        path: {{ . | quote }}
+        {{- end }}
+    {{- end }}
+  {{- with .Values.global.resourceNames }}
+  resource-names.yaml: |
+    resourceNames:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
+{{- end }}

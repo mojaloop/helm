@@ -1,0 +1,193 @@
+{{- /*
+  The IAM's own processes. One codebase, one image, separate deployments
+  because they want different access: the decision endpoint is on every
+  request and holds read-only Keto, provisioning is on resource creation and
+  holds the only Keto write URL in the platform. Neither carries a gateway
+  route.
+*/}}
+{{- range $key, $process := dict "decision" .Values.decision "provisioning" .Values.provisioning }}
+{{- if $process.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ml-iam-services.fullname" $ }}-{{ $key }}
+  labels:
+    {{- include "ml-iam-services.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $key }}
+spec:
+  replicas: {{ $process.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ml-iam-services.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $key }}
+  template:
+    metadata:
+      annotations:
+        {{- /* Roles and exclusions are read at startup, so a change to them
+               restarts the pod that enforces them */}}
+        {{- with $.Values.global }}{{ with .iamRoles }}
+        checksum/roles: {{ . | toJson | sha256sum }}
+        {{- end }}{{ end }}
+        {{- /* The documents it composes are mounted, so a registered service
+               joining, leaving or moving re-composes on the next rollout */}}
+        {{- if eq $key "provisioning" }}
+        {{- with $.Values.global }}{{ with .authz }}
+        checksum/authz: {{ . | toJson | sha256sum }}
+        {{- end }}{{ end }}
+        {{- end }}
+        {{- with $process.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "ml-iam-services.selectorLabels" $ | nindent 8 }}
+        app.kubernetes.io/component: {{ $key }}
+    spec:
+      {{- /* Provisioning reconciles what services declare, so it holds a
+             token scoped to reading those documents and publishing what it
+             composed; the decision endpoint asks the cluster nothing */}}
+      {{- if eq $key "provisioning" }}
+      serviceAccountName: {{ include "ml-iam-services.fullname" $ }}-provisioning
+      automountServiceAccountToken: true
+      {{- else }}
+      automountServiceAccountToken: false
+      {{- end }}
+      {{- with $.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      {{- with $process.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $key }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          image: {{ include "ml-iam-services.image" $ | quote }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          args:
+            {{- toYaml $process.args | nindent 12 }}
+            {{- if and (eq $key "provisioning") $.Values.global }}
+            {{- if $.Values.global.authz }}
+            - --registry=/registry/registry.yaml
+            {{- with $.Values.global.resourceNames }}
+            - --resource-names=/registry/resource-names.yaml
+            {{- end }}
+            {{- end }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ $process.service.targetPort }}
+              protocol: TCP
+          env:
+            {{- range $name, $value := $process.env }}
+            - name: {{ $name }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- /* The namespace it reconciles is the one it runs in */}}
+            {{- if eq $key "provisioning" }}
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- end }}
+            {{- /* The first identity, created while the roles are applied */}}
+            {{- if and (eq $key "provisioning") $.Values.global }}
+            {{- with $.Values.global.iamAdmin }}
+            {{- if .email }}
+            - name: IAM_ADMIN_EMAIL
+              value: {{ .email | quote }}
+            - name: IAM_HUB_ADMIN_ROLE
+              value: {{ .role | default "hub-admin" | quote }}
+            - name: IAM_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .passwordSecret | default "iam-admin-password" | quote }}
+                  key: {{ .passwordSecretKey | default "password" | quote }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+          volumeMounts:
+            {{- with $process.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- if and (eq $key "provisioning") $.Values.global }}
+            {{- if $.Values.global.authz }}
+            - name: registry
+              mountPath: /registry
+              readOnly: true
+            {{- range $.Values.global.authz }}
+            - name: authz-{{ .name }}
+              mountPath: /authz/{{ .name }}
+              readOnly: true
+            {{- end }}
+            {{- end }}
+            {{- end }}
+          livenessProbe:
+            {{- toYaml $process.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml $process.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml $process.resources | nindent 12 }}
+      volumes:
+        {{- with $process.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if and (eq $key "provisioning") $.Values.global }}
+        {{- if $.Values.global.authz }}
+        - name: registry
+          configMap:
+            name: authz-registry
+        {{- /* Name these by digest: the rules are derived from what they
+               resolve to, and re-derived when they change */}}
+        {{- range $.Values.global.authz }}
+        - name: authz-{{ .name }}
+          image:
+            reference: {{ .image }}
+            pullPolicy: IfNotPresent
+        {{- end }}
+        {{- end }}
+        {{- end }}
+      {{- with $process.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $process.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $process.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ml-iam-services.fullname" $ }}-{{ $key }}
+  labels:
+    {{- include "ml-iam-services.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $key }}
+spec:
+  type: {{ $process.service.type }}
+  ports:
+    - port: {{ $process.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "ml-iam-services.selectorLabels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $key }}
+{{- end }}
+{{- end }}

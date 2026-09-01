@@ -1,0 +1,53 @@
+{{- if .Values.provisioning.enabled }}
+{{- /*
+  What the IAM may do in the cluster: read the documents services declare,
+  say what became of each one, and publish what it composed. It writes no
+  workload and reads no secret, so a compromised IAM cannot become a
+  cluster-wide reader.
+
+  Which service may declare which document is the API server's answer, from
+  each service's own Role, not from anything here.
+*/}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "ml-iam-services.fullname" . }}-provisioning
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "ml-iam-services.fullname" . }}-provisioning
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["mojaloop.io"]
+    resources: ["authzdocuments"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["mojaloop.io"]
+    resources: ["authzdocuments/status"]
+    verbs: ["get", "patch", "update"]
+  # The composed rules and catalog, which the gateway and Keto read
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch", "create", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "ml-iam-services.fullname" . }}-provisioning
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "ml-iam-services.fullname" . }}-provisioning
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "ml-iam-services.fullname" . }}-provisioning
+    namespace: {{ .Release.Namespace }}
+{{- end }}

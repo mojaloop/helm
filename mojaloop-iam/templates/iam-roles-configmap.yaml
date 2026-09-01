@@ -1,0 +1,20 @@
+{{- /*
+  The deployment's roles, assignments and exclusions, as one file. It is
+  ordinary values: reviewed in the same pull request as everything else,
+  rendered on every sync, and diffed by whatever applies the chart.
+
+  One reader, the provisioning service: it applies the roles when it starts,
+  and holds the exclusions to refuse a grant that would break one. The
+  checksum on its pod template ties a change here to a restart.
+*/}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iam-default-roles
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: iam-default-roles
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  default-roles.json: |
+    {{- .Values.global.iamRoles | toJson | nindent 4 }}

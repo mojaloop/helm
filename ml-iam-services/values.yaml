@@ -7,26 +7,95 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-ketoBatchAuth:
+# Asked by the gateway for every request. Read-only Keto, no route.
+decision:
   enabled: true
-  replicaCount: 1
+  replicaCount: 2
+  args: ["decide"]
 
   service:
     type: ClusterIP
-    port: 80
-    targetPort: 3000
+    port: 3002
+    targetPort: 3002
 
   env:
-    PORT: "3000"
+    PORT: "3002"
     KETO_READ_URL: "http://keto-read.ory.svc.cluster.local"
+    # A scope wider than this is a deployment granting by enumeration
+    SCOPE_ALARM: "500"
 
   resources:
     requests:
-      memory: "32Mi"
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "128Mi"
+      cpu: "500m"
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 3
+    periodSeconds: 5
+
+  volumes: []
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+
+# Applies the deployment's roles when it starts, then serves the IAM that
+# services and the role UI call. The only holder of a Keto write URL.
+#
+# One replica on purpose: it writes, and two copies reconciling the same roles
+# at once would interleave their clear-then-write. The decision endpoint is the
+# one on every request, and it only reads.
+provisioning:
+  enabled: true
+  replicaCount: 1
+  args:
+    - provisioning
+    - --roles=/config/roles/default-roles.json
+    # The documents the chart mounted and the ones services declare while the
+    # deployment runs, composed here and published for the gateway and Keto
+    - --publish-as=authz-published
+
+  service:
+    type: ClusterIP
+    port: 3003
+    targetPort: 3003
+
+  env:
+    PORT: "3003"
+    KETO_READ_URL: "http://keto-read.ory.svc.cluster.local"
+    KETO_WRITE_URL: "http://keto-write.ory.svc.cluster.local"
+    KRATOS_ADMIN_URL: "http://kratos-admin.ory.svc.cluster.local"
+
+  volumes:
+    - name: roles
+      configMap:
+        name: iam-default-roles
+  volumeMounts:
+    - name: roles
+      mountPath: /config/roles
+      readOnly: true
+
+  resources:
+    requests:
+      memory: "64Mi"
       cpu: "25m"
     limits:
-      memory: "64Mi"
-      cpu: "100m"
+      memory: "128Mi"
+      cpu: "200m"
 
   livenessProbe:
     httpGet:

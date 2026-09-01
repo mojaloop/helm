@@ -1,0 +1,17 @@
+{{- /* Oathkeeper always mounts oathkeeper-rules but maester creates it after the
+       first Rule CR, so seed it empty for the pod to start, the lookup keeps
+       maester's content, under gitops let maester own it */}}
+{{- $existing := lookup "v1" "ConfigMap" .Release.Namespace "oathkeeper-rules" -}}
+{{- $rules := "[]" -}}
+{{- if and $existing $existing.data (index $existing.data "access-rules.json") -}}
+{{- $rules = index $existing.data "access-rules.json" -}}
+{{- end -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oathkeeper-rules
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/resource-policy": keep
+data:
+  "access-rules.json": {{ $rules | quote }}

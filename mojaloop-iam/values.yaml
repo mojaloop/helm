@@ -1,3 +1,78 @@
+# Authorization is derived: each service's image carries its OpenAPI document
+# (read via ImageVolume so scratch images work), and the IAM composes every
+# registered document into this deployment's gateway rules, Keto model and
+# catalog. A permission id two services claim, a request two services both
+# match, or a resource type nothing accounts for fails the rollout.
+#
+# The deployment supplies the list, one entry per service:
+#
+#   - name: <service name>
+#     image: <image carrying the document>
+#     spec: <path to the document inside that image>
+#     url:
+#       host: <hostname the rules match>          # required
+#       path: <mount point under a shared host>   # optional, omit at the root
+#
+# A micro-frontend adds a portal block, read as the remote manifest by the
+# shell that composes it:
+#
+#     portal:
+#       path: <where the shell mounts it>
+#       label: <menu entry>
+#       scope: <federated container it exposes>
+#       permission: <namespace>:<object>#<permit>   # optional, gates the entry
+#
+# Ad-hoc rules outside a bundle go in as oathkeeper.ory.sh Rule CRs (maester
+# controller mode)
+global:
+  authz: []
+  # One real thing under several services' names, so an operator picks it once
+  # and every service's spelling of it is bound. A type no path binds is
+  # legitimate and has to appear here for the rollout to accept it.
+  #
+  #   Participant:
+  #     label: Participant
+  #     members:
+  #       - { service: mcm, type: dfsps }
+  #       - { service: reports, type: participants }
+  resourceNames: {}
+  # Composes the documents; the IAM's own image
+  iamImage: mojaloop/ml-iam-services:v0.1.2
+  # The deployment's roles, the assignments it ships with, and the pairs of
+  # permissions it refuses to see in one pair of hands. Reviewed and versioned
+  # like any other value: the provisioning service applies it when it starts,
+  # and enforces the exclusions on every grant made after.
+  #
+  #   roles:
+  #     hub-operator:
+  #       grants:
+  #         - permission: reports.getReport
+  #           bind: { reports: all, participants: all }
+  #     dfsp-operator:
+  #       params: [dfspId]
+  #       onProvision: admin
+  #       grants:
+  #         - permission: mcm.getDFSPca
+  #           bind: { dfsps: $dfspId }
+  #   assignments:
+  #     - { subject: <identity id>, role: hub-operator }
+  #   exclusions:
+  #     - name: audit-exclusion
+  #       a: [settlement.auditSettlement]
+  #       b: [settlement.positionFundsInOut, settlement.positionNDCEdit]
+  iamRoles:
+    roles: {}
+  # The first identity a fresh deployment logs in with. The provisioning
+  # service creates it while applying the roles, and puts it in `role`. Leave
+  # the email empty to create nobody, which is what SSO deployments want.
+  # Password: passwordSecret if set, else one generated on first install and
+  # kept in Secret iam-admin-password.
+  iamAdmin:
+    email: ""
+    role: hub-admin
+    passwordSecret: ""
+    passwordSecretKey: password
+
 oathkeeper:
   enabled: true
   global:
@@ -14,16 +89,23 @@ oathkeeper:
         format: json
       access_rules:
         matching_strategy: regexp
+        repositories:
+          # Rules from oathkeeper.ory.sh Rule CRs (maester keeps this file)
+          - file:///etc/rules/access-rules.json
+          # The aggregate of all authz bundles, staged by the fetch-authz init
+          - file:///etc/authz-rules/access-rules.yml
       authenticators:
         jwt:
           enabled: true
           config:
             jwks_urls:
               - http://hydra-public/.well-known/jwks.json
-            target_audience:
-              - connection-manager-api
-            # Hydra generates its JWT signing keysets lazily on first use;
-            # 5s covers the cold keygen and only ever applies once.
+            # No audience requirement, Hydra serves only this platform's machine
+            # clients and Keto authorizes by subject, a token proves identity and
+            # the permit decides access (a multi-provider deployment can set an
+            # audience here to isolate token reuse)
+            target_audience: []
+            # Hydra generates JWKS lazily on first use, 5s covers the cold keygen
             jwks_max_wait: 5s
         cookie_session:
           enabled: true
@@ -39,25 +121,24 @@ oathkeeper:
           enabled: true
           config:
             subject: guest
+        noop:
+          enabled: true
       authorizers:
         allow:
           enabled: true
-        keto_engine_acp_ory:
+        deny:
           enabled: true
-          config:
-            base_url: "http://keto-read"
-            required_action: "read"
-            required_resource: "unknown"
-            flavor: "regex"
         remote_json:
           enabled: true
           config:
-            remote: http://keto-read/relation-tuples/check
+            # The decision endpoint: checks compose from Keto, and the resource
+            # types a rule declares come back as the caller's visible set
+            remote: http://ml-iam-services-decision:3002/
+            forward_response_headers_to_upstream:
+              - X-Scope
+            # Deny-safe default, the denied namespace fails every check, each rule sets its own payload
             payload: |
-              {
-                "subject": "{{ print .Subject }}",
-                "resource": "{{ printIndex .MatchContext.RegexpCaptureGroups 0 }}"
-              }
+              {"namespace":"denied","object":"denied","relation":"denied","subject_id":"{{ print .Subject }}"}
       mutators:
         id_token:
           enabled: true
@@ -71,7 +152,7 @@ oathkeeper:
               X-User: '{{ print .Subject }}'
               X-Email: '{{ with .Extra.identity }}{{ print .traits.email }}{{ end }}'
               X-DFSP-ID: '{{ with .Extra.identity }}{{ with .metadata_public }}{{ with .dfspId }}{{ . }}{{ end }}{{ end }}{{ end }}'
-              X-Roles: '[{{ if .Extra.identity }}{{ with .Extra.identity.metadata_public }}{{ with .role }}"{{ . }}"{{ end }}{{ with .dfspId }}"dfsp:{{ . }}"{{ end }}{{ end }}{{ else }}"dfsp:{{ print .Subject }}"{{ end }}]'
+              X-Roles: '{{ $r := list }}{{ with .Extra.identity }}{{ with .metadata_public }}{{ $r = .roles | default list }}{{ with .dfspId }}{{ $r = append $r (printf "dfsp:%s" .) }}{{ end }}{{ end }}{{ else }}{{ $r = list (printf "dfsp:%s" $.Subject) }}{{ end }}{{ toJson $r }}'
         noop:
           enabled: true
       errors:
@@ -97,6 +178,24 @@ oathkeeper:
         api:
           port: 4456
     managedAccessRules: false
+  # The rules the IAM composed. Kubernetes keeps the mounted file current and
+  # Oathkeeper reloads the repository it names, so a service whose surface
+  # changes reaches the gateway without a rollout. Optional because Oathkeeper
+  # serves an empty rule set as 404, which is the right answer for a platform
+  # that has not composed yet.
+  deployment:
+    extraVolumes:
+      - name: authz-rules
+        configMap:
+          name: authz-published
+          optional: true
+          items:
+            - key: access-rules.yml
+              path: access-rules.yml
+    extraVolumeMounts:
+      - name: authz-rules
+        mountPath: /etc/authz-rules
+        readOnly: true
   maester:
     enabled: true
     oathkeeperFullnameOverride: 'oathkeeper'
@@ -106,7 +205,7 @@ oathkeeper:
     deployment:
       envs:
         - name: authorizersAvailable
-          value: allow,deny,noop,remote_json,keto_engine_acp_ory
+          value: allow,deny,remote_json
   serviceMonitor:
     scheme: http
     scrapeInterval: 60s
@@ -114,6 +213,7 @@ oathkeeper:
 
 keto:
   enabled: true
+  fullnameOverride: "keto"
   replicaCount: 1
   secret:
     enabled: false
@@ -140,20 +240,22 @@ keto:
         metrics:
           port: 4468
       namespaces:
-        location: file:///etc/keto-namespaces
-  # OPL namespace files ship inside service Docker images and are mounted
-  # via K8s ImageVolume + subPath. Each contributing service adds:
-  #   extraVolumes:
-  #     - name: <svc>-opl
-  #       image: { reference: <org>/<svc>:<tag> }
-  #   extraVolumeMounts:
-  #     - name: <svc>-opl
-  #       mountPath: /etc/keto-namespaces/<svc>.ts
-  #       subPath: <path/to/svc>.keto.ts
-  # Keto loads all .ts files from /etc/keto-namespaces at startup.
+        location: file:///etc/keto-namespaces/namespaces.ts
+  # The OPL model the IAM composed, at namespaces.location. Keto reads this
+  # file to start and reloads it in place, so the seed it starts on becomes the
+  # composition without a restart.
   deployment:
-    extraVolumes: []
-    extraVolumeMounts: []
+    extraVolumes:
+      - name: authz-namespaces
+        configMap:
+          name: authz-published
+          items:
+            - key: keto-namespaces.ts
+              path: namespaces.ts
+    extraVolumeMounts:
+      - name: authz-namespaces
+        mountPath: /etc/keto-namespaces
+        readOnly: true
   serviceMonitor:
     scheme: http
     scrapeInterval: 60s
@@ -285,9 +387,6 @@ kratos:
                           name: Authorization
                           value: Bearer kratos-webhook-token
                           in: header
-          logout:
-            after:
-              default_browser_return_url: https://localhost/realms/hub-operators/protocol/openid-connect/logout
           error:
             ui_url: https://localhost/ui/error
           registration:
@@ -308,6 +407,15 @@ kratos:
                           value: Bearer kratos-webhook-token
                           in: header
                   - hook: session
+          recovery:
+            enabled: true
+            ui_url: https://localhost/ui/recovery
+            use: link
+            lifespan: 168h
+          settings:
+            ui_url: https://localhost/ui/settings
+            privileged_session_max_age: 15m
+            required_aal: highest_available
       log:
         level: info
         format: json
@@ -323,9 +431,10 @@ kratos:
       courier:
         template_override_path: /conf/courier-templates
         smtp:
-          connection_uri: smtp://mailpit:1025/?disable_starttls=true
+          connection_uri: smtp://mailpit-smtp:25/?disable_starttls=true
+          # Deployment values, noreply@<deployment domain> and the hub's display name
           from_address: noreply@mojaloop.local
-          from_name: Mojaloop MCM
+          from_name: Mojaloop Hub
   serviceMonitor:
     enabled: true
     scheme: http
@@ -334,6 +443,13 @@ kratos:
 
 hydra:
   enabled: true
+  fullnameOverride: "hydra"
+  # Serve admin/public on :80 so consumers reach hydra by bare service name
+  service:
+    public:
+      port: 80
+    admin:
+      port: 80
   secret:
     enabled: false
     nameOverride: hydra-secret
@@ -375,51 +491,25 @@ hydra:
         format: json
 
 ml-iam-services:
-  ketoBatchAuth:
-    env:
-      KETO_READ_URL: "http://keto-read"
   kratosRoleWebhook:
     env:
       KRATOS_ADMIN_URL: "http://kratos-admin"
       KETO_READ_URL: "http://keto-read"
 
-# Helm hook that seeds the initial hub-admin: a Kratos identity (password
-# credential) and the Hub:<ketoHubObject>#admins Keto tuple. Opt-in; production
-# deployments typically bootstrap admins via SSO and leave this disabled.
-#
-# Admin password source:
-#   - If adminPasswordSecret is set, the password is read from that Secret.
-#   - Otherwise, the chart generates a random password on first install,
-#     persists it in Secret 'iam-bootstrap-admin-password' (kept across helm
-#     uninstall), and reuses it on subsequent upgrades.
-iamBootstrap:
-  enabled: false
-  image: python:3.14-alpine
-  kratosAdminUrl: http://kratos-admin
-  ketoWriteUrl: http://keto-write
-  adminEmail: admin@mcm.local
-  adminPasswordSecret: ""
-  adminPasswordSecretKey: password
-  hubAdminRole: hub-admin
-  ketoHubObject: mojaloop
 
-# Kratos self-service UI: login, recovery, settings, error pages.
 kratos-ui:
   enabled: false
+  fullnameOverride: kratos-ui
 
-# Mailpit SMTP catcher for dev/CI. Acts as the Kratos courier backend so
-# invitation and recovery emails can be inspected via Mailpit's web UI.
+# Mailpit SMTP catcher for dev, the Kratos courier backend for invitation and
+# recovery emails
 mailpit:
   enabled: false
+  fullnameOverride: mailpit
 
-# External exposure via Gateway API HTTPRoutes. The parent Gateway is
-# expected to exist already (typical Cilium/Contour/NGINX-GW shape, with
-# allowedRoutes.namespaces.from: All on its HTTPS listener); the chart
-# only renders HTTPRoutes that attach to it. Setting host fields below
-# to a non-empty string causes the corresponding HTTPRoute to render.
-# oathkeeperProxyConsumerNamespaces lists the namespaces whose HTTPRoutes
-# are allowed to backend into oathkeeper-proxy. Renders a single
-# ReferenceGrant; the IAM chart itself names no specific consumer.
+# Gateway API HTTPRoutes for the IdP surfaces, a hosts entry is a host string
+# attached via the shared parentRefs, or a {host, parentRefs} map for its own
+# attachment, a non-empty entry renders its HTTPRoute
 gateway:
   enabled: false
   parentRefs: []
@@ -428,21 +518,30 @@ gateway:
     kratos: ""
     auth: ""
     mailpit: ""
-  oathkeeperProxyConsumerNamespaces: []
+  # Namespaces whose HTTPRoutes call the Oathkeeper decision API via ExternalAuth,
+  # rendered as a ReferenceGrant to the oathkeeper-api Service
+  oathkeeperConsumerNamespaces: []
 
-# Bundled PostgreSQL — when enabled, the chart provisions a Postgres instance
-# with three databases (hydra, kratos, keto) on first install, materialises
-# 'ml-iam-postgresql-credentials' with an autogenerated superuser password,
-# and synthesises hydra-secret/kratos-secret/keto-secret with DSNs pointing
-# at it. Disable to bring an external Postgres; in that case the three Ory
-# Secrets must be supplied externally before installing.
-postgresql:
-  enabled: true
-  fullnameOverride: ml-iam-postgresql
-  auth:
-    existingSecret: ml-iam-postgresql-credentials
-    secretKeys:
-      adminPasswordKey: postgres-password
-  primary:
-    initdb:
-      scriptsSecret: ml-iam-postgresql-initdb
+# External database, provision the databases and users externally (CNPG,
+# Percona, managed cloud DB)
+# Prod: leave host empty and supply the hydra/kratos/keto Secrets externally
+# Dev/eval: set host and passwords, the chart builds the Secrets from them
+database:
+  host: ""
+  port: 5432
+  # postgres or mysql, Ory supports both
+  type: postgres
+  # DSN query params, per-driver defaults when empty
+  params: ""
+  hydra:
+    database: hydra
+    user: hydra
+    password: ""
+  kratos:
+    database: kratos
+    user: kratos
+    password: ""
+  keto:
+    database: keto
+    user: keto
+    password: ""
