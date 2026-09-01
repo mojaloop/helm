@@ -1,0 +1,50 @@
+{{- /*
+  When gateway.oathkeeper is enabled the route delegates auth to it via the
+  ExternalAuth filter, forwarding the session cookie in and the scope header
+  out; disabled, the route plainly forwards. A cross-namespace oathkeeper
+  reference needs a ReferenceGrant in the oathkeeper namespace.
+*/}}
+{{- if .Values.gateway.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ template "ml-testing-toolkit-frontend.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  parentRefs:
+    {{- toYaml .Values.gateway.parentRefs | nindent 4 }}
+  hostnames:
+    - {{ required "gateway.host is required when the gateway is enabled" .Values.gateway.host | quote }}
+  rules:
+    - filters:
+        # The scope is the decision endpoint's word, so a client's own copy is
+        # removed at the edge and cannot reach anything behind it
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            remove:
+              - X-Scope
+      {{- if .Values.gateway.oathkeeper.enabled }}
+        - type: ExternalAuth
+          externalAuth:
+            protocol: HTTP
+            backendRef:
+              name: {{ .Values.gateway.oathkeeper.serviceName | quote }}
+              {{- with .Values.gateway.oathkeeper.serviceNamespace }}
+              namespace: {{ . | quote }}
+              {{- end }}
+              port: {{ .Values.gateway.oathkeeper.servicePort }}
+            http:
+              path: /decisions
+              allowedHeaders:
+                # The session cookie is the sole authenticator this surface
+                # declares; accept picks the error shape, a login redirect for
+                # a browser and a json 401 for anything else
+                - cookie
+                - accept
+              allowedResponseHeaders:
+                - x-scope
+      {{- end }}
+      backendRefs:
+        - name: {{ template "ml-testing-toolkit-frontend.fullname" . }}
+          port: {{ .Values.service.port }}
+{{- end }}
