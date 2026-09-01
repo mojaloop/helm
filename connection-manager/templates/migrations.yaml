@@ -43,15 +43,17 @@ spec:
         - /bin/sh
         - -c
         - |
-          echo "Waiting for DNS resolution of $DATABASE_HOST..."
-          until nslookup "$DATABASE_HOST"; do
-            echo "DB host $DATABASE_HOST not yet resolvable, retrying in 5s..."
+          echo "Waiting for $DATABASE_HOST:$DATABASE_PORT to accept connections..."
+          until nc -z "$DATABASE_HOST" "$DATABASE_PORT"; do
+            echo "$DATABASE_HOST:$DATABASE_PORT not ready, retrying in 5s..."
             sleep 5
           done
-          echo "DB host $DATABASE_HOST resolved"
+          echo "$DATABASE_HOST:$DATABASE_PORT is ready"
         env:
         - name: DATABASE_HOST
           value: {{ .Values.db.host }}
+        - name: DATABASE_PORT
+          value: {{ .Values.db.port | quote }}
       containers:
       - name: db-migration
         securityContext:
@@ -110,6 +112,7 @@ spec:
           value: {{ .Values.db.schema }}
         - name: DATABASE_PORT
           value: {{ .Values.db.port | quote }}
+        {{- include "connection-manager.vaultEnv" . | nindent 8 }}
         {{- if .Values.migrations.env }}
         {{- range $key, $val := .Values.migrations.env }}
         - name: {{ $key | quote }}

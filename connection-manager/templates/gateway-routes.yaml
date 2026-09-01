@@ -1,30 +1,84 @@
-{{- if and .Values.gateway.enabled .Values.gateway.host -}}
+{{- /*
+  Gateway routes for the MCM UI and API, each route delegates auth to the shared
+  Oathkeeper via the ExternalAuth filter, Oathkeeper matches the bundle rules in
+  the service image (permissions/oathkeeper-rules.yml) by the request host
+
+  A cross-namespace oathkeeper reference needs a ReferenceGrant in the oathkeeper
+  namespace
+*/}}
+{{- if .Values.gateway.enabled -}}
 {{- $fullname := include "connection-manager.fullname" . -}}
+{{- $oath := .Values.gateway.oathkeeper -}}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: {{ $fullname }}
+  name: {{ $fullname }}-api
   namespace: {{ .Release.Namespace }}
 spec:
   parentRefs:
-    {{- toYaml .Values.gateway.parentRefs | nindent 4 }}
+    {{- toYaml .Values.gateway.api.parentRefs | nindent 4 }}
   hostnames:
-    - {{ .Values.gateway.host | quote }}
+    {{- toYaml (required "gateway.api.hosts is required when the gateway is enabled" .Values.gateway.api.hosts) | nindent 4 }}
   rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /api
+    - filters:
+        {{- with .Values.gateway.api.cors }}
+        - type: CORS
+          cors:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        - type: ExternalAuth
+          externalAuth:
+            protocol: HTTP
+            backendRef:
+              name: {{ $oath.serviceName | quote }}
+              namespace: {{ $oath.serviceNamespace | quote }}
+              port: {{ $oath.servicePort }}
+            http:
+              path: /decisions
+              allowedHeaders:
+                - cookie
+                - authorization
+                - accept
+                - x-forwarded-proto
+              allowedResponseHeaders:
+                - x-user
+                - x-email
+                - x-roles
+                - x-dfsp-id
+                - x-scope
       backendRefs:
-        - group: ""
-          kind: Service
-          name: {{ .Values.gateway.oathkeeper.serviceName | quote }}
-          namespace: {{ .Values.gateway.oathkeeper.serviceNamespace | quote }}
-          port: {{ .Values.gateway.oathkeeper.servicePort }}
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
+        - name: {{ $fullname }}-api
+          port: {{ .Values.api.ports.containerPort }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullname }}-ui
+  namespace: {{ .Release.Namespace }}
+spec:
+  parentRefs:
+    {{- toYaml .Values.gateway.ui.parentRefs | nindent 4 }}
+  hostnames:
+    {{- toYaml (required "gateway.ui.hosts is required when the gateway is enabled" .Values.gateway.ui.hosts) | nindent 4 }}
+  rules:
+    - filters:
+        - type: ExternalAuth
+          externalAuth:
+            protocol: HTTP
+            backendRef:
+              name: {{ $oath.serviceName | quote }}
+              namespace: {{ $oath.serviceNamespace | quote }}
+              port: {{ $oath.servicePort }}
+            http:
+              path: /decisions
+              allowedHeaders:
+                - cookie
+                - accept
+                - x-forwarded-proto
+              allowedResponseHeaders:
+                - x-user
+                - x-email
+                - x-roles
       backendRefs:
         - name: {{ $fullname }}-ui
           port: {{ .Values.ui.ports.containerPort }}

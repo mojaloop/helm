@@ -107,6 +107,7 @@ api:
 
 ui:
   disabled: false
+  authEnabled: false
   checkSessionUrl: ''
   loginUrl: ''
   loginProvider: ''
@@ -155,19 +156,26 @@ db:
   # sslCaSecret: mysql-tls-client-creds
   # sslCaSecretKey: cacert.pem
 
-# External exposure is via Gateway API HTTPRoutes; no legacy Ingress.
-# A single MCM HTTPRoute fans out by path on `gateway.host`:
-#   /api/* → oathkeeper-proxy (cross-namespace, gated by a ReferenceGrant
-#            that the mojaloop-iam chart renders)
-#   /*     → mcm-connection-manager-ui
+# External exposure is via Gateway API HTTPRoutes, one route per surface (api, ui),
+# each delegating auth to the shared Oathkeeper through the ExternalAuth filter (a
+# cross-namespace reference is gated by a ReferenceGrant the mojaloop-iam chart
+# renders)
 gateway:
   enabled: false
-  host: ""
-  parentRefs: []
+  # Shared Oathkeeper decision API, the ExternalAuth filter delegates each request here
   oathkeeper:
     serviceNamespace: iam
-    serviceName: oathkeeper-proxy
-    servicePort: 4455
+    serviceName: oathkeeper-api
+    servicePort: 4456
+  # API HTTPRoute hostnames and parentRefs
+  api:
+    hosts: []
+    parentRefs: []
+    cors: {}
+  # UI HTTPRoute hostnames and parentRefs
+  ui:
+    hosts: []
+    parentRefs: []
 
 imagePullPolicy: IfNotPresent
 

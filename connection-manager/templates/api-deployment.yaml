@@ -87,55 +87,13 @@ spec:
             - name: EXTRA_ROOT_CERT_FILE_NAME
               value: /mcm_secrets/extraTLS_root_cert.pem
             {{- end }}
-            {{- if .Values.api.vault.auth.k8s.enabled }}
-            - name: VAULT_AUTH_METHOD
-              value: K8S
-            - name: VAULT_K8S_TOKEN_FILE
-              value: {{ .Values.api.vault.auth.k8s.token }}
-            - name: VAULT_K8S_ROLE
-              value: {{ .Values.api.vault.auth.k8s.role }}
-            - name: VAULT_K8S_AUTH_MOUNT_POINT
-              value: {{ .Values.api.vault.auth.k8s.mountPoint }}
-            {{- else if .Values.api.vault.auth.appRole.enabled }}
-            - name: VAULT_AUTH_METHOD
-              value: APP_ROLE
-            - name: VAULT_ROLE_ID_FILE
-              value: {{ .Values.api.vault.auth.appRole.roleId }}
-            - name: VAULT_ROLE_SECRET_ID_FILE
-              value: {{ .Values.api.vault.auth.appRole.roleSecretId }}
-            {{- end }}
-            - name: VAULT_ENDPOINT
-              value: {{ .Values.api.vault.endpoint }}
-            - name: VAULT_MOUNT_PKI
-              value: {{ .Values.api.vault.mounts.pki }}
-            - name: VAULT_MOUNT_INTERMEDIATE_PKI
-              value: {{ .Values.api.vault.mounts.intermediatePki }}
-            - name: VAULT_MOUNT_KV
-              value: {{ .Values.api.vault.mounts.kv }}
-            - name: VAULT_PKI_SERVER_ROLE
-              value: {{ .Values.api.vault.pkiServerRole }}
-            - name: VAULT_PKI_CLIENT_ROLE
-              value: {{ .Values.api.vault.pkiClientRole }}
-            - name: VAULT_SIGN_EXPIRY_HOURS
-              value: {{ .Values.api.vault.signExpiryHours | quote }}
-            - name: INTERNAL_CA_TTL
-              value: {{ .Values.api.vault.internalCaTtl | quote }}
+            {{- include "connection-manager.vaultEnv" . | nindent 12 }}
             - name: CLIENT_CSR_PARAMETERS
               value: /resources/tlsClientCSRParameters.json
             - name: SERVER_CSR_PARAMETERS
               value: /resources/tlsServerCSRParameters.json
             - name: CA_CSR_PARAMETERS
               value: /resources/caCSRParameters.json
-            - name: VAULT_MOUNT_DFSP_CLIENT_CERT_BUNDLE
-              value: {{ .Values.api.vault.mounts.dfspClientCertBundle | quote }}
-            - name: VAULT_MOUNT_DFSP_INT_IP_WHITELIST_BUNDLE
-              value: {{ .Values.api.vault.mounts.dfspInternalIPWhitelistBundle | quote }}
-            - name: VAULT_MOUNT_DFSP_EXT_IP_WHITELIST_BUNDLE
-              value: {{ .Values.api.vault.mounts.dfspExternalIPWhitelistBundle | quote }}
-            - name: SWITCH_FQDN
-              value: {{ .Values.api.switchFQDN | quote }}
-            - name: SWITCH_ID
-              value: {{ .Values.api.switchId | quote }}
             - name: PRIVATE_KEY_LENGTH
               value: {{ .Values.api.vault.keyLength | quote }}
             - name: CERT_MANAGER_ENABLED
@@ -185,6 +143,8 @@ spec:
               value: "true"
             - name: IAM_AUTO_CREATE_ACCOUNTS
               value: {{ .Values.iam.autoCreateAccounts | default true | quote }}
+            - name: IAM_PROVISIONING_URL
+              value: {{ .Values.global.iam.provisioningUrl | quote }}
             - name: HYDRA_ADMIN_URL
               value: {{ .Values.global.iam.hydra.adminUrl | quote }}
             - name: HYDRA_PUBLIC_URL

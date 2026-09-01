@@ -44,9 +44,10 @@ spec:
               value: {{ .Values.ui.loginProvider | quote }}
             - name: LOGOUT_URL
               value: {{ .Values.ui.logoutUrl | quote }}
-            {{- with .Values.ui.oauth }}
             - name: AUTH_ENABLED
-              value: {{ .enabled | quote }}
+              value: {{ .Values.ui.authEnabled | quote }}
+            {{- if .Values.ui.oauth.enabled }}
+            {{- with .Values.ui.oauth }}
             - name: UI_OIDC_LOGIN_REDIRECT_URL
               value: "{{ .hubOidcProviderUrl }}/auth"
             - name: OIDC_TOKEN_PROVIDER_URL
@@ -62,6 +63,7 @@ spec:
               {{- else }}
               value: {{ .clientSecret }}
               {{- end }}
+            {{- end }}
             {{- end }}
             {{- if .Values.ui.env }}
             {{- range $key, $val := .Values.ui.env }}
