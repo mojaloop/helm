@@ -102,7 +102,11 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             {{- end }}
-            {{- /* The first identity, created while the roles are applied */}}
+            {{- /*
+              The first identity, created while the roles are applied. It is
+              invited by email to set its password; a passwordSecret grants
+              one directly instead, for a deployment with no mail path.
+            */}}
             {{- if and (eq $key "provisioning") $.Values.global }}
             {{- with $.Values.global.iamAdmin }}
             {{- if .email }}
@@ -110,11 +114,13 @@ spec:
               value: {{ .email | quote }}
             - name: IAM_HUB_ADMIN_ROLE
               value: {{ .role | default "hub-admin" | quote }}
+            {{- if .passwordSecret }}
             - name: IAM_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .passwordSecret | default "iam-admin-password" | quote }}
+                  name: {{ .passwordSecret | quote }}
                   key: {{ .passwordSecretKey | default "password" | quote }}
+            {{- end }}
             {{- end }}
             {{- end }}
             {{- end }}
