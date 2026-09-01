@@ -747,3 +747,56 @@ proxy-cache-redis-standalone:
       ## @param master.persistence.enabled Enable persistence on Redis&reg; master nodes using Persistent Volume Claims
       ##
       enabled: false
+
+# Postgres for the Ory stack (hydra/kratos/keto), off by default
+iam-postgres:
+  enabled: false
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
+  fullnameOverride: iam-db
+  auth:
+    postgresPassword: postgres
+  primary:
+    persistence:
+      enabled: false
+    initdb:
+      scripts:
+        001-iam-databases.sql: |
+          CREATE USER hydra WITH PASSWORD 'hydra';
+          CREATE DATABASE hydra OWNER hydra;
+          CREATE USER kratos WITH PASSWORD 'kratos';
+          CREATE DATABASE kratos OWNER kratos;
+          CREATE USER keto WITH PASSWORD 'keto';
+          CREATE DATABASE keto OWNER keto;
+
+# MySQL for MCM, off by default
+mcm-mysql:
+  enabled: false
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/mysql
+  fullnameOverride: mcm-db
+  auth:
+    rootPassword: mcm-root
+    createDatabase: true
+    database: mcm
+    username: mcm
+    password: mcm
+  primary:
+    persistence:
+      enabled: false
+
+# Vault for MCM PKI/secrets, off by default, standalone is sealed, set
+# server.dev.enabled for an auto-unsealed dev server, authDelegator lets the
+# SA validate k8s auth tokens
+openbao:
+  enabled: false
+  fullnameOverride: openbao
+  server:
+    authDelegator:
+      enabled: true
+    standalone:
+      enabled: true
+  injector:
+    enabled: false
