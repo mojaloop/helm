@@ -93,15 +93,17 @@ single declaration answers both authorization questions, so there is nothing
 else to write.
 
 **What is checked.** If the path binds an id for a declared type, the
-operation is authorized against `<type>/<id>`. If it does not, the operation
-is authorized against the service singleton.
+operation is authorized against `<ResourceName>/<id>` — the deployment's name
+for the real thing the type spells, which is how one grant covers every
+service's spelling of it. If it does not, the operation is authorized against
+the service singleton.
 
 **What the caller may see.** Every declared type appears in the `X-Scope`
 header, carrying the resources of that type named by the role that admitted
 the request.
 
 ```
-GET  /widgets/{widgetId}/ca      [widgets]  check widgets/{widgetId}   X-Scope: widgets=…
+GET  /widgets/{widgetId}/ca      [widgets]  check Widget/{widgetId}    X-Scope: widgets=…
 GET  /widgets                    [widgets]  check __self__             X-Scope: widgets=…
 POST /external/certs             [widgets]  check __self__             X-Scope: widgets=…
 GET  /hub/endpoints/ips/{epId}   []         check __self__             X-Scope: none
@@ -128,8 +130,8 @@ bare.
 **Multiple types.** A check addresses exactly one object, so an operation
 declaring two types that both have bound ids emits one check per type, in
 capture order, and all must pass.
-`/reports/{reportId}/widgets/{widgetId}` checks `reports/{reportId}` and
-`widgets/{widgetId}` together, and its scope carries both types.
+`/reports/{reportId}/widgets/{widgetId}` checks `Report/{reportId}` and
+`Widget/{widgetId}` together, and its scope carries both types.
 
 The generator writes a derivation table alongside the rules: one line per
 operation stating what it concluded. It is reviewed once per service and
@@ -141,16 +143,19 @@ than a 403 in staging.
 Keto has no objectless tuple. Every stored edge and every check is
 `(namespace, object, relation, subject)`, so an operation about nothing in
 particular still has to name an object. Three shapes cover every case, fixed
-platform-wide because they live in stored tuples:
+platform-wide because they live in stored tuples. A resource is spelled by
+its **resource name** — the deployment's one name for the real thing, however
+each service's paths spell it — so the same grant answers every service's
+check about it:
 
 ```
-widgets/w7        one resource
-widgets/__all__   every resource of that type, present and future
+Widget/w7         one resource
+Widget/__all__    every resource of that name, present and future
 __self__          the service itself
 ```
 
 ```
-example:widgets/w7#getWidgetCa@Role:auditor#members
+example:Widget/w7#getWidgetCa@Role:auditor#members
     role auditor may call getWidgetCa, on widget w7
 
 example:__self__#getWidgets@Role:hub-operator#members
@@ -160,7 +165,7 @@ example:__self__#getWidgets@Role:hub-operator#members
 `__self__` is what an operation with no bound id is authorized against. It is
 a real grant point, not a placeholder: for a collection listing it answers
 "may you call this endpoint", which is a different question from "which rows
-come back". A caller holding `widgets/w7#getWidgetCa` has a non-empty visible
+come back". A caller holding `Widget/w7#getWidgetCa` has a non-empty visible
 set without holding `getWidgets`, and must not reach the listing.
 
 `__all__` is an ordinary object, not a structural link. The decision endpoint
@@ -169,8 +174,8 @@ makes "grant over everything" one tuple instead of a traversal, and what makes
 it collapse a scope to `*`.
 
 A resource object always contains a slash and `__self__` never does, so the
-two cannot collide. Within a type, `__all__` is a reserved id. Keto accepts
-any string as an object, so the write path is what enforces both.
+two cannot collide. Within a resource name, `__all__` is a reserved id. Keto
+accepts any string as an object, so the write path is what enforces both.
 
 ## The Keto model
 
@@ -207,8 +212,8 @@ is accepted with `201`. Permission names therefore need no declaration, and a
 service adding an operation needs no model change.
 
 **Role indirection resolves with no permit.** A check for
-`example:widgets/w7#getWidgetCa` by `user-1` passes when the stored tuples are
-`example:widgets/w7#getWidgetCa@Role:auditor#members` and
+`example:Widget/w7#getWidgetCa` by `user-1` passes when the stored tuples are
+`example:Widget/w7#getWidgetCa@Role:auditor#members` and
 `Role:auditor#members@user-1`. Subject-set traversal is part of evaluation,
 not something a permit switches on.
 
@@ -248,7 +253,7 @@ forwarded headers are global platform configuration.
   authorizer:
     handler: remote_json
     config:
-      payload: '{"namespace":"example","object":"widgets/{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}","relation":"getWidgetCa","subject_id":"{{ print .Subject }}","scope":["widgets"]}'
+      payload: '{"namespace":"example","object":"Widget/{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}","relation":"getWidgetCa","subject_id":"{{ print .Subject }}","scope":[{"type":"widgets","resourceName":"Widget"}]}'
   mutators:
     - handler: header
 ```
@@ -257,13 +262,14 @@ Matches must be mutually disjoint or Oathkeeper answers 500, so a templated
 segment competing with literal siblings at the same position carries a
 computed negative lookahead listing them.
 
-The payload has two forms, plus `scope` which carries the declared types and
-appears on both:
+The payload has two forms, plus `scope` which appears on both and carries
+each declared type under both spellings: the resource name is what the grants
+hold, the type is what the caller's service reads back in `X-Scope`.
 
 ```
-one type bound:   {"namespace":…,"object":"widgets/{{ capture }}","relation":…,"subject_id":…,"scope":["widgets"]}
-two types bound:  {"allOf":[ {first check}, {second check} ],"scope":["reports","widgets"]}
-none bound:       {"namespace":…,"object":"__self__","relation":…,"subject_id":…,"scope":["widgets"]}
+one type bound:   {"namespace":…,"object":"Widget/{{ capture }}","relation":…,"subject_id":…,"scope":[{"type":"widgets","resourceName":"Widget"}]}
+two types bound:  {"allOf":[ {first check}, {second check} ],"scope":[{"type":"reports",…},{"type":"widgets",…}]}
+none bound:       {"namespace":…,"object":"__self__","relation":…,"subject_id":…,"scope":[{"type":"widgets","resourceName":"Widget"}]}
 no types at all:  {"namespace":…,"object":"__self__","relation":…,"subject_id":…,"scope":[]}
 ```
 
@@ -305,8 +311,9 @@ It evaluates in two steps.
 subject holds the relation on the object, or on that object's `__all__` form.
 The singleton has no `__all__` form. Any check failing is a denial.
 
-**The scope.** For each type in `scope`, the visible set is computed from the
-roles that carried the checks, and returned in `X-Scope`. A declared type
+**The scope.** For each pair in `scope`, the visible set is enumerated under
+the pair's resource name from the roles that carried the checks, and returned
+in `X-Scope` under the pair's type — the caller's own spelling. A declared type
 resolving to an empty set is a denial: on a listing an empty filter reads as
 "no restriction" in a query layer and returns the whole table, and on any
 other operation an empty set means the caller has no standing in that type at
@@ -344,12 +351,12 @@ GET /relation-tuples?namespace=<service>&subject_set.namespace=Role
                     &subject_set.object=<role>&subject_set.relation=members
     -> every grant that role holds, kept together
 
-keep the roles holding the checked object, or its "<type>/__all__" form, under
-the relation the request asked for; the others granted something else and say
-nothing about this request
+keep the roles holding the checked object, or its "<ResourceName>/__all__"
+form, under the relation the request asked for; the others granted something
+else and say nothing about this request
 
-within those, keep objects under "<type>/"; "<type>/__all__" among them
-collapses that type's answer to "*"
+within those, keep objects under "<ResourceName>/"; "<ResourceName>/__all__"
+among them collapses that resource name's answer to "*"
 ```
 
 A further query for tuples written directly to the subject finds only grants
@@ -402,44 +409,43 @@ roles:
   hub-operator:
     grants:
       - permission: example.getWidgets
-        bind: { widgets: all }
+        resources: { Widget: all }
       - permission: example.getWidgetCa
-        bind: { widgets: all }
+        resources: { Widget: all }
   west-auditor:
     grants:
       - permission: example.getWidgetCa
-        bind: { widgets: [w7, w11] }
+        resources: { Widget: [w7, w11] }
   widget-operator:
-    params: [widgetId]
     grants:
       - permission: example.getWidgetCa
-        bind: { widgets: $widgetId }
       - permission: example.issueCert
-        bind: { widgets: $widgetId }
 
 assignments:
-  - { subject: <identity id>, role: widget-operator, args: { widgetId: w7 } }
+  - { subject: <identity id>, role: widget-operator, resources: { Widget: w7 } }
 ```
 
-A grant names a permission from the catalog and binds its types. Every type
-the permission's path **binds an id for** must be bound, because that is what
-the check addresses. Every other type the permission **declares** may be
-bound, and those are the resources the operation may touch once it runs. A
-binding is `all`, an explicit id list, or a role parameter left open until
-assignment; binding a type the permission does not declare is rejected, since
-it would write a tuple nothing ever reads.
+A grant names a permission from the catalog and, per resource name the
+permission is scoped by, either names the resources — `all`, one id, a list —
+or leaves the resource name open. Every open one is the assignment's to name,
+so the role's signature is derived, never declared: `widget-operator` above
+takes a `Widget` because its grants name none, and it instantiates once per
+named resource. Naming a resource name the permission is not scoped by is
+rejected, since it would write a tuple nothing ever reads.
 
-The catalog states both sets, so a role author reads rather than guesses:
-`scopedBy` is what the operation declares, and `bound` is the subset the path
-carries an id for.
+Which resource names scope a permission is the catalog's to say, stamped at
+composition from the deployment's vocabulary, so a role author reads rather
+than guesses: `scopedBy` is what the operation declares in its own spelling,
+`bound` is the subset the path carries an id for, and `resourceNames` maps
+each spelling to the name the grants hold.
 
 ```
-getWidgetCa  resources [widgets]              bound [widgets]  widgets/<id>#getWidgetCa
-getWidgets   resources [widgets]              bound []         __self__#getWidgets
-                                                               widgets/<id>#getWidgets
-getReport    resources [reports,participants] bound [reports]  reports/<id>#getReport
-                                                               participants/<id>#getReport
-getRegions   resources []                     bound []         __self__#getRegions
+getWidgetCa  scopedBy [widgets: Widget]                    bound [widgets]  Widget/<id>#getWidgetCa
+getWidgets   scopedBy [widgets: Widget]                    bound []         __self__#getWidgets
+                                                                            Widget/<id>#getWidgets
+getReport    scopedBy [reports: Report,                    bound [reports]  Report/<id>#getReport
+              participants: Participant]                                    Participant/<id>#getReport
+getRegions   scopedBy []                                   bound []         __self__#getRegions
 ```
 
 The checked object comes first and the rest follow, all under the same
@@ -461,8 +467,8 @@ participant", without the two combining into all four pairs. A role is one
 statement about one operation over one set of resources, and merging two of
 them would invent access neither granted.
 
-A role with open parameters instantiates per argument tuple: the grants
-materialize against `Role:widget-operator@widgetId=w7`, and the assignment
+A role with open resource names instantiates per resource tuple: the grants
+materialize against `Role:widget-operator@Widget=w7`, and the assignment
 adds the subject to that instance's `members`. Assignment and revocation stay
 one membership edge, which is the property that makes revocation immediate and
 auditable. Revocation asks nothing of the resource, so a grant on a widget
@@ -473,16 +479,17 @@ records it:
 
 ```
 GET  /catalog                        every service's permissions, with their summaries
-GET  /roles                          the roles, and which arguments each one asks for
-GET  /resources?type=widgets         the widgets that exist, to choose among
+GET  /roles                          the roles, and which resource names each leaves open
+GET  /resources?resourceName=Widget  the widgets that exist, to choose among
 GET  /subjects/<id>/assignments      what someone holds, one entry per instance
-POST /subjects/<id>/assignments      { role, args }
-DELETE /subjects/<id>/assignments    { role, args }
+POST /subjects/<id>/assignments      { role, resources }
+DELETE /subjects/<id>/assignments    { role, resources }
 GET  /state                          what this deployment applied, and when
 ```
 
-An assignment naming a role that takes different arguments, or an argument
-naming a resource that does not exist, is refused before anything is written.
+An assignment whose resources are not keyed by exactly the resource names the
+role leaves open, or that names a resource that does not exist, is refused
+before anything is written.
 
 `/state` answers the catalog it validated against, the roles and exclusions it
 read, and the record of applying them: how many tuples, which role instances
@@ -498,56 +505,42 @@ nothing but the IAM holds Keto write access.
 
 ### Provisioning a resource
 
-A service that creates a resource does not create the roles over it. It tells
-the IAM the resource now exists and who its principals are, and the IAM
-instantiates whichever parameterized roles the deployment defined over that
-type.
+A service that creates a resource names only it, keyed by the resource name
+the deployment configured into it — a deployment-invented word the service
+ferries without interpreting, like any other value — and the IAM records that
+the resource exists, refusing a name the vocabulary does not declare:
 
 ```
 POST /provision
-{ "args": { "dfspId": "dfsp7" },
-  "principals": { "admin": "<identity id>", "machine": "dfsp7" } }
-```
+{ "resourceName": "Participant", "id": "dfsp7" }
 
-A parameterized role declares which principal it is granted to when its
-resource appears, which is deployment policy and so lives beside the grants:
-
-```yaml
-dfsp-operator:
-  params: [dfspId]
-  onProvision: admin       # the human who administers the resource
-  grants: [...]
-dfsp-client:
-  params: [dfspId]
-  onProvision: machine     # the resource's own machine client
-  grants: [...]
-```
-
-The IAM instantiates every role whose parameters the arguments cover and whose
-`onProvision` principal was supplied, then adds that principal to the
-instance's members. A role without `onProvision` is never instantiated this
-way; it waits for an explicit assignment.
-
-A resource with no principals at all is ordinary. A report exists to be
-granted rather than to be owned, and a resource type no parameterized role
-covers still has to be offerable the day it appears, so provisioning always
-records that the resource exists:
-
-```
-Resource:reports/dfspSettlement#exists@__registry__
+Resource:Participant/dfsp7#exists@__registry__
 ```
 
 That row grants nothing — its own namespace, a relation no rule checks, a
-subject that is not a principal — and it is what lets the role UI offer a
-report by name before anybody holds it. Deprovisioning removes it.
+subject that is not a principal — and it is what lets the role UI offer the
+resource by name before anybody holds it.
 
-Deprovisioning removes those instances and answers with the subjects left
+Who holds which role over the new resource arrives as ordinary assignments,
+made explicitly by the caller, with role names from the same configuration:
+
+```
+POST /subjects/<identity id>/assignments
+{ "role": "dfsp-operator", "resources": { "Participant": "dfsp7" } }
+```
+
+Nothing is implied: no role is instantiated by provisioning itself, and a
+deployment that wants different roles over onboarded resources edits its
+values, not a service.
+
+Deprovisioning retires every role instance whose resources include the one
+that is gone, removes the registry row, and answers with the subjects left
 holding no role at all, so the caller can retire an identity that operates
 nothing else without ever reading the graph itself.
 
 This is the only reason a service ever talks to the IAM's write side, and it
-still writes no tuple: it names a resource and its principals, and the IAM
-decides what that means.
+still writes no tuple: it names a resource, and the IAM decides what that
+means.
 
 Evaluation is union over grants. There is no deny rule and no subtraction, so
 access flowing through a role is revoked by editing the role or the
@@ -590,7 +583,7 @@ a resource binding, an authenticator on the operation, or a service business
 rule. If an irreducible case appears, the decision endpoint is the one place a
 condition could be evaluated, and it gets priced against that concrete case.
 
-## Resource names: one noun, many services
+## Resource names: one name, many spellings
 
 Services keep their own vocabularies. The same real-world thing is `widgets`
 in one document, `components` in another, `parts` in a third, and the ids are
@@ -607,11 +600,12 @@ resourceNames:
       - { service: finance,   type: parts }
 ```
 
-A grant binds a type per service, so a role covering all three writes
-`example:widgets/c7`, `reporting:components/c7` and `finance:parts/c7`. What
-the name adds is that an operator picks "Component: c7" once and the role UI
-knows those three bindings are the same choice, rather than offering three
-unrelated pickers over the same ids.
+The resource name is the platform's key for the resource. A grant covering
+all three services writes `example:Component/c7`, `reporting:Component/c7`
+and `finance:Component/c7` — one object spelling everywhere tuples are stored
+and checked — and an operator picks "Component: c7" once. The services'
+spellings exist only at their boundaries: in the paths the gateway matches
+and in the `X-Scope` each service reads back.
 
 It is deployment data because no service can hold it. For `example` to say
 its `widgets` are `reporting`'s `components`, it would have to know
@@ -619,16 +613,17 @@ its `widgets` are `reporting`'s `components`, it would have to know
 its peers. The deployment is the only layer that sees both.
 
 The vocabulary is total, and composition checks it in both directions: every
-type every service is about must appear here under some noun — a grantable
-kind the deployment never named is a rollout that stops — and every member
-here must be a type its service really is about, so a typo stops the rollout
-instead of producing a picker whose choices bind nothing. A service arriving
-while the deployment runs is held to the same rule: a new type it declares is
-refused until the deployment names it.
+type every service is about must appear here under some resource name — a
+grantable kind the deployment never named is a rollout that stops — and every
+member here must be a type its service really is about, so a typo stops the
+rollout instead of producing a picker whose choices bind nothing. A service
+arriving while the deployment runs is held to the same rule: a new type it
+declares is refused until the deployment names it.
 
 The values an operator picks from are the registry the IAM already keeps:
-provisioning records `Resource:<type>/<id>#exists` when a service creates a
-resource, and `GET /resources?type=` answers from it. A deployment whose
+provisioning records `Resource:<ResourceName>/<id>#exists` when a service
+creates a resource, and `GET /resources?resourceName=` answers from it. A
+deployment whose
 authoritative list lives somewhere the platform is never told about — a
 service that predates it, or one nobody can change — names it, and says what
 comes back:
@@ -647,23 +642,23 @@ of `{ name }` needs only `id: /name`. Nothing is inferred: a source whose
 pointers do not resolve is a rollout that stops, because a syncer guessing at
 a response shape would populate the picker with whatever it happened to find.
 
-Each id the source lists is recorded under every member type of its noun,
-which is the noun's own assertion: one real thing, one id, several spellings.
-Sourced rows carry their own registry marker, `__source__` beside
-provisioning's `__registry__`, so reconciling them can never remove a row a
-service provisioned, and every reader of the registry accepts either.
+Each id the source lists is recorded once, under the resource name itself —
+one real thing, one row, however many spellings its members give it. Sourced
+rows carry their own registry marker, `__source__` beside provisioning's
+`__registry__`, so reconciling them can never remove a row a service
+provisioned, and every reader of the registry accepts either.
 
-Only the ids ever enter the platform: they are what grants bind, so they are
+Only the ids ever enter the platform: they are what grants hold, so they are
 what the registry records. Everything else about a row is the owning service's
 data, and a consumer that renders rows — a picker showing names beside ids —
 reads them from that service through the gateway, under its own authorization.
 
-The vocabulary itself is served whole at `GET /resource-names`: every noun
-with its label, description, members and source, exactly as the deployment
-declared it, for any consumer to take the fields it needs. A noun's `label`
-and `description` are a string or a language-keyed map; the nouns are
-deployment-invented, so the deployment is the only place their translations
-can come from.
+The vocabulary itself is served whole at `GET /resource-names`: every
+resource name with its label, description, members and source, exactly as the
+deployment declared it, for any consumer to take the fields it needs. A
+resource name's `label` and `description` are a string or a language-keyed
+map; the names are deployment-invented, so the deployment is the only place
+their translations can come from.
 
 Provisioning calls it on an interval and writes the same registry rows a
 service would have provisioned, so the picker still reads one place and a

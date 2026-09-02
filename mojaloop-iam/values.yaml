@@ -43,19 +43,21 @@ global:
   # like any other value: the provisioning service applies it when it starts,
   # and enforces the exclusions on every grant made after.
   #
+  # A grant either names the resources of a scoped resource name (all, an id,
+  # a list) or leaves the name open, and every open one is the assignment's to
+  # name — which is what makes dfsp-operator below one role per Participant.
+  #
   #   roles:
   #     hub-operator:
   #       grants:
   #         - permission: reports.getReport
-  #           bind: { reports: all, participants: all }
+  #           resources: { Report: all, Participant: all }
   #     dfsp-operator:
-  #       params: [dfspId]
-  #       onProvision: admin
   #       grants:
   #         - permission: mcm.getDFSPca
-  #           bind: { dfsps: $dfspId }
   #   assignments:
   #     - { subject: <identity id>, role: hub-operator }
+  #     - { subject: <identity id>, role: dfsp-operator, resources: { Participant: dfsp1 } }
   #   exclusions:
   #     - name: audit-exclusion
   #       a: [settlement.auditSettlement]

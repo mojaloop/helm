@@ -199,7 +199,7 @@ credential presence). The list comes from the operation's OpenAPI `security`.
   authorizer:
     handler: remote_json
     config:
-      payload: '{"namespace":"example","object":"widgets/{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}","relation":"getWidgetCa","subject_id":"{{ print .Subject }}","scope":["widgets"]}'
+      payload: '{"namespace":"example","object":"Widget/{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}","relation":"getWidgetCa","subject_id":"{{ print .Subject }}","scope":[{"type":"widgets","resourceName":"Widget"}]}'
   mutators:
     - handler: header
 ```
@@ -314,8 +314,8 @@ provisioning endpoint is not. It opens a rollout by applying the deployment's
 role documents against the composed catalog and creating the first
 administrator, and refuses to serve if a role names a permission no service
 advertises. From then on a service calls it when it creates a resource, naming
-the resource and its principals, and those same role documents decide what that
-implies. It runs single-replica, because applying roles clears and rewrites the
+it under the resource name the deployment configured into it, and assigns its
+configured roles over it explicitly. It runs single-replica, because applying roles clears and rewrites the
 grants of each role and two copies would interleave. The aggregator is a job
 that runs once per rollout.
 
