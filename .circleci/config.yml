@@ -124,6 +124,7 @@ jobs:
       - run:
           name: Install and run linter
           command: |
+            if [ -z "$(ls -A test 2>/dev/null)" ]; then echo "Nothing rendered, nothing to lint"; exit 0; fi
             nvm install v20.18.0 && nvm alias default v20.18.0
             node --version
             npm ci --legacy-peer-deps
@@ -145,6 +146,7 @@ jobs:
       - run:
           name: Run kubectl-validate
           command: |
+            if [ -z "$(ls -A test 2>/dev/null)" ]; then echo "Nothing rendered, nothing to validate"; exit 0; fi
             ./kubectl-validate test --version 1.32 |& grep -v $'OK\033\[0m$' | sed '/^$/N;/^\n$/D'
       - store_artifacts:
           path: /home/circleci/project/test

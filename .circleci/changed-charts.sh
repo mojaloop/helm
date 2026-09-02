@@ -16,8 +16,13 @@ BASE=$(git merge-base HEAD origin/main 2>/dev/null) || {
     exit 1
 }
 
-# Chart directories in the tree, vendored dependencies excluded
-mapfile -t dirs < <(find . -maxdepth 3 -name Chart.yaml -not -path '*/charts/*' -printf '%h\n' | sed 's|^\./||' | sort)
+# Chart directories in the tree, vendored dependencies excluded. BusyBox
+# find, so no -printf and ! instead of -not.
+mapfile -t dirs < <(find . -maxdepth 3 -name Chart.yaml ! -path '*/charts/*' | sed 's|/Chart.yaml$||; s|^\./||' | sort)
+[ "${#dirs[@]}" -gt 0 ] || {
+    echo "changed-charts: found no chart directories" >&2
+    exit 1
+}
 
 declare -A changed=()
 while IFS= read -r file; do
