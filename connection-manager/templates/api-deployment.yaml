@@ -132,12 +132,6 @@ spec:
             - name: KEYCLOAK_AUTO_CREATE_ACCOUNTS
               value: {{ .Values.api.keycloak.autoCreateAccounts | quote }}
             {{- end }}
-            {{- if .Values.api.keto.enabled }}
-            - name: ENABLE_KETO
-              value: "true"
-            - name: KETO_WRITE_URL
-              value: {{ .Values.api.keto.writeUrl | quote }}
-            {{- end }}
             {{- if .Values.iam.enabled }}
             - name: IAM_ENABLED
               value: "true"
@@ -159,10 +153,18 @@ spec:
               value: {{ .Values.iam.kratos.identitySchemaId | quote }}
             - name: KRATOS_INVITE_RETURN_TO_URL
               value: {{ .Values.iam.kratos.inviteReturnToUrl | default .Values.api.clientUrl | quote }}
-            - name: KETO_READ_URL
-              value: {{ .Values.global.iam.keto.readUrl | quote }}
-            - name: KETO_WRITE_URL
-              value: {{ .Values.global.iam.keto.writeUrl | quote }}
+            {{- with .Values.iam.dfspResourceName }}
+            - name: IAM_DFSP_RESOURCE_NAME
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.iam.dfspAdminRole }}
+            - name: IAM_DFSP_ADMIN_ROLE
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.iam.dfspClientRole }}
+            - name: IAM_DFSP_CLIENT_ROLE
+              value: {{ . | quote }}
+            {{- end }}
             {{- end }}
             {{- if .Values.api.openid.enabled }}
             - name: OPENID_CLIENT_ID
