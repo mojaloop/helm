@@ -57,6 +57,7 @@
    helm repo add mojaloop-charts https://mojaloop.github.io/charts/repo
    helm repo add redpanda https://charts.redpanda.com
    helm repo add ory https://k8s.ory.sh/helm/charts
+   helm repo add jouve https://jouve.github.io/charts/
    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
    ```
 
@@ -162,7 +163,7 @@ Setting `iam.enabled: true` on the top-level Mojaloop chart activates the full I
 
 - `oathkeeper`, `keto`, `kratos` (upstream Ory charts)
 - `hydra` (Ory Hydra OAuth2/OIDC server)
-- `ml-iam-services` (Mojaloop Ory IAM services: keto-batch-auth, kratos-role-webhook)
+- `ml-iam-services` (Mojaloop Ory IAM services: kratos-role-webhook)
 
 It also signals that per-app IAM should be enabled for apps that support it (e.g. `connection-manager`).
 
