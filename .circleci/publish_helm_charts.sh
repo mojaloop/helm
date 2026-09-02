@@ -17,8 +17,15 @@ source $BASH_ENV
 echo "Package helm charts..." | tee git.log
 bash package.sh
 
+if ! ls repo/*.tgz > /dev/null 2>&1; then
+  echo "No charts packaged, nothing to publish" | tee git.log
+  exit 0
+fi
+
 echo "Cloning fresh directory checked out with release branch" | tee git.log
-git clone -b $GITHUB_TARGET_BRANCH --single-branch $CIRCLE_REPOSITORY_URL $WORKING_RELEASE_DIRECTORY &> git.log
+# The release branch carries every chart version ever published; the tip is
+# all a publish needs
+git clone -b $GITHUB_TARGET_BRANCH --single-branch --depth 1 $CIRCLE_REPOSITORY_URL $WORKING_RELEASE_DIRECTORY &> git.log
 
 echo "Moving packaged charts to release directory and repo folder" | tee git.log
 mv repo/*.* $WORKING_RELEASE_DIRECTORY/repo

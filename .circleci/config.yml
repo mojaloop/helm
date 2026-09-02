@@ -87,10 +87,12 @@ jobs:
       - run:
           name: Update Helm Charts
           command: |
+            if [ -z "${CIRCLE_TAG:-}" ] && echo "${CIRCLE_BRANCH:-}" | grep -Eq '^(major|minor|patch)/'; then export CHANGED_CHARTS_ONLY=true; fi
             bash update-charts-dep.sh
       - run:
           name: Linting Helm Charts
           command: |
+            if [ -z "${CIRCLE_TAG:-}" ] && echo "${CIRCLE_BRANCH:-}" | grep -Eq '^(major|minor|patch)/'; then export CHANGED_CHARTS_ONLY=true; fi
             bash lint-charts.sh
       - run:
           name: Rendering Helm Charts
@@ -98,6 +100,7 @@ jobs:
             curl -L --output /usr/bin/yq https://github.com/mikefarah/yq/releases/download/v4.45.1/yq_linux_amd64
             chmod +x /usr/bin/yq
             yq --version
+            if [ -z "${CIRCLE_TAG:-}" ] && echo "${CIRCLE_BRANCH:-}" | grep -Eq '^(major|minor|patch)/'; then export CHANGED_CHARTS_ONLY=true; fi
             bash lint-render.sh
       - persist_to_workspace:
           root: .
@@ -271,15 +274,23 @@ jobs:
             git config --global user.name "$GIT_CI_EMAIL"
       - run:
           name: Publish Helm Charts
-          command: .circleci/publish_helm_charts.sh
+          command: |
+            if [ -z "${CIRCLE_TAG:-}" ] && echo "${CIRCLE_BRANCH:-}" | grep -Eq '^(major|minor|patch)/'; then export CHANGED_CHARTS_ONLY=true; fi
+            .circleci/publish_helm_charts.sh
       - run:
           name: Trigger downstream workflows
           # DOWNSTREAM_IMAGE_ variables contain downstream repository:token pairs
           command: |
             DOWNSTREAM=$(compgen -A variable | grep "^DOWNSTREAM_IMAGE_")
             if [ -n "$DOWNSTREAM" ]; then
-                echo "wait for GitHub Pages to publish"
-                sleep 180
+                MARKER="${CIRCLE_TAG:+${CIRCLE_TAG#v}}"
+                MARKER="${MARKER:-.${CIRCLE_BUILD_NUM}}"
+                INDEX="${HELM_MOJALOOP_REPO_URI:-https://mojaloop.github.io/helm/repo}/index.yaml"
+                echo "waiting for $MARKER to reach $INDEX"
+                for _ in $(seq 1 36); do
+                    if curl -s "$INDEX" | grep -q -- "$MARKER"; then break; fi
+                    sleep 5
+                done
             fi
             for var in $DOWNSTREAM; do
                 REPO_NAME=$(echo "${!var}" | cut -d: -f1)

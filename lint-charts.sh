@@ -61,6 +61,17 @@ else
     )
 fi
 
+# A preview branch is priced by what it changes, not by the tree
+if [ "${CHANGED_CHARTS_ONLY:-}" = "true" ] && scoped=$(bash .circleci/changed-charts.sh); then
+    declare -a kept=()
+    for chart in "${charts[@]}"; do
+        c=$(echo "$chart" | sed 's:/*$::;s/ *$//')
+        if grep -Fxq "$c" <<< "$scoped"; then kept+=("$chart"); fi
+    done
+    echo "Charts scoped to this branch's changes: ${kept[*]:-none}"
+    charts=("${kept[@]}")
+fi
+
 echo "\n"
 
 for chart in "${charts[@]}"
