@@ -100,6 +100,7 @@ else
         ml-operator
         inter-scheme-proxy-adapter
         ml-iam-services
+        mojaloop-iam
     )
 fi
 
