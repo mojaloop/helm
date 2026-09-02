@@ -27,16 +27,6 @@ defaults_Dependencies: &defaults_Dependencies
     apk add --no-cache --update -t build-dependencies make gcc g++ libtool autoconf automake
     apk --no-cache add --update gnupg
 
-defaults_license_scanner: &defaults_license_scanner
-  name: Install and set up license-scanner
-  command: |
-    git clone https://github.com/mojaloop/license-scanner /tmp/license-scanner
-    cd /tmp/license-scanner && make build default-files set-up
-    echo 'export mode=docker' >> $BASH_ENV
-    dockerImages=`cd /home/circleci/project && ./.circleci/format-docker-images.sh`
-    echo "dockerImages are $dockerImages"
-    echo "export dockerImages=\"${dockerImages}\"" >> $BASH_ENV
-
 defaults_Environment: &defaults_environment
   name: Set default environment
   command: |
@@ -162,8 +152,6 @@ jobs:
     steps:
       - checkout
       - run:
-          <<: *defaults_license_scanner
-      - run:
           name: Set up nvm
           command: |
             # Note: this needs to be separate from the nvm install step
@@ -172,30 +160,16 @@ jobs:
       - run:
           name: Set up correct node version
           command: |
-            nvm install v10.15.3 && nvm alias default v10.15.3
+            nvm install v20 && nvm alias default v20
             node --version
       - run:
-          name: Run the license-scanner
+          name: Install Syft
           command: |
-            source $BASH_ENV
-            env | grep docker
-            cd /tmp/license-scanner && make run
+            curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sudo sh -s -- -b /usr/local/bin
+            syft version
       - run:
-          name: Build and save license-scanner summary
-          command: |
-            node --version
-            cd /tmp/license-scanner && make postprocess
-      - run:
-          name: If this is a release, upload the license-scanner file to the github release
-          command: |
-            if [ "${CIRCLE_TAG}" = "" ] || [[ "$CIRCLE_TAG" == *-snapshot* ]]; then
-              exit 0
-            fi
-            mv /tmp/license-scanner/results/license-summary.xlsx ./license-summary-${CIRCLE_TAG}.xlsx
-            .circleci/upload-github-release-asset.sh github_api_token=$GITHUB_TOKEN owner=mojaloop repo=helm tag=${CIRCLE_TAG} filename=license-summary-${CIRCLE_TAG}.xlsx
-      - store_artifacts:
-          path: /tmp/license-scanner/results
-          destination: licenses
+          name: Run the license gate
+          command: npx --yes @mojaloop/license-scanner-tool .
 
   sbom-aggregate:
     executor: default-docker-helm
