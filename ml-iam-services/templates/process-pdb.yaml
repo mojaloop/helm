@@ -1,0 +1,28 @@
+{{- /*
+  A disruption budget for a process that declares one. The gateway answers
+  nothing while the decision endpoint has no ready replica, so a drain that
+  would take the last one waits instead.
+*/}}
+{{- range $key, $process := dict "decision" .Values.decision "provisioning" .Values.provisioning }}
+{{- if and $process.enabled (($process.pdb).enabled) }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "ml-iam-services.fullname" $ }}-{{ $key }}
+  labels:
+    {{- include "ml-iam-services.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $key }}
+spec:
+  {{- with $process.pdb.minAvailable }}
+  minAvailable: {{ . }}
+  {{- end }}
+  {{- with $process.pdb.maxUnavailable }}
+  maxUnavailable: {{ . }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ml-iam-services.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $key }}
+{{- end }}
+{{- end }}

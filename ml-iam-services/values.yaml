@@ -11,6 +11,12 @@ fullnameOverride: ""
 decision:
   enabled: true
   replicaCount: 2
+  # The gateway refuses every request while no replica answers, so a voluntary
+  # disruption may take one only while another remains. Against a single
+  # replica a budget refuses drains outright, so it belongs where more run.
+  pdb:
+    enabled: false
+    minAvailable: 1
   args: ["decide"]
 
   service:
