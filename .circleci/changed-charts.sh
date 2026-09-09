@@ -2,10 +2,13 @@
 
 #
 # Prints the chart directories this branch changes relative to origin/main,
-# one per line, closed over the local file:// dependency graph: a change to a
-# subchart lists every chart that vendors it, so an umbrella republishes when
-# anything inside it moves. Exits non-zero when no merge base can be resolved,
-# so callers keep their full chart list.
+# one per line, closed over the local file:// dependency graph in both
+# directions. Upwards, a change to a subchart lists every chart that vendors it,
+# so an umbrella republishes when anything inside it moves. Downwards, a listed
+# chart lists everything it vendors, because packaging reads each dependency's
+# own charts/ directory from disk: a dependency left unbuilt is vendored hollow
+# and its workloads vanish from the published umbrella without an error. Exits
+# non-zero when no merge base can be resolved, so callers keep their full list.
 #
 
 set -eo pipefail
@@ -38,14 +41,15 @@ grew=1
 while [ "$grew" = 1 ]; do
     grew=0
     for dir in "${dirs[@]}"; do
-        [ -n "${changed[$dir]:-}" ] && continue
         while IFS= read -r dep; do
             target=$(cd "$dir" 2>/dev/null && cd "${dep#file://}" 2>/dev/null && pwd) || continue
             rel=${target#"$PWD"/}
-            if [ -n "${changed[$rel]:-}" ]; then
+            if [ -n "${changed[$dir]:-}" ] && [ -z "${changed[$rel]:-}" ]; then
+                changed["$rel"]=1
+                grew=1
+            elif [ -n "${changed[$rel]:-}" ] && [ -z "${changed[$dir]:-}" ]; then
                 changed["$dir"]=1
                 grew=1
-                break
             fi
         done < <(grep -o 'file://[^"'\'' ]*' "$dir/Chart.yaml" 2>/dev/null || true)
     done
