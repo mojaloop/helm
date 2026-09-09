@@ -23,6 +23,11 @@ spec:
           requestHeaderModifier:
             remove:
               - X-Scope
+        {{- with .Values.gateway.cors }}
+        - type: CORS
+          cors:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
       {{- if .Values.gateway.oathkeeper.enabled }}
         - type: ExternalAuth
           externalAuth:
