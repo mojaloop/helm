@@ -1,9 +1,20 @@
+{{- /*
+  The kratos chart appends deployment.extraVolumes to its migration job, which
+  runs as a pre-install hook, so this mount is on a pod that starts before the
+  release's own resources exist. A lighter hook weight than that job puts the
+  templates in place first; the deployment mounts them for the life of the
+  release, so nothing deletes them afterwards.
+*/}}
 {{- if .Values.kratos.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: kratos-courier-recovery-valid
   namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation
 data:
   {{- range $path, $_ := .Files.Glob "files/courier-templates/recovery/valid/*" }}
   {{ base $path }}: |-
