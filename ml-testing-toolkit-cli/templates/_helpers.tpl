@@ -128,6 +128,11 @@ containers:
       mountPath: /opt/app/extra-ca-certs.crt
       subPath: ca.crt
     {{- end }}
+    {{- if .Values.config.useLocalTestCases }}
+    - name: test-cases
+      mountPath: {{ .Values.config.localTestCasesPath }}
+      readOnly: true
+    {{- end }}
 {{- end }}
 
 {{- define "ml-testing-toolkit-cli.template.volumes" }}
@@ -155,4 +160,10 @@ volumes:
 {{- end }}
 - name: tmp
   emptyDir: {}
+{{- if .Values.config.useLocalTestCases }}
+- name: test-cases
+  hostPath:
+    path: {{ .Values.config.localTestCasesHostPath }}
+    type: Directory
+{{- end }}
 {{- end }}

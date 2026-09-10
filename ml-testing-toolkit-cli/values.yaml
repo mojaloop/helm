@@ -21,15 +21,19 @@ restartPolicy: Never
 
 ## Bash script for TTK CLI
 script: |
+    {{- if .Values.config.useLocalTestCases }}
+    echo "Using local test cases from {{ .Values.config.localTestCasesPath }}";
+    {{- else }}
     until nslookup github.com; do sleep 5;done;
     echo "Downloading the test collection...";
     wget {{ .Values.config.testCasesZipUrl }} -O /tmp/downloaded-test-collections.zip;
     mkdir /tmp/test_cases;
     unzip -d /tmp/test_cases -o /tmp/downloaded-test-collections.zip;
+    {{- end }}
     npm run cli -- \
       -c cli-default-config.json \
       -e cli-testcase-environment.json \
-      -i /tmp/test_cases/{{ .Values.config.testCasesPathInZip }} \
+      -i {{ if .Values.config.useLocalTestCases }}{{ .Values.config.localTestCasesPath }}{{ else }}/tmp/test_cases/{{ .Values.config.testCasesPathInZip }}{{ end }} \
       -u {{ .Values.config.ttkBackendURL | replace "$release_name" .Release.Name }} \
       --report-format html \
       {{- if .Values.config.awsS3BucketName }}
@@ -124,6 +128,12 @@ config:
   ## Choose one of the following test-case paths for Provisioning or Golden Path test-cases:
   # testCasesPathInZip: testing-toolkit-test-cases-12.0.0/collections/hub/provisioning
   testCasesPathInZip: testing-toolkit-test-cases-<TAG_VERSION>/collections/hub/golden_path
+  ## Use local test cases instead of downloading from GitHub
+  ## When enabled, test cases are loaded from a hostPath volume mounted at localTestCasesPath
+  useLocalTestCases: false
+  localTestCasesPath: /opt/app/test_cases
+  ## Host path to test cases directory (required when useLocalTestCases is true)
+  localTestCasesHostPath: ""
   ## Optional config for uploading reports to S3 Buckets. If enabled: WS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION under the 'configCreds' is required.
   # awsS3BucketName: 's3_bucket_name'
   # awsS3FilePath: ttk-tests/reports
