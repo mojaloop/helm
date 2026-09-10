@@ -1,0 +1,115 @@
+# Deployment overrides for the mojaloop-iam chart:
+#   helm install ml-iam ./mojaloop-iam -n mojaloop -f mojaloop/values-deploy-iam.example.yaml
+#
+# All optional components are enabled on top of the chart defaults
+# (bundled PostgreSQL is already on): Kratos self-service UI, the
+# iam-bootstrap Job (auto-generates the hub-admin password), and Mailpit
+# as the dev SMTP sink (Kratos courier is rewired to ml-iam-mailpit-smtp).
+# Replace the example.com FQDNs with your deployment's actual values.
+
+oathkeeper:
+  oathkeeper:
+    config:
+      errors:
+        handlers:
+          redirect:
+            enabled: true
+            config:
+              to: https://auth.example.com/self-service/login/browser
+
+hydra:
+  hydra:
+    config:
+      urls:
+        self:
+          issuer: https://hydra.example.com
+        consent: https://auth.example.com/consent
+        login: https://auth.example.com/login
+        logout: https://auth.example.com/logout
+
+kratos:
+  kratos:
+    config:
+      serve:
+        public:
+          base_url: https://kratos.example.com/
+          cors:
+            allowed_origins:
+              - https://*.example.com
+      cookies:
+        domain: example.com
+      session:
+        cookie:
+          domain: example.com
+      selfservice:
+        default_browser_return_url: https://example.com/
+        allowed_return_urls:
+          - https://example.com/
+          - https://auth.example.com/
+        flows:
+          login:
+            ui_url: https://auth.example.com/login
+          error:
+            ui_url: https://auth.example.com/error
+          recovery:
+            ui_url: https://auth.example.com/recovery
+          settings:
+            ui_url: https://auth.example.com/settings
+          verification:
+            ui_url: https://auth.example.com/verification
+      courier:
+        smtp:
+          connection_uri: smtp://ml-iam-mailpit-smtp/?disable_starttls=true
+          from_address: noreply@example.com
+          from_name: Mojaloop Hub
+
+# External database — the chart never installs one. Point at the platform's
+# managed instance (operator / CNPG / cloud DB) holding the hydra, kratos and
+# keto databases. Under gitops (ArgoCD) leave host empty and supply
+# hydra-secret/kratos-secret/keto-secret externally instead.
+database:
+  host: iam-db.example.com
+  hydra:
+    password: change-me
+  kratos:
+    password: change-me
+  keto:
+    password: change-me
+
+# Authorization bundles — the only place services are declared. MCM's internal
+# host serves the human portal (Kratos cookie); the external host serves the
+# machine clients (Hydra JWT).
+global:
+  authz:
+    - name: mcm
+      image: mojaloop/connection-manager-api:v3.9.0-snapshot.1
+      fqdn:
+        SERVICE_FQDN_INTERNAL: mcm.int.example.com
+        SERVICE_FQDN_EXTERNAL: mcm.example.com
+
+iamBootstrap:
+  enabled: true
+  adminEmail: admin@example.com
+  # Leave empty to auto-generate; reference a Secret in production.
+  adminPasswordSecret: ""
+  adminPasswordSecretKey: password
+
+kratos-ui:
+  enabled: true
+
+mailpit:
+  enabled: true
+
+gateway:
+  enabled: true
+  parentRefs:
+    - name: mojaloop
+      namespace: infra
+      sectionName: https
+  hosts:
+    hydra: hydra.example.com
+    kratos: kratos.example.com
+    auth: auth.example.com
+    mailpit: mailpit.example.com
+  oathkeeperConsumerNamespaces:
+    - mojaloop
