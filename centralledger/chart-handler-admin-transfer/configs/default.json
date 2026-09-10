@@ -75,7 +75,7 @@
         },
         "SETTINGS": {
             "RULES": {
-                "SCRIPTS_FOLDER": "./scripts/transferSettlementTemp",
+                "SCRIPTS_FOLDER": "/tmp",
                 "SCRIPT_TIMEOUT": 100,
                 "CONSUMER_COMMIT": true,
                 "FROM_SWITCH": true
@@ -123,57 +123,57 @@
     "PROXY_CACHE": {{ .Values.config.proxy_cache | toPrettyJson | nindent 2 }},
     "API_DOC_ENDPOINTS_ENABLED": true,
     "KAFKA": {
-        "EVENT_TYPE_ACTION_TOPIC_MAP" : {
-          "POSITION":{
-            "PREPARE": null,
-            "FX_PREPARE": null,
-            "BULK_PREPARE": null,
-            "COMMIT": null,
-            "BULK_COMMIT": null,
-            "RESERVE": null,
-            "FX_RESERVE": null,
-            "TIMEOUT_RESERVED": null,
-            "FX_TIMEOUT_RESERVED": null,
-            "ABORT": null,
-            "FX_ABORT": null
+      "DEFAULT_BROKER": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
+      "EVENT_TYPE_ACTION_TOPIC_MAP" : {
+        "POSITION":{
+          "PREPARE": null,
+          "FX_PREPARE": null,
+          "BULK_PREPARE": null,
+          "COMMIT": null,
+          "BULK_COMMIT": null,
+          "RESERVE": null,
+          "FX_RESERVE": null,
+          "TIMEOUT_RESERVED": null,
+          "FX_TIMEOUT_RESERVED": null,
+          "ABORT": null,
+          "FX_ABORT": null
+        }
+      },
+      "TOPIC_TEMPLATES": {
+          "PARTICIPANT_TOPIC_TEMPLATE": {
+              "TEMPLATE": "topic-{{"{{"}}participantName{{"}}"}}-{{"{{"}}functionality{{"}}"}}-{{"{{"}}action{{"}}"}}",
+              "REGEX": "topic-(.*)-(.*)-(.*)"
+          },
+          "GENERAL_TOPIC_TEMPLATE": {
+              "TEMPLATE": "topic-{{"{{"}}functionality{{"}}"}}-{{"{{"}}action{{"}}"}}",
+              "REGEX": "topic-(.*)-(.*)"
           }
-        },
-        "TOPIC_TEMPLATES": {
-            "PARTICIPANT_TOPIC_TEMPLATE": {
-                "TEMPLATE": "topic-{{"{{"}}participantName{{"}}"}}-{{"{{"}}functionality{{"}}"}}-{{"{{"}}action{{"}}"}}",
-                "REGEX": "topic-(.*)-(.*)-(.*)"
-            },
-            "GENERAL_TOPIC_TEMPLATE": {
-                "TEMPLATE": "topic-{{"{{"}}functionality{{"}}"}}-{{"{{"}}action{{"}}"}}",
-                "REGEX": "topic-(.*)-(.*)"
-            }
         },
         "CONSUMER": {
             "BULK": {
-                "PREPARE": {
-                    "config": {
-                        "options": {
-                            "mode": 2,
-                            "batchSize": 1,
-                            "pollFrequency": 10,
-                            "recursiveTimeout": 100,
-                            "messageCharset": "utf8",
-                            "messageAsJSON": true,
-                            "sync": true,
-                            "consumeTimeout": 1000
-                        },
-                        "rdkafkaConf": {
-                            "client.id": "cl-con-bulk-prepare",
-                            "group.id": "cl-group-bulk-prepare",
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
-                            "socket.keepalive.enable": true,
-                            "allow.auto.create.topics": true
-                        },
-                        "topicConf": {
-                            "auto.offset.reset": "earliest"
-                        }
-                    }
-                },
+              "PREPARE": {
+                "config": {
+                  "options": {
+                    "mode": 2,
+                    "batchSize": 1,
+                    "pollFrequency": 10,
+                    "recursiveTimeout": 100,
+                    "messageCharset": "utf8",
+                    "messageAsJSON": true,
+                    "sync": true,
+                    "consumeTimeout": 1000
+                  },
+                  "rdkafkaConf": {
+                    "client.id": "cl-con-bulk-prepare",
+                    "group.id": "cl-group-bulk-prepare",
+                    "socket.keepalive.enable": true,
+                    "allow.auto.create.topics": true
+                  },
+                  "topicConf": {
+                    "auto.offset.reset": "earliest"
+                  }
+                }
+              },
                 "PROCESSING": {
                     "config": {
                         "options": {
@@ -189,7 +189,6 @@
                         "rdkafkaConf": {
                             "client.id": "cl-con-bulk-processing",
                             "group.id": "cl-group-bulk-processing",
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "socket.keepalive.enable": true,
                             "allow.auto.create.topics": true
                         },
@@ -213,7 +212,6 @@
                         "rdkafkaConf": {
                             "client.id": "cl-con-bulk-fulfil",
                             "group.id": "cl-group-bulk-fulfil",
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "socket.keepalive.enable": true,
                             "allow.auto.create.topics": true
                         },
@@ -237,7 +235,6 @@
                         "rdkafkaConf": {
                             "client.id": "cl-con-bulk-get",
                             "group.id": "cl-group-bulk-get",
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "socket.keepalive.enable": true,
                             "allow.auto.create.topics": true
                         },
@@ -263,7 +260,6 @@
                         "rdkafkaConf": {
                             "client.id": "cl-con-transfer-prepare",
                             "group.id": "cl-group-transfer-prepare",
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "socket.keepalive.enable": true,
                             "allow.auto.create.topics": true
                         },
@@ -287,7 +283,6 @@
                         "rdkafkaConf": {
                             "client.id": "cl-con-transfer-position",
                             "group.id": "cl-group-transfer-position",
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "socket.keepalive.enable": true,
                             "allow.auto.create.topics": true
                         },
@@ -311,7 +306,6 @@
                         "rdkafkaConf": {
                             "client.id": "cl-con-transfer-position-batch",
                             "group.id": "cl-group-transfer-position-batch",
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "socket.keepalive.enable": true,
                             "allow.auto.create.topics": true
                         },
@@ -335,7 +329,6 @@
                         "rdkafkaConf": {
                             "client.id": "cl-con-transfer-fulfil",
                             "group.id": "cl-group-transfer-fulfil",
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "socket.keepalive.enable": true,
                             "allow.auto.create.topics": true
                         },
@@ -359,7 +352,6 @@
                         "rdkafkaConf": {
                             "client.id": "cl-con-transfer-get",
                             "group.id": "cl-group-transfer-get",
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "socket.keepalive.enable": true,
                             "allow.auto.create.topics": true
                         },
@@ -385,7 +377,6 @@
                         "rdkafkaConf": {
                             "client.id": "cl-con-transfer-admin",
                             "group.id": "cl-group-transfer-admin",
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "socket.keepalive.enable": true,
                             "allow.auto.create.topics": true
                         },
@@ -411,7 +402,6 @@
                   "rdkafkaConf": {
                     "client.id": "TESTONLY",
                     "group.id": "TESTONLY",
-                    "metadata.broker.list": "localhost:9092",
                     "socket.keepalive.enable": true,
                     "allow.auto.create.topics": true
                   },
@@ -437,7 +427,6 @@
                   "rdkafkaConf": {
                     "client.id": "cs-con-deferredsettlement-close",
                     "group.id": "cs-group-deferredsettlement-close",
-                    "metadata.broker.list": "localhost:9092",
                     "socket.keepalive.enable": true,
                     "allow.auto.create.topics": true
                   },
@@ -456,7 +445,6 @@
                             "messageCharset": "utf8"
                         },
                         "rdkafkaConf": {
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "client.id": "cl-prod-bulk-processing",
                             "event_cb": true,
                             "dr_cb": false,
@@ -477,7 +465,6 @@
                             "messageCharset": "utf8"
                         },
                         "rdkafkaConf": {
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "client.id": "cl-prod-transfer-prepare",
                             "event_cb": true,
                             "dr_cb": false,
@@ -496,7 +483,6 @@
                             "messageCharset": "utf8"
                         },
                         "rdkafkaConf": {
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "client.id": "cl-prod-transfer-position",
                             "event_cb": true,
                             "dr_cb": false,
@@ -515,7 +501,6 @@
                             "messageCharset": "utf8"
                         },
                         "rdkafkaConf": {
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "client.id": "cl-prod-transfer-fulfil",
                             "event_cb": true,
                             "dr_cb": false,
@@ -534,7 +519,6 @@
                             "messageCharset": "utf8"
                         },
                         "rdkafkaConf": {
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "client.id": "cl-prod-transfer-get",
                             "event_cb": true,
                             "dr_cb": false,
@@ -555,7 +539,6 @@
                             "messageCharset": "utf8"
                         },
                         "rdkafkaConf": {
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
                             "client.id": "cl-prod-notification-event",
                             "event_cb": true,
                             "dr_cb": false,
@@ -570,25 +553,24 @@
                 }
             },
             "ADMIN": {
-                "TRANSFER": {
-                    "config": {
-                        "options": {
-                            "messageCharset": "utf8"
-                        },
-                        "rdkafkaConf": {
-                            "metadata.broker.list": "{{ (default .Values.config.kafka_host $kafkaHost) }}:{{ .Values.config.kafka_port }}",
-                            "client.id": "admin-transfer-produce",
-                            "event_cb": true,
-                            "dr_cb": false,
-                            "socket.keepalive.enable": true,
-                            "queue.buffering.max.messages": 10000000
-                        },
-                        "topicConf": {
-                            "request.required.acks": "all",
-                            "partitioner": "{{ .Values.config.kafka_partitioner }}"
-                        }
+              "TRANSFER": {
+                "config": {
+                  "options": {
+                    "messageCharset": "utf8"
+                    },
+                    "rdkafkaConf": {
+                      "client.id": "admin-transfer-produce",
+                      "event_cb": true,
+                      "dr_cb": false,
+                      "socket.keepalive.enable": true,
+                      "queue.buffering.max.messages": 10000000
+                    },
+                    "topicConf": {
+                      "request.required.acks": "all",
+                      "partitioner": "{{ .Values.config.kafka_partitioner }}"
                     }
-                }
+                  }
+               }
             }
         }
     }
