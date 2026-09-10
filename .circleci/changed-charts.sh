@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
 
 #
-# Prints the chart directories this branch changes relative to origin/main,
-# one per line, closed over the local file:// dependency graph in both
-# directions. Upwards, a change to a subchart lists every chart that vendors it,
-# so an umbrella republishes when anything inside it moves. Downwards, a listed
-# chart lists everything it vendors, because packaging reads each dependency's
-# own charts/ directory from disk: a dependency left unbuilt is vendored hollow
-# and its workloads vanish from the published umbrella without an error. Exits
-# non-zero when no merge base can be resolved, so callers keep their full list.
+# Prints the chart directories this branch changes relative to origin/main, one
+# per line, closed over the local file:// dependency graph in both directions.
+# Exits non-zero when no merge base can be resolved, so callers keep their full
+# chart list.
 #
 
 set -eo pipefail
