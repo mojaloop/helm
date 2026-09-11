@@ -17,12 +17,6 @@ spec:
     - {{ required "gateway.host is required when the gateway is enabled" .Values.gateway.host | quote }}
   rules:
     - filters:
-        # The scope is the decision endpoint's word, so a client's own copy is
-        # removed at the edge and cannot reach anything behind it
-        - type: RequestHeaderModifier
-          requestHeaderModifier:
-            remove:
-              - X-Scope
       {{- if .Values.gateway.oathkeeper.enabled }}
         - type: ExternalAuth
           externalAuth:
@@ -41,8 +35,6 @@ spec:
                 # a browser and a json 401 for anything else
                 - cookie
                 - accept
-              allowedResponseHeaders:
-                - x-scope
       {{- end }}
       backendRefs:
         - name: {{ template "ml-testing-toolkit-frontend.fullname" . }}
