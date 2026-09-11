@@ -24,7 +24,7 @@ image:
   pullSecrets: []
 
 replicaCount: 1
-command: '["node", "src/handlers/index.js", "h", "--grossSettlement"]'
+command: '["node", "dist/handlers/index.js", "h", "--grossSettlement"]'
 
 ## Enable diagnostic mode in the deployment
 ##
@@ -41,7 +41,7 @@ diagnosticMode:
   ##
   args:
     - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    - src/handlers/index.js
+    - dist/handlers/index.js
     - h
     - '--grossSettlement'
 
@@ -238,6 +238,14 @@ config:
   db_debug: false
   db_additional_connection_options: {}
 
+  ## MongoDB Configuration
+  objstore_disabled: true
+  mongo_host: mongodb
+  mongo_port: 27017
+  mongo_user: ''
+  mongo_password: ''
+  mongo_database: central_ledger
+
   ## SSL Configuration
   db_ssl_enabled: false
   db_ssl_verify: false
@@ -262,6 +270,38 @@ config:
   hub_participant:
     id: 1
     name: Hub
+
+  ## Payee participant currency validation
+  payee_participant_currency_validation_enabled: false
+
+  ## Cache configuration
+  cache_enabled: false
+  cache_max_byte_size: 10000000
+  cache_expires_in_ms: 1000
+
+  ## Proxy cache configuration
+  proxy_cache:
+    enabled: false
+    type: redis-cluster
+    proxyConfig:
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
+
+  ## Distributed lock configuration for timeout handler
+  distLockConfig:
+    enabled: false
+    lockTimeout: 10000
+    acquireTimeout: 5000
+    driftFactor: 0.01
+    retryCount: 3
+    retryDelay: 200
+    retryJitter: 100
+    redisConfigs:
+    - type: redis-cluster
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
 
   ## Log config
   log_level: info
