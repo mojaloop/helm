@@ -1,0 +1,85 @@
+{{- if and .Values.simulators .Values.gateway.enabled }}
+{{- $ctx := . -}}
+{{- $prefix := include "mojaloop-simulator.prefix" . -}}
+{{- range $name, $customConfig := .Values.simulators }}
+{{- $config := merge $customConfig $ctx.Values.defaults }}
+{{- if $config.gateway.enabled }}
+{{- $fullName := printf "%s%s" $prefix $name }}
+{{- $adapter := printf "%s-scheme-adapter" $fullName }}
+{{- range $host := (default (list) $config.gateway.hosts) }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ printf "%s-%s" $fullName (regexReplaceAll "[^a-zA-Z0-9]+" $host "-") | trunc 63 | trimSuffix "-" }}
+  namespace: {{ $ctx.Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/name: sim-{{ $fullName }}
+    {{- include "mojaloop-simulator.common-labels" $ctx | nindent 4 }}
+spec:
+  parentRefs:
+    {{- toYaml $ctx.Values.gateway.parentRefs | nindent 4 }}
+  hostnames:
+    - {{ $host | quote }}
+  rules:
+    {{- range $leg := list
+          (dict "path" "outbound" "service" $adapter "port" $config.config.schemeAdapter.env.OUTBOUND_LISTEN_PORT)
+          (dict "path" "inbound" "service" $adapter "port" $config.config.schemeAdapter.env.INBOUND_LISTEN_PORT)
+          (dict "path" "sdktest" "service" $adapter "port" $config.config.schemeAdapter.env.TEST_LISTEN_PORT)
+          (dict "path" "test" "service" (printf "%s-backend" $fullName) "port" $config.config.backend.env.TEST_API_LISTEN_PORT) }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /sim/{{ $name }}/{{ $leg.path }}
+      filters:
+        # The gateway strips the routing prefix; the simulator answers at its
+        # own API root
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+        {{- include "mojaloop-common.httproute.filters" $ctx | nindent 8 }}
+      backendRefs:
+        - name: {{ $leg.service | quote }}
+          port: {{ $leg.port }}
+    {{- end }}
+{{- if $config.config.thirdpartysdk.enabled }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ printf "%s-tpsdk-%s" $fullName (regexReplaceAll "[^a-zA-Z0-9]+" $host "-") | trunc 63 | trimSuffix "-" }}
+  namespace: {{ $ctx.Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/name: sim-{{ $fullName }}-thirdparty-sdk
+    {{- include "mojaloop-simulator.common-labels" $ctx | nindent 4 }}
+spec:
+  parentRefs:
+    {{- toYaml $ctx.Values.gateway.parentRefs | nindent 4 }}
+  hostnames:
+    - {{ $host | quote }}
+  rules:
+    {{- range $leg := list
+          (dict "path" "outbound" "port" $config.config.thirdpartysdk.env.OUTBOUND_LISTEN_PORT)
+          (dict "path" "inbound" "port" $config.config.thirdpartysdk.env.INBOUND_LISTEN_PORT) }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /sim/{{ $name }}/thirdpartysdk/{{ $leg.path }}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+        {{- include "mojaloop-common.httproute.filters" $ctx | nindent 8 }}
+      backendRefs:
+        - name: {{ printf "%s-thirdparty-sdk" $fullName | quote }}
+          port: {{ $leg.port }}
+    {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

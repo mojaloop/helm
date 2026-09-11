@@ -3,30 +3,31 @@
 # Declare variables to be passed into your templates.
 replicaCount: 1
 
-ingress:
-  enabled: true
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
-    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+gateway:
+  enabled: false
+  parentRefs: []
+  cors: {}
+  ## Delegates auth on the route to Oathkeeper; disable to route without authorization
+  oathkeeper:
+    enabled: true
+    serviceName: oathkeeper-api
+    servicePort: 4456
+  ## Each host becomes its own route; serviceName is suffixed onto the release name
   hosts:
     - host: "www.acquirer-merchant.local"
       paths:
         - path: /api/v1
-          pathType: Prefix
           serviceName: acquirer-backend-clusterip-service
           servicePort: 5555
         - path: /participants
-          pathType: Prefix
           serviceName: registry-oracle-clusterip-service
           servicePort: 8888
         - path: /
-          pathType: Prefix
           serviceName: acquirer-frontend-clusterip-service
           servicePort: 5173
     - host: "s3.acquirer-merchant.local"
       paths:
         - path: /
-          pathType: Prefix
           serviceName: minio-clusterip-service
           servicePort: 5173
 image:

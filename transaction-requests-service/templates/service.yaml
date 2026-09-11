@@ -8,17 +8,9 @@ metadata:
     app.kubernetes.io/version: {{ .Chart.Version }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-  {{- if or .Values.ingress.annotations .Values.commonAnnotations .Values.ingress.certManager }}
+  {{- with .Values.commonAnnotations }}
   annotations:
-    {{- if .Values.ingress.certManager }}
-    kubernetes.io/tls-acme: "true"
-    {{- end }}
-    {{- if .Values.ingress.annotations }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.ingress.annotations "context" $) | nindent 4 }}
-    {{- end }}
-    {{- if .Values.commonAnnotations }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
-    {{- end }}
+    {{- include "common.tplvalues.render" ( dict "value" . "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
   type: {{ .Values.service.type }}

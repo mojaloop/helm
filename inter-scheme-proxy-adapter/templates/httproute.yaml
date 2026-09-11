@@ -1,0 +1,34 @@
+{{- if .Values.gateway.enabled -}}
+{{- $fullname := include "common.names.fullname" . -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+{{ include "mojaloop-common.httproute.metadata" (dict "context" . "fullname" $fullname) }}
+spec:
+  parentRefs:
+    {{- toYaml .Values.gateway.parentRefs | nindent 4 }}
+  hostnames:
+    - {{ required "gateway.host is required when the gateway is enabled" .Values.gateway.host | quote }}
+  rules:
+    {{- if hasKey .Values.env "INBOUND_LISTEN_PORT_A" }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /inbound-a/
+      filters:
+        {{- include "mojaloop-common.httproute.filters" . | nindent 8 }}
+      backendRefs:
+        - name: {{ $fullname }}
+          port: {{ .Values.env.INBOUND_LISTEN_PORT_A }}
+    {{- end }}
+    {{- if hasKey .Values.env "INBOUND_LISTEN_PORT_B" }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /inbound-b/
+      filters:
+        {{- include "mojaloop-common.httproute.filters" . | nindent 8 }}
+      backendRefs:
+        - name: {{ $fullname }}
+          port: {{ .Values.env.INBOUND_LISTEN_PORT_B }}
+    {{- end }}
+{{- end }}

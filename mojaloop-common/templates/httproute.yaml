@@ -1,0 +1,83 @@
+{{/*
+  Mojaloop Common templates for Gateway API routing.
+
+  Usage for a chart whose service answers on one port:
+    {{ include "mojaloop-common.httproute" (dict "context" . "fullname" (include "<chart>.fullname" .)) }}
+
+  A chart that splits paths across several service ports writes its own
+  HTTPRoute and reuses the filter list on each rule:
+    {{- include "mojaloop-common.httproute.filters" . | nindent 8 }}
+
+  The caller passes its own fullname because each chart names its Service with
+  its own helper, and the route's backendRef has to resolve to that Service.
+
+  A cross-namespace oathkeeper reference needs a ReferenceGrant in the
+  oathkeeper namespace.
+*/}}
+{{- define "mojaloop-common.httproute.filters" -}}
+# The scope is the decision endpoint's word, so a client's own copy is removed
+# at the edge and cannot reach anything behind it
+- type: RequestHeaderModifier
+  requestHeaderModifier:
+    remove:
+      - X-Scope
+{{- with .Values.gateway.cors }}
+- type: CORS
+  cors:
+    {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- if .Values.gateway.oathkeeper.enabled }}
+- type: ExternalAuth
+  externalAuth:
+    protocol: HTTP
+    backendRef:
+      name: {{ .Values.gateway.oathkeeper.serviceName | quote }}
+      {{- with .Values.gateway.oathkeeper.serviceNamespace }}
+      namespace: {{ . | quote }}
+      {{- end }}
+      port: {{ .Values.gateway.oathkeeper.servicePort }}
+    http:
+      path: /decisions
+      allowedHeaders:
+        # The session cookie is the sole authenticator this surface declares;
+        # accept picks the error shape, a login redirect for a browser and a
+        # json 401 for anything else
+        - cookie
+        - accept
+      allowedResponseHeaders:
+        # The decision endpoint's scope, the one header the platform hands a
+        # service
+        - x-scope
+{{- end }}
+{{- end }}
+
+{{- define "mojaloop-common.httproute.metadata" -}}
+metadata:
+  name: {{ .fullname }}
+  namespace: {{ .context.Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/name: {{ .context.Chart.Name }}
+    app.kubernetes.io/instance: {{ .context.Release.Name }}
+    app.kubernetes.io/managed-by: {{ .context.Release.Service }}
+{{- end }}
+
+{{- define "mojaloop-common.httproute" -}}
+{{- $ctx := .context -}}
+{{- $fullname := .fullname -}}
+{{- if $ctx.Values.gateway.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+{{ include "mojaloop-common.httproute.metadata" . }}
+spec:
+  parentRefs:
+    {{- toYaml $ctx.Values.gateway.parentRefs | nindent 4 }}
+  hostnames:
+    - {{ required "gateway.host is required when the gateway is enabled" $ctx.Values.gateway.host | quote }}
+  rules:
+    - filters:
+        {{- include "mojaloop-common.httproute.filters" $ctx | nindent 8 }}
+      backendRefs:
+        - name: {{ $fullname }}
+          port: {{ $ctx.Values.service.port }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,50 @@
+{{- $gw := index .Values "image-watcher" "gateway" -}}
+{{- if $gw.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: image-watcher
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app: ml-operator
+    {{- include "ml-operator.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+    {{- toYaml $gw.parentRefs | nindent 4 }}
+  hostnames:
+    - {{ required "image-watcher.gateway.host is required when the gateway is enabled" $gw.host | quote }}
+  rules:
+    - filters:
+        # The scope is the decision endpoint's word, so a client's own copy is
+        # removed at the edge and cannot reach anything behind it
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            remove:
+              - X-Scope
+        {{- with $gw.cors }}
+        - type: CORS
+          cors:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+      {{- if $gw.oathkeeper.enabled }}
+        - type: ExternalAuth
+          externalAuth:
+            protocol: HTTP
+            backendRef:
+              name: {{ $gw.oathkeeper.serviceName | quote }}
+              {{- with $gw.oathkeeper.serviceNamespace }}
+              namespace: {{ . | quote }}
+              {{- end }}
+              port: {{ $gw.oathkeeper.servicePort }}
+            http:
+              path: /decisions
+              allowedHeaders:
+                - cookie
+                - accept
+              allowedResponseHeaders:
+                - x-scope
+      {{- end }}
+      backendRefs:
+        - name: image-watcher
+          port: {{ index .Values "image-watcher" "service" "port" }}
+{{- end }}
