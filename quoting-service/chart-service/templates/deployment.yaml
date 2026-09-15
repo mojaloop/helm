@@ -92,6 +92,8 @@ spec:
             {{- end }}
           {{- include "mojaloop-common.probes" . | nindent 10 }}
           env:
+            - name: ERROR_HANDLING_AJV_JOI_PARITY
+              value: {{ .Values.config.error_handling_ajv_joi_parity | quote }}
             {{- if .Values.env }}
             {{- range $key, $val := .Values.env }}
             - name: {{ $key }}
@@ -172,6 +174,8 @@ spec:
             - name: {{ template "quotingservice.fullname" . }}-sidecar-volume
               mountPath: /opt/app/config
           env:
+            - name: ERROR_HANDLING_AJV_JOI_PARITY
+              value: {{ .Values.config.error_handling_ajv_joi_parity | quote }}
             - name: LOG_LEVEL
               value: {{ .Values.sidecar.config.log_level }}
         {{- end }}
