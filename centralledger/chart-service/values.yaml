@@ -7,14 +7,14 @@ global: {}
 # Declare variables to be passed into your templates.
 
 image:
-  registry: docker.io
-  repository: mojaloop/central-ledger
-  tag: v19.14.0
+  registry: ""
+  repository: central-ledger
+  tag: local3
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
   ##
-  pullPolicy: IfNotPresent
+  pullPolicy: Never
   ## Optionally specify an array of imagePullSecrets.
   ## Secrets must be manually created in the namespace.
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -25,7 +25,7 @@ image:
   pullSecrets: []
 
 replicaCount: 1
-command: '["node", "src/api/index.js"]'
+command: '["node", "dist/api/index.js"]'
 
 ## Enable diagnostic mode in the deployment
 ##
@@ -41,7 +41,7 @@ diagnosticMode:
   ##
   args:
     - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    - src/api/index.js
+    - dist/api/index.js
 
   ## @param diagnosticMode.debug config to override all debug information
   ##
@@ -219,6 +219,21 @@ config:
     enabled: false
     type: redis-cluster
     proxyConfig:
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
+
+  ## Distributed lock configuration for timeout handler
+  distLockConfig:
+    enabled: false
+    lockTimeout: 10000
+    acquireTimeout: 5000
+    driftFactor: 0.01
+    retryCount: 3
+    retryDelay: 200
+    retryJitter: 100
+    redisConfigs:
+    - type: redis-cluster
       cluster:
         - host: proxy-cache-redis
           port: 6379
