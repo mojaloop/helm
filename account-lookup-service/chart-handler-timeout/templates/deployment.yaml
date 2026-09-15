@@ -72,6 +72,8 @@ spec:
           args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
           {{- end }}
           env:
+            - name: ERROR_HANDLING_AJV_JOI_PARITY
+              value: {{ .Values.config.error_handling_ajv_joi_parity | quote }}
             {{- if .Values.env }}
             {{- range $key, $val := .Values.env }}
             - name: {{ $key }}
@@ -160,6 +162,8 @@ spec:
             - name: {{ template "account-lookup-service-handler-timeout.fullname" . }}-sidecar-volume
               mountPath: /opt/app/config
           env:
+            - name: ERROR_HANDLING_AJV_JOI_PARITY
+              value: {{ .Values.config.error_handling_ajv_joi_parity | quote }}
             - name: LOG_LEVEL
               value: {{ .Values.sidecar.config.log_level | quote }}
             - name: LOG_FILTER
