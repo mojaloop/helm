@@ -132,6 +132,17 @@ CONFIG:
   ## to ensure normal single-scheme functionalities/validations work as expected, and vise versa.
   interscheme_enabled: &INTERSCHEME_ENABLED false
 
+  ## Ledger: 
+  ## Controls the ledger interface of the central-ledger components.
+  ## - NONE        : Separate position handler from prepare and fulfil handlers. Existing handling
+  ##                 of Admin, FSPIOP and Settlement APIs remains untouched. For now this is the 
+  ##                 default behaviour as it lets us implement the new 
+  ## - SQL         : 
+  ## - LOCKSTEP    : 
+  ## - TIGERBEETLE :
+  ledger_mode: 'NONE' 
+
+
   ## PROXY CACHE
   proxy_cache: &PROXY_CACHE
     enabled: *INTERSCHEME_ENABLED
@@ -2424,7 +2435,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "dist/api/index.js"]'
+    command: '["node", "dist/api_admin/index.js"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -2440,7 +2451,7 @@ centralledger:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        - src/api/index.js
+        - src/api_admin/index.js
 
       ## @param diagnosticMode.debug config to override all debug information
       ##
@@ -4740,7 +4751,7 @@ centralsettlement:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "dist/api/index.js"]'
+    command: '["node", "dist/api_admin/index.js"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -4756,7 +4767,7 @@ centralsettlement:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        - src/api/index.js
+        - src/api_admin/index.js
 
       ## @param diagnosticMode.debug config to override all debug information
       ##
@@ -4767,16 +4778,16 @@ centralsettlement:
     readinessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
-      initialDelaySeconds: 60
-      periodSeconds: 15
+        path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 5
 
     livenessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
-      initialDelaySeconds: 60
-      periodSeconds: 15
+        path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 5
 
     ## Pod scheduling preferences.
     ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -5147,14 +5158,14 @@ centralsettlement:
     readinessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
     livenessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
@@ -5529,14 +5540,14 @@ centralsettlement:
     readinessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
     livenessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
@@ -5911,14 +5922,14 @@ centralsettlement:
     readinessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
     livenessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
