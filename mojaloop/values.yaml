@@ -132,6 +132,17 @@ CONFIG:
   ## to ensure normal single-scheme functionalities/validations work as expected, and vise versa.
   interscheme_enabled: &INTERSCHEME_ENABLED false
 
+  ## Ledger: 
+  ## Controls the ledger interface of the central-ledger components.
+  ## - NONE        : Separate position handler from prepare and fulfil handlers. Existing handling
+  ##                 of Admin, FSPIOP and Settlement APIs remains untouched. For now this is the 
+  ##                 default behaviour as it lets us implement the new 
+  ## - SQL         : 
+  ## - LOCKSTEP    : 
+  ## - TIGERBEETLE :
+  ledger_mode: 'NONE' 
+
+
   ## PROXY CACHE
   proxy_cache: &PROXY_CACHE
     enabled: *INTERSCHEME_ENABLED
@@ -2406,14 +2417,14 @@ centralledger:
 
     # Declare variables to be passed into your templates.
     image:
-      registry: docker.io
-      repository: mojaloop/central-ledger
-      tag: v19.14.0
+      registry: ""
+      repository: central-ledger
+      tag: local3
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
       ##
-      pullPolicy: IfNotPresent
+      pullPolicy: Never
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -2424,7 +2435,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/api/index.js"]'
+    command: '["node", "dist/api_admin/index.js"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -2440,7 +2451,7 @@ centralledger:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        - src/api/index.js
+        - src/api_admin/index.js
 
       ## @param diagnosticMode.debug config to override all debug information
       ##
@@ -2699,14 +2710,14 @@ centralledger:
     enabled: true
 
     image:
-      registry: docker.io
-      repository: mojaloop/central-ledger
-      tag: v19.14.0
+      registry: ""
+      repository: central-ledger
+      tag: local3
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
       ##
-      pullPolicy: IfNotPresent
+      pullPolicy: Never
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -2717,7 +2728,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
+    command: '["node", "dist/handlers/index.js", "handler", "--prepare"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -2733,7 +2744,7 @@ centralledger:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        - src/handlers/index.js
+        - dist/handlers/index.js
         - handler
         - '--prepare'
 
@@ -2986,17 +2997,17 @@ centralledger:
     # This is a YAML-formatted file.
 
     # Declare variables to be passed into your templates.
-    enabled: true
+    enabled: false
 
     image:
-      registry: docker.io
-      repository: mojaloop/central-ledger
-      tag: v19.14.0
+      registry: ""
+      repository: central-ledger
+      tag: local3
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
       ##
-      pullPolicy: IfNotPresent
+      pullPolicy: Never
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -3007,7 +3018,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "handler", "--position"]'
+    command: '["node", "dist/handlers/index.js", "handler", "--position"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -3211,7 +3222,7 @@ centralledger:
       sessionAffinityConfig: {}
 
     ingress:
-      enabled: true
+      enabled: false
       ## @param ingress.pathType Ingress path type
       ##
       pathType: ImplementationSpecific
@@ -3277,14 +3288,14 @@ centralledger:
     enabled: true
 
     image:
-      registry: docker.io
-      repository: mojaloop/central-ledger
-      tag: v19.14.0
+      registry: ""
+      repository: central-ledger
+      tag: local3
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
       ##
-      pullPolicy: IfNotPresent
+      pullPolicy: Never
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -3295,7 +3306,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "handler", "--positionbatch"]'
+    command: '["node", "dist/handlers/index.js", "handler", "--positionbatch"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -3505,7 +3516,7 @@ centralledger:
       sessionAffinityConfig: {}
 
     ingress:
-      enabled: true
+      enabled: false
       ## @param ingress.pathType Ingress path type
       ##
       pathType: ImplementationSpecific
@@ -3570,14 +3581,14 @@ centralledger:
     enabled: true
 
     image:
-      registry: docker.io
-      repository: mojaloop/central-ledger
-      tag: v19.14.0
+      registry: ""
+      repository: central-ledger
+      tag: local3
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
       ##
-      pullPolicy: IfNotPresent
+      pullPolicy: Never
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -3588,7 +3599,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "handler", "--get"]'
+    command: '["node", "dist/handlers/index.js", "handler", "--get"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -3857,14 +3868,14 @@ centralledger:
     enabled: true
 
     image:
-      registry: docker.io
-      repository: mojaloop/central-ledger
-      tag: v19.14.0
+      registry: ""
+      repository: central-ledger
+      tag: local3
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
       ##
-      pullPolicy: IfNotPresent
+      pullPolicy: Never
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -3875,7 +3886,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
+    command: '["node", "dist/handlers/index.js", "handler", "--fulfil"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -4144,14 +4155,14 @@ centralledger:
     enabled: true
 
     image:
-      registry: docker.io
-      repository: mojaloop/central-ledger
-      tag: v19.14.0
+      registry: ""
+      repository: central-ledger
+      tag: local3
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
       ##
-      pullPolicy: IfNotPresent
+      pullPolicy: Never
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -4162,7 +4173,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
+    command: '["node", "dist/handlers/index.js", "handler", "--timeout"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -4436,14 +4447,14 @@ centralledger:
     enabled: true
 
     image:
-      registry: docker.io
-      repository: mojaloop/central-ledger
-      tag: v19.14.0
+      registry: ""
+      repository: central-ledger
+      tag: local3
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
       ##
-      pullPolicy: IfNotPresent
+      pullPolicy: Never
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -4454,7 +4465,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "handler", "--admin"]'
+    command: '["node", "dist/handlers/index.js", "handler", "--admin"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -4722,14 +4733,14 @@ centralsettlement:
     enabled: true
 
     image:
-      registry: docker.io
-      repository: mojaloop/central-settlement
-      tag: v17.4.0
+      registry: ""
+      repository: central-ledger
+      tag: local3
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
       ##
-      pullPolicy: IfNotPresent
+      pullPolicy: Never
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -4740,7 +4751,7 @@ centralsettlement:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/api/index.js"]'
+    command: '["node", "dist/api_admin/index.js"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -4756,7 +4767,7 @@ centralsettlement:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        - src/api/index.js
+        - src/api_admin/index.js
 
       ## @param diagnosticMode.debug config to override all debug information
       ##
@@ -4767,16 +4778,16 @@ centralsettlement:
     readinessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
-      initialDelaySeconds: 60
-      periodSeconds: 15
+        path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 5
 
     livenessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
-      initialDelaySeconds: 60
-      periodSeconds: 15
+        path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 5
 
     ## Pod scheduling preferences.
     ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -5100,14 +5111,14 @@ centralsettlement:
     enabled: true
 
     image:
-      registry: docker.io
-      repository: mojaloop/central-settlement
-      tag: v17.4.0
+      registry: ""
+      repository: central-ledger
+      tag: local3
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
       ##
-      pullPolicy: IfNotPresent
+      pullPolicy: Never
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -5118,7 +5129,7 @@ centralsettlement:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "h", "--deferredSettlement"]'
+    command: '["node", "dist/settlement/handlers/index.js", "h", "--deferredSettlement"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -5147,14 +5158,14 @@ centralsettlement:
     readinessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
     livenessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
@@ -5482,14 +5493,14 @@ centralsettlement:
     enabled: false
 
     image:
-      registry: docker.io
-      repository: mojaloop/central-settlement
-      tag: v17.4.0
+      registry: ""
+      repository: central-ledger
+      tag: local3
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
       ##
-      pullPolicy: IfNotPresent
+      pullPolicy: Never
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -5500,7 +5511,7 @@ centralsettlement:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "h", "--grossSettlement"]'
+    command: '["node", "dist/settlement/handlers/index.js", "h", "--grossSettlement"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -5529,14 +5540,14 @@ centralsettlement:
     readinessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
     livenessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
@@ -5864,14 +5875,14 @@ centralsettlement:
     enabled: true
 
     image:
-      registry: docker.io
-      repository: mojaloop/central-settlement
-      tag: v17.4.0
+      registry: ""
+      repository: central-ledger
+      tag: local3
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
       ##
-      pullPolicy: IfNotPresent
+      pullPolicy: Never
       ## Optionally specify an array of imagePullSecrets.
       ## Secrets must be manually created in the namespace.
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -5882,7 +5893,7 @@ centralsettlement:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "h", "--rules"]'
+    command: '["node", "dist/settlement/handlers/index.js", "h", "--rules"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -5911,14 +5922,14 @@ centralsettlement:
     readinessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
     livenessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
@@ -12705,7 +12716,7 @@ ml-ttk-cronjob-cleanup:
 
 ml-ttk-test-setup:
   tests:
-    enabled: true
+    enabled: false
     weight: -9
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
