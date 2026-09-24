@@ -1,0 +1,117 @@
+# Shared configuration values referenced across multiple charts.
+# In the umbrella chart these were YAML anchors; in helmfile they're
+# defined once here and injected into each release that needs them.
+
+## Hub
+hub:
+  id: 1
+  name: Hub
+
+## Kafka
+kafka:
+  host: kafka
+  port: 9092
+
+## MySQL (shared instance)
+mysql:
+  host: mysqldb
+  port: 3306
+  secret:
+    name: mysqldb
+    key: mysql-password
+  ssl:
+    enabled: false
+    verify: false
+    caSecret: null
+
+## Databases
+databases:
+  als:
+    name: account_lookup
+    user: account_lookup
+  alsOracle:
+    name: oracle_msisdn
+    user: oracle_msisdn
+  centralLedger:
+    name: central_ledger
+    user: central_ledger
+  thirdpartyAuthSvc:
+    name: auth_svc
+    user: auth_svc
+  thirdpartyConsentOracle:
+    name: consent_oracle
+    user: consent_oracle
+
+## MongoDB -- bulk object store
+mongo:
+  host: cl-mongodb
+  port: 27017
+  user: mojaloop
+  secret:
+    name: cl-mongodb
+    key: mongodb-passwords
+  database: mlos
+
+## MongoDB -- TTK
+ttkMongo:
+  host: ttk-mongodb
+  port: "27017"
+  user: ttk
+  secret:
+    name: ttk-mongodb
+    key: mongodb-passwords
+  database: ttk
+  connectionString: null
+  connectionStringSecret:
+    name: null
+    key: null
+  params: {}
+
+## TTK SSL
+ttkSsl:
+  enabled: false
+  verify: false
+  caSecret: {}
+  clientCert: {}
+
+## Redis -- TTK simulators
+ttkSimsRedis:
+  host: ttksims-redis-master
+  port: 6379
+
+## Redis -- thirdparty auth service
+thirdpartyAuthSvcRedis:
+  host: auth-svc-redis-master
+  port: 6379
+
+## Proxy cache
+proxyCache:
+  enabled: false
+  type: redis-cluster
+  proxyConfig:
+    cluster:
+      - host: proxy-cache-redis
+        port: 6379
+
+## Feature flags
+features:
+  interschemeEnabled: false
+  payeeParticipantCurrencyValidationEnabled: true
+  batchSize: 100
+  apiType: fspiop
+  ttkTransformerName: none
+  sdkIlpVersion: "1"
+  originalPayloadStorage: kafka
+  payloadCache:
+    enabled: false
+    type: redis-cluster
+    connectionConfig:
+      cluster:
+        - host: proxy-cache-redis
+          port: 6379
+
+## TTK test params (FSPIOP mode defaults)
+ttkParams:
+  validCondition: "$param_validConditionV1"
+  ilpPacket: "$param_validIlpPacketV1"
+  validFulfillment: "$param_validFulfillmentV1"
