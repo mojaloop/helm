@@ -1,7 +1,7 @@
 {{- /*
-  Gateway routes for the MCM UI and API, each route delegates auth to the shared
-  Oathkeeper via the ExternalAuth filter, Oathkeeper matches the bundle rules in
-  the service image (permissions/oathkeeper-rules.yml) by the request host
+  Gateway routes for the MCM UI and API. Each delegates auth to the shared
+  Oathkeeper via the ExternalAuth filter and keys its backend for the IAM from
+  api.authz and ui.authz.
 
   A cross-namespace oathkeeper reference needs a ReferenceGrant in the oathkeeper
   namespace
@@ -14,6 +14,7 @@ kind: HTTPRoute
 metadata:
   name: {{ $fullname }}-api
   namespace: {{ .Release.Namespace }}
+  {{- include "mojaloop-common.authz.annotations" (dict "backend" (printf "%s-api" $fullname) "authz" .Values.api.authz) | nindent 2 }}
 spec:
   parentRefs:
     {{- toYaml .Values.gateway.api.parentRefs | nindent 4 }}
@@ -49,6 +50,7 @@ kind: HTTPRoute
 metadata:
   name: {{ $fullname }}-ui
   namespace: {{ .Release.Namespace }}
+  {{- include "mojaloop-common.authz.annotations" (dict "backend" (printf "%s-ui" $fullname) "authz" .Values.ui.authz) | nindent 2 }}
 spec:
   parentRefs:
     {{- toYaml .Values.gateway.ui.parentRefs | nindent 4 }}

@@ -71,9 +71,15 @@ provisioning:
   args:
     - provisioning
     - --roles=/config/roles/default-roles.json
-    # The documents the chart mounted and the ones services declare while the
-    # deployment runs, composed here and published for the gateway and Keto
+    # Every routed backend's document, composed here and published for the
+    # gateway and Keto
     - --publish-as=authz-published
+
+  # Refuses an AuthzDocument that would never compose when it is written.
+  # Needs cert-manager: the chart issues the webhook's certificate from a
+  # self-signed issuer and injects its CA into the webhook configuration.
+  webhook:
+    enabled: true
 
   service:
     type: ClusterIP

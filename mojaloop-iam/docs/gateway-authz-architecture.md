@@ -44,8 +44,9 @@ Cilium CNI is the fallback while Cilium `ExternalAuth` is pre-release.
    renders the rule's payload, and asks the decision endpoint, which is the only
    thing that talks to Keto.
 5. **Services are self-contained.** Each service ships its OpenAPI document and
-   nothing else about authorization. Adding a service is one registration entry
-   plus its routes, with no change to the platform.
+   nothing else about authorization, and answers with it on its own routes.
+   Adding a service is an annotation on its routes, with no change to the
+   platform.
 
 ## Two layers
 
@@ -125,7 +126,7 @@ integration:
    Every route carries this, not only the ones that front a service that reads
    the scope. An authorized route overwrites the header anyway, because the
    decision endpoint answers with one either way and the gateway forwards what
-   it answered; an anonymous route never calls the decision endpoint at all, so
+   it answered; a CORS preflight never calls the decision endpoint at all, so
    without the `remove` the client's own value travels on untouched. Measured on
    the local stack: a request carrying `X-Scope: dfsps=forged` reaches the
    upstream verbatim when nothing strips it, and does not when this filter is
@@ -183,10 +184,12 @@ pinned to exactly one service (one hostname = one service). The host also keys
 every user-facing URL Oathkeeper builds (the login redirect's `return_to`), so
 what the browser sees is always the real URL.
 
-Each endpoint is one rule, and its `authenticators` list names the credentials it
-accepts: a human-only endpoint lists `cookie_session`, a machine-only endpoint
-lists `jwt`, an endpoint on both lists both (tried in order, falling through by
-credential presence). The list comes from the operation's OpenAPI `security`.
+Each endpoint is one rule, and its `authenticators` list names the credentials
+the deployment accepts: `cookie_session` for a human, `jwt` for a machine, both
+where both are served, tried in order and falling through by credential
+presence. The list is the deployment's and identical on every rule it
+generates, because which credentials exist is a property of the installation
+rather than of an operation.
 
 ```yaml
 - id: example.getWidgetCa
@@ -219,8 +222,8 @@ human-only action by reaching a shared rule.
 Per-tier exposure is host-level: internal-only hosts (UIs, the IdP UIs) attach
 only to the internal gateway, so off the VPN they do not resolve and return 404 at
 the edge. A dual-tier host like the API attaches to both gateways, and a machine
-that reaches a human-only endpoint hits a `cookie_session`-only rule and gets 401
-from Oathkeeper.
+reaching a human-only endpoint authenticates as itself and is refused by the
+grants its subject holds.
 
 Rules are generated, and carry no per-rule handler configuration, so a rule
 cannot branch on `X-Gateway-Tier`. It does not need to: the `authenticators`
@@ -229,27 +232,49 @@ rest.
 
 ## What a service registers
 
-A service ships its OpenAPI document in its image and nothing else about
-authorization. The deployment registers where that document is and where the
-service is served:
+An annotation on the route it already has, keyed by the name the route gives
+the backend:
 
 ```yaml
-global:
-  authz:
-    - name: example
-      image: org/example-api:<tag>
-      spec: /opt/app/src/api/openapi.yaml
-      url:
-        host: api.example.<domain>
-        # path: /example    # when served under a prefix of a shared host
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: example-api
+  annotations:
+    iam.mojaloop.io/example-api.service: example
+spec:
+  rules:
+    - backendRefs: [{ name: example-api, port: 80 }]
 ```
 
-Nothing outside `global.authz` names a service.
+Its presence opts that backend in and its value is the prefix of the backend's
+permissions. A value belongs to exactly one Service; the same value on another
+Service is a conflict, so two apps never share a prefix. Nothing else names a
+service, and nothing names an image, a tag, a digest, a file path or a
+deployment. The route itself is never restructured: several backends behind
+one route each get their own key.
 
-The aggregator mounts each registered image, reads the document, and generates
-that service's artifacts with the host and mount path filled in, failing the
-rollout on an unprovided variable. It then serves the aggregate to Oathkeeper
-and Keto:
+The operator resolves each keyed backend to its Service and reads the document
+there, on the port its `backendRef` uses:
+
+```
+GET /.authz/openapi   → the document the service loaded, with an ETag
+```
+
+Asking the running service is what makes the answer the one in force: whichever
+document its configuration selected, whichever copy its resolver landed on,
+whatever its framework assembled from code. The host and mount path the rules
+match on come from the route's own hostnames and matches, and each rule
+contributes only the operations it can reach.
+
+A backend that cannot answer for itself — a third-party image, a static bundle
+— has its document named by the route: `iam.mojaloop.io/<backend>.schema`
+names an `AuthzDocument` in the route's namespace, and that resource is the
+backend's document. A resource no route names does nothing.
+`discovery.md` holds the rest: split rules, conflicts, and reading the route.
+
+From that the operator generates each service's artifacts and serves the
+aggregate to Oathkeeper and Keto:
 
 | generated | staged as |
 |---|---|
@@ -281,17 +306,24 @@ A UI registers the same way. It serves at least one route, so it has an OpenAPI
 document describing it, and the generator produces a whole-host rule from it:
 
 ```yaml
-- id: example-ui.getApp
+- id: exampleUi.getApp
   match:
     url: <http|https>://example.<domain><(?:/.*)?>
     methods: [GET]
   authenticators:
     - handler: cookie_session
   authorizer:
-    handler: allow
+    handler: remote_json
+    config:
+      payload: '{"namespace":"exampleUi","object":"__self__","relation":"getApp","subject_id":"{{ print .Subject }}","scope":[]}'
   mutators:
     - handler: header
 ```
+
+A static bundle answers no document of its own, so its chart renders an
+`AuthzDocument` for it and names it on the route. Opening the app to every
+signed-in human is then `$authenticated` holding `exampleUi.getApp`, which is a
+grant an operator can see and change rather than a property of the rule.
 
 CORS preflights carry no credentials and are answered before authorization, so
 the generator emits one credential-less OPTIONS rule per service. ext_authz runs
@@ -307,7 +339,7 @@ URL.
 |---|---|---|---|
 | decision | every request | read-only Keto | Oathkeeper, no route |
 | provisioning | rollout, resource creation | Keto write, Kratos admin | services, no public route |
-| aggregator | deploy | the registered images | the rollout |
+| operator | whenever a route or its endpoints change | read on routes and services | the API server |
 
 The decision endpoint is on the hot path and answers a rendered payload. The
 provisioning endpoint is not. It opens a rollout by applying the deployment's
@@ -316,15 +348,58 @@ administrator, and refuses to serve if a role names a permission no service
 advertises. From then on a service calls it when it creates a resource, naming
 it under the resource name the deployment configured into it, and assigns its
 configured roles over it explicitly. It runs single-replica, because applying roles clears and rewrites the
-grants of each role and two copies would interleave. The aggregator is a job
-that runs once per rollout.
+grants of each role and two copies would interleave. The operator runs for as
+long as the deployment does, since a route appearing or a rollout finishing is
+what it answers to.
 
 Services never link a Keto client. What they do link is `@mojaloop/authz`, a
-zero-dependency package holding the `X-Scope` contract in both directions, so
-the endpoint that writes the header and every service that reads it cannot
-disagree about what it means. It carries a round-trip test for exactly that,
-and it stays free of the generator, the Keto client and the provisioner, which
-would otherwise pull the whole toolchain into every service image.
+small package holding the `X-Scope` contract in both directions, so the
+endpoint that writes the header and every service that reads it cannot disagree
+about what it means. It carries a round-trip test for exactly that, and it
+stays free of the generator, the Keto client and the provisioner, which would
+otherwise pull the whole toolchain into every service image. It also answers
+the document request, from the same document the guard enforces.
+
+## Reachability
+
+Two questions, two mechanisms, no overlap: the network answers *may you
+connect*, and the gateway answers *may you do this*. Putting HTTP methods and
+paths in network policy would restate the rules derived from the documents in a
+second place, where they would drift.
+
+| layer | resource | owner |
+|---|---|---|
+| a Deny nothing overrides | `ClusterNetworkPolicy` `tier: Admin` | the platform, in `platform-config` |
+| who may reach a service | `NetworkPolicy` shipped with its chart | the service |
+| a floor under everything unpoliced | `ClusterNetworkPolicy` `tier: Baseline` | the platform |
+| FQDN egress and Envoy redirect | `CiliumNetworkPolicy` | the deployment |
+
+The per-service layer is a `NetworkPolicy` rather than a Cilium one because
+`mojaloop-common` installs on clusters this project does not run: a vendor CRD
+there is a chart that refuses to apply. Only the DFSP callback case needs what
+Cilium alone expresses, and it already lives in the deployment.
+
+An Admin-tier rule admits its callers with `Pass`, not `Accept`. `Accept` ends
+evaluation for both tiers, which would fix those callers as permanently allowed
+and stop a chart from ever narrowing them; `Pass` denies everything else in the
+tier nothing overrides and hands the rest down.
+
+Measured on Cilium 1.20.2 with `k8sClusterNetworkPolicy.enabled`, against a pod
+carrying a liveness probe:
+
+- a `NetworkPolicy` explicitly admitting a namespace the Admin tier denies does
+  not admit it
+- a caller the Admin tier passes is still refused by a `NetworkPolicy` that
+  does not name it
+- kubelet probes survive an Admin-tier Deny, which has no node selector to
+  admit them with
+
+Enabling it is `k8sClusterNetworkPolicy.enabled: true` in each substrate's
+Cilium values and the `network-policy-api` CRD vendored beside the Gateway API
+one.
+
+The Baseline floor makes an unpoliced workload unreachable rather than open, so
+a service is reachable only through a policy that names its callers.
 
 ## TLS
 

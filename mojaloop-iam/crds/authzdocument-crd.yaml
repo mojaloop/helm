@@ -30,14 +30,12 @@ spec:
       schema:
         openAPIV3Schema:
           description: >-
-            A service's authorization surface, for a service whose surface
-            changes while the deployment runs. What a chart mounts and what a
-            resource declares are read the same way, so a helm upgrade and a
-            kubectl apply reach the gateway by one path.
-
-            Who may write one is Kubernetes' answer: grant a service's
-            ServiceAccount write on its own document by name, and the API
-            server enforces that it cannot touch another's.
+            The OpenAPI document of a backend that does not serve its own: a
+            third-party image, or one that is not to be changed. It is read
+            only when an HTTPRoute in the same namespace names it with
+            iam.mojaloop.io/<backend>.schema, and the route's
+            iam.mojaloop.io/<backend>.service gives its operations their
+            permission prefix. A document no route names does nothing.
           type: object
           required: [spec]
           properties:
@@ -47,34 +45,26 @@ spec:
               properties:
                 document:
                   description: >-
-                    The service's OpenAPI document, as its own operator
-                    generated it. Annotated with x-authz, so it says which
-                    service it is and what each operation is scoped by.
-                  type: string
-                url:
-                  description: Where the service is served, which the gateway rules match on.
+                    The OpenAPI 3.1 or later document, written inline as YAML
+                    or JSON, with x-authz where an operation is scoped.
                   type: object
-                  properties:
-                    host:
-                      type: string
-                    path:
-                      type: string
+                  x-kubernetes-preserve-unknown-fields: true
             status:
               type: object
               properties:
                 service:
-                  description: The service the document declares.
+                  description: The permission prefixes the routes naming this document give it.
                   type: string
                 state:
                   description: >-
-                    Accepted when this document is part of what the gateway
-                    now enforces. Refused when it is wrong. Blocked when
-                    another document is wrong, since nothing is published
-                    while any of them is.
+                    Accepted when the gateway enforces what it describes.
+                    Refused when it, or a prefix it is read under, is wrong;
+                    that prefix keeps what it last composed to. Unreferenced
+                    when no route names it.
                   type: string
-                  enum: [Accepted, Refused, Blocked]
+                  enum: [Accepted, Refused, Unreferenced]
                 messages:
-                  description: What refused it, in the words the composer used.
+                  description: What refused it, in the words the operator used.
                   type: array
                   items:
                     type: string

@@ -7,6 +7,7 @@
 */}}
 {{- range $key, $process := dict "decision" .Values.decision "provisioning" .Values.provisioning }}
 {{- if $process.enabled }}
+{{- $webhook := and (eq $key "provisioning") (dig "webhook" "enabled" false $process) }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -29,11 +30,9 @@ spec:
         {{- with $.Values.global }}{{ with .iamRoles }}
         checksum/roles: {{ . | toJson | sha256sum }}
         {{- end }}{{ end }}
-        {{- /* The documents it composes are mounted, so a registered service
-               joining, leaving or moving re-composes on the next rollout */}}
         {{- if eq $key "provisioning" }}
-        {{- with $.Values.global }}{{ with .authz }}
-        checksum/authz: {{ . | toJson | sha256sum }}
+        {{- with $.Values.global }}{{ with .resourceNames }}
+        checksum/resource-names: {{ . | toJson | sha256sum }}
         {{- end }}{{ end }}
         {{- end }}
         {{- with $process.podAnnotations }}
@@ -79,17 +78,22 @@ spec:
           args:
             {{- toYaml $process.args | nindent 12 }}
             {{- if and (eq $key "provisioning") $.Values.global }}
-            {{- if $.Values.global.authz }}
-            - --registry=/registry/registry.yaml
-            {{- with $.Values.global.resourceNames }}
-            - --resource-names=/registry/resource-names.yaml
+            {{- if $.Values.global.resourceNames }}
+            - --resource-names=/resource-names/resource-names.yaml
             {{- end }}
             {{- end }}
+            {{- if $webhook }}
+            - --webhook-cert-dir=/webhook-tls
             {{- end }}
           ports:
             - name: http
               containerPort: {{ $process.service.targetPort }}
               protocol: TCP
+            {{- if $webhook }}
+            - name: webhook
+              containerPort: 9443
+              protocol: TCP
+            {{- end }}
           env:
             {{- range $name, $value := $process.env }}
             - name: {{ $name }}
@@ -129,16 +133,16 @@ spec:
             {{- toYaml . | nindent 12 }}
             {{- end }}
             {{- if and (eq $key "provisioning") $.Values.global }}
-            {{- if $.Values.global.authz }}
-            - name: registry
-              mountPath: /registry
-              readOnly: true
-            {{- range $.Values.global.authz }}
-            - name: authz-{{ .name }}
-              mountPath: /authz/{{ .name }}
+            {{- if $.Values.global.resourceNames }}
+            - name: resource-names
+              mountPath: /resource-names
               readOnly: true
             {{- end }}
             {{- end }}
+            {{- if $webhook }}
+            - name: webhook-tls
+              mountPath: /webhook-tls
+              readOnly: true
             {{- end }}
           {{- with $process.startupProbe }}
           startupProbe:
@@ -155,19 +159,16 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- if and (eq $key "provisioning") $.Values.global }}
-        {{- if $.Values.global.authz }}
-        - name: registry
+        {{- if $.Values.global.resourceNames }}
+        - name: resource-names
           configMap:
-            name: authz-registry
-        {{- /* Name these by digest: the rules are derived from what they
-               resolve to, and re-derived when they change */}}
-        {{- range $.Values.global.authz }}
-        - name: authz-{{ .name }}
-          image:
-            reference: {{ .image }}
-            pullPolicy: IfNotPresent
+            name: authz-resource-names
         {{- end }}
         {{- end }}
+        {{- if $webhook }}
+        - name: webhook-tls
+          secret:
+            secretName: {{ include "ml-iam-services.fullname" $ }}-webhook-tls
         {{- end }}
       {{- with $process.nodeSelector }}
       nodeSelector:
@@ -196,6 +197,12 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    {{- if $webhook }}
+    - port: 443
+      targetPort: webhook
+      protocol: TCP
+      name: webhook
+    {{- end }}
   selector:
     {{- include "ml-iam-services.selectorLabels" $ | nindent 4 }}
     app.kubernetes.io/component: {{ $key }}

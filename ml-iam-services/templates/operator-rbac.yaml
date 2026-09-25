@@ -1,12 +1,9 @@
 {{- if .Values.provisioning.enabled }}
 {{- /*
-  What the IAM may do in the cluster: read the documents services declare,
-  say what became of each one, and publish what it composed. It writes no
-  workload and reads no secret, so a compromised IAM cannot become a
-  cluster-wide reader.
-
-  Which service may declare which document is the API server's answer, from
-  each service's own Role, not from anything here.
+  What the IAM may do in the cluster: read the routes, the gateways they attach
+  to and the documents routes name, wherever they are; say on each route and
+  document what became of it; and publish what it composed into its own
+  namespace. No rule here reaches a secret or a workload.
 */}}
 apiVersion: v1
 kind: ServiceAccount
@@ -24,12 +21,6 @@ metadata:
   labels:
     {{- include "ml-iam-services.labels" . | nindent 4 }}
 rules:
-  - apiGroups: ["mojaloop.io"]
-    resources: ["authzdocuments"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["mojaloop.io"]
-    resources: ["authzdocuments/status"]
-    verbs: ["get", "patch", "update"]
   # The composed rules and catalog, which the gateway and Keto read
   - apiGroups: [""]
     resources: ["configmaps"]
@@ -45,6 +36,41 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
+  name: {{ include "ml-iam-services.fullname" . }}-provisioning
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "ml-iam-services.fullname" . }}-provisioning
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "ml-iam-services.fullname" . }}-provisioning
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["mojaloop.io"]
+    resources: ["authzdocuments"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["mojaloop.io"]
+    resources: ["authzdocuments/status"]
+    verbs: ["get", "patch", "update"]
+  - apiGroups: ["gateway.networking.k8s.io"]
+    resources: ["httproutes", "gateways"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "ml-iam-services.fullname" . }}-provisioning
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
   name: {{ include "ml-iam-services.fullname" . }}-provisioning
 subjects:
   - kind: ServiceAccount

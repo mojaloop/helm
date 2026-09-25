@@ -10,6 +10,7 @@ kind: HTTPRoute
 metadata:
   name: {{ template "ml-testing-toolkit-frontend.fullname" . }}
   namespace: {{ .Release.Namespace | quote }}
+  {{- include "mojaloop-common.authz.annotations" (dict "backend" (include "ml-testing-toolkit-frontend.fullname" .) "authz" .Values.authz) | nindent 2 }}
 spec:
   parentRefs:
     {{- toYaml .Values.gateway.parentRefs | nindent 4 }}

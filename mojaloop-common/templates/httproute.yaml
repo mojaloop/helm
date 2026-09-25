@@ -10,6 +10,7 @@
 
   The caller passes its own fullname because each chart names its Service with
   its own helper, and the route's backendRef has to resolve to that Service.
+  The chart's authz values key that backend for the IAM (see authzdocument.yaml).
 
   The decision endpoint's whole response is copied onto the request, so what a
   decision carries stays between it and the service that reads it.
@@ -52,6 +53,7 @@ metadata:
     app.kubernetes.io/name: {{ .context.Chart.Name }}
     app.kubernetes.io/instance: {{ .context.Release.Name }}
     app.kubernetes.io/managed-by: {{ .context.Release.Service }}
+  {{- include "mojaloop-common.authz.annotations" (dict "backend" .fullname "authz" .context.Values.authz) | nindent 2 }}
 {{- end }}
 
 {{- define "mojaloop-common.httproute" -}}
@@ -72,5 +74,9 @@ spec:
       backendRefs:
         - name: {{ $fullname }}
           port: {{ $ctx.Values.service.port }}
+{{- with include "mojaloop-common.authzdocument" (dict "context" $ctx "backend" $fullname "authz" $ctx.Values.authz) }}
+---
+{{ . }}
+{{- end }}
 {{- end }}
 {{- end }}

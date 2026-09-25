@@ -1,31 +1,11 @@
-# Authorization is derived: each service's image carries its OpenAPI document
-# (read via ImageVolume so scratch images work), and the IAM composes every
-# registered document into this deployment's gateway rules, Keto model and
-# catalog. A permission id two services claim, a request two services both
-# match, or a resource type nothing accounts for fails the rollout.
-#
-# The deployment supplies the list, one entry per service:
-#
-#   - name: <service name>
-#     image: <image carrying the document>
-#     spec: <path to the document inside that image>
-#     url:
-#       host: <hostname the rules match>          # required
-#       path: <mount point under a shared host>   # optional, omit at the root
-#
-# A micro-frontend adds a portal block, read as the remote manifest by the
-# shell that composes it:
-#
-#     portal:
-#       path: <where the shell mounts it>
-#       label: <menu entry>
-#       scope: <federated container it exposes>
-#       permission: <namespace>:<object>#<permit>   # optional, gates the entry
+# Authorization is derived: an HTTPRoute keys each backend it sends traffic to
+# with iam.mojaloop.io/<backend>.service, the backend serves its OpenAPI
+# document or the route names an AuthzDocument, and the IAM composes every
+# keyed backend into this deployment's gateway rules, Keto model and catalog.
 #
 # Ad-hoc rules outside a bundle go in as oathkeeper.ory.sh Rule CRs (maester
 # controller mode)
 global:
-  authz: []
   # One real thing under several services' names, so an operator picks it once
   # and every service's spelling of it is bound. A type no path binds is
   # legitimate and has to appear here for the rollout to accept it.

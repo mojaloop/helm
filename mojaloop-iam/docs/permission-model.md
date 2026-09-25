@@ -14,9 +14,11 @@ Everything else asks, or moves bytes.
 One method on one endpoint pattern is one permission. GET and PUT on the same
 path are different permissions. This is Kubernetes-verbs and AWS-actions
 granularity: a mid-sized service advertises roughly one permission per API
-operation, the catalog is long, and that is correct. Anonymous infrastructure
-routes, health probes and CORS preflights, are not permissions and never
-appear in a catalog.
+operation, the catalog is long, and that is correct. An operation open to
+everyone is a permission like any other, held by the `$everyone` role, so a
+health probe appears in the catalog and is granted rather than exempted. A CORS
+preflight carries no credential and is answered before authorization, and is
+the one thing that is not a permission.
 
 A permission has two spellings and they are not interchangeable:
 
@@ -26,14 +28,17 @@ example.getWidgetCa   the permission id: the gateway rule id, the catalog key,
 getWidgetCa           the relation: what a stored tuple holds, what a check asks
 ```
 
-The id is the relation prefixed with the service. The prefix keeps ids unique
+The id is the relation prefixed with the service, and the service is the value
+the route's annotation gives the backend serving the operation
+(`iam.mojaloop.io/<backend>.service`). The prefix keeps ids unique
 across a deployment; the relation lives inside the service's own namespace and
 needs no prefix. Anything reading the catalog and writing tuples has to
 convert between them.
 
-By default the relation is the `operationId`. An operation may pin a different
-one, which is what lets a handler be renamed without rewriting every role that
-references it.
+The relation is the `operationId`, which puts an operationId inside the
+authorization contract: renaming one retires a permission and introduces
+another. The platform reports that as the breaking change it is, and a
+deployment moves its roles across in two phases while both revisions serve.
 
 ## The API document is the only authored artifact
 
@@ -41,21 +46,23 @@ A service repository contains no rules file, no permission model, and no
 roles. It contains its OpenAPI document, and the platform generates the rest
 at deploy time.
 
-`x-authz` accepts exactly four keys and rejects everything else at build
-time — two at the document root, two on an operation:
+`x-authz` accepts exactly two keys and rejects everything else at build
+time — one at the document root, one on an operation:
 
 ```yaml
 x-authz:
-  service: example              # root: the namespace and id prefix
   resourceTypes: [widgets]      # root: every resource type the operations use
 
 paths:
   /widgets/{widgetId}/ca:
     get:
       x-authz:
-        permission: issueCert            # the relation, replacing the operationId
         scopedBy: [{ widgets: widgetId }] # the types scoping this answer
 ```
+
+A document names no service. Which prefix its operations answer under is the
+route's to say, per backend, since only the deployment holds it. A prefix
+belongs to one Kubernetes Service, so two apps never share one.
 
 `resourceTypes` is the document's whole vocabulary, authored once and checked
 both ways: an operation using a type outside it fails the build — which is
@@ -69,11 +76,11 @@ parameter must exist on the path. A bare `type` declares the type unbound. A
 bare entry naming a type the path binds is refused, because it would read as
 bound and not be.
 
-Two things are declared in native OpenAPI rather than in `x-authz`, because
-OpenAPI already has words for them. `security: []` on an operation makes it
-anonymous, and no permission exists for it. The security schemes an operation
-lists become its authenticators: an `apiKey` in a cookie is a browser session,
-an `http`/`bearer` JWT is a machine token.
+A document says nothing about how a caller proves who they are. Its own
+`security` is documentation for whoever reads or generates against it, and
+nothing in this platform treats it as authorization input: which credentials an
+endpoint accepts is the deployment's, which knows what identity it runs, and
+what a caller may then do is the role's.
 
 ```yaml
 paths:
@@ -81,9 +88,6 @@ paths:
     get:
       operationId: getWidgetCa
       summary: Returns the widget CA certificates   # shown in the role UI
-      security:
-      - session: []
-      - machineToken: []
 ```
 
 ## `scopedBy` is the whole story
@@ -200,9 +204,11 @@ That is the whole model: three shared classes and one empty class per service.
 It is this small because of what Keto actually enforces, verified against
 `ory/keto` v26.2.0 rather than inferred.
 
-A service name is a class name, so it is checked against what a class may be
-called. A hyphen would produce a file Keto cannot parse, and a file it cannot
-parse takes the whole staged model with it.
+A class name is a deterministic safe encoding of the service name, so the name
+a route gives a backend is not limited to what a class may be called. A hyphen
+in a class name would produce a file Keto cannot parse, and a file it cannot
+parse takes the whole staged model with it. A name that is already a valid
+class name encodes to itself, so stored tuples never move.
 
 **Namespaces are enforced.** A write to an undeclared namespace is rejected
 with `404 Unknown namespace`. This is the only reason the file exists.
@@ -240,7 +246,9 @@ Per service, from the one document:
 Every rule is the same skeleton; only the payload varies. Rules never name
 infrastructure: no remote URL, no header lists, no per-rule handler
 configuration beyond the payload. The decision endpoint's address and the
-forwarded headers are global platform configuration.
+forwarded headers are global platform configuration, and so is the
+`authenticators` list, which names the credentials the deployment accepts on an
+authorized route.
 
 ```yaml
 - id: example.getWidgetCa
@@ -406,6 +414,12 @@ the same IAM APIs.
 
 ```yaml
 roles:
+  $everyone:
+    grants:
+      - permission: example.getHealth
+  $authenticated:
+    grants:
+      - permission: example.getCurrentUser
   hub-operator:
     grants:
       - permission: example.getWidgets
@@ -424,6 +438,16 @@ roles:
 assignments:
   - { subject: <identity id>, role: widget-operator, resources: { Widget: w7 } }
 ```
+
+`$everyone` and `$authenticated` are reserved, and what they mean is the
+platform's rather than a naming convention. `$everyone` is in effect for every
+request; `$authenticated` for every request carrying an identity the deployment
+accepts. Neither can be created, renamed, deleted or assigned to anybody, and
+between them they are how an operation reaches a caller holding no ordinary
+role: a health probe through the first, a "which permissions do I hold"
+endpoint through the second. An operation nothing grants is reachable by
+nobody, which is what makes a new operation held by nobody until a deployment
+says otherwise.
 
 A grant names a permission from the catalog and, per resource name the
 permission is scoped by, either names the resources — `all`, one id, a list —
@@ -700,10 +724,11 @@ are kept disjoint.
 Every build verifies, against the service's API document and the generated
 artifacts:
 
-- `x-authz` carries only the four permitted keys, at the permitted levels
-- every operation declares `security` explicitly, and every non-anonymous
-  operation has a summary, since the summary is what a human reads in the role
-  UI
+- `x-authz` carries only the two permitted keys, at the permitted levels
+- every operation has a summary, since the summary is what a human reads in the
+  role UI
+- every backend the platform authorizes is keyed on its route, and every rule
+  reaching it carries the `ExternalAuth` filter
 - a typed document authors `x-authz.resourceTypes`, and it equals the set its
   operations use — a type one operation misspells fails the build naming the
   operation, a listed type nothing uses fails the same way
@@ -724,7 +749,7 @@ artifacts:
   direction, and all matches are mutually disjoint
 - `allOf` checks appear in capture order, each index pointing at the capture
   group whose name matches its type
-- `noop` appears only on anonymous routes
+- `noop` appears only on the CORS preflight rule
 - shared `User` and `Role` declarations are byte-identical across services
 - a throwaway Keto boots against the concatenated model and `GET /namespaces`
   lists every expected namespace, guarding the parser's silent-drop failure

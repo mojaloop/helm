@@ -1,0 +1,15 @@
+{{- /*
+  The deployment's names for one real thing that services spell differently.
+  The IAM composes every routed service's document against them.
+*/}}
+{{- with .Values.global.resourceNames }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authz-resource-names
+  namespace: {{ $.Release.Namespace }}
+data:
+  resource-names.yaml: |
+    resourceNames:
+      {{- toYaml . | nindent 6 }}
+{{- end }}
