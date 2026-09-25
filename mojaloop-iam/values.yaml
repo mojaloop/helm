@@ -167,6 +167,17 @@ oathkeeper:
   # serves an empty rule set as 404, which is the right answer for a platform
   # that has not composed yet.
   deployment:
+    customStartupProbe:
+      httpGet:
+        path: /health/alive
+        port: http-api
+        httpHeaders:
+          - name: Host
+            value: '127.0.0.1'
+      failureThreshold: 5
+      successThreshold: 1
+      timeoutSeconds: 2
+      initialDelaySeconds: 1
     extraVolumes:
       - name: authz-rules
         configMap:
