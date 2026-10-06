@@ -34,6 +34,9 @@ spec:
         {{- with $.Values.global }}{{ with .resourceNames }}
         checksum/resource-names: {{ . | toJson | sha256sum }}
         {{- end }}{{ end }}
+        {{- with $.Values.global }}{{ with .iamMigrations }}
+        checksum/migrations: {{ . | toJson | sha256sum }}
+        {{- end }}{{ end }}
         {{- end }}
         {{- with $process.podAnnotations }}
         {{- toYaml . | nindent 8 }}
@@ -80,6 +83,9 @@ spec:
             {{- if and (eq $key "provisioning") $.Values.global }}
             {{- if $.Values.global.resourceNames }}
             - --resource-names=/resource-names/resource-names.yaml
+            {{- end }}
+            {{- if $.Values.global.iamMigrations }}
+            - --migrations=/migrations/migrations.json
             {{- end }}
             {{- end }}
             {{- if $webhook }}
@@ -138,6 +144,11 @@ spec:
               mountPath: /resource-names
               readOnly: true
             {{- end }}
+            {{- if $.Values.global.iamMigrations }}
+            - name: migrations
+              mountPath: /migrations
+              readOnly: true
+            {{- end }}
             {{- end }}
             {{- if $webhook }}
             - name: webhook-tls
@@ -163,6 +174,11 @@ spec:
         - name: resource-names
           configMap:
             name: authz-resource-names
+        {{- end }}
+        {{- if $.Values.global.iamMigrations }}
+        - name: migrations
+          configMap:
+            name: authz-migrations
         {{- end }}
         {{- end }}
         {{- if $webhook }}

@@ -7,30 +7,12 @@
     "global": {
       "type": "object",
       "properties": {
-        "authz": {
-          "description": "The services this deployment runs, one entry each.",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["name", "image", "spec", "url"],
-            "additionalProperties": true,
-            "properties": {
-              "name": { "type": "string", "minLength": 1 },
-              "image": { "type": "string", "minLength": 1 },
-              "spec": {
-                "description": "Where the OpenAPI document sits inside that image.",
-                "type": "string",
-                "pattern": "^/"
-              },
-              "url": {
-                "type": "object",
-                "required": ["host"],
-                "properties": {
-                  "host": { "type": "string", "minLength": 1 },
-                  "path": { "type": "string", "pattern": "^/" }
-                }
-              }
-            }
+        "iamMigrations": {
+          "description": "Where the grants of a renamed or removed permission go: the new permission id, or null to drop them.",
+          "type": "object",
+          "propertyNames": { "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*\\.[^.]+$" },
+          "additionalProperties": {
+            "anyOf": [{ "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*\\.[^.]+$" }, { "type": "null" }]
           }
         },
         "resourceNames": {
