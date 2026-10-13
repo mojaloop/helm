@@ -113,9 +113,27 @@
     },
     "PROXY_CACHE": {{ .Values.config.proxy_cache | toPrettyJson | nindent 2 }},
     "API_DOC_ENDPOINTS_ENABLED": true,
-    "LEDGER": {{ .Values.config.ledger_mode | quote }},
-    "TIGERBEETLE_ADDRESSES": {{ .Values.config.tigerbeetle_addresses | quote }},
-    "TIGERBEETLE_CLUSTER_ID": {{ .Values.config.tigerbeetle_cluster_id | quote }},
+    {{- if eq .Values.config.ledger_mode "NONE" }}
+    "HANDLERS_TRANSFER_DISPATCH_MODE": "JOINED",
+    "HANDLERS_TRANSFER_POSITION_FUSE": "UNFUSE",
+    "API_MODE_ADMIN": "NONE",
+    "API_MODE_SETTLEMENT": "NONE",
+    "LEDGER": "SQL",
+    {{- else if eq .Values.config.ledger_mode "SQL" }}
+    "HANDLERS_TRANSFER_DISPATCH_MODE": "SPLIT",
+    "HANDLERS_TRANSFER_POSITION_FUSE": "FUSE",
+    "API_MODE_ADMIN": "LEDGER",
+    "API_MODE_SETTLEMENT": "LEDGER",
+    "LEDGER": "SQL",
+    {{- else if eq .Values.config.ledger_mode "TIGERBEETLE" }}
+    "HANDLERS_TRANSFER_DISPATCH_MODE": "SPLIT",
+    "HANDLERS_TRANSFER_POSITION_FUSE": "FUSE",
+    "API_MODE_ADMIN": "LEDGER",
+    "API_MODE_SETTLEMENT": "LEDGER",
+    "LEDGER": "TIGERBEETLE",
+    {{- end }}
+    "TIGERBEETLE_ADDRESSES": {{ .Values.config.tigerbeetle_addresses | default "" | quote }},
+    "TIGERBEETLE_CLUSTER_ID": {{ .Values.config.tigerbeetle_cluster_id | default "0" | quote }},
     "KAFKA": {
         "EVENT_TYPE_ACTION_TOPIC_MAP" : {
             "POSITION":{
