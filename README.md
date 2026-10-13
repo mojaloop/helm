@@ -82,25 +82,73 @@ Refer to [example-mojaloop-backend/README.md#installation](./example-mojaloop-ba
 
 The following Helm Charts have the following external dependencies:
 
-| Chart                       | Dependency            | Notes                                                                                                                                                                     |
-| --------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Account-Lookup-Service      | MySQL                 |                                                                                                                                                                           |
-| Quoting-Service             | MySQL                 |                                                                                                                                                                           |
-| ML-API-Adapter              | Kafka                 |                                                                                                                                                                           |
-| Central-Ledger              | Kafka, MySQL, MongoDB |                                                                                                                                                                           |
-| Central-Settlements         | MySQL                 |                                                                                                                                                                           |
-| Central-Event-Processor     | Kafka, MongoDB        |                                                                                                                                                                           |
-| Transaction-Request-Service | N/A                   |                                                                                                                                                                           |
-| Thirdparty Auth-Service     | Redis, MySQL          |                                                                                                                                                                           |
-| Thirdparty Consent Oracle   | MySQL                 |                                                                                                                                                                           |
-| Thirdparty SDK              | N/A                   |                                                                                                                                                                           |
-| Simulator                   | N/A                   |                                                                                                                                                                           |
-| Mojaloop-Simulator          | Redis                 | There is a dependency on Redis, however due to the dynamic nature of the Mojaloop-Simulator, a Redis container will be created dynamically for each configured Simulator. |
-| Mojaloop-Testing-Toolkit    | MongoDB               |                                                                                                                                                                           |
-| Mojaloop-TTK-Simulators     | Redis, MongoDB        |                                                                                                                                                                           |
-| SDK-Scheme-Adapter          | Redis, Kafka          |                                                                                                                                                                           |
-| Bulk-API-Adapter            | Kafka, MongoDB        |                                                                                                                                                                           |
-|                             |                       |                                                                                                                                                                           |
+| Chart                       | Dependency                         | Notes                                                                                                                                                                     |
+| --------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Account-Lookup-Service      | MySQL                              |                                                                                                                                                                           |
+| Quoting-Service             | MySQL                              |                                                                                                                                                                           |
+| ML-API-Adapter              | Kafka                              |                                                                                                                                                                           |
+| Central-Ledger              | Kafka, MySQL, MongoDB, TigerBeetle | TigerBeetle is only required with LEDGER_MODE is `TIGERBEETLE` or `LOCKSTEP`.                                                                                             |
+| Central-Settlements         | MySQL, TigerBeetle                 | TigerBeetle is only required with LEDGER_MODE is `TIGERBEETLE` or `LOCKSTEP`.                                                                                             |
+| Central-Event-Processor     | Kafka, MongoDB                     |                                                                                                                                                                           |
+| Transaction-Request-Service | N/A                                |                                                                                                                                                                           |
+| Thirdparty Auth-Service     | Redis, MySQL                       |                                                                                                                                                                           |
+| Thirdparty Consent Oracle   | MySQL                              |                                                                                                                                                                           |
+| Thirdparty SDK              | N/A                                |                                                                                                                                                                           |
+| Simulator                   | N/A                                |                                                                                                                                                                           |
+| Mojaloop-Simulator          | Redis                              | There is a dependency on Redis, however due to the dynamic nature of the Mojaloop-Simulator, a Redis container will be created dynamically for each configured Simulator. |
+| Mojaloop-Testing-Toolkit    | MongoDB                            |                                                                                                                                                                           |
+| Mojaloop-TTK-Simulators     | Redis, MongoDB                     |                                                                                                                                                                           |
+| SDK-Scheme-Adapter          | Redis, Kafka                       |                                                                                                                                                                           |
+| Bulk-API-Adapter            | Kafka, MongoDB                     |                                                                                                                                                                           |
+|                             |                                    |                                                                                                                                                                           |
+
+#### Deploying TigerBeetle
+
+When `LEDGER_MODE` is set to `TIGERBEETLE` or `LOCKSTEP`, the Central-Settlements services will use
+the [TigerBeetle](https://docs.tigerbeetle.com/) OLTP database for the clearing engine in
+Central-Ledger.
+
+TigerBeetle is a highly available, high performance transactions processing database. It's a 
+replicated state machine, which runs across 1-6 replicas. 
+
+TigerBeetle does not recommend using Helm or Kubernetes to deploy and manage a TigerBeetle cluster,
+the key reasons for are:
+1. **Simplicity**: TigerBeetle ships as a single binary and doesn't require containerization to make
+   it easy to run.
+2. **Safety**: Helm and Kubernetes increase the failure surface area, for example through
+   accidentally deleted Persistent Volumes, or operations run against the wrong k8s context.
+3. **Built in Replication and High Availability** TigerBeetle replicates data and stays avaiable
+   using the [Viewstamped Replication (VSR)](https://dspace.mit.edu/entities/publication/80846d94-fcd3-40e6-87fb-8d91fe99a5d1)
+   consensus protocol, so it doesn't need Kubernetes for high availability.
+
+   Running TigerBeetle on Kubernetes also stacks two consensus-based systems on top of one other.
+   Kubernetes can restart, evict, or reschedule pods, or reattach volumes, without any knowledge
+   of VSR quorum state, thus undermining TigerBeetle's availability and durability guarantees.
+
+A 3-replica TigerBeetle cluster can be run on a single linux machine like so:
+(this example was taken from [TigerBeetle Documentation](https://docs.tigerbeetle.com/operating/deploying/))
+
+```bash
+curl -Lo tigerbeetle.zip https://linux.tigerbeetle.com && unzip tigerbeetle.zip && ./tigerbeetle version
+./tigerbeetle format --cluster=0 --replica-count=3 --replica=0 ./0_0.tigerbeetle
+./tigerbeetle format --cluster=0 --replica-count=3 --replica=1 ./0_1.tigerbeetle
+./tigerbeetle format --cluster=0 --replica-count=3 --replica=2 ./0_2.tigerbeetle
+
+./tigerbeetle start --addresses=127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002 ./0_0.tigerbeetle &
+./tigerbeetle start --addresses=127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002 ./0_1.tigerbeetle &
+./tigerbeetle start --addresses=127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002 ./0_2.tigerbeetle &
+```
+
+In this example, in `values.yaml`, would then be:
+- `CL_TIGERBEETLE_ADDRESSES`:  `"127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002"`
+- `CL_TIGERBEETLE_CLUSTER_ID`: `"0"`
+
+Production deployment differs in three aspects (see [Cluster Recommendations](https://docs.tigerbeetle.com/operating/cluster/)):
+
+- Each replica runs on a dedicated machine.
+- Six replicas are used rather than three.
+- There’s a supervisor process to restart a replica process after a crash.
+
 
 ### Deploying Mojaloop Helm Charts
 

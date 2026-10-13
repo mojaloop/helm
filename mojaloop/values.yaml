@@ -132,6 +132,38 @@ CONFIG:
   ## to ensure normal single-scheme functionalities/validations work as expected, and vise versa.
   interscheme_enabled: &INTERSCHEME_ENABLED false
 
+  ## LEDGER: 
+  ## Controls the ledger interface of the central-ledger and central-settlement.
+  ## - NONE        : (default) Separates./ position handler from prepare and fulfil handlers. Existing
+  ##                 handling of Admin, FSPIOP and Settlement APIs remains untouched.
+  ## - SQL         : Fuses together prepare + position and fulfil + position handlers. 
+  ##                 Central-ledger will use the LedgerSQL implementation for the Admin, FSPIOP and
+  ##                 Settlement APIs. 
+  ## - LOCKSTEP    : (Not yet implemented) Placeholder for the LedgerLockstep experimental 
+  ##                 implementation. Runs LedgerSQL and LedgerTigerBeetle in lock step with one
+  ##                 another for verification purposes.
+  ## - TIGERBEETLE : (Experimental) Central-ledger will use the LedgerTigerBeetle implementation for
+  ##                 the Admin, FSPIOP and Settlement APIs. Requires a central-ledger TIGERBEETLE
+  ##                 configuration to be set.
+  ##                 Not to be used for production deployments. This will become the default 
+  ##                 `ledger_mode` in future releases.
+  ledger_mode: &LEDGER_MODE 'SQL'
+
+  ## cl_tigerbeetle_addresses:
+  ##
+  ## A comma separated string of TigerBeetle replica addresses. Note that TigerBeetle requires IPv4 
+  ## or IPv6, and doesn't support DNS names.
+  ## For example,
+  ## - "3000"                                                    Single replica cluster at 127.0.0.1:3000
+  ## - "172.25.0.100:3000,172.25.0.101:3000,172.25.1.100:3000"   3 replica cluster at 172.X.X
+  cl_tigerbeetle_addresses: &CL_TIGERBEETLE_ADDRESSES ''
+
+  ## cl_tigerbeetle_cluster_id:
+  ##
+  ## A TigerBeetle Cluster ID is a 128 bit unsigned integer. For safely parsing in
+  ## YAML, we specify it as a string and serialize as a BigInt in Central-Ledger.
+  cl_tigerbeetle_cluster_id: &CL_TIGERBEETLE_CLUSTER_ID "0"
+
   ## PROXY CACHE
   proxy_cache: &PROXY_CACHE
     enabled: *INTERSCHEME_ENABLED
@@ -2408,7 +2440,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.14.0
+      tag: v21.0.0-tigerbeetle.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2424,7 +2456,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/api/index.js"]'
+    command: '["node", "dist/api_admin/index.js"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -2440,7 +2472,7 @@ centralledger:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        - src/api/index.js
+        - src/api_admin/index.js
 
       ## @param diagnosticMode.debug config to override all debug information
       ##
@@ -2564,6 +2596,10 @@ centralledger:
 
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
+
+      ledger_mode: *LEDGER_MODE
+      tigerbeetle_addresses: *CL_TIGERBEETLE_ADDRESSES
+      tigerbeetle_cluster_id: *CL_TIGERBEETLE_CLUSTER_ID
 
     ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -2701,7 +2737,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.14.0
+      tag: v21.0.0-tigerbeetle.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -2717,7 +2753,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "handler", "--prepare"]'
+    command: '["node", "dist/handlers/index.js", "handler", "--prepare"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -2733,7 +2769,7 @@ centralledger:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        - src/handlers/index.js
+        - dist/handlers/index.js
         - handler
         - '--prepare'
 
@@ -2859,6 +2895,8 @@ centralledger:
 
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
+
+      ledger_mode: *LEDGER_MODE
 
       ## Enable On-Us transfers
       enable_on_us_transfers: false
@@ -2986,12 +3024,12 @@ centralledger:
     # This is a YAML-formatted file.
 
     # Declare variables to be passed into your templates.
-    enabled: true
+    enabled: false
 
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.14.0
+      tag: v21.0.0-tigerbeetle.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3007,7 +3045,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "handler", "--position"]'
+    command: '["node", "dist/handlers/index.js", "handler", "--position"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -3150,6 +3188,8 @@ centralledger:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
+      ledger_mode: *LEDGER_MODE
+
     ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     ## The initContainers configuration comes from the corresponding sub chart.
@@ -3211,7 +3251,7 @@ centralledger:
       sessionAffinityConfig: {}
 
     ingress:
-      enabled: true
+      enabled: false
       ## @param ingress.pathType Ingress path type
       ##
       pathType: ImplementationSpecific
@@ -3279,7 +3319,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.14.0
+      tag: v21.0.0-tigerbeetle.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3295,7 +3335,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "handler", "--positionbatch"]'
+    command: '["node", "dist/handlers/index.js", "handler", "--positionbatch"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -3438,6 +3478,8 @@ centralledger:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
+      ledger_mode: *LEDGER_MODE
+
       ## BATCH_PROCESSING: Custom configuration for batch processing
       # The batch size to be requested by the Kafka consumer.
       batch_size: *BATCH_SIZE
@@ -3505,7 +3547,7 @@ centralledger:
       sessionAffinityConfig: {}
 
     ingress:
-      enabled: true
+      enabled: false
       ## @param ingress.pathType Ingress path type
       ##
       pathType: ImplementationSpecific
@@ -3572,7 +3614,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.14.0
+      tag: v21.0.0-tigerbeetle.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3588,7 +3630,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "handler", "--get"]'
+    command: '["node", "dist/handlers/index.js", "handler", "--get"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -3731,6 +3773,8 @@ centralledger:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
+      ledger_mode: *LEDGER_MODE
+
     ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     ## The initContainers configuration comes from the corresponding sub chart.
@@ -3859,7 +3903,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.14.0
+      tag: v21.0.0-tigerbeetle.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -3875,7 +3919,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "handler", "--fulfil"]'
+    command: '["node", "dist/handlers/index.js", "handler", "--fulfil"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -4018,6 +4062,8 @@ centralledger:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
+      ledger_mode: *LEDGER_MODE
+
     ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     ## The initContainers configuration comes from the corresponding sub chart.
@@ -4146,7 +4192,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.14.0
+      tag: v21.0.0-tigerbeetle.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -4162,7 +4208,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "handler", "--timeout"]'
+    command: '["node", "dist/handlers/index.js", "handler", "--timeout"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -4310,6 +4356,8 @@ centralledger:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
+      ledger_mode: *LEDGER_MODE
+
     ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     ## The initContainers configuration comes from the corresponding sub chart.
@@ -4438,7 +4486,7 @@ centralledger:
     image:
       registry: docker.io
       repository: mojaloop/central-ledger
-      tag: v19.14.0
+      tag: v21.0.0-tigerbeetle.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -4454,7 +4502,7 @@ centralledger:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "handler", "--admin"]'
+    command: '["node", "dist/handlers/index.js", "handler", "--admin"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -4597,6 +4645,8 @@ centralledger:
       ## Proxy cache configuration
       proxy_cache: *PROXY_CACHE
 
+      ledger_mode: *LEDGER_MODE
+
     ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     ## The initContainers configuration comes from the corresponding sub chart.
@@ -4723,8 +4773,8 @@ centralsettlement:
 
     image:
       registry: docker.io
-      repository: mojaloop/central-settlement
-      tag: v17.4.0
+      repository: mojaloop/central-ledger
+      tag: v21.0.0-tigerbeetle.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -4740,7 +4790,7 @@ centralsettlement:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/api/index.js"]'
+    command: '["node", "dist/api_admin/index.js"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -4756,7 +4806,7 @@ centralsettlement:
       ##
       args:
         - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        - src/api/index.js
+        - src/api_admin/index.js
 
       ## @param diagnosticMode.debug config to override all debug information
       ##
@@ -4767,16 +4817,16 @@ centralsettlement:
     readinessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
-      initialDelaySeconds: 60
-      periodSeconds: 15
+        path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 5
 
     livenessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
-      initialDelaySeconds: 60
-      periodSeconds: 15
+        path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 5
 
     ## Pod scheduling preferences.
     ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -4978,6 +5028,8 @@ centralsettlement:
         include_cause_extension: false
         truncate_extensions: true
 
+      ledger_mode: *LEDGER_MODE
+
     ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     ## The initContainers configuration comes from the corresponding sub chart.
@@ -5101,8 +5153,8 @@ centralsettlement:
 
     image:
       registry: docker.io
-      repository: mojaloop/central-settlement
-      tag: v17.4.0
+      repository: mojaloop/central-ledger
+      tag: v21.0.0-tigerbeetle.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -5118,7 +5170,7 @@ centralsettlement:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "h", "--deferredSettlement"]'
+    command: '["node", "dist/settlement/handlers/index.js", "h", "--deferredSettlement"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -5147,14 +5199,14 @@ centralsettlement:
     readinessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
     livenessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
@@ -5358,6 +5410,8 @@ centralsettlement:
         include_cause_extension: false
         truncate_extensions: true
 
+      ledger_mode: *LEDGER_MODE
+
     ## @param initContainers
     ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
     ## The initContainers configuration comes from the corresponding sub chart.
@@ -5483,8 +5537,8 @@ centralsettlement:
 
     image:
       registry: docker.io
-      repository: mojaloop/central-settlement
-      tag: v17.4.0
+      repository: mojaloop/central-ledger
+      tag: v21.0.0-tigerbeetle.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -5500,7 +5554,7 @@ centralsettlement:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "h", "--grossSettlement"]'
+    command: '["node", "dist/settlement/handlers/index.js", "h", "--grossSettlement"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -5529,14 +5583,14 @@ centralsettlement:
     readinessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
     livenessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
@@ -5865,8 +5919,8 @@ centralsettlement:
 
     image:
       registry: docker.io
-      repository: mojaloop/central-settlement
-      tag: v17.4.0
+      repository: mojaloop/central-ledger
+      tag: v21.0.0-tigerbeetle.2
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -5882,7 +5936,7 @@ centralsettlement:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "h", "--rules"]'
+    command: '["node", "dist/settlement/handlers/index.js", "h", "--rules"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -5911,14 +5965,14 @@ centralsettlement:
     readinessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
     livenessProbe:
       enabled: true
       httpGet:
-        path: /v2/health
+        path: /health
       initialDelaySeconds: 60
       periodSeconds: 15
 
@@ -11178,6 +11232,8 @@ mojaloop-bulk:
         ## Proxy cache configuration
         proxy_cache: *PROXY_CACHE
 
+        ledger_mode: *LEDGER_MODE
+
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
@@ -11462,6 +11518,8 @@ mojaloop-bulk:
         ## Proxy cache configuration
         proxy_cache: *PROXY_CACHE
 
+        ledger_mode: *LEDGER_MODE
+
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
@@ -11743,6 +11801,8 @@ mojaloop-bulk:
         ## Proxy cache configuration
         proxy_cache: *PROXY_CACHE
 
+        ledger_mode: *LEDGER_MODE
+
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
         forensicloggingsidecar_disabled: true
@@ -12023,6 +12083,8 @@ mojaloop-bulk:
 
         ## Proxy cache configuration
         proxy_cache: *PROXY_CACHE
+
+        ledger_mode: *LEDGER_MODE
 
         ## Forensic Logging sidecar
         # this is for Forensic Logging Sidecar
@@ -12705,7 +12767,7 @@ ml-ttk-cronjob-cleanup:
 
 ml-ttk-test-setup:
   tests:
-    enabled: true
+    enabled: false
     weight: -9
   config:
     ## Test-case archive zip for test-cases: https://github.com/mojaloop/testing-toolkit-test-cases
