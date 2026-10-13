@@ -105,7 +105,8 @@ The following Helm Charts have the following external dependencies:
 #### Deploying TigerBeetle
 
 When `LEDGER_MODE` is set to `TIGERBEETLE` or `LOCKSTEP`, the Central-Settlements services will use
-the [TigerBeetle](https://docs.tigerbeetle.com/) OLTP database for the core clearing engine.
+the [TigerBeetle](https://docs.tigerbeetle.com/) OLTP database for the clearing engine in
+Central-Ledger.
 
 TigerBeetle is a highly available, high performance transactions processing database. It's a 
 replicated state machine, which runs across 1-6 replicas. 
