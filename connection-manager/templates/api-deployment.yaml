@@ -10,7 +10,7 @@ spec:
   replicas: {{ .Values.api.replicaCount }}
   strategy: {}
   selector:
-    matchLabels:
+    matchLabels: &labels
       app.kubernetes.io/name: {{ include "connection-manager.fullname" . }}-api
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
@@ -19,12 +19,7 @@ spec:
       annotations:
 {{- toYaml . | nindent 8 }}
 {{- end }}
-      labels:
-        app.kubernetes.io/name: {{ include "connection-manager.fullname" . }}-api
-        app.kubernetes.io/instance: {{ .Release.Name }}
-        {{- if .Values.iam.enabled }}
-        iam.mojaloop.io/provisioning-client: "true"
-        {{- end }}
+      labels: *labels
     spec:
       serviceAccountName: {{ .Values.api.serviceAccount.name }}
       securityContext:
@@ -143,17 +138,17 @@ spec:
             - name: IAM_AUTO_CREATE_ACCOUNTS
               value: {{ .Values.iam.autoCreateAccounts | default true | quote }}
             - name: IAM_PROVISIONING_URL
-              value: {{ dig "iam" "provisioningUrl" "" (.Values.global | default dict) | required "iam.enabled needs global.iam.provisioningUrl" | quote }}
+              value: {{ .Values.global.iam.provisioningUrl | quote }}
             - name: HYDRA_ADMIN_URL
-              value: {{ dig "iam" "hydra" "adminUrl" "" (.Values.global | default dict) | required "iam.enabled needs global.iam.hydra.adminUrl" | quote }}
+              value: {{ .Values.global.iam.hydra.adminUrl | quote }}
             - name: HYDRA_PUBLIC_URL
-              value: {{ dig "iam" "hydra" "publicUrl" "" (.Values.global | default dict) | required "iam.enabled needs global.iam.hydra.publicUrl" | quote }}
+              value: {{ .Values.global.iam.hydra.publicUrl | quote }}
             - name: HYDRA_AUDIENCE
               value: {{ .Values.iam.hydra.audience | quote }}
             - name: KRATOS_ADMIN_URL
-              value: {{ dig "iam" "kratos" "adminUrl" "" (.Values.global | default dict) | required "iam.enabled needs global.iam.kratos.adminUrl" | quote }}
+              value: {{ .Values.global.iam.kratos.adminUrl | quote }}
             - name: KRATOS_PUBLIC_URL
-              value: {{ dig "iam" "kratos" "publicUrl" "" (.Values.global | default dict) | required "iam.enabled needs global.iam.kratos.publicUrl" | quote }}
+              value: {{ .Values.global.iam.kratos.publicUrl | quote }}
             - name: KRATOS_IDENTITY_SCHEMA_ID
               value: {{ .Values.iam.kratos.identitySchemaId | quote }}
             - name: KRATOS_INVITE_RETURN_TO_URL
