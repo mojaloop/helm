@@ -24,30 +24,18 @@ spec:
       app.kubernetes.io/component: {{ $key }}
   template:
     metadata:
+      {{- with $process.podAnnotations }}
       annotations:
-        {{- /* Roles and exclusions are read at startup, so a change to them
-               restarts the pod that enforces them */}}
-        {{- with $.Values.global }}{{ with .iamRoles }}
-        checksum/roles: {{ . | toJson | sha256sum }}
-        {{- end }}{{ end }}
-        {{- if eq $key "provisioning" }}
-        {{- with $.Values.global }}{{ with .resourceNames }}
-        checksum/resource-names: {{ . | toJson | sha256sum }}
-        {{- end }}{{ end }}
-        {{- with $.Values.global }}{{ with .iamMigrations }}
-        checksum/migrations: {{ . | toJson | sha256sum }}
-        {{- end }}{{ end }}
-        {{- end }}
-        {{- with $process.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-        {{- end }}
+      {{- end }}
       labels:
         {{- include "ml-iam-services.selectorLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $key }}
     spec:
-      {{- /* Provisioning reconciles what services declare, so it holds a
-             token scoped to reading those documents and publishing what it
-             composed; the decision endpoint asks the cluster nothing */}}
+      {{- /* Provisioning reconciles what services and the deployment declare,
+             so it holds a token scoped to reading those objects, writing their
+             status and publishing what it composed; the decision endpoint asks
+             the cluster nothing */}}
       {{- if eq $key "provisioning" }}
       serviceAccountName: {{ include "ml-iam-services.fullname" $ }}-provisioning
       automountServiceAccountToken: true
@@ -80,14 +68,6 @@ spec:
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
           args:
             {{- toYaml $process.args | nindent 12 }}
-            {{- if and (eq $key "provisioning") $.Values.global }}
-            {{- if $.Values.global.resourceNames }}
-            - --resource-names=/resource-names/resource-names.yaml
-            {{- end }}
-            {{- if $.Values.global.iamMigrations }}
-            - --migrations=/migrations/migrations.json
-            {{- end }}
-            {{- end }}
             {{- if $webhook }}
             - --webhook-cert-dir=/webhook-tls
             {{- end }}
@@ -138,18 +118,6 @@ spec:
             {{- with $process.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-            {{- if and (eq $key "provisioning") $.Values.global }}
-            {{- if $.Values.global.resourceNames }}
-            - name: resource-names
-              mountPath: /resource-names
-              readOnly: true
-            {{- end }}
-            {{- if $.Values.global.iamMigrations }}
-            - name: migrations
-              mountPath: /migrations
-              readOnly: true
-            {{- end }}
-            {{- end }}
             {{- if $webhook }}
             - name: webhook-tls
               mountPath: /webhook-tls
@@ -168,18 +136,6 @@ spec:
       volumes:
         {{- with $process.volumes }}
         {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- if and (eq $key "provisioning") $.Values.global }}
-        {{- if $.Values.global.resourceNames }}
-        - name: resource-names
-          configMap:
-            name: authz-resource-names
-        {{- end }}
-        {{- if $.Values.global.iamMigrations }}
-        - name: migrations
-          configMap:
-            name: authz-migrations
-        {{- end }}
         {{- end }}
         {{- if $webhook }}
         - name: webhook-tls

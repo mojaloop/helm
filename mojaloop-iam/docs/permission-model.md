@@ -14,17 +14,17 @@ Everything else asks, or moves bytes.
 One method on one endpoint pattern is one permission. GET and PUT on the same
 path are different permissions. This is Kubernetes-verbs and AWS-actions
 granularity: a mid-sized service advertises roughly one permission per API
-operation, the catalog is long, and that is correct. An operation open to
-everyone is a permission like any other, held by the `$everyone` role, so a
-health probe appears in the catalog and is granted rather than exempted. A CORS
-preflight carries no credential and is answered before authorization, and is
-the one thing that is not a permission.
+operation, the catalog is long, and that is correct. An operation the pod
+answers itself, such as a health probe or a metrics scrape, is marked
+`internal`: it is no permission, has no gateway rule, and the gateway answers
+404 for it. A CORS preflight carries no credential and is answered before
+authorization, and is not a permission either.
 
 A permission has two spellings and they are not interchangeable:
 
 ```
 example.getWidgetCa   the permission id: the gateway rule id, the catalog key,
-                      the name a role document references
+                      the name a role's grants reference
 getWidgetCa           the relation: what a stored tuple holds, what a check asks
 ```
 
@@ -37,8 +37,8 @@ convert between them.
 
 The relation is the `operationId`, which puts an operationId inside the
 authorization contract: renaming one retires a permission and introduces
-another. The platform reports that as the breaking change it is, and a
-deployment moves its roles across in two phases while both revisions serve.
+another. A role still naming the retired id is refused, holds nothing until it
+names the new one, and says which id in its `Ready` condition.
 
 ## The API document is the only authored artifact
 
@@ -46,8 +46,9 @@ A service repository contains no rules file, no permission model, and no
 roles. It contains its OpenAPI document, and the platform generates the rest
 at deploy time.
 
-`x-authz` accepts exactly two keys and rejects everything else at build
-time — one at the document root, one on an operation:
+`x-authz` accepts exactly these keys and rejects everything else at build
+time: `resourceTypes` at the document root, `scopedBy` and `internal` on an
+operation:
 
 ```yaml
 x-authz:
@@ -107,7 +108,7 @@ header, carrying the resources of that type named by the role that admitted
 the request.
 
 ```
-GET  /widgets/{widgetId}/ca      [widgets]  check Widget/{widgetId}    X-Scope: widgets=…
+GET  /widgets/{widgetId}/ca      [widgets]  check widget/{widgetId}    X-Scope: widgets=…
 GET  /widgets                    [widgets]  check __self__             X-Scope: widgets=…
 POST /external/certs             [widgets]  check __self__             X-Scope: widgets=…
 GET  /hub/endpoints/ips/{epId}   []         check __self__             X-Scope: none
@@ -134,8 +135,8 @@ bare.
 **Multiple types.** A check addresses exactly one object, so an operation
 declaring two types that both have bound ids emits one check per type, in
 capture order, and all must pass.
-`/reports/{reportId}/widgets/{widgetId}` checks `Report/{reportId}` and
-`Widget/{widgetId}` together, and its scope carries both types.
+`/reports/{reportId}/widgets/{widgetId}` checks `report/{reportId}` and
+`widget/{widgetId}` together, and its scope carries both types.
 
 The generator writes a derivation table alongside the rules: one line per
 operation stating what it concluded. It is reviewed once per service and
@@ -153,13 +154,13 @@ each service's paths spell it — so the same grant answers every service's
 check about it:
 
 ```
-Widget/w7         one resource
-Widget/__all__    every resource of that name, present and future
+widget/w7         one resource
+widget/__all__    every resource of that name, present and future
 __self__          the service itself
 ```
 
 ```
-example:Widget/w7#getWidgetCa@Role:auditor#members
+example:widget/w7#getWidgetCa@Role:auditor#members
     role auditor may call getWidgetCa, on widget w7
 
 example:__self__#getWidgets@Role:hub-operator#members
@@ -169,7 +170,7 @@ example:__self__#getWidgets@Role:hub-operator#members
 `__self__` is what an operation with no bound id is authorized against. It is
 a real grant point, not a placeholder: for a collection listing it answers
 "may you call this endpoint", which is a different question from "which rows
-come back". A caller holding `Widget/w7#getWidgetCa` has a non-empty visible
+come back". A caller holding `widget/w7#getWidgetCa` has a non-empty visible
 set without holding `getWidgets`, and must not reach the listing.
 
 `__all__` is an ordinary object, not a structural link. The decision endpoint
@@ -218,8 +219,8 @@ is accepted with `201`. Permission names therefore need no declaration, and a
 service adding an operation needs no model change.
 
 **Role indirection resolves with no permit.** A check for
-`example:Widget/w7#getWidgetCa` by `user-1` passes when the stored tuples are
-`example:Widget/w7#getWidgetCa@Role:auditor#members` and
+`example:widget/w7#getWidgetCa` by `user-1` passes when the stored tuples are
+`example:widget/w7#getWidgetCa@Role:auditor#members` and
 `Role:auditor#members@user-1`. Subject-set traversal is part of evaluation,
 not something a permit switches on.
 
@@ -261,7 +262,7 @@ authorized route.
   authorizer:
     handler: remote_json
     config:
-      payload: '{"namespace":"example","object":"Widget/{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}","relation":"getWidgetCa","subject_id":"{{ print .Subject }}","scope":[{"type":"widgets","resourceName":"Widget"}]}'
+      payload: '{"namespace":"example","object":"widget/{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}","relation":"getWidgetCa","subject_id":"{{ print .Subject }}","scope":[{"type":"widgets","resourceName":"widget"}]}'
   mutators:
     - handler: header
 ```
@@ -275,9 +276,9 @@ each declared type under both spellings: the resource name is what the grants
 hold, the type is what the caller's service reads back in `X-Scope`.
 
 ```
-one type bound:   {"namespace":…,"object":"Widget/{{ capture }}","relation":…,"subject_id":…,"scope":[{"type":"widgets","resourceName":"Widget"}]}
+one type bound:   {"namespace":…,"object":"widget/{{ capture }}","relation":…,"subject_id":…,"scope":[{"type":"widgets","resourceName":"widget"}]}
 two types bound:  {"allOf":[ {first check}, {second check} ],"scope":[{"type":"reports",…},{"type":"widgets",…}]}
-none bound:       {"namespace":…,"object":"__self__","relation":…,"subject_id":…,"scope":[{"type":"widgets","resourceName":"Widget"}]}
+none bound:       {"namespace":…,"object":"__self__","relation":…,"subject_id":…,"scope":[{"type":"widgets","resourceName":"widget"}]}
 no types at all:  {"namespace":…,"object":"__self__","relation":…,"subject_id":…,"scope":[]}
 ```
 
@@ -408,52 +409,49 @@ whose upstream cannot be asked a scoped question declares its listings
 
 ## Roles, assignments, and grants
 
-Roles are deployment data, composed in the UI or in gitops from the
-permissions services advertise. Both paths write the same documents through
-the same IAM APIs.
+Roles are deployment data, composed from the permissions services advertise.
+A role is one `AuthzRole` object, in any namespace, its name unique across the
+cluster; the IAM watches them and applies an edit in place.
 
 ```yaml
-roles:
-  $everyone:
-    grants:
-      - permission: example.getHealth
-  $authenticated:
-    grants:
-      - permission: example.getCurrentUser
-  hub-operator:
-    grants:
-      - permission: example.getWidgets
-        resources: { Widget: all }
-      - permission: example.getWidgetCa
-        resources: { Widget: all }
-  west-auditor:
-    grants:
-      - permission: example.getWidgetCa
-        resources: { Widget: [w7, w11] }
-  widget-operator:
-    grants:
-      - permission: example.getWidgetCa
-      - permission: example.issueCert
-
-assignments:
-  - { subject: <identity id>, role: widget-operator, resources: { Widget: w7 } }
+apiVersion: iam.mojaloop.io/v1
+kind: AuthzRole
+metadata:
+  name: hub-operator
+spec:
+  grants:
+    - permission: example.getWidgets
+      resources: { widget: all }
+    - permission: example.getWidgetCa
+      resources: { widget: all }
+---
+kind: AuthzRole
+metadata:
+  name: west-auditor
+spec:
+  grants:
+    - permission: example.getWidgetCa
+      resources: { widget: [w7, w11] }
+---
+kind: AuthzRole
+metadata:
+  name: widget-operator
+spec:
+  grants:
+    - permission: example.getWidgetCa
+    - permission: example.issueCert
 ```
 
-`$everyone` and `$authenticated` are reserved, and what they mean is the
-platform's rather than a naming convention. `$everyone` is in effect for every
-request; `$authenticated` for every request carrying an identity the deployment
-accepts. Neither can be created, renamed, deleted or assigned to anybody, and
-between them they are how an operation reaches a caller holding no ordinary
-role: a health probe through the first, a "which permissions do I hold"
-endpoint through the second. An operation nothing grants is reachable by
-nobody, which is what makes a new operation held by nobody until a deployment
-says otherwise.
+An assignment is made through the IAM's API, naming the resources the role
+leaves open: `{ role: widget-operator, resources: { widget: w7 } }`. An
+operation nothing grants is reachable by nobody, which is what makes a new
+operation held by nobody until a deployment says otherwise.
 
 A grant names a permission from the catalog and, per resource name the
 permission is scoped by, either names the resources — `all`, one id, a list —
 or leaves the resource name open. Every open one is the assignment's to name,
 so the role's signature is derived, never declared: `widget-operator` above
-takes a `Widget` because its grants name none, and it instantiates once per
+takes a `widget` because its grants name none, and it instantiates once per
 named resource. Naming a resource name the permission is not scoped by is
 rejected, since it would write a tuple nothing ever reads.
 
@@ -464,11 +462,11 @@ than guesses: `scopedBy` is what the operation declares in its own spelling,
 each spelling to the name the grants hold.
 
 ```
-getWidgetCa  scopedBy [widgets: Widget]                    bound [widgets]  Widget/<id>#getWidgetCa
-getWidgets   scopedBy [widgets: Widget]                    bound []         __self__#getWidgets
-                                                                            Widget/<id>#getWidgets
-getReport    scopedBy [reports: Report,                    bound [reports]  Report/<id>#getReport
-              participants: Participant]                                    Participant/<id>#getReport
+getWidgetCa  scopedBy [widgets: widget]                    bound [widgets]  widget/<id>#getWidgetCa
+getWidgets   scopedBy [widgets: widget]                    bound []         __self__#getWidgets
+                                                                            widget/<id>#getWidgets
+getReport    scopedBy [reports: report,                    bound [reports]  report/<id>#getReport
+              participants: participant]                                    participant/<id>#getReport
 getRegions   scopedBy []                                   bound []         __self__#getRegions
 ```
 
@@ -492,7 +490,7 @@ statement about one operation over one set of resources, and merging two of
 them would invent access neither granted.
 
 A role with open resource names instantiates per resource tuple: the grants
-materialize against `Role:widget-operator@Widget=w7`, and the assignment
+materialize against `Role:widget-operator@widget=w7`, and the assignment
 adds the subject to that instance's `members`. Assignment and revocation stay
 one membership edge, which is the property that makes revocation immediate and
 auditable. Revocation asks nothing of the resource, so a grant on a widget
@@ -504,7 +502,7 @@ records it:
 ```
 GET  /catalog                        every service's permissions, with their summaries
 GET  /roles                          the roles, and which resource names each leaves open
-GET  /resources?resourceName=Widget  the widgets that exist, to choose among
+GET  /resources?resourceName=widget  the widgets that exist, to choose among
 GET  /subjects/<id>/assignments      what someone holds, one entry per instance
 POST /subjects/<id>/assignments      { role, resources }
 DELETE /subjects/<id>/assignments    { role, resources }
@@ -515,11 +513,13 @@ An assignment whose resources are not keyed by exactly the resource names the
 role leaves open, or that names a resource that does not exist, is refused
 before anything is written.
 
-`/state` answers the catalog it validated against, the roles and exclusions it
-read, and the record of applying them: how many tuples, which role instances
-were refreshed, which were retired, and every holding that breaks an exclusion.
-It is what an operator reads to see whether the roles in git are the roles in
-Keto, without being handed a Keto client to go looking.
+`/state` answers the catalog it validated against, the roles and separation
+rules it applied, and the record of applying them: how many grants were
+written and removed, how many role instances were refreshed, and every holding
+that breaks a separation rule. Each object also says what became of it in its
+own `Ready` condition. That is what an operator reads to see whether the roles
+in git are the roles in Keto, without being handed a Keto client to go
+looking.
 
 Every grant is written through the IAM: by a human in the UI, by deployment
 defaults shipped as editable seed data, or by a service acting as a governed
@@ -536,9 +536,9 @@ the resource exists, refusing a name the vocabulary does not declare:
 
 ```
 POST /provision
-{ "resourceName": "Participant", "id": "dfsp7" }
+{ "resourceName": "participant", "id": "dfsp7" }
 
-Resource:Participant/dfsp7#exists@__registry__
+Resource:participant/dfsp7#exists@__registry__
 ```
 
 That row grants nothing — its own namespace, a relation no rule checks, a
@@ -550,12 +550,12 @@ made explicitly by the caller, with role names from the same configuration:
 
 ```
 POST /subjects/<identity id>/assignments
-{ "role": "dfsp-operator", "resources": { "Participant": "dfsp7" } }
+{ "role": "dfsp-operator", "resources": { "participant": "dfsp7" } }
 ```
 
 Nothing is implied: no role is instantiated by provisioning itself, and a
-deployment that wants different roles over onboarded resources edits its
-values, not a service.
+deployment that wants different roles over onboarded resources edits its roles
+and the role names it configures, not a service.
 
 Deprovisioning retires every role instance whose resources include the one
 that is gone, removes the registry row, and answers with the subjects left
@@ -579,19 +579,26 @@ holds in a deployment with a single participant, and neither grant is wrong on
 its own.
 
 ```yaml
-exclusions:
-  - name: audit-exclusion
-    a: [settlement.auditSettlement]
-    b: [settlement.positionFundsInOut, settlement.positionNDCEdit]
+apiVersion: iam.mojaloop.io/v1
+kind: AuthzSeparation
+metadata:
+  name: audit-exclusion
+spec:
+  groups:
+    - [settlement.auditSettlement]
+    - [settlement.positionFundsInOut, settlement.positionNDCEdit]
 ```
 
-Every pair across the two sides is refused. It is checked where a holding is
-written and nowhere else. Applying a deployment's roles refuses one that
-carries both sides, and reports every subject whose existing roles already
-combine them; an assignment is refused when the roles the subject would then
-hold reach both sides, naming the rule. A combination that is never written needs no check when a request
-arrives, and a check there would report the problem to the person least able to
-do anything about it.
+A subject may hold permissions from at most one group. `within: subject`, the
+default, compares whatever the resources; `within: resource`, naming a
+`resourceName`, compares holdings over the same resource only, a grant over
+`all` meeting every other. It is checked where a holding is written and
+nowhere else. A role whose own grants span two groups is refused when it is
+applied; a rule arriving after holdings that break it lists those subjects on
+its status; an assignment is refused when the roles the subject would then
+hold span two groups, naming the rule. A combination that is never written
+needs no check when a request arrives, and a check there would report the
+problem to the person least able to do anything about it.
 
 The two grants typically arrive months apart from different administrators, so
 the graph is the only place their union is ever visible. That is the whole
@@ -615,19 +622,23 @@ the same strings because they are the same thing. A deployment declares that
 once:
 
 ```yaml
-resourceNames:
-  Component:
-    label: Component
-    members:
-      - { service: example,   type: widgets }
-      - { service: reporting, type: components }
-      - { service: finance,   type: parts }
+apiVersion: iam.mojaloop.io/v1
+kind: AuthzResourceName
+metadata:
+  name: component
+spec:
+  label: Component
+  members:
+    - { service: example,   type: widgets }
+    - { service: reporting, type: components }
+    - { service: finance,   type: parts }
 ```
 
-The resource name is the platform's key for the resource. A grant covering
-all three services writes `example:Component/c7`, `reporting:Component/c7`
-and `finance:Component/c7` — one object spelling everywhere tuples are stored
-and checked — and an operator picks "Component: c7" once. The services'
+The resource name is the object's name and the platform's key for the
+resource. A grant covering all three services writes `example:component/c7`,
+`reporting:component/c7` and `finance:component/c7` — one object spelling
+everywhere tuples are stored and checked — and an operator picks "component
+c7" once. The services'
 spellings exist only at their boundaries: in the paths the gateway matches
 and in the `X-Scope` each service reads back.
 
@@ -645,7 +656,7 @@ arriving while the deployment runs is held to the same rule: a new type it
 declares is refused until the deployment names it.
 
 The values an operator picks from are the registry the IAM already keeps:
-provisioning records `Resource:<ResourceName>/<id>#exists` when a service
+provisioning records `Resource:<resource name>/<id>#exists` when a service
 creates a resource, and `GET /resources?resourceName=` answers from it. A
 deployment whose
 authoritative list lives somewhere the platform is never told about — a
@@ -653,11 +664,11 @@ service that predates it, or one nobody can change — names it, and says what
 comes back:
 
 ```yaml
-    source:
-      url: http://central-ledger/participants   # the listing, read in-cluster
-      id: /name                # JSON Pointer to the id within each item
-      list: /data/items        # optional: to the array; omitted, the body is the array
-      label: /displayName      # optional: display text, for consumers that render rows
+  source:
+    url: http://central-ledger/participants     # the listing, read in-cluster
+    id: /name                # JSON Pointer to the id within each item
+    list: /data/items        # optional: to the array; omitted, the body is the array
+    label: /displayName      # optional: display text, for consumers that render rows
 ```
 
 The pointers are RFC 6901, so `list: /data/items` and `id: /attributes/code`
@@ -757,11 +768,9 @@ artifacts:
 - a functional probe grants a permission through a role and through `__all__`
   and expects both to pass, and asserts the resulting `X-Scope`
 
-## Open decision
+## Composing a role is unrestricted
 
-**Whether a permission can refuse `all`.** Some operations should never be
-grantable over every resource at once, credential issuance being the standing
-example. `__all__` is an ordinary object, so nothing currently prevents a
-deployment from granting one. A refusal would have to be declared on the
-operation and enforced by the IAM write path, which means a new `x-authz`
-key, and it is the only candidate for one.
+Any permission may go into any role, over one resource, a list or `all`. A
+document cannot limit how its operations are granted: which permissions belong
+together, and over what, is the deployment's judgement, expressed in its roles
+and, where two must never meet, in a separation rule.

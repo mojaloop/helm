@@ -1,8 +1,8 @@
 {{- if and .Values.provisioning.enabled .Values.provisioning.webhook.enabled }}
 {{- /*
-  Admission for AuthzDocument: the provisioning process runs the reader the
-  composition uses on every write and refuses what would never compose.
-  Failing closed, so no document is stored unchecked while the IAM is down.
+  Admission for the IAM's kinds: the provisioning process runs the checks it
+  applies on every write and refuses what it would refuse. Failing closed, so
+  no object is stored unchecked while the IAM is down.
 */}}
 {{- $fullname := include "ml-iam-services.fullname" . }}
 {{- $service := printf "%s-provisioning" $fullname }}
@@ -34,13 +34,13 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: {{ $fullname }}-authzdocument
+  name: {{ $fullname }}-admission
   labels:
     {{- include "ml-iam-services.labels" . | nindent 4 }}
   annotations:
     cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ $fullname }}-webhook
 webhooks:
-  - name: authzdocuments.mojaloop.io
+  - name: admission.iam.mojaloop.io
     admissionReviewVersions: [v1]
     sideEffects: None
     failurePolicy: Fail
@@ -49,12 +49,12 @@ webhooks:
       service:
         name: {{ $service }}
         namespace: {{ .Release.Namespace }}
-        path: /validate-authzdocument
+        path: /validate
         port: 443
     rules:
-      - apiGroups: [mojaloop.io]
+      - apiGroups: [iam.mojaloop.io]
         apiVersions: [v1]
-        resources: [authzdocuments]
+        resources: [authzdocuments, authzroles, authzseparations, authzresourcenames]
         operations: [CREATE, UPDATE]
         scope: Namespaced
 {{- end }}

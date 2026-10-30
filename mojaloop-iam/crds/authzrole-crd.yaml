@@ -1,0 +1,112 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: authzroles.iam.mojaloop.io
+spec:
+  group: iam.mojaloop.io
+  scope: Namespaced
+  names:
+    kind: AuthzRole
+    plural: authzroles
+    singular: authzrole
+    shortNames:
+      - authzrole
+    categories:
+      - authz
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Ready
+          type: string
+          jsonPath: .status.conditions[?(@.type=="Ready")].status
+        - name: Reason
+          type: string
+          jsonPath: .status.conditions[?(@.type=="Ready")].reason
+        - name: Open
+          type: string
+          jsonPath: .status.open
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: >-
+            A role: a set of grants, each a permission from the catalog and,
+            per resource name the permission is scoped by, the resources it
+            covers or none, leaving that resource name for each assignment to
+            name. The object's name is the role's name, unique across the
+            cluster.
+          type: object
+          required: [spec]
+          properties:
+            spec:
+              type: object
+              required: [grants]
+              properties:
+                title:
+                  description: The name an administrator reads.
+                  type: string
+                description:
+                  type: string
+                heldBy:
+                  description: >-
+                    authenticated: held by every signed-in subject, never
+                    assigned. Such a role fixes every resource it grants over.
+                  type: string
+                  enum: [authenticated]
+                grants:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    required: [permission]
+                    properties:
+                      permission:
+                        description: A permission id, <prefix>.<operationId>.
+                        type: string
+                        minLength: 1
+                      resources:
+                        description: >-
+                          Per resource name: all, one id, or a list of ids. A
+                          resource name the permission is scoped by and this
+                          leaves out is the assignment's to name.
+                        type: object
+                        additionalProperties:
+                          x-kubernetes-preserve-unknown-fields: true
+            status:
+              type: object
+              properties:
+                observedGeneration:
+                  type: integer
+                open:
+                  description: The resource names an assignment of this role must name.
+                  type: array
+                  items:
+                    type: string
+                conditions:
+                  type: array
+                  x-kubernetes-list-type: map
+                  x-kubernetes-list-map-keys: [type]
+                  items:
+                    type: object
+                    required: [type, status, reason, lastTransitionTime]
+                    properties:
+                      type:
+                        type: string
+                      status:
+                        type: string
+                        enum: ["True", "False", "Unknown"]
+                      reason:
+                        description: Accepted, Refused, or Waiting for a service not composed yet.
+                        type: string
+                      message:
+                        type: string
+                      observedGeneration:
+                        type: integer
+                      lastTransitionTime:
+                        type: string
+                        format: date-time

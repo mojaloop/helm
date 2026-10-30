@@ -59,25 +59,26 @@ decision:
   affinity: {}
   podAnnotations: {}
 
-# Applies the deployment's roles when it starts, then serves the IAM that
-# services and the role UI call. The only holder of a Keto write URL.
+# Keeps the deployment's roles, separation rules and resource names applied
+# as they change, and serves the IAM that services and the role UI call. The
+# only holder of a Keto write URL.
 #
-# One replica on purpose: it writes, and two copies reconciling the same roles
-# at once would interleave their clear-then-write. The decision endpoint is the
-# one on every request, and it only reads.
+# One replica on purpose: it writes, and two copies applying the same roles at
+# once would race each other. The decision endpoint is the one on every
+# request, and it only reads.
 provisioning:
   enabled: true
   replicaCount: 1
   args:
     - provisioning
-    - --roles=/config/roles/default-roles.json
     # Every routed backend's document, composed here and published for the
     # gateway and Keto
     - --publish-as=authz-published
 
-  # Refuses an AuthzDocument that would never compose when it is written.
-  # Needs cert-manager: the chart issues the webhook's certificate from a
-  # self-signed issuer and injects its CA into the webhook configuration.
+  # Refuses an AuthzDocument, AuthzRole, AuthzSeparation or AuthzResourceName
+  # the IAM would refuse, when it is written. Needs cert-manager: the chart
+  # issues the webhook's certificate from a self-signed issuer and injects its
+  # CA into the webhook configuration.
   webhook:
     enabled: true
 
@@ -93,14 +94,8 @@ provisioning:
     KRATOS_ADMIN_URL: "http://kratos-admin.ory.svc.cluster.local"
     KRATOS_PUBLIC_URL: "http://kratos-public.ory.svc.cluster.local"
 
-  volumes:
-    - name: roles
-      configMap:
-        name: iam-default-roles
-  volumeMounts:
-    - name: roles
-      mountPath: /config/roles
-      readOnly: true
+  volumes: []
+  volumeMounts: []
 
   resources:
     requests:

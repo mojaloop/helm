@@ -97,7 +97,7 @@ a namespace cannot attach it to a route that did not ask for it, and cannot
 take a name already in use.
 
 ```yaml
-apiVersion: mojaloop.io/v1
+apiVersion: iam.mojaloop.io/v1
 kind: AuthzDocument
 metadata:
   name: mcm-connection-manager-ui

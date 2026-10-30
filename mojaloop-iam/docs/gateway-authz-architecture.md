@@ -202,7 +202,7 @@ rather than of an operation.
   authorizer:
     handler: remote_json
     config:
-      payload: '{"namespace":"example","object":"Widget/{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}","relation":"getWidgetCa","subject_id":"{{ print .Subject }}","scope":[{"type":"widgets","resourceName":"Widget"}]}'
+      payload: '{"namespace":"example","object":"widget/{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}","relation":"getWidgetCa","subject_id":"{{ print .Subject }}","scope":[{"type":"widgets","resourceName":"widget"}]}'
   mutators:
     - handler: header
 ```
@@ -338,19 +338,20 @@ URL.
 | process | on | holds | reached by |
 |---|---|---|---|
 | decision | every request | read-only Keto | Oathkeeper, no route |
-| provisioning | rollout, resource creation | Keto write, Kratos admin | services, no public route |
-| operator | whenever a route or its endpoints change | read on routes and services | the API server |
+| provisioning | a role or rule changing, resource creation | Keto write, Kratos admin | services, no public route |
+| operator | whenever a route, its endpoints or a resource name change | read on routes, services and the IAM's objects | the API server |
 
 The decision endpoint is on the hot path and answers a rendered payload. The
-provisioning endpoint is not. It opens a rollout by applying the deployment's
-role documents against the composed catalog and creating the first
-administrator, and refuses to serve if a role names a permission no service
-advertises. From then on a service calls it when it creates a resource, naming
-it under the resource name the deployment configured into it, and assigns its
-configured roles over it explicitly. It runs single-replica, because applying roles clears and rewrites the
-grants of each role and two copies would interleave. The operator runs for as
-long as the deployment does, since a route appearing or a rollout finishing is
-what it answers to.
+provisioning endpoint is not. It applies the deployment's `AuthzRole` and
+`AuthzSeparation` objects against the composed catalog whenever one of them or
+the composition changes, creates the first administrator on the first apply,
+and writes each object's verdict back onto it; a role naming a permission no
+service advertises is refused and holds nothing. A service calls it when it
+creates a resource, naming it under the resource name the deployment
+configured into it, and assigns its configured roles over it explicitly. It
+runs single-replica, because two copies applying the same roles would race.
+The operator runs for as long as the deployment does, since a route appearing
+or a rollout finishing is what it answers to.
 
 Services never link a Keto client. What they do link is `@mojaloop/authz`, a
 small package holding the `X-Scope` contract in both directions, so the

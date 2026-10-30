@@ -1,0 +1,122 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: authzresourcenames.iam.mojaloop.io
+spec:
+  group: iam.mojaloop.io
+  scope: Namespaced
+  names:
+    kind: AuthzResourceName
+    plural: authzresourcenames
+    singular: authzresourcename
+    shortNames:
+      - authzrn
+    categories:
+      - authz
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Resources
+          type: integer
+          jsonPath: .status.resources
+        - name: Ready
+          type: string
+          jsonPath: .status.conditions[?(@.type=="Ready")].status
+        - name: Reason
+          type: string
+          jsonPath: .status.conditions[?(@.type=="Ready")].reason
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          description: >-
+            The deployment's one name for a real thing that services spell
+            differently: each member is one service's resource type. The
+            object's name is the resource name, spelled the same in grants,
+            assignments, a service's configuration and the IAM's records.
+          type: object
+          required: [spec]
+          properties:
+            spec:
+              type: object
+              required: [members]
+              properties:
+                label:
+                  description: Display text, a string or one per language.
+                  x-kubernetes-preserve-unknown-fields: true
+                description:
+                  description: Display text, a string or one per language.
+                  x-kubernetes-preserve-unknown-fields: true
+                members:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    required: [service, type]
+                    properties:
+                      service:
+                        description: A permission prefix.
+                        type: string
+                        minLength: 1
+                      type:
+                        description: A resource type that service's document declares.
+                        type: string
+                        minLength: 1
+                source:
+                  description: >-
+                    A listing that answers the whole id set, for resources no
+                    service provisions. Pointers are RFC 6901.
+                  type: object
+                  required: [url, id]
+                  properties:
+                    url:
+                      type: string
+                    list:
+                      description: To the array in the response; omitted, the body is the array.
+                      type: string
+                    id:
+                      description: To the id within each item.
+                      type: string
+                    label:
+                      description: To a display text within each item.
+                      type: string
+            status:
+              type: object
+              properties:
+                observedGeneration:
+                  type: integer
+                resources:
+                  description: How many resources of this name exist.
+                  type: integer
+                lastSync:
+                  description: When the source was last read.
+                  type: string
+                  format: date-time
+                conditions:
+                  type: array
+                  x-kubernetes-list-type: map
+                  x-kubernetes-list-map-keys: [type]
+                  items:
+                    type: object
+                    required: [type, status, reason, lastTransitionTime]
+                    properties:
+                      type:
+                        type: string
+                      status:
+                        type: string
+                        enum: ["True", "False", "Unknown"]
+                      reason:
+                        description: Accepted, Refused, or Waiting for a member's service.
+                        type: string
+                      message:
+                        type: string
+                      observedGeneration:
+                        type: integer
+                      lastTransitionTime:
+                        type: string
+                        format: date-time

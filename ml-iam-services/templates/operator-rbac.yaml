@@ -1,9 +1,10 @@
 {{- if .Values.provisioning.enabled }}
 {{- /*
   What the IAM may do in the cluster: read the routes, the gateways they attach
-  to and the documents routes name, wherever they are; say on each route and
-  document what became of it; and publish what it composed into its own
-  namespace. No rule here reaches a secret or a workload.
+  to, the documents routes name and the deployment's roles, separation rules
+  and resource names, wherever they are; say on each route and object what
+  became of it; and publish what it composed into its own namespace. No rule
+  here reaches a secret or a workload.
 */}}
 apiVersion: v1
 kind: ServiceAccount
@@ -49,11 +50,15 @@ metadata:
   labels:
     {{- include "ml-iam-services.labels" . | nindent 4 }}
 rules:
-  - apiGroups: ["mojaloop.io"]
-    resources: ["authzdocuments"]
+  - apiGroups: ["iam.mojaloop.io"]
+    resources: ["authzdocuments", "authzroles", "authzseparations", "authzresourcenames"]
     verbs: ["get", "list", "watch"]
-  - apiGroups: ["mojaloop.io"]
-    resources: ["authzdocuments/status"]
+  - apiGroups: ["iam.mojaloop.io"]
+    resources:
+      - "authzdocuments/status"
+      - "authzroles/status"
+      - "authzseparations/status"
+      - "authzresourcenames/status"
     verbs: ["get", "patch", "update"]
   - apiGroups: ["gateway.networking.k8s.io"]
     resources: ["httproutes", "gateways"]
