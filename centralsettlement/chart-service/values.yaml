@@ -24,7 +24,7 @@ image:
   pullSecrets: []
 
 replicaCount: 1
-command: '["node", "src/handlers/index.js", "h", "--grossSettlement"]'
+command: '["npm", "run", "start:handlers", "--", "h", "--grossSettlement"]'
 
 ## Enable diagnostic mode in the deployment
 ##
@@ -35,15 +35,16 @@ diagnosticMode:
   ## @param diagnosticMode.command Command to override all containers in the deployment
   ##
   command:
-    - node
+    - npm
+    - run
+    - start:handlers
+    - "--"
+    - h
+    - "--grossSettlement"
 
   ## @param diagnosticMode.args Args to override all containers in the deployment
   ##
-  args:
-    - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-    - src/handlers/index.js
-    - h
-    - '--grossSettlement'
+  args: []
 
   ## @param diagnosticMode.debug config to override all debug information
   ##
@@ -411,9 +412,8 @@ gateway:
   host: ""
   parentRefs: []
   cors: {}
-  ## Delegates auth on the route to Oathkeeper; disable to route without authorization
+  ## The decision API a route keyed for the IAM asks through its ExternalAuth filter
   oathkeeper:
-    enabled: true
     serviceName: oathkeeper-api
     servicePort: 4456
 
@@ -428,14 +428,3 @@ gateway:
 #  cpu: 100m
 #  memory: 128Mi
 resources: {}
-
-gateway:
-  enabled: false
-  host: ""
-  parentRefs: []
-  cors: {}
-  ## Delegates auth on the route to Oathkeeper; disable to route without authorization
-  oathkeeper:
-    enabled: true
-    serviceName: oathkeeper-api
-    servicePort: 4456

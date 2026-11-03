@@ -169,32 +169,20 @@ CONFIG:
 # This is a YAML-formatted file.
 # Declare global configurations
 global:
+  # The IAM switch. On, the IAM is installed and every chart with an IAM
+  # integration uses it: routes whose authz names a prefix carry the
+  # ExternalAuth filter and key their backend, and services provision through
+  # it. Off, nothing of it is deployed and nothing integrating does anything
+  # IAM-related.
   iam:
-    keto:
-      readUrl: http://keto-read
-      writeUrl: http://keto-write
-    kratos:
-      adminUrl: http://kratos-admin
-      publicUrl: http://kratos-public
-      roleWebhookUrl: http://ml-iam-services-kratos-role-webhook
-    hydra:
-      adminUrl: http://hydra-admin
-      publicUrl: http://hydra-public
+    enabled: false
+    # The IAM's internal API, which the services that provision call
+    provisioningUrl: http://ml-iam-services-api-internal
 
-iam:
-  enabled: false
-
-mojaloop-iam:
-  keto:
-    deployment:
-      extraVolumes:
-        - name: mcm-opl
-          image:
-            reference: mojaloop/connection-manager-api:v3.9.0-snapshot.1
-      extraVolumeMounts:
-        - name: mcm-opl
-          mountPath: /etc/keto-namespaces/mcm.ts
-          subPath: opt/app/permissions/mcm.keto.ts
+# The IAM: Ory and the IAM's own processes, installed with global.iam.enabled.
+# A deployment running the IAM as a release of its own sets enabled false
+# here and keeps global.iam.enabled on.
+mojaloop-iam: {}
 
 pdb:
   enabled: true
@@ -4107,7 +4095,7 @@ centralsettlement:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/api/index.js"]'
+    command: '["npm", "run", "start:api"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -4118,12 +4106,12 @@ centralsettlement:
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
       command:
-        - node
+        - npm
+        - run
+        - start:api
       ## @param diagnosticMode.args Args to override all containers in the deployment
       ##
-      args:
-        - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        - src/api/index.js
+      args: []
 
       ## @param diagnosticMode.debug config to override all debug information
       ##
@@ -4439,7 +4427,7 @@ centralsettlement:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "h", "--deferredSettlement"]'
+    command: '["npm", "run", "start:handlers", "--", "h", "--deferredSettlement"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -4450,14 +4438,15 @@ centralsettlement:
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
       command:
-        - node
-      ## @param diagnosticMode.args Args to override all containers in the deployment
-      ##
-      args:
-        - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
-        - src/handlers/index.js
+        - npm
+        - run
+        - start:handlers
+        - "--"
         - h
         - "--deferredSettlement"
+      ## @param diagnosticMode.args Args to override all containers in the deployment
+      ##
+      args: []
 
       ## @param diagnosticMode.debug config to override all debug information
       ##
@@ -4775,7 +4764,7 @@ centralsettlement:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "h", "--grossSettlement"]'
+    command: '["npm", "run", "start:handlers", "--", "h", "--grossSettlement"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -4786,14 +4775,15 @@ centralsettlement:
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
       command:
-        - node
-        - src/handlers/index.js
+        - npm
+        - run
+        - start:handlers
+        - "--"
         - h
         - "--grossSettlement"
       ## @param diagnosticMode.args Args to override all containers in the deployment
       ##
-      args:
-        - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      args: []
 
       ## @param diagnosticMode.debug config to override all debug information
       ##
@@ -5111,7 +5101,7 @@ centralsettlement:
       pullSecrets: []
 
     replicaCount: 1
-    command: '["node", "src/handlers/index.js", "h", "--rules"]'
+    command: '["npm", "run", "start:handlers", "--", "h", "--rules"]'
 
     ## Enable diagnostic mode in the deployment
     ##
@@ -5122,14 +5112,15 @@ centralsettlement:
       ## @param diagnosticMode.command Command to override all containers in the deployment
       ##
       command:
-        - node
-        - src/handlers/index.js
+        - npm
+        - run
+        - start:handlers
+        - "--"
         - h
         - "--rules"
       ## @param diagnosticMode.args Args to override all containers in the deployment
       ##
-      args:
-        - --inspect=0.0.0.0:{{ .Values.diagnosticMode.debug.port }}
+      args: []
 
       ## @param diagnosticMode.debug config to override all debug information
       ##
@@ -10327,8 +10318,6 @@ inter-scheme-proxy-adapter:
 
 connection-manager:
   enabled: false
-  iam:
-    enabled: false
   api:
     disabled: false
     replicaCount: 1
@@ -10341,22 +10330,6 @@ connection-manager:
       nodePort: 31057
       metricsServerPort: 9100
     pingPongServerUrl: https://ml-participant-connection-test-svc:80
-    keycloak:
-      enabled: false
-      baseUrl: http://localhost:8080
-      discoveryUrl: http://localhost:8080/realms/dfsps/.well-known/openid-configuration
-      adminClientId: connection-manager-api-service
-      adminClientSecret: changeme
-      dfspsRealm: dfsps
-      autoCreateAccounts: true
-    keto:
-      enabled: false
-      writeUrl: http://localhost:4467
-    openid:
-      enabled: false
-      clientId: connection-manager-auth-client
-      clientSecret: changeme
-    clientUrl: http://localhost:3000/
     url: https://localhost
     extraTLS:
       certChain:
@@ -11198,72 +11171,3 @@ ml-ttk-test-cleanup:
   parameters:
     <<: *simNames
   testCaseEnvironmentFile: *ttkInputValues
-
-ml-ttk-test-mcm-iam:
-  tests:
-    enabled: false
-    weight: 3
-  config:
-    testCasesZipUrl: https://github.com/mojaloop/testing-toolkit-test-cases/archive/v20.3.0-mcm-iam.10.zip
-    testCasesPathInZip: testing-toolkit-test-cases-20.3.0-mcm-iam.10/collections/hub/mcm
-    ttkBackendURL: http://$release_name-ml-testing-toolkit-backend:5050
-    testSuiteName: MCM IAM Tests
-    environmentName: Development
-    saveReport: true
-    saveReportBaseUrl: "testing-toolkit.local"
-    reportName: mcm_iam_tests
-    allowFailures: false
-    mcmScriptsVersion: v3.8.0-snapshot.25
-    ## MCM service configuration
-    mcmUrl: http://mcm-connection-manager-api:3001
-    kratosPublicUrl: http://kratos-public
-    keycloakUrl: http://keycloak
-    keycloakRealm: mojaloop
-    mailpitUrl: http://mailpit-http:8025
-    portalAdminUser: portal_admin
-  env:
-    NPM_CONFIG_UPDATE_NOTIFIER: "false"
-  script: |
-    set -e
-    echo "===================================="
-    echo "MCM IAM Test Runner"
-    echo "===================================="
-
-    # Wait for DNS
-    until nslookup github.com; do echo "Waiting for DNS..."; sleep 5; done
-
-    # Download scripts
-    echo "Downloading MCM test scripts..."
-    MCM_SCRIPTS_BASE="https://raw.githubusercontent.com/mojaloop/connection-manager-api/{{ .Values.config.mcmScriptsVersion }}/scripts"
-    wget "${MCM_SCRIPTS_BASE}/mcm-test-setup" -O /tmp/mcm-test-setup
-    wget "${MCM_SCRIPTS_BASE}/mcm-iam-test.sh" -O /tmp/mcm-iam-test.sh
-    chmod +x /tmp/mcm-test-setup /tmp/mcm-iam-test.sh
-
-    # Download test collections
-    echo "Downloading test collections..."
-    wget {{ .Values.config.testCasesZipUrl }} -O /tmp/test-collections.zip
-    mkdir -p /tmp/test_cases
-    unzip -d /tmp/test_cases -o /tmp/test-collections.zip
-
-    # Export environment variables for mcm-iam-test.sh
-    export MCM_URL="{{ .Values.config.mcmUrl }}"
-    export KRATOS_PUBLIC_URL="{{ .Values.config.kratosPublicUrl }}"
-    export KEYCLOAK_URL="{{ .Values.config.keycloakUrl }}"
-    export KEYCLOAK_REALM="{{ .Values.config.keycloakRealm }}"
-    export MAILPIT_URL="{{ .Values.config.mailpitUrl }}"
-    export PORTAL_ADMIN_USER="{{ .Values.config.portalAdminUser }}"
-    export PORTAL_ADMIN_PASSWORD="${PORTAL_ADMIN_PASSWORD}"
-    export TTK_BACKEND_URL="{{ .Values.config.ttkBackendURL | replace "$release_name" .Release.Name }}"
-    export TEST_CASES_DIR="/tmp/test_cases/{{ .Values.config.testCasesPathInZip }}"
-    export SAVE_REPORT="{{ .Values.config.saveReport }}"
-    export SAVE_REPORT_BASE_URL="{{ .Values.config.saveReportBaseUrl }}"
-    export ALLOW_FAILURES="{{ .Values.config.allowFailures }}"
-
-    # Run MCM IAM tests
-    /tmp/mcm-iam-test.sh
-  configFileDefaults:
-    mode: outbound
-    logLevel: "2"
-  parameters: {}
-  testCaseEnvironmentFile:
-    inputValues: {}

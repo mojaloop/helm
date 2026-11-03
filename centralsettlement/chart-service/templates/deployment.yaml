@@ -93,6 +93,10 @@ spec:
             {{- end }}
           {{- include "mojaloop-common.probes" . | nindent 10 }}
           env:
+            {{- if .Values.diagnosticMode.enabled }}
+            - name: NPM_CONFIG_NODE_OPTIONS
+              value: {{ printf "--inspect=0.0.0.0:%v" .Values.diagnosticMode.debug.internalPort | quote }}
+            {{- end }}
             - name: CSET_DATABASE__PASSWORD
             {{- if .Values.config.db_secret }}
               valueFrom:

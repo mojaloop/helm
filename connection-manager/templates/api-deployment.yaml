@@ -108,51 +108,15 @@ spec:
             {{- end }}
             - name: PING_PONG_SERVER_URL
               value: {{ .Values.api.pingPongServerUrl | quote }}
-            {{- if .Values.api.keycloak.enabled }}
-            - name: KEYCLOAK_ENABLED
-              value: "true"
-            - name: KEYCLOAK_BASE_URL
-              value: {{ .Values.api.keycloak.baseUrl | quote }}
-            - name: KEYCLOAK_DISCOVERY_URL
-              value: {{ .Values.api.keycloak.discoveryUrl | quote }}
-            - name: KEYCLOAK_ADMIN_CLIENT_ID
-              value: {{ .Values.api.keycloak.adminClientId | quote }}
-            {{- if .Values.api.keycloak.adminClientSecretName }}
-            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.api.keycloak.adminClientSecretName }}
-                  key: {{ .Values.api.keycloak.adminClientSecretKey }}
-            {{- else }}
-            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
-              value: {{ .Values.api.keycloak.adminClientSecret | quote }}
-            {{- end }}
-            - name: KEYCLOAK_DFSPS_REALM
-              value: {{ .Values.api.keycloak.dfspsRealm | quote }}
-            - name: KEYCLOAK_AUTO_CREATE_ACCOUNTS
-              value: {{ .Values.api.keycloak.autoCreateAccounts | quote }}
-            {{- end }}
-            {{- if .Values.iam.enabled }}
+            {{- if (dig "iam" "enabled" false (.Values.global | default dict)) }}
             - name: IAM_ENABLED
               value: "true"
             - name: IAM_AUTO_CREATE_ACCOUNTS
-              value: {{ .Values.iam.autoCreateAccounts | default true | quote }}
+              value: {{ .Values.iam.autoCreateAccounts | quote }}
             - name: IAM_PROVISIONING_URL
-              value: {{ .Values.global.iam.provisioningUrl | quote }}
-            - name: HYDRA_ADMIN_URL
-              value: {{ .Values.global.iam.hydra.adminUrl | quote }}
-            - name: HYDRA_PUBLIC_URL
-              value: {{ .Values.global.iam.hydra.publicUrl | quote }}
-            - name: HYDRA_AUDIENCE
-              value: {{ .Values.iam.hydra.audience | quote }}
-            - name: KRATOS_ADMIN_URL
-              value: {{ .Values.global.iam.kratos.adminUrl | quote }}
-            - name: KRATOS_PUBLIC_URL
-              value: {{ .Values.global.iam.kratos.publicUrl | quote }}
-            - name: KRATOS_IDENTITY_SCHEMA_ID
-              value: {{ .Values.iam.kratos.identitySchemaId | quote }}
-            - name: KRATOS_INVITE_RETURN_TO_URL
-              value: {{ .Values.iam.kratos.inviteReturnToUrl | default .Values.api.clientUrl | quote }}
+              value: {{ required "global.iam.provisioningUrl is required with the IAM on: it is the IAM's internal API" .Values.global.iam.provisioningUrl | quote }}
+            - name: IAM_DFSP_CLIENT_AUDIENCE
+              value: {{ required "iam.dfspClientAudience is required with the IAM on" .Values.iam.dfspClientAudience | quote }}
             {{- with .Values.iam.dfspResourceName }}
             - name: IAM_DFSP_RESOURCE_NAME
               value: {{ . | quote }}
@@ -166,22 +130,6 @@ spec:
               value: {{ . | quote }}
             {{- end }}
             {{- end }}
-            {{- if .Values.api.openid.enabled }}
-            - name: OPENID_CLIENT_ID
-              value: {{ .Values.api.openid.clientId | quote }}
-            {{- if .Values.api.openid.clientSecretName }}
-            - name: OPENID_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.api.openid.clientSecretName }}
-                  key: {{ .Values.api.openid.clientSecretKey }}
-            {{- else }}
-            - name: OPENID_CLIENT_SECRET
-              value: {{ .Values.api.openid.clientSecret | quote }}
-            {{- end }}
-            {{- end }}
-            - name: CLIENT_URL
-              value: {{ .Values.api.clientUrl | quote }}
             {{- if .Values.api.env }}
             {{- range $key, $val := .Values.api.env }}
             - name: {{ $key | quote }}

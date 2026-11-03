@@ -4,36 +4,30 @@
 # Replace the example.com FQDNs, switch identity, DB Secret and CSR fields
 # with your deployment's actual values.
 
-iam:
-  enabled: true
-  hydra:
-    audience: connection-manager-api
-  kratos:
-    identitySchemaId: default
-    inviteReturnToUrl: https://mcm.example.com/
-
-# In-cluster IAM endpoints consumed by the MCM API container and the
-# Oathkeeper rule templates. FQDNs assume the IAM stack is installed in
-# the 'iam' namespace; override the host part if you put it elsewhere.
+# The IAM installed in the iam namespace with values-deploy-iam.example.yaml;
+# MCM calls its internal API, which admits MCM's API pods by network rule
 global:
   iam:
-    keto:
-      readUrl: http://keto-read.iam.svc.cluster.local
-      writeUrl: http://keto-write.iam.svc.cluster.local
-    hydra:
-      adminUrl: http://hydra-admin.iam.svc.cluster.local
-      publicUrl: http://hydra-public.iam.svc.cluster.local
-    kratos:
-      adminUrl: http://kratos-admin.iam.svc.cluster.local
-      publicUrl: http://kratos-public.iam.svc.cluster.local
+    enabled: true
+    provisioningUrl: http://ml-iam-services-api-internal.iam.svc.cluster.local
+
+# Each onboarded DFSP is recorded as a participant; its invited admin and its
+# machine client are assigned these AuthzRoles over it
+iam:
+  dfspResourceName: participant
+  dfspAdminRole: dfsp-operator
+  dfspClientRole: dfsp-client
 
 api:
   url: https://mcm.example.com
-  clientUrl: https://mcm.example.com/
   switchId: your-switch-id
   switchFQDN: switch.example.com
+  authz:
+    service: mcm
 
 ui:
+  authz:
+    service: mcmUi
   checkSessionUrl: https://kratos.example.com/sessions/whoami
   loginUrl: https://auth.example.com/login
   logoutUrl: https://auth.example.com/logout
@@ -47,11 +41,20 @@ db:
 
 gateway:
   enabled: true
-  host: mcm.example.com
-  parentRefs:
-    - name: mojaloop
-      namespace: infra
-      sectionName: https
+  api:
+    hosts:
+      - mcm-api.example.com
+    parentRefs:
+      - name: mojaloop
+        namespace: infra
+        sectionName: https
+  ui:
+    hosts:
+      - mcm.example.com
+    parentRefs:
+      - name: mojaloop
+        namespace: infra
+        sectionName: https
 
 config:
   tlsClientCSRParametersData: |-

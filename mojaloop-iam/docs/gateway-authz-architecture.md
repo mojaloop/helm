@@ -13,7 +13,7 @@ What permissions, roles, and grants mean, and who may define each, is
 | CNI, kube-proxy replacement, L4, LoadBalancer, pod encryption | Cilium (1.20, pre-release accepted) |
 | L7 gateways, routing, ext_authz, CORS | Cilium Gateway API + the `ExternalAuth` filter (GEP-1494) |
 | Authorization PDP | Oathkeeper (one shared rule set) + the IAM decision endpoint + Keto |
-| Authorization writes | the IAM provisioning endpoint, the only holder of Keto write access |
+| Authorization writes | the IAM's controller, the only holder of Keto write access |
 | VPN and split-horizon DNS | Netbird, on every environment |
 | TLS | cert-manager with Let's Encrypt DNS-01 |
 
@@ -36,9 +36,9 @@ Cilium CNI is the fallback while Cilium `ExternalAuth` is pre-release.
 2. **The trust boundary is the network, not the URL.** Internal (VPN) versus
    external (public) is decided by which gateway served the request, through
    split-horizon DNS. Hostnames carry no tier label.
-3. **The gateway stamps trust context.** The boundary decides the tier once,
-   scopes the credential, and tags the request. Everything downstream reads the
-   tag.
+3. **The gateway carries the decision.** A backend reads what the decision
+   path answered, `X-Scope` and, for the IAM's own operations, the caller, set
+   by the gateway in place of anything the client sent.
 4. **Oathkeeper is the policy enforcement point.** One rule per endpoint,
    called by the gateway through ext_authz. It authenticates the subject,
    renders the rule's payload, and asks the decision endpoint, which is the only
@@ -102,36 +102,10 @@ Two Cilium Gateway-API gateways, each on its own LoadBalancer address:
 - **External gateway:** public address, publishes the machine routes (machine
   APIs), enforces JWT auth.
 
-Each gateway does four things through Gateway-API filters and the ext_authz
+Each gateway does three things through Gateway-API filters and the ext_authz
 integration:
 
-1. **Stamps the tier header and clears the platform headers.**
-   `RequestHeaderModifier` with `set` writes `X-Gateway-Tier:
-   internal|external`, overwriting any client-supplied copy, and with `remove`
-   drops any inbound `X-Scope`. That header is written only by the
-   authorization path on allow, so stripping it at the edge is what makes its
-   presence unforgeable and its absence meaningful.
-
-   ```yaml
-   filters:
-     - type: RequestHeaderModifier
-       requestHeaderModifier:
-         set:
-           - name: X-Gateway-Tier
-             value: internal
-         remove:
-           - X-Scope
-   ```
-
-   Every route carries this, not only the ones that front a service that reads
-   the scope. An authorized route overwrites the header anyway, because the
-   decision endpoint answers with one either way and the gateway forwards what
-   it answered; a CORS preflight never calls the decision endpoint at all, so
-   without the `remove` the client's own value travels on untouched. Measured on
-   the local stack: a request carrying `X-Scope: dfsps=forged` reaches the
-   upstream verbatim when nothing strips it, and does not when this filter is
-   present.
-2. **Calls Oathkeeper** through the `ExternalAuth` filter (GEP-1494) on its
+1. **Calls Oathkeeper** through the `ExternalAuth` filter (GEP-1494) on its
    routes, pointing at the shared Oathkeeper. Verified field shape on 1.20:
 
    ```yaml
@@ -145,12 +119,20 @@ integration:
            # credentials + the headers Oathkeeper's handlers read, x-forwarded-proto
            # rebuilds the https URL, accept picks the browser or json error handler
            allowedHeaders: [cookie, authorization, accept, x-forwarded-proto]
-           allowedResponseHeaders: [x-scope]               # forwarded upstream on allow
    ```
 
-3. **Publishes only its tier's routes.** The per-tier endpoint subset is which
+   On allow, Envoy sets every header Oathkeeper answered with on the request,
+   in place of whatever the client sent under that name (Cilium configures
+   `allowed_upstream_headers` as `.*`, and Envoy 1.38 applies each with
+   `setCopy`). Every rule the IAM emits answers with `X-Scope`: an operation's
+   rule carries the decision endpoint's scope, and a CORS preflight's rule,
+   which never asks it, states `none`. A request that passes the gateway
+   therefore carries the gateway's scope and never the client's. The IAM's own
+   operations also receive `X-User`, the subject Oathkeeper authenticated; no
+   service's rule sets it.
+2. **Publishes only its tier's routes.** The per-tier endpoint subset is which
    HTTPRoutes each gateway carries.
-4. **Handles SPA CORS** with the Gateway-API CORS filter on the API routes, so
+3. **Handles SPA CORS** with the Gateway-API CORS filter on the API routes, so
    the browser call from the UI host to the API host needs no app-side CORS.
 
 ## Host and naming scheme
@@ -204,13 +186,15 @@ rather than of an operation.
     config:
       payload: '{"namespace":"example","object":"widget/{{ printIndex .MatchContext.RegexpCaptureGroups 1 }}","relation":"getWidgetCa","subject_id":"{{ print .Subject }}","scope":[{"type":"widgets","resourceName":"widget"}]}'
   mutators:
-    - handler: header
+    - handler: noop
 ```
 
-Rules never name infrastructure. The decision endpoint's address, the response
-headers it is allowed to return, and the mutator's header set are global
-Oathkeeper configuration, identical for every service. The only thing that
-varies per rule is the match and the payload.
+Rules never name infrastructure. The decision endpoint's address and the
+response headers it may return are global Oathkeeper configuration, identical
+for every service. What varies per rule is the match, the payload, and the
+headers its `header` mutator sets: `X-Scope: none` on a preflight, `X-User` on
+the IAM's own operations. Oathkeeper merges a rule's handler configuration into
+the global one, so the global `header` mutator names no header of its own.
 
 Sharing one rule is safe because Keto keys on the subject, which the credential
 determines: a cookie resolves a human identity, a JWT resolves a machine client,
@@ -225,10 +209,9 @@ the edge. A dual-tier host like the API attaches to both gateways, and a machine
 reaching a human-only endpoint authenticates as itself and is refused by the
 grants its subject holds.
 
-Rules are generated, and carry no per-rule handler configuration, so a rule
-cannot branch on `X-Gateway-Tier`. It does not need to: the `authenticators`
-list already names which credentials an endpoint accepts, and Keto gates the
-rest.
+Rules are generated, and nothing in them depends on which gateway served the
+request: the `authenticators` list names which credentials an endpoint accepts,
+and Keto gates the rest.
 
 ## What a service registers
 
@@ -315,7 +298,7 @@ document describing it, and the generator produces a whole-host rule from it:
   authorizer:
     handler: remote_json
     config:
-      payload: '{"namespace":"exampleUi","object":"__self__","relation":"getApp","subject_id":"{{ print .Subject }}","scope":[]}'
+      payload: '{"namespace":"exampleUi","object":"$self","relation":"getApp","subject_id":"{{ print .Subject }}","scope":[]}'
   mutators:
     - handler: header
 ```
@@ -332,26 +315,30 @@ ahead of the gateway's CORS filter, which is why the rule has to exist.
 ## The IAM's own processes
 
 One codebase, deployed as separate processes because they want different
-access and different scaling. Nothing else in the platform holds a Keto write
-URL.
+access and different scaling. Only the controller holds a Keto write URL, and
+a network rule admits only its pods to Keto's write port.
 
 | process | on | holds | reached by |
 |---|---|---|---|
 | decision | every request | read-only Keto | Oathkeeper, no route |
-| provisioning | a role or rule changing, resource creation | Keto write, Kratos admin | services, no public route |
-| operator | whenever a route, its endpoints or a resource name change | read on routes, services and the IAM's objects | the API server |
+| controller | a route, its endpoints, a document or one of the IAM's objects changing; every assignment, provisioning and resource listing | Keto write (grants, memberships, the registry), Kratos admin, read on routes, endpoints and the IAM's objects, status write; the resource names, so it alone reads their sources | the API server (admission); the api, by network rule |
+| api | people through the gateway; the provisioning authority | read-only Keto, Kratos admin, Hydra admin | its public port through the gateway; its internal port by network rule |
 
 The decision endpoint is on the hot path and answers a rendered payload. The
-provisioning endpoint is not. It applies the deployment's `AuthzRole` and
-`AuthzSeparation` objects against the composed catalog whenever one of them or
-the composition changes, creates the first administrator on the first apply,
-and writes each object's verdict back onto it; a role naming a permission no
-service advertises is refused and holds nothing. A service calls it when it
-creates a resource, naming it under the resource name the deployment
-configured into it, and assigns its configured roles over it explicitly. It
-runs single-replica, because two copies applying the same roles would race.
-The operator runs for as long as the deployment does, since a route appearing
-or a rollout finishing is what it answers to.
+controller is not. It composes every keyed backend's document, applies the
+deployment's `AuthzRole` and `AuthzSeparation` objects against the composed
+catalog whenever one of them or the composition changes, answers admission for
+the IAM's kinds, creates the first administrator on the first apply, and
+writes each object's verdict back onto it; a role naming a permission no
+service advertises is refused and holds nothing. Its replicas elect one
+writer of grants and memberships through a Lease, so every assignment is
+checked against one view of roles, rules and memberships; the others compose
+and answer admission too, and hand the leader the writes they receive. The
+api serves the IAM's public API to people and its internal API to the
+provisioning authority: it names a resource it created under the resource name
+the deployment configured into it, and assigns its configured roles over it
+explicitly; the api hands every write, and every listing of
+resources, to the controller.
 
 Services never link a Keto client. What they do link is `@mojaloop/authz`, a
 small package holding the `X-Scope` contract in both directions, so the
@@ -439,10 +426,9 @@ substrate.
 3. After login the Kratos cookie is set on the shared parent domain.
 4. The SPA loads from `<service>.<domain>` and calls `api.<service>.<domain>`
    (cross-origin, handled by the gateway CORS filter, cookie sent).
-5. The internal gateway stamps `internal`, strips any inbound `X-Scope`, and
-   calls Oathkeeper, which authenticates via `cookie_session`, posts the
-   rendered payload to the decision endpoint, and on allow forwards the
-   `X-Scope` it returned.
+5. The internal gateway calls Oathkeeper, which authenticates via
+   `cookie_session` and posts the rendered payload to the decision endpoint; on
+   allow the gateway sets the `X-Scope` it returned on the request.
 
 **Machine (off VPN):**
 
@@ -450,9 +436,8 @@ substrate.
 2. The machine fetches a token from `hydra.<domain>` (client credentials).
 3. It calls `api.<service>.<domain>`, resolved by public DNS to the external
    gateway.
-4. The external gateway stamps `external`, strips the platform headers, and
-   calls Oathkeeper, which authenticates via `jwt` and takes the same decision
-   path. The machine's `X-Scope` names the resources the role that admitted the
+4. The external gateway calls Oathkeeper, which authenticates via `jwt` and
+   takes the same decision path. The machine's `X-Scope` names the resources the role that admitted the
    call covers, which is how a service learns which participant is calling
    without any identity claim carrying that fact.
 
@@ -460,8 +445,8 @@ substrate.
 
 Confirmed live on Cilium 1.20.0-pre.4 with Gateway API v1.6 experimental CRDs:
 
-- `ExternalAuth` forwards Oathkeeper's mutated headers to the upstream on allow
-  (`allowedResponseHeaders`).
+- `ExternalAuth` sets the headers Oathkeeper answers with on the upstream
+  request on allow.
 - A deny passes Oathkeeper's response straight back, so the redirect error handler
   returns 302 with the login `Location` for a browser, and the `return_to` is the
   clean original URL (host from the check request, scheme from the forwarded
@@ -480,5 +465,5 @@ call rather than a second hydration round trip.
 The kind sim approximates split-horizon, since sslip.io maps a name to a fixed
 IP and cannot answer per network. It runs two gateways on two LoadBalancer
 addresses and reaches each tier by its gateway address, standing in for the DNS
-split. The generated rules, the tier header, ext_authz, Oathkeeper, the decision
+split. The generated rules, ext_authz, Oathkeeper, the decision
 endpoint, and Keto match the production shape.

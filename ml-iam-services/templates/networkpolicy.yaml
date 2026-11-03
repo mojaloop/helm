@@ -1,0 +1,144 @@
+{{- /*
+  Who reaches each of the IAM's processes. Admin tier, so no namespaced
+  NetworkPolicy can widen this. The callers a rule names Pass rather than
+  Accept: Accept would end evaluation here and stop a caller's own chart from
+  narrowing them further, while Pass hands them to the NetworkPolicy tier with
+  that option intact. Every other pod is denied in the one tier nothing
+  overrides.
+
+  A deny naming pods leaves what is not a pod: the kubelet's probes, the API
+  server calling admission, and a gateway that reaches backends from outside
+  any pod.
+*/}}
+{{- $fullname := include "ml-iam-services.fullname" . }}
+{{- $policy := .Values.networkPolicy }}
+{{- $controller := include "ml-iam-services.componentPeer" (dict "context" . "component" "controller") }}
+apiVersion: policy.networking.k8s.io/v1alpha2
+kind: ClusterNetworkPolicy
+metadata:
+  name: {{ .Release.Namespace }}-{{ $fullname }}-api
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  tier: Admin
+  priority: {{ $policy.priority }}
+  subject:
+    pods:
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ .Release.Namespace | quote }}
+      podSelector:
+        matchLabels:
+          {{- include "ml-iam-services.componentLabels" (dict "context" . "component" "api") | nindent 10 }}
+  ingress:
+    - name: public
+      action: Pass
+      from:
+        {{- with include "ml-iam-services.peers" (dict "context" . "peers" $policy.gateway) }}
+        {{- . | trim | nindent 8 }}
+        {{- end }}
+        {{- $controller | nindent 8 }}
+      protocols:
+        - tcp:
+            destinationPort:
+              number: {{ int .Values.api.env.PUBLIC_PORT }}
+    {{- with $policy.internalCallers }}
+    - name: internal
+      action: Pass
+      from:
+        {{- include "ml-iam-services.peers" (dict "context" $ "peers" .) | trim | nindent 8 }}
+      protocols:
+        - tcp:
+            destinationPort:
+              number: {{ int $.Values.api.env.INTERNAL_PORT }}
+    {{- end }}
+    {{- with $policy.kratos }}
+    - name: kratos
+      action: Pass
+      from:
+        {{- include "ml-iam-services.peers" (dict "context" $ "peers" .) | trim | nindent 8 }}
+      protocols:
+        - tcp:
+            destinationPort:
+              number: {{ int $.Values.api.env.INTERNAL_PORT }}
+    {{- end }}
+    - name: nothing-else
+      action: Deny
+      from:
+        - namespaces: {}
+---
+apiVersion: policy.networking.k8s.io/v1alpha2
+kind: ClusterNetworkPolicy
+metadata:
+  name: {{ .Release.Namespace }}-{{ $fullname }}-controller
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  tier: Admin
+  priority: {{ $policy.priority }}
+  subject:
+    pods:
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ .Release.Namespace | quote }}
+      podSelector:
+        matchLabels:
+          {{- include "ml-iam-services.componentLabels" (dict "context" . "component" "controller") | nindent 10 }}
+  ingress:
+    - name: api
+      action: Pass
+      from:
+        {{- include "ml-iam-services.componentPeer" (dict "context" . "component" "api") | nindent 8 }}
+      protocols:
+        - tcp:
+            destinationPort:
+              number: {{ int .Values.controller.env.PORT }}
+    # A standby replica hands the leader the writes only the leader makes
+    - name: replicas
+      action: Pass
+      from:
+        {{- $controller | nindent 8 }}
+      protocols:
+        - tcp:
+            destinationPort:
+              number: {{ int .Values.controller.env.PORT }}
+    - name: nothing-else
+      action: Deny
+      from:
+        - namespaces: {}
+---
+apiVersion: policy.networking.k8s.io/v1alpha2
+kind: ClusterNetworkPolicy
+metadata:
+  name: {{ .Release.Namespace }}-{{ $fullname }}-decision
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: decision
+spec:
+  tier: Admin
+  priority: {{ $policy.priority }}
+  subject:
+    pods:
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ .Release.Namespace | quote }}
+      podSelector:
+        matchLabels:
+          {{- include "ml-iam-services.componentLabels" (dict "context" . "component" "decision") | nindent 10 }}
+  ingress:
+    {{- with $policy.oathkeeper }}
+    - name: oathkeeper
+      action: Pass
+      from:
+        {{- include "ml-iam-services.peers" (dict "context" $ "peers" .) | trim | nindent 8 }}
+      protocols:
+        - tcp:
+            destinationPort:
+              number: {{ int $.Values.decision.service.targetPort }}
+    {{- end }}
+    - name: nothing-else
+      action: Deny
+      from:
+        - namespaces: {}

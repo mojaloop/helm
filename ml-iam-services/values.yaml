@@ -9,7 +9,6 @@ fullnameOverride: ""
 
 # Asked by the gateway for every request. Read-only Keto, no route.
 decision:
-  enabled: true
   replicaCount: 2
   # The gateway refuses every request while no replica answers, so a voluntary
   # disruption may take one only while another remains. Against a single
@@ -42,14 +41,12 @@ decision:
     httpGet:
       path: /health
       port: http
-    initialDelaySeconds: 10
     periodSeconds: 10
 
   readinessProbe:
     httpGet:
       path: /health
       port: http
-    initialDelaySeconds: 3
     periodSeconds: 5
 
   volumes: []
@@ -59,21 +56,36 @@ decision:
   affinity: {}
   podAnnotations: {}
 
-# Keeps the deployment's roles, separation rules and resource names applied
-# as they change, and serves the IAM that services and the role UI call. The
-# only holder of a Keto write URL.
-#
-# One replica on purpose: it writes, and two copies applying the same roles at
-# once would race each other. The decision endpoint is the one on every
-# request, and it only reads.
-provisioning:
-  enabled: true
-  replicaCount: 1
-  args:
-    - provisioning
-    # Every routed backend's document, composed here and published for the
-    # gateway and Keto
-    - --publish-as=authz-published
+# Composes the deployment's routes and documents, applies its roles and
+# separation rules, answers admission and writes every assignment. Every
+# replica composes and answers admission; the one holding the release's Lease
+# is the single writer of grants and memberships, and the others hand it the
+# writes they receive.
+controller:
+  replicaCount: 2
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+  # The ConfigMap the composed gateway rules and Keto model are published as
+  publishAs: authz-published
+
+  # How the replicas hold the Lease. A leader that releases it on stopping is
+  # replaced the moment the others see it change; these govern only a leader
+  # that dies or loses the API server. Measured on kind-dev, 2026-10-30, under
+  # the load of 100 pods restarting: a Lease patch takes at most 32.5 ms (300
+  # writes), a Keto patch of 200 tuples at most 193.4 ms (300 patches).
+  lease:
+    # The ceiling the deployment sets for any timeout: how long writes wait
+    # for a replacement after the leader dies
+    durationSeconds: 10
+    # The leader stops writing this long after its last renewal landed, so a
+    # write in flight then lands 2 s before anyone may take the lease: ten
+    # times the longest Keto patch measured
+    renewDeadlineMs: 8000
+    # Thirty times the longest Lease patch measured, so one renewal never
+    # overlaps the next, and eight attempts fit before the deadline
+    renewEveryMs: 1000
 
   # Refuses an AuthzDocument, AuthzRole, AuthzSeparation or AuthzResourceName
   # the IAM would refuse, when it is written. Needs cert-manager: the chart
@@ -85,7 +97,6 @@ provisioning:
   service:
     type: ClusterIP
     port: 80
-    targetPort: 3003
 
   env:
     PORT: "3003"
@@ -93,9 +104,6 @@ provisioning:
     KETO_WRITE_URL: "http://keto-write.ory.svc.cluster.local"
     KRATOS_ADMIN_URL: "http://kratos-admin.ory.svc.cluster.local"
     KRATOS_PUBLIC_URL: "http://kratos-public.ory.svc.cluster.local"
-
-  volumes: []
-  volumeMounts: []
 
   resources:
     requests:
@@ -105,74 +113,120 @@ provisioning:
       memory: "320Mi"
       cpu: "200m"
 
-  startupProbe:
-    httpGet:
-      path: /health
-      port: http
-    periodSeconds: 5
-    failureThreshold: 60
-
   livenessProbe:
     httpGet:
       path: /health
       port: http
-    initialDelaySeconds: 10
     periodSeconds: 10
 
+  # Ready once the deployment's roles are applied; no write is taken before
   readinessProbe:
     httpGet:
-      path: /health
+      path: /ready
       port: http
-    initialDelaySeconds: 3
     periodSeconds: 5
 
+  volumes: []
+  volumeMounts: []
   nodeSelector: {}
   tolerations: []
   affinity: {}
   podAnnotations: {}
 
-kratosRoleWebhook:
-  enabled: true
-  replicaCount: 1
+# The public API, for people through the gateway, and the internal API, the
+# provisioning authority's, reachable only by what networkPolicy.internalCallers
+# names, as two ports of one process. It reads the
+# composition the controller announces, reads Keto only, and hands every write
+# and every listing of resources to the controller.
+api:
+  replicaCount: 2
+  pdb:
+    enabled: false
+    minAvailable: 1
 
+  # The public port, the backend of the route
   service:
     type: ClusterIP
     port: 80
-    targetPort: 8080
+
+  # The internal port, reachable only by the callers networkPolicy names
+  internalService:
+    type: ClusterIP
+    port: 80
 
   env:
-    PORT: "8080"
-    KRATOS_ADMIN_URL: "http://kratos-admin.ory.svc.cluster.local:80"
+    PUBLIC_PORT: "3004"
+    INTERNAL_PORT: "3005"
     KETO_READ_URL: "http://keto-read.ory.svc.cluster.local"
+    KRATOS_ADMIN_URL: "http://kratos-admin.ory.svc.cluster.local"
+    KRATOS_PUBLIC_URL: "http://kratos-public.ory.svc.cluster.local"
+    HYDRA_ADMIN_URL: "http://hydra-admin.ory.svc.cluster.local"
 
   resources:
     requests:
-      memory: "32Mi"
+      memory: "160Mi"
       cpu: "25m"
     limits:
-      memory: "64Mi"
-      cpu: "100m"
+      memory: "320Mi"
+      cpu: "200m"
 
   livenessProbe:
     httpGet:
       path: /health
-      port: http
-    initialDelaySeconds: 10
+      port: public
     periodSeconds: 10
 
+  # Ready once it holds the composition the controller announced
   readinessProbe:
     httpGet:
       path: /health
-      port: http
-    initialDelaySeconds: 3
+      port: internal
     periodSeconds: 5
 
+  volumes: []
+  volumeMounts: []
   nodeSelector: {}
   tolerations: []
   affinity: {}
   podAnnotations: {}
 
+# The api's public port through the gateway. The IAM decides who may use its
+# own API like any other service's, so the route always carries the
+# ExternalAuth filter and keys its backend under authz.service.
+gateway:
+  enabled: false
+  host: ""
+  parentRefs: []
+  cors: {}
+  oathkeeper:
+    serviceName: oathkeeper-api
+    servicePort: 4456
+    serviceNamespace: ""
+
+authz:
+  # The permission prefix the IAM's own operations answer under; the
+  # deployment's to say. The controller records the IAM's own roles and
+  # permissions under it.
+  service: ""
+
+# Who reaches each process, as Admin-tier ClusterNetworkPolicies: what a rule
+# names is passed to the namespaced tier, every other pod is denied. The
+# internal API and the controller authenticate nothing, so these rules are
+# the whole of their access control.
+#
+# Each entry names pods: `namespace` (empty for the release's own) and a
+# `podSelector`.
+networkPolicy:
+  priority: 10
+  # The gateway's proxy pods, which reach the public port. The controller
+  # reaches it too, for the API document.
+  gateway: []
+  # The provisioning authority's pods, the only ones that reach the internal port
+  internalCallers: []
+  # The pods that ask the decision endpoint
+  oathkeeper: []
+  # The Kratos pods, which tell the internal port's login about every sign-in
+  kratos: []
+
 serviceAccount:
-  create: false
-  name: ""
   annotations: {}

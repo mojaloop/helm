@@ -1,0 +1,57 @@
+{{- /*
+  Ory's admin APIs answer whoever reaches them. Each component's admin port
+  is passed to the namespaced tier for the pods allowed to call it and denied
+  to every other pod; its read and public ports are left alone. Keto's write
+  port answers only the IAM controller, the one writer of grants; the other
+  admin ports answer pods in this release's namespace.
+*/}}
+{{- $namespace := dict "namespaces" (dict "matchLabels" (dict "kubernetes.io/metadata.name" .Release.Namespace)) }}
+{{- $components := list }}
+{{- if .Values.keto.enabled }}
+{{- $writers := dict "pods" (dict
+  "namespaceSelector" (dict "matchLabels" (dict "kubernetes.io/metadata.name" .Release.Namespace))
+  "podSelector" .Values.oryAdminNetworkPolicy.ketoWriters) }}
+{{- $components = append $components (dict "name" "keto" "port" .Values.keto.keto.config.serve.write.port "from" $writers) }}
+{{- end }}
+{{- if .Values.kratos.enabled }}
+{{- $components = append $components (dict "name" "kratos" "port" .Values.kratos.kratos.config.serve.admin.port "from" $namespace) }}
+{{- end }}
+{{- if .Values.hydra.enabled }}
+{{- $components = append $components (dict "name" "hydra" "port" (dig "config" "serve" "admin" "port" 4445 .Values.hydra.hydra) "from" $namespace) }}
+{{- end }}
+{{- range $components }}
+---
+apiVersion: policy.networking.k8s.io/v1alpha2
+kind: ClusterNetworkPolicy
+metadata:
+  name: {{ $.Release.Namespace }}-{{ .name }}-admin
+spec:
+  tier: Admin
+  priority: {{ $.Values.oryAdminNetworkPolicy.priority }}
+  subject:
+    pods:
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ $.Release.Namespace | quote }}
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: {{ .name }}
+          app.kubernetes.io/instance: {{ $.Release.Name }}
+  ingress:
+    - name: callers
+      action: Pass
+      from:
+        {{- list .from | toYaml | nindent 8 }}
+      protocols:
+        - tcp:
+            destinationPort:
+              number: {{ int .port }}
+    - name: nothing-else
+      action: Deny
+      from:
+        - namespaces: {}
+      protocols:
+        - tcp:
+            destinationPort:
+              number: {{ int .port }}
+{{- end }}

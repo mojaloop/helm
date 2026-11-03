@@ -1,11 +1,34 @@
-{{- if and .Values.provisioning.enabled .Values.provisioning.webhook.enabled }}
+{{- if .Values.controller.webhook.enabled }}
 {{- /*
-  Admission for the IAM's kinds: the provisioning process runs the checks it
-  applies on every write and refuses what it would refuse. Failing closed, so
-  no object is stored unchecked while the IAM is down.
+  Admission for the IAM's kinds: the controller runs the checks it applies on
+  every write and refuses what it would refuse. Failing closed, so no object
+  is stored unchecked while the IAM is down.
+
+  The controller answers admission from the moment it starts, before it is
+  ready, and refuses what it cannot check yet with its own message. This
+  Service publishes the pod while it is not ready so the API server reaches
+  it then too.
 */}}
 {{- $fullname := include "ml-iam-services.fullname" . }}
-{{- $service := printf "%s-provisioning" $fullname }}
+{{- $service := printf "%s-webhook" $fullname }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $service }}
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  type: ClusterIP
+  publishNotReadyAddresses: true
+  ports:
+    - port: 443
+      targetPort: webhook
+      protocol: TCP
+      name: webhook
+  selector:
+    {{- include "ml-iam-services.componentLabels" (dict "context" . "component" "controller") | nindent 4 }}
+---
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
@@ -56,5 +79,11 @@ webhooks:
         apiVersions: [v1]
         resources: [authzdocuments, authzroles, authzseparations, authzresourcenames]
         operations: [CREATE, UPDATE]
+        scope: Namespaced
+      # A role another role's grants name by id stays until they no longer do
+      - apiGroups: [iam.mojaloop.io]
+        apiVersions: [v1]
+        resources: [authzroles]
+        operations: [DELETE]
         scope: Namespaced
 {{- end }}

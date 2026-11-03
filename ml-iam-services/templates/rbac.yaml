@@ -1,0 +1,153 @@
+{{- /*
+  What the IAM's processes may do in the cluster. The controller reads the
+  routes, the gateways they attach to, the endpoints of the backends they
+  send to, the documents routes name and the deployment's roles, separation
+  rules and resource names, wherever they are; says on each route and object
+  what became of it; and publishes the composition, its announcement and the
+  history of every permission ever composed into its own namespace, where its
+  replicas also elect their one writer through a Lease. The api watches that
+  announcement and keeps the roles composed through it, in the same
+  namespace. No rule here reaches a secret or a workload.
+*/}}
+{{- $fullname := include "ml-iam-services.fullname" . }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $fullname }}-controller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+  {{- with .Values.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $fullname }}-controller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+rules:
+  # The composed gateway rules and Keto model, the composition's announcement
+  # and the permission history
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch", "create", "patch", "update"]
+  # The one Lease the replicas elect their writer through, which the release
+  # creates; a list or watch names it by field selector
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    resourceNames: [{{ printf "%s-controller" $fullname | quote }}]
+    verbs: ["get", "list", "watch", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $fullname }}-controller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $fullname }}-controller
+subjects:
+  - kind: ServiceAccount
+    name: {{ $fullname }}-controller
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ $fullname }}-controller
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+rules:
+  - apiGroups: ["iam.mojaloop.io"]
+    resources: ["authzdocuments", "authzroles", "authzseparations", "authzresourcenames"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["iam.mojaloop.io"]
+    resources:
+      - "authzdocuments/status"
+      - "authzroles/status"
+      - "authzseparations/status"
+      - "authzresourcenames/status"
+    verbs: ["get", "patch", "update"]
+  - apiGroups: ["gateway.networking.k8s.io"]
+    resources: ["httproutes", "gateways"]
+    verbs: ["get", "list", "watch"]
+  # A backend's rollout, after which its document is read again
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ $fullname }}-controller
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ $fullname }}-controller
+subjects:
+  - kind: ServiceAccount
+    name: {{ $fullname }}-controller
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $fullname }}-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+  {{- with .Values.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $fullname }}-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["iam.mojaloop.io"]
+    resources: ["authzroles"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $fullname }}-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $fullname }}-api
+subjects:
+  - kind: ServiceAccount
+    name: {{ $fullname }}-api
+    namespace: {{ .Release.Namespace }}

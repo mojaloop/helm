@@ -31,7 +31,7 @@ dependencies:
     repository: "file://../centralledger"
     condition: centralledger.enabled
   - name: centralsettlement
-    version: 17.2.0
+    version: 17.2.1
     repository: "file://../centralsettlement"
     condition: centralsettlement.enabled
   - name: simulator
@@ -146,11 +146,6 @@ dependencies:
     version: 17.2.0
     repository: "file://../ml-testing-toolkit-cli"
     condition: ml-ttk-test-cleanup.tests.enabled
-  - name: ml-testing-toolkit-cli
-    alias: ml-ttk-test-mcm-iam
-    version: 17.2.0
-    repository: "file://../ml-testing-toolkit-cli"
-    condition: ml-ttk-test-mcm-iam.tests.enabled
   - name: inter-scheme-proxy-adapter
     alias: inter-scheme-proxy-adapter
     version: 17.2.0
@@ -160,7 +155,9 @@ dependencies:
     version: 17.2.0
     repository: "file://../connection-manager"
     condition: connection-manager.enabled
+  # Installed with the IAM on, unless the deployment runs the IAM as a release
+  # of its own and sets mojaloop-iam.enabled false
   - name: mojaloop-iam
     version: 17.2.3
     repository: "file://../mojaloop-iam"
-    condition: iam.enabled
+    condition: mojaloop-iam.enabled,global.iam.enabled

@@ -18,28 +18,33 @@
   the deployment's to say. operationId, title and summary are the surface
   describing itself and do not change between deployments.
 
+  Nothing here renders unless global.iam.enabled is on: with the IAM off it is
+  not deployed, and neither are the kinds these objects are.
+
   Usage, with the name of the Service the route sends to:
     metadata:
       name: ...
-      {{- include "mojaloop-common.authz.annotations" (dict "backend" $name "authz" .Values.authz) | nindent 2 }}
+      {{- include "mojaloop-common.authz.annotations" (dict "context" . "backend" $name "authz" .Values.authz) | nindent 2 }}
 
     {{ include "mojaloop-common.authzdocument" (dict "context" . "backend" $name "authz" .Values.authz) }}
 */}}
-{{- define "mojaloop-common.authz.annotations" -}}
-{{- with .authz }}
-{{- if .service }}
-annotations:
-  iam.mojaloop.io/{{ $.backend }}.service: {{ .service | quote }}
-  {{- if .operationId }}
-  iam.mojaloop.io/{{ $.backend }}.schema: {{ $.backend | quote }}
-  {{- end }}
+{{- define "mojaloop-common.authz.protected" -}}
+{{- if and (dig "iam" "enabled" false (.context.Values.global | default dict)) (dig "service" "" (.authz | default dict)) }}true{{ end }}
 {{- end }}
+
+{{- define "mojaloop-common.authz.annotations" -}}
+{{- if include "mojaloop-common.authz.protected" . -}}
+annotations:
+  iam.mojaloop.io/{{ .backend }}.service: {{ .authz.service | quote }}
+  {{- if .authz.operationId }}
+  iam.mojaloop.io/{{ .backend }}.schema: {{ .backend | quote }}
+  {{- end }}
 {{- end }}
 {{- end }}
 
 {{- define "mojaloop-common.authzdocument" -}}
+{{- if and (include "mojaloop-common.authz.protected" .) .authz.operationId }}
 {{- with .authz }}
-{{- if and .service .operationId }}
 apiVersion: iam.mojaloop.io/v1
 kind: AuthzDocument
 metadata:

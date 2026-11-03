@@ -1,0 +1,188 @@
+{{- /*
+  The controller, the single writer of grants and memberships. Every replica
+  composes and answers admission; the one holding the Lease writes, and the
+  others hand it the writes they receive. A replica that stops releases the
+  lease, so another takes it the moment it changes. It reconciles what
+  services and the deployment declare, so it holds a token scoped to reading
+  those objects, writing their status and publishing what it composed.
+*/}}
+{{- $fullname := include "ml-iam-services.fullname" . }}
+{{- $process := .Values.controller }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullname }}-controller
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  replicas: {{ $process.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ml-iam-services.componentLabels" (dict "context" . "component" "controller") | nindent 6 }}
+  template:
+    metadata:
+      {{- with $process.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ml-iam-services.componentLabels" (dict "context" . "component" "controller") | nindent 8 }}
+    spec:
+      serviceAccountName: {{ $fullname }}-controller
+      automountServiceAccountToken: true
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: controller
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          image: {{ include "ml-iam-services.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - controller
+            - --publish-as={{ required "controller.publishAs is required" $process.publishAs }}
+            - --announce-as={{ $fullname }}-composition
+            - --history-as={{ $fullname }}-history
+            {{- with .Values.authz.service }}
+            - --serves-as={{ . }}
+            {{- end }}
+            {{- if $process.webhook.enabled }}
+            - --webhook-cert-dir=/webhook-tls
+            {{- end }}
+            - --lease={{ $fullname }}-controller
+          ports:
+            - name: http
+              containerPort: {{ int $process.env.PORT }}
+              protocol: TCP
+            {{- if $process.webhook.enabled }}
+            - name: webhook
+              containerPort: 9443
+              protocol: TCP
+            {{- end }}
+          env:
+            {{- range $name, $value := $process.env }}
+            - name: {{ $name }}
+              value: {{ $value | quote }}
+            {{- end }}
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: LEASE_DURATION_SECONDS
+              value: {{ required "controller.lease.durationSeconds is required" $process.lease.durationSeconds | quote }}
+            - name: LEASE_RENEW_DEADLINE_MS
+              value: {{ required "controller.lease.renewDeadlineMs is required" $process.lease.renewDeadlineMs | quote }}
+            - name: LEASE_RENEW_EVERY_MS
+              value: {{ required "controller.lease.renewEveryMs is required" $process.lease.renewEveryMs | quote }}
+            {{- /*
+              The first identity, created while the roles are applied. It is
+              invited by email to set its password; a passwordSecret grants
+              one directly instead, for a deployment with no mail path.
+            */}}
+            {{- with (.Values.global).iamAdmin }}
+            {{- if .email }}
+            - name: IAM_ADMIN_EMAIL
+              value: {{ .email | quote }}
+            - name: IAM_HUB_ADMIN_ROLE
+              value: {{ .role | default "hub-admin" | quote }}
+            {{- if .passwordSecret }}
+            - name: IAM_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .passwordSecret | quote }}
+                  key: {{ .passwordSecretKey | default "password" | quote }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+          {{- if or $process.volumeMounts $process.webhook.enabled }}
+          volumeMounts:
+            {{- with $process.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- if $process.webhook.enabled }}
+            - name: webhook-tls
+              mountPath: /webhook-tls
+              readOnly: true
+            {{- end }}
+          {{- end }}
+          livenessProbe:
+            {{- toYaml $process.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml $process.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml $process.resources | nindent 12 }}
+      {{- if or $process.volumes $process.webhook.enabled }}
+      volumes:
+        {{- with $process.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if $process.webhook.enabled }}
+        - name: webhook-tls
+          secret:
+            secretName: {{ $fullname }}-webhook-tls
+        {{- end }}
+      {{- end }}
+      {{- with $process.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $process.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $process.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullname }}-controller
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  type: {{ $process.service.type }}
+  ports:
+    - port: {{ $process.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "ml-iam-services.componentLabels" (dict "context" . "component" "controller") | nindent 4 }}
+---
+{{- /*
+  Created here, so the controller only reads, watches and patches it. Its
+  holder is written by the replicas alone; the spec stays empty here, so an
+  upgrade leaves the holder as it is.
+*/}}
+apiVersion: coordination.k8s.io/v1
+kind: Lease
+metadata:
+  name: {{ $fullname }}-controller
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec: {}

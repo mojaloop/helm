@@ -2,9 +2,7 @@
 # with iam.mojaloop.io/<backend>.service, the backend serves its OpenAPI
 # document or the route names an AuthzDocument, and the IAM composes every
 # keyed backend into this deployment's gateway rules, Keto model and catalog.
-#
-# Ad-hoc rules outside a bundle go in as oathkeeper.ory.sh Rule CRs (maester
-# controller mode)
+# Those rules are the gateway's only ones.
 #
 # The deployment's roles, separation rules and resource names are AuthzRole,
 # AuthzSeparation and AuthzResourceName objects, in any namespace; the chart
@@ -12,8 +10,8 @@
 global:
   # Composes the documents; the IAM's own image
   iamImage: mojaloop/ml-iam-services:v0.1.2
-  # The first identity a fresh deployment logs in with. The provisioning
-  # service creates it while applying the roles, puts it in `role`, and
+  # The first identity a fresh deployment logs in with. The IAM's controller
+  # creates it while applying the roles, puts it in `role`, and
   # invites it by email to set its password — the same courier flow every
   # other operator onboards through. Leave the email empty to create nobody,
   # which is what SSO deployments want. A passwordSecret grants a password
@@ -41,10 +39,7 @@ oathkeeper:
       access_rules:
         matching_strategy: regexp
         repositories:
-          # Rules from oathkeeper.ory.sh Rule CRs (maester keeps this file)
-          - file:///etc/rules/access-rules.json
-          # The aggregate of all authz bundles, staged by the fetch-authz init
-          - file:///etc/authz-rules/access-rules.yml
+          - file:///etc/rules/access-rules.yml
       authenticators:
         jwt:
           enabled: true
@@ -92,18 +87,11 @@ oathkeeper:
               {"namespace":"denied","object":"denied","relation":"denied","subject_id":"{{ print .Subject }}"}
       mutators:
         id_token:
-          enabled: true
-          config:
-            issuer_url: http://oathkeeper-api:4456/
-            jwks_url: http://oathkeeper:4456/.well-known/jwks.json
+          enabled: false
         header:
           enabled: true
           config:
-            headers:
-              X-User: '{{ print .Subject }}'
-              X-Email: '{{ with .Extra.identity }}{{ print .traits.email }}{{ end }}'
-              X-DFSP-ID: '{{ with .Extra.identity }}{{ with .metadata_public }}{{ with .dfspId }}{{ . }}{{ end }}{{ end }}{{ end }}'
-              X-Roles: '{{ $r := list }}{{ with .Extra.identity }}{{ with .metadata_public }}{{ $r = .roles | default list }}{{ with .dfspId }}{{ $r = append $r (printf "dfsp:%s" .) }}{{ end }}{{ end }}{{ else }}{{ $r = list (printf "dfsp:%s" $.Subject) }}{{ end }}{{ toJson $r }}'
+            headers: {}
         noop:
           enabled: true
       errors:
@@ -129,11 +117,13 @@ oathkeeper:
         api:
           port: 4456
     managedAccessRules: false
-  # The rules the IAM composed. Kubernetes keeps the mounted file current and
-  # Oathkeeper reloads the repository it names, so a service whose surface
-  # changes reaches the gateway without a rollout. Optional because Oathkeeper
-  # serves an empty rule set as 404, which is the right answer for a platform
-  # that has not composed yet.
+    # The rules the IAM composed, mounted at /etc/rules. Kubernetes keeps the
+    # mounted file current and Oathkeeper reloads the repository it names, so
+    # a service whose surface changes reaches the gateway without a rollout.
+    # The ConfigMap is seeded empty at install, and Oathkeeper serves an empty
+    # rule set as 404, the right answer for a platform not composed yet.
+    accessRulesOverride:
+      nameOverride: authz-published
   deployment:
     customStartupProbe:
       httpGet:
@@ -146,28 +136,8 @@ oathkeeper:
       successThreshold: 1
       timeoutSeconds: 2
       initialDelaySeconds: 1
-    extraVolumes:
-      - name: authz-rules
-        configMap:
-          name: authz-published
-          optional: true
-          items:
-            - key: access-rules.yml
-              path: access-rules.yml
-    extraVolumeMounts:
-      - name: authz-rules
-        mountPath: /etc/authz-rules
-        readOnly: true
   maester:
-    enabled: true
-    oathkeeperFullnameOverride: 'oathkeeper'
-  oathkeeper-maester:
-    fullnameOverride: 'oathkeeper-maester'
-    oathkeeperFullnameOverride: 'oathkeeper'
-    deployment:
-      envs:
-        - name: authorizersAvailable
-          value: allow,deny,remote_json
+    enabled: false
   serviceMonitor:
     scheme: http
     scrapeInterval: 60s
@@ -274,24 +244,12 @@ kratos:
                 "name": {
                   "title": "Name",
                   "type": "string"
-                },
-                "roles": {
-                  "title": "User Roles",
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
                 }
               },
               "required": ["email"],
               "additionalProperties": false
             }
           }
-        }
-      "role-injection-body.jsonnet": |
-        function(ctx) {
-          identity_id: ctx.identity.id,
-          user_subject: ctx.identity.traits.subject
         }
     config:
       identity:
@@ -333,41 +291,22 @@ kratos:
             ui_url: https://localhost/ui/login
             lifespan: 10m
             after:
+              # The IAM writes what the person holds into their identity before
+              # the session is handed out. Body: function(ctx) { identity_id: ctx.identity.id }
+              hooks:
+                - hook: web_hook
+                  config:
+                    url: http://ml-iam-services-api-internal/login
+                    method: POST
+                    body: base64://ZnVuY3Rpb24oY3R4KSB7IGlkZW50aXR5X2lkOiBjdHguaWRlbnRpdHkuaWQgfQ==
               oidc:
                 default_browser_return_url: https://localhost/ui/welcome
-                hooks:
-                  - hook: web_hook
-                    config:
-                      url: http://ml-iam-services-kratos-role-webhook/inject-roles
-                      method: POST
-                      body: file:///etc/config/role-injection-body.jsonnet
-                      response:
-                        parse: false
-                      auth:
-                        type: api_key
-                        config:
-                          name: Authorization
-                          value: Bearer kratos-webhook-token
-                          in: header
           error:
             ui_url: https://localhost/ui/error
           registration:
             after:
               oidc:
                 hooks:
-                  - hook: web_hook
-                    config:
-                      url: http://ml-iam-services-kratos-role-webhook/inject-roles
-                      method: POST
-                      body: file:///etc/config/role-injection-body.jsonnet
-                      response:
-                        parse: false
-                      auth:
-                        type: api_key
-                        config:
-                          name: Authorization
-                          value: Bearer kratos-webhook-token
-                          in: header
                   - hook: session
           recovery:
             enabled: true
@@ -452,12 +391,47 @@ hydra:
         level: info
         format: json
 
+# The IAM's processes, beside the Ory they use. Named fixed like every Ory
+# component here, so the remote_json authorizer above names the decision
+# endpoint whatever the release is called.
 ml-iam-services:
-  kratosRoleWebhook:
+  fullnameOverride: ml-iam-services
+  decision:
     env:
-      KRATOS_ADMIN_URL: "http://kratos-admin"
       KETO_READ_URL: "http://keto-read"
+  controller:
+    env:
+      KETO_READ_URL: "http://keto-read"
+      KETO_WRITE_URL: "http://keto-write"
+      KRATOS_ADMIN_URL: "http://kratos-admin"
+      KRATOS_PUBLIC_URL: "http://kratos-public"
+  api:
+    env:
+      KETO_READ_URL: "http://keto-read"
+      KRATOS_ADMIN_URL: "http://kratos-admin"
+      KRATOS_PUBLIC_URL: "http://kratos-public"
+      HYDRA_ADMIN_URL: "http://hydra-admin"
+  networkPolicy:
+    oathkeeper:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/name: oathkeeper
+    kratos:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/name: kratos
 
+# Ory's admin APIs (Keto write, Kratos admin, Hydra admin) authenticate
+# nothing. Keto's write port answers only the IAM controller; Kratos and
+# Hydra admin answer pods in this release's namespace: the IAM's processes,
+# the login UI and Ory's own controllers. An Admin-tier ClusterNetworkPolicy
+# per component.
+oryAdminNetworkPolicy:
+  priority: 10
+  ketoWriters:
+    matchLabels:
+      app.kubernetes.io/name: ml-iam-services
+      app.kubernetes.io/component: controller
 
 kratos-ui:
   enabled: false

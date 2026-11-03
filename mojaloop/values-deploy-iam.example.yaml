@@ -1,11 +1,11 @@
 # Deployment overrides for the mojaloop-iam chart:
-#   helm install ml-iam ./mojaloop-iam -n mojaloop -f mojaloop/values-deploy-iam.example.yaml
+#   helm install ml-iam ./mojaloop-iam -n iam -f mojaloop/values-deploy-iam.example.yaml
 #
-# All optional components are enabled on top of the chart defaults
-# (bundled PostgreSQL is already on): Kratos self-service UI, the
-# iam-bootstrap Job (auto-generates the hub-admin password), and Mailpit
-# as the dev SMTP sink (Kratos courier is rewired to ml-iam-mailpit-smtp).
-# Replace the example.com FQDNs with your deployment's actual values.
+# All optional components are enabled on top of the chart defaults: the
+# Kratos self-service UI, the IAM's own API behind the gateway, the first
+# administrator, and Mailpit as the dev SMTP sink (the Kratos courier is
+# rewired to mailpit-smtp). Replace the example.com FQDNs with your
+# deployment's actual values.
 
 oathkeeper:
   oathkeeper:
@@ -59,7 +59,7 @@ kratos:
             ui_url: https://auth.example.com/verification
       courier:
         smtp:
-          connection_uri: smtp://ml-iam-mailpit-smtp/?disable_starttls=true
+          connection_uri: smtp://mailpit-smtp/?disable_starttls=true
           from_address: noreply@example.com
           from_name: Mojaloop Hub
 
@@ -76,23 +76,32 @@ database:
   keto:
     password: change-me
 
-# Authorization bundles — the only place services are declared. MCM's internal
-# host serves the human portal (Kratos cookie); the external host serves the
-# machine clients (Hydra JWT).
+# The first administrator, created while the roles are applied and invited by
+# email to set a password. The role is an AuthzRole the deployment applies.
 global:
-  authz:
-    - name: mcm
-      image: mojaloop/connection-manager-api:v3.9.0-snapshot.1
-      fqdn:
-        SERVICE_FQDN_INTERNAL: mcm.int.example.com
-        SERVICE_FQDN_EXTERNAL: mcm.example.com
+  iamAdmin:
+    email: admin@example.com
+    role: hub-admin
 
-iamBootstrap:
-  enabled: true
-  adminEmail: admin@example.com
-  # Leave empty to auto-generate; reference a Secret in production.
-  adminPasswordSecret: ""
-  adminPasswordSecretKey: password
+# The IAM's own API, behind the gateway; its operations answer under iam
+ml-iam-services:
+  gateway:
+    enabled: true
+    host: iam-api.example.com
+    parentRefs:
+      - name: mojaloop
+        namespace: infra
+        sectionName: https
+  authz:
+    service: iam
+  networkPolicy:
+    # The services that provision, here MCM's API
+    internalCallers:
+      - namespace: mojaloop
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: mcm-connection-manager-api
+            app.kubernetes.io/instance: mcm
 
 kratos-ui:
   enabled: true

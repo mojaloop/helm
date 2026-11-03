@@ -32,42 +32,27 @@ The following table lists the parameters you are expected to edit for your deplo
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `api.url` | `https://localhost` | Base URL for API ingress |
-| `api.clientUrl` | `http://localhost:3000/` | MCM UI URL for CORS and redirects |
 | `api.switchFQDN` | `switch.example.com` | FQDN of the Mojaloop switch |
 | `api.switchId` | `dummySwitchId` | Identifier for the switch |
 
-### Authentication Configuration (Keycloak)
+### IAM
 
-To enable Keycloak authentication, set `api.keycloak.enabled` to `true` and configure:
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `api.keycloak.enabled` | `false` | Enable Keycloak authentication |
-| `api.keycloak.baseUrl` | `http://localhost:8080` | Keycloak server base URL |
-| `api.keycloak.discoveryUrl` | - | OIDC discovery URL |
-| `api.keycloak.adminClientId` | `connection-manager-api-service` | Keycloak admin client ID |
-| `api.keycloak.adminClientSecret` | `changeme` | Admin client secret (use secret reference for production) |
-| `api.keycloak.dfspsRealm` | `dfsps` | Keycloak realm for DFSPs |
-| `api.keycloak.autoCreateAccounts` | `true` | Auto-create user accounts |
-
-### Authorization Configuration (Keto)
-
-To enable Keto authorization, set `api.keto.enabled` to `true` and configure:
+MCM uses the IAM only when `global.iam.enabled` is on: it records each DFSP it
+onboards, creates its accounts and machine client, and assigns their roles
+through the IAM's internal API. Its routes key their backends for the IAM and
+carry the ExternalAuth filter under the same switch.
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `api.keto.enabled` | `false` | Enable Keto authorization |
-| `api.keto.writeUrl` | `http://localhost:4467` | Keto write API URL |
-
-### OpenID Connect Configuration
-
-To enable OpenID Connect, set `api.openid.enabled` to `true` and configure:
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `api.openid.enabled` | `false` | Enable OpenID Connect |
-| `api.openid.clientId` | `connection-manager-auth-client` | OIDC client ID |
-| `api.openid.clientSecret` | `changeme` | OIDC client secret (use secret reference for production) |
+| `global.iam.enabled` | - | Use the IAM |
+| `global.iam.provisioningUrl` | - | The IAM's internal API, required with the IAM on |
+| `iam.autoCreateAccounts` | `true` | Create the DFSP's accounts and machine client at onboarding |
+| `iam.dfspClientAudience` | `connection-manager-api` | Audience the DFSP's machine client is issued tokens for |
+| `iam.dfspResourceName` | - | The deployment's resource name for a DFSP |
+| `iam.dfspAdminRole` | - | Role the invited DFSP admin is assigned over the DFSP |
+| `iam.dfspClientRole` | - | Role the DFSP's machine client is assigned over the DFSP |
+| `api.authz.service` | - | Permission prefix the API route keys its backend under |
+| `ui.authz.service` | - | Permission prefix the UI route keys its backend under |
 
 ## Developer/Debugging Configuration
 

@@ -1,10 +1,11 @@
 {{- /*
   A disruption budget for a process that declares one. The gateway answers
   nothing while the decision endpoint has no ready replica, so a drain that
-  would take the last one waits instead.
+  would take the last one waits instead; the api the same for the IAM's own
+  API and the provisioning authority, and the controller for admission.
 */}}
-{{- range $key, $process := dict "decision" .Values.decision "provisioning" .Values.provisioning }}
-{{- if and $process.enabled (($process.pdb).enabled) }}
+{{- range $key, $process := dict "decision" .Values.decision "api" .Values.api "controller" .Values.controller }}
+{{- if ($process.pdb).enabled }}
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget

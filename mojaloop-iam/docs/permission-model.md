@@ -77,6 +77,16 @@ parameter must exist on the path. A bare `type` declares the type unbound. A
 bare entry naming a type the path binds is refused, because it would read as
 bound and not be.
 
+One entry is a word rather than a type: `$resources`, for an operation that
+acts on whatever resources the deployment declares without knowing their
+names, as the IAM's own role and assignment operations do. Composition
+expands it into every resource name the deployment declares that the
+operation's types do not already map, and the operation's guard then accepts
+any type in `X-Scope`. `$resources` is never bound. A grant may fix one of
+those names to `$all`; a grant leaving it out does not open it for
+assignment, it follows the holder's own assignment, reaching what that names
+of it or nothing. Any other entry starting with `$` is refused.
+
 A document says nothing about how a caller proves who they are. Its own
 `security` is documentation for whoever reads or generates against it, and
 nothing in this platform treats it as authorization input: which credentials an
@@ -109,9 +119,9 @@ the request.
 
 ```
 GET  /widgets/{widgetId}/ca      [widgets]  check widget/{widgetId}    X-Scope: widgets=…
-GET  /widgets                    [widgets]  check __self__             X-Scope: widgets=…
-POST /external/certs             [widgets]  check __self__             X-Scope: widgets=…
-GET  /hub/endpoints/ips/{epId}   []         check __self__             X-Scope: none
+GET  /widgets                    [widgets]  check $self                X-Scope: widgets=…
+POST /external/certs             [widgets]  check $self                X-Scope: widgets=…
+GET  /hub/endpoints/ips/{epId}   []         check $self                X-Scope: none
 ```
 
 The second row is a collection listing: the type has no bound id, so the
@@ -155,32 +165,34 @@ check about it:
 
 ```
 widget/w7         one resource
-widget/__all__    every resource of that name, present and future
-__self__          the service itself
+widget/$all       every resource of that name, present and future
+$self             the service itself
 ```
 
 ```
 example:widget/w7#getWidgetCa@Role:auditor#members
     role auditor may call getWidgetCa, on widget w7
 
-example:__self__#getWidgets@Role:hub-operator#members
+example:$self#getWidgets@Role:hub-operator#members
     role hub-operator may call getWidgets
 ```
 
-`__self__` is what an operation with no bound id is authorized against. It is
+`$self` is what an operation with no bound id is authorized against. It is
 a real grant point, not a placeholder: for a collection listing it answers
 "may you call this endpoint", which is a different question from "which rows
 come back". A caller holding `widget/w7#getWidgetCa` has a non-empty visible
 set without holding `getWidgets`, and must not reach the listing.
 
-`__all__` is an ordinary object, not a structural link. The decision endpoint
+`$all` is an ordinary object, not a structural link. The decision endpoint
 checks it as a second object whenever the first one misses, which is what
 makes "grant over everything" one tuple instead of a traversal, and what makes
-it collapse a scope to `*`.
+it collapse a scope to `$all`.
 
-A resource object always contains a slash and `__self__` never does, so the
-two cannot collide. Within a resource name, `__all__` is a reserved id. Keto
-accepts any string as an object, so the write path is what enforces both.
+Every word the IAM reserves starts with `$`: `$all`, `$self`, and the subjects
+`$authenticated` and `$registry`. No resource id may start with `$`, or hold
+`,` or `;`, which separate ids in the scope a service is handed. Keto accepts
+any string as an object, so the IAM refuses such an id wherever one enters: a
+provisioned id, an id a source lists and an id a role names.
 
 ## The Keto model
 
@@ -278,8 +290,8 @@ hold, the type is what the caller's service reads back in `X-Scope`.
 ```
 one type bound:   {"namespace":…,"object":"widget/{{ capture }}","relation":…,"subject_id":…,"scope":[{"type":"widgets","resourceName":"widget"}]}
 two types bound:  {"allOf":[ {first check}, {second check} ],"scope":[{"type":"reports",…},{"type":"widgets",…}]}
-none bound:       {"namespace":…,"object":"__self__","relation":…,"subject_id":…,"scope":[{"type":"widgets","resourceName":"widget"}]}
-no types at all:  {"namespace":…,"object":"__self__","relation":…,"subject_id":…,"scope":[]}
+none bound:       {"namespace":…,"object":"$self","relation":…,"subject_id":…,"scope":[{"type":"widgets","resourceName":"widget"}]}
+no types at all:  {"namespace":…,"object":"$self","relation":…,"subject_id":…,"scope":[]}
 ```
 
 The decision endpoint rejects anything that does not parse as this schema, and
@@ -317,8 +329,9 @@ is the single audit point, writing one record per decision either way.
 It evaluates in two steps.
 
 **The checks.** One check, or every check under `allOf`. A check passes if the
-subject holds the relation on the object, or on that object's `__all__` form.
-The singleton has no `__all__` form. Any check failing is a denial.
+subject holds the relation on the object, or on that object's `$all` form,
+itself or through a role every authenticated subject holds. The singleton has
+no `$all` form. Any check failing is a denial.
 
 **The scope.** For each pair in `scope`, the visible set is enumerated under
 the pair's resource name from the roles that carried the checks, and returned
@@ -333,13 +346,14 @@ produces one.
 
 ## Scope: how it is computed
 
-Visibility is defined as holding any grant on the resource. That is exactly
-what the enumeration finds, so the header and a per-resource check can never
-disagree, and it gives "whoever may change a thing may see it" without a
-separate implication mechanism.
+An operation's scope is the resources the grant that admitted it names, and
+nothing else the caller holds: a role's grant of another operation lends this
+one none of its resources. A grant names a set or leaves it to the
+assignment, the way a method catches an exception or declares it, so each
+operation sees exactly what its own line in the role says.
 
 ```
-X-Scope: widgets=*
+X-Scope: widgets=$all
 X-Scope: widgets=w7,w11
 X-Scope: reports=monthly,quarterly;widgets=w1,w4
 X-Scope: none
@@ -354,26 +368,43 @@ filter, with no traversal at all. So:
 ```
 GET /relation-tuples?namespace=Role&relation=members&subject_id=<subject>
     -> the caller's roles
+GET /relation-tuples?namespace=Role&relation=heldBy&subject_id=$authenticated
+    -> the roles every authenticated subject holds
 
 for each role:
 GET /relation-tuples?namespace=<service>&subject_set.namespace=Role
                     &subject_set.object=<role>&subject_set.relation=members
     -> every grant that role holds, kept together
 
-keep the roles holding the checked object, or its "<ResourceName>/__all__"
+keep the roles holding the checked object, or its "<ResourceName>/$all"
 form, under the relation the request asked for; the others granted something
 else and say nothing about this request
 
-within those, keep objects under "<ResourceName>/"; "<ResourceName>/__all__"
-among them collapses that resource name's answer to "*"
+within those, keep the objects under "<ResourceName>/" of that relation;
+"<ResourceName>/$all" among them collapses that resource name's answer to
+"$all"
 ```
+
+Keto cannot query a subject set by namespace and object alone (v26.2.0
+answers 400 `incomplete subject`), so the rows of a role carry no line of
+their own, and a permission a role named twice would read back as one: "the
+settlement report for dfsp-a" beside "the window report for every DFSP" as
+the settlement report for every DFSP. A role therefore names each permission
+once, with one reach, and the IAM refuses a role that repeats one; two reaches
+of one permission are two roles. Measured on kind-dev, 2026-11-01, the
+decision's reads for a caller holding one role take p50 2.96 ms.
+
+A resource name that `$resources` brings into an operation's scope says which
+of those resources the operation acts on, and the caller's reach over it may
+be none: the decision answers it as an empty list rather than a denial, and
+the service asks its guard for exactly that.
 
 A further query for tuples written directly to the subject finds only grants
 that bypassed a role. Those are reported as policy violations rather than
 merged into the answer.
 
 A scope exceeding the size cap is an operational alarm, a deployment granting
-by enumeration where it should have granted `all`, never a truncation.
+by enumeration where it should have granted `$all`, never a truncation.
 
 A service does not implement this format. `@mojaloop/authz` holds it, in both
 directions: the decision endpoint renders the header with it and every service
@@ -421,17 +452,9 @@ metadata:
 spec:
   grants:
     - permission: example.getWidgets
-      resources: { widget: all }
+      resources: { widget: $all }
     - permission: example.getWidgetCa
-      resources: { widget: all }
----
-kind: AuthzRole
-metadata:
-  name: west-auditor
-spec:
-  grants:
-    - permission: example.getWidgetCa
-      resources: { widget: [w7, w11] }
+      resources: { widget: $all }
 ---
 kind: AuthzRole
 metadata:
@@ -447,12 +470,23 @@ leaves open: `{ role: widget-operator, resources: { widget: w7 } }`. An
 operation nothing grants is reachable by nobody, which is what makes a new
 operation held by nobody until a deployment says otherwise.
 
-A grant names a permission from the catalog and, per resource name the
-permission is scoped by, either names the resources — `all`, one id, a list —
-or leaves the resource name open. Every open one is the assignment's to name,
-so the role's signature is derived, never declared: `widget-operator` above
-takes a `widget` because its grants name none, and it instantiates once per
-named resource. Naming a resource name the permission is not scoped by is
+A role with `heldBy: authenticated` is never assigned: every authenticated
+subject holds it. The IAM writes `Role:<role>#heldBy@$authenticated`, and the
+decision checks the request's object through each such role besides the
+caller's own. No assignment names resources for it, so it may leave no
+resource name open, and it may hold no permission of a separation group,
+which everyone would then hold. The IAM's change stream (`iam.getChanges`),
+which a UI listens to, is granted this way.
+
+A grant names a permission from the catalog, at most once per role, and, per
+resource name the permission is scoped by, either fixes it to `$all` or leaves
+it open. Every open one is the assignment's to name, so the role's signature
+is derived, never declared: `widget-operator` above takes a `widget` because
+its grants name none, and it instantiates once per named resource. A role
+names no runtime ids: a widget is created and retired by its service, and a
+role naming one would outlive it as a grant on nothing. Ids are named only of
+the IAM's own resource names, `role` and `permission`, whose ids are
+deployment data. Naming a resource name the permission is not scoped by is
 rejected, since it would write a tuple nothing ever reads.
 
 Which resource names scope a permission is the catalog's to say, stamped at
@@ -463,31 +497,29 @@ each spelling to the name the grants hold.
 
 ```
 getWidgetCa  scopedBy [widgets: widget]                    bound [widgets]  widget/<id>#getWidgetCa
-getWidgets   scopedBy [widgets: widget]                    bound []         __self__#getWidgets
+getWidgets   scopedBy [widgets: widget]                    bound []         $self#getWidgets
                                                                             widget/<id>#getWidgets
 getReport    scopedBy [reports: report,                    bound [reports]  report/<id>#getReport
               participants: participant]                                    participant/<id>#getReport
-getRegions   scopedBy []                                   bound []         __self__#getRegions
+getRegions   scopedBy []                                   bound []         $self#getRegions
 ```
 
 The checked object comes first and the rest follow, all under the same
 relation, so holding one is what it means to see it and a single query answers
 both questions.
 
-A scope comes from the role that admitted the request, and from no other role
-the caller happens to hold. Within that role it is the union over every
-resource the role names in that type, whether it named it by binding the scope
-type on this grant or by holding another grant on the same resource: a role
-granting `getWidgets` on `__self__` and `getWidgetCa` on `widgets/w7` produces
-a listing scoped to `w7` either way. A role granting the listing and naming
-nothing shows the caller nothing, and the empty-set rule turns that into a
-denial rather than a silently empty page.
+A scope comes from the grant that admitted the request, and from no other
+grant the caller happens to hold, in this role or another. A grant leaving the
+resource name open takes the assignment's, so
+`role(widget) { getWidgets; getWidgetCa($all) }` assigned over `w7` lists `w7`
+and reads every CA: the CA grant says what may be read of a CA, not which
+widgets appear in a listing.
 
-Keeping the scope inside the admitting role is what lets one role say "this
-report, for this participant" while another says "that report, for that
-participant", without the two combining into all four pairs. A role is one
-statement about one operation over one set of resources, and merging two of
-them would invent access neither granted.
+Keeping the scope inside the admitting grant is what lets one grant say "the
+settlement report, for the assigned participant" while another says "the
+window report, for every participant", in one role or two, without the two
+combining into the settlement report for every participant. Merging two grants
+would invent access neither granted.
 
 A role with open resource names instantiates per resource tuple: the grants
 materialize against `Role:widget-operator@widget=w7`, and the assignment
@@ -501,17 +533,17 @@ records it:
 
 ```
 GET  /catalog                        every service's permissions, with their summaries
-GET  /roles                          the roles, and which resource names each leaves open
-GET  /resources?resourceName=widget  the widgets that exist, to choose among
+GET  /roles                          the roles the caller's scope names, and which resource names each leaves open
+GET  /resources?resourceName=widget  the widgets that exist and the caller's scope reaches, to choose among
 GET  /subjects/<id>/assignments      what someone holds, one entry per instance
 POST /subjects/<id>/assignments      { role, resources }
 DELETE /subjects/<id>/assignments    { role, resources }
 GET  /state                          what this deployment applied, and when
 ```
 
-An assignment whose resources are not keyed by exactly the resource names the
-role leaves open, or that names a resource that does not exist, is refused
-before anything is written.
+An assignment names one id or `$all` for each resource name the role leaves
+open. One whose resources are not keyed by exactly those names, or that names
+a resource that does not exist, is refused before anything is written.
 
 `/state` answers the catalog it validated against, the roles and separation
 rules it applied, and the record of applying them: how many grants were
@@ -522,23 +554,25 @@ in git are the roles in Keto, without being handed a Keto client to go
 looking.
 
 Every grant is written through the IAM: by a human in the UI, by deployment
-defaults shipped as editable seed data, or by a service acting as a governed
-subject, holding deployment-granted IAM permissions with the acting human
-recorded on-behalf-of. Nothing grant-shaped ships in a service artifact, and
-nothing but the IAM holds Keto write access.
+defaults shipped as editable seed data, or by the provisioning authority over
+the internal API, described below. Nothing grant-shaped ships in a service
+artifact, and
+nothing but the IAM's controller holds Keto write access.
 
 ### Provisioning a resource
 
-A service that creates a resource names only it, keyed by the resource name
-the deployment configured into it — a deployment-invented word the service
-ferries without interpreting, like any other value — and the IAM records that
-the resource exists, refusing a name the vocabulary does not declare:
+The provisioning authority, the one client whose job is creating resources and
+the identities that operate them (here the connection manager onboarding a
+DFSP), names only the resource, keyed by the resource name the deployment
+configured into it — a deployment-invented word it ferries without
+interpreting, like any other value — and the IAM records that the resource
+exists, refusing a name the vocabulary does not declare:
 
 ```
 POST /provision
 { "resourceName": "participant", "id": "dfsp7" }
 
-Resource:participant/dfsp7#exists@__registry__
+Resource:participant/dfsp7#exists@$registry
 ```
 
 That row grants nothing — its own namespace, a relation no rule checks, a
@@ -562,9 +596,10 @@ that is gone, removes the registry row, and answers with the subjects left
 holding no role at all, so the caller can retire an identity that operates
 nothing else without ever reading the graph itself.
 
-This is the only reason a service ever talks to the IAM's write side, and it
+The provisioning authority is the only client of the IAM's write side, and it
 still writes no tuple: it names a resource, and the IAM decides what that
-means.
+means. A regular service never talks to the IAM at all: the resources it serves
+reach the IAM through a source the deployment names.
 
 Evaluation is union over grants. There is no deny rule and no subtraction, so
 access flowing through a role is revoked by editing the role or the
@@ -592,7 +627,7 @@ spec:
 A subject may hold permissions from at most one group. `within: subject`, the
 default, compares whatever the resources; `within: resource`, naming a
 `resourceName`, compares holdings over the same resource only, a grant over
-`all` meeting every other. It is checked where a holding is written and
+`$all` meeting every other. It is checked where a holding is written and
 nowhere else. A role whose own grants span two groups is refused when it is
 applied; a rule arriving after holdings that break it lists those subjects on
 its status; an assignment is refused when the roles the subject would then
@@ -673,33 +708,42 @@ comes back:
 
 The pointers are RFC 6901, so `list: /data/items` and `id: /attributes/code`
 reach into whatever shape the listing already answers with, and a bare array
-of `{ name }` needs only `id: /name`. Nothing is inferred: a source whose
-pointers do not resolve is a rollout that stops, because a syncer guessing at
-a response shape would populate the picker with whatever it happened to find.
+of `{ name }` needs only `id: /name`. Nothing is inferred: pointers that do
+not resolve are an answer the IAM refuses, with the reason, never a guess at
+the response shape.
 
-Each id the source lists is recorded once, under the resource name itself —
-one real thing, one row, however many spellings its members give it. Sourced
-rows carry their own registry marker, `__source__` beside provisioning's
-`__registry__`, so reconciling them can never remove a row a service
-provisioned, and every reader of the registry accepts either.
+The IAM reads a source when someone needs its answer, and at no other time:
+a picker asking for that resource name, an assignment naming one of its ids,
+or its `AuthzResourceName` object changing. Nothing reads it between requests,
+and the source announces nothing. A source whose answer the pointers cannot
+read refuses its object, with the reason in its `Ready` condition; one that
+does not answer leaves it standing and says so there. The object's
+`status.resources` is how many ids the IAM knew when it last listed the
+resource name, and `status.read` when it last read the source. Each
+id it lists stands under the resource name itself, one real thing however many
+spellings its members give it. Readers arriving while a read is under way share
+it. A read that fails is answered by the last good one, and `GET /resources`
+names the resource name in its `stale-sources` header; an assignment refused
+for an id the source cannot confirm says so, with the source's reason.
 
 Only the ids ever enter the platform: they are what grants hold, so they are
-what the registry records. Everything else about a row is the owning service's
+what the registry answers with. Everything else about a row is the owning service's
 data, and a consumer that renders rows — a picker showing names beside ids —
 reads them from that service through the gateway, under its own authorization.
 
 The vocabulary itself is served whole at `GET /resource-names`: every
 resource name with its label, description, members and source, exactly as the
-deployment declared it, for any consumer to take the fields it needs. A
+deployment declared it, for any consumer to take the fields it needs. The
+IAM's own names, roles and permissions, carry `own: true`: theirs are the only
+ids a role may name, which is how a role editor knows where to offer ids. A
 resource name's `label` and `description` are a string or a language-keyed
 map; the names are deployment-invented, so the deployment is the only place
 their translations can come from.
 
-Provisioning calls it on an interval and writes the same registry rows a
-service would have provisioned, so the picker still reads one place and a
-resource can never be offered that no grant could be materialized against. A
-listing that pages is out of scope: the operation must answer the whole set,
-and one that cannot is a service that should provision its resources instead.
+A listing that pages is out of scope: a source answers the whole set, so a
+service whose own listing pages serves its source a listing that does not.
+Provisioning is never the way round it; only the provisioning authority
+provisions.
 
 ## What never ships in a service
 
@@ -765,12 +809,57 @@ artifacts:
 - a throwaway Keto boots against the concatenated model and `GET /namespaces`
   lists every expected namespace, guarding the parser's silent-drop failure
   mode
-- a functional probe grants a permission through a role and through `__all__`
+- a functional probe grants a permission through a role and through `$all`
   and expects both to pass, and asserts the resulting `X-Scope`
 
-## Composing a role is unrestricted
+## Who may grant what
 
-Any permission may go into any role, over one resource, a list or `all`. A
+Any permission may go into any role, over `$all` or left to the assignment. A
 document cannot limit how its operations are granted: which permissions belong
 together, and over what, is the deployment's judgement, expressed in its roles
 and, where two must never meet, in a separation rule.
+
+What limits a role is who writes it. A role among the deployment's objects is
+written by whoever may apply them. Through the IAM's API, nobody hands out
+access they do not hold, and nobody reaches past their own scope. Writing a
+role and assigning one are separate grants, each scoped by the IAM's own
+resource names and, through `$resources`, by every resource name the
+deployment declares:
+
+```
+listRoles, getRole          scopedBy [role]
+createRole                  scopedBy [permission, $resources]
+updateRole                  scopedBy [role, permission, $resources]
+assignRole, unassignRole    scopedBy [role, $resources]
+listResources               scopedBy [$resources]
+```
+
+A name `$resources` brings in is never left open by a role: an administrator's
+role either fixes it to `$all`, or it follows the administrator's own
+assignment, so whoever operates three DFSPs reaches those three. What the
+caller's scope reaches of each name is their reach.
+
+- writing a role (`iam.createRole`, `iam.updateRole`): every grant is one the
+  writer holds over what it fixes, through one role instance, or one whose
+  permission the writer's scope names, fixed no wider than their reach; `$all`
+  takes a reach of `$all`. A resource name the grant leaves open passes either
+  way: it gives nothing until an assignment names it, and the assigner answers
+  for that.
+- assigning a role (`iam.assignRole`): the assigner's scope names the role,
+  whatever they hold, and reaches every resource the assignment names, or the
+  assigner holds everything the role gives over the ones it does not reach.
+  An assignment may name `$all` where the assigner's reach of that name is
+  `$all`.
+- deleting a role: refused while anyone holds it, and while another role's
+  grants name it by id, since such a grant would outlive it and reach a later
+  role of the same name. Admission refuses removing an `AuthzRole` the same way.
+- reading: `GET /roles` and `GET /roles/<name>` answer the roles the caller's
+  scope names, and `GET /resources` the resources it reaches.
+
+Each combination of resources has to be held through one role instance, as the
+decision admits a request through one. An administrator's reach is therefore
+deployment data like any other: a role granting `iam.assignRole` over
+`role: $all` and `participant: $all` hands out every role over every
+participant; one granting it over `role: [dfsp-operator]`, its participant
+left to follow the assignment, hands out `dfsp-operator` over the participants
+its holder was assigned.

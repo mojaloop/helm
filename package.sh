@@ -48,6 +48,7 @@ if [ -n "${1:-}" ]; then
     declare -a charts=("$1")
 else
     declare -a charts=(
+        mojaloop-common
         example-mojaloop-backend
         ml-testing-toolkit
         ml-testing-toolkit-cli

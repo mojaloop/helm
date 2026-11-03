@@ -1,12 +1,9 @@
+# MCM uses the IAM only when global.iam.enabled is on, reaching its internal
+# API at global.iam.provisioningUrl.
 iam:
-  enabled: false
   autoCreateAccounts: true
-  hydra:
-    audience: connection-manager-api
-  kratos:
-    identitySchemaId: default
-    # Defaults to api.clientUrl when unset
-    inviteReturnToUrl: ""
+  # The audience the DFSP's machine client is issued tokens for
+  dfspClientAudience: connection-manager-api
   # DFSP onboarding, passed through opaquely: dfspResourceName is the
   # deployment's resource name for a DFSP, under which each one is recorded
   # and over which the roles are assigned — the invited admin identity gets
@@ -35,29 +32,6 @@ api:
   ## document. The deployment's to say.
   authz:
     service: ""
-
-  # Keycloak integration for authentication and user management
-  keycloak:
-    enabled: false
-    baseUrl: http://localhost:8080
-    discoveryUrl: http://localhost:8080/realms/dfsps/.well-known/openid-configuration
-    adminClientId: connection-manager-api-service
-    adminClientSecret: changeme
-    # adminClientSecretName: keycloak-secret
-    # adminClientSecretKey: secret
-    dfspsRealm: dfsps
-    autoCreateAccounts: true
-
-  # OpenID Connect configuration
-  openid:
-    enabled: false
-    clientId: connection-manager-auth-client
-    clientSecret: changeme
-    # clientSecretName: oidc-secret
-    # clientSecretKey: secret
-
-  # MCM UI URL for redirects and CORS
-  clientUrl: http://localhost:3000/
 
   # API URL for ingress
   url: https://localhost
@@ -171,10 +145,10 @@ db:
   # sslCaSecret: mysql-tls-client-creds
   # sslCaSecretKey: cacert.pem
 
-# External exposure is via Gateway API HTTPRoutes, one route per surface (api, ui),
-# each delegating auth to the shared Oathkeeper through the ExternalAuth filter (a
-# cross-namespace reference is gated by a ReferenceGrant the mojaloop-iam chart
-# renders)
+# External exposure is via Gateway API HTTPRoutes, one route per surface (api, ui).
+# With global.iam.enabled on, a route whose authz names a prefix delegates auth to
+# the shared Oathkeeper through the ExternalAuth filter (a cross-namespace
+# reference is gated by a ReferenceGrant the mojaloop-iam chart renders)
 gateway:
   enabled: false
   # Shared Oathkeeper decision API, the ExternalAuth filter delegates each request here

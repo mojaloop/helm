@@ -247,20 +247,28 @@ The object's name is the resource name, unique across the cluster. Every type
 a service uses must be a member of some resource name, and every member must
 be a type its service declares. Otherwise the composition is refused. A member
 whose service isn't deployed binds nothing until it is, and the object's
-`Ready` message lists it. `status.resources` counts the resources of the name
-the IAM knows.
+`Ready` message lists it. A `source` is read when a picker asks for the
+resource name, an assignment names one of its ids, or the object changes,
+never on a timer; a read that fails is answered by the last good one, marked
+stale. A source whose answer doesn't match `list` and `id` refuses the object;
+one that doesn't answer is named in its `Ready` message. `kubectl get
+authzresourcenames` shows how many resources each name had when last listed.
 
 ## Roles and assignments
 
 A role is an `AuthzRole` object, in any namespace, named once across the
-cluster. A grant names a permission and, for each resource name the
-permission is scoped by, one of:
+cluster. A grant names a permission, at most once per role, and, for each
+resource name the permission is scoped by, one of:
 
 | The grant says | Meaning |
 |---|---|
-| `resources: { participant: all }` | every participant, including future ones |
-| `resources: { participant: [dfsp1, dfsp2] }` | exactly these |
+| `resources: { participant: $all }` | every participant, including future ones |
 | nothing | left open, so each assignment names the participant |
+
+A role names no participant by id: participants come and go with the
+services that create them, and a grant naming one would outlive it. Which
+participant a holding covers is the assignment's to say. Ids are named only
+of the IAM's own resource names, `role` and `permission`.
 
 ```yaml
 apiVersion: iam.mojaloop.io/v1
@@ -274,7 +282,7 @@ spec:
   grants:
     - { permission: mcm.getDFSPca }
     - { permission: mcm.setDFSPca }
-    - { permission: mcm.getDFSPs, resources: { participant: all } }
+    - { permission: mcm.getDFSPs, resources: { participant: $all } }
 ```
 
 `status.open` lists the resource names an assignment must name. A role whose
@@ -291,24 +299,83 @@ An operation no role grants can't be called by anyone.
 
 ### Assigning roles
 
-Operators assign roles on the portal's role screen, which works through the
-role assignment service. A service that creates resources calls the IAM's API
-directly, as the connection manager does when it onboards a DFSP. The subject
-is the identity id for a person and the OAuth client id for a machine client.
+Operators assign roles on the portal's role screen, which calls the IAM's
+public API through the gateway. Every operation of that API is a permission
+like any other service's, under the `iam` prefix. The subject is the identity
+id for a person and the OAuth client id for a machine client.
 
 ```
 GET    /catalog                              every permission, with its summary
-GET    /roles                                the roles, and which resource names each leaves open
-GET    /resources?resourceName=participant   what can be picked
 GET    /resource-names                       the deployment's resource names
+GET    /resources?resourceName=participant   what can be picked
+GET    /roles                                the roles, and which resource names each leaves open
+POST   /roles, PUT/DELETE /roles/<name>      roles composed on the screen
+GET    /subjects                             the people and machine clients
 GET    /subjects/<id>/assignments            what someone holds
 POST   /subjects/<id>/assignments            { role, resources }
 DELETE /subjects/<id>/assignments            { role, resources }
-GET    /state                                what is applied, and what is waiting
+GET    /state                                what is applied, what waits, and what was refused
 ```
 
-The API is only reachable inside the cluster. Restrict it with a network policy
-to the role assignment service and the services that create resources.
+Nobody hands out access they don't hold, and nobody reaches past their own
+scope. The IAM's role and assignment operations are scoped by `role` or
+`permission` and by `$resources`, every resource name the deployment
+declares. A grant either fixes such a name to `$all`, or leaves it to follow
+its holder's own assignment: a DFSP administrator assigned over dfsp1 reaches
+dfsp1.
+
+Assigning a role is refused unless the assigner's `iam.assignRole` scope names
+the role, whatever they hold, and reaches every resource the assignment names
+or the assigner holds everything the role gives over the ones it doesn't. An
+assignment may name `$all` where the assigner reaches every participant.
+Composing or editing a role follows the same rule with `iam.createRole` and
+`iam.updateRole` naming permissions; a resource name a composed grant leaves
+open passes, since it gives nothing until someone assigns it. `GET /roles`
+shows the roles the caller's scope names, and `GET /resources` the resources
+it reaches. A role is deleted only once nobody holds it and no other role's
+grants name it.
+
+```yaml
+apiVersion: iam.mojaloop.io/v1
+kind: AuthzRole
+metadata:
+  name: dfsp-admin             # leaves participant open
+  namespace: ory
+spec:
+  title: DFSP administrator
+  description: Hands out dfsp-operator over the DFSPs it administers
+  grants:
+    - { permission: mcm.getDFSPs }
+    - { permission: iam.listRoles, resources: { role: [dfsp-operator] } }
+    - { permission: iam.listResources }                                  # its own DFSPs
+    - { permission: iam.assignRole, resources: { role: [dfsp-operator] } } # over its own DFSPs
+```
+
+An administrator's role is therefore deployment data like any other: an
+`AuthzRole` that names what its holders may hand out and over what.
+
+The IAM's internal API serves the provisioning authority, the one client whose
+job is creating resources and the identities that operate them: here the
+connection manager, which onboards DFSPs and holds their Vault and PKI. When it
+onboards a DFSP it records that the resource exists, creates the people and
+machine clients that operate it, and assigns them roles named in its own
+configuration. A regular service never calls the IAM; the IAM learns the
+resources a service serves from the sources the deployment names:
+
+```
+POST   /provision                  { resourceName, id }
+DELETE /provision                  { resourceName, id }   answers who is left holding nothing
+POST   /accounts                   { email, name }        finds or creates a person, invites a new one
+DELETE /accounts/<subject>                                once they hold no role
+POST   /clients                    { id, name }           answers the secret once
+POST   /clients/<subject>/secret                          a new secret, answered once
+DELETE /clients/<subject>                                 once it holds no role
+POST   /subjects/<id>/assignments  { role, resources }
+DELETE /subjects/<id>/assignments  { role, resources }
+```
+
+The internal API authenticates nothing. Only the pods the chart's
+`networkPolicy.internalCallers` names reach it.
 
 ## Separation of duties
 
@@ -332,7 +399,7 @@ spec:
 
 `within: subject`, the default, refuses anyone holding two groups whatever the
 resources. `within: resource` with `resourceName: participant` refuses two
-groups over the same participant only, a grant over `all` meeting every other.
+groups over the same participant only, a grant over `$all` meeting every other.
 
 An assignment that would give someone two groups is refused, and the error
 names the rule. A role whose own grants span two groups is refused when it is
@@ -384,12 +451,13 @@ kubectl get authzrole -A
 # wait for a role to be applied
 kubectl -n ory wait --for=condition=Ready authzrole/dfsp-operator
 
-# the IAM's API, through the Kubernetes API server
-IAM=/api/v1/namespaces/<iam namespace>/services/<release>-ml-iam-services-provisioning:80/proxy
+# the IAM's public API and its controller, through the Kubernetes API server
+IAM=/api/v1/namespaces/<iam namespace>/services/ml-iam-services-api:80/proxy
+CONTROLLER=/api/v1/namespaces/<iam namespace>/services/ml-iam-services-controller:80/proxy
 
-kubectl get --raw $IAM/state               # what was applied, waiting roles, holdings that break a rule
-kubectl get --raw $IAM/catalog             # every permission the deployment offers
-kubectl get --raw $IAM/access-rules.yml    # the rules the gateway enforces
+kubectl get --raw $IAM/state                      # what was applied, waiting roles, holdings that break a rule
+kubectl get --raw $IAM/catalog                    # every permission the deployment offers
+kubectl get --raw $CONTROLLER/access-rules.yml    # the rules the gateway enforces
 ```
 
 ## Worked example: the operator machine API

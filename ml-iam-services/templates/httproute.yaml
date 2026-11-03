@@ -1,0 +1,56 @@
+{{- /*
+  The api's public port through the gateway. The IAM is deployed only when it
+  is on, and its API trusts the gateway's decision for every operation, so
+  this route always carries the ExternalAuth filter and always keys its
+  backend: the controller reads the document the api serves at
+  /.authz/openapi under authz.service.
+
+  A cross-namespace decision-endpoint reference needs a ReferenceGrant in its
+  namespace.
+*/}}
+{{- if .Values.gateway.enabled }}
+{{- $backend := printf "%s-api" (include "ml-iam-services.fullname" .) }}
+{{- $oath := .Values.gateway.oathkeeper }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $backend }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+  annotations:
+    iam.mojaloop.io/{{ $backend }}.service: {{ required "authz.service is required: it is the prefix the IAM's own operations answer under" .Values.authz.service | quote }}
+spec:
+  parentRefs:
+    {{- toYaml (required "gateway.parentRefs is required when the gateway is enabled" .Values.gateway.parentRefs) | nindent 4 }}
+  hostnames:
+    - {{ required "gateway.host is required when the gateway is enabled" .Values.gateway.host | quote }}
+  rules:
+    - filters:
+        {{- with .Values.gateway.cors }}
+        - type: CORS
+          cors:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        - type: ExternalAuth
+          externalAuth:
+            protocol: HTTP
+            backendRef:
+              name: {{ $oath.serviceName | quote }}
+              {{- with $oath.serviceNamespace }}
+              namespace: {{ . | quote }}
+              {{- end }}
+              port: {{ $oath.servicePort }}
+            http:
+              path: /decisions
+              allowedHeaders:
+                # A person's session cookie or a machine client's token;
+                # accept picks the error shape
+                - cookie
+                - authorization
+                - accept
+      backendRefs:
+        - name: {{ $backend }}
+          port: {{ .Values.api.service.port }}
+{{- end }}

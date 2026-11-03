@@ -1,4 +1,11 @@
+{{- /*
+  The route carries the ExternalAuth filter exactly when it keys its backend
+  for the IAM: global.iam.enabled is on and image-watcher.authz.service names
+  a prefix.
+*/}}
 {{- $gw := index .Values "image-watcher" "gateway" -}}
+{{- $authz := index .Values "image-watcher" "authz" | default dict -}}
+{{- $protected := and (dig "iam" "enabled" false (.Values.global | default dict)) $authz.service -}}
 {{- if $gw.enabled -}}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -8,19 +15,24 @@ metadata:
   labels:
     app: ml-operator
     {{- include "ml-operator.labels" . | nindent 4 }}
+  {{- if $protected }}
+  annotations:
+    iam.mojaloop.io/image-watcher.service: {{ $authz.service | quote }}
+  {{- end }}
 spec:
   parentRefs:
     {{- toYaml $gw.parentRefs | nindent 4 }}
   hostnames:
     - {{ required "image-watcher.gateway.host is required when the gateway is enabled" $gw.host | quote }}
   rules:
-    - filters:
+    - {{- if or $gw.cors $protected }}
+      filters:
         {{- with $gw.cors }}
         - type: CORS
           cors:
             {{- toYaml . | nindent 12 }}
         {{- end }}
-      {{- if $gw.oathkeeper.enabled }}
+        {{- if $protected }}
         - type: ExternalAuth
           externalAuth:
             protocol: HTTP
@@ -35,6 +47,7 @@ spec:
               allowedHeaders:
                 - cookie
                 - accept
+        {{- end }}
       {{- end }}
       backendRefs:
         - name: image-watcher

@@ -1,0 +1,102 @@
+{{- /*
+  The decision endpoint Oathkeeper asks on every request. It reads Keto and
+  asks the cluster nothing.
+*/}}
+{{- $fullname := include "ml-iam-services.fullname" . }}
+{{- $process := .Values.decision }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullname }}-decision
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: decision
+spec:
+  replicas: {{ $process.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ml-iam-services.componentLabels" (dict "context" . "component" "decision") | nindent 6 }}
+  template:
+    metadata:
+      {{- with $process.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ml-iam-services.componentLabels" (dict "context" . "component" "decision") | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: decision
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          image: {{ include "ml-iam-services.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            {{- toYaml $process.args | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ $process.service.targetPort }}
+              protocol: TCP
+          env:
+            {{- range $name, $value := $process.env }}
+            - name: {{ $name }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- with $process.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            {{- toYaml $process.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml $process.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml $process.resources | nindent 12 }}
+      {{- with $process.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $process.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $process.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $process.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullname }}-decision
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: decision
+spec:
+  type: {{ $process.service.type }}
+  ports:
+    - port: {{ $process.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "ml-iam-services.componentLabels" (dict "context" . "component" "decision") | nindent 4 }}

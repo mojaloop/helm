@@ -49,20 +49,45 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Create the name of the service account to use
+Selector labels of one process
+Usage: {{ include "ml-iam-services.componentLabels" (dict "context" . "component" "api") }}
 */}}
-{{- define "ml-iam-services.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "ml-iam-services.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- define "ml-iam-services.componentLabels" -}}
+{{ include "ml-iam-services.selectorLabels" .context }}
+app.kubernetes.io/component: {{ .component }}
+{{- end }}
+
+{{/*
+Network-policy peers from entries of {namespace, podSelector}, an empty
+namespace being the release's own
+Usage: {{ include "ml-iam-services.peers" (dict "context" . "peers" .Values.networkPolicy.gateway) }}
+*/}}
+{{- define "ml-iam-services.peers" -}}
+{{- range .peers }}
+- pods:
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: {{ .namespace | default $.context.Release.Namespace | quote }}
+    podSelector:
+      {{- toYaml (required "a networkPolicy entry names its pods in podSelector" .podSelector) | nindent 6 }}
 {{- end }}
 {{- end }}
 
 {{/*
-The IAM build. A deployment that also composes its authorization surface names
-that build once in global.iamImage, and the composer and these processes are
-the same code reading the same catalog format.
+A network-policy peer naming one of the IAM's own processes
+*/}}
+{{- define "ml-iam-services.componentPeer" -}}
+- pods:
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: {{ .context.Release.Namespace | quote }}
+    podSelector:
+      matchLabels:
+        {{- include "ml-iam-services.componentLabels" . | nindent 8 }}
+{{- end }}
+
+{{/*
+The IAM build: global.iamImage when the deployment pins one, image otherwise
 */}}
 {{- define "ml-iam-services.image" -}}
 {{- with .Values.global }}{{ with .iamImage }}{{ . }}{{ end }}{{ end }}

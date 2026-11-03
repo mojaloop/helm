@@ -1,46 +1,38 @@
 {{- /*
-  Gateway routes for the MCM UI and API. Each delegates auth to the shared
-  Oathkeeper via the ExternalAuth filter and keys its backend for the IAM from
-  api.authz and ui.authz.
+  Gateway routes for the MCM UI and API. Each keys its backend for the IAM
+  from api.authz and ui.authz, and carries the ExternalAuth filter to the
+  shared Oathkeeper exactly when it does: global.iam.enabled is on and the
+  authz names a prefix.
 
   A cross-namespace oathkeeper reference needs a ReferenceGrant in the oathkeeper
   namespace
 */}}
 {{- if .Values.gateway.enabled -}}
 {{- $fullname := include "connection-manager.fullname" . -}}
-{{- $oath := .Values.gateway.oathkeeper -}}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: {{ $fullname }}-api
   namespace: {{ .Release.Namespace }}
-  {{- include "mojaloop-common.authz.annotations" (dict "backend" (printf "%s-api" $fullname) "authz" .Values.api.authz) | nindent 2 }}
+  {{- include "mojaloop-common.authz.annotations" (dict "context" . "backend" (printf "%s-api" $fullname) "authz" .Values.api.authz) | nindent 2 }}
 spec:
   parentRefs:
     {{- toYaml .Values.gateway.api.parentRefs | nindent 4 }}
   hostnames:
     {{- toYaml (required "gateway.api.hosts is required when the gateway is enabled" .Values.gateway.api.hosts) | nindent 4 }}
   rules:
-    - filters:
+    {{- $apiAuth := include "mojaloop-common.httproute.externalAuth" (dict "context" . "authz" .Values.api.authz "allowedHeaders" (list "cookie" "authorization" "accept" "x-forwarded-proto")) | trim }}
+    - {{- if or .Values.gateway.api.cors $apiAuth }}
+      filters:
         {{- with .Values.gateway.api.cors }}
         - type: CORS
           cors:
             {{- toYaml . | nindent 12 }}
         {{- end }}
-        - type: ExternalAuth
-          externalAuth:
-            protocol: HTTP
-            backendRef:
-              name: {{ $oath.serviceName | quote }}
-              namespace: {{ $oath.serviceNamespace | quote }}
-              port: {{ $oath.servicePort }}
-            http:
-              path: /decisions
-              allowedHeaders:
-                - cookie
-                - authorization
-                - accept
-                - x-forwarded-proto
+        {{- with $apiAuth }}
+        {{- . | nindent 8 }}
+        {{- end }}
+      {{- end }}
       backendRefs:
         - name: {{ $fullname }}-api
           port: {{ .Values.api.ports.containerPort }}
@@ -50,27 +42,17 @@ kind: HTTPRoute
 metadata:
   name: {{ $fullname }}-ui
   namespace: {{ .Release.Namespace }}
-  {{- include "mojaloop-common.authz.annotations" (dict "backend" (printf "%s-ui" $fullname) "authz" .Values.ui.authz) | nindent 2 }}
+  {{- include "mojaloop-common.authz.annotations" (dict "context" . "backend" (printf "%s-ui" $fullname) "authz" .Values.ui.authz) | nindent 2 }}
 spec:
   parentRefs:
     {{- toYaml .Values.gateway.ui.parentRefs | nindent 4 }}
   hostnames:
     {{- toYaml (required "gateway.ui.hosts is required when the gateway is enabled" .Values.gateway.ui.hosts) | nindent 4 }}
   rules:
-    - filters:
-        - type: ExternalAuth
-          externalAuth:
-            protocol: HTTP
-            backendRef:
-              name: {{ $oath.serviceName | quote }}
-              namespace: {{ $oath.serviceNamespace | quote }}
-              port: {{ $oath.servicePort }}
-            http:
-              path: /decisions
-              allowedHeaders:
-                - cookie
-                - accept
-                - x-forwarded-proto
+    - {{- with include "mojaloop-common.httproute.externalAuth" (dict "context" . "authz" .Values.ui.authz "allowedHeaders" (list "cookie" "accept" "x-forwarded-proto")) | trim }}
+      filters:
+        {{- . | nindent 8 }}
+      {{- end }}
       backendRefs:
         - name: {{ $fullname }}-ui
           port: {{ .Values.ui.ports.containerPort }}

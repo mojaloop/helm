@@ -1,0 +1,132 @@
+{{- /*
+  The api: the public API on one port, the internal API on the other. It
+  reads the composition the controller announces in its ConfigMap, writes
+  the roles composed through it as AuthzRole objects, and hands every
+  assignment to the controller.
+*/}}
+{{- $fullname := include "ml-iam-services.fullname" . }}
+{{- $process := .Values.api }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullname }}-api
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  replicas: {{ $process.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ml-iam-services.componentLabels" (dict "context" . "component" "api") | nindent 6 }}
+  template:
+    metadata:
+      {{- with $process.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ml-iam-services.componentLabels" (dict "context" . "component" "api") | nindent 8 }}
+    spec:
+      serviceAccountName: {{ $fullname }}-api
+      automountServiceAccountToken: true
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          image: {{ include "ml-iam-services.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - api
+            - --announced-in={{ $fullname }}-composition
+          ports:
+            - name: public
+              containerPort: {{ int $process.env.PUBLIC_PORT }}
+              protocol: TCP
+            - name: internal
+              containerPort: {{ int $process.env.INTERNAL_PORT }}
+              protocol: TCP
+          env:
+            {{- range $name, $value := $process.env }}
+            - name: {{ $name }}
+              value: {{ $value | quote }}
+            {{- end }}
+            - name: CONTROLLER_URL
+              value: "http://{{ $fullname }}-controller{{ if ne (int .Values.controller.service.port) 80 }}:{{ .Values.controller.service.port }}{{ end }}"
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          {{- with $process.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            {{- toYaml $process.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml $process.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml $process.resources | nindent 12 }}
+      {{- with $process.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $process.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $process.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $process.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullname }}-api
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  type: {{ $process.service.type }}
+  ports:
+    - port: {{ $process.service.port }}
+      targetPort: public
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "ml-iam-services.componentLabels" (dict "context" . "component" "api") | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullname }}-api-internal
+  labels:
+    {{- include "ml-iam-services.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  type: {{ $process.internalService.type }}
+  ports:
+    - port: {{ $process.internalService.port }}
+      targetPort: internal
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "ml-iam-services.componentLabels" (dict "context" . "component" "api") | nindent 4 }}
