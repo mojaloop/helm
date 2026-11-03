@@ -293,7 +293,7 @@ kratos:
             after:
               # The IAM writes what the person holds into their identity before
               # the session is handed out. Body: function(ctx) { identity_id: ctx.identity.id }
-              hooks:
+              hooks: &writePermissions
                 - hook: web_hook
                   config:
                     url: http://ml-iam-services-api-internal/login
@@ -313,6 +313,8 @@ kratos:
             ui_url: https://localhost/ui/recovery
             use: link
             lifespan: 168h
+            after:
+              hooks: *writePermissions
           settings:
             ui_url: https://localhost/ui/settings
             privileged_session_max_age: 15m
