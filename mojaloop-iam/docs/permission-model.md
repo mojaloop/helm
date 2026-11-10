@@ -36,9 +36,13 @@ needs no prefix. Anything reading the catalog and writing tuples has to
 convert between them.
 
 The relation is the `operationId`, which puts an operationId inside the
-authorization contract: renaming one retires a permission and introduces
-another. A role still naming the retired id is refused, holds nothing until it
-names the new one, and says which id in its `Ready` condition.
+authorization contract. The IAM keeps every permission it has composed, so it
+tells a rename from a removal and from a typo: an operation keeping its method
+and path under a new `operationId` is a rename, and so is one naming the
+operation it takes over in `x-authz.replaces`. A grant naming a renamed
+permission holds under the new name, a grant naming a removed one is dropped,
+and the role's `Ready` condition says which. A name no catalog ever held is
+refused.
 
 ## The API document is the only authored artifact
 
@@ -47,8 +51,8 @@ roles. It contains its OpenAPI document, and the platform generates the rest
 at deploy time.
 
 `x-authz` accepts exactly these keys and rejects everything else at build
-time: `resourceTypes` at the document root, `scopedBy` and `internal` on an
-operation:
+time: `resourceTypes` at the document root, and `scopedBy`, `internal` and
+`replaces` on an operation:
 
 ```yaml
 x-authz:
@@ -417,15 +421,18 @@ guarding their own copy.
 What a service supplies is the name of its own resource type:
 
 ```js
-const { INTERNAL, idsInScope } = require('@mojaloop/authz')
+const { createGuard, EVERYTHING } = require('@mojaloop/authz')
 
-const ids = idsInScope(req.scope, 'widgets')
-if (ids !== undefined) query.whereIn('widgets.id', ids)
+const authz = await createGuard('src/api/openapi.yaml')
+
+const widgets = authz(req, 'widgets')
+if (widgets.restricted) query.whereIn('widgets.id', widgets.ids)
 ```
 
-`undefined` is no restriction, an empty array is nothing visible, and a call
-carrying no scope at all raises rather than defaulting open, so a read with no
-gateway in the path says so by name with `INTERNAL`.
+An unrestricted caller reads `restricted: false`. A caller reaching none of the
+type is refused with `Forbidden`, status 403, so a handler never holds an
+answer that reaches nothing. A request carrying no scope reaches nothing, so a
+read with no gateway in the path says so by name, passing `EVERYTHING`.
 
 That clause is the service's entire authorization footprint. It knows its own
 resource type and its own row ids; it knows no permissions, no roles, no
@@ -779,7 +786,7 @@ are kept disjoint.
 Every build verifies, against the service's API document and the generated
 artifacts:
 
-- `x-authz` carries only the two permitted keys, at the permitted levels
+- `x-authz` carries only the permitted keys, at the permitted levels
 - every operation has a summary, since the summary is what a human reads in the
   role UI
 - every backend the platform authorizes is keyed on its route, and every rule

@@ -40,9 +40,11 @@ mcm.createDFSPInboundEnrollment
 settlement.getSettlementWindows
 ```
 
-Renaming an `operationId` changes the permission id. A role granting a
-permission its service no longer offers is refused and holds nothing until the
-role names the new id; its `Ready` condition says which permission.
+Renaming an `operationId` while its method and path stay is a rename: grants
+naming the old id hold under the new one. An operation that also moved to a
+new path names what it takes over, `x-authz: { replaces: [getDFSPs] }`. A
+grant naming a permission that was removed is dropped. The role's `Ready`
+condition says which, and a name no catalog ever held is refused.
 
 CORS preflight requests are answered without authorization and are not
 permissions.
