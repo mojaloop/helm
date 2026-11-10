@@ -5,7 +5,8 @@ write roles. It covers how a service declares its permissions, how a
 deployment exposes the service through the gateway, how roles grant
 permissions, and how to find out why a request was refused. The model behind
 it is in `permission-model.md`, and how the IAM finds a route's document is in
-`discovery.md`.
+`discovery.md`. To put a service or UI behind the IAM for the first time,
+start with `guide.md`.
 
 ## How it fits together
 
